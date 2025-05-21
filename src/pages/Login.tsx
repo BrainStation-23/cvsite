@@ -1,22 +1,53 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { toast } from "@/hooks/use-toast";
+import { Eye, EyeOff } from "lucide-react";
 
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
-  const { signIn } = useAuth();
+  const { signIn, isAuthenticated, user } = useAuth();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    // Redirect if already authenticated
+    if (isAuthenticated && user) {
+      redirectBasedOnRole(user.role);
+    }
+  }, [isAuthenticated, user, navigate]);
+
+  const redirectBasedOnRole = (role: string) => {
+    switch (role) {
+      case 'admin':
+        navigate('/admin/dashboard');
+        break;
+      case 'manager':
+        navigate('/manager/dashboard');
+        break;
+      case 'employee':
+        navigate('/employee/dashboard');
+        break;
+      default:
+        navigate('/');
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
     
     if (!email || !password) {
-      setError('Please enter both email and password');
+      toast({
+        title: "Error",
+        description: "Please enter both email and password",
+        variant: "destructive"
+      });
       return;
     }
     
@@ -24,15 +55,21 @@ const Login = () => {
       setLoading(true);
       await signIn(email, password);
       
-      // In a real app, this would navigate based on role from Supabase
-      // For now, navigate to admin dashboard for demo
-      navigate('/admin/dashboard');
-    } catch (err) {
+      // Auth context will handle the redirect via the useEffect above
+    } catch (err: any) {
       console.error('Login error:', err);
-      setError('Invalid email or password');
+      toast({
+        title: "Authentication failed",
+        description: err.message || "Invalid email or password",
+        variant: "destructive"
+      });
     } finally {
       setLoading(false);
     }
+  };
+
+  const togglePasswordVisibility = () => {
+    setShowPassword(prev => !prev);
   };
 
   return (
@@ -45,105 +82,61 @@ const Login = () => {
           </h2>
         </div>
         <div className="mt-8 bg-white dark:bg-gray-800 py-8 px-4 shadow sm:rounded-lg sm:px-10">
-          {error && (
-            <div className="mb-4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
-              {error}
-            </div>
-          )}
           <form className="space-y-6" onSubmit={handleSubmit}>
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                Email address
-              </label>
-              <div className="mt-1">
-                <input
-                  id="email"
-                  name="email"
-                  type="email"
-                  autoComplete="email"
-                  required
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-cvsite-teal focus:border-cvsite-teal"
-                />
-              </div>
+              <Label htmlFor="email">Email address</Label>
+              <Input
+                id="email"
+                name="email"
+                type="email"
+                autoComplete="email"
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="mt-1"
+              />
             </div>
 
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                Password
-              </label>
-              <div className="mt-1">
-                <input
+              <Label htmlFor="password">Password</Label>
+              <div className="mt-1 relative">
+                <Input
                   id="password"
                   name="password"
-                  type="password"
+                  type={showPassword ? "text" : "password"}
                   autoComplete="current-password"
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-cvsite-teal focus:border-cvsite-teal"
                 />
+                <button
+                  type="button"
+                  onClick={togglePasswordVisibility}
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500"
+                >
+                  {showPassword ? (
+                    <EyeOff className="h-4 w-4" />
+                  ) : (
+                    <Eye className="h-4 w-4" />
+                  )}
+                </button>
               </div>
             </div>
 
             <div>
-              <button
+              <Button
                 type="submit"
                 disabled={loading}
-                className={`w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-cvsite-teal hover:bg-cvsite-navy focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-cvsite-teal ${loading ? 'opacity-70 cursor-not-allowed' : ''}`}
+                className="w-full"
               >
                 {loading ? (
                   <div className="w-5 h-5 border-t-2 border-b-2 border-white rounded-full animate-spin"></div>
                 ) : (
                   'Sign in'
                 )}
-              </button>
+              </Button>
             </div>
           </form>
-
-          <div className="mt-6">
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-gray-300"></div>
-              </div>
-              <div className="relative flex justify-center text-sm">
-                <span className="px-2 bg-white dark:bg-gray-800 text-gray-500">
-                  Demo Accounts
-                </span>
-              </div>
-            </div>
-
-            <div className="mt-6 grid grid-cols-1 gap-3">
-              <button
-                onClick={() => {
-                  setEmail('admin@example.com');
-                  setPassword('password');
-                }}
-                className="w-full inline-flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-700 hover:bg-gray-50"
-              >
-                Admin Login
-              </button>
-              <button
-                onClick={() => {
-                  setEmail('manager@example.com');
-                  setPassword('password');
-                }}
-                className="w-full inline-flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-700 hover:bg-gray-50"
-              >
-                Manager Login
-              </button>
-              <button
-                onClick={() => {
-                  setEmail('employee@example.com');
-                  setPassword('password');
-                }}
-                className="w-full inline-flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-700 hover:bg-gray-50"
-              >
-                Employee Login
-              </button>
-            </div>
-          </div>
         </div>
       </div>
     </div>

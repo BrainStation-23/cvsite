@@ -1,5 +1,7 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { User as SupabaseUser, Session } from '@supabase/supabase-js';
+import { supabase } from '../integrations/supabase/client';
 import { User, UserRole } from '../types';
 
 interface AuthContextType {
@@ -15,47 +17,102 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
+  const [session, setSession] = useState<Session | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // This would be replaced with Supabase session checking
-    const checkSession = async () => {
+    // Set up auth state listener first
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (event, currentSession) => {
+        setSession(currentSession);
+        
+        if (currentSession?.user) {
+          // Transform Supabase user to our User type
+          // In a real app, we would fetch more user data from profiles table
+          setTimeout(async () => {
+            try {
+              const { data, error } = await supabase
+                .from('user_roles')
+                .select('role')
+                .eq('user_id', currentSession.user.id)
+                .single();
+              
+              if (error) throw error;
+              
+              const userRole = data.role as UserRole;
+              
+              setUser({
+                id: currentSession.user.id,
+                email: currentSession.user.email || '',
+                firstName: currentSession.user.user_metadata.first_name || '',
+                lastName: currentSession.user.user_metadata.last_name || '',
+                role: userRole,
+                profileImageUrl: currentSession.user.user_metadata.avatar_url || '/placeholder.svg',
+              });
+            } catch (error) {
+              console.error('Error fetching user role:', error);
+              setUser(null);
+            }
+          }, 0);
+        } else {
+          setUser(null);
+        }
+      }
+    );
+
+    // Then check for existing session
+    const initializeAuth = async () => {
       try {
         setIsLoading(true);
-        // Mock session check - to be replaced with Supabase
-        const storedUser = localStorage.getItem('cvsite-user');
+        const { data: { session: initialSession } } = await supabase.auth.getSession();
         
-        if (storedUser) {
-          setUser(JSON.parse(storedUser));
+        if (initialSession?.user) {
+          const { data, error } = await supabase
+            .from('user_roles')
+            .select('role')
+            .eq('user_id', initialSession.user.id)
+            .single();
+          
+          if (error) throw error;
+          
+          const userRole = data.role as UserRole;
+          
+          setUser({
+            id: initialSession.user.id,
+            email: initialSession.user.email || '',
+            firstName: initialSession.user.user_metadata.first_name || '',
+            lastName: initialSession.user.user_metadata.last_name || '',
+            role: userRole,
+            profileImageUrl: initialSession.user.user_metadata.avatar_url || '/placeholder.svg',
+          });
+          
+          setSession(initialSession);
         }
       } catch (error) {
-        console.error('Session check error:', error);
+        console.error('Error initializing auth:', error);
       } finally {
         setIsLoading(false);
       }
     };
 
-    checkSession();
+    initializeAuth();
+
+    return () => {
+      subscription.unsubscribe();
+    };
   }, []);
 
   const signIn = async (email: string, password: string) => {
     try {
       setIsLoading(true);
-      // This would be replaced with Supabase authentication
-      console.log('Signing in with:', email, password);
-      
-      // Demo user - remove this once Supabase is integrated
-      const demoUser: User = {
-        id: '1',
+      const { error } = await supabase.auth.signInWithPassword({
         email,
-        firstName: 'John',
-        lastName: 'Doe',
-        role: 'admin',
-        profileImageUrl: '/placeholder.svg',
-      };
+        password
+      });
       
-      setUser(demoUser);
-      localStorage.setItem('cvsite-user', JSON.stringify(demoUser));
+      if (error) throw error;
+      
+      // Auth state change listener will handle setting the user
     } catch (error) {
       console.error('Sign in error:', error);
       throw error;
@@ -67,9 +124,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const signOut = async () => {
     try {
       setIsLoading(true);
-      // This would be replaced with Supabase sign out
-      setUser(null);
-      localStorage.removeItem('cvsite-user');
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
+      
+      // Auth state change listener will handle clearing the user
     } catch (error) {
       console.error('Sign out error:', error);
       throw error;
