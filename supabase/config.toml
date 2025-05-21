@@ -1,1 +1,23 @@
+
 project_id = "pvkzzkbwjntazemosbot"
+
+[functions.create-user]
+verify_jwt = true
+
+[functions.bulk-create-users]
+verify_jwt = true
+
+[functions.delete-user]
+verify_jwt = true
+
+[functions.bulk-delete-users]
+verify_jwt = true
+
+[functions.update-user]
+verify_jwt = true
+
+[functions.bulk-update-users]
+verify_jwt = true
+
+[functions.list-users]
+verify_jwt = true
