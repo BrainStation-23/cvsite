@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import DashboardLayout from '../../components/Layout/DashboardLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -14,11 +14,9 @@ import { PlatformSettings as PlatformSettingsType } from '../../types';
 import { Spinner } from '@/components/ui/spinner';
 
 // Define the shape of a setting from the database
-interface PlatformSetting {
+interface SettingItem {
   id: string;
-  category: string;
   name: string;
-  value: string;
   created_at: string;
   updated_at: string;
 }
@@ -37,117 +35,129 @@ const PlatformSettings: React.FC = () => {
     sbu: ''
   });
   
-  // Fetch all platform settings directly from the database
-  const { data: platformSettingsData, isLoading, error } = useQuery({
-    queryKey: ['platformSettings'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('platform_settings')
-        .select('*')
-        .order('name');
-      
-      if (error) throw error;
-      console.log("Settings data fetched:", data); // Debug log
-      return data as PlatformSetting[];
-    },
+  // Fetch data from each table
+  const fetchSettings = async (table: string) => {
+    const { data, error } = await supabase
+      .from(table)
+      .select('*')
+      .order('name');
+    
+    if (error) throw error;
+    console.log(`${table} data fetched:`, data);
+    return data as SettingItem[];
+  };
+  
+  // Use separate queries for each category
+  const { 
+    data: universities, 
+    isLoading: isLoadingUniversities 
+  } = useQuery({
+    queryKey: ['universities'],
+    queryFn: () => fetchSettings('universities'),
   });
   
-  // Group settings by category
-  const [settings, setSettings] = useState<PlatformSettingsType>({
-    universities: [],
-    departments: [],
-    degrees: [],
-    designations: [],
-    references: [],
-    sbus: []
+  const { 
+    data: departments, 
+    isLoading: isLoadingDepartments 
+  } = useQuery({
+    queryKey: ['departments'],
+    queryFn: () => fetchSettings('departments'),
   });
   
-  useEffect(() => {
-    if (platformSettingsData) {
-      const groupedSettings: PlatformSettingsType = {
-        universities: [],
-        departments: [],
-        degrees: [],
-        designations: [],
-        references: [],
-        sbus: []
-      };
-      
-      platformSettingsData.forEach(setting => {
-        const category = setting.category + 's' as keyof PlatformSettingsType;
-        if (category in groupedSettings) {
-          // Only add the value if it doesn't already exist
-          if (!groupedSettings[category].includes(setting.value)) {
-            groupedSettings[category].push(setting.value);
-          }
-        }
-      });
-      
-      setSettings(groupedSettings);
-    }
-  }, [platformSettingsData]);
+  const { 
+    data: degrees, 
+    isLoading: isLoadingDegrees 
+  } = useQuery({
+    queryKey: ['degrees'],
+    queryFn: () => fetchSettings('degrees'),
+  });
+  
+  const { 
+    data: designations, 
+    isLoading: isLoadingDesignations 
+  } = useQuery({
+    queryKey: ['designations'],
+    queryFn: () => fetchSettings('designations'),
+  });
+  
+  const { 
+    data: references, 
+    isLoading: isLoadingReferences 
+  } = useQuery({
+    queryKey: ['references'],
+    queryFn: () => fetchSettings('references'),
+  });
+  
+  const { 
+    data: sbus, 
+    isLoading: isLoadingSbus 
+  } = useQuery({
+    queryKey: ['sbus'],
+    queryFn: () => fetchSettings('sbus'),
+  });
+  
+  // Combined loading state
+  const isLoading = 
+    isLoadingUniversities || 
+    isLoadingDepartments || 
+    isLoadingDegrees || 
+    isLoadingDesignations || 
+    isLoadingReferences || 
+    isLoadingSbus;
+  
+  // Group settings for the UI
+  const settings: PlatformSettingsType = {
+    universities: universities?.map(item => item.name) || [],
+    departments: departments?.map(item => item.name) || [],
+    degrees: degrees?.map(item => item.name) || [],
+    designations: designations?.map(item => item.name) || [],
+    references: references?.map(item => item.name) || [],
+    sbus: sbus?.map(item => item.name) || []
+  };
   
   // Add setting mutation
   const addSettingMutation = useMutation({
-    mutationFn: async ({ category, name, value }: { category: string, name: string, value: string }) => {
-      const singularCategory = category.endsWith('s') ? category.slice(0, -1) : category;
-      
-      const { data, error } = await supabase.rpc(
-        'update_platform_setting',
-        { 
-          p_category: singularCategory, 
-          p_name: value, 
-          p_value: value 
-        }
-      );
+    mutationFn: async ({ table, name }: { table: string, name: string }) => {
+      const { data, error } = await supabase
+        .from(table)
+        .insert({ name })
+        .select();
       
       if (error) throw error;
       return data;
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['platformSettings'] });
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: [variables.table] });
     },
   });
   
   // Delete setting mutation
   const deleteSettingMutation = useMutation({
-    mutationFn: async ({ category, name }: { category: string, name: string }) => {
-      const singularCategory = category.endsWith('s') ? category.slice(0, -1) : category;
-      
-      const { data, error } = await supabase.rpc(
-        'delete_platform_setting',
-        { 
-          p_category: singularCategory, 
-          p_name: name 
-        }
-      );
+    mutationFn: async ({ table, id }: { table: string, id: string }) => {
+      const { data, error } = await supabase
+        .from(table)
+        .delete()
+        .eq('id', id);
       
       if (error) throw error;
       return data;
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['platformSettings'] });
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: [variables.table] });
     },
   });
   
-  const addItem = (category: keyof PlatformSettingsType, value: string) => {
+  const addItem = (table: string, category: keyof PlatformSettingsType, value: string) => {
     if (!value.trim()) return;
     
     // Perform the mutation
     addSettingMutation.mutate(
       { 
-        category, 
-        name: value.trim(), 
-        value: value.trim() 
+        table, 
+        name: value.trim() 
       },
       {
         onSuccess: () => {
-          // Update local state for immediate UI feedback
-          setSettings({
-            ...settings,
-            [category]: [...settings[category], value.trim()]
-          });
-          
           // Reset the input
           setNewItem({
             ...newItem,
@@ -170,29 +180,23 @@ const PlatformSettings: React.FC = () => {
     );
   };
   
-  const removeItem = (category: keyof PlatformSettingsType, index: number) => {
-    const itemToRemove = settings[category][index];
+  const removeItem = (table: string, categoryItems: SettingItem[] | undefined, itemName: string) => {
+    if (!categoryItems) return;
+    
+    const itemToRemove = categoryItems.find(item => item.name === itemName);
+    if (!itemToRemove) return;
     
     // Perform the mutation
     deleteSettingMutation.mutate(
       { 
-        category, 
-        name: itemToRemove 
+        table, 
+        id: itemToRemove.id
       },
       {
         onSuccess: () => {
-          // Update local state for immediate UI feedback
-          const updatedItems = [...settings[category]];
-          updatedItems.splice(index, 1);
-          
-          setSettings({
-            ...settings,
-            [category]: updatedItems
-          });
-          
           toast({
             title: "Item removed",
-            description: `"${itemToRemove}" has been removed from ${category}.`,
+            description: `"${itemName}" has been removed.`,
           });
         },
         onError: (error) => {
@@ -208,9 +212,12 @@ const PlatformSettings: React.FC = () => {
   
   // Helper function to render setting items
   const renderSettingItems = (
+    table: string,
     category: keyof PlatformSettingsType,
     title: string,
-    inputName: keyof typeof newItem
+    inputName: keyof typeof newItem,
+    items: SettingItem[] | undefined,
+    isLoadingItems: boolean
   ) => (
     <Card>
       <CardHeader>
@@ -225,13 +232,13 @@ const PlatformSettings: React.FC = () => {
             className="mr-2"
           />
           <Button 
-            onClick={() => addItem(category, newItem[inputName])}
+            onClick={() => addItem(table, category, newItem[inputName])}
             disabled={addSettingMutation.isPending}
           >
             {addSettingMutation.isPending ? 'Adding...' : 'Add'}
           </Button>
         </div>
-        {isLoading ? (
+        {isLoadingItems ? (
           <div className="flex justify-center p-4">
             <Spinner />
           </div>
@@ -244,7 +251,7 @@ const PlatformSettings: React.FC = () => {
               >
                 <span>{item}</span>
                 <button 
-                  onClick={() => removeItem(category, index)}
+                  onClick={() => removeItem(table, items, item)}
                   className="ml-2 text-gray-500 hover:text-red-500"
                   disabled={deleteSettingMutation.isPending}
                 >
@@ -258,17 +265,12 @@ const PlatformSettings: React.FC = () => {
     </Card>
   );
   
-  if (error) {
+  // Handle general loading errors
+  if (isLoading) {
     return (
       <DashboardLayout>
-        <div className="text-center text-red-500">
-          <p>Error loading settings: {error instanceof Error ? error.message : 'Unknown error'}</p>
-          <Button 
-            onClick={() => queryClient.invalidateQueries({ queryKey: ['platformSettings'] })}
-            className="mt-4"
-          >
-            Retry
-          </Button>
+        <div className="flex justify-center items-center h-64">
+          <Spinner />
         </div>
       </DashboardLayout>
     );
@@ -289,27 +291,27 @@ const PlatformSettings: React.FC = () => {
         </TabsList>
         
         <TabsContent value="universities">
-          {renderSettingItems('universities', 'Universities', 'university')}
+          {renderSettingItems('universities', 'universities', 'Universities', 'university', universities, isLoadingUniversities)}
         </TabsContent>
         
         <TabsContent value="departments">
-          {renderSettingItems('departments', 'Departments', 'department')}
+          {renderSettingItems('departments', 'departments', 'Departments', 'department', departments, isLoadingDepartments)}
         </TabsContent>
         
         <TabsContent value="degrees">
-          {renderSettingItems('degrees', 'Degrees', 'degree')}
+          {renderSettingItems('degrees', 'degrees', 'Degrees', 'degree', degrees, isLoadingDegrees)}
         </TabsContent>
         
         <TabsContent value="designations">
-          {renderSettingItems('designations', 'Designations', 'designation')}
+          {renderSettingItems('designations', 'designations', 'Designations', 'designation', designations, isLoadingDesignations)}
         </TabsContent>
         
         <TabsContent value="references">
-          {renderSettingItems('references', 'References', 'reference')}
+          {renderSettingItems('references', 'references', 'References', 'reference', references, isLoadingReferences)}
         </TabsContent>
         
         <TabsContent value="sbus">
-          {renderSettingItems('sbus', 'SBUs', 'sbu')}
+          {renderSettingItems('sbus', 'sbus', 'SBUs', 'sbu', sbus, isLoadingSbus)}
         </TabsContent>
       </Tabs>
     </DashboardLayout>

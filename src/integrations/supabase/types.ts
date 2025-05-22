@@ -9,6 +9,69 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      degrees: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      departments: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      designations: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       employees: {
         Row: {
           biography: string | null
@@ -45,33 +108,6 @@ export type Database = {
         }
         Relationships: []
       }
-      platform_settings: {
-        Row: {
-          category: string
-          created_at: string
-          id: string
-          name: string
-          updated_at: string
-          value: string
-        }
-        Insert: {
-          category: string
-          created_at?: string
-          id?: string
-          name: string
-          updated_at?: string
-          value: string
-        }
-        Update: {
-          category?: string
-          created_at?: string
-          id?: string
-          name?: string
-          updated_at?: string
-          value?: string
-        }
-        Relationships: []
-      }
       profiles: {
         Row: {
           created_at: string
@@ -95,6 +131,69 @@ export type Database = {
           first_name?: string | null
           id?: string
           last_name?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      references: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      sbus: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      universities: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
           updated_at?: string
         }
         Relationships: []
@@ -128,21 +227,6 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      delete_platform_setting: {
-        Args: { p_category: string; p_name: string }
-        Returns: boolean
-      }
-      get_platform_settings_by_category: {
-        Args: { category_name: string }
-        Returns: {
-          category: string
-          created_at: string
-          id: string
-          name: string
-          updated_at: string
-          value: string
-        }[]
-      }
       has_any_role: {
         Args: { roles: string[] }
         Returns: boolean
@@ -150,17 +234,6 @@ export type Database = {
       has_role: {
         Args: { _role: string }
         Returns: boolean
-      }
-      update_platform_setting: {
-        Args: { p_category: string; p_name: string; p_value: string }
-        Returns: {
-          category: string
-          created_at: string
-          id: string
-          name: string
-          updated_at: string
-          value: string
-        }
       }
     }
     Enums: {
