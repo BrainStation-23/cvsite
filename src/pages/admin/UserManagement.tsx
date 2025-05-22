@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import DashboardLayout from '../../components/Layout/DashboardLayout';
 import { Button } from '@/components/ui/button';
@@ -13,6 +14,8 @@ import {
   DeleteUserDialog, 
   BulkUploadDialog
 } from '@/components/admin/UserDialogs';
+import { UserData, SortColumn, SortOrder } from '@/hooks/types/user-management';
+import { UserRole } from '@/types';
 
 const UserManagement: React.FC = () => {
   const [isAddUserDialogOpen, setIsAddUserDialogOpen] = useState(false);

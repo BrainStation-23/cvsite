@@ -21,3 +21,6 @@ export interface PaginationData {
   perPage: number;
   pageCount: number;
 }
+
+// Re-export UserRole to fix the import issues
+export { UserRole };

@@ -1,7 +1,8 @@
 
 import { supabase } from '../../integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { SortColumn, SortOrder, UserRole } from '../types/user-management';
+import { SortColumn, SortOrder } from '../types/user-management';
+import { UserRole } from '@/types';
 import { ListUsersResponse } from '../types/supabase-responses';
 
 export function useUserListing(state: ReturnType<typeof import('./use-user-state').useUserState>) {

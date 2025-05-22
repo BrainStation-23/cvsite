@@ -1,6 +1,7 @@
 
 import { useState } from 'react';
-import { UserData, PaginationData, UserRole, SortColumn, SortOrder } from '../types/user-management';
+import { UserData, PaginationData, SortColumn, SortOrder } from '../types/user-management';
+import { UserRole } from '@/types';
 
 export function useUserState() {
   const [users, setUsers] = useState<UserData[]>([]);
