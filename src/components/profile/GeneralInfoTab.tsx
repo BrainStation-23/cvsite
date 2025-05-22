@@ -20,6 +20,7 @@ interface GeneralInfoFormData {
   lastName: string;
   designation: string;
   biography: string;
+  orgId: string;
 }
 
 interface GeneralInfoTabProps {
@@ -29,6 +30,7 @@ interface GeneralInfoTabProps {
 
 export const GeneralInfoTab: React.FC<GeneralInfoTabProps> = ({ form, isEditing }) => {
   const [designations, setDesignations] = useState<string[]>([]);
+  const [organizations, setOrganizations] = useState<string[]>(['default']);
 
   // Fetch designations from the database
   const { data: designationsData } = useQuery({
@@ -45,12 +47,31 @@ export const GeneralInfoTab: React.FC<GeneralInfoTabProps> = ({ form, isEditing 
     enabled: isEditing,
   });
 
+  // Fetch organizations from the database (for now, we'll use a placeholder)
+  // In the future, this would be a real API call to get organizations
+  const { data: organizationsData } = useQuery({
+    queryKey: ['organizations'],
+    queryFn: async () => {
+      // This is just a placeholder. In a real application,
+      // you would fetch the actual organizations from your database
+      return ['default', 'org1', 'org2', 'org3'];
+    },
+    enabled: isEditing,
+  });
+
   // Update designations when data is fetched
   useEffect(() => {
     if (designationsData) {
       setDesignations(designationsData);
     }
   }, [designationsData]);
+
+  // Update organizations when data is fetched
+  useEffect(() => {
+    if (organizationsData) {
+      setOrganizations(organizationsData);
+    }
+  }, [organizationsData]);
 
   return (
     <Card>
@@ -121,6 +142,38 @@ export const GeneralInfoTab: React.FC<GeneralInfoTabProps> = ({ form, isEditing 
                           {designations.map((designation) => (
                             <SelectItem key={designation} value={designation}>
                               {designation}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    ) : (
+                      <div className="mt-1 text-gray-900 dark:text-gray-100">{field.value || "Not specified"}</div>
+                    )}
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="orgId"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="block text-sm font-medium text-gray-700 dark:text-gray-300">Organization</FormLabel>
+                  <FormControl>
+                    {isEditing ? (
+                      <Select
+                        value={field.value}
+                        onValueChange={field.onChange}
+                      >
+                        <SelectTrigger className="mt-1 block w-full rounded-md border-gray-300">
+                          <SelectValue placeholder="Select an organization" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {organizations.map((org) => (
+                            <SelectItem key={org} value={org}>
+                              {org}
                             </SelectItem>
                           ))}
                         </SelectContent>

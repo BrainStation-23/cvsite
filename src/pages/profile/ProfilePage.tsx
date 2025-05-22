@@ -52,7 +52,8 @@ const ProfilePage: React.FC = () => {
       firstName: generalInfo.firstName,
       lastName: generalInfo.lastName,
       designation: generalInfo.designation || '',
-      biography: generalInfo.biography || ''
+      biography: generalInfo.biography || '',
+      orgId: generalInfo.orgId || 'default'
     }
   });
 
@@ -63,7 +64,8 @@ const ProfilePage: React.FC = () => {
         firstName: generalInfo.firstName,
         lastName: generalInfo.lastName,
         designation: generalInfo.designation || '',
-        biography: generalInfo.biography || ''
+        biography: generalInfo.biography || '',
+        orgId: generalInfo.orgId || 'default'
       });
     }
   }, [isLoading, generalInfo, form.reset]);
@@ -73,12 +75,14 @@ const ProfilePage: React.FC = () => {
     lastName: string;
     designation: string;
     biography: string;
+    orgId: string;
   }) => {
     const success = await saveGeneralInfo({
       firstName: data.firstName,
       lastName: data.lastName,
       designation: data.designation || null,
-      biography: data.biography || null
+      biography: data.biography || null,
+      orgId: data.orgId || null
     });
     
     if (success) {
