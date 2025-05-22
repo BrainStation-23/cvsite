@@ -2,13 +2,9 @@
 import React from 'react';
 import DashboardLayout from '../../components/Layout/DashboardLayout';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Spinner } from '@/components/ui/spinner';
-import { useAuth } from '@/contexts/AuthContext';
 import SettingCategory from '@/components/admin/SettingCategory';
 
 const PlatformSettings: React.FC = () => {
-  const { user } = useAuth();
-  
   return (
     <DashboardLayout>
       <h1 className="text-2xl font-semibold mb-6 text-cvsite-navy dark:text-white">Platform Settings</h1>
