@@ -23,4 +23,4 @@ export interface PaginationData {
 }
 
 // Re-export UserRole to fix the import issues
-export { UserRole };
+export type { UserRole };
