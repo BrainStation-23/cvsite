@@ -1,0 +1,123 @@
+
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
+
+// Define the shape of a setting item
+export interface SettingItem {
+  id: string;
+  name: string;
+  created_at: string;
+  updated_at: string;
+}
+
+// Define valid table names for type safety
+export type SettingTableName = 'universities' | 'departments' | 'degrees' | 'designations' | 'references' | 'sbus';
+
+export const usePlatformSettings = (table: SettingTableName) => {
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+  
+  // Fetch data from the specified table
+  const fetchSettings = async () => {
+    const { data, error } = await supabase
+      .from(table)
+      .select('*')
+      .order('name');
+    
+    if (error) throw error;
+    return data as SettingItem[];
+  };
+  
+  // Query hook for the specific table
+  const { 
+    data: items, 
+    isLoading,
+    error
+  } = useQuery({
+    queryKey: [table],
+    queryFn: fetchSettings,
+  });
+  
+  // Add setting mutation
+  const addSettingMutation = useMutation({
+    mutationFn: async (name: string) => {
+      const { data, error } = await supabase
+        .from(table)
+        .insert({ name })
+        .select();
+      
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [table] });
+    },
+  });
+  
+  // Delete setting mutation
+  const deleteSettingMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const { data, error } = await supabase
+        .from(table)
+        .delete()
+        .eq('id', id);
+      
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [table] });
+    },
+  });
+  
+  const addItem = (value: string) => {
+    if (!value.trim()) return;
+    
+    // Perform the mutation
+    addSettingMutation.mutate(value.trim(), {
+      onSuccess: () => {
+        toast({
+          title: "Item added",
+          description: `"${value}" has been added.`,
+        });
+      },
+      onError: (error) => {
+        toast({
+          title: "Error",
+          description: `Failed to add item: ${error instanceof Error ? error.message : 'Unknown error'}`,
+          variant: "destructive"
+        });
+      }
+    });
+  };
+  
+  const removeItem = (id: string, name: string) => {
+    // Perform the mutation
+    deleteSettingMutation.mutate(id, {
+      onSuccess: () => {
+        toast({
+          title: "Item removed",
+          description: `"${name}" has been removed.`,
+        });
+      },
+      onError: (error) => {
+        toast({
+          title: "Error",
+          description: `Failed to remove item: ${error instanceof Error ? error.message : 'Unknown error'}`,
+          variant: "destructive"
+        });
+      }
+    });
+  };
+
+  return {
+    items,
+    isLoading,
+    error,
+    addItem,
+    removeItem,
+    isAddingItem: addSettingMutation.isPending,
+    isRemovingItem: deleteSettingMutation.isPending
+  };
+};
