@@ -195,7 +195,7 @@ export const ExperienceTab: React.FC<ExperienceTabProps> = ({
                           <SelectContent>
                             {isLoadingDesignations ? (
                               <div className="flex justify-center p-2">
-                                <Spinner size="sm" />
+                                <Spinner />
                               </div>
                             ) : (
                               designations?.map((designation) => (
@@ -361,7 +361,7 @@ export const ExperienceTab: React.FC<ExperienceTabProps> = ({
                                   <SelectContent>
                                     {isLoadingDesignations ? (
                                       <div className="flex justify-center p-2">
-                                        <Spinner size="sm" />
+                                        <Spinner />
                                       </div>
                                     ) : (
                                       designations?.map((designation) => (

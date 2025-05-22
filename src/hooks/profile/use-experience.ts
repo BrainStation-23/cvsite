@@ -10,7 +10,8 @@ type ExperienceDB = {
   id: string;
   profile_id: string;
   company_name: string;
-  designation: string;
+  designation?: string;
+  position: string; // This is still required by the database
   description?: string;
   start_date: string;
   end_date?: string;
@@ -23,7 +24,8 @@ type ExperienceDB = {
 const mapToExperience = (data: ExperienceDB): Experience => ({
   id: data.id,
   companyName: data.company_name,
-  designation: data.designation,
+  // Use designation if available, otherwise fall back to position
+  designation: data.designation || data.position,
   description: data.description || '',
   startDate: new Date(data.start_date),
   endDate: data.end_date ? new Date(data.end_date) : undefined,
@@ -34,6 +36,8 @@ const mapToExperience = (data: ExperienceDB): Experience => ({
 const mapToExperienceDB = (exp: Omit<Experience, 'id'>, profileId: string) => ({
   profile_id: profileId,
   company_name: exp.companyName,
+  // Set both position and designation to the same value until the database schema is updated
+  position: exp.designation, // Keep position for backward compatibility
   designation: exp.designation,
   description: exp.description,
   start_date: exp.startDate.toISOString().split('T')[0],
@@ -132,7 +136,10 @@ export function useExperience() {
       const dbData: Partial<ExperienceDB> = {};
       
       if (experience.companyName) dbData.company_name = experience.companyName;
-      if (experience.designation) dbData.designation = experience.designation;
+      if (experience.designation) {
+        dbData.designation = experience.designation;
+        dbData.position = experience.designation; // Also update position for backward compatibility
+      }
       if (experience.description !== undefined) dbData.description = experience.description;
       if (experience.startDate) dbData.start_date = experience.startDate.toISOString().split('T')[0];
       
