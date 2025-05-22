@@ -20,6 +20,26 @@ export interface PaginationData {
   pageCount: number;
 }
 
+// Define the interface for the RPC function response
+interface ListUsersResponse {
+  users: Array<{
+    id: string;
+    email: string;
+    created_at: string;
+    last_sign_in_at: string | null;
+    first_name: string | null;
+    last_name: string | null;
+    role: UserRole;
+  }>;
+  pagination: {
+    total_count: number;
+    filtered_count: number;
+    page: number;
+    per_page: number;
+    page_count: number;
+  };
+}
+
 interface UseUserManagementProps {
   initialPage?: number;
   initialPerPage?: number;
@@ -68,7 +88,7 @@ export function useUserManagement({
     setIsLoading(true);
     
     try {
-      const { data, error } = await supabase.rpc('list_users', {
+      const { data, error } = await supabase.rpc<ListUsersResponse>('list_users', {
         search_query: search || null,
         filter_role: role || null,
         page_number: page,
@@ -79,24 +99,32 @@ export function useUserManagement({
       
       if (error) throw error;
       
+      if (!data) {
+        console.error('No data returned from list_users RPC');
+        throw new Error('No data returned from server');
+      }
+      
+      // Type assertion to handle the response structure
+      const response = data as unknown as ListUsersResponse;
+      
       // Map the returned data to our UserData format
-      const formattedUsers = data.users.map((user: any) => ({
+      const formattedUsers = response.users.map(user => ({
         id: user.id,
         email: user.email,
         firstName: user.first_name || '',
         lastName: user.last_name || '',
-        role: user.role || 'unknown',
+        role: user.role || 'employee',
         createdAt: user.created_at,
-        lastSignIn: user.last_sign_in_at
+        lastSignIn: user.last_sign_in_at || undefined
       }));
       
       setUsers(formattedUsers);
       setPagination({
-        totalCount: data.pagination.total_count,
-        filteredCount: data.pagination.filtered_count,
-        page: data.pagination.page,
-        perPage: data.pagination.per_page,
-        pageCount: data.pagination.page_count
+        totalCount: response.pagination.total_count,
+        filteredCount: response.pagination.filtered_count,
+        page: response.pagination.page,
+        perPage: response.pagination.per_page,
+        pageCount: response.pagination.page_count
       });
       
       // Update state with the query parameters
@@ -322,7 +350,7 @@ export function useUserManagement({
       
       toast({
         title: "Bulk upload completed",
-        description: data.message || `Users have been added successfully.`,
+        description: data?.message || `Users have been added successfully.`,
       });
       
       return true;
