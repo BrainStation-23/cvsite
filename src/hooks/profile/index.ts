@@ -4,14 +4,19 @@ import { useGeneralInfo } from './use-general-info';
 import { useSkills } from './use-skills';
 import { useExperience } from './use-experience';
 import { useEducation } from './use-education';
-import { Training, Achievement, Project } from '@/types';
+import { useTraining } from './use-training';
+import { useAchievements } from './use-achievements';
+import { useProjects } from './use-projects';
 
 export { useGeneralInfo } from './use-general-info';
 export { useSkills } from './use-skills';
 export { useExperience } from './use-experience';
 export { useEducation } from './use-education';
+export { useTraining } from './use-training';
+export { useAchievements } from './use-achievements';
+export { useProjects } from './use-projects';
 
-export interface ProfileFormData {
+export type ProfileFormData = {
   firstName: string;
   lastName: string;
   designation: string;
@@ -24,26 +29,32 @@ export interface ProfileFormData {
     name: string;
     proficiency: number;
   }[];
-}
+};
 
 export function useProfile() {
   const generalInfoHook = useGeneralInfo();
   const skillsHook = useSkills();
   const experienceHook = useExperience();
   const educationHook = useEducation();
-  const [trainings, setTrainings] = useState<Training[]>([]);
-  const [achievements, setAchievements] = useState<Achievement[]>([]);
-  const [projects, setProjects] = useState<Project[]>([]);
+  const trainingHook = useTraining();
+  const achievementsHook = useAchievements();
+  const projectsHook = useProjects();
 
   const isLoading = generalInfoHook.isLoading || 
                    skillsHook.isLoading || 
                    experienceHook.isLoading || 
-                   educationHook.isLoading;
+                   educationHook.isLoading ||
+                   trainingHook.isLoading ||
+                   achievementsHook.isLoading ||
+                   projectsHook.isLoading;
   
   const isSaving = generalInfoHook.isSaving || 
                    skillsHook.isSaving || 
                    experienceHook.isSaving || 
-                   educationHook.isSaving;
+                   educationHook.isSaving ||
+                   trainingHook.isSaving ||
+                   achievementsHook.isSaving ||
+                   projectsHook.isSaving;
 
   return {
     // State
@@ -54,9 +65,9 @@ export function useProfile() {
     specializedSkills: skillsHook.specializedSkills,
     experiences: experienceHook.experiences,
     education: educationHook.education,
-    trainings,
-    achievements,
-    projects,
+    trainings: trainingHook.trainings,
+    achievements: achievementsHook.achievements,
+    projects: projectsHook.projects,
     
     // Methods
     saveGeneralInfo: generalInfoHook.saveGeneralInfo,
@@ -69,6 +80,15 @@ export function useProfile() {
     deleteExperience: experienceHook.deleteExperience,
     saveEducation: educationHook.saveEducation,
     updateEducation: educationHook.updateEducation,
-    deleteEducation: educationHook.deleteEducation
+    deleteEducation: educationHook.deleteEducation,
+    saveTraining: trainingHook.saveTraining,
+    updateTraining: trainingHook.updateTraining,
+    deleteTraining: trainingHook.deleteTraining,
+    saveAchievement: achievementsHook.saveAchievement,
+    updateAchievement: achievementsHook.updateAchievement, 
+    deleteAchievement: achievementsHook.deleteAchievement,
+    saveProject: projectsHook.saveProject,
+    updateProject: projectsHook.updateProject,
+    deleteProject: projectsHook.deleteProject
   };
 }

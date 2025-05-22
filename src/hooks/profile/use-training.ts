@@ -1,0 +1,219 @@
+
+import { useState, useEffect } from 'react';
+import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
+import { Training } from '@/types';
+
+// Type for database training record format
+type TrainingDB = {
+  id: string;
+  profile_id: string;
+  title: string;
+  provider: string;
+  description?: string;
+  certification_date: string;
+  certificate_url?: string;
+  created_at: string;
+  updated_at: string;
+};
+
+// Map from database format to application model
+const mapToTraining = (data: TrainingDB): Training => ({
+  id: data.id,
+  title: data.title,
+  provider: data.provider,
+  description: data.description || '',
+  date: new Date(data.certification_date),
+  certificateUrl: data.certificate_url
+});
+
+// Map from application model to database format
+const mapToTrainingDB = (training: Omit<Training, 'id'>, profileId: string) => ({
+  profile_id: profileId,
+  title: training.title,
+  provider: training.provider,
+  description: training.description || null,
+  certification_date: training.date.toISOString().split('T')[0],
+  certificate_url: training.certificateUrl || null
+});
+
+export function useTraining() {
+  const { user } = useAuth();
+  const { toast } = useToast();
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
+  const [trainings, setTrainings] = useState<Training[]>([]);
+
+  // Fetch trainings
+  const fetchTrainings = async () => {
+    if (!user?.id) return;
+    
+    try {
+      setIsLoading(true);
+      const { data, error } = await supabase
+        .from('trainings')
+        .select('*')
+        .eq('profile_id', user.id)
+        .order('certification_date', { ascending: false });
+      
+      if (error) throw error;
+      
+      if (data) {
+        // Map database records to application model format
+        const mappedData = data.map(mapToTraining);
+        setTrainings(mappedData);
+      }
+    } catch (error) {
+      console.error('Error fetching trainings:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to load training information',
+        variant: 'destructive'
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Save training
+  const saveTraining = async (training: Omit<Training, 'id'>) => {
+    if (!user?.id) return false;
+    
+    try {
+      setIsSaving(true);
+      
+      // Convert to database format
+      const dbData = mapToTrainingDB(training, user.id);
+      
+      const { data, error } = await supabase
+        .from('trainings')
+        .insert(dbData)
+        .select();
+      
+      if (error) throw error;
+      
+      // Update local state with the new training entry
+      if (data && data.length > 0) {
+        const newTraining = mapToTraining(data[0] as TrainingDB);
+        setTrainings(prev => [...prev, newTraining]);
+      }
+      
+      toast({
+        title: 'Success',
+        description: 'Training has been added',
+      });
+      
+      return true;
+    } catch (error) {
+      console.error('Error saving training:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to add training',
+        variant: 'destructive'
+      });
+      return false;
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  // Update training
+  const updateTraining = async (id: string, training: Partial<Training>) => {
+    if (!user?.id) return false;
+    
+    try {
+      setIsSaving(true);
+      
+      // Convert partial training data to database format
+      const dbData: Partial<TrainingDB> = {};
+      
+      if (training.title) dbData.title = training.title;
+      if (training.provider) dbData.provider = training.provider;
+      if (training.description !== undefined) dbData.description = training.description;
+      if (training.date) dbData.certification_date = training.date.toISOString().split('T')[0];
+      if (training.certificateUrl !== undefined) dbData.certificate_url = training.certificateUrl;
+      
+      dbData.updated_at = new Date().toISOString();
+      
+      const { error } = await supabase
+        .from('trainings')
+        .update(dbData)
+        .eq('id', id)
+        .eq('profile_id', user.id);
+      
+      if (error) throw error;
+      
+      // Update local state
+      setTrainings(prev => 
+        prev.map(item => item.id === id ? { ...item, ...training } : item)
+      );
+      
+      toast({
+        title: 'Success',
+        description: 'Training has been updated',
+      });
+      
+      return true;
+    } catch (error) {
+      console.error('Error updating training:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to update training',
+        variant: 'destructive'
+      });
+      return false;
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  // Delete training
+  const deleteTraining = async (id: string) => {
+    if (!user?.id) return false;
+    
+    try {
+      const { error } = await supabase
+        .from('trainings')
+        .delete()
+        .eq('id', id)
+        .eq('profile_id', user.id);
+      
+      if (error) throw error;
+      
+      // Update local state
+      setTrainings(prev => prev.filter(item => item.id !== id));
+      
+      toast({
+        title: 'Success',
+        description: 'Training has been removed',
+      });
+      
+      return true;
+    } catch (error) {
+      console.error('Error deleting training:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to remove training',
+        variant: 'destructive'
+      });
+      return false;
+    }
+  };
+
+  // Load trainings data
+  useEffect(() => {
+    if (user?.id) {
+      fetchTrainings();
+    }
+  }, [user?.id]);
+
+  return {
+    trainings,
+    isLoading,
+    isSaving,
+    saveTraining,
+    updateTraining,
+    deleteTraining
+  };
+}

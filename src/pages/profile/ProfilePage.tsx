@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import DashboardLayout from '../../components/Layout/DashboardLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -9,9 +9,14 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { useProfile } from '@/hooks/use-profile';
 import { Skill } from '@/types';
-import { PlusCircle, Trash2, Save } from 'lucide-react';
+import { PlusCircle, Trash2 } from 'lucide-react';
 import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form';
 import { useForm } from 'react-hook-form';
+import { ExperienceTab } from '@/components/profile/ExperienceTab';
+import { EducationTab } from '@/components/profile/EducationTab';
+import { TrainingTab } from '@/components/profile/TrainingTab';
+import { AchievementsTab } from '@/components/profile/AchievementsTab';
+import { ProjectsTab } from '@/components/profile/ProjectsTab';
 
 const ProfilePage: React.FC = () => {
   const { toast } = useToast();
@@ -25,11 +30,31 @@ const ProfilePage: React.FC = () => {
     generalInfo,
     technicalSkills,
     specializedSkills,
+    experiences,
+    education,
+    trainings,
+    achievements,
+    projects,
     saveGeneralInfo,
     saveTechnicalSkill,
     saveSpecializedSkill,
     deleteTechnicalSkill,
-    deleteSpecializedSkill
+    deleteSpecializedSkill,
+    saveExperience,
+    updateExperience,
+    deleteExperience,
+    saveEducation,
+    updateEducation,
+    deleteEducation,
+    saveTraining,
+    updateTraining,
+    deleteTraining,
+    saveAchievement,
+    updateAchievement,
+    deleteAchievement,
+    saveProject,
+    updateProject,
+    deleteProject
   } = useProfile();
 
   const form = useForm({
@@ -42,7 +67,7 @@ const ProfilePage: React.FC = () => {
   });
 
   // Update form values when profile data changes
-  React.useEffect(() => {
+  useEffect(() => {
     if (!isLoading) {
       form.reset({
         firstName: generalInfo.firstName,
@@ -419,113 +444,58 @@ const ProfilePage: React.FC = () => {
           </TabsContent>
           
           <TabsContent value="experience">
-            <Card>
-              <CardHeader>
-                <div className="flex justify-between items-center">
-                  <CardTitle>Work Experience</CardTitle>
-                  {isEditing && (
-                    <Button variant="outline">
-                      <PlusCircle className="mr-2 h-4 w-4" />
-                      Add Experience
-                    </Button>
-                  )}
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="text-center text-gray-500 dark:text-gray-400 py-8">
-                  No work experience added yet. 
-                  {isEditing && ' Click "Add Experience" to add your work history.'}
-                </div>
-              </CardContent>
-            </Card>
+            <ExperienceTab
+              experiences={experiences}
+              isEditing={isEditing}
+              isSaving={isSaving}
+              onSave={saveExperience}
+              onUpdate={updateExperience}
+              onDelete={deleteExperience}
+            />
           </TabsContent>
           
           <TabsContent value="education">
-            <Card>
-              <CardHeader>
-                <div className="flex justify-between items-center">
-                  <CardTitle>Education</CardTitle>
-                  {isEditing && (
-                    <Button variant="outline">
-                      <PlusCircle className="mr-2 h-4 w-4" />
-                      Add Education
-                    </Button>
-                  )}
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="text-center text-gray-500 dark:text-gray-400 py-8">
-                  No education history added yet. 
-                  {isEditing && ' Click "Add Education" to add your educational background.'}
-                </div>
-              </CardContent>
-            </Card>
+            <EducationTab
+              education={education}
+              isEditing={isEditing}
+              isSaving={isSaving}
+              onSave={saveEducation}
+              onUpdate={updateEducation}
+              onDelete={deleteEducation}
+            />
           </TabsContent>
           
           <TabsContent value="training">
-            <Card>
-              <CardHeader>
-                <div className="flex justify-between items-center">
-                  <CardTitle>Training & Certifications</CardTitle>
-                  {isEditing && (
-                    <Button variant="outline">
-                      <PlusCircle className="mr-2 h-4 w-4" />
-                      Add Training
-                    </Button>
-                  )}
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="text-center text-gray-500 dark:text-gray-400 py-8">
-                  No training or certifications added yet. 
-                  {isEditing && ' Click "Add Training" to add your certifications.'}
-                </div>
-              </CardContent>
-            </Card>
+            <TrainingTab
+              trainings={trainings}
+              isEditing={isEditing}
+              isSaving={isSaving}
+              onSave={saveTraining}
+              onUpdate={updateTraining}
+              onDelete={deleteTraining}
+            />
           </TabsContent>
           
           <TabsContent value="achievements">
-            <Card>
-              <CardHeader>
-                <div className="flex justify-between items-center">
-                  <CardTitle>Achievements</CardTitle>
-                  {isEditing && (
-                    <Button variant="outline">
-                      <PlusCircle className="mr-2 h-4 w-4" />
-                      Add Achievement
-                    </Button>
-                  )}
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="text-center text-gray-500 dark:text-gray-400 py-8">
-                  No achievements added yet. 
-                  {isEditing && ' Click "Add Achievement" to add your professional accomplishments.'}
-                </div>
-              </CardContent>
-            </Card>
+            <AchievementsTab
+              achievements={achievements}
+              isEditing={isEditing}
+              isSaving={isSaving}
+              onSave={saveAchievement}
+              onUpdate={updateAchievement}
+              onDelete={deleteAchievement}
+            />
           </TabsContent>
           
           <TabsContent value="projects">
-            <Card>
-              <CardHeader>
-                <div className="flex justify-between items-center">
-                  <CardTitle>Projects</CardTitle>
-                  {isEditing && (
-                    <Button variant="outline">
-                      <PlusCircle className="mr-2 h-4 w-4" />
-                      Add Project
-                    </Button>
-                  )}
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="text-center text-gray-500 dark:text-gray-400 py-8">
-                  No projects added yet. 
-                  {isEditing && ' Click "Add Project" to add projects you\'ve worked on.'}
-                </div>
-              </CardContent>
-            </Card>
+            <ProjectsTab
+              projects={projects}
+              isEditing={isEditing}
+              isSaving={isSaving}
+              onSave={saveProject}
+              onUpdate={updateProject}
+              onDelete={deleteProject}
+            />
           </TabsContent>
         </Tabs>
       )}
