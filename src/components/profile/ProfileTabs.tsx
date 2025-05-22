@@ -1,7 +1,6 @@
-
 import React from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { GeneralInfoTab } from './GeneralInfoTab';
+import { GeneralInfoTab, GeneralInfoFormData } from './GeneralInfoTab';
 import { SkillsTab } from './SkillsTab';
 import { ExperienceTab } from './ExperienceTab';
 import { EducationTab } from './EducationTab';
@@ -12,12 +11,7 @@ import { UseFormReturn } from 'react-hook-form';
 import { Skill, Experience, Education, Training, Achievement, Project } from '@/types';
 
 interface ProfileTabsProps {
-  form: UseFormReturn<{
-    firstName: string;
-    lastName: string;
-    designation: string;
-    biography: string;
-  }>;
+  form: UseFormReturn<GeneralInfoFormData>;
   isEditing: boolean;
   technicalSkills: Skill[];
   specializedSkills: Skill[];

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import DashboardLayout from '../../components/Layout/DashboardLayout';
 import { Button } from '@/components/ui/button';
@@ -7,6 +6,7 @@ import { useProfile } from '@/hooks/use-profile';
 import { useForm } from 'react-hook-form';
 import { ProfileTabs } from '@/components/profile/ProfileTabs';
 import { Skill } from '@/types';
+import { GeneralInfoFormData } from '@/components/profile/GeneralInfoTab';
 
 const ProfilePage: React.FC = () => {
   const { toast } = useToast();
@@ -47,7 +47,7 @@ const ProfilePage: React.FC = () => {
     deleteProject
   } = useProfile();
 
-  const form = useForm({
+  const form = useForm<GeneralInfoFormData>({
     defaultValues: {
       firstName: generalInfo.firstName,
       lastName: generalInfo.lastName,
@@ -70,13 +70,7 @@ const ProfilePage: React.FC = () => {
     }
   }, [isLoading, generalInfo, form.reset]);
 
-  const handleUpdateProfile = async (data: {
-    firstName: string;
-    lastName: string;
-    designation: string;
-    biography: string;
-    orgId: string;
-  }) => {
+  const handleUpdateProfile = async (data: GeneralInfoFormData) => {
     const success = await saveGeneralInfo({
       firstName: data.firstName,
       lastName: data.lastName,

@@ -15,7 +15,7 @@ import { UseFormReturn } from 'react-hook-form';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 
-interface GeneralInfoFormData {
+export interface GeneralInfoFormData {
   firstName: string;
   lastName: string;
   designation: string;
