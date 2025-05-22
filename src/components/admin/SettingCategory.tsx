@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, KeyboardEvent } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -23,10 +23,28 @@ const SettingCategory: React.FC<SettingCategoryProps> = ({ title, table }) => {
     isRemovingItem 
   } = usePlatformSettings(table);
   
-  const handleAddItem = () => {
-    if (newValue.trim()) {
-      addItem(newValue);
-      setNewValue('');
+  const handleAddItems = () => {
+    if (!newValue.trim()) return;
+    
+    // Split by comma and trim each item
+    const values = newValue
+      .split(',')
+      .map(item => item.trim())
+      .filter(item => item.length > 0);
+    
+    // Add each item
+    values.forEach(value => {
+      addItem(value);
+    });
+    
+    // Clear the input
+    setNewValue('');
+  };
+  
+  const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter' && !isAddingItem && newValue.trim()) {
+      e.preventDefault();
+      handleAddItems();
     }
   };
 
@@ -41,10 +59,11 @@ const SettingCategory: React.FC<SettingCategoryProps> = ({ title, table }) => {
             placeholder={`Add new ${title.toLowerCase().slice(0, -1)}...`}
             value={newValue}
             onChange={(e) => setNewValue(e.target.value)}
+            onKeyDown={handleKeyDown}
             className="mr-2"
           />
           <Button 
-            onClick={handleAddItem}
+            onClick={handleAddItems}
             disabled={isAddingItem || !newValue.trim()}
           >
             {isAddingItem ? 'Adding...' : 'Add'}

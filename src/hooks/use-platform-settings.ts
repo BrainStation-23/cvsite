@@ -42,6 +42,16 @@ export const usePlatformSettings = (table: SettingTableName) => {
   // Add setting mutation
   const addSettingMutation = useMutation({
     mutationFn: async (name: string) => {
+      // Check if item already exists to prevent duplicates
+      const existingItems = items || [];
+      const itemExists = existingItems.some(item => 
+        item.name.toLowerCase() === name.toLowerCase()
+      );
+      
+      if (itemExists) {
+        throw new Error(`"${name}" already exists`);
+      }
+      
       const { data, error } = await supabase
         .from(table)
         .insert({ name })
@@ -83,11 +93,16 @@ export const usePlatformSettings = (table: SettingTableName) => {
         });
       },
       onError: (error) => {
-        toast({
-          title: "Error",
-          description: `Failed to add item: ${error instanceof Error ? error.message : 'Unknown error'}`,
-          variant: "destructive"
-        });
+        // Don't show error toast for duplicate items when adding multiple items
+        if (error instanceof Error && error.message.includes("already exists")) {
+          console.log(error.message);
+        } else {
+          toast({
+            title: "Error",
+            description: `Failed to add item: ${error instanceof Error ? error.message : 'Unknown error'}`,
+            variant: "destructive"
+          });
+        }
       }
     });
   };
