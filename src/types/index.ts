@@ -1,3 +1,4 @@
+
 export type UserRole = "admin" | "manager" | "employee";
 
 export interface User {
@@ -43,7 +44,7 @@ export interface Education {
   id: string;
   university: string;
   degree: string;
-  field: string;
+  field: string; // Keeping for backward compatibility with UI
   startDate: Date;
   endDate?: Date;
   isCurrent?: boolean;

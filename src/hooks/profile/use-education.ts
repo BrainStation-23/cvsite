@@ -10,13 +10,12 @@ type EducationDB = {
   id: string;
   profile_id: string;
   university: string;
-  degree: string;
-  field: string;
-  gpa?: string;
+  degree: string | null;
+  department: string | null;
+  gpa?: string | null;
   start_date: string;
-  end_date?: string;
-  is_current?: boolean;
-  department?: string;
+  end_date?: string | null;
+  is_current?: boolean | null;
   created_at: string;
   updated_at: string;
 };
@@ -25,10 +24,10 @@ type EducationDB = {
 const mapToEducation = (data: EducationDB): Education => ({
   id: data.id,
   university: data.university,
-  degree: data.degree,
-  field: data.field,
-  gpa: data.gpa,
-  department: data.department,
+  degree: data.degree || '',
+  field: '', // Use empty string as field no longer exists in the database
+  gpa: data.gpa || undefined,
+  department: data.department || undefined,
   startDate: new Date(data.start_date),
   endDate: data.end_date ? new Date(data.end_date) : undefined,
   isCurrent: data.is_current || false
@@ -38,10 +37,9 @@ const mapToEducation = (data: EducationDB): Education => ({
 const mapToEducationDB = (edu: Omit<Education, 'id'>, profileId: string) => ({
   profile_id: profileId,
   university: edu.university,
-  degree: edu.degree,
-  field: edu.field,
-  gpa: edu.gpa,
-  department: edu.department,
+  degree: edu.degree || null,
+  department: edu.department || null,
+  gpa: edu.gpa || null,
   start_date: edu.startDate.toISOString().split('T')[0],
   end_date: edu.endDate ? edu.endDate.toISOString().split('T')[0] : null,
   is_current: edu.isCurrent || false
@@ -138,10 +136,9 @@ export function useEducation() {
       const dbData: Partial<EducationDB> = {};
       
       if (educationData.university) dbData.university = educationData.university;
-      if (educationData.degree) dbData.degree = educationData.degree;
-      if (educationData.field) dbData.field = educationData.field;
-      if (educationData.gpa !== undefined) dbData.gpa = educationData.gpa;
-      if (educationData.department !== undefined) dbData.department = educationData.department;
+      if (educationData.degree !== undefined) dbData.degree = educationData.degree || null;
+      if (educationData.department !== undefined) dbData.department = educationData.department || null;
+      if (educationData.gpa !== undefined) dbData.gpa = educationData.gpa || null;
       if (educationData.startDate) dbData.start_date = educationData.startDate.toISOString().split('T')[0];
       
       if (educationData.endDate) {
