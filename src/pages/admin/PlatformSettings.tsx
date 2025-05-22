@@ -21,6 +21,9 @@ interface SettingItem {
   updated_at: string;
 }
 
+// Define valid table names for type safety
+type SettingTableName = 'universities' | 'departments' | 'degrees' | 'designations' | 'references' | 'sbus';
+
 const PlatformSettings: React.FC = () => {
   const { toast } = useToast();
   const { user } = useAuth();
@@ -36,7 +39,7 @@ const PlatformSettings: React.FC = () => {
   });
   
   // Fetch data from each table
-  const fetchSettings = async (table: string) => {
+  const fetchSettings = async (table: SettingTableName) => {
     const { data, error } = await supabase
       .from(table)
       .select('*')
@@ -117,7 +120,7 @@ const PlatformSettings: React.FC = () => {
   
   // Add setting mutation
   const addSettingMutation = useMutation({
-    mutationFn: async ({ table, name }: { table: string, name: string }) => {
+    mutationFn: async ({ table, name }: { table: SettingTableName, name: string }) => {
       const { data, error } = await supabase
         .from(table)
         .insert({ name })
@@ -133,7 +136,7 @@ const PlatformSettings: React.FC = () => {
   
   // Delete setting mutation
   const deleteSettingMutation = useMutation({
-    mutationFn: async ({ table, id }: { table: string, id: string }) => {
+    mutationFn: async ({ table, id }: { table: SettingTableName, id: string }) => {
       const { data, error } = await supabase
         .from(table)
         .delete()
@@ -147,7 +150,7 @@ const PlatformSettings: React.FC = () => {
     },
   });
   
-  const addItem = (table: string, category: keyof PlatformSettingsType, value: string) => {
+  const addItem = (table: SettingTableName, category: keyof PlatformSettingsType, value: string) => {
     if (!value.trim()) return;
     
     // Perform the mutation
@@ -180,7 +183,7 @@ const PlatformSettings: React.FC = () => {
     );
   };
   
-  const removeItem = (table: string, categoryItems: SettingItem[] | undefined, itemName: string) => {
+  const removeItem = (table: SettingTableName, categoryItems: SettingItem[] | undefined, itemName: string) => {
     if (!categoryItems) return;
     
     const itemToRemove = categoryItems.find(item => item.name === itemName);
@@ -212,7 +215,7 @@ const PlatformSettings: React.FC = () => {
   
   // Helper function to render setting items
   const renderSettingItems = (
-    table: string,
+    table: SettingTableName,
     category: keyof PlatformSettingsType,
     title: string,
     inputName: keyof typeof newItem,
