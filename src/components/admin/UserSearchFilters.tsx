@@ -86,14 +86,14 @@ const UserSearchFilters: React.FC<UserSearchFiltersProps> = ({
             Filter by Role
           </label>
           <Select
-            value={currentRole || ''}
-            onValueChange={(value) => onFilterRole(value as UserRole || null)}
+            value={currentRole || "all-roles"}
+            onValueChange={(value) => onFilterRole(value === "all-roles" ? null : value as UserRole)}
           >
             <SelectTrigger>
               <SelectValue placeholder="All Roles" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">All Roles</SelectItem>
+              <SelectItem value="all-roles">All Roles</SelectItem>
               <SelectItem value="admin">Admin</SelectItem>
               <SelectItem value="manager">Manager</SelectItem>
               <SelectItem value="employee">Employee</SelectItem>

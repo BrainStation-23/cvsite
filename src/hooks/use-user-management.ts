@@ -117,7 +117,7 @@ export function useUserManagement({
       }
       
       // Type assertion to handle the response structure
-      const response = data as ListUsersResponse;
+      const response = data as unknown as ListUsersResponse;
       
       // Map the returned data to our UserData format
       const formattedUsers = response.users.map(user => ({
