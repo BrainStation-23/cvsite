@@ -1,5 +1,6 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import DashboardLayout from '../../components/Layout/DashboardLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -7,20 +8,25 @@ import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { X } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
 import { PlatformSettings as PlatformSettingsType } from '../../types';
+import { Spinner } from '@/components/ui/spinner';
+
+// Define the shape of a setting from the database
+interface PlatformSetting {
+  id: string;
+  category: string;
+  name: string;
+  value: string;
+  created_at: string;
+  updated_at: string;
+}
 
 const PlatformSettings: React.FC = () => {
   const { toast } = useToast();
-  
-  // Sample platform settings data - would come from Supabase in a real app
-  const [settings, setSettings] = useState<PlatformSettingsType>({
-    universities: ['Harvard University', 'MIT', 'Stanford University'],
-    departments: ['Engineering', 'Marketing', 'Sales', 'Human Resources', 'Finance'],
-    degrees: ['Bachelor of Science', 'Master of Science', 'PhD', 'MBA'],
-    designations: ['Software Engineer', 'Project Manager', 'Product Manager', 'UX Designer'],
-    references: ['Internal Project', 'Client Project', 'Research'],
-    sbus: ['Technology', 'Healthcare', 'Finance', 'Retail']
-  });
+  const { user } = useAuth();
+  const queryClient = useQueryClient();
   
   const [newItem, setNewItem] = useState({
     university: '',
@@ -31,38 +37,169 @@ const PlatformSettings: React.FC = () => {
     sbu: ''
   });
   
+  // Fetch all platform settings
+  const { data: platformSettingsData, isLoading, error } = useQuery({
+    queryKey: ['platformSettings'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('platform_settings')
+        .select('*')
+        .order('name');
+      
+      if (error) throw error;
+      return data as PlatformSetting[];
+    },
+  });
+  
+  // Group settings by category
+  const [settings, setSettings] = useState<PlatformSettingsType>({
+    universities: [],
+    departments: [],
+    degrees: [],
+    designations: [],
+    references: [],
+    sbus: []
+  });
+  
+  useEffect(() => {
+    if (platformSettingsData) {
+      const groupedSettings: PlatformSettingsType = {
+        universities: [],
+        departments: [],
+        degrees: [],
+        designations: [],
+        references: [],
+        sbus: []
+      };
+      
+      platformSettingsData.forEach(setting => {
+        const category = setting.category + 's' as keyof PlatformSettingsType;
+        if (category in groupedSettings) {
+          groupedSettings[category].push(setting.value);
+        }
+      });
+      
+      setSettings(groupedSettings);
+    }
+  }, [platformSettingsData]);
+  
+  // Add setting mutation
+  const addSettingMutation = useMutation({
+    mutationFn: async ({ category, name, value }: { category: string, name: string, value: string }) => {
+      const singularCategory = category.endsWith('s') ? category.slice(0, -1) : category;
+      
+      const { data, error } = await supabase.rpc(
+        'update_platform_setting',
+        { 
+          p_category: singularCategory, 
+          p_name: value, 
+          p_value: value 
+        }
+      );
+      
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['platformSettings'] });
+    },
+  });
+  
+  // Delete setting mutation
+  const deleteSettingMutation = useMutation({
+    mutationFn: async ({ category, name }: { category: string, name: string }) => {
+      const singularCategory = category.endsWith('s') ? category.slice(0, -1) : category;
+      
+      const { data, error } = await supabase.rpc(
+        'delete_platform_setting',
+        { 
+          p_category: singularCategory, 
+          p_name: name 
+        }
+      );
+      
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['platformSettings'] });
+    },
+  });
+  
   const addItem = (category: keyof PlatformSettingsType, value: string) => {
     if (!value.trim()) return;
     
-    setSettings({
-      ...settings,
-      [category]: [...settings[category], value.trim()]
-    });
-    
-    setNewItem({
-      ...newItem,
-      [category]: ''
-    });
-    
-    toast({
-      title: "Item added",
-      description: `"${value}" has been added to ${category}.`,
-    });
+    // Perform the mutation
+    addSettingMutation.mutate(
+      { 
+        category, 
+        name: value.trim(), 
+        value: value.trim() 
+      },
+      {
+        onSuccess: () => {
+          // Update local state for immediate UI feedback
+          setSettings({
+            ...settings,
+            [category]: [...settings[category], value.trim()]
+          });
+          
+          // Reset the input
+          setNewItem({
+            ...newItem,
+            [category.endsWith('s') ? category.slice(0, -1) : category]: ''
+          });
+          
+          toast({
+            title: "Item added",
+            description: `"${value}" has been added to ${category}.`,
+          });
+        },
+        onError: (error) => {
+          toast({
+            title: "Error",
+            description: `Failed to add item: ${error instanceof Error ? error.message : 'Unknown error'}`,
+            variant: "destructive"
+          });
+        }
+      }
+    );
   };
   
   const removeItem = (category: keyof PlatformSettingsType, index: number) => {
-    const updatedItems = [...settings[category]];
-    updatedItems.splice(index, 1);
+    const itemToRemove = settings[category][index];
     
-    setSettings({
-      ...settings,
-      [category]: updatedItems
-    });
-    
-    toast({
-      title: "Item removed",
-      description: `Item has been removed from ${category}.`,
-    });
+    // Perform the mutation
+    deleteSettingMutation.mutate(
+      { 
+        category, 
+        name: itemToRemove 
+      },
+      {
+        onSuccess: () => {
+          // Update local state for immediate UI feedback
+          const updatedItems = [...settings[category]];
+          updatedItems.splice(index, 1);
+          
+          setSettings({
+            ...settings,
+            [category]: updatedItems
+          });
+          
+          toast({
+            title: "Item removed",
+            description: `"${itemToRemove}" has been removed from ${category}.`,
+          });
+        },
+        onError: (error) => {
+          toast({
+            title: "Error",
+            description: `Failed to remove item: ${error instanceof Error ? error.message : 'Unknown error'}`,
+            variant: "destructive"
+          });
+        }
+      }
+    );
   };
   
   // Helper function to render setting items
@@ -85,29 +222,53 @@ const PlatformSettings: React.FC = () => {
           />
           <Button 
             onClick={() => addItem(category, newItem[inputName])}
+            disabled={addSettingMutation.isPending}
           >
-            Add
+            {addSettingMutation.isPending ? 'Adding...' : 'Add'}
           </Button>
         </div>
-        <div className="flex flex-wrap gap-2">
-          {settings[category].map((item, index) => (
-            <div 
-              key={index} 
-              className="flex items-center bg-gray-100 dark:bg-gray-700 px-3 py-2 rounded-md"
-            >
-              <span>{item}</span>
-              <button 
-                onClick={() => removeItem(category, index)}
-                className="ml-2 text-gray-500 hover:text-red-500"
+        {isLoading ? (
+          <div className="flex justify-center p-4">
+            <Spinner />
+          </div>
+        ) : (
+          <div className="flex flex-wrap gap-2">
+            {settings[category].map((item, index) => (
+              <div 
+                key={index} 
+                className="flex items-center bg-gray-100 dark:bg-gray-700 px-3 py-2 rounded-md"
               >
-                <X size={16} />
-              </button>
-            </div>
-          ))}
-        </div>
+                <span>{item}</span>
+                <button 
+                  onClick={() => removeItem(category, index)}
+                  className="ml-2 text-gray-500 hover:text-red-500"
+                  disabled={deleteSettingMutation.isPending}
+                >
+                  <X size={16} />
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
       </CardContent>
     </Card>
   );
+  
+  if (error) {
+    return (
+      <DashboardLayout>
+        <div className="text-center text-red-500">
+          <p>Error loading settings: {error instanceof Error ? error.message : 'Unknown error'}</p>
+          <Button 
+            onClick={() => queryClient.invalidateQueries({ queryKey: ['platformSettings'] })}
+            className="mt-4"
+          >
+            Retry
+          </Button>
+        </div>
+      </DashboardLayout>
+    );
+  }
   
   return (
     <DashboardLayout>
