@@ -11,7 +11,6 @@ export interface GeneralInfo {
   designation: string | null;
   biography: string | null;
   profileImage: string | null;
-  orgId: string | null;
 }
 
 export function useGeneralInfo() {
@@ -24,8 +23,7 @@ export function useGeneralInfo() {
     lastName: '',
     designation: null,
     biography: null,
-    profileImage: null,
-    orgId: null
+    profileImage: null
   });
 
   // Use React Query to fetch general info
@@ -71,8 +69,7 @@ export function useGeneralInfo() {
           lastName: data.last_name,
           designation: data.designation,
           biography: data.biography,
-          profileImage: data.profile_image,
-          orgId: data.org_id
+          profileImage: data.profile_image
         };
       } else {
         // Use user data as fallback
@@ -81,8 +78,7 @@ export function useGeneralInfo() {
           lastName: user.lastName || '',
           designation: null,
           biography: null,
-          profileImage: user.profileImageUrl || null,
-          orgId: 'default'
+          profileImage: user.profileImageUrl || null
         };
       }
     },
@@ -116,7 +112,6 @@ export function useGeneralInfo() {
     lastName: string;
     designation: string | null;
     biography: string | null;
-    orgId: string | null;
   }) => {
     if (!user?.id) return false;
     
@@ -141,7 +136,6 @@ export function useGeneralInfo() {
             last_name: data.lastName,
             designation: data.designation,
             biography: data.biography,
-            org_id: data.orgId,
             updated_at: new Date().toISOString()
           })
           .eq('profile_id', user.id);
@@ -153,7 +147,7 @@ export function useGeneralInfo() {
           .from('general_information')
           .insert({
             profile_id: user.id,
-            org_id: data.orgId || 'default',
+            org_id: 'default', // Default org ID, replace with actual org ID if available
             first_name: data.firstName,
             last_name: data.lastName,
             designation: data.designation,

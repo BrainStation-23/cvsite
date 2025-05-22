@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import DashboardLayout from '../../components/Layout/DashboardLayout';
 import { Button } from '@/components/ui/button';
@@ -6,7 +7,6 @@ import { useProfile } from '@/hooks/use-profile';
 import { useForm } from 'react-hook-form';
 import { ProfileTabs } from '@/components/profile/ProfileTabs';
 import { Skill } from '@/types';
-import { GeneralInfoFormData } from '@/components/profile/GeneralInfoTab';
 
 const ProfilePage: React.FC = () => {
   const { toast } = useToast();
@@ -47,13 +47,12 @@ const ProfilePage: React.FC = () => {
     deleteProject
   } = useProfile();
 
-  const form = useForm<GeneralInfoFormData>({
+  const form = useForm({
     defaultValues: {
       firstName: generalInfo.firstName,
       lastName: generalInfo.lastName,
       designation: generalInfo.designation || '',
-      biography: generalInfo.biography || '',
-      orgId: generalInfo.orgId || 'default'
+      biography: generalInfo.biography || ''
     }
   });
 
@@ -64,19 +63,22 @@ const ProfilePage: React.FC = () => {
         firstName: generalInfo.firstName,
         lastName: generalInfo.lastName,
         designation: generalInfo.designation || '',
-        biography: generalInfo.biography || '',
-        orgId: generalInfo.orgId || 'default'
+        biography: generalInfo.biography || ''
       });
     }
   }, [isLoading, generalInfo, form.reset]);
 
-  const handleUpdateProfile = async (data: GeneralInfoFormData) => {
+  const handleUpdateProfile = async (data: {
+    firstName: string;
+    lastName: string;
+    designation: string;
+    biography: string;
+  }) => {
     const success = await saveGeneralInfo({
       firstName: data.firstName,
       lastName: data.lastName,
       designation: data.designation || null,
-      biography: data.biography || null,
-      orgId: data.orgId || null
+      biography: data.biography || null
     });
     
     if (success) {
