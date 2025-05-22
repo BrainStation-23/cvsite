@@ -8,7 +8,6 @@ import { useQuery } from '@tanstack/react-query';
 export interface GeneralInfo {
   firstName: string;
   lastName: string;
-  designation: string | null;
   biography: string | null;
   profileImage: string | null;
 }
@@ -21,7 +20,6 @@ export function useGeneralInfo() {
   const [generalInfo, setGeneralInfo] = useState<GeneralInfo>({
     firstName: '',
     lastName: '',
-    designation: null,
     biography: null,
     profileImage: null
   });
@@ -67,7 +65,6 @@ export function useGeneralInfo() {
         return {
           firstName: data.first_name,
           lastName: data.last_name,
-          designation: data.designation,
           biography: data.biography,
           profileImage: data.profile_image
         };
@@ -76,7 +73,6 @@ export function useGeneralInfo() {
         return {
           firstName: user.firstName || '',
           lastName: user.lastName || '',
-          designation: null,
           biography: null,
           profileImage: user.profileImageUrl || null
         };
@@ -110,7 +106,6 @@ export function useGeneralInfo() {
   const saveGeneralInfo = async (data: {
     firstName: string;
     lastName: string;
-    designation: string | null;
     biography: string | null;
   }) => {
     if (!user?.id) return false;
@@ -134,7 +129,6 @@ export function useGeneralInfo() {
           .update({
             first_name: data.firstName,
             last_name: data.lastName,
-            designation: data.designation,
             biography: data.biography,
             updated_at: new Date().toISOString()
           })
@@ -147,10 +141,8 @@ export function useGeneralInfo() {
           .from('general_information')
           .insert({
             profile_id: user.id,
-            org_id: 'default', // Default org ID, replace with actual org ID if available
             first_name: data.firstName,
             last_name: data.lastName,
-            designation: data.designation,
             biography: data.biography
           });
         

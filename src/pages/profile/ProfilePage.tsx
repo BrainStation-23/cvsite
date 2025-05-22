@@ -51,7 +51,6 @@ const ProfilePage: React.FC = () => {
     defaultValues: {
       firstName: generalInfo.firstName,
       lastName: generalInfo.lastName,
-      designation: generalInfo.designation || '',
       biography: generalInfo.biography || ''
     }
   });
@@ -62,7 +61,6 @@ const ProfilePage: React.FC = () => {
       form.reset({
         firstName: generalInfo.firstName,
         lastName: generalInfo.lastName,
-        designation: generalInfo.designation || '',
         biography: generalInfo.biography || ''
       });
     }
@@ -71,13 +69,11 @@ const ProfilePage: React.FC = () => {
   const handleUpdateProfile = async (data: {
     firstName: string;
     lastName: string;
-    designation: string;
     biography: string;
   }) => {
     const success = await saveGeneralInfo({
       firstName: data.firstName,
       lastName: data.lastName,
-      designation: data.designation || null,
       biography: data.biography || null
     });
     

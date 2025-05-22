@@ -275,11 +275,9 @@ export type Database = {
         Row: {
           biography: string | null
           created_at: string
-          designation: string | null
           first_name: string
           id: string
           last_name: string
-          org_id: string
           profile_id: string
           profile_image: string | null
           updated_at: string
@@ -287,11 +285,9 @@ export type Database = {
         Insert: {
           biography?: string | null
           created_at?: string
-          designation?: string | null
           first_name: string
           id?: string
           last_name: string
-          org_id: string
           profile_id: string
           profile_image?: string | null
           updated_at?: string
@@ -299,23 +295,14 @@ export type Database = {
         Update: {
           biography?: string | null
           created_at?: string
-          designation?: string | null
           first_name?: string
           id?: string
           last_name?: string
-          org_id?: string
           profile_id?: string
           profile_image?: string | null
           updated_at?: string
         }
         Relationships: [
-          {
-            foreignKeyName: "general_information_designation_fkey"
-            columns: ["designation"]
-            isOneToOne: false
-            referencedRelation: "designations"
-            referencedColumns: ["name"]
-          },
           {
             foreignKeyName: "general_information_profile_id_fkey"
             columns: ["profile_id"]
