@@ -37,24 +37,16 @@ const PlatformSettings: React.FC = () => {
     sbu: ''
   });
   
-  // Fetch all platform settings
+  // Fetch all platform settings directly from the database
   const { data: platformSettingsData, isLoading, error } = useQuery({
     queryKey: ['platformSettings'],
     queryFn: async () => {
-      // Using the edge function to fetch settings
-      const response = await fetch(`${supabase.supabaseUrl}/functions/v1/list-settings`, {
-        headers: {
-          'Authorization': `Bearer ${supabase.supabaseKey}`,
-          'Content-Type': 'application/json'
-        }
-      });
+      const { data, error } = await supabase
+        .from('platform_settings')
+        .select('*')
+        .order('name');
       
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to fetch settings');
-      }
-      
-      const data = await response.json();
+      if (error) throw error;
       console.log("Settings data fetched:", data); // Debug log
       return data as PlatformSetting[];
     },
