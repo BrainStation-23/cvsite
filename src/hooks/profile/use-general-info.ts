@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import { useQuery } from '@tanstack/react-query';
 
 export interface GeneralInfo {
   firstName: string;
@@ -25,71 +26,85 @@ export function useGeneralInfo() {
     profileImage: null
   });
 
-  // Fetch general info
-  const fetchGeneralInfo = async () => {
-    if (!user?.id) return;
-    
-    try {
-      setIsLoading(true);
+  // Use React Query to fetch general info
+  const { data, error, refetch } = useQuery({
+    queryKey: ['generalInfo', user?.id],
+    queryFn: async () => {
+      if (!user?.id) throw new Error('No user ID available');
       
       // Check if profile exists
       const { data: profile, error: profileError } = await supabase
         .from('profiles')
         .select('id')
         .eq('id', user.id)
-        .single();
+        .maybeSingle();
         
-      if (profileError) {
-        if (profileError.code === 'PGRST116') {
-          // Profile doesn't exist, create one
-          const { error } = await supabase
-            .from('profiles')
-            .insert({ id: user.id });
-            
-          if (error) throw error;
-        } else {
-          throw profileError;
-        }
+      if (profileError && profileError.code !== 'PGRST116') {
+        throw profileError;
+      }
+      
+      if (!profile) {
+        // Profile doesn't exist, create one
+        const { error } = await supabase
+          .from('profiles')
+          .insert({ id: user.id });
+          
+        if (error) throw error;
       }
       
       // Get general info
-      const { data, error } = await supabase
+      const { data, error: generalInfoError } = await supabase
         .from('general_information')
         .select('*')
         .eq('profile_id', user.id)
-        .single();
+        .maybeSingle();
       
-      if (error && error.code !== 'PGRST116') throw error;
+      if (generalInfoError && generalInfoError.code !== 'PGRST116') {
+        throw generalInfoError;
+      }
       
       if (data) {
-        setGeneralInfo({
+        return {
           firstName: data.first_name,
           lastName: data.last_name,
           designation: data.designation,
           biography: data.biography,
           profileImage: data.profile_image
-        });
+        };
       } else {
         // Use user data as fallback
-        setGeneralInfo({
+        return {
           firstName: user.firstName || '',
           lastName: user.lastName || '',
           designation: null,
           biography: null,
           profileImage: user.profileImageUrl || null
-        });
+        };
       }
-    } catch (error) {
+    },
+    enabled: !!user?.id,
+  });
+
+  // Update general info state when data changes
+  useEffect(() => {
+    if (data) {
+      setGeneralInfo(data);
+      setIsLoading(false);
+    }
+  }, [data]);
+
+  // Handle error in fetching
+  useEffect(() => {
+    if (error) {
       console.error('Error fetching general info:', error);
       toast({
         title: 'Error',
         description: 'Failed to load profile information',
         variant: 'destructive'
       });
-    } finally {
       setIsLoading(false);
     }
-  };
+  }, [error, toast]);
 
   // Save general info
   const saveGeneralInfo = async (data: {
@@ -108,7 +123,7 @@ export function useGeneralInfo() {
         .from('general_information')
         .select('id')
         .eq('profile_id', user.id)
-        .single();
+        .maybeSingle();
       
       if (checkError && checkError.code !== 'PGRST116') throw checkError;
       
@@ -142,14 +157,8 @@ export function useGeneralInfo() {
         if (error) throw error;
       }
       
-      // Update local state
-      setGeneralInfo(prev => ({
-        ...prev,
-        firstName: data.firstName,
-        lastName: data.lastName,
-        designation: data.designation,
-        biography: data.biography
-      }));
+      // Refetch the data to update local state
+      refetch();
       
       toast({
         title: 'Success',
@@ -169,13 +178,6 @@ export function useGeneralInfo() {
       setIsSaving(false);
     }
   };
-
-  // Load general info data
-  useEffect(() => {
-    if (user?.id) {
-      fetchGeneralInfo();
-    }
-  }, [user?.id]);
 
   return {
     isLoading,
