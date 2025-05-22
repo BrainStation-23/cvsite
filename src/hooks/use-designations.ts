@@ -21,6 +21,7 @@ export const useDesignations = () => {
         throw error;
       }
 
+      // Ensure we return an array of objects with id and name properties
       return data || [];
     },
   });
