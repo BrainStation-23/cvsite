@@ -5,6 +5,43 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { Experience } from '@/types';
 
+// Type for database experience record format
+type ExperienceDB = {
+  id: string;
+  profile_id: string;
+  company_name: string;
+  position: string;
+  description?: string;
+  designation?: string;
+  start_date: string;
+  end_date?: string;
+  is_current?: boolean;
+  created_at: string;
+  updated_at: string;
+};
+
+// Map from database format to application model
+const mapToExperience = (data: ExperienceDB): Experience => ({
+  id: data.id,
+  companyName: data.company_name,
+  position: data.position,
+  description: data.description || '',
+  startDate: new Date(data.start_date),
+  endDate: data.end_date ? new Date(data.end_date) : undefined,
+  isCurrent: data.is_current || false
+});
+
+// Map from application model to database format
+const mapToExperienceDB = (exp: Omit<Experience, 'id'>, profileId: string) => ({
+  profile_id: profileId,
+  company_name: exp.companyName,
+  position: exp.position,
+  description: exp.description,
+  start_date: exp.startDate.toISOString().split('T')[0],
+  end_date: exp.endDate ? exp.endDate.toISOString().split('T')[0] : null,
+  is_current: exp.isCurrent || false
+});
+
 export function useExperience() {
   const { user } = useAuth();
   const { toast } = useToast();
@@ -27,7 +64,9 @@ export function useExperience() {
       if (error) throw error;
       
       if (data) {
-        setExperiences(data);
+        // Map database records to application model format
+        const mappedData = data.map(mapToExperience);
+        setExperiences(mappedData);
       }
     } catch (error) {
       console.error('Error fetching experiences:', error);
@@ -42,24 +81,27 @@ export function useExperience() {
   };
 
   // Save experience
-  const saveExperience = async (experience: Omit<Experience, 'id' | 'created_at' | 'updated_at'>) => {
+  const saveExperience = async (experience: Omit<Experience, 'id'>) => {
     if (!user?.id) return false;
     
     try {
       setIsSaving(true);
       
+      // Convert to database format
+      const dbData = mapToExperienceDB(experience, user.id);
+      
       const { data, error } = await supabase
         .from('experiences')
-        .insert({
-          ...experience,
-          profile_id: user.id
-        })
+        .insert(dbData)
         .select();
       
       if (error) throw error;
       
-      // Update local state
-      setExperiences(prev => [...prev, data[0]]);
+      // Update local state with the new experience entry
+      if (data && data.length > 0) {
+        const newExperience = mapToExperience(data[0] as ExperienceDB);
+        setExperiences(prev => [...prev, newExperience]);
+      }
       
       toast({
         title: 'Success',
@@ -87,12 +129,27 @@ export function useExperience() {
     try {
       setIsSaving(true);
       
+      // Convert partial experience data to database format
+      const dbData: Partial<ExperienceDB> = {};
+      
+      if (experience.companyName) dbData.company_name = experience.companyName;
+      if (experience.position) dbData.position = experience.position;
+      if (experience.description !== undefined) dbData.description = experience.description;
+      if (experience.startDate) dbData.start_date = experience.startDate.toISOString().split('T')[0];
+      
+      if (experience.endDate) {
+        dbData.end_date = experience.endDate.toISOString().split('T')[0];
+      } else if (experience.endDate === null) {
+        dbData.end_date = null;
+      }
+      
+      if (experience.isCurrent !== undefined) dbData.is_current = experience.isCurrent;
+      
+      dbData.updated_at = new Date().toISOString();
+      
       const { error } = await supabase
         .from('experiences')
-        .update({
-          ...experience,
-          updated_at: new Date().toISOString()
-        })
+        .update(dbData)
         .eq('id', id)
         .eq('profile_id', user.id);
       
@@ -100,7 +157,7 @@ export function useExperience() {
       
       // Update local state
       setExperiences(prev => 
-        prev.map(exp => exp.id === id ? { ...exp, ...experience } as Experience : exp)
+        prev.map(exp => exp.id === id ? { ...exp, ...experience } : exp)
       );
       
       toast({
