@@ -47,6 +47,7 @@ const ProfilePage: React.FC = () => {
     deleteProject
   } = useProfile();
 
+  // Updated form to match the GeneralInfoFormData interface
   const form = useForm({
     defaultValues: {
       firstName: generalInfo.firstName,

@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { GeneralInfoTab } from './GeneralInfoTab';
@@ -11,11 +10,11 @@ import { ProjectsTab } from './ProjectsTab';
 import { UseFormReturn } from 'react-hook-form';
 import { Skill, Experience, Education, Training, Achievement, Project } from '@/types';
 
+// Update the form type to match GeneralInfoFormData
 interface ProfileTabsProps {
   form: UseFormReturn<{
     firstName: string;
     lastName: string;
-    designation: string;
     biography: string;
   }>;
   isEditing: boolean;
