@@ -28,6 +28,7 @@ const mapToEducation = (data: EducationDB): Education => ({
   degree: data.degree,
   field: data.field,
   gpa: data.gpa,
+  department: data.department,
   startDate: new Date(data.start_date),
   endDate: data.end_date ? new Date(data.end_date) : undefined,
   isCurrent: data.is_current || false
@@ -40,6 +41,7 @@ const mapToEducationDB = (edu: Omit<Education, 'id'>, profileId: string) => ({
   degree: edu.degree,
   field: edu.field,
   gpa: edu.gpa,
+  department: edu.department,
   start_date: edu.startDate.toISOString().split('T')[0],
   end_date: edu.endDate ? edu.endDate.toISOString().split('T')[0] : null,
   is_current: edu.isCurrent || false
@@ -139,6 +141,7 @@ export function useEducation() {
       if (educationData.degree) dbData.degree = educationData.degree;
       if (educationData.field) dbData.field = educationData.field;
       if (educationData.gpa !== undefined) dbData.gpa = educationData.gpa;
+      if (educationData.department !== undefined) dbData.department = educationData.department;
       if (educationData.startDate) dbData.start_date = educationData.startDate.toISOString().split('T')[0];
       
       if (educationData.endDate) {

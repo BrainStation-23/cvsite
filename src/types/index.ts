@@ -1,4 +1,3 @@
-
 export type UserRole = "admin" | "manager" | "employee";
 
 export interface User {
@@ -49,6 +48,7 @@ export interface Education {
   endDate?: Date;
   isCurrent?: boolean;
   gpa?: string;
+  department?: string;
 }
 
 export interface Training {

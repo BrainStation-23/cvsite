@@ -12,6 +12,8 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Calendar } from '@/components/ui/calendar';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { usePlatformSettings } from '@/hooks/use-platform-settings';
 
 interface EducationTabProps {
   education: Education[];
@@ -35,6 +37,11 @@ export const EducationTab: React.FC<EducationTabProps> = ({
   const [startDate, setStartDate] = useState<Date | undefined>(new Date());
   const [endDate, setEndDate] = useState<Date | undefined>();
   const [isCurrent, setIsCurrent] = useState(false);
+
+  // Fetch platform settings for dropdowns
+  const { items: universities } = usePlatformSettings('universities');
+  const { items: departments } = usePlatformSettings('departments');
+  const { items: degrees } = usePlatformSettings('degrees');
 
   const addForm = useForm<Omit<Education, 'id'>>({
     defaultValues: {
@@ -164,9 +171,23 @@ export const EducationTab: React.FC<EducationTabProps> = ({
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>University / Institution</FormLabel>
-                      <FormControl>
-                        <Input {...field} placeholder="University or institution name" />
-                      </FormControl>
+                      <Select
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select university" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {universities?.map((uni) => (
+                            <SelectItem key={uni.id} value={uni.name}>
+                              {uni.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -176,12 +197,27 @@ export const EducationTab: React.FC<EducationTabProps> = ({
                   <FormField
                     control={addForm.control}
                     name="degree"
+                    rules={{ required: 'Degree is required' }}
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Degree</FormLabel>
-                        <FormControl>
-                          <Input {...field} placeholder="e.g. Bachelor of Science" />
-                        </FormControl>
+                        <Select
+                          onValueChange={field.onChange}
+                          defaultValue={field.value}
+                        >
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select degree" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {degrees?.map((deg) => (
+                              <SelectItem key={deg.id} value={deg.name}>
+                                {deg.name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
                         <FormMessage />
                       </FormItem>
                     )}
@@ -190,6 +226,7 @@ export const EducationTab: React.FC<EducationTabProps> = ({
                   <FormField
                     control={addForm.control}
                     name="field"
+                    rules={{ required: 'Field of study is required' }}
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Field of Study</FormLabel>
@@ -201,6 +238,34 @@ export const EducationTab: React.FC<EducationTabProps> = ({
                     )}
                   />
                 </div>
+
+                <FormField
+                  control={addForm.control}
+                  name="department"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Department</FormLabel>
+                      <Select
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select department" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {departments?.map((dept) => (
+                            <SelectItem key={dept.id} value={dept.name}>
+                              {dept.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <FormItem>
@@ -320,9 +385,23 @@ export const EducationTab: React.FC<EducationTabProps> = ({
                           render={({ field }) => (
                             <FormItem>
                               <FormLabel>University / Institution</FormLabel>
-                              <FormControl>
-                                <Input {...field} placeholder="University or institution name" />
-                              </FormControl>
+                              <Select
+                                onValueChange={field.onChange}
+                                defaultValue={field.value}
+                              >
+                                <FormControl>
+                                  <SelectTrigger>
+                                    <SelectValue placeholder="Select university" />
+                                  </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                  {universities?.map((uni) => (
+                                    <SelectItem key={uni.id} value={uni.name}>
+                                      {uni.name}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
                               <FormMessage />
                             </FormItem>
                           )}
@@ -332,12 +411,27 @@ export const EducationTab: React.FC<EducationTabProps> = ({
                           <FormField
                             control={editForm.control}
                             name="degree"
+                            rules={{ required: 'Degree is required' }}
                             render={({ field }) => (
                               <FormItem>
                                 <FormLabel>Degree</FormLabel>
-                                <FormControl>
-                                  <Input {...field} placeholder="e.g. Bachelor of Science" />
-                                </FormControl>
+                                <Select
+                                  onValueChange={field.onChange}
+                                  defaultValue={field.value}
+                                >
+                                  <FormControl>
+                                    <SelectTrigger>
+                                      <SelectValue placeholder="Select degree" />
+                                    </SelectTrigger>
+                                  </FormControl>
+                                  <SelectContent>
+                                    {degrees?.map((deg) => (
+                                      <SelectItem key={deg.id} value={deg.name}>
+                                        {deg.name}
+                                      </SelectItem>
+                                    ))}
+                                  </SelectContent>
+                                </Select>
                                 <FormMessage />
                               </FormItem>
                             )}
@@ -346,6 +440,7 @@ export const EducationTab: React.FC<EducationTabProps> = ({
                           <FormField
                             control={editForm.control}
                             name="field"
+                            rules={{ required: 'Field of study is required' }}
                             render={({ field }) => (
                               <FormItem>
                                 <FormLabel>Field of Study</FormLabel>
@@ -357,6 +452,34 @@ export const EducationTab: React.FC<EducationTabProps> = ({
                             )}
                           />
                         </div>
+
+                        <FormField
+                          control={editForm.control}
+                          name="department"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Department</FormLabel>
+                              <Select
+                                onValueChange={field.onChange}
+                                defaultValue={field.value}
+                              >
+                                <FormControl>
+                                  <SelectTrigger>
+                                    <SelectValue placeholder="Select department" />
+                                  </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                  {departments?.map((dept) => (
+                                    <SelectItem key={dept.id} value={dept.name}>
+                                      {dept.name}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
                         
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                           <FormItem>

@@ -116,7 +116,6 @@ export type Database = {
           degree: string | null
           department: string | null
           end_date: string | null
-          field: string | null
           gpa: string | null
           id: string
           is_current: boolean | null
@@ -130,7 +129,6 @@ export type Database = {
           degree?: string | null
           department?: string | null
           end_date?: string | null
-          field?: string | null
           gpa?: string | null
           id?: string
           is_current?: boolean | null
@@ -144,7 +142,6 @@ export type Database = {
           degree?: string | null
           department?: string | null
           end_date?: string | null
-          field?: string | null
           gpa?: string | null
           id?: string
           is_current?: boolean | null
