@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '../integrations/supabase/client';
@@ -98,8 +97,7 @@ export function useUserManagement({
     setIsLoading(true);
     
     try {
-      // Fix: Remove type parameters from the rpc call as they're causing issues
-      // The Supabase client will handle the type inference based on the function name
+      // Remove type parameters from the rpc call and use the updated list_users function
       const { data, error } = await supabase.rpc('list_users', {
         search_query: search || null,
         filter_role: role || null,
