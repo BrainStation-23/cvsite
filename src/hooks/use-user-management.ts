@@ -40,6 +40,16 @@ interface ListUsersResponse {
   };
 }
 
+// Define the interface for the RPC function parameters
+interface ListUsersParams {
+  search_query: string | null;
+  filter_role: UserRole | null;
+  page_number: number;
+  items_per_page: number;
+  sort_by: SortColumn;
+  sort_order: SortOrder;
+}
+
 interface UseUserManagementProps {
   initialPage?: number;
   initialPerPage?: number;
@@ -88,7 +98,7 @@ export function useUserManagement({
     setIsLoading(true);
     
     try {
-      const { data, error } = await supabase.rpc<ListUsersResponse>('list_users', {
+      const { data, error } = await supabase.rpc<ListUsersResponse, ListUsersParams>('list_users', {
         search_query: search || null,
         filter_role: role || null,
         page_number: page,
