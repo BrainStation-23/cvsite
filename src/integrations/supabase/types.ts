@@ -235,6 +235,17 @@ export type Database = {
         Args: { _role: string }
         Returns: boolean
       }
+      list_users: {
+        Args: {
+          search_query?: string
+          filter_role?: string
+          page_number?: number
+          items_per_page?: number
+          sort_by?: string
+          sort_order?: string
+        }
+        Returns: Json
+      }
     }
     Enums: {
       [_ in never]: never
