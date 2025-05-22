@@ -1,9 +1,8 @@
-
 import React, { useState, useEffect } from 'react';
 import DashboardLayout from '../../components/Layout/DashboardLayout';
 import { Button } from '@/components/ui/button';
 import { Upload, RefreshCw, UserPlus } from 'lucide-react';
-import { SortColumn, SortOrder, useUserManagement, UserData } from '@/hooks/use-user-management';
+import { useUserManagement } from '@/hooks/use-user-management';
 import UserSearchFilters from '@/components/admin/UserSearchFilters';
 import UserList from '@/components/admin/UserList';
 import UserPagination from '@/components/admin/UserPagination';
@@ -14,7 +13,6 @@ import {
   DeleteUserDialog, 
   BulkUploadDialog
 } from '@/components/admin/UserDialogs';
-import { UserRole } from '@/types';
 
 const UserManagement: React.FC = () => {
   const [isAddUserDialogOpen, setIsAddUserDialogOpen] = useState(false);
