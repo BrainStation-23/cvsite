@@ -98,7 +98,9 @@ export function useUserManagement({
     setIsLoading(true);
     
     try {
-      const { data, error } = await supabase.rpc<ListUsersResponse, ListUsersParams>('list_users', {
+      // Fix: Remove type parameters from the rpc call as they're causing issues
+      // The Supabase client will handle the type inference based on the function name
+      const { data, error } = await supabase.rpc('list_users', {
         search_query: search || null,
         filter_role: role || null,
         page_number: page,
@@ -115,7 +117,7 @@ export function useUserManagement({
       }
       
       // Type assertion to handle the response structure
-      const response = data as unknown as ListUsersResponse;
+      const response = data as ListUsersResponse;
       
       // Map the returned data to our UserData format
       const formattedUsers = response.users.map(user => ({
