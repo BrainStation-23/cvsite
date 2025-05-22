@@ -13,6 +13,9 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Calendar } from '@/components/ui/calendar';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { useDesignations } from '@/hooks/use-designations';
+import { Spinner } from '@/components/ui/spinner';
 
 interface ExperienceTabProps {
   experiences: Experience[];
@@ -36,11 +39,12 @@ export const ExperienceTab: React.FC<ExperienceTabProps> = ({
   const [startDate, setStartDate] = useState<Date | undefined>(new Date());
   const [endDate, setEndDate] = useState<Date | undefined>();
   const [isCurrent, setIsCurrent] = useState(false);
+  const { data: designations, isLoading: isLoadingDesignations } = useDesignations();
 
   const addForm = useForm<Omit<Experience, 'id'>>({
     defaultValues: {
       companyName: '',
-      position: '',
+      designation: '',
       description: '',
       startDate: new Date(),
       isCurrent: false
@@ -50,7 +54,7 @@ export const ExperienceTab: React.FC<ExperienceTabProps> = ({
   const editForm = useForm<Omit<Experience, 'id'>>({
     defaultValues: {
       companyName: '',
-      position: '',
+      designation: '',
       description: '',
       startDate: new Date(),
       isCurrent: false
@@ -64,7 +68,7 @@ export const ExperienceTab: React.FC<ExperienceTabProps> = ({
     setIsCurrent(false);
     addForm.reset({
       companyName: '',
-      position: '',
+      designation: '',
       description: '',
       startDate: new Date(),
       isCurrent: false
@@ -94,7 +98,7 @@ export const ExperienceTab: React.FC<ExperienceTabProps> = ({
     
     editForm.reset({
       companyName: experience.companyName,
-      position: experience.position,
+      designation: experience.designation,
       description: experience.description || '',
       startDate: experience.startDate,
       endDate: experience.endDate,
@@ -174,13 +178,34 @@ export const ExperienceTab: React.FC<ExperienceTabProps> = ({
                 
                 <FormField
                   control={addForm.control}
-                  name="position"
-                  rules={{ required: 'Position is required' }}
+                  name="designation"
+                  rules={{ required: 'Designation is required' }}
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Position</FormLabel>
+                      <FormLabel>Designation</FormLabel>
                       <FormControl>
-                        <Input {...field} placeholder="Your job title" />
+                        <Select
+                          onValueChange={field.onChange}
+                          defaultValue={field.value}
+                          disabled={isLoadingDesignations}
+                        >
+                          <SelectTrigger className="w-full">
+                            <SelectValue placeholder="Select designation" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {isLoadingDesignations ? (
+                              <div className="flex justify-center p-2">
+                                <Spinner size="sm" />
+                              </div>
+                            ) : (
+                              designations?.map((designation) => (
+                                <SelectItem key={designation.id} value={designation.name}>
+                                  {designation.name}
+                                </SelectItem>
+                              ))
+                            )}
+                          </SelectContent>
+                        </Select>
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -319,13 +344,34 @@ export const ExperienceTab: React.FC<ExperienceTabProps> = ({
                         
                         <FormField
                           control={editForm.control}
-                          name="position"
-                          rules={{ required: 'Position is required' }}
+                          name="designation"
+                          rules={{ required: 'Designation is required' }}
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel>Position</FormLabel>
+                              <FormLabel>Designation</FormLabel>
                               <FormControl>
-                                <Input {...field} placeholder="Your job title" />
+                                <Select
+                                  onValueChange={field.onChange}
+                                  defaultValue={field.value}
+                                  disabled={isLoadingDesignations}
+                                >
+                                  <SelectTrigger className="w-full">
+                                    <SelectValue placeholder="Select designation" />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    {isLoadingDesignations ? (
+                                      <div className="flex justify-center p-2">
+                                        <Spinner size="sm" />
+                                      </div>
+                                    ) : (
+                                      designations?.map((designation) => (
+                                        <SelectItem key={designation.id} value={designation.name}>
+                                          {designation.name}
+                                        </SelectItem>
+                                      ))
+                                    )}
+                                  </SelectContent>
+                                </Select>
                               </FormControl>
                               <FormMessage />
                             </FormItem>
@@ -434,7 +480,7 @@ export const ExperienceTab: React.FC<ExperienceTabProps> = ({
                   <>
                     <AccordionTrigger className="hover:no-underline">
                       <div className="flex-1 flex flex-col md:flex-row md:items-center justify-between pr-4">
-                        <div className="font-medium">{experience.position} at {experience.companyName}</div>
+                        <div className="font-medium">{experience.designation} at {experience.companyName}</div>
                         <div className="text-muted-foreground text-sm mt-1 md:mt-0">
                           {format(experience.startDate, 'MMM yyyy')} - {experience.isCurrent ? 'Present' : experience.endDate ? format(experience.endDate, 'MMM yyyy') : ''}
                         </div>

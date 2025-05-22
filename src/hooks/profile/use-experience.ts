@@ -10,9 +10,8 @@ type ExperienceDB = {
   id: string;
   profile_id: string;
   company_name: string;
-  position: string;
+  designation: string;
   description?: string;
-  designation?: string;
   start_date: string;
   end_date?: string;
   is_current?: boolean;
@@ -24,7 +23,7 @@ type ExperienceDB = {
 const mapToExperience = (data: ExperienceDB): Experience => ({
   id: data.id,
   companyName: data.company_name,
-  position: data.position,
+  designation: data.designation,
   description: data.description || '',
   startDate: new Date(data.start_date),
   endDate: data.end_date ? new Date(data.end_date) : undefined,
@@ -35,7 +34,7 @@ const mapToExperience = (data: ExperienceDB): Experience => ({
 const mapToExperienceDB = (exp: Omit<Experience, 'id'>, profileId: string) => ({
   profile_id: profileId,
   company_name: exp.companyName,
-  position: exp.position,
+  designation: exp.designation,
   description: exp.description,
   start_date: exp.startDate.toISOString().split('T')[0],
   end_date: exp.endDate ? exp.endDate.toISOString().split('T')[0] : null,
@@ -133,7 +132,7 @@ export function useExperience() {
       const dbData: Partial<ExperienceDB> = {};
       
       if (experience.companyName) dbData.company_name = experience.companyName;
-      if (experience.position) dbData.position = experience.position;
+      if (experience.designation) dbData.designation = experience.designation;
       if (experience.description !== undefined) dbData.description = experience.description;
       if (experience.startDate) dbData.start_date = experience.startDate.toISOString().split('T')[0];
       

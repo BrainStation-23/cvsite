@@ -33,7 +33,7 @@ export interface Skill {
 export interface Experience {
   id: string;
   companyName: string;
-  position: string;
+  designation: string;
   startDate: Date;
   endDate?: Date;
   isCurrent?: boolean;
