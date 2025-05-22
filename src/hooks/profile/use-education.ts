@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
@@ -25,9 +24,8 @@ const mapToEducation = (data: EducationDB): Education => ({
   id: data.id,
   university: data.university,
   degree: data.degree || '',
-  field: '', // Use empty string as field no longer exists in the database
-  gpa: data.gpa || undefined,
   department: data.department || undefined,
+  gpa: data.gpa || undefined,
   startDate: new Date(data.start_date),
   endDate: data.end_date ? new Date(data.end_date) : undefined,
   isCurrent: data.is_current || false

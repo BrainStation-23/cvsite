@@ -1,4 +1,5 @@
 
+
 export type UserRole = "admin" | "manager" | "employee";
 
 export interface User {
@@ -44,12 +45,11 @@ export interface Education {
   id: string;
   university: string;
   degree: string;
-  field: string; // Keeping for backward compatibility with UI
+  department?: string;
   startDate: Date;
   endDate?: Date;
   isCurrent?: boolean;
   gpa?: string;
-  department?: string;
 }
 
 export interface Training {
@@ -88,3 +88,4 @@ export interface PlatformSettings {
   references: string[];
   sbus: string[]; // Strategic Business Units
 }
+
