@@ -41,12 +41,21 @@ const PlatformSettings: React.FC = () => {
   const { data: platformSettingsData, isLoading, error } = useQuery({
     queryKey: ['platformSettings'],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('platform_settings')
-        .select('*')
-        .order('name');
+      // Using the edge function to fetch settings
+      const response = await fetch(`${supabase.supabaseUrl}/functions/v1/list-settings`, {
+        headers: {
+          'Authorization': `Bearer ${supabase.supabaseKey}`,
+          'Content-Type': 'application/json'
+        }
+      });
       
-      if (error) throw error;
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to fetch settings');
+      }
+      
+      const data = await response.json();
+      console.log("Settings data fetched:", data); // Debug log
       return data as PlatformSetting[];
     },
   });
@@ -75,7 +84,10 @@ const PlatformSettings: React.FC = () => {
       platformSettingsData.forEach(setting => {
         const category = setting.category + 's' as keyof PlatformSettingsType;
         if (category in groupedSettings) {
-          groupedSettings[category].push(setting.value);
+          // Only add the value if it doesn't already exist
+          if (!groupedSettings[category].includes(setting.value)) {
+            groupedSettings[category].push(setting.value);
+          }
         }
       });
       
