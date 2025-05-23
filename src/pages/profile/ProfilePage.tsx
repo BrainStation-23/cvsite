@@ -6,6 +6,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useProfile } from '@/hooks/use-profile';
 import { useForm } from 'react-hook-form';
 import { ProfileTabs } from '@/components/profile/ProfileTabs';
+import { GeneralInfoFormData } from '@/components/profile/GeneralInfoTab';
 import { Skill } from '@/types';
 
 const ProfilePage: React.FC = () => {
@@ -48,7 +49,7 @@ const ProfilePage: React.FC = () => {
   } = useProfile();
 
   // Updated form to match the GeneralInfoFormData interface
-  const form = useForm({
+  const form = useForm<GeneralInfoFormData>({
     defaultValues: {
       firstName: generalInfo.firstName,
       lastName: generalInfo.lastName,
@@ -67,11 +68,7 @@ const ProfilePage: React.FC = () => {
     }
   }, [isLoading, generalInfo, form.reset]);
 
-  const handleUpdateProfile = async (data: {
-    firstName: string;
-    lastName: string;
-    biography: string;
-  }) => {
+  const handleUpdateProfile = async (data: GeneralInfoFormData) => {
     const success = await saveGeneralInfo({
       firstName: data.firstName,
       lastName: data.lastName,

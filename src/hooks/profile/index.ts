@@ -19,16 +19,7 @@ export { useProjects } from './use-projects';
 export type ProfileFormData = {
   firstName: string;
   lastName: string;
-  designation: string;
   biography: string;
-  technicalSkills: {
-    name: string;
-    proficiency: number;
-  }[];
-  specializedSkills: {
-    name: string;
-    proficiency: number;
-  }[];
 };
 
 export function useProfile() {

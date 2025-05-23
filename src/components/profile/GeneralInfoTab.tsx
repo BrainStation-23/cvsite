@@ -6,7 +6,8 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { UseFormReturn } from 'react-hook-form';
 
-interface GeneralInfoFormData {
+// Define this type consistently across all files
+export interface GeneralInfoFormData {
   firstName: string;
   lastName: string;
   biography: string;
