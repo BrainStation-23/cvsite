@@ -1,17 +1,17 @@
 
 import { UserRole } from '@/types';
 
-// Define the interface for the RPC function response
 export interface ListUsersResponse {
-  users: Array<{
+  users: {
     id: string;
     email: string;
     created_at: string;
-    last_sign_in_at: string | null;
-    first_name: string | null;
-    last_name: string | null;
+    last_sign_in_at: string;
+    first_name: string;
+    last_name: string;
     role: UserRole;
-  }>;
+    employee_id?: string; // Added this field to fix the TypeScript error
+  }[];
   pagination: {
     total_count: number;
     filtered_count: number;
