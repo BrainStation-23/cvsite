@@ -28,7 +28,8 @@ const ViewProfilePage: React.FC = () => {
     education,
     trainings,
     achievements,
-    projects
+    projects,
+    refetch
   } = useEmployeeProfile(profileId || '');
 
   const {
@@ -89,8 +90,7 @@ const ViewProfilePage: React.FC = () => {
     
     if (success) {
       setIsEditing(false);
-      // Optionally refresh the data here
-      window.location.reload();
+      refetch();
     }
   };
 
@@ -109,8 +109,7 @@ const ViewProfilePage: React.FC = () => {
       const success = await handleAddTechnicalSkill(newTechnicalSkill);
       if (success) {
         setNewTechnicalSkill({ name: '', proficiency: 1 });
-        // Optionally refresh the data here
-        window.location.reload();
+        refetch();
       }
     }
     return false;
@@ -121,8 +120,7 @@ const ViewProfilePage: React.FC = () => {
       const success = await handleAddSpecializedSkill(newSpecializedSkill);
       if (success) {
         setNewSpecializedSkill({ name: '', proficiency: 1 });
-        // Optionally refresh the data here
-        window.location.reload();
+        refetch();
       }
     }
     return false;
@@ -131,8 +129,7 @@ const ViewProfilePage: React.FC = () => {
   const handleDeleteTechnicalSkill = async (id: string) => {
     const success = await deleteTechnicalSkill(id);
     if (success) {
-      // Optionally refresh the data here
-      window.location.reload();
+      refetch();
     }
     return success;
   };
@@ -140,8 +137,7 @@ const ViewProfilePage: React.FC = () => {
   const handleDeleteSpecializedSkill = async (id: string) => {
     const success = await deleteSpecializedSkill(id);
     if (success) {
-      // Optionally refresh the data here
-      window.location.reload();
+      refetch();
     }
     return success;
   };
@@ -149,91 +145,91 @@ const ViewProfilePage: React.FC = () => {
   // Wrapper functions for other operations that refresh data
   const saveExperienceWrapper = async (experience: any) => {
     const success = await saveExperience(experience);
-    if (success) window.location.reload();
+    if (success) refetch();
     return success;
   };
 
   const updateExperienceWrapper = async (id: string, experience: any) => {
     const success = await updateExperience(id, experience);
-    if (success) window.location.reload();
+    if (success) refetch();
     return success;
   };
 
   const deleteExperienceWrapper = async (id: string) => {
     const success = await deleteExperience(id);
-    if (success) window.location.reload();
+    if (success) refetch();
     return success;
   };
 
   const saveEducationWrapper = async (education: any) => {
     const success = await saveEducation(education);
-    if (success) window.location.reload();
+    if (success) refetch();
     return success;
   };
 
   const updateEducationWrapper = async (id: string, education: any) => {
     const success = await updateEducation(id, education);
-    if (success) window.location.reload();
+    if (success) refetch();
     return success;
   };
 
   const deleteEducationWrapper = async (id: string) => {
     const success = await deleteEducation(id);
-    if (success) window.location.reload();
+    if (success) refetch();
     return success;
   };
 
   const saveTrainingWrapper = async (training: any) => {
     const success = await saveTraining(training);
-    if (success) window.location.reload();
+    if (success) refetch();
     return success;
   };
 
   const updateTrainingWrapper = async (id: string, training: any) => {
     const success = await updateTraining(id, training);
-    if (success) window.location.reload();
+    if (success) refetch();
     return success;
   };
 
   const deleteTrainingWrapper = async (id: string) => {
     const success = await deleteTraining(id);
-    if (success) window.location.reload();
+    if (success) refetch();
     return success;
   };
 
   const saveAchievementWrapper = async (achievement: any) => {
     const success = await saveAchievement(achievement);
-    if (success) window.location.reload();
+    if (success) refetch();
     return success;
   };
 
   const updateAchievementWrapper = async (id: string, achievement: any) => {
     const success = await updateAchievement(id, achievement);
-    if (success) window.location.reload();
+    if (success) refetch();
     return success;
   };
 
   const deleteAchievementWrapper = async (id: string) => {
     const success = await deleteAchievement(id);
-    if (success) window.location.reload();
+    if (success) refetch();
     return success;
   };
 
   const saveProjectWrapper = async (project: any) => {
     const success = await saveProject(project);
-    if (success) window.location.reload();
+    if (success) refetch();
     return success;
   };
 
   const updateProjectWrapper = async (id: string, project: any) => {
     const success = await updateProject(id, project);
-    if (success) window.location.reload();
+    if (success) refetch();
     return success;
   };
 
   const deleteProjectWrapper = async (id: string) => {
     const success = await deleteProject(id);
-    if (success) window.location.reload();
+    if (success) refetch();
     return success;
   };
 
