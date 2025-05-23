@@ -1,10 +1,11 @@
+
 import React from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { GeneralInfoTab, GeneralInfoFormData } from './GeneralInfoTab';
 import { SkillsTab } from './SkillsTab';
 import { ExperienceTab } from './ExperienceTab';
 import { EducationTab } from './EducationTab';
-import { TrainingTab } from './TrainingTab';
+import { TrainingTab } from './training/TrainingTab';
 import { AchievementsTab } from './AchievementsTab';
 import { ProjectsTab } from './ProjectsTab';
 import { UseFormReturn } from 'react-hook-form';
