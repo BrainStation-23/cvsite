@@ -73,16 +73,22 @@ export interface EmployeeProfile {
 }
 
 export interface EmployeeProfilesPagination {
-  total_count: number;
-  filtered_count: number;
+  totalCount: number;
+  filteredCount: number;
   page: number;
-  per_page: number;
-  page_count: number;
+  perPage: number;
+  pageCount: number;
 }
 
 export interface EmployeeProfilesResponse {
   profiles: EmployeeProfile[];
-  pagination: EmployeeProfilesPagination;
+  pagination: {
+    total_count: number;
+    filtered_count: number;
+    page: number;
+    per_page: number;
+    page_count: number;
+  };
 }
 
 export type EmployeeProfileSortColumn = 'first_name' | 'last_name' | 'employee_id' | 'created_at' | 'updated_at';
