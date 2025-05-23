@@ -26,6 +26,7 @@ interface AddUserDialogProps {
     lastName: string;
     role: UserRole;
     password: string;
+    employeeId: string;
   }) => Promise<boolean>;
   isLoading: boolean;
 }
@@ -42,6 +43,7 @@ export const AddUserDialog: React.FC<AddUserDialogProps> = ({
     lastName: '',
     role: 'employee' as UserRole,
     password: '',
+    employeeId: '',
   });
   
   const resetForm = () => {
@@ -51,6 +53,7 @@ export const AddUserDialog: React.FC<AddUserDialogProps> = ({
       lastName: '',
       role: 'employee',
       password: '',
+      employeeId: '',
     });
   };
   
@@ -81,6 +84,17 @@ export const AddUserDialog: React.FC<AddUserDialogProps> = ({
               type="email"
               value={newUser.email}
               onChange={(e) => setNewUser({ ...newUser, email: e.target.value })}
+            />
+          </div>
+          <div className="grid gap-2">
+            <Label htmlFor="employeeId">
+              Employee ID
+            </Label>
+            <Input
+              id="employeeId"
+              type="text"
+              value={newUser.employeeId}
+              onChange={(e) => setNewUser({ ...newUser, employeeId: e.target.value })}
             />
           </div>
           <div className="grid grid-cols-2 gap-4">
@@ -143,7 +157,7 @@ export const AddUserDialog: React.FC<AddUserDialogProps> = ({
           </Button>
           <Button 
             onClick={handleAddUser} 
-            disabled={isLoading || !newUser.email || !newUser.firstName || !newUser.lastName || !newUser.password}
+            disabled={isLoading || !newUser.email || !newUser.firstName || !newUser.lastName || !newUser.password || !newUser.employeeId}
           >
             {isLoading ? (
               <>
@@ -479,7 +493,7 @@ export const BulkUploadDialog: React.FC<BulkUploadDialogProps> = ({
         </DialogHeader>
         <div className="py-4">
           <p className="mb-4 text-sm text-gray-500">
-            Upload a CSV or Excel file with user data. The file should have columns for email, password, firstName, lastName, and role.
+            Upload a CSV or Excel file with user data. The file should have columns for: <strong>email, employeeId, password, firstName, lastName, role</strong>.
           </p>
           <Label htmlFor="file-upload">Upload File</Label>
           <Input 

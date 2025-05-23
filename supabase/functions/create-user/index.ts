@@ -20,13 +20,13 @@ serve(async (req) => {
     // Create a Supabase client with the service role key
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
     
-    const { email, password, firstName, lastName, role } = await req.json();
+    const { email, password, firstName, lastName, role, employeeId } = await req.json();
     
-    console.log('Creating user with data:', { email, firstName, lastName, role });
+    console.log('Creating user with data:', { email, firstName, lastName, role, employeeId });
     
-    if (!email || !password || !firstName || !lastName || !role) {
+    if (!email || !password || !firstName || !lastName || !role || !employeeId) {
       return new Response(
-        JSON.stringify({ error: 'Missing required fields' }),
+        JSON.stringify({ error: 'Missing required fields: email, password, firstName, lastName, role, and employeeId are all required' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
@@ -47,7 +47,8 @@ serve(async (req) => {
       user_metadata: {
         first_name: firstName,
         last_name: lastName,
-        role: role
+        role: role,
+        employee_id: employeeId
       }
     });
     
@@ -86,7 +87,8 @@ serve(async (req) => {
           email: authData.user.email,
           firstName,
           lastName,
-          role
+          role,
+          employeeId
         } 
       }),
       { status: 201, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }

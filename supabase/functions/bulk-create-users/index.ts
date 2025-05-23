@@ -21,10 +21,11 @@ const parseFileData = async (formData: FormData): Promise<any[]> => {
     const rows = await csv.parse(text, { skipFirstRow: true });
     return rows.map(row => ({
       email: row[0],
-      password: row[1],
-      firstName: row[2],
-      lastName: row[3],
-      role: row[4]
+      employeeId: row[1],
+      password: row[2],
+      firstName: row[3],
+      lastName: row[4],
+      role: row[5]
     }));
   } else if (fileType === 'xlsx' || fileType === 'xls') {
     const workbook = xlsx.read(arrayBuffer);
@@ -32,6 +33,7 @@ const parseFileData = async (formData: FormData): Promise<any[]> => {
     const data = xlsx.utils.sheet_to_json(worksheet);
     return data.map((row: any) => ({
       email: row.email,
+      employeeId: row.employeeId,
       password: row.password,
       firstName: row.firstName,
       lastName: row.lastName,
@@ -73,11 +75,11 @@ serve(async (req) => {
     
     // Process each user
     for (const user of users) {
-      const { email, password, firstName, lastName, role } = user;
+      const { email, password, firstName, lastName, role, employeeId } = user;
       
       // Basic validation
-      if (!email || !password || !firstName || !lastName || !role) {
-        results.failed.push({ ...user, error: 'Missing required fields' });
+      if (!email || !password || !firstName || !lastName || !role || !employeeId) {
+        results.failed.push({ ...user, error: 'Missing required fields: email, password, firstName, lastName, role, and employeeId are all required' });
         continue;
       }
       
@@ -88,7 +90,7 @@ serve(async (req) => {
       }
       
       try {
-        // Create user in Supabase Auth
+        // Create user in Supabase Auth - the trigger will handle profile and role creation
         const { data: authData, error: authError } = await supabase.auth.admin.createUser({
           email,
           password,
@@ -96,6 +98,8 @@ serve(async (req) => {
           user_metadata: {
             first_name: firstName,
             last_name: lastName,
+            role: role,
+            employee_id: employeeId
           }
         });
         
@@ -104,24 +108,13 @@ serve(async (req) => {
           continue;
         }
         
-        // Assign role to the user
-        const { error: roleError } = await supabase
-          .from('user_roles')
-          .insert({ user_id: authData.user.id, role });
-        
-        if (roleError) {
-          // Attempt to clean up by deleting the user if role assignment fails
-          await supabase.auth.admin.deleteUser(authData.user.id);
-          results.failed.push({ ...user, error: roleError.message });
-          continue;
-        }
-        
         results.successful.push({ 
           id: authData.user.id,
           email: authData.user.email,
           firstName,
           lastName,
-          role
+          role,
+          employeeId
         });
       } catch (error) {
         results.failed.push({ ...user, error: error.message || 'Unknown error' });

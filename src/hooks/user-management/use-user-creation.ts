@@ -14,6 +14,7 @@ export function useUserCreation(state: ReturnType<typeof import('./use-user-stat
     lastName: string;
     role: UserRole;
     password: string;
+    employeeId: string;
   }) => {
     try {
       setIsLoading(true);
@@ -24,7 +25,8 @@ export function useUserCreation(state: ReturnType<typeof import('./use-user-stat
           password: userData.password,
           firstName: userData.firstName,
           lastName: userData.lastName,
-          role: userData.role
+          role: userData.role,
+          employeeId: userData.employeeId
         }
       });
       
@@ -32,7 +34,7 @@ export function useUserCreation(state: ReturnType<typeof import('./use-user-stat
       
       toast({
         title: "User created",
-        description: `${userData.firstName} ${userData.lastName} has been added successfully.`,
+        description: `${userData.firstName} ${userData.lastName} (${userData.employeeId}) has been added successfully.`,
       });
       
       return true;
