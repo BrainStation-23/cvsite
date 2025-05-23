@@ -14,6 +14,7 @@ export function useUserUpdate(state: ReturnType<typeof import('./use-user-state'
     firstName: string;
     lastName: string;
     role: UserRole;
+    employeeId: string;
     password?: string;
   }) => {
     try {
@@ -26,6 +27,7 @@ export function useUserUpdate(state: ReturnType<typeof import('./use-user-state'
           firstName: userData.firstName,
           lastName: userData.lastName,
           role: userData.role,
+          employeeId: userData.employeeId,
           password: userData.password || undefined
         }
       });
@@ -34,7 +36,7 @@ export function useUserUpdate(state: ReturnType<typeof import('./use-user-state'
       
       toast({
         title: "User updated",
-        description: `${userData.firstName} ${userData.lastName} has been updated successfully.`,
+        description: `${userData.firstName} ${userData.lastName} (${userData.employeeId}) has been updated successfully.`,
       });
       
       return true;

@@ -10,6 +10,7 @@ export interface UserData {
   firstName: string;
   lastName: string;
   role: UserRole;
+  employeeId?: string;
   createdAt?: string;
   lastSignIn?: string;
 }

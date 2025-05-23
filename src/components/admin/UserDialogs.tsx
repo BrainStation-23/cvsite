@@ -184,6 +184,7 @@ interface EditUserDialogProps {
     firstName: string;
     lastName: string;
     role: UserRole;
+    employeeId: string;
     password?: string;
   }) => Promise<boolean>;
   isLoading: boolean;
@@ -202,6 +203,7 @@ export const EditUserDialog: React.FC<EditUserDialogProps> = ({
     firstName: '',
     lastName: '',
     role: '' as UserRole,
+    employeeId: '',
     password: '',
   });
   
@@ -213,6 +215,7 @@ export const EditUserDialog: React.FC<EditUserDialogProps> = ({
         firstName: user.firstName,
         lastName: user.lastName,
         role: user.role,
+        employeeId: user.employeeId || '',
         password: '',
       });
     }
@@ -241,6 +244,17 @@ export const EditUserDialog: React.FC<EditUserDialogProps> = ({
               type="email"
               value={editUser.email}
               onChange={(e) => setEditUser({ ...editUser, email: e.target.value })}
+            />
+          </div>
+          <div className="grid gap-2">
+            <Label htmlFor="edit-employeeId">
+              Employee ID
+            </Label>
+            <Input
+              id="edit-employeeId"
+              type="text"
+              value={editUser.employeeId}
+              onChange={(e) => setEditUser({ ...editUser, employeeId: e.target.value })}
             />
           </div>
           <div className="grid grid-cols-2 gap-4">
@@ -304,7 +318,7 @@ export const EditUserDialog: React.FC<EditUserDialogProps> = ({
           </Button>
           <Button 
             onClick={handleUpdateUser} 
-            disabled={isLoading || !editUser.email || !editUser.firstName || !editUser.lastName}
+            disabled={isLoading || !editUser.email || !editUser.firstName || !editUser.lastName || !editUser.employeeId}
           >
             {isLoading ? (
               <>

@@ -10,7 +10,13 @@ import {
   TableHeader, 
   TableRow 
 } from '@/components/ui/table';
-import { Loader2, Edit, Trash } from 'lucide-react';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
+import { Loader2, Edit, Trash, Clock, Calendar } from 'lucide-react';
 import { UserData } from '@/hooks/use-user-management';
 import { formatDistanceToNow } from 'date-fns';
 
@@ -39,6 +45,15 @@ const UserList: React.FC<UserListProps> = ({
     }
   };
 
+  const formatFullDate = (dateString?: string) => {
+    if (!dateString) return 'Never';
+    try {
+      return new Date(dateString).toLocaleString();
+    } catch (error) {
+      return 'Invalid date';
+    }
+  };
+
   if (isLoading && users.length === 0) {
     return (
       <div className="p-8 flex justify-center">
@@ -48,72 +63,113 @@ const UserList: React.FC<UserListProps> = ({
   }
 
   return (
-    <div className="bg-white dark:bg-gray-800 shadow rounded-lg overflow-hidden">
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Name</TableHead>
-            <TableHead>Email</TableHead>
-            <TableHead>Role</TableHead>
-            <TableHead>Created</TableHead>
-            <TableHead>Last Login</TableHead>
-            <TableHead className="text-right">Actions</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {users.length === 0 ? (
+    <TooltipProvider>
+      <div className="bg-white dark:bg-gray-800 shadow rounded-lg overflow-hidden">
+        <Table>
+          <TableHeader>
             <TableRow>
-              <TableCell colSpan={6} className="text-center py-8 text-gray-500">
-                No users found
-              </TableCell>
+              <TableHead>Name</TableHead>
+              <TableHead>Email</TableHead>
+              <TableHead>Employee ID</TableHead>
+              <TableHead>Role</TableHead>
+              <TableHead>
+                <div className="flex items-center gap-1">
+                  <Calendar size={14} />
+                  Created
+                </div>
+              </TableHead>
+              <TableHead>
+                <div className="flex items-center gap-1">
+                  <Clock size={14} />
+                  Last Login
+                </div>
+              </TableHead>
+              <TableHead className="text-right">Actions</TableHead>
             </TableRow>
-          ) : (
-            users.map((user) => (
-              <TableRow key={user.id}>
-                <TableCell>
-                  {user.firstName} {user.lastName}
-                </TableCell>
-                <TableCell>{user.email}</TableCell>
-                <TableCell>
-                  <Badge variant={user.role === 'admin' ? 'default' : user.role === 'manager' ? 'secondary' : 'outline'}>
-                    {user.role.charAt(0).toUpperCase() + user.role.slice(1)}
-                  </Badge>
-                </TableCell>
-                <TableCell>{formatDate(user.createdAt)}</TableCell>
-                <TableCell>{formatDate(user.lastSignIn)}</TableCell>
-                <TableCell className="text-right space-x-2">
-                  <Button 
-                    variant="outline" 
-                    size="sm"
-                    onClick={() => onResetPassword(user)}
-                  >
-                    Reset Password
-                  </Button>
-                  <Button 
-                    variant="outline" 
-                    size="sm"
-                    onClick={() => onEdit(user)}
-                    className="flex items-center gap-1"
-                  >
-                    <Edit size={14} />
-                    Edit
-                  </Button>
-                  <Button 
-                    variant="outline" 
-                    size="sm"
-                    onClick={() => onDelete(user)}
-                    className="flex items-center gap-1 text-red-500 hover:text-red-600"
-                  >
-                    <Trash size={14} />
-                    Delete
-                  </Button>
+          </TableHeader>
+          <TableBody>
+            {users.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={7} className="text-center py-8 text-gray-500">
+                  No users found
                 </TableCell>
               </TableRow>
-            ))
-          )}
-        </TableBody>
-      </Table>
-    </div>
+            ) : (
+              users.map((user) => (
+                <TableRow key={user.id}>
+                  <TableCell className="font-medium">
+                    {user.firstName} {user.lastName}
+                  </TableCell>
+                  <TableCell>{user.email}</TableCell>
+                  <TableCell>
+                    <Badge variant="outline" className="font-mono text-xs">
+                      {user.employeeId || 'N/A'}
+                    </Badge>
+                  </TableCell>
+                  <TableCell>
+                    <Badge variant={user.role === 'admin' ? 'default' : user.role === 'manager' ? 'secondary' : 'outline'}>
+                      {user.role.charAt(0).toUpperCase() + user.role.slice(1)}
+                    </Badge>
+                  </TableCell>
+                  <TableCell>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <div className="cursor-help text-sm text-gray-600 dark:text-gray-400">
+                          {formatDate(user.createdAt)}
+                        </div>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>{formatFullDate(user.createdAt)}</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TableCell>
+                  <TableCell>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <div className="cursor-help text-sm text-gray-600 dark:text-gray-400">
+                          {formatDate(user.lastSignIn)}
+                        </div>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>{formatFullDate(user.lastSignIn)}</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex items-center justify-end gap-1">
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={() => onResetPassword(user)}
+                        className="h-8 px-2 text-xs"
+                      >
+                        Reset Password
+                      </Button>
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={() => onEdit(user)}
+                        className="h-8 w-8 p-0"
+                      >
+                        <Edit size={14} />
+                      </Button>
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={() => onDelete(user)}
+                        className="h-8 w-8 p-0 text-red-500 hover:text-red-600 hover:bg-red-50"
+                      >
+                        <Trash size={14} />
+                      </Button>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))
+            )}
+          </TableBody>
+        </Table>
+      </div>
+    </TooltipProvider>
   );
 };
 
