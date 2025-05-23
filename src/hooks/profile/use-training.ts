@@ -38,23 +38,26 @@ const mapToTrainingDB = (training: Omit<Training, 'id'>, profileId: string) => (
   certificate_url: training.certificateUrl || null
 });
 
-export function useTraining() {
+export function useTraining(profileId?: string) {
   const { user } = useAuth();
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [trainings, setTrainings] = useState<Training[]>([]);
 
+  // Use provided profileId or fallback to auth user id
+  const targetProfileId = profileId || user?.id;
+
   // Fetch trainings
   const fetchTrainings = async () => {
-    if (!user?.id) return;
+    if (!targetProfileId) return;
     
     try {
       setIsLoading(true);
       const { data, error } = await supabase
         .from('trainings')
         .select('*')
-        .eq('profile_id', user.id)
+        .eq('profile_id', targetProfileId)
         .order('certification_date', { ascending: false });
       
       if (error) throw error;
@@ -78,13 +81,13 @@ export function useTraining() {
 
   // Save training
   const saveTraining = async (training: Omit<Training, 'id'>) => {
-    if (!user?.id) return false;
+    if (!targetProfileId) return false;
     
     try {
       setIsSaving(true);
       
       // Convert to database format
-      const dbData = mapToTrainingDB(training, user.id);
+      const dbData = mapToTrainingDB(training, targetProfileId);
       
       const { data, error } = await supabase
         .from('trainings')
@@ -120,7 +123,7 @@ export function useTraining() {
 
   // Update training
   const updateTraining = async (id: string, training: Partial<Training>) => {
-    if (!user?.id) return false;
+    if (!targetProfileId) return false;
     
     try {
       setIsSaving(true);
@@ -140,7 +143,7 @@ export function useTraining() {
         .from('trainings')
         .update(dbData)
         .eq('id', id)
-        .eq('profile_id', user.id);
+        .eq('profile_id', targetProfileId);
       
       if (error) throw error;
       
@@ -170,14 +173,14 @@ export function useTraining() {
 
   // Delete training
   const deleteTraining = async (id: string) => {
-    if (!user?.id) return false;
+    if (!targetProfileId) return false;
     
     try {
       const { error } = await supabase
         .from('trainings')
         .delete()
         .eq('id', id)
-        .eq('profile_id', user.id);
+        .eq('profile_id', targetProfileId);
       
       if (error) throw error;
       
@@ -203,10 +206,10 @@ export function useTraining() {
 
   // Load trainings data
   useEffect(() => {
-    if (user?.id) {
+    if (targetProfileId) {
       fetchTrainings();
     }
-  }, [user?.id]);
+  }, [targetProfileId]);
 
   return {
     trainings,

@@ -42,23 +42,26 @@ const mapToExperienceDB = (exp: Omit<Experience, 'id'>, profileId: string) => ({
   is_current: exp.isCurrent || false
 });
 
-export function useExperience() {
+export function useExperience(profileId?: string) {
   const { user } = useAuth();
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [experiences, setExperiences] = useState<Experience[]>([]);
 
+  // Use provided profileId or fallback to auth user id
+  const targetProfileId = profileId || user?.id;
+
   // Fetch experiences
   const fetchExperiences = async () => {
-    if (!user?.id) return;
+    if (!targetProfileId) return;
     
     try {
       setIsLoading(true);
       const { data, error } = await supabase
         .from('experiences')
         .select('*')
-        .eq('profile_id', user.id)
+        .eq('profile_id', targetProfileId)
         .order('start_date', { ascending: false });
       
       if (error) throw error;
@@ -82,13 +85,13 @@ export function useExperience() {
 
   // Save experience
   const saveExperience = async (experience: Omit<Experience, 'id'>) => {
-    if (!user?.id) return false;
+    if (!targetProfileId) return false;
     
     try {
       setIsSaving(true);
       
       // Convert to database format
-      const dbData = mapToExperienceDB(experience, user.id);
+      const dbData = mapToExperienceDB(experience, targetProfileId);
       
       const { data, error } = await supabase
         .from('experiences')
@@ -124,7 +127,7 @@ export function useExperience() {
 
   // Update experience
   const updateExperience = async (id: string, experience: Partial<Experience>) => {
-    if (!user?.id) return false;
+    if (!targetProfileId) return false;
     
     try {
       setIsSaving(true);
@@ -153,7 +156,7 @@ export function useExperience() {
         .from('experiences')
         .update(dbData)
         .eq('id', id)
-        .eq('profile_id', user.id);
+        .eq('profile_id', targetProfileId);
       
       if (error) throw error;
       
@@ -183,14 +186,14 @@ export function useExperience() {
 
   // Delete experience
   const deleteExperience = async (id: string) => {
-    if (!user?.id) return false;
+    if (!targetProfileId) return false;
     
     try {
       const { error } = await supabase
         .from('experiences')
         .delete()
         .eq('id', id)
-        .eq('profile_id', user.id);
+        .eq('profile_id', targetProfileId);
       
       if (error) throw error;
       
@@ -216,10 +219,10 @@ export function useExperience() {
 
   // Load experiences data
   useEffect(() => {
-    if (user?.id) {
+    if (targetProfileId) {
       fetchExperiences();
     }
-  }, [user?.id]);
+  }, [targetProfileId]);
 
   return {
     experiences,

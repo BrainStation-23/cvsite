@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
@@ -43,23 +44,26 @@ const mapToEducationDB = (edu: Omit<Education, 'id'>, profileId: string) => ({
   is_current: edu.isCurrent || false
 });
 
-export function useEducation() {
+export function useEducation(profileId?: string) {
   const { user } = useAuth();
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [education, setEducation] = useState<Education[]>([]);
 
+  // Use provided profileId or fallback to auth user id
+  const targetProfileId = profileId || user?.id;
+
   // Fetch education
   const fetchEducation = async () => {
-    if (!user?.id) return;
+    if (!targetProfileId) return;
     
     try {
       setIsLoading(true);
       const { data, error } = await supabase
         .from('education')
         .select('*')
-        .eq('profile_id', user.id)
+        .eq('profile_id', targetProfileId)
         .order('start_date', { ascending: false });
       
       if (error) throw error;
@@ -83,13 +87,13 @@ export function useEducation() {
 
   // Save education
   const saveEducation = async (educationData: Omit<Education, 'id'>) => {
-    if (!user?.id) return false;
+    if (!targetProfileId) return false;
     
     try {
       setIsSaving(true);
       
       // Convert to database format
-      const dbData = mapToEducationDB(educationData, user.id);
+      const dbData = mapToEducationDB(educationData, targetProfileId);
       
       const { data, error } = await supabase
         .from('education')
@@ -125,7 +129,7 @@ export function useEducation() {
 
   // Update education
   const updateEducation = async (id: string, educationData: Partial<Education>) => {
-    if (!user?.id) return false;
+    if (!targetProfileId) return false;
     
     try {
       setIsSaving(true);
@@ -153,7 +157,7 @@ export function useEducation() {
         .from('education')
         .update(dbData)
         .eq('id', id)
-        .eq('profile_id', user.id);
+        .eq('profile_id', targetProfileId);
       
       if (error) throw error;
       
@@ -183,14 +187,14 @@ export function useEducation() {
 
   // Delete education
   const deleteEducation = async (id: string) => {
-    if (!user?.id) return false;
+    if (!targetProfileId) return false;
     
     try {
       const { error } = await supabase
         .from('education')
         .delete()
         .eq('id', id)
-        .eq('profile_id', user.id);
+        .eq('profile_id', targetProfileId);
       
       if (error) throw error;
       
@@ -216,10 +220,10 @@ export function useEducation() {
 
   // Load education data
   useEffect(() => {
-    if (user?.id) {
+    if (targetProfileId) {
       fetchEducation();
     }
-  }, [user?.id]);
+  }, [targetProfileId]);
 
   return {
     education,

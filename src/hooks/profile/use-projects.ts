@@ -47,23 +47,26 @@ const mapToProjectDB = (project: Omit<Project, 'id'>, profileId: string) => ({
   url: project.url || null
 });
 
-export function useProjects() {
+export function useProjects(profileId?: string) {
   const { user } = useAuth();
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [projects, setProjects] = useState<Project[]>([]);
 
+  // Use provided profileId or fallback to auth user id
+  const targetProfileId = profileId || user?.id;
+
   // Fetch projects
   const fetchProjects = async () => {
-    if (!user?.id) return;
+    if (!targetProfileId) return;
     
     try {
       setIsLoading(true);
       const { data, error } = await supabase
         .from('projects')
         .select('*')
-        .eq('profile_id', user.id)
+        .eq('profile_id', targetProfileId)
         .order('start_date', { ascending: false });
       
       if (error) throw error;
@@ -87,13 +90,13 @@ export function useProjects() {
 
   // Save project
   const saveProject = async (project: Omit<Project, 'id'>) => {
-    if (!user?.id) return false;
+    if (!targetProfileId) return false;
     
     try {
       setIsSaving(true);
       
       // Convert to database format
-      const dbData = mapToProjectDB(project, user.id);
+      const dbData = mapToProjectDB(project, targetProfileId);
       
       const { data, error } = await supabase
         .from('projects')
@@ -129,7 +132,7 @@ export function useProjects() {
 
   // Update project
   const updateProject = async (id: string, project: Partial<Project>) => {
-    if (!user?.id) return false;
+    if (!targetProfileId) return false;
     
     try {
       setIsSaving(true);
@@ -158,7 +161,7 @@ export function useProjects() {
         .from('projects')
         .update(dbData)
         .eq('id', id)
-        .eq('profile_id', user.id);
+        .eq('profile_id', targetProfileId);
       
       if (error) throw error;
       
@@ -188,14 +191,14 @@ export function useProjects() {
 
   // Delete project
   const deleteProject = async (id: string) => {
-    if (!user?.id) return false;
+    if (!targetProfileId) return false;
     
     try {
       const { error } = await supabase
         .from('projects')
         .delete()
         .eq('id', id)
-        .eq('profile_id', user.id);
+        .eq('profile_id', targetProfileId);
       
       if (error) throw error;
       
@@ -221,10 +224,10 @@ export function useProjects() {
 
   // Load projects data
   useEffect(() => {
-    if (user?.id) {
+    if (targetProfileId) {
       fetchProjects();
     }
-  }, [user?.id]);
+  }, [targetProfileId]);
 
   return {
     projects,

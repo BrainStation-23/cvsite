@@ -32,23 +32,26 @@ const mapToAchievementDB = (achievement: Omit<Achievement, 'id'>, profileId: str
   date: achievement.date.toISOString().split('T')[0]
 });
 
-export function useAchievements() {
+export function useAchievements(profileId?: string) {
   const { user } = useAuth();
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [achievements, setAchievements] = useState<Achievement[]>([]);
 
+  // Use provided profileId or fallback to auth user id
+  const targetProfileId = profileId || user?.id;
+
   // Fetch achievements
   const fetchAchievements = async () => {
-    if (!user?.id) return;
+    if (!targetProfileId) return;
     
     try {
       setIsLoading(true);
       const { data, error } = await supabase
         .from('achievements')
         .select('*')
-        .eq('profile_id', user.id)
+        .eq('profile_id', targetProfileId)
         .order('date', { ascending: false });
       
       if (error) throw error;
@@ -72,13 +75,13 @@ export function useAchievements() {
 
   // Save achievement
   const saveAchievement = async (achievement: Omit<Achievement, 'id'>) => {
-    if (!user?.id) return false;
+    if (!targetProfileId) return false;
     
     try {
       setIsSaving(true);
       
       // Convert to database format
-      const dbData = mapToAchievementDB(achievement, user.id);
+      const dbData = mapToAchievementDB(achievement, targetProfileId);
       
       const { data, error } = await supabase
         .from('achievements')
@@ -114,7 +117,7 @@ export function useAchievements() {
 
   // Update achievement
   const updateAchievement = async (id: string, achievement: Partial<Achievement>) => {
-    if (!user?.id) return false;
+    if (!targetProfileId) return false;
     
     try {
       setIsSaving(true);
@@ -132,7 +135,7 @@ export function useAchievements() {
         .from('achievements')
         .update(dbData)
         .eq('id', id)
-        .eq('profile_id', user.id);
+        .eq('profile_id', targetProfileId);
       
       if (error) throw error;
       
@@ -162,14 +165,14 @@ export function useAchievements() {
 
   // Delete achievement
   const deleteAchievement = async (id: string) => {
-    if (!user?.id) return false;
+    if (!targetProfileId) return false;
     
     try {
       const { error } = await supabase
         .from('achievements')
         .delete()
         .eq('id', id)
-        .eq('profile_id', user.id);
+        .eq('profile_id', targetProfileId);
       
       if (error) throw error;
       
@@ -195,10 +198,10 @@ export function useAchievements() {
 
   // Load achievements data
   useEffect(() => {
-    if (user?.id) {
+    if (targetProfileId) {
       fetchAchievements();
     }
-  }, [user?.id]);
+  }, [targetProfileId]);
 
   return {
     achievements,
