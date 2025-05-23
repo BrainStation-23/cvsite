@@ -598,6 +598,22 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      get_employee_profiles: {
+        Args: {
+          search_query?: string
+          skill_filter?: string
+          experience_filter?: string
+          education_filter?: string
+          training_filter?: string
+          achievement_filter?: string
+          project_filter?: string
+          page_number?: number
+          items_per_page?: number
+          sort_by?: string
+          sort_order?: string
+        }
+        Returns: Json
+      }
       has_any_role: {
         Args: { roles: string[] }
         Returns: boolean
