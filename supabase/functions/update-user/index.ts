@@ -20,7 +20,7 @@ serve(async (req) => {
     // Create a Supabase client with the service role key
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
     
-    const { userId, email, firstName, lastName, role, password } = await req.json();
+    const { userId, email, firstName, lastName, role, employeeId, password } = await req.json();
     
     if (!userId) {
       return new Response(
@@ -30,19 +30,47 @@ serve(async (req) => {
     }
     
     // Update user metadata if provided
-    if (firstName || lastName) {
+    if (firstName || lastName || email || password) {
       const userMetadata: Record<string, any> = {};
       if (firstName) userMetadata.first_name = firstName;
       if (lastName) userMetadata.last_name = lastName;
+      if (employeeId) userMetadata.employee_id = employeeId;
+      
+      const updateData: Record<string, any> = {};
+      if (email) updateData.email = email;
+      if (password) updateData.password = password;
+      if (Object.keys(userMetadata).length > 0) {
+        updateData.user_metadata = userMetadata;
+      }
       
       const { error: updateError } = await supabase.auth.admin.updateUserById(
         userId,
-        { email, password, user_metadata: userMetadata }
+        updateData
       );
       
       if (updateError) {
         return new Response(
           JSON.stringify({ error: updateError.message }),
+          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+    }
+    
+    // Update profile table if profile-related fields are provided
+    if (firstName || lastName || employeeId) {
+      const profileUpdates: Record<string, any> = {};
+      if (firstName) profileUpdates.first_name = firstName;
+      if (lastName) profileUpdates.last_name = lastName;
+      if (employeeId) profileUpdates.employee_id = employeeId;
+      
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .update(profileUpdates)
+        .eq('id', userId);
+      
+      if (profileError) {
+        return new Response(
+          JSON.stringify({ error: profileError.message }),
           { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         );
       }

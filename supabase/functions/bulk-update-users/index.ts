@@ -25,7 +25,8 @@ const parseFileData = async (formData: FormData): Promise<any[]> => {
       firstName: row[2],
       lastName: row[3],
       role: row[4],
-      password: row[5] // Optional
+      employeeId: row[5],
+      password: row[6] // Optional
     }));
   } else if (fileType === 'xlsx' || fileType === 'xls') {
     const workbook = xlsx.read(arrayBuffer);
@@ -37,6 +38,7 @@ const parseFileData = async (formData: FormData): Promise<any[]> => {
       firstName: row.firstName,
       lastName: row.lastName,
       role: row.role,
+      employeeId: row.employeeId,
       password: row.password // Optional
     }));
   } else {
@@ -75,7 +77,7 @@ serve(async (req) => {
     
     // Process each user
     for (const user of users) {
-      const { userId, email, firstName, lastName, role, password } = user;
+      const { userId, email, firstName, lastName, role, employeeId, password } = user;
       
       if (!userId) {
         results.failed.push({ ...user, error: 'User ID is required' });
@@ -84,7 +86,7 @@ serve(async (req) => {
       
       try {
         // Update user metadata if provided
-        if (email || firstName || lastName || password) {
+        if (email || firstName || lastName || employeeId || password) {
           const updateData: Record<string, any> = {};
           
           if (email) updateData.email = email;
@@ -93,6 +95,7 @@ serve(async (req) => {
           const userMetadata: Record<string, any> = {};
           if (firstName) userMetadata.first_name = firstName;
           if (lastName) userMetadata.last_name = lastName;
+          if (employeeId) userMetadata.employee_id = employeeId;
           
           if (Object.keys(userMetadata).length > 0) {
             updateData.user_metadata = userMetadata;
@@ -108,6 +111,24 @@ serve(async (req) => {
               results.failed.push({ userId, error: updateError.message });
               continue;
             }
+          }
+        }
+        
+        // Update profile table if profile-related fields are provided
+        if (firstName || lastName || employeeId) {
+          const profileUpdates: Record<string, any> = {};
+          if (firstName) profileUpdates.first_name = firstName;
+          if (lastName) profileUpdates.last_name = lastName;
+          if (employeeId) profileUpdates.employee_id = employeeId;
+          
+          const { error: profileError } = await supabase
+            .from('profiles')
+            .update(profileUpdates)
+            .eq('id', userId);
+          
+          if (profileError) {
+            results.failed.push({ userId, error: profileError.message });
+            continue;
           }
         }
         
