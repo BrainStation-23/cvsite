@@ -78,30 +78,55 @@ serve(async (req) => {
     
     console.log('User created successfully:', authData.user.id);
     
-    // Verify the profile and role were created by the trigger
+    // Create profile entry
     const { data: profileData, error: profileError } = await supabase
       .from('profiles')
-      .select('*')
-      .eq('id', authData.user.id)
+      .insert({
+        id: authData.user.id,
+        first_name: firstName,
+        last_name: lastName
+      })
+      .select()
       .single();
     
     if (profileError) {
-      console.error('Error verifying profile creation:', profileError);
-    } else {
-      console.log('Profile created successfully:', profileData);
+      console.error('Error creating profile:', profileError);
+      
+      // Clean up by deleting the user if profile creation fails
+      await supabase.auth.admin.deleteUser(authData.user.id);
+      
+      return new Response(
+        JSON.stringify({ error: 'Failed to create user profile. Please try again.' }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
     }
     
+    console.log('Profile created successfully:', profileData);
+    
+    // Create role entry
     const { data: roleData, error: roleError } = await supabase
       .from('user_roles')
-      .select('*')
-      .eq('user_id', authData.user.id)
+      .insert({
+        user_id: authData.user.id,
+        role: role
+      })
+      .select()
       .single();
     
     if (roleError) {
-      console.error('Error verifying role creation:', roleError);
-    } else {
-      console.log('Role assigned successfully:', roleData);
+      console.error('Error creating role:', roleError);
+      
+      // Clean up by deleting the user and profile if role creation fails
+      await supabase.auth.admin.deleteUser(authData.user.id);
+      await supabase.from('profiles').delete().eq('id', authData.user.id);
+      
+      return new Response(
+        JSON.stringify({ error: 'Failed to assign user role. Please try again.' }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
     }
+    
+    console.log('Role assigned successfully:', roleData);
     
     return new Response(
       JSON.stringify({ 
