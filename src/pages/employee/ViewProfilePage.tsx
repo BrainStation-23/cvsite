@@ -4,12 +4,17 @@ import { useParams, useNavigate } from 'react-router-dom';
 import DashboardLayout from '../../components/Layout/DashboardLayout';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, Edit, Save, X } from 'lucide-react';
-import { useEmployeeProfile } from '@/hooks/use-employee-profile';
-import { useEmployeeProfileEditor } from '@/hooks/use-employee-profile-editor';
 import { ProfileTabs } from '@/components/profile/ProfileTabs';
 import { useForm } from 'react-hook-form';
 import { GeneralInfoFormData } from '@/components/profile/GeneralInfoTab';
 import { useAuth } from '@/contexts/AuthContext';
+import { useGeneralInfo } from '@/hooks/profile/use-general-info';
+import { useSkills } from '@/hooks/profile/use-skills';
+import { useExperience } from '@/hooks/profile/use-experience';
+import { useEducation } from '@/hooks/profile/use-education';
+import { useTraining } from '@/hooks/profile/use-training';
+import { useAchievements } from '@/hooks/profile/use-achievements';
+import { useProjects } from '@/hooks/profile/use-projects';
 
 const ViewProfilePage: React.FC = () => {
   const { profileId } = useParams<{ profileId: string }>();
@@ -19,43 +24,20 @@ const ViewProfilePage: React.FC = () => {
   const [newTechnicalSkill, setNewTechnicalSkill] = useState({ name: '', proficiency: 1 });
   const [newSpecializedSkill, setNewSpecializedSkill] = useState({ name: '', proficiency: 1 });
   
-  const {
-    isLoading,
-    generalInfo,
-    technicalSkills,
-    specializedSkills,
-    experiences,
-    education,
-    trainings,
-    achievements,
-    projects,
-    refetch
-  } = useEmployeeProfile(profileId || '');
+  // Use the updated hooks with profileId
+  const { isLoading: generalInfoLoading, generalInfo, saveGeneralInfo, isSaving: generalInfoSaving } = useGeneralInfo(profileId);
+  const { isLoading: skillsLoading, technicalSkills, specializedSkills, saveTechnicalSkill, saveSpecializedSkill, deleteTechnicalSkill, deleteSpecializedSkill, isSaving: skillsSaving } = useSkills(profileId);
+  const { experiences, saveExperience, updateExperience, deleteExperience, isLoading: experienceLoading, isSaving: experienceSaving } = useExperience(profileId);
+  const { education, saveEducation, updateEducation, deleteEducation, isLoading: educationLoading, isSaving: educationSaving } = useEducation(profileId);
+  const { trainings, saveTraining, updateTraining, deleteTraining, isLoading: trainingLoading, isSaving: trainingSaving } = useTraining(profileId);
+  const { achievements, saveAchievement, updateAchievement, deleteAchievement, isLoading: achievementsLoading, isSaving: achievementsSaving } = useAchievements(profileId);
+  const { projects, saveProject, updateProject, deleteProject, isLoading: projectsLoading, isSaving: projectsSaving } = useProjects(profileId);
 
-  const {
-    canEdit,
-    isSaving,
-    saveGeneralInfo,
-    handleAddTechnicalSkill,
-    deleteTechnicalSkill,
-    handleAddSpecializedSkill,
-    deleteSpecializedSkill,
-    saveExperience,
-    updateExperience,
-    deleteExperience,
-    saveEducation,
-    updateEducation,
-    deleteEducation,
-    saveTraining,
-    updateTraining,
-    deleteTraining,
-    saveAchievement,
-    updateAchievement,
-    deleteAchievement,
-    saveProject,
-    updateProject,
-    deleteProject
-  } = useEmployeeProfileEditor(profileId || '');
+  // Check if current user can edit (admin or manager)
+  const canEdit = user?.role === 'admin' || user?.role === 'manager';
+
+  const isLoading = generalInfoLoading || skillsLoading || experienceLoading || educationLoading || trainingLoading || achievementsLoading || projectsLoading;
+  const isSaving = generalInfoSaving || skillsSaving || experienceSaving || educationSaving || trainingSaving || achievementsSaving || projectsSaving;
 
   const form = useForm<GeneralInfoFormData>({
     defaultValues: {
@@ -90,7 +72,6 @@ const ViewProfilePage: React.FC = () => {
     
     if (success) {
       setIsEditing(false);
-      refetch();
     }
   };
 
@@ -106,10 +87,9 @@ const ViewProfilePage: React.FC = () => {
 
   const handleAddTechnicalSkillWrapper = async () => {
     if (newTechnicalSkill.name.trim()) {
-      const success = await handleAddTechnicalSkill(newTechnicalSkill);
+      const success = await saveTechnicalSkill({ ...newTechnicalSkill, id: '' });
       if (success) {
         setNewTechnicalSkill({ name: '', proficiency: 1 });
-        refetch();
       }
     }
     return false;
@@ -117,120 +97,12 @@ const ViewProfilePage: React.FC = () => {
 
   const handleAddSpecializedSkillWrapper = async () => {
     if (newSpecializedSkill.name.trim()) {
-      const success = await handleAddSpecializedSkill(newSpecializedSkill);
+      const success = await saveSpecializedSkill({ ...newSpecializedSkill, id: '' });
       if (success) {
         setNewSpecializedSkill({ name: '', proficiency: 1 });
-        refetch();
       }
     }
     return false;
-  };
-
-  const handleDeleteTechnicalSkill = async (id: string) => {
-    const success = await deleteTechnicalSkill(id);
-    if (success) {
-      refetch();
-    }
-    return success;
-  };
-
-  const handleDeleteSpecializedSkill = async (id: string) => {
-    const success = await deleteSpecializedSkill(id);
-    if (success) {
-      refetch();
-    }
-    return success;
-  };
-
-  // Wrapper functions for other operations that refresh data
-  const saveExperienceWrapper = async (experience: any) => {
-    const success = await saveExperience(experience);
-    if (success) refetch();
-    return success;
-  };
-
-  const updateExperienceWrapper = async (id: string, experience: any) => {
-    const success = await updateExperience(id, experience);
-    if (success) refetch();
-    return success;
-  };
-
-  const deleteExperienceWrapper = async (id: string) => {
-    const success = await deleteExperience(id);
-    if (success) refetch();
-    return success;
-  };
-
-  const saveEducationWrapper = async (education: any) => {
-    const success = await saveEducation(education);
-    if (success) refetch();
-    return success;
-  };
-
-  const updateEducationWrapper = async (id: string, education: any) => {
-    const success = await updateEducation(id, education);
-    if (success) refetch();
-    return success;
-  };
-
-  const deleteEducationWrapper = async (id: string) => {
-    const success = await deleteEducation(id);
-    if (success) refetch();
-    return success;
-  };
-
-  const saveTrainingWrapper = async (training: any) => {
-    const success = await saveTraining(training);
-    if (success) refetch();
-    return success;
-  };
-
-  const updateTrainingWrapper = async (id: string, training: any) => {
-    const success = await updateTraining(id, training);
-    if (success) refetch();
-    return success;
-  };
-
-  const deleteTrainingWrapper = async (id: string) => {
-    const success = await deleteTraining(id);
-    if (success) refetch();
-    return success;
-  };
-
-  const saveAchievementWrapper = async (achievement: any) => {
-    const success = await saveAchievement(achievement);
-    if (success) refetch();
-    return success;
-  };
-
-  const updateAchievementWrapper = async (id: string, achievement: any) => {
-    const success = await updateAchievement(id, achievement);
-    if (success) refetch();
-    return success;
-  };
-
-  const deleteAchievementWrapper = async (id: string) => {
-    const success = await deleteAchievement(id);
-    if (success) refetch();
-    return success;
-  };
-
-  const saveProjectWrapper = async (project: any) => {
-    const success = await saveProject(project);
-    if (success) refetch();
-    return success;
-  };
-
-  const updateProjectWrapper = async (id: string, project: any) => {
-    const success = await updateProject(id, project);
-    if (success) refetch();
-    return success;
-  };
-
-  const deleteProjectWrapper = async (id: string) => {
-    const success = await deleteProject(id);
-    if (success) refetch();
-    return success;
   };
 
   if (isLoading) {
@@ -314,23 +186,23 @@ const ViewProfilePage: React.FC = () => {
           setNewSpecializedSkill={setNewSpecializedSkill}
           handleAddTechnicalSkill={handleAddTechnicalSkillWrapper}
           handleAddSpecializedSkill={handleAddSpecializedSkillWrapper}
-          saveExperience={saveExperienceWrapper}
-          updateExperience={updateExperienceWrapper}
-          deleteExperience={deleteExperienceWrapper}
-          saveEducation={saveEducationWrapper}
-          updateEducation={updateEducationWrapper}
-          deleteEducation={deleteEducationWrapper}
-          saveTraining={saveTrainingWrapper}
-          updateTraining={updateTrainingWrapper}
-          deleteTraining={deleteTrainingWrapper}
-          saveAchievement={saveAchievementWrapper}
-          updateAchievement={updateAchievementWrapper}
-          deleteAchievement={deleteAchievementWrapper}
-          saveProject={saveProjectWrapper}
-          updateProject={updateProjectWrapper}
-          deleteProject={deleteProjectWrapper}
-          deleteTechnicalSkill={handleDeleteTechnicalSkill}
-          deleteSpecializedSkill={handleDeleteSpecializedSkill}
+          saveExperience={saveExperience}
+          updateExperience={updateExperience}
+          deleteExperience={deleteExperience}
+          saveEducation={saveEducation}
+          updateEducation={updateEducation}
+          deleteEducation={deleteEducation}
+          saveTraining={saveTraining}
+          updateTraining={updateTraining}
+          deleteTraining={deleteTraining}
+          saveAchievement={saveAchievement}
+          updateAchievement={updateAchievement}
+          deleteAchievement={deleteAchievement}
+          saveProject={saveProject}
+          updateProject={updateProject}
+          deleteProject={deleteProject}
+          deleteTechnicalSkill={deleteTechnicalSkill}
+          deleteSpecializedSkill={deleteSpecializedSkill}
         />
       </div>
     </DashboardLayout>

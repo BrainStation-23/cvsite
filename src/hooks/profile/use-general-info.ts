@@ -12,40 +12,36 @@ export interface GeneralInfo {
   profileImage: string | null;
 }
 
-export function useGeneralInfo() {
+export function useGeneralInfo(profileId?: string) {
   const { user } = useAuth();
   const { toast } = useToast();
-  const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
-  const [generalInfo, setGeneralInfo] = useState<GeneralInfo>({
-    firstName: '',
-    lastName: '',
-    biography: null,
-    profileImage: null
-  });
+  
+  // Use provided profileId or fallback to auth user id
+  const targetProfileId = profileId || user?.id;
 
   // Use React Query to fetch general info
-  const { data, error, refetch } = useQuery({
-    queryKey: ['generalInfo', user?.id],
+  const { data, error, refetch, isLoading } = useQuery({
+    queryKey: ['generalInfo', targetProfileId],
     queryFn: async () => {
-      if (!user?.id) throw new Error('No user ID available');
+      if (!targetProfileId) throw new Error('No profile ID available');
       
       // Check if profile exists
       const { data: profile, error: profileError } = await supabase
         .from('profiles')
         .select('id')
-        .eq('id', user.id)
+        .eq('id', targetProfileId)
         .maybeSingle();
         
       if (profileError && profileError.code !== 'PGRST116') {
         throw profileError;
       }
       
-      if (!profile) {
-        // Profile doesn't exist, create one
+      if (!profile && !profileId) {
+        // Only create profile if this is for the current user (no profileId provided)
         const { error } = await supabase
           .from('profiles')
-          .insert({ id: user.id });
+          .insert({ id: targetProfileId });
           
         if (error) throw error;
       }
@@ -54,7 +50,7 @@ export function useGeneralInfo() {
       const { data, error: generalInfoError } = await supabase
         .from('general_information')
         .select('*')
-        .eq('profile_id', user.id)
+        .eq('profile_id', targetProfileId)
         .maybeSingle();
       
       if (generalInfoError && generalInfoError.code !== 'PGRST116') {
@@ -69,25 +65,25 @@ export function useGeneralInfo() {
           profileImage: data.profile_image
         };
       } else {
-        // Use user data as fallback
+        // Use user data as fallback only if this is current user
+        if (!profileId && user) {
+          return {
+            firstName: user.firstName || '',
+            lastName: user.lastName || '',
+            biography: null,
+            profileImage: user.profileImageUrl || null
+          };
+        }
         return {
-          firstName: user.firstName || '',
-          lastName: user.lastName || '',
+          firstName: '',
+          lastName: '',
           biography: null,
-          profileImage: user.profileImageUrl || null
+          profileImage: null
         };
       }
     },
-    enabled: !!user?.id,
+    enabled: !!targetProfileId,
   });
-
-  // Update general info state when data changes
-  useEffect(() => {
-    if (data) {
-      setGeneralInfo(data);
-      setIsLoading(false);
-    }
-  }, [data]);
 
   // Handle error in fetching
   useEffect(() => {
@@ -98,7 +94,6 @@ export function useGeneralInfo() {
         description: 'Failed to load profile information',
         variant: 'destructive'
       });
-      setIsLoading(false);
     }
   }, [error, toast]);
 
@@ -108,7 +103,7 @@ export function useGeneralInfo() {
     lastName: string;
     biography: string | null;
   }) => {
-    if (!user?.id) return false;
+    if (!targetProfileId) return false;
     
     try {
       setIsSaving(true);
@@ -117,7 +112,7 @@ export function useGeneralInfo() {
       const { data: existingData, error: checkError } = await supabase
         .from('general_information')
         .select('id')
-        .eq('profile_id', user.id)
+        .eq('profile_id', targetProfileId)
         .maybeSingle();
       
       if (checkError && checkError.code !== 'PGRST116') throw checkError;
@@ -132,7 +127,7 @@ export function useGeneralInfo() {
             biography: data.biography,
             updated_at: new Date().toISOString()
           })
-          .eq('profile_id', user.id);
+          .eq('profile_id', targetProfileId);
         
         if (error) throw error;
       } else {
@@ -140,7 +135,7 @@ export function useGeneralInfo() {
         const { error } = await supabase
           .from('general_information')
           .insert({
-            profile_id: user.id,
+            profile_id: targetProfileId,
             first_name: data.firstName,
             last_name: data.lastName,
             biography: data.biography
@@ -174,7 +169,12 @@ export function useGeneralInfo() {
   return {
     isLoading,
     isSaving,
-    generalInfo,
+    generalInfo: data || {
+      firstName: '',
+      lastName: '',
+      biography: null,
+      profileImage: null
+    },
     saveGeneralInfo,
   };
 }

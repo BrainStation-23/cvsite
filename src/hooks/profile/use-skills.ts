@@ -5,7 +5,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { Skill } from '@/types';
 
-export function useSkills() {
+export function useSkills(profileId?: string) {
   const { user } = useAuth();
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(true);
@@ -13,15 +13,18 @@ export function useSkills() {
   const [technicalSkills, setTechnicalSkills] = useState<Skill[]>([]);
   const [specializedSkills, setSpecializedSkills] = useState<Skill[]>([]);
 
+  // Use provided profileId or fallback to auth user id
+  const targetProfileId = profileId || user?.id;
+
   // Fetch technical skills
   const fetchTechnicalSkills = async () => {
-    if (!user?.id) return;
+    if (!targetProfileId) return;
     
     try {
       const { data, error } = await supabase
         .from('technical_skills')
         .select('*')
-        .eq('profile_id', user.id);
+        .eq('profile_id', targetProfileId);
       
       if (error) throw error;
       
@@ -39,13 +42,13 @@ export function useSkills() {
 
   // Fetch specialized skills
   const fetchSpecializedSkills = async () => {
-    if (!user?.id) return;
+    if (!targetProfileId) return;
     
     try {
       const { data, error } = await supabase
         .from('specialized_skills')
         .select('*')
-        .eq('profile_id', user.id);
+        .eq('profile_id', targetProfileId);
       
       if (error) throw error;
       
@@ -65,7 +68,7 @@ export function useSkills() {
 
   // Save technical skill
   const saveTechnicalSkill = async (skill: Skill) => {
-    if (!user?.id) return false;
+    if (!targetProfileId) return false;
     
     try {
       setIsSaving(true);
@@ -87,7 +90,7 @@ export function useSkills() {
         const { data, error } = await supabase
           .from('technical_skills')
           .insert({
-            profile_id: user.id,
+            profile_id: targetProfileId,
             name: skill.name,
             proficiency: skill.proficiency
           })
@@ -131,7 +134,7 @@ export function useSkills() {
 
   // Save specialized skill
   const saveSpecializedSkill = async (skill: Skill) => {
-    if (!user?.id) return false;
+    if (!targetProfileId) return false;
     
     try {
       setIsSaving(true);
@@ -153,7 +156,7 @@ export function useSkills() {
         const { data, error } = await supabase
           .from('specialized_skills')
           .insert({
-            profile_id: user.id,
+            profile_id: targetProfileId,
             name: skill.name,
             proficiency: skill.proficiency
           })
@@ -197,14 +200,14 @@ export function useSkills() {
 
   // Delete technical skill
   const deleteTechnicalSkill = async (skillId: string) => {
-    if (!user?.id) return false;
+    if (!targetProfileId) return false;
     
     try {
       const { error } = await supabase
         .from('technical_skills')
         .delete()
         .eq('id', skillId)
-        .eq('profile_id', user.id);
+        .eq('profile_id', targetProfileId);
       
       if (error) throw error;
       
@@ -230,14 +233,14 @@ export function useSkills() {
 
   // Delete specialized skill
   const deleteSpecializedSkill = async (skillId: string) => {
-    if (!user?.id) return false;
+    if (!targetProfileId) return false;
     
     try {
       const { error } = await supabase
         .from('specialized_skills')
         .delete()
         .eq('id', skillId)
-        .eq('profile_id', user.id);
+        .eq('profile_id', targetProfileId);
       
       if (error) throw error;
       
@@ -263,7 +266,7 @@ export function useSkills() {
 
   // Load skills data
   useEffect(() => {
-    if (user?.id) {
+    if (targetProfileId) {
       setIsLoading(true);
       Promise.all([
         fetchTechnicalSkills(),
@@ -272,7 +275,7 @@ export function useSkills() {
         setIsLoading(false);
       });
     }
-  }, [user?.id]);
+  }, [targetProfileId]);
 
   return {
     isLoading,
