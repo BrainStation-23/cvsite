@@ -273,7 +273,7 @@ const EmployeeData: React.FC = () => {
           </CardContent>
         </Card>
 
-        {pagination.page_count > 1 && (
+        {pagination.pageCount > 1 && (
           <UserPagination
             pagination={pagination}
             onPageChange={handlePageChange}
