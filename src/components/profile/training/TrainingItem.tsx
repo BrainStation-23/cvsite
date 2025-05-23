@@ -9,7 +9,7 @@ interface TrainingItemProps {
   training: Training;
   isEditing: boolean;
   onEdit: (training: Training) => void;
-  onDelete: (id: string) => Promise<void>;
+  onDelete: (id: string) => Promise<boolean>;
 }
 
 export const TrainingItem: React.FC<TrainingItemProps> = ({

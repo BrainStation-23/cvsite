@@ -16,10 +16,6 @@ export const TrainingList: React.FC<TrainingListProps> = ({
   onEdit,
   onDelete
 }) => {
-  const handleDelete = async (id: string) => {
-    return await onDelete(id);
-  };
-
   if (trainings.length === 0) {
     return (
       <div className="text-center text-gray-500 dark:text-gray-400 py-8">
@@ -37,7 +33,7 @@ export const TrainingList: React.FC<TrainingListProps> = ({
           training={training}
           isEditing={isEditing}
           onEdit={onEdit}
-          onDelete={handleDelete}
+          onDelete={onDelete}
         />
       ))}
     </div>
