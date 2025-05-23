@@ -24,11 +24,11 @@ export function useEmployeeProfiles({
   const [profiles, setProfiles] = useState<EmployeeProfile[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [pagination, setPagination] = useState<EmployeeProfilesPagination>({
-    total_count: 0,
-    filtered_count: 0,
+    totalCount: 0,
+    filteredCount: 0,
     page: initialPage,
-    per_page: initialPerPage,
-    page_count: 0
+    perPage: initialPerPage,
+    pageCount: 0
   });
   
   const [searchQuery, setSearchQuery] = useState<string>('');
@@ -56,7 +56,7 @@ export function useEmployeeProfiles({
   } = {}) => {
     const {
       page = pagination.page,
-      perPage = pagination.per_page,
+      perPage = pagination.perPage,
       search = searchQuery,
       skillFilter: skills = skillFilter,
       experienceFilter: experience = experienceFilter,
@@ -114,7 +114,17 @@ export function useEmployeeProfiles({
       const response = data as unknown as EmployeeProfilesResponse;
       
       setProfiles(response.profiles || []);
-      setPagination(response.pagination);
+      
+      // Map the response pagination properties to match our interface
+      const mappedPagination: EmployeeProfilesPagination = {
+        totalCount: response.pagination.total_count,
+        filteredCount: response.pagination.filtered_count,
+        page: response.pagination.page,
+        perPage: response.pagination.per_page,
+        pageCount: response.pagination.page_count
+      };
+      
+      setPagination(mappedPagination);
       
       // Update state with the query parameters
       setSearchQuery(search);
