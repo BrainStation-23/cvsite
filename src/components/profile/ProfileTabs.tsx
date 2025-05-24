@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { GeneralInfoTab, GeneralInfoFormData } from './GeneralInfoTab';
@@ -11,10 +10,12 @@ import { ProjectsTab } from './ProjectsTab';
 import { UseFormReturn } from 'react-hook-form';
 import { Skill, Experience, Education, Training, Achievement, Project } from '@/types';
 
-// Update the form type to match GeneralInfoFormData
+// Update the form type to match GeneralInfoFormData and add missing props
 interface ProfileTabsProps {
   form: UseFormReturn<GeneralInfoFormData>;
   isEditing: boolean;
+  profileId?: string;
+  onImageUpdate: (imageUrl: string | null) => void;
   technicalSkills: Skill[];
   specializedSkills: Skill[];
   experiences: Experience[];
@@ -51,6 +52,8 @@ interface ProfileTabsProps {
 export const ProfileTabs: React.FC<ProfileTabsProps> = ({
   form,
   isEditing,
+  profileId,
+  onImageUpdate,
   technicalSkills,
   specializedSkills,
   experiences,
@@ -96,7 +99,12 @@ export const ProfileTabs: React.FC<ProfileTabsProps> = ({
       </TabsList>
       
       <TabsContent value="general">
-        <GeneralInfoTab form={form} isEditing={isEditing} />
+        <GeneralInfoTab 
+          form={form} 
+          isEditing={isEditing} 
+          profileId={profileId}
+          onImageUpdate={onImageUpdate}
+        />
       </TabsContent>
       
       <TabsContent value="skills">
