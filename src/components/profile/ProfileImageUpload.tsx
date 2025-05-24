@@ -1,8 +1,8 @@
 
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Input } from '@/components/ui/input';
+import { AspectRatio } from '@/components/ui/aspect-ratio';
 import { Camera, Trash2, Upload } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
@@ -166,22 +166,36 @@ export const ProfileImageUpload: React.FC<ProfileImageUploadProps> = ({
   };
 
   return (
-    <div className="flex flex-col items-center space-y-4">
-      <div className="relative">
-        <Avatar className="h-32 w-32">
-          <AvatarImage src={currentImageUrl || undefined} alt={userName} />
-          <AvatarFallback className="text-lg">
-            {getInitials(userName)}
-          </AvatarFallback>
-        </Avatar>
+    <div className="flex flex-col items-center space-y-6">
+      {/* Profile Image Preview */}
+      <div className="relative w-64">
+        <AspectRatio ratio={4/3} className="bg-gray-100 dark:bg-gray-800 rounded-lg overflow-hidden border-2 border-gray-200 dark:border-gray-700">
+          {currentImageUrl ? (
+            <img
+              src={currentImageUrl}
+              alt={userName}
+              className="w-full h-full object-cover"
+            />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-900">
+              <div className="text-center">
+                <div className="text-3xl font-bold text-gray-400 dark:text-gray-500 mb-2">
+                  {getInitials(userName)}
+                </div>
+                <p className="text-sm text-gray-500 dark:text-gray-400">No image uploaded</p>
+              </div>
+            </div>
+          )}
+        </AspectRatio>
         
+        {/* Camera overlay button for editing */}
         {isEditing && (
-          <div className="absolute -bottom-2 -right-2">
+          <div className="absolute top-3 right-3">
             <label htmlFor="profile-image-upload">
               <Button
                 type="button"
                 size="sm"
-                className="rounded-full h-8 w-8 p-0"
+                className="rounded-full h-10 w-10 p-0 shadow-lg"
                 disabled={uploading}
                 asChild
               >
@@ -190,29 +204,23 @@ export const ProfileImageUpload: React.FC<ProfileImageUploadProps> = ({
                 </span>
               </Button>
             </label>
-            <Input
-              id="profile-image-upload"
-              type="file"
-              accept="image/*"
-              onChange={handleFileSelect}
-              className="hidden"
-              disabled={uploading}
-            />
           </div>
         )}
       </div>
 
+      {/* Action Buttons */}
       {isEditing && (
-        <div className="flex gap-2">
-          <label htmlFor="profile-image-upload">
+        <div className="flex flex-col sm:flex-row gap-3 w-full max-w-xs">
+          <label htmlFor="profile-image-upload" className="flex-1">
             <Button
               type="button"
               variant="outline"
               size="sm"
               disabled={uploading}
+              className="w-full"
               asChild
             >
-              <span className="cursor-pointer flex items-center gap-2">
+              <span className="cursor-pointer flex items-center justify-center gap-2">
                 <Upload className="h-4 w-4" />
                 {uploading ? 'Uploading...' : 'Upload Image'}
               </span>
@@ -226,13 +234,24 @@ export const ProfileImageUpload: React.FC<ProfileImageUploadProps> = ({
               size="sm"
               onClick={handleRemoveImage}
               disabled={deleting || uploading}
+              className="flex-1"
             >
-              <Trash2 className="h-4 w-4" />
+              <Trash2 className="h-4 w-4 mr-2" />
               {deleting ? 'Removing...' : 'Remove'}
             </Button>
           )}
         </div>
       )}
+
+      {/* Hidden file input */}
+      <Input
+        id="profile-image-upload"
+        type="file"
+        accept="image/*"
+        onChange={handleFileSelect}
+        className="hidden"
+        disabled={uploading}
+      />
     </div>
   );
 };
