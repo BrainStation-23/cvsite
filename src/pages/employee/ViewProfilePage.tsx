@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import DashboardLayout from '../../components/Layout/DashboardLayout';
@@ -43,7 +42,8 @@ const ViewProfilePage: React.FC = () => {
     defaultValues: {
       firstName: generalInfo.firstName || '',
       lastName: generalInfo.lastName || '',
-      biography: generalInfo.biography || ''
+      biography: generalInfo.biography || '',
+      profileImage: generalInfo.profileImage
     }
   });
 
@@ -53,7 +53,8 @@ const ViewProfilePage: React.FC = () => {
       form.reset({
         firstName: generalInfo.firstName || '',
         lastName: generalInfo.lastName || '',
-        biography: generalInfo.biography || ''
+        biography: generalInfo.biography || '',
+        profileImage: generalInfo.profileImage
       });
     }
   }, [isLoading, generalInfo, form]);
@@ -67,7 +68,8 @@ const ViewProfilePage: React.FC = () => {
     const success = await saveGeneralInfo({
       firstName: formData.firstName,
       lastName: formData.lastName,
-      biography: formData.biography
+      biography: formData.biography,
+      profileImage: formData.profileImage
     });
     
     if (success) {
@@ -81,8 +83,13 @@ const ViewProfilePage: React.FC = () => {
     form.reset({
       firstName: generalInfo.firstName || '',
       lastName: generalInfo.lastName || '',
-      biography: generalInfo.biography || ''
+      biography: generalInfo.biography || '',
+      profileImage: generalInfo.profileImage
     });
+  };
+
+  const handleImageUpdate = (imageUrl: string | null) => {
+    form.setValue('profileImage', imageUrl);
   };
 
   const handleAddTechnicalSkillWrapper = async () => {
@@ -172,6 +179,8 @@ const ViewProfilePage: React.FC = () => {
         <ProfileTabs
           form={form}
           isEditing={isEditing}
+          profileId={profileId}
+          onImageUpdate={handleImageUpdate}
           technicalSkills={technicalSkills}
           specializedSkills={specializedSkills}
           experiences={experiences}

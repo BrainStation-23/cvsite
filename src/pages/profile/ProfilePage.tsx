@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import DashboardLayout from '../../components/Layout/DashboardLayout';
 import { Button } from '@/components/ui/button';
@@ -53,7 +52,8 @@ const ProfilePage: React.FC = () => {
     defaultValues: {
       firstName: generalInfo.firstName,
       lastName: generalInfo.lastName,
-      biography: generalInfo.biography || ''
+      biography: generalInfo.biography || '',
+      profileImage: generalInfo.profileImage
     }
   });
 
@@ -63,7 +63,8 @@ const ProfilePage: React.FC = () => {
       form.reset({
         firstName: generalInfo.firstName,
         lastName: generalInfo.lastName,
-        biography: generalInfo.biography || ''
+        biography: generalInfo.biography || '',
+        profileImage: generalInfo.profileImage
       });
     }
   }, [isLoading, generalInfo, form.reset]);
@@ -72,12 +73,17 @@ const ProfilePage: React.FC = () => {
     const success = await saveGeneralInfo({
       firstName: data.firstName,
       lastName: data.lastName,
-      biography: data.biography || null
+      biography: data.biography || null,
+      profileImage: data.profileImage
     });
     
     if (success) {
       setIsEditing(false);
     }
+  };
+
+  const handleImageUpdate = (imageUrl: string | null) => {
+    form.setValue('profileImage', imageUrl);
   };
 
   const handleAddTechnicalSkill = async () => {
@@ -151,6 +157,7 @@ const ProfilePage: React.FC = () => {
         <ProfileTabs
           form={form}
           isEditing={isEditing}
+          onImageUpdate={handleImageUpdate}
           technicalSkills={technicalSkills}
           specializedSkills={specializedSkills}
           experiences={experiences}

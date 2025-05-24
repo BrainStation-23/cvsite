@@ -102,6 +102,7 @@ export function useGeneralInfo(profileId?: string) {
     firstName: string;
     lastName: string;
     biography: string | null;
+    profileImage?: string | null;
   }) => {
     if (!targetProfileId) return false;
     
@@ -125,6 +126,7 @@ export function useGeneralInfo(profileId?: string) {
             first_name: data.firstName,
             last_name: data.lastName,
             biography: data.biography,
+            profile_image: data.profileImage,
             updated_at: new Date().toISOString()
           })
           .eq('profile_id', targetProfileId);
@@ -138,7 +140,8 @@ export function useGeneralInfo(profileId?: string) {
             profile_id: targetProfileId,
             first_name: data.firstName,
             last_name: data.lastName,
-            biography: data.biography
+            biography: data.biography,
+            profile_image: data.profileImage
           });
         
         if (error) throw error;
