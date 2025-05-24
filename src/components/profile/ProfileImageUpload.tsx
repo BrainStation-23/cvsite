@@ -169,12 +169,13 @@ export const ProfileImageUpload: React.FC<ProfileImageUploadProps> = ({
     <div className="flex flex-col items-center space-y-6">
       {/* Profile Image Preview */}
       <div className="relative w-64">
-        <AspectRatio ratio={4/3} className="bg-gray-100 dark:bg-gray-800 rounded-lg overflow-hidden border-2 border-gray-200 dark:border-gray-700">
+        <AspectRatio ratio={3/4} className="bg-gray-100 dark:bg-gray-800 rounded-lg overflow-hidden border-2 border-gray-200 dark:border-gray-700">
           {currentImageUrl ? (
             <img
               src={currentImageUrl}
               alt={userName}
               className="w-full h-full object-cover"
+              style={{ objectPosition: 'center' }}
             />
           ) : (
             <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-900">
