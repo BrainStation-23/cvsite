@@ -18,7 +18,7 @@ export const AzureLoginButton: React.FC<AzureLoginButtonProps> = ({ loading, set
         provider: 'azure',
         options: {
           scopes: 'openid profile email',
-          redirectTo: `${window.location.origin}/login`
+          redirectTo: `${window.location.origin}/auth/callback`
         }
       });
 

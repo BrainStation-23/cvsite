@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -9,6 +8,7 @@ import ProtectedRoute from "./components/ProtectedRoute";
 
 // Pages
 import Login from "./pages/Login";
+import Callback from "./pages/auth/Callback";
 import AdminDashboard from "./pages/dashboard/AdminDashboard";
 import ManagerDashboard from "./pages/dashboard/ManagerDashboard";
 import EmployeeDashboard from "./pages/dashboard/EmployeeDashboard";
@@ -32,6 +32,7 @@ const App = () => (
           <Routes>
             {/* Public Routes */}
             <Route path="/login" element={<Login />} />
+            <Route path="/auth/callback" element={<Callback />} />
             <Route path="/" element={<Navigate to="/login" replace />} />
             
             {/* Admin Routes */}
