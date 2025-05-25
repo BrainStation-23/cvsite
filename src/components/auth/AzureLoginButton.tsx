@@ -2,6 +2,7 @@
 import React from 'react';
 import { Button } from "@/components/ui/button";
 import { toast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 interface AzureLoginButtonProps {
   loading: boolean;
@@ -12,20 +13,29 @@ export const AzureLoginButton: React.FC<AzureLoginButtonProps> = ({ loading, set
   const handleAzureLogin = async () => {
     try {
       setLoading(true);
-      // TODO: Implement Azure AD login
-      toast({
-        title: "Coming Soon",
-        description: "Azure AD integration will be implemented soon",
-        variant: "default"
+      
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider: 'azure',
+        options: {
+          scopes: 'openid profile email',
+          redirectTo: `${window.location.origin}/login`
+        }
       });
-    } catch (error) {
+
+      if (error) {
+        throw error;
+      }
+
+      // The redirect will happen automatically if successful
+      console.log('Azure AD login initiated');
+      
+    } catch (error: any) {
       console.error('Azure login error:', error);
       toast({
         title: "Azure Login Failed",
-        description: "Unable to authenticate with Microsoft Azure AD",
+        description: error.message || "Unable to authenticate with Microsoft Azure AD",
         variant: "destructive"
       });
-    } finally {
       setLoading(false);
     }
   };

@@ -20,73 +20,91 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [session, setSession] = useState<Session | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
+  const fetchUserProfile = async (supabaseUser: SupabaseUser) => {
+    try {
+      // First try to get existing role
+      let { data: roleData, error: roleError } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', supabaseUser.id)
+        .single();
+
+      // If no role exists, create one (default to employee)
+      if (roleError && roleError.code === 'PGRST116') {
+        const { data: newRoleData, error: createRoleError } = await supabase
+          .from('user_roles')
+          .insert([{ user_id: supabaseUser.id, role: 'employee' }])
+          .select('role')
+          .single();
+
+        if (createRoleError) {
+          console.error('Error creating user role:', createRoleError);
+          throw createRoleError;
+        }
+        roleData = newRoleData;
+      } else if (roleError) {
+        console.error('Error fetching user role:', roleError);
+        throw roleError;
+      }
+
+      const userRole = roleData.role as UserRole;
+
+      // Create or update profile if needed
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .upsert([{
+          id: supabaseUser.id,
+          first_name: supabaseUser.user_metadata.first_name || supabaseUser.user_metadata.name?.split(' ')[0] || '',
+          last_name: supabaseUser.user_metadata.last_name || supabaseUser.user_metadata.name?.split(' ').slice(1).join(' ') || '',
+          employee_id: supabaseUser.user_metadata.employee_id || null
+        }]);
+
+      if (profileError) {
+        console.error('Error upserting profile:', profileError);
+      }
+
+      setUser({
+        id: supabaseUser.id,
+        email: supabaseUser.email || '',
+        firstName: supabaseUser.user_metadata.first_name || supabaseUser.user_metadata.name?.split(' ')[0] || '',
+        lastName: supabaseUser.user_metadata.last_name || supabaseUser.user_metadata.name?.split(' ').slice(1).join(' ') || '',
+        role: userRole,
+        profileImageUrl: supabaseUser.user_metadata.avatar_url || supabaseUser.user_metadata.picture || '/placeholder.svg',
+      });
+    } catch (error) {
+      console.error('Error setting up user profile:', error);
+      setUser(null);
+    }
+  };
+
   useEffect(() => {
     // Set up auth state listener first
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, currentSession) => {
+      async (event, currentSession) => {
+        console.log('Auth state change:', event, currentSession?.user?.id);
         setSession(currentSession);
         
         if (currentSession?.user) {
-          // Transform Supabase user to our User type
-          // In a real app, we would fetch more user data from profiles table
-          setTimeout(async () => {
-            try {
-              const { data, error } = await supabase
-                .from('user_roles')
-                .select('role')
-                .eq('user_id', currentSession.user.id)
-                .single();
-              
-              if (error) throw error;
-              
-              const userRole = data.role as UserRole;
-              
-              setUser({
-                id: currentSession.user.id,
-                email: currentSession.user.email || '',
-                firstName: currentSession.user.user_metadata.first_name || '',
-                lastName: currentSession.user.user_metadata.last_name || '',
-                role: userRole,
-                profileImageUrl: currentSession.user.user_metadata.avatar_url || '/placeholder.svg',
-              });
-            } catch (error) {
-              console.error('Error fetching user role:', error);
-              setUser(null);
-            }
+          // Use setTimeout to avoid potential callback deadlock
+          setTimeout(() => {
+            fetchUserProfile(currentSession.user);
           }, 0);
         } else {
           setUser(null);
         }
+        
+        setIsLoading(false);
       }
     );
 
     // Then check for existing session
     const initializeAuth = async () => {
       try {
-        setIsLoading(true);
         const { data: { session: initialSession } } = await supabase.auth.getSession();
         
         if (initialSession?.user) {
-          const { data, error } = await supabase
-            .from('user_roles')
-            .select('role')
-            .eq('user_id', initialSession.user.id)
-            .single();
-          
-          if (error) throw error;
-          
-          const userRole = data.role as UserRole;
-          
-          setUser({
-            id: initialSession.user.id,
-            email: initialSession.user.email || '',
-            firstName: initialSession.user.user_metadata.first_name || '',
-            lastName: initialSession.user.user_metadata.last_name || '',
-            role: userRole,
-            profileImageUrl: initialSession.user.user_metadata.avatar_url || '/placeholder.svg',
-          });
-          
           setSession(initialSession);
+          await fetchUserProfile(initialSession.user);
         }
       } catch (error) {
         console.error('Error initializing auth:', error);
