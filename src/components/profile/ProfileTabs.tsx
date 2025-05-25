@@ -10,7 +10,7 @@ import { ProjectsTab } from './ProjectsTab';
 import { UseFormReturn } from 'react-hook-form';
 import { Skill, Experience, Education, Training, Achievement, Project } from '@/types';
 import { Card } from '@/components/ui/card';
-import { User, Briefcase, GraduationCap, Award, FolderOpen, Zap, Certificate } from 'lucide-react';
+import { User, Briefcase, GraduationCap, Award, FolderOpen, Zap, BookOpen } from 'lucide-react';
 
 // Update the form type to match GeneralInfoFormData and add missing props
 interface ProfileTabsProps {
@@ -93,7 +93,7 @@ export const ProfileTabs: React.FC<ProfileTabsProps> = ({
     { value: "skills", label: "Skills", icon: Zap },
     { value: "experience", label: "Experience", icon: Briefcase },
     { value: "education", label: "Education", icon: GraduationCap },
-    { value: "training", label: "Training", icon: Certificate },
+    { value: "training", label: "Training", icon: BookOpen },
     { value: "achievements", label: "Achievements", icon: Award },
     { value: "projects", label: "Projects", icon: FolderOpen }
   ];
