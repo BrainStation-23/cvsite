@@ -94,7 +94,7 @@ const DegreeSettings: React.FC = () => {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center justify-between">
-            <span>Degrees Management</span>
+            <span>Degree Management</span>
             <DegreeCSVManager 
               degrees={allDegrees}
               onValidationResult={handleValidationResult}
