@@ -1,4 +1,3 @@
-
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -109,6 +108,51 @@ export const useUniversitySettings = () => {
       queryClient.invalidateQueries({ queryKey: ['universities'] });
     },
   });
+
+  // Bulk import mutation
+  const bulkImportMutation = useMutation({
+    mutationFn: async (universities: UniversityFormData[]) => {
+      const existingItems = items || [];
+      const duplicates: string[] = [];
+      const validUniversities: UniversityFormData[] = [];
+
+      universities.forEach(university => {
+        const exists = existingItems.some(item => 
+          item.name.toLowerCase() === university.name.toLowerCase()
+        );
+        if (exists) {
+          duplicates.push(university.name);
+        } else {
+          validUniversities.push(university);
+        }
+      });
+
+      if (duplicates.length > 0) {
+        throw new Error(`Duplicate universities found: ${duplicates.join(', ')}`);
+      }
+
+      if (validUniversities.length === 0) {
+        throw new Error('No valid universities to import');
+      }
+
+      const { data, error } = await supabase
+        .from('universities')
+        .insert(
+          validUniversities.map(university => ({
+            name: university.name,
+            type: university.type,
+            acronyms: university.acronyms || null
+          }))
+        )
+        .select();
+      
+      if (error) throw error;
+      return { imported: data, duplicates };
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['universities'] });
+    },
+  });
   
   const addItem = (university: UniversityFormData) => {
     addUniversityMutation.mutate(university, {
@@ -168,6 +212,24 @@ export const useUniversitySettings = () => {
     });
   };
 
+  const bulkImportItems = (universities: UniversityFormData[]) => {
+    bulkImportMutation.mutate(universities, {
+      onSuccess: (result) => {
+        toast({
+          title: "Bulk import successful",
+          description: `${result.imported.length} universities imported successfully.`,
+        });
+      },
+      onError: (error) => {
+        toast({
+          title: "Import failed",
+          description: error instanceof Error ? error.message : 'Unknown error',
+          variant: "destructive"
+        });
+      }
+    });
+  };
+
   return {
     items,
     isLoading,
@@ -175,8 +237,10 @@ export const useUniversitySettings = () => {
     addItem,
     updateItem,
     removeItem,
+    bulkImportItems,
     isAddingItem: addUniversityMutation.isPending,
     isUpdatingItem: updateUniversityMutation.isPending,
-    isRemovingItem: deleteUniversityMutation.isPending
+    isRemovingItem: deleteUniversityMutation.isPending,
+    isBulkImporting: bulkImportMutation.isPending
   };
 };

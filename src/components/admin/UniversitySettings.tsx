@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -7,6 +6,8 @@ import { useUniversitySettings, UniversityFormData } from '@/hooks/use-universit
 import UniversityAddForm from './university/UniversityAddForm';
 import UniversityTable from './university/UniversityTable';
 import UniversityDeleteDialog from './university/UniversityDeleteDialog';
+import UniversityCSVManager from './university/UniversityCSVManager';
+import UniversityBulkImport from './university/UniversityBulkImport';
 
 const UniversitySettings: React.FC = () => {
   const [isAdding, setIsAdding] = useState(false);
@@ -16,6 +17,7 @@ const UniversitySettings: React.FC = () => {
     id: '',
     name: ''
   });
+  const [bulkImportData, setBulkImportData] = useState<UniversityFormData[]>([]);
   
   const { 
     items, 
@@ -23,9 +25,11 @@ const UniversitySettings: React.FC = () => {
     addItem, 
     updateItem, 
     removeItem, 
+    bulkImportItems,
     isAddingItem, 
     isUpdatingItem, 
-    isRemovingItem 
+    isRemovingItem,
+    isBulkImporting
   } = useUniversitySettings();
 
   const handleStartAddNew = () => {
@@ -67,6 +71,19 @@ const UniversitySettings: React.FC = () => {
     setDeleteDialog({ isOpen: false, id: '', name: '' });
   };
 
+  const handleCSVImport = (universities: UniversityFormData[]) => {
+    setBulkImportData(universities);
+  };
+
+  const handleBulkImportConfirm = () => {
+    bulkImportItems(bulkImportData);
+    setBulkImportData([]);
+  };
+
+  const handleBulkImportCancel = () => {
+    setBulkImportData([]);
+  };
+
   if (isLoading) {
     return (
       <Card>
@@ -85,15 +102,31 @@ const UniversitySettings: React.FC = () => {
       <CardHeader>
         <div className="flex justify-between items-center">
           <CardTitle>Universities</CardTitle>
-          {!isAdding && (
-            <Button variant="outline" onClick={handleStartAddNew}>
-              <PlusCircle className="mr-2 h-4 w-4" />
-              Add University
-            </Button>
-          )}
+          <div className="flex gap-2">
+            <UniversityCSVManager 
+              universities={items || []}
+              onImport={handleCSVImport}
+              isImporting={isBulkImporting}
+            />
+            {!isAdding && (
+              <Button variant="outline" onClick={handleStartAddNew}>
+                <PlusCircle className="mr-2 h-4 w-4" />
+                Add University
+              </Button>
+            )}
+          </div>
         </div>
       </CardHeader>
       <CardContent>
+        {bulkImportData.length > 0 && (
+          <UniversityBulkImport
+            universities={bulkImportData}
+            onConfirm={handleBulkImportConfirm}
+            onCancel={handleBulkImportCancel}
+            isImporting={isBulkImporting}
+          />
+        )}
+
         {isAdding && (
           <UniversityAddForm
             onSave={handleSaveNew}
