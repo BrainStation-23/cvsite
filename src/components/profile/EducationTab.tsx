@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -12,7 +11,9 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Calendar } from '@/components/ui/calendar';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { UniversityCombobox } from '@/components/admin/university/UniversityCombobox';
+import { DegreeCombobox } from '@/components/admin/degree/DegreeCombobox';
+import { DepartmentCombobox } from '@/components/admin/department/DepartmentCombobox';
 import { usePlatformSettings } from '@/hooks/use-platform-settings';
 
 interface EducationTabProps {
@@ -168,23 +169,13 @@ export const EducationTab: React.FC<EducationTabProps> = ({
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>University / Institution</FormLabel>
-                      <Select
-                        onValueChange={field.onChange}
-                        defaultValue={field.value}
-                      >
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select university" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {universities?.map((uni) => (
-                            <SelectItem key={uni.id} value={uni.name}>
-                              {uni.name}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                      <FormControl>
+                        <UniversityCombobox
+                          value={field.value}
+                          onValueChange={field.onChange}
+                          placeholder="Select university"
+                        />
+                      </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -198,23 +189,13 @@ export const EducationTab: React.FC<EducationTabProps> = ({
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Degree</FormLabel>
-                        <Select
-                          onValueChange={field.onChange}
-                          defaultValue={field.value}
-                        >
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select degree" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            {degrees?.map((deg) => (
-                              <SelectItem key={deg.id} value={deg.name}>
-                                {deg.name}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
+                        <FormControl>
+                          <DegreeCombobox
+                            value={field.value}
+                            onValueChange={field.onChange}
+                            placeholder="Select degree"
+                          />
+                        </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
@@ -226,23 +207,13 @@ export const EducationTab: React.FC<EducationTabProps> = ({
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Department</FormLabel>
-                        <Select
-                          onValueChange={field.onChange}
-                          defaultValue={field.value}
-                        >
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select department" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            {departments?.map((dept) => (
-                              <SelectItem key={dept.id} value={dept.name}>
-                                {dept.name}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
+                        <FormControl>
+                          <DepartmentCombobox
+                            value={field.value}
+                            onValueChange={field.onChange}
+                            placeholder="Select department"
+                          />
+                        </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
@@ -367,23 +338,13 @@ export const EducationTab: React.FC<EducationTabProps> = ({
                           render={({ field }) => (
                             <FormItem>
                               <FormLabel>University / Institution</FormLabel>
-                              <Select
-                                onValueChange={field.onChange}
-                                defaultValue={field.value}
-                              >
-                                <FormControl>
-                                  <SelectTrigger>
-                                    <SelectValue placeholder="Select university" />
-                                  </SelectTrigger>
-                                </FormControl>
-                                <SelectContent>
-                                  {universities?.map((uni) => (
-                                    <SelectItem key={uni.id} value={uni.name}>
-                                      {uni.name}
-                                    </SelectItem>
-                                  ))}
-                                </SelectContent>
-                              </Select>
+                              <FormControl>
+                                <UniversityCombobox
+                                  value={field.value}
+                                  onValueChange={field.onChange}
+                                  placeholder="Select university"
+                                />
+                              </FormControl>
                               <FormMessage />
                             </FormItem>
                           )}
@@ -397,23 +358,13 @@ export const EducationTab: React.FC<EducationTabProps> = ({
                             render={({ field }) => (
                               <FormItem>
                                 <FormLabel>Degree</FormLabel>
-                                <Select
-                                  onValueChange={field.onChange}
-                                  defaultValue={field.value}
-                                >
-                                  <FormControl>
-                                    <SelectTrigger>
-                                      <SelectValue placeholder="Select degree" />
-                                    </SelectTrigger>
-                                  </FormControl>
-                                  <SelectContent>
-                                    {degrees?.map((deg) => (
-                                      <SelectItem key={deg.id} value={deg.name}>
-                                        {deg.name}
-                                      </SelectItem>
-                                    ))}
-                                  </SelectContent>
-                                </Select>
+                                <FormControl>
+                                  <DegreeCombobox
+                                    value={field.value}
+                                    onValueChange={field.onChange}
+                                    placeholder="Select degree"
+                                  />
+                                </FormControl>
                                 <FormMessage />
                               </FormItem>
                             )}
@@ -425,23 +376,13 @@ export const EducationTab: React.FC<EducationTabProps> = ({
                             render={({ field }) => (
                               <FormItem>
                                 <FormLabel>Department</FormLabel>
-                                <Select
-                                  onValueChange={field.onChange}
-                                  defaultValue={field.value}
-                                >
-                                  <FormControl>
-                                    <SelectTrigger>
-                                      <SelectValue placeholder="Select department" />
-                                    </SelectTrigger>
-                                  </FormControl>
-                                  <SelectContent>
-                                    {departments?.map((dept) => (
-                                      <SelectItem key={dept.id} value={dept.name}>
-                                        {dept.name}
-                                      </SelectItem>
-                                    ))}
-                                  </SelectContent>
-                                </Select>
+                                <FormControl>
+                                  <DepartmentCombobox
+                                    value={field.value}
+                                    onValueChange={field.onChange}
+                                    placeholder="Select department"
+                                  />
+                                </FormControl>
                                 <FormMessage />
                               </FormItem>
                             )}
