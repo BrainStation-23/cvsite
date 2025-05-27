@@ -5,6 +5,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import SettingCategory from '@/components/admin/SettingCategory';
 import UniversitySettings from '@/components/admin/UniversitySettings';
 import DepartmentSettings from '@/components/admin/DepartmentSettings';
+import DegreeSettings from '@/components/admin/DegreeSettings';
 
 const PlatformSettings: React.FC = () => {
   return (
@@ -30,7 +31,7 @@ const PlatformSettings: React.FC = () => {
         </TabsContent>
         
         <TabsContent value="degrees">
-          <SettingCategory title="Degrees" table="degrees" />
+          <DegreeSettings />
         </TabsContent>
         
         <TabsContent value="designations">

@@ -50,18 +50,21 @@ export type Database = {
       degrees: {
         Row: {
           created_at: string
+          full_form: string | null
           id: string
           name: string
           updated_at: string
         }
         Insert: {
           created_at?: string
+          full_form?: string | null
           id?: string
           name: string
           updated_at?: string
         }
         Update: {
           created_at?: string
+          full_form?: string | null
           id?: string
           name?: string
           updated_at?: string
@@ -647,6 +650,16 @@ export type Database = {
         Args: {
           search_query?: string
           filter_role?: string
+          page_number?: number
+          items_per_page?: number
+          sort_by?: string
+          sort_order?: string
+        }
+        Returns: Json
+      }
+      search_degrees: {
+        Args: {
+          search_query?: string
           page_number?: number
           items_per_page?: number
           sort_by?: string
