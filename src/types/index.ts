@@ -1,5 +1,3 @@
-
-
 export type UserRole = "admin" | "manager" | "employee";
 
 export interface User {
@@ -29,6 +27,7 @@ export interface Skill {
   id: string;
   name: string;
   proficiency: number; // 1-5
+  priority: number;
 }
 
 export interface Experience {
@@ -88,4 +87,3 @@ export interface PlatformSettings {
   references: string[];
   sbus: string[]; // Strategic Business Units
 }
-

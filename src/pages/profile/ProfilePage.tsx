@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import DashboardLayout from '../../components/Layout/DashboardLayout';
 import { Button } from '@/components/ui/button';
@@ -11,8 +12,8 @@ import { Skill } from '@/types';
 const ProfilePage: React.FC = () => {
   const { toast } = useToast();
   const [isEditing, setIsEditing] = useState(false);
-  const [newTechnicalSkill, setNewTechnicalSkill] = useState<Omit<Skill, 'id'>>({ name: '', proficiency: 1 });
-  const [newSpecializedSkill, setNewSpecializedSkill] = useState<Omit<Skill, 'id'>>({ name: '', proficiency: 1 });
+  const [newTechnicalSkill, setNewTechnicalSkill] = useState<Omit<Skill, 'id'>>({ name: '', proficiency: 1, priority: 0 });
+  const [newSpecializedSkill, setNewSpecializedSkill] = useState<Omit<Skill, 'id'>>({ name: '', proficiency: 1, priority: 0 });
   
   const {
     isLoading,
@@ -30,6 +31,7 @@ const ProfilePage: React.FC = () => {
     saveSpecializedSkill,
     deleteTechnicalSkill,
     deleteSpecializedSkill,
+    reorderTechnicalSkills,
     saveExperience,
     updateExperience,
     deleteExperience,
@@ -98,7 +100,7 @@ const ProfilePage: React.FC = () => {
 
     const success = await saveTechnicalSkill(newTechnicalSkill as Skill);
     if (success) {
-      setNewTechnicalSkill({ name: '', proficiency: 1 });
+      setNewTechnicalSkill({ name: '', proficiency: 1, priority: 0 });
     }
   };
 
@@ -114,7 +116,7 @@ const ProfilePage: React.FC = () => {
 
     const success = await saveSpecializedSkill(newSpecializedSkill as Skill);
     if (success) {
-      setNewSpecializedSkill({ name: '', proficiency: 1 });
+      setNewSpecializedSkill({ name: '', proficiency: 1, priority: 0 });
     }
   };
 
@@ -189,6 +191,7 @@ const ProfilePage: React.FC = () => {
           deleteProject={deleteProject}
           deleteTechnicalSkill={deleteTechnicalSkill}
           deleteSpecializedSkill={deleteSpecializedSkill}
+          reorderTechnicalSkills={reorderTechnicalSkills}
         />
       )}
     </DashboardLayout>

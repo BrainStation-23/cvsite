@@ -47,6 +47,7 @@ interface ProfileTabsProps {
   deleteProject: (id: string) => Promise<boolean>;
   deleteTechnicalSkill: (id: string) => Promise<boolean>;
   deleteSpecializedSkill: (id: string) => Promise<boolean>;
+  reorderTechnicalSkills?: (reorderedSkills: Skill[]) => Promise<boolean>;
 }
 
 export const ProfileTabs: React.FC<ProfileTabsProps> = ({
@@ -84,7 +85,8 @@ export const ProfileTabs: React.FC<ProfileTabsProps> = ({
   updateProject,
   deleteProject,
   deleteTechnicalSkill,
-  deleteSpecializedSkill
+  deleteSpecializedSkill,
+  reorderTechnicalSkills
 }) => {
   return (
     <Tabs defaultValue="general" className="w-full">
@@ -120,6 +122,7 @@ export const ProfileTabs: React.FC<ProfileTabsProps> = ({
           handleAddSpecializedSkill={handleAddSpecializedSkill}
           deleteTechnicalSkill={deleteTechnicalSkill}
           deleteSpecializedSkill={deleteSpecializedSkill}
+          onReorderTechnicalSkills={reorderTechnicalSkills}
         />
       </TabsContent>
       
