@@ -651,6 +651,17 @@ export type Database = {
         }
         Returns: Json
       }
+      search_universities: {
+        Args: {
+          search_query?: string
+          type_filter?: string
+          page_number?: number
+          items_per_page?: number
+          sort_by?: string
+          sort_order?: string
+        }
+        Returns: Json
+      }
     }
     Enums: {
       [_ in never]: never

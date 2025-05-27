@@ -4,10 +4,13 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { PlusCircle } from 'lucide-react';
 import { useUniversitySettings, UniversityFormData } from '@/hooks/use-university-settings';
+import { useUniversitySearch } from '@/hooks/use-university-search';
 import UniversityAddForm from './university/UniversityAddForm';
 import UniversityTable from './university/UniversityTable';
 import UniversityDeleteDialog from './university/UniversityDeleteDialog';
 import UniversityCSVManager from './university/UniversityCSVManager';
+import UniversitySearchFilters, { SortColumn, SortOrder } from './university/UniversitySearchFilters';
+import UniversityPagination from './university/UniversityPagination';
 
 const UniversitySettings: React.FC = () => {
   const [isAdding, setIsAdding] = useState(false);
@@ -17,10 +20,16 @@ const UniversitySettings: React.FC = () => {
     id: '',
     name: ''
   });
+
+  // Search and filter state
+  const [searchQuery, setSearchQuery] = useState<string | null>(null);
+  const [typeFilter, setTypeFilter] = useState<string | null>(null);
+  const [page, setPage] = useState(1);
+  const [perPage, setPerPage] = useState(10);
+  const [sortBy, setSortBy] = useState<SortColumn>('name');
+  const [sortOrder, setSortOrder] = useState<SortOrder>('asc');
   
   const { 
-    items, 
-    isLoading, 
     addItem, 
     updateItem, 
     removeItem, 
@@ -30,6 +39,16 @@ const UniversitySettings: React.FC = () => {
     isRemovingItem,
     isBulkImporting
   } = useUniversitySettings();
+
+  // Use the new search hook
+  const { data: searchResult, isLoading } = useUniversitySearch({
+    searchQuery,
+    typeFilter,
+    page,
+    perPage,
+    sortBy,
+    sortOrder
+  });
 
   const handleStartAddNew = () => {
     setIsAdding(true);
@@ -74,7 +93,40 @@ const UniversitySettings: React.FC = () => {
     bulkImportItems(universities);
   };
 
-  if (isLoading) {
+  const handleSearch = (query: string | null) => {
+    setSearchQuery(query);
+    setPage(1); // Reset to first page
+  };
+
+  const handleFilterType = (type: string | null) => {
+    setTypeFilter(type);
+    setPage(1); // Reset to first page
+  };
+
+  const handleSortChange = (column: SortColumn, order: SortOrder) => {
+    setSortBy(column);
+    setSortOrder(order);
+    setPage(1); // Reset to first page
+  };
+
+  const handleReset = () => {
+    setSearchQuery(null);
+    setTypeFilter(null);
+    setSortBy('name');
+    setSortOrder('asc');
+    setPage(1);
+  };
+
+  const handlePageChange = (newPage: number) => {
+    setPage(newPage);
+  };
+
+  const handlePerPageChange = (newPerPage: number) => {
+    setPerPage(newPerPage);
+    setPage(1); // Reset to first page
+  };
+
+  if (isLoading && !searchResult) {
     return (
       <Card>
         <CardHeader>
@@ -87,6 +139,9 @@ const UniversitySettings: React.FC = () => {
     );
   }
 
+  const universities = searchResult?.universities || [];
+  const pagination = searchResult?.pagination;
+
   return (
     <Card>
       <CardHeader>
@@ -94,7 +149,7 @@ const UniversitySettings: React.FC = () => {
           <CardTitle>Universities</CardTitle>
           <div className="flex gap-2">
             <UniversityCSVManager 
-              universities={items || []}
+              universities={universities}
               onImport={handleCSVImport}
               isImporting={isBulkImporting}
             />
@@ -116,8 +171,20 @@ const UniversitySettings: React.FC = () => {
           />
         )}
         
+        <UniversitySearchFilters
+          onSearch={handleSearch}
+          onFilterType={handleFilterType}
+          onSortChange={handleSortChange}
+          onReset={handleReset}
+          searchQuery={searchQuery}
+          currentType={typeFilter}
+          sortBy={sortBy}
+          sortOrder={sortOrder}
+          isLoading={isLoading}
+        />
+        
         <UniversityTable
-          items={items || []}
+          items={universities}
           editingId={editingId}
           onEdit={handleStartEdit}
           onCancelEdit={handleCancelEdit}
@@ -126,6 +193,15 @@ const UniversitySettings: React.FC = () => {
           isUpdating={isUpdatingItem}
           isRemoving={isRemovingItem}
         />
+
+        {pagination && (
+          <UniversityPagination
+            pagination={pagination}
+            onPageChange={handlePageChange}
+            onPerPageChange={handlePerPageChange}
+            isLoading={isLoading}
+          />
+        )}
         
         <UniversityDeleteDialog
           isOpen={deleteDialog.isOpen}
