@@ -24,7 +24,7 @@ export const useDegreeSettings = () => {
     const { data, error } = await supabase.rpc('search_degrees');
     
     if (error) throw error;
-    const response = data as DegreeSearchResponse;
+    const response = data as unknown as DegreeSearchResponse;
     return response?.degrees || [];
   };
   

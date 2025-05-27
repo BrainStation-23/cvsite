@@ -45,7 +45,7 @@ export const useDegreeSearch = ({
     });
     
     if (error) throw error;
-    return data as DegreeSearchResponse;
+    return data as unknown as DegreeSearchResponse;
   };
   
   return useQuery({
