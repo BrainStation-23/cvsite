@@ -400,24 +400,41 @@ export type Database = {
       }
       references: {
         Row: {
+          company: string | null
           created_at: string
+          designation: string | null
+          email: string | null
           id: string
           name: string
           updated_at: string
         }
         Insert: {
+          company?: string | null
           created_at?: string
+          designation?: string | null
+          email?: string | null
           id?: string
           name: string
           updated_at?: string
         }
         Update: {
+          company?: string | null
           created_at?: string
+          designation?: string | null
+          email?: string | null
           id?: string
           name?: string
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "references_designation_fkey"
+            columns: ["designation"]
+            isOneToOne: false
+            referencedRelation: "designations"
+            referencedColumns: ["name"]
+          },
+        ]
       }
       sbus: {
         Row: {
@@ -668,6 +685,16 @@ export type Database = {
         Returns: Json
       }
       search_departments: {
+        Args: {
+          search_query?: string
+          page_number?: number
+          items_per_page?: number
+          sort_by?: string
+          sort_order?: string
+        }
+        Returns: Json
+      }
+      search_references: {
         Args: {
           search_query?: string
           page_number?: number
