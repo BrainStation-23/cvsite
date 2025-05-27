@@ -37,7 +37,7 @@ export const DegreeCombobox: React.FC<DegreeComboboxProps> = ({
   const { data: searchData, isLoading } = useDegreeSearch({
     searchQuery,
     page: 1,
-    perPage: 50,
+    itemsPerPage: 50,
     sortBy: 'name',
     sortOrder: 'asc',
   });
