@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { PlusCircle, Trash2, Pencil, X } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { useUniversitySettings, UniversityFormData } from '@/hooks/use-university-settings';
@@ -13,6 +14,11 @@ import { useUniversitySettings, UniversityFormData } from '@/hooks/use-universit
 const UniversitySettings: React.FC = () => {
   const [isAdding, setIsAdding] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [deleteDialog, setDeleteDialog] = useState<{ isOpen: boolean; id: string; name: string }>({
+    isOpen: false,
+    id: '',
+    name: ''
+  });
   
   const { 
     items, 
@@ -78,10 +84,17 @@ const UniversitySettings: React.FC = () => {
     setEditingId(null);
   };
 
-  const handleDelete = async (id: string, name: string) => {
-    if (window.confirm(`Are you sure you want to delete "${name}"?`)) {
-      removeItem(id, name);
-    }
+  const handleDeleteClick = (id: string, name: string) => {
+    setDeleteDialog({ isOpen: true, id, name });
+  };
+
+  const handleDeleteConfirm = () => {
+    removeItem(deleteDialog.id, deleteDialog.name);
+    setDeleteDialog({ isOpen: false, id: '', name: '' });
+  };
+
+  const handleDeleteCancel = () => {
+    setDeleteDialog({ isOpen: false, id: '', name: '' });
   };
 
   if (isLoading) {
@@ -298,7 +311,7 @@ const UniversitySettings: React.FC = () => {
                           <Button 
                             variant="destructive" 
                             size="sm" 
-                            onClick={() => handleDelete(item.id, item.name)}
+                            onClick={() => handleDeleteClick(item.id, item.name)}
                             disabled={isRemovingItem}
                           >
                             <Trash2 className="h-4 w-4" />
@@ -316,6 +329,26 @@ const UniversitySettings: React.FC = () => {
             No universities found. Click "Add University" to add the first one.
           </div>
         )}
+        
+        <AlertDialog open={deleteDialog.isOpen} onOpenChange={(open) => !open && handleDeleteCancel()}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Delete University</AlertDialogTitle>
+              <AlertDialogDescription>
+                Are you sure you want to delete "{deleteDialog.name}"? This action cannot be undone.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel onClick={handleDeleteCancel}>Cancel</AlertDialogCancel>
+              <AlertDialogAction 
+                onClick={handleDeleteConfirm}
+                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              >
+                Delete
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </CardContent>
     </Card>
   );
