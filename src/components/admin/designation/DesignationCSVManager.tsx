@@ -21,9 +21,12 @@ const DesignationCSVManager: React.FC<DesignationCSVManagerProps> = ({
   const { toast } = useToast();
   const [isImportDialogOpen, setIsImportDialogOpen] = useState(false);
 
+  // Add safety check for designations
+  const safeDesignations = designations || [];
+
   const handleExport = () => {
     try {
-      exportDesignationsToCSV(designations);
+      exportDesignationsToCSV(safeDesignations);
       toast({
         title: "Export successful",
         description: "Designations have been exported to CSV.",
@@ -39,12 +42,12 @@ const DesignationCSVManager: React.FC<DesignationCSVManagerProps> = ({
 
   return (
     <div className="flex gap-2">
-      <Button variant="outline" onClick={handleExport} disabled={designations.length === 0}>
+      <Button variant="outline" onClick={handleExport} disabled={safeDesignations.length === 0}>
         <Download className="mr-2 h-4 w-4" />
         Export CSV
       </Button>
       <DesignationImportDialog
-        designations={designations}
+        designations={safeDesignations}
         onValidationResult={onValidationResult}
         isBulkImporting={isBulkImporting}
         isOpen={isImportDialogOpen}
