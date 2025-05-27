@@ -7,6 +7,7 @@ import { Upload, Download } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { parseReferencesCSV, validateReferenceCSVData, downloadReferenceCSVTemplate } from '@/utils/referenceCsvUtils';
 import { ReferenceItem } from '@/hooks/use-reference-settings';
+import { useDesignationSettings } from '@/hooks/use-designation-settings';
 import ReferenceCSVValidation from './ReferenceCSVValidation';
 
 interface ReferenceImportDialogProps {
@@ -27,6 +28,10 @@ const ReferenceImportDialog: React.FC<ReferenceImportDialogProps> = ({
   const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [validationResult, setValidationResult] = React.useState<any>(null);
+  
+  // Get valid designations from the database
+  const { designations } = useDesignationSettings();
+  const validDesignations = designations?.map(d => d.name) || [];
 
   const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -44,7 +49,7 @@ const ReferenceImportDialog: React.FC<ReferenceImportDialogProps> = ({
         return;
       }
 
-      const validation = validateReferenceCSVData(parsedData, references);
+      const validation = validateReferenceCSVData(parsedData, references, validDesignations);
       setValidationResult(validation);
 
       if (validation.errors.length === 0) {
@@ -109,6 +114,7 @@ const ReferenceImportDialog: React.FC<ReferenceImportDialogProps> = ({
               <ul className="text-sm text-gray-600 dark:text-gray-400 space-y-1">
                 <li>• Required columns: name, email, designation, company</li>
                 <li>• Email addresses must be unique</li>
+                <li>• Designation must exist in the system</li>
                 <li>• All fields are required</li>
                 <li>• Use proper CSV format with headers</li>
               </ul>

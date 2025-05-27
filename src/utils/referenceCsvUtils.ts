@@ -40,7 +40,8 @@ export const parseReferencesCSV = (file: File): Promise<ReferenceFormData[]> => 
 
 export const validateReferenceCSVData = (
   data: ReferenceFormData[], 
-  existingReferences: ReferenceItem[]
+  existingReferences: ReferenceItem[],
+  validDesignations: string[] = []
 ) => {
   const errors: Array<{
     row: number;
@@ -51,6 +52,7 @@ export const validateReferenceCSVData = (
   const valid: ReferenceFormData[] = [];
   const existingEmails = new Set(existingReferences.map(r => r.email?.toLowerCase()).filter(Boolean));
   const seenEmails = new Set<string>();
+  const validDesignationSet = new Set(validDesignations.map(d => d.toLowerCase()));
 
   data.forEach((item, index) => {
     const rowErrors: string[] = [];
@@ -87,6 +89,13 @@ export const validateReferenceCSVData = (
 
     if (!item.designation || typeof item.designation !== 'string' || item.designation.trim() === '') {
       rowErrors.push('Designation is required');
+    } else {
+      const normalizedDesignation = item.designation.trim().toLowerCase();
+      
+      // Check if designation exists in the database
+      if (validDesignations.length > 0 && !validDesignationSet.has(normalizedDesignation)) {
+        rowErrors.push(`Designation "${item.designation.trim()}" does not exist in the system`);
+      }
     }
 
     if (!item.company || typeof item.company !== 'string' || item.company.trim() === '') {
