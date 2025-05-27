@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Download } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
@@ -19,6 +19,7 @@ const DegreeCSVManager: React.FC<DegreeCSVManagerProps> = ({
   isBulkImporting
 }) => {
   const { toast } = useToast();
+  const [isImportDialogOpen, setIsImportDialogOpen] = useState(false);
 
   const handleExport = () => {
     try {
@@ -46,6 +47,8 @@ const DegreeCSVManager: React.FC<DegreeCSVManagerProps> = ({
         degrees={degrees}
         onValidationResult={onValidationResult}
         isBulkImporting={isBulkImporting}
+        isOpen={isImportDialogOpen}
+        onOpenChange={setIsImportDialogOpen}
       />
     </div>
   );

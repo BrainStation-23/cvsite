@@ -1,5 +1,5 @@
 
-import React, { useRef } from 'react';
+import React, { useRef, useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -13,12 +13,16 @@ interface DegreeImportDialogProps {
   degrees: DegreeItem[];
   onValidationResult: (result: any) => void;
   isBulkImporting: boolean;
+  isOpen: boolean;
+  onOpenChange: (open: boolean) => void;
 }
 
 const DegreeImportDialog: React.FC<DegreeImportDialogProps> = ({
   degrees,
   onValidationResult,
-  isBulkImporting
+  isBulkImporting,
+  isOpen,
+  onOpenChange
 }) => {
   const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -41,6 +45,9 @@ const DegreeImportDialog: React.FC<DegreeImportDialogProps> = ({
 
       const validation = validateDegreeCSVData(parsedData, degrees);
       onValidationResult(validation);
+      
+      // Close the dialog after processing
+      onOpenChange(false);
 
       if (validation.errors.length === 0) {
         toast({
@@ -68,7 +75,7 @@ const DegreeImportDialog: React.FC<DegreeImportDialogProps> = ({
   };
 
   return (
-    <Dialog>
+    <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogTrigger asChild>
         <Button variant="outline" disabled={isBulkImporting}>
           <Upload className="mr-2 h-4 w-4" />
