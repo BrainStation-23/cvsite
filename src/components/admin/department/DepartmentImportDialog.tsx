@@ -76,7 +76,7 @@ const DepartmentImportDialog: React.FC<DepartmentImportDialogProps> = ({
           {isBulkImporting ? "Importing..." : "Import CSV"}
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+      <DialogContent className="max-w-2xl">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <FileText className="h-5 w-5" />
@@ -84,11 +84,9 @@ const DepartmentImportDialog: React.FC<DepartmentImportDialogProps> = ({
           </DialogTitle>
         </DialogHeader>
         
-        <div className="space-y-6">
+        <div className="space-y-4">
           {/* CSV Format Guidelines */}
-          <div className="space-y-4">
-            <h3 className="text-lg font-semibold">CSV Format Guidelines</h3>
-            
+          <div className="space-y-3">
             <Alert>
               <AlertCircle className="h-4 w-4" />
               <AlertDescription>
@@ -96,84 +94,72 @@ const DepartmentImportDialog: React.FC<DepartmentImportDialogProps> = ({
               </AlertDescription>
             </Alert>
 
-            <div className="space-y-3">
-              <div className="bg-gray-50 p-4 rounded-lg">
-                <h4 className="font-medium mb-2">Required Format:</h4>
-                <div className="bg-white p-3 rounded border font-mono text-sm">
-                  <div className="text-gray-600">name,full_form</div>
-                  <div>Computer Science,Department of Computer Science and Engineering</div>
-                  <div>Mathematics,Department of Mathematics</div>
-                  <div>Physics,Department of Physics</div>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <h4 className="font-medium text-green-700 flex items-center gap-1">
-                    <CheckCircle className="h-4 w-4" />
-                    Required Fields
-                  </h4>
-                  <ul className="text-sm space-y-1 text-gray-700">
-                    <li><strong>name:</strong> Department name (required, unique)</li>
-                  </ul>
-                </div>
-                
-                <div className="space-y-2">
-                  <h4 className="font-medium text-blue-700 flex items-center gap-1">
-                    <AlertCircle className="h-4 w-4" />
-                    Optional Fields
-                  </h4>
-                  <ul className="text-sm space-y-1 text-gray-700">
-                    <li><strong>full_form:</strong> Full department name</li>
-                  </ul>
-                </div>
+            <div className="bg-gray-50 p-3 rounded-lg">
+              <h4 className="font-medium mb-2">Required Format:</h4>
+              <div className="bg-white p-2 rounded border font-mono text-sm">
+                <div className="text-gray-600">name,full_form</div>
+                <div>Computer Science,Department of Computer Science and Engineering</div>
+                <div>Mathematics,Department of Mathematics</div>
               </div>
             </div>
-          </div>
 
-          {/* Important Notes */}
-          <div className="space-y-3">
-            <h4 className="font-medium">Important Notes:</h4>
-            <ul className="text-sm space-y-1 text-gray-700 list-disc list-inside">
-              <li>Department names must be unique and cannot be empty</li>
-              <li>Duplicate department names within the CSV or existing in the database will be rejected</li>
-              <li>The first row must contain column headers exactly as shown above</li>
-              <li>Save your file in CSV format (UTF-8 encoding recommended)</li>
-              <li>Maximum file size: 5MB</li>
-            </ul>
+            <div className="grid grid-cols-2 gap-3 text-sm">
+              <div className="space-y-1">
+                <h4 className="font-medium text-green-700 flex items-center gap-1">
+                  <CheckCircle className="h-3 w-3" />
+                  Required
+                </h4>
+                <p className="text-gray-700"><strong>name:</strong> Department name (unique)</p>
+              </div>
+              
+              <div className="space-y-1">
+                <h4 className="font-medium text-blue-700 flex items-center gap-1">
+                  <AlertCircle className="h-3 w-3" />
+                  Optional
+                </h4>
+                <p className="text-gray-700"><strong>full_form:</strong> Full department name</p>
+              </div>
+            </div>
+
+            <div className="bg-blue-50 border border-blue-200 rounded-md p-3">
+              <h4 className="font-medium text-blue-800 mb-1">Important Notes:</h4>
+              <ul className="text-sm text-blue-700 space-y-1">
+                <li>• Department names must be unique and cannot be empty</li>
+                <li>• First row must contain column headers exactly as shown</li>
+                <li>• Save file in CSV format (UTF-8 encoding recommended)</li>
+              </ul>
+            </div>
           </div>
 
           {/* Actions */}
-          <div className="space-y-4 pt-4 border-t">
-            <div className="flex gap-3">
-              <Button 
-                variant="outline" 
-                onClick={downloadDepartmentCSVTemplate}
-                className="flex-1"
-              >
-                <Download className="mr-2 h-4 w-4" />
-                Download Template
-              </Button>
-              
-              <Button 
-                variant="outline" 
-                onClick={() => fileInputRef.current?.click()}
-                disabled={isBulkImporting}
-                className="flex-1"
-              >
-                <Upload className="mr-2 h-4 w-4" />
-                Choose CSV File
-              </Button>
-            </div>
+          <div className="flex gap-3 pt-2">
+            <Button 
+              variant="outline" 
+              onClick={downloadDepartmentCSVTemplate}
+              className="flex-1"
+            >
+              <Download className="mr-2 h-4 w-4" />
+              Download Template
+            </Button>
             
-            <Input
-              ref={fileInputRef}
-              type="file"
-              accept=".csv"
-              onChange={handleFileChange}
-              className="hidden"
-            />
+            <Button 
+              variant="outline" 
+              onClick={() => fileInputRef.current?.click()}
+              disabled={isBulkImporting}
+              className="flex-1"
+            >
+              <Upload className="mr-2 h-4 w-4" />
+              Choose CSV File
+            </Button>
           </div>
+          
+          <Input
+            ref={fileInputRef}
+            type="file"
+            accept=".csv"
+            onChange={handleFileChange}
+            className="hidden"
+          />
         </div>
       </DialogContent>
     </Dialog>
