@@ -1,11 +1,12 @@
 
-import React, { useRef } from 'react';
+import React, { useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Download, Upload } from 'lucide-react';
+import { Download, Upload, HelpCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { exportUniversitiesToCSV, parseUniversitiesCSV } from '@/utils/csvUtils';
 import { UniversityItem, UniversityFormData } from '@/hooks/use-university-settings';
+import UniversityImportDialog from './UniversityImportDialog';
 
 interface UniversityCSVManagerProps {
   universities: UniversityItem[];
@@ -20,6 +21,7 @@ const UniversityCSVManager: React.FC<UniversityCSVManagerProps> = ({
 }) => {
   const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [showImportDialog, setShowImportDialog] = useState(false);
 
   const handleExport = () => {
     try {
@@ -38,6 +40,11 @@ const UniversityCSVManager: React.FC<UniversityCSVManagerProps> = ({
   };
 
   const handleImportClick = () => {
+    setShowImportDialog(true);
+  };
+
+  const handleProceedToImport = () => {
+    setShowImportDialog(false);
     fileInputRef.current?.click();
   };
 
@@ -67,25 +74,33 @@ const UniversityCSVManager: React.FC<UniversityCSVManagerProps> = ({
   };
 
   return (
-    <div className="flex gap-2">
-      <Button variant="outline" onClick={handleExport} disabled={universities.length === 0}>
-        <Download className="mr-2 h-4 w-4" />
-        Export CSV
-      </Button>
-      
-      <Button variant="outline" onClick={handleImportClick} disabled={isImporting}>
-        <Upload className="mr-2 h-4 w-4" />
-        {isImporting ? "Importing..." : "Import CSV"}
-      </Button>
-      
-      <Input
-        ref={fileInputRef}
-        type="file"
-        accept=".csv"
-        onChange={handleFileChange}
-        className="hidden"
+    <>
+      <div className="flex gap-2">
+        <Button variant="outline" onClick={handleExport} disabled={universities.length === 0}>
+          <Download className="mr-2 h-4 w-4" />
+          Export CSV
+        </Button>
+        
+        <Button variant="outline" onClick={handleImportClick} disabled={isImporting}>
+          <Upload className="mr-2 h-4 w-4" />
+          {isImporting ? "Importing..." : "Import CSV"}
+        </Button>
+        
+        <Input
+          ref={fileInputRef}
+          type="file"
+          accept=".csv"
+          onChange={handleFileChange}
+          className="hidden"
+        />
+      </div>
+
+      <UniversityImportDialog
+        isOpen={showImportDialog}
+        onClose={() => setShowImportDialog(false)}
+        onProceedToImport={handleProceedToImport}
       />
-    </div>
+    </>
   );
 };
 

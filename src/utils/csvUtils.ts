@@ -1,4 +1,3 @@
-
 import Papa from 'papaparse';
 import { UniversityFormData } from '@/hooks/use-university-settings';
 
@@ -7,6 +6,40 @@ export interface UniversityCSVRow {
   type: 'public' | 'private';
   acronyms?: string;
 }
+
+export const downloadCSVTemplate = () => {
+  const templateData = [
+    {
+      name: 'Harvard University',
+      type: 'private',
+      acronyms: 'HU'
+    },
+    {
+      name: 'University of California, Berkeley',
+      type: 'public',
+      acronyms: 'UC Berkeley, UCB'
+    },
+    {
+      name: 'Massachusetts Institute of Technology',
+      type: 'private',
+      acronyms: 'MIT'
+    }
+  ];
+
+  const csv = Papa.unparse(templateData);
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const link = document.createElement('a');
+  
+  if (link.download !== undefined) {
+    const url = URL.createObjectURL(blob);
+    link.setAttribute('href', url);
+    link.setAttribute('download', 'university_template.csv');
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  }
+};
 
 export const exportUniversitiesToCSV = (universities: any[]) => {
   const csvData = universities.map(university => ({
