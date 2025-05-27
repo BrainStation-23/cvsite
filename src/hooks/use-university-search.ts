@@ -46,7 +46,13 @@ export const useUniversitySearch = (params: UniversitySearchParams = {}) => {
       });
 
       if (error) throw error;
-      return data as UniversitySearchResult;
+      
+      // Type assertion with proper validation
+      if (!data || typeof data !== 'object') {
+        throw new Error('Invalid response from search_universities function');
+      }
+      
+      return data as unknown as UniversitySearchResult;
     },
   });
 };
