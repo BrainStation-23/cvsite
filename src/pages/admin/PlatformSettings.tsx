@@ -6,6 +6,7 @@ import SettingCategory from '@/components/admin/SettingCategory';
 import UniversitySettings from '@/components/admin/UniversitySettings';
 import DepartmentSettings from '@/components/admin/DepartmentSettings';
 import DegreeSettings from '@/components/admin/DegreeSettings';
+import DesignationSettings from '@/components/admin/DesignationSettings';
 
 const PlatformSettings: React.FC = () => {
   return (
@@ -35,7 +36,7 @@ const PlatformSettings: React.FC = () => {
         </TabsContent>
         
         <TabsContent value="designations">
-          <SettingCategory title="Designations" table="designations" />
+          <DesignationSettings />
         </TabsContent>
         
         <TabsContent value="references">
