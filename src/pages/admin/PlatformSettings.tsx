@@ -4,6 +4,7 @@ import DashboardLayout from '../../components/Layout/DashboardLayout';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import SettingCategory from '@/components/admin/SettingCategory';
 import UniversitySettings from '@/components/admin/UniversitySettings';
+import DepartmentSettings from '@/components/admin/DepartmentSettings';
 
 const PlatformSettings: React.FC = () => {
   return (
@@ -25,7 +26,7 @@ const PlatformSettings: React.FC = () => {
         </TabsContent>
         
         <TabsContent value="departments">
-          <SettingCategory title="Departments" table="departments" />
+          <DepartmentSettings />
         </TabsContent>
         
         <TabsContent value="degrees">
