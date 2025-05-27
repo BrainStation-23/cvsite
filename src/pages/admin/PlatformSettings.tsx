@@ -3,6 +3,7 @@ import React from 'react';
 import DashboardLayout from '../../components/Layout/DashboardLayout';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import SettingCategory from '@/components/admin/SettingCategory';
+import UniversitySettings from '@/components/admin/UniversitySettings';
 
 const PlatformSettings: React.FC = () => {
   return (
@@ -20,7 +21,7 @@ const PlatformSettings: React.FC = () => {
         </TabsList>
         
         <TabsContent value="universities">
-          <SettingCategory title="Universities" table="universities" />
+          <UniversitySettings />
         </TabsContent>
         
         <TabsContent value="departments">

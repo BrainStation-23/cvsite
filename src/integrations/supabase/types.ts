@@ -550,21 +550,27 @@ export type Database = {
       }
       universities: {
         Row: {
+          acronyms: string | null
           created_at: string
           id: string
           name: string
+          type: string
           updated_at: string
         }
         Insert: {
+          acronyms?: string | null
           created_at?: string
           id?: string
           name: string
+          type: string
           updated_at?: string
         }
         Update: {
+          acronyms?: string | null
           created_at?: string
           id?: string
           name?: string
+          type?: string
           updated_at?: string
         }
         Relationships: []
