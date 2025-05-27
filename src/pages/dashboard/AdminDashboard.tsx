@@ -34,31 +34,32 @@ const AdminDashboard: React.FC = () => {
 
   return (
     <DashboardLayout>
-      <h1 className="text-2xl font-semibold mb-6 text-cvsite-navy dark:text-white">Admin Dashboard</h1>
-      <p className="mb-6 text-gray-600 dark:text-gray-300">
-        Welcome to the CVSite admin dashboard. From here you can manage all aspects of the application.
-      </p>
-      
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
-        {modules.map((module, index) => (
-          <Card key={index} className="hover:shadow-lg transition-shadow">
-            <CardHeader className="pb-2">
-              <div className="flex justify-between items-start">
-                <CardTitle className="text-lg font-medium">{module.title}</CardTitle>
-                {module.icon}
-              </div>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-gray-500 dark:text-gray-400">{module.description}</p>
-              <a 
-                href={module.link}
-                className="mt-4 inline-block text-cvsite-teal hover:text-cvsite-navy dark:hover:text-cvsite-light-blue"
-              >
-                Access &rarr;
-              </a>
-            </CardContent>
-          </Card>
-        ))}
+      <div className="p-6">
+        <p className="mb-6 text-gray-600 dark:text-gray-300">
+          Welcome to the CVSite admin dashboard. From here you can manage all aspects of the application.
+        </p>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
+          {modules.map((module, index) => (
+            <Card key={index} className="hover:shadow-lg transition-shadow">
+              <CardHeader className="pb-2">
+                <div className="flex justify-between items-start">
+                  <CardTitle className="text-lg font-medium">{module.title}</CardTitle>
+                  {module.icon}
+                </div>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-gray-500 dark:text-gray-400">{module.description}</p>
+                <a 
+                  href={module.link}
+                  className="mt-4 inline-block text-cvsite-teal hover:text-cvsite-navy dark:hover:text-cvsite-light-blue"
+                >
+                  Access &rarr;
+                </a>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
       </div>
     </DashboardLayout>
   );
