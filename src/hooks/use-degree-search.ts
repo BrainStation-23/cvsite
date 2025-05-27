@@ -10,6 +10,23 @@ interface UseDegreeSearchProps {
   sortOrder?: 'asc' | 'desc';
 }
 
+interface DegreeSearchResponse {
+  degrees: Array<{
+    id: string;
+    name: string;
+    full_form?: string;
+    created_at: string;
+    updated_at: string;
+  }>;
+  pagination: {
+    total_count: number;
+    filtered_count: number;
+    page: number;
+    per_page: number;
+    page_count: number;
+  };
+}
+
 export const useDegreeSearch = ({
   searchQuery = '',
   page = 1,
@@ -18,7 +35,7 @@ export const useDegreeSearch = ({
   sortOrder = 'asc'
 }: UseDegreeSearchProps = {}) => {
   
-  const searchDegrees = async () => {
+  const searchDegrees = async (): Promise<DegreeSearchResponse> => {
     const { data, error } = await supabase.rpc('search_degrees', {
       search_query: searchQuery || null,
       page_number: page,
@@ -28,7 +45,7 @@ export const useDegreeSearch = ({
     });
     
     if (error) throw error;
-    return data;
+    return data as DegreeSearchResponse;
   };
   
   return useQuery({

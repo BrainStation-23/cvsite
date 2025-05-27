@@ -4,16 +4,28 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { DegreeFormData, DegreeItem } from '@/utils/degreeCsvUtils';
 
+interface DegreeSearchResponse {
+  degrees: DegreeItem[];
+  pagination: {
+    total_count: number;
+    filtered_count: number;
+    page: number;
+    per_page: number;
+    page_count: number;
+  };
+}
+
 export const useDegreeSettings = () => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   
   // Fetch degrees using RPC function
-  const fetchDegrees = async () => {
+  const fetchDegrees = async (): Promise<DegreeItem[]> => {
     const { data, error } = await supabase.rpc('search_degrees');
     
     if (error) throw error;
-    return data?.degrees || [];
+    const response = data as DegreeSearchResponse;
+    return response?.degrees || [];
   };
   
   // Query hook for degrees
