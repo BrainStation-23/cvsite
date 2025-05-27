@@ -4,7 +4,7 @@ import { UniversityFormData } from '@/hooks/use-university-settings';
 
 export interface UniversityCSVRow {
   name: string;
-  type: 'public' | 'private';
+  type: 'Public' | 'Private' | 'International' | 'Special';
   acronyms?: string;
 }
 
@@ -20,22 +20,51 @@ export interface CSVValidationError {
   message: string;
 }
 
+// Helper function to format type with proper case
+const formatUniversityType = (type: string): 'Public' | 'Private' | 'International' | 'Special' | null => {
+  if (!type || typeof type !== 'string') return null;
+  
+  const lowerType = type.toLowerCase().trim();
+  switch (lowerType) {
+    case 'public':
+      return 'Public';
+    case 'private':
+      return 'Private';
+    case 'international':
+      return 'International';
+    case 'special':
+      return 'Special';
+    default:
+      return null;
+  }
+};
+
 export const downloadCSVTemplate = () => {
   const templateData = [
     {
       name: 'Harvard University',
-      type: 'private',
+      type: 'Private',
       acronyms: 'HU'
     },
     {
       name: 'University of California, Berkeley',
-      type: 'public',
+      type: 'Public',
       acronyms: 'UC Berkeley, UCB'
     },
     {
       name: 'Massachusetts Institute of Technology',
-      type: 'private',
+      type: 'Private',
       acronyms: 'MIT'
+    },
+    {
+      name: 'International University of Monaco',
+      type: 'International',
+      acronyms: 'IUM'
+    },
+    {
+      name: 'Special Forces University',
+      type: 'Special',
+      acronyms: 'SFU'
     }
   ];
 
@@ -124,21 +153,22 @@ export const validateCSVData = (data: any[], existingUniversities: any[] = []): 
     }
 
     // Validate type
-    if (!row.type || (row.type !== 'public' && row.type !== 'private')) {
+    const formattedType = formatUniversityType(row.type);
+    if (!formattedType) {
       errors.push({
         row: rowNumber,
         field: 'type',
         value: row.type || '',
-        message: 'Type must be either "public" or "private"'
+        message: 'Type must be one of: Public, Private, International, Special (case insensitive)'
       });
       hasErrors = true;
     }
 
     // If no errors, add to valid array
-    if (!hasErrors) {
+    if (!hasErrors && formattedType) {
       valid.push({
         name: row.name.trim(),
-        type: row.type as 'public' | 'private',
+        type: formattedType,
         acronyms: row.acronyms ? row.acronyms.trim() : ''
       });
     }

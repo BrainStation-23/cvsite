@@ -22,7 +22,7 @@ const UniversityAddForm: React.FC<UniversityAddFormProps> = ({
   const addForm = useForm<UniversityFormData>({
     defaultValues: {
       name: '',
-      type: 'public',
+      type: 'Public',
       acronyms: ''
     }
   });
@@ -73,8 +73,10 @@ const UniversityAddForm: React.FC<UniversityAddFormProps> = ({
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="public">Public</SelectItem>
-                      <SelectItem value="private">Private</SelectItem>
+                      <SelectItem value="Public">Public</SelectItem>
+                      <SelectItem value="Private">Private</SelectItem>
+                      <SelectItem value="International">International</SelectItem>
+                      <SelectItem value="Special">Special</SelectItem>
                     </SelectContent>
                   </Select>
                   <FormMessage />

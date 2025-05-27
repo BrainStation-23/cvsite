@@ -17,6 +17,21 @@ interface UniversityTableProps {
   isRemoving: boolean;
 }
 
+const getTypeDisplayStyles = (type: string) => {
+  switch (type) {
+    case 'Public':
+      return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200';
+    case 'Private':
+      return 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200';
+    case 'International':
+      return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200';
+    case 'Special':
+      return 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200';
+    default:
+      return 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200';
+  }
+};
+
 const UniversityTable: React.FC<UniversityTableProps> = ({
   items,
   editingId,
@@ -62,12 +77,8 @@ const UniversityTable: React.FC<UniversityTableProps> = ({
               <>
                 <TableCell className="font-medium">{item.name}</TableCell>
                 <TableCell>
-                  <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                    item.type === 'public' 
-                      ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200'
-                      : 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200'
-                  }`}>
-                    {item.type === 'public' ? 'Public' : 'Private'}
+                  <span className={`px-2 py-1 rounded-full text-xs font-medium ${getTypeDisplayStyles(item.type)}`}>
+                    {item.type}
                   </span>
                 </TableCell>
                 <TableCell>{item.acronyms || '-'}</TableCell>

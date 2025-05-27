@@ -6,7 +6,7 @@ import { useToast } from '@/hooks/use-toast';
 export interface UniversityItem {
   id: string;
   name: string;
-  type: 'public' | 'private';
+  type: 'Public' | 'Private' | 'International' | 'Special';
   acronyms: string | null;
   created_at: string;
   updated_at: string;
@@ -14,9 +14,30 @@ export interface UniversityItem {
 
 export interface UniversityFormData {
   name: string;
-  type: 'public' | 'private';
+  type: 'Public' | 'Private' | 'International' | 'Special';
   acronyms?: string;
 }
+
+// Helper function to format type with proper case
+const formatUniversityType = (type: string): 'Public' | 'Private' | 'International' | 'Special' => {
+  const lowerType = type.toLowerCase();
+  switch (lowerType) {
+    case 'public':
+      return 'Public';
+    case 'private':
+      return 'Private';
+    case 'international':
+      return 'International';
+    case 'special':
+      return 'Special';
+    default:
+      // If it's already properly formatted, return as is
+      if (['Public', 'Private', 'International', 'Special'].includes(type)) {
+        return type as 'Public' | 'Private' | 'International' | 'Special';
+      }
+      return 'Public'; // Default fallback
+  }
+};
 
 export const useUniversitySettings = () => {
   const { toast } = useToast();
@@ -60,7 +81,7 @@ export const useUniversitySettings = () => {
         .from('universities')
         .insert({
           name: university.name,
-          type: university.type,
+          type: formatUniversityType(university.type),
           acronyms: university.acronyms || null
         })
         .select();
@@ -80,7 +101,7 @@ export const useUniversitySettings = () => {
         .from('universities')
         .update({
           name: university.name,
-          type: university.type,
+          type: formatUniversityType(university.type),
           acronyms: university.acronyms || null
         })
         .eq('id', id)
@@ -122,7 +143,7 @@ export const useUniversitySettings = () => {
         .insert(
           universities.map(university => ({
             name: university.name,
-            type: university.type,
+            type: formatUniversityType(university.type),
             acronyms: university.acronyms || null
           }))
         )

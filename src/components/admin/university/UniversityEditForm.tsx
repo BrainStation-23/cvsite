@@ -65,8 +65,10 @@ const UniversityEditForm: React.FC<UniversityEditFormProps> = ({
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    <SelectItem value="public">Public</SelectItem>
-                    <SelectItem value="private">Private</SelectItem>
+                    <SelectItem value="Public">Public</SelectItem>
+                    <SelectItem value="Private">Private</SelectItem>
+                    <SelectItem value="International">International</SelectItem>
+                    <SelectItem value="Special">Special</SelectItem>
                   </SelectContent>
                 </Select>
                 <FormMessage />
