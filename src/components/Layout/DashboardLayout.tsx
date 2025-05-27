@@ -13,27 +13,12 @@ import {
   Menu,
   X
 } from 'lucide-react';
-import {
-  Breadcrumb,
-  BreadcrumbList,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbSeparator,
-  BreadcrumbPage,
-} from '@/components/ui/breadcrumb';
-
-interface BreadcrumbItem {
-  label: string;
-  href?: string;
-}
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
-  title?: string;
-  breadcrumbs?: BreadcrumbItem[];
 }
 
-const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children, title, breadcrumbs }) => {
+const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
@@ -50,10 +35,6 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children, title, brea
       console.error('Error signing out:', error);
     }
   };
-
-  // Default title based on user role
-  const defaultTitle = `${user?.role.charAt(0).toUpperCase() + user?.role.slice(1)} Dashboard`;
-  const pageTitle = title || defaultTitle;
 
   // Navigation links based on user role
   const navLinks = [
@@ -117,35 +98,13 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children, title, brea
       </aside>
 
       {/* Main content */}
-      <div className={`flex-1 ${isSidebarOpen ? 'ml-64' : 'ml-16'} transition-margin duration-300 ease-in-out flex flex-col`}>
+      <div className={`flex-1 ${isSidebarOpen ? 'ml-64' : 'ml-16'} transition-margin duration-300 ease-in-out`}>
         {/* Header */}
-        <header className="bg-white dark:bg-gray-800 shadow-md py-4 px-6 flex-shrink-0">
+        <header className="bg-white dark:bg-gray-800 shadow-md py-4 px-6">
           <div className="flex justify-between items-center">
-            <div>
-              <h2 className="text-xl font-semibold text-cvsite-navy dark:text-white mb-1">
-                {pageTitle}
-              </h2>
-              {breadcrumbs && breadcrumbs.length > 0 && (
-                <Breadcrumb>
-                  <BreadcrumbList>
-                    {breadcrumbs.map((breadcrumb, index) => (
-                      <React.Fragment key={index}>
-                        <BreadcrumbItem>
-                          {breadcrumb.href ? (
-                            <BreadcrumbLink asChild>
-                              <Link to={breadcrumb.href}>{breadcrumb.label}</Link>
-                            </BreadcrumbLink>
-                          ) : (
-                            <BreadcrumbPage>{breadcrumb.label}</BreadcrumbPage>
-                          )}
-                        </BreadcrumbItem>
-                        {index < breadcrumbs.length - 1 && <BreadcrumbSeparator />}
-                      </React.Fragment>
-                    ))}
-                  </BreadcrumbList>
-                </Breadcrumb>
-              )}
-            </div>
+            <h2 className="text-xl font-semibold text-cvsite-navy dark:text-white">
+              {user?.role.charAt(0).toUpperCase() + user?.role.slice(1)} Dashboard
+            </h2>
             <div className="flex items-center space-x-3">
               <span className="text-sm text-gray-600 dark:text-gray-300">
                 {user?.firstName} {user?.lastName}
@@ -158,7 +117,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children, title, brea
         </header>
 
         {/* Content */}
-        <main className="flex-1 overflow-hidden">
+        <main className="p-6 h-[calc(100vh-72px)] overflow-auto">
           {children}
         </main>
       </div>
