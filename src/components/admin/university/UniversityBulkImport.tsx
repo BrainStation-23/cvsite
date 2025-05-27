@@ -45,7 +45,7 @@ const UniversityBulkImport: React.FC<UniversityBulkImportProps> = ({
                 <TableRow key={index}>
                   <TableCell className="font-medium">{university.name}</TableCell>
                   <TableCell>
-                    <Badge variant={university.type === 'public' ? 'default' : 'secondary'}>
+                    <Badge variant={university.type === 'Public' ? 'default' : 'secondary'}>
                       {university.type}
                     </Badge>
                   </TableCell>
