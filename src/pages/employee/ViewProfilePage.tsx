@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import DashboardLayout from '../../components/Layout/DashboardLayout';
@@ -20,12 +21,12 @@ const ViewProfilePage: React.FC = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
-  const [newTechnicalSkill, setNewTechnicalSkill] = useState({ name: '', proficiency: 1 });
-  const [newSpecializedSkill, setNewSpecializedSkill] = useState({ name: '', proficiency: 1 });
+  const [newTechnicalSkill, setNewTechnicalSkill] = useState({ name: '', proficiency: 1, priority: 0 });
+  const [newSpecializedSkill, setNewSpecializedSkill] = useState({ name: '', proficiency: 1, priority: 0 });
   
   // Use the updated hooks with profileId
   const { isLoading: generalInfoLoading, generalInfo, saveGeneralInfo, isSaving: generalInfoSaving } = useGeneralInfo(profileId);
-  const { isLoading: skillsLoading, technicalSkills, specializedSkills, saveTechnicalSkill, saveSpecializedSkill, deleteTechnicalSkill, deleteSpecializedSkill, isSaving: skillsSaving } = useSkills(profileId);
+  const { isLoading: skillsLoading, technicalSkills, specializedSkills, saveTechnicalSkill, saveSpecializedSkill, deleteTechnicalSkill, deleteSpecializedSkill, reorderTechnicalSkills, isSaving: skillsSaving } = useSkills(profileId);
   const { experiences, saveExperience, updateExperience, deleteExperience, isLoading: experienceLoading, isSaving: experienceSaving } = useExperience(profileId);
   const { education, saveEducation, updateEducation, deleteEducation, isLoading: educationLoading, isSaving: educationSaving } = useEducation(profileId);
   const { trainings, saveTraining, updateTraining, deleteTraining, isLoading: trainingLoading, isSaving: trainingSaving } = useTraining(profileId);
@@ -96,7 +97,7 @@ const ViewProfilePage: React.FC = () => {
     if (newTechnicalSkill.name.trim()) {
       const success = await saveTechnicalSkill({ ...newTechnicalSkill, id: '' });
       if (success) {
-        setNewTechnicalSkill({ name: '', proficiency: 1 });
+        setNewTechnicalSkill({ name: '', proficiency: 1, priority: 0 });
       }
     }
     return false;
@@ -106,7 +107,7 @@ const ViewProfilePage: React.FC = () => {
     if (newSpecializedSkill.name.trim()) {
       const success = await saveSpecializedSkill({ ...newSpecializedSkill, id: '' });
       if (success) {
-        setNewSpecializedSkill({ name: '', proficiency: 1 });
+        setNewSpecializedSkill({ name: '', proficiency: 1, priority: 0 });
       }
     }
     return false;
@@ -212,6 +213,7 @@ const ViewProfilePage: React.FC = () => {
           deleteProject={deleteProject}
           deleteTechnicalSkill={deleteTechnicalSkill}
           deleteSpecializedSkill={deleteSpecializedSkill}
+          reorderTechnicalSkills={reorderTechnicalSkills}
         />
       </div>
     </DashboardLayout>

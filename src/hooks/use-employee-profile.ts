@@ -51,11 +51,12 @@ export function useEmployeeProfile(profileId: string) {
         });
       }
 
-      // Fetch technical skills
+      // Fetch technical skills with priority ordering
       const { data: techSkillsData, error: techSkillsError } = await supabase
         .from('technical_skills')
         .select('*')
-        .eq('profile_id', profileId);
+        .eq('profile_id', profileId)
+        .order('priority', { ascending: true });
 
       if (techSkillsError) throw techSkillsError;
 
@@ -63,7 +64,8 @@ export function useEmployeeProfile(profileId: string) {
         setTechnicalSkills(techSkillsData.map(skill => ({
           id: skill.id,
           name: skill.name,
-          proficiency: skill.proficiency
+          proficiency: skill.proficiency,
+          priority: skill.priority || 0
         })));
       }
 
@@ -79,7 +81,8 @@ export function useEmployeeProfile(profileId: string) {
         setSpecializedSkills(specSkillsData.map(skill => ({
           id: skill.id,
           name: skill.name,
-          proficiency: skill.proficiency
+          proficiency: skill.proficiency,
+          priority: 0 // Specialized skills don't use priority ordering
         })));
       }
 
