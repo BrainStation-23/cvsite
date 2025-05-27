@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -13,9 +12,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Calendar } from '@/components/ui/calendar';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { useDesignations } from '@/hooks/use-designations';
-import { Spinner } from '@/components/ui/spinner';
+import { DesignationCombobox } from '@/components/admin/designation/DesignationCombobox';
 
 interface ExperienceTabProps {
   experiences: Experience[];
@@ -39,7 +36,6 @@ export const ExperienceTab: React.FC<ExperienceTabProps> = ({
   const [startDate, setStartDate] = useState<Date | undefined>(new Date());
   const [endDate, setEndDate] = useState<Date | undefined>();
   const [isCurrent, setIsCurrent] = useState(false);
-  const { data: designations, isLoading: isLoadingDesignations } = useDesignations();
 
   const addForm = useForm<Omit<Experience, 'id'>>({
     defaultValues: {
@@ -184,28 +180,11 @@ export const ExperienceTab: React.FC<ExperienceTabProps> = ({
                     <FormItem>
                       <FormLabel>Designation</FormLabel>
                       <FormControl>
-                        <Select
+                        <DesignationCombobox
+                          value={field.value}
                           onValueChange={field.onChange}
-                          defaultValue={field.value}
-                          disabled={isLoadingDesignations}
-                        >
-                          <SelectTrigger className="w-full">
-                            <SelectValue placeholder="Select designation" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {isLoadingDesignations ? (
-                              <div className="flex justify-center p-2">
-                                <Spinner />
-                              </div>
-                            ) : (
-                              designations?.map((designation) => (
-                                <SelectItem key={designation.id} value={designation.name}>
-                                  {designation.name}
-                                </SelectItem>
-                              ))
-                            )}
-                          </SelectContent>
-                        </Select>
+                          placeholder="Select designation"
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -350,28 +329,11 @@ export const ExperienceTab: React.FC<ExperienceTabProps> = ({
                             <FormItem>
                               <FormLabel>Designation</FormLabel>
                               <FormControl>
-                                <Select
+                                <DesignationCombobox
+                                  value={field.value}
                                   onValueChange={field.onChange}
-                                  defaultValue={field.value}
-                                  disabled={isLoadingDesignations}
-                                >
-                                  <SelectTrigger className="w-full">
-                                    <SelectValue placeholder="Select designation" />
-                                  </SelectTrigger>
-                                  <SelectContent>
-                                    {isLoadingDesignations ? (
-                                      <div className="flex justify-center p-2">
-                                        <Spinner />
-                                      </div>
-                                    ) : (
-                                      designations?.map((designation) => (
-                                        <SelectItem key={designation.id} value={designation.name}>
-                                          {designation.name}
-                                        </SelectItem>
-                                      ))
-                                    )}
-                                  </SelectContent>
-                                </Select>
+                                  placeholder="Select designation"
+                                />
                               </FormControl>
                               <FormMessage />
                             </FormItem>
