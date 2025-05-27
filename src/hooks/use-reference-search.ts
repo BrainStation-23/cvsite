@@ -52,7 +52,14 @@ export const useReferenceSearch = (params: ReferenceSearchParams = {}) => {
       });
 
       if (error) throw error;
-      return data as ReferenceSearchResult;
+      
+      // Type guard to ensure we have the correct structure
+      if (!data || typeof data !== 'object') {
+        throw new Error('Invalid response format from search_references');
+      }
+
+      // Cast to unknown first, then to our expected type
+      return data as unknown as ReferenceSearchResult;
     },
   });
 };
