@@ -42,6 +42,7 @@ export const DepartmentCombobox: React.FC<DepartmentComboboxProps> = ({
     sortOrder: 'asc',
   });
 
+  // Safely access departments with fallback to empty array
   const departments = searchData?.departments || [];
 
   const selectedDepartment = departments.find(

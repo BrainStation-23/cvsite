@@ -42,6 +42,7 @@ export const UniversityCombobox: React.FC<UniversityComboboxProps> = ({
     sortOrder: 'asc',
   });
 
+  // Safely access universities with fallback to empty array
   const universities = searchData?.universities || [];
 
   const selectedUniversity = universities.find(

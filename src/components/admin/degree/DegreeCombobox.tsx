@@ -32,16 +32,17 @@ export const DegreeCombobox: React.FC<DegreeComboboxProps> = ({
   disabled = false
 }) => {
   const [open, setOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState<string>('');
+  const [searchQuery, setSearchQuery] = useState<string | null>(null);
 
   const { data: searchData, isLoading } = useDegreeSearch({
     searchQuery,
     page: 1,
-    itemsPerPage: 50,
+    perPage: 50,
     sortBy: 'name',
     sortOrder: 'asc',
   });
 
+  // Safely access degrees with fallback to empty array
   const degrees = searchData?.degrees || [];
 
   const selectedDegree = degrees.find(
@@ -66,8 +67,8 @@ export const DegreeCombobox: React.FC<DegreeComboboxProps> = ({
         <Command>
           <CommandInput
             placeholder="Search degrees..."
-            value={searchQuery}
-            onValueChange={setSearchQuery}
+            value={searchQuery || ''}
+            onValueChange={(search) => setSearchQuery(search || null)}
           />
           <CommandList>
             <CommandEmpty>

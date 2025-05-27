@@ -23,7 +23,10 @@ export const EducationList: React.FC<EducationListProps> = ({
     }
   };
 
-  if (education.length === 0) {
+  // Safely handle education array with fallback
+  const educationList = education || [];
+
+  if (educationList.length === 0) {
     return (
       <div className="text-center text-gray-500 dark:text-gray-400 py-8">
         No education history added yet. 
@@ -34,7 +37,7 @@ export const EducationList: React.FC<EducationListProps> = ({
 
   return (
     <Accordion type="single" collapsible className="space-y-4">
-      {education.map((edu) => (
+      {educationList.map((edu) => (
         <EducationItem
           key={edu.id}
           education={edu}
