@@ -98,9 +98,9 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
       </aside>
 
       {/* Main content */}
-      <div className={`flex-1 ${isSidebarOpen ? 'ml-64' : 'ml-16'} transition-margin duration-300 ease-in-out flex flex-col h-screen`}>
+      <div className={`flex-1 ${isSidebarOpen ? 'ml-64' : 'ml-16'} transition-margin duration-300 ease-in-out`}>
         {/* Header */}
-        <header className="bg-white dark:bg-gray-800 shadow-md py-4 px-6 flex-shrink-0">
+        <header className="bg-white dark:bg-gray-800 shadow-md py-4 px-6">
           <div className="flex justify-between items-center">
             <h2 className="text-xl font-semibold text-cvsite-navy dark:text-white">
               {user?.role.charAt(0).toUpperCase() + user?.role.slice(1)} Dashboard
@@ -117,7 +117,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
         </header>
 
         {/* Content */}
-        <main className="flex-1 overflow-hidden">
+        <main className="p-6 h-[calc(100vh-72px)] overflow-auto">
           {children}
         </main>
       </div>
