@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -7,7 +8,6 @@ import UniversityAddForm from './university/UniversityAddForm';
 import UniversityTable from './university/UniversityTable';
 import UniversityDeleteDialog from './university/UniversityDeleteDialog';
 import UniversityCSVManager from './university/UniversityCSVManager';
-import UniversityBulkImport from './university/UniversityBulkImport';
 
 const UniversitySettings: React.FC = () => {
   const [isAdding, setIsAdding] = useState(false);
@@ -17,7 +17,6 @@ const UniversitySettings: React.FC = () => {
     id: '',
     name: ''
   });
-  const [bulkImportData, setBulkImportData] = useState<UniversityFormData[]>([]);
   
   const { 
     items, 
@@ -72,16 +71,7 @@ const UniversitySettings: React.FC = () => {
   };
 
   const handleCSVImport = (universities: UniversityFormData[]) => {
-    setBulkImportData(universities);
-  };
-
-  const handleBulkImportConfirm = () => {
-    bulkImportItems(bulkImportData);
-    setBulkImportData([]);
-  };
-
-  const handleBulkImportCancel = () => {
-    setBulkImportData([]);
+    bulkImportItems(universities);
   };
 
   if (isLoading) {
@@ -118,15 +108,6 @@ const UniversitySettings: React.FC = () => {
         </div>
       </CardHeader>
       <CardContent>
-        {bulkImportData.length > 0 && (
-          <UniversityBulkImport
-            universities={bulkImportData}
-            onConfirm={handleBulkImportConfirm}
-            onCancel={handleBulkImportCancel}
-            isImporting={isBulkImporting}
-          />
-        )}
-
         {isAdding && (
           <UniversityAddForm
             onSave={handleSaveNew}

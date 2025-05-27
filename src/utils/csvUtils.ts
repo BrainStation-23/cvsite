@@ -1,3 +1,4 @@
+
 import Papa from 'papaparse';
 import { UniversityFormData } from '@/hooks/use-university-settings';
 
@@ -5,6 +6,18 @@ export interface UniversityCSVRow {
   name: string;
   type: 'public' | 'private';
   acronyms?: string;
+}
+
+export interface CSVValidationResult {
+  valid: UniversityFormData[];
+  errors: CSVValidationError[];
+}
+
+export interface CSVValidationError {
+  row: number;
+  field: string;
+  value: string;
+  message: string;
 }
 
 export const downloadCSVTemplate = () => {
@@ -63,20 +76,88 @@ export const exportUniversitiesToCSV = (universities: any[]) => {
   }
 };
 
-export const parseUniversitiesCSV = (file: File): Promise<UniversityFormData[]> => {
+export const validateCSVData = (data: any[], existingUniversities: any[] = []): CSVValidationResult => {
+  const valid: UniversityFormData[] = [];
+  const errors: CSVValidationError[] = [];
+  const seenNames = new Set();
+  
+  // Create a set of existing university names for quick lookup
+  const existingNames = new Set(existingUniversities.map(u => u.name.toLowerCase().trim()));
+
+  data.forEach((row: any, index: number) => {
+    const rowNumber = index + 2; // +2 because index starts at 0 and CSV has header row
+    let hasErrors = false;
+
+    // Validate name
+    if (!row.name || typeof row.name !== 'string' || row.name.trim() === '') {
+      errors.push({
+        row: rowNumber,
+        field: 'name',
+        value: row.name || '',
+        message: 'University name is required'
+      });
+      hasErrors = true;
+    } else {
+      const trimmedName = row.name.trim();
+      const lowerName = trimmedName.toLowerCase();
+      
+      // Check for duplicates within CSV
+      if (seenNames.has(lowerName)) {
+        errors.push({
+          row: rowNumber,
+          field: 'name',
+          value: trimmedName,
+          message: 'Duplicate university name in CSV'
+        });
+        hasErrors = true;
+      } else if (existingNames.has(lowerName)) {
+        errors.push({
+          row: rowNumber,
+          field: 'name',
+          value: trimmedName,
+          message: 'University already exists in database'
+        });
+        hasErrors = true;
+      } else {
+        seenNames.add(lowerName);
+      }
+    }
+
+    // Validate type
+    if (!row.type || (row.type !== 'public' && row.type !== 'private')) {
+      errors.push({
+        row: rowNumber,
+        field: 'type',
+        value: row.type || '',
+        message: 'Type must be either "public" or "private"'
+      });
+      hasErrors = true;
+    }
+
+    // If no errors, add to valid array
+    if (!hasErrors) {
+      valid.push({
+        name: row.name.trim(),
+        type: row.type as 'public' | 'private',
+        acronyms: row.acronyms ? row.acronyms.trim() : ''
+      });
+    }
+  });
+
+  return { valid, errors };
+};
+
+export const parseUniversitiesCSV = (file: File): Promise<any[]> => {
   return new Promise((resolve, reject) => {
     Papa.parse(file, {
       header: true,
       complete: (results) => {
         try {
-          const universities: UniversityFormData[] = results.data
-            .filter((row: any) => row.name && row.name.trim() !== '')
-            .map((row: any) => ({
-              name: row.name.trim(),
-              type: (row.type === 'private' ? 'private' : 'public') as 'public' | 'private',
-              acronyms: row.acronyms ? row.acronyms.trim() : ''
-            }));
-          resolve(universities);
+          // Filter out empty rows
+          const filteredData = results.data.filter((row: any) => 
+            row.name && row.name.toString().trim() !== ''
+          );
+          resolve(filteredData);
         } catch (error) {
           reject(error);
         }

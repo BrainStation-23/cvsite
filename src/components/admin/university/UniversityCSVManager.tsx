@@ -2,11 +2,12 @@
 import React, { useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Download, Upload, HelpCircle } from 'lucide-react';
+import { Download, Upload } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { exportUniversitiesToCSV, parseUniversitiesCSV } from '@/utils/csvUtils';
+import { exportUniversitiesToCSV, parseUniversitiesCSV, validateCSVData } from '@/utils/csvUtils';
 import { UniversityItem, UniversityFormData } from '@/hooks/use-university-settings';
 import UniversityImportDialog from './UniversityImportDialog';
+import UniversityCSVValidation from './UniversityCSVValidation';
 
 interface UniversityCSVManagerProps {
   universities: UniversityItem[];
@@ -22,6 +23,7 @@ const UniversityCSVManager: React.FC<UniversityCSVManagerProps> = ({
   const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [showImportDialog, setShowImportDialog] = useState(false);
+  const [validationResult, setValidationResult] = useState<any>(null);
 
   const handleExport = () => {
     try {
@@ -53,12 +55,33 @@ const UniversityCSVManager: React.FC<UniversityCSVManagerProps> = ({
     if (!file) return;
 
     try {
-      const universities = await parseUniversitiesCSV(file);
-      onImport(universities);
-      toast({
-        title: "Import successful",
-        description: `${universities.length} universities ready to import.`,
-      });
+      const parsedData = await parseUniversitiesCSV(file);
+      
+      if (parsedData.length === 0) {
+        toast({
+          title: "Import failed",
+          description: "No valid data found in CSV file.",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      // Validate the data
+      const validation = validateCSVData(parsedData, universities);
+      setValidationResult(validation);
+
+      if (validation.errors.length === 0) {
+        toast({
+          title: "Validation successful",
+          description: `${validation.valid.length} universities ready to import.`,
+        });
+      } else {
+        toast({
+          title: "Validation completed",
+          description: `Found ${validation.errors.length} errors and ${validation.valid.length} valid entries.`,
+          variant: validation.valid.length > 0 ? "default" : "destructive"
+        });
+      }
     } catch (error) {
       toast({
         title: "Import failed",
@@ -71,6 +94,15 @@ const UniversityCSVManager: React.FC<UniversityCSVManagerProps> = ({
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
+  };
+
+  const handleValidationProceed = (validUniversities: UniversityFormData[]) => {
+    onImport(validUniversities);
+    setValidationResult(null);
+  };
+
+  const handleValidationCancel = () => {
+    setValidationResult(null);
   };
 
   return (
@@ -94,6 +126,15 @@ const UniversityCSVManager: React.FC<UniversityCSVManagerProps> = ({
           className="hidden"
         />
       </div>
+
+      {validationResult && (
+        <UniversityCSVValidation
+          validationResult={validationResult}
+          onProceed={handleValidationProceed}
+          onCancel={handleValidationCancel}
+          isImporting={isImporting}
+        />
+      )}
 
       <UniversityImportDialog
         isOpen={showImportDialog}
