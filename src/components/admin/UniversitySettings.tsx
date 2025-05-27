@@ -128,14 +128,16 @@ const UniversitySettings: React.FC = () => {
 
   if (isLoading && !searchResult) {
     return (
-      <Card>
-        <CardHeader>
-          <CardTitle>Universities</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="text-center py-8">Loading universities...</div>
-        </CardContent>
-      </Card>
+      <div className="h-full flex flex-col">
+        <Card className="flex-1 flex flex-col">
+          <CardHeader className="flex-shrink-0">
+            <CardTitle>Universities</CardTitle>
+          </CardHeader>
+          <CardContent className="flex-1 flex items-center justify-center">
+            <div className="text-center py-8">Loading universities...</div>
+          </CardContent>
+        </Card>
+      </div>
     );
   }
 
@@ -143,74 +145,84 @@ const UniversitySettings: React.FC = () => {
   const pagination = searchResult?.pagination;
 
   return (
-    <Card>
-      <CardHeader>
-        <div className="flex justify-between items-center">
-          <CardTitle>Universities</CardTitle>
-          <div className="flex gap-2">
-            <UniversityCSVManager 
-              universities={universities}
-              onImport={handleCSVImport}
-              isImporting={isBulkImporting}
-            />
-            {!isAdding && (
-              <Button variant="outline" onClick={handleStartAddNew}>
-                <PlusCircle className="mr-2 h-4 w-4" />
-                Add University
-              </Button>
-            )}
+    <div className="h-full flex flex-col">
+      <Card className="flex-1 flex flex-col">
+        <CardHeader className="flex-shrink-0">
+          <div className="flex justify-between items-center">
+            <CardTitle>Universities</CardTitle>
+            <div className="flex gap-2">
+              <UniversityCSVManager 
+                universities={universities}
+                onImport={handleCSVImport}
+                isImporting={isBulkImporting}
+              />
+              {!isAdding && (
+                <Button variant="outline" onClick={handleStartAddNew}>
+                  <PlusCircle className="mr-2 h-4 w-4" />
+                  Add University
+                </Button>
+              )}
+            </div>
           </div>
-        </div>
-      </CardHeader>
-      <CardContent>
-        {isAdding && (
-          <UniversityAddForm
-            onSave={handleSaveNew}
-            onCancel={handleCancelAdd}
-            isAdding={isAddingItem}
-          />
-        )}
-        
-        <UniversitySearchFilters
-          onSearch={handleSearch}
-          onFilterType={handleFilterType}
-          onSortChange={handleSortChange}
-          onReset={handleReset}
-          searchQuery={searchQuery}
-          currentType={typeFilter}
-          sortBy={sortBy}
-          sortOrder={sortOrder}
-          isLoading={isLoading}
-        />
-        
-        <UniversityTable
-          items={universities}
-          editingId={editingId}
-          onEdit={handleStartEdit}
-          onCancelEdit={handleCancelEdit}
-          onSaveEdit={handleSaveEdit}
-          onDelete={handleDeleteClick}
-          isUpdating={isUpdatingItem}
-          isRemoving={isRemovingItem}
-        />
+        </CardHeader>
+        <CardContent className="flex-1 flex flex-col overflow-hidden">
+          {isAdding && (
+            <div className="mb-4 flex-shrink-0">
+              <UniversityAddForm
+                onSave={handleSaveNew}
+                onCancel={handleCancelAdd}
+                isAdding={isAddingItem}
+              />
+            </div>
+          )}
+          
+          <div className="flex-shrink-0 mb-4">
+            <UniversitySearchFilters
+              onSearch={handleSearch}
+              onFilterType={handleFilterType}
+              onSortChange={handleSortChange}
+              onReset={handleReset}
+              searchQuery={searchQuery}
+              currentType={typeFilter}
+              sortBy={sortBy}
+              sortOrder={sortOrder}
+              isLoading={isLoading}
+            />
+          </div>
+          
+          <div className="flex-1 overflow-y-auto">
+            <UniversityTable
+              items={universities}
+              editingId={editingId}
+              onEdit={handleStartEdit}
+              onCancelEdit={handleCancelEdit}
+              onSaveEdit={handleSaveEdit}
+              onDelete={handleDeleteClick}
+              isUpdating={isUpdatingItem}
+              isRemoving={isRemovingItem}
+            />
+          </div>
 
-        {pagination && (
-          <UniversityPagination
-            pagination={pagination}
-            onPageChange={handlePageChange}
-            onPerPageChange={handlePerPageChange}
-            isLoading={isLoading}
+          {pagination && (
+            <div className="flex-shrink-0 mt-4">
+              <UniversityPagination
+                pagination={pagination}
+                onPageChange={handlePageChange}
+                onPerPageChange={handlePerPageChange}
+                isLoading={isLoading}
+              />
+            </div>
+          )}
+          
+          <UniversityDeleteDialog
+            isOpen={deleteDialog.isOpen}
+            universityName={deleteDialog.name}
+            onConfirm={handleDeleteConfirm}
+            onCancel={handleDeleteCancel}
           />
-        )}
-        
-        <UniversityDeleteDialog
-          isOpen={deleteDialog.isOpen}
-          universityName={deleteDialog.name}
-          onConfirm={handleDeleteConfirm}
-          onCancel={handleDeleteCancel}
-        />
-      </CardContent>
-    </Card>
+        </CardContent>
+      </Card>
+    </div>
   );
 };
 
