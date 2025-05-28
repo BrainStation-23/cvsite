@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import DashboardLayout from '../../components/Layout/DashboardLayout';
@@ -34,9 +33,9 @@ const CVTemplatePreview: React.FC = () => {
   }, [id, getTemplate]);
 
   useEffect(() => {
-    // Fetch employee profiles when component mounts
+    // Fetch employee profiles when component mounts - only once
     fetchProfiles();
-  }, [fetchProfiles]);
+  }, []); // Empty dependency array to run only once
 
   useEffect(() => {
     if (selectedProfileId && profiles) {
