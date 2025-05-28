@@ -180,7 +180,6 @@ const ViewProfilePage: React.FC = () => {
         <ProfileTabs
           form={form}
           isEditing={isEditing}
-          profileId={profileId}
           onImageUpdate={handleImageUpdate}
           technicalSkills={technicalSkills}
           specializedSkills={specializedSkills}
@@ -213,6 +212,8 @@ const ViewProfilePage: React.FC = () => {
           deleteProject={deleteProject}
           deleteTechnicalSkill={deleteTechnicalSkill}
           deleteSpecializedSkill={deleteSpecializedSkill}
+          saveTechnicalSkill={saveTechnicalSkill}
+          saveSpecializedSkill={saveSpecializedSkill}
           reorderTechnicalSkills={reorderTechnicalSkills}
         />
       </div>

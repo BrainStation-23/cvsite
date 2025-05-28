@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { UseFormReturn } from 'react-hook-form';
@@ -28,20 +29,20 @@ interface ProfileTabsProps {
   setNewSpecializedSkill: (skill: Omit<Skill, 'id'>) => void;
   handleAddTechnicalSkill: () => void;
   handleAddSpecializedSkill: () => void;
-  saveExperience: (experience: Experience) => Promise<boolean>;
-  updateExperience: (experience: Experience) => Promise<boolean>;
+  saveExperience: (experience: Omit<Experience, 'id'>) => Promise<boolean>;
+  updateExperience: (id: string, experience: Partial<Experience>) => Promise<boolean>;
   deleteExperience: (id: string) => Promise<boolean>;
-  saveEducation: (education: Education) => Promise<boolean>;
-  updateEducation: (education: Education) => Promise<boolean>;
+  saveEducation: (education: Omit<Education, 'id'>) => Promise<boolean>;
+  updateEducation: (id: string, education: Partial<Education>) => Promise<boolean>;
   deleteEducation: (id: string) => Promise<boolean>;
-  saveTraining: (training: Training) => Promise<boolean>;
-  updateTraining: (training: Training) => Promise<boolean>;
+  saveTraining: (training: Omit<Training, 'id'>) => Promise<boolean>;
+  updateTraining: (id: string, training: Partial<Training>) => Promise<boolean>;
   deleteTraining: (id: string) => Promise<boolean>;
-  saveAchievement: (achievement: Achievement) => Promise<boolean>;
-  updateAchievement: (achievement: Achievement) => Promise<boolean>;
+  saveAchievement: (achievement: Omit<Achievement, 'id'>) => Promise<boolean>;
+  updateAchievement: (id: string, achievement: Partial<Achievement>) => Promise<boolean>;
   deleteAchievement: (id: string) => Promise<boolean>;
-  saveProject: (project: Project) => Promise<boolean>;
-  updateProject: (project: Project) => Promise<boolean>;
+  saveProject: (project: Omit<Project, 'id'>) => Promise<boolean>;
+  updateProject: (id: string, project: Partial<Project>) => Promise<boolean>;
   deleteProject: (id: string) => Promise<boolean>;
   deleteTechnicalSkill: (id: string) => Promise<boolean>;
   deleteSpecializedSkill: (id: string) => Promise<boolean>;
