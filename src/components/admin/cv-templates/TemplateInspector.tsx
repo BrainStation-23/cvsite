@@ -16,12 +16,16 @@ interface TemplateInspectorProps {
   template: CVTemplate;
   onTemplateUpdate: (updates: Partial<CVTemplate>) => void;
   onConfigurationChange: () => void;
+  selectedProfileId?: string;
+  onProfileChange?: (profileId: string) => void;
 }
 
 const TemplateInspector: React.FC<TemplateInspectorProps> = ({
   template,
   onTemplateUpdate,
-  onConfigurationChange
+  onConfigurationChange,
+  selectedProfileId,
+  onProfileChange
 }) => {
   const [activeTab, setActiveTab] = useState('controls');
 
@@ -53,7 +57,11 @@ const TemplateInspector: React.FC<TemplateInspectorProps> = ({
 
           <div className="flex-1 overflow-auto">
             <TabsContent value="controls" className="p-4 m-0">
-              <PreviewControls template={template} />
+              <PreviewControls 
+                template={template}
+                selectedProfileId={selectedProfileId}
+                onProfileChange={onProfileChange}
+              />
             </TabsContent>
 
             <TabsContent value="basic" className="p-4 m-0">

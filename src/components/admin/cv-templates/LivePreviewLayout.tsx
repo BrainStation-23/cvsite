@@ -20,6 +20,8 @@ const LivePreviewLayout: React.FC<LivePreviewLayoutProps> = ({
   onSectionsChange
 }) => {
   const [previewKey, setPreviewKey] = useState(0);
+  const [selectedProfileId, setSelectedProfileId] = useState<string>('');
+  const [currentSelectedProfile, setCurrentSelectedProfile] = useState<any>(selectedProfile);
 
   const handleConfigurationChange = () => {
     // Force preview to re-render when configuration changes
@@ -27,18 +29,29 @@ const LivePreviewLayout: React.FC<LivePreviewLayoutProps> = ({
     onSectionsChange?.();
   };
 
+  const handleProfileChange = (profileId: string) => {
+    console.log('Profile changed to:', profileId);
+    setSelectedProfileId(profileId);
+    // The profile data will be passed from the parent component
+    // For now, we'll trigger a re-render
+    setPreviewKey(prev => prev + 1);
+  };
+
+  // Use the selectedProfile from props if available, otherwise use the local state
+  const profileToDisplay = selectedProfile || currentSelectedProfile;
+
   return (
     <div className="h-full w-full">
       <ResizablePanelGroup direction="horizontal" className="h-full">
         {/* Live Preview Panel */}
         <ResizablePanel defaultSize={70} minSize={50}>
           <div className="h-full p-6 overflow-auto bg-gray-50">
-            {selectedProfile ? (
+            {profileToDisplay ? (
               <div className="flex justify-center">
                 <CVPreview 
                   key={previewKey}
                   template={template} 
-                  profile={selectedProfile} 
+                  profile={profileToDisplay} 
                 />
               </div>
             ) : (
@@ -61,6 +74,8 @@ const LivePreviewLayout: React.FC<LivePreviewLayoutProps> = ({
               template={template}
               onTemplateUpdate={onTemplateUpdate}
               onConfigurationChange={handleConfigurationChange}
+              selectedProfileId={selectedProfileId}
+              onProfileChange={handleProfileChange}
             />
           </div>
         </ResizablePanel>

@@ -36,6 +36,9 @@ const PreviewControls: React.FC<PreviewControlsProps> = ({
   }, [selectedProfileId, profiles]);
 
   const handleProfileChange = (profileId: string) => {
+    console.log('Profile selected:', profileId);
+    const profile = profiles?.find(p => p.id === profileId);
+    setSelectedProfile(profile || null);
     onProfileChange?.(profileId);
   };
 

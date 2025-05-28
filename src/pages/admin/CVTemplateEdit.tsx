@@ -49,6 +49,7 @@ const CVTemplateEdit: React.FC = () => {
   useEffect(() => {
     if (selectedProfileId && profiles) {
       const profile = profiles.find(p => p.id === selectedProfileId);
+      console.log('Setting selected profile:', profile);
       setSelectedProfile(profile || null);
     }
   }, [selectedProfileId, profiles]);
