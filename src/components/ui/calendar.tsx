@@ -1,11 +1,11 @@
 
 import * as React from "react";
-import { ChevronLeft, ChevronRight, ChevronDown } from "lucide-react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { DayPicker } from "react-day-picker";
 
 import { cn } from "@/lib/utils";
 import { buttonVariants } from "@/components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Button } from "@/components/ui/button";
 
 export type CalendarProps = React.ComponentProps<typeof DayPicker>;
 
@@ -16,65 +16,199 @@ function Calendar({
   ...props
 }: CalendarProps) {
   const [currentMonth, setCurrentMonth] = React.useState<Date>(props.month || new Date());
+  const [view, setView] = React.useState<'days' | 'months' | 'years'>('days');
 
   const months = [
-    "January", "February", "March", "April", "May", "June",
-    "July", "August", "September", "October", "November", "December"
+    "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+    "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
   ];
 
-  // Generate years from 1900 to current year + 10
   const currentYear = new Date().getFullYear();
-  const years = Array.from({ length: currentYear - 1900 + 11 }, (_, i) => 1900 + i);
+  const startYear = Math.floor(currentYear / 10) * 10 - 10;
+  const years = Array.from({ length: 30 }, (_, i) => startYear + i);
 
-  const handleMonthChange = (monthIndex: string) => {
-    const newMonth = new Date(currentMonth.getFullYear(), parseInt(monthIndex), 1);
+  const handleMonthSelect = (monthIndex: number) => {
+    const newMonth = new Date(currentMonth.getFullYear(), monthIndex, 1);
     setCurrentMonth(newMonth);
     props.onMonthChange?.(newMonth);
+    setView('days');
   };
 
-  const handleYearChange = (year: string) => {
-    const newMonth = new Date(parseInt(year), currentMonth.getMonth(), 1);
+  const handleYearSelect = (year: number) => {
+    const newMonth = new Date(year, currentMonth.getMonth(), 1);
     setCurrentMonth(newMonth);
     props.onMonthChange?.(newMonth);
+    setView('days');
+  };
+
+  const handlePrevious = () => {
+    if (view === 'days') {
+      const newMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1, 1);
+      setCurrentMonth(newMonth);
+      props.onMonthChange?.(newMonth);
+    } else if (view === 'months') {
+      const newMonth = new Date(currentMonth.getFullYear() - 1, currentMonth.getMonth(), 1);
+      setCurrentMonth(newMonth);
+    } else if (view === 'years') {
+      const newMonth = new Date(currentMonth.getFullYear() - 10, currentMonth.getMonth(), 1);
+      setCurrentMonth(newMonth);
+    }
+  };
+
+  const handleNext = () => {
+    if (view === 'days') {
+      const newMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 1);
+      setCurrentMonth(newMonth);
+      props.onMonthChange?.(newMonth);
+    } else if (view === 'months') {
+      const newMonth = new Date(currentMonth.getFullYear() + 1, currentMonth.getMonth(), 1);
+      setCurrentMonth(newMonth);
+    } else if (view === 'years') {
+      const newMonth = new Date(currentMonth.getFullYear() + 10, currentMonth.getMonth(), 1);
+      setCurrentMonth(newMonth);
+    }
   };
 
   const customComponents = {
     IconLeft: ({ ..._props }) => <ChevronLeft className="h-4 w-4" />,
     IconRight: ({ ..._props }) => <ChevronRight className="h-4 w-4" />,
     Caption: ({ displayMonth }: { displayMonth: Date }) => {
-      return (
-        <div className="flex items-center justify-center gap-2 py-2">
-          <Select value={displayMonth.getMonth().toString()} onValueChange={handleMonthChange}>
-            <SelectTrigger className="w-[110px] h-8 text-sm">
-              <SelectValue>{months[displayMonth.getMonth()]}</SelectValue>
-              <ChevronDown className="h-3 w-3 opacity-50" />
-            </SelectTrigger>
-            <SelectContent>
+      if (view === 'months') {
+        return (
+          <div className="flex flex-col space-y-2 p-2">
+            <div className="flex items-center justify-between">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handlePrevious}
+                className="h-8 w-8 p-0"
+              >
+                <ChevronLeft className="h-4 w-4" />
+              </Button>
+              <Button
+                variant="ghost"
+                onClick={() => setView('years')}
+                className="text-sm font-medium"
+              >
+                {displayMonth.getFullYear()}
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleNext}
+                className="h-8 w-8 p-0"
+              >
+                <ChevronRight className="h-4 w-4" />
+              </Button>
+            </div>
+            <div className="grid grid-cols-3 gap-2">
               {months.map((month, index) => (
-                <SelectItem key={month} value={index.toString()}>
+                <Button
+                  key={month}
+                  variant={index === displayMonth.getMonth() ? "default" : "ghost"}
+                  size="sm"
+                  onClick={() => handleMonthSelect(index)}
+                  className="h-8 text-xs"
+                >
                   {month}
-                </SelectItem>
+                </Button>
               ))}
-            </SelectContent>
-          </Select>
-          
-          <Select value={displayMonth.getFullYear().toString()} onValueChange={handleYearChange}>
-            <SelectTrigger className="w-[80px] h-8 text-sm">
-              <SelectValue>{displayMonth.getFullYear()}</SelectValue>
-              <ChevronDown className="h-3 w-3 opacity-50" />
-            </SelectTrigger>
-            <SelectContent className="max-h-[200px]">
-              {years.reverse().map((year) => (
-                <SelectItem key={year} value={year.toString()}>
+            </div>
+          </div>
+        );
+      }
+
+      if (view === 'years') {
+        const currentDecade = Math.floor(displayMonth.getFullYear() / 10) * 10;
+        const yearGrid = Array.from({ length: 12 }, (_, i) => currentDecade - 1 + i);
+        
+        return (
+          <div className="flex flex-col space-y-2 p-2">
+            <div className="flex items-center justify-between">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handlePrevious}
+                className="h-8 w-8 p-0"
+              >
+                <ChevronLeft className="h-4 w-4" />
+              </Button>
+              <div className="text-sm font-medium">
+                {currentDecade} - {currentDecade + 9}
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleNext}
+                className="h-8 w-8 p-0"
+              >
+                <ChevronRight className="h-4 w-4" />
+              </Button>
+            </div>
+            <div className="grid grid-cols-3 gap-2">
+              {yearGrid.map((year) => (
+                <Button
+                  key={year}
+                  variant={year === displayMonth.getFullYear() ? "default" : "ghost"}
+                  size="sm"
+                  onClick={() => handleYearSelect(year)}
+                  className="h-8 text-xs"
+                  disabled={year < currentDecade || year > currentDecade + 9}
+                >
                   {year}
-                </SelectItem>
+                </Button>
               ))}
-            </SelectContent>
-          </Select>
+            </div>
+          </div>
+        );
+      }
+
+      return (
+        <div className="flex items-center justify-between py-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handlePrevious}
+            className="h-8 w-8 p-0"
+          >
+            <ChevronLeft className="h-4 w-4" />
+          </Button>
+          <div className="flex items-center gap-1">
+            <Button
+              variant="ghost"
+              onClick={() => setView('months')}
+              className="text-sm font-medium"
+            >
+              {months[displayMonth.getMonth()]}
+            </Button>
+            <Button
+              variant="ghost"
+              onClick={() => setView('years')}
+              className="text-sm font-medium"
+            >
+              {displayMonth.getFullYear()}
+            </Button>
+          </div>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleNext}
+            className="h-8 w-8 p-0"
+          >
+            <ChevronRight className="h-4 w-4" />
+          </Button>
         </div>
       );
     }
   };
+
+  if (view !== 'days') {
+    return (
+      <div className={cn("p-3 pointer-events-auto", className)}>
+        {customComponents.Caption({ displayMonth: currentMonth })}
+      </div>
+    );
+  }
 
   return (
     <DayPicker
