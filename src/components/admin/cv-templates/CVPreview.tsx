@@ -3,6 +3,7 @@ import React from 'react';
 import { CVTemplate } from '@/types/cv-templates';
 import { createCVStyles } from './cv-preview-styles';
 import { CVPageRenderer } from './CVPageRenderer';
+import { useTemplateConfiguration } from '@/hooks/use-template-configuration';
 
 interface CVPreviewProps {
   template: CVTemplate;
@@ -10,7 +11,22 @@ interface CVPreviewProps {
 }
 
 const CVPreview: React.FC<CVPreviewProps> = ({ template, profile }) => {
+  const { sections, fieldMappings, isLoading } = useTemplateConfiguration(template.id);
   const styles = createCVStyles(template);
+
+  if (isLoading) {
+    return (
+      <div style={{ 
+        display: 'flex', 
+        justifyContent: 'center', 
+        alignItems: 'center', 
+        height: '400px',
+        fontFamily: 'Arial, sans-serif'
+      }}>
+        Loading template configuration...
+      </div>
+    );
+  }
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minHeight: 'fit-content' }}>
@@ -21,6 +37,8 @@ const CVPreview: React.FC<CVPreviewProps> = ({ template, profile }) => {
           totalPages={template.pages_count}
           profile={profile}
           styles={styles}
+          sections={sections}
+          fieldMappings={fieldMappings}
         />
       ))}
     </div>
