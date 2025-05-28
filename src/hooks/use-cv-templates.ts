@@ -14,6 +14,7 @@ export const useCVTemplates = () => {
   const {
     isCreating,
     isUpdating,
+    isDeleting,
     createTemplate,
     updateTemplate,
     deleteTemplate
@@ -24,10 +25,12 @@ export const useCVTemplates = () => {
     isLoading,
     isCreating,
     isUpdating,
+    isDeleting,
     createTemplate,
     updateTemplate,
     deleteTemplate,
     getTemplate,
+    getTemplates: fetchTemplates, // Alias for backward compatibility
     refetch
   };
 };
