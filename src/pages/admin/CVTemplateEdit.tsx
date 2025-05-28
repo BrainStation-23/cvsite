@@ -13,10 +13,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ArrowLeft, Save, Eye } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { useCVTemplates } from '@/hooks/use-cv-templates';
-import { CVOrientation } from '@/types/cv-templates';
+import { CVOrientation, CVTemplate } from '@/types/cv-templates';
 import TemplateBuilder from '@/components/admin/cv-templates/TemplateBuilder';
 import SectionManager from '@/components/admin/cv-templates/SectionManager';
 import FieldMapper from '@/components/admin/cv-templates/FieldMapper';
+import { useToast } from '@/hooks/use-toast';
 
 interface EditTemplateForm {
   name: string;
@@ -30,8 +31,10 @@ const CVTemplateEdit: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { getTemplate, updateTemplate, isUpdating } = useCVTemplates();
-  const [template, setTemplate] = useState(null);
+  const [template, setTemplate] = useState<CVTemplate | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const { toast } = useToast();
 
   const { register, handleSubmit, setValue, watch, formState: { errors } } = useForm<EditTemplateForm>();
 
@@ -54,15 +57,31 @@ const CVTemplateEdit: React.FC = () => {
     loadTemplate();
   }, [id, getTemplate, setValue]);
 
+  // Watch for form changes to detect unsaved changes
+  useEffect(() => {
+    const subscription = watch((value, { name, type }) => {
+      if (template && type === 'change') {
+        setHasUnsavedChanges(true);
+      }
+    });
+    return () => subscription.unsubscribe();
+  }, [watch, template]);
+
   const onSubmit = async (data: EditTemplateForm) => {
-    if (id) {
+    if (id && template) {
       const success = await updateTemplate(id, {
         ...data,
-        layout_config: template?.layout_config || {}
+        layout_config: template.layout_config || {}
       });
       
       if (success) {
-        navigate('/admin/cv-templates');
+        setHasUnsavedChanges(false);
+        toast({
+          title: "Success",
+          description: "Template saved successfully"
+        });
+        // Reload template to get updated data
+        await loadTemplate();
       }
     }
   };
@@ -70,13 +89,23 @@ const CVTemplateEdit: React.FC = () => {
   const handleLayoutUpdate = (layoutConfig: Record<string, any>) => {
     if (template) {
       setTemplate(prev => ({
-        ...prev,
+        ...prev!,
         layout_config: layoutConfig
       }));
+      setHasUnsavedChanges(true);
     }
   };
 
+  const handleSaveAll = async () => {
+    const formData = watch();
+    await onSubmit(formData);
+  };
+
   const handleBack = () => {
+    if (hasUnsavedChanges) {
+      const confirmLeave = window.confirm('You have unsaved changes. Are you sure you want to leave?');
+      if (!confirmLeave) return;
+    }
     navigate('/admin/cv-templates');
   };
 
@@ -124,12 +153,23 @@ const CVTemplateEdit: React.FC = () => {
               <Eye className="h-4 w-4 mr-2" />
               Preview
             </Button>
-            <Button type="submit" form="template-form" disabled={isUpdating}>
+            <Button 
+              onClick={handleSaveAll} 
+              disabled={isUpdating}
+              className={hasUnsavedChanges ? 'bg-orange-600 hover:bg-orange-700' : ''}
+            >
               <Save className="h-4 w-4 mr-2" />
-              {isUpdating ? 'Saving...' : 'Save Changes'}
+              {isUpdating ? 'Saving...' : hasUnsavedChanges ? 'Save Changes *' : 'Save'}
             </Button>
           </div>
         </div>
+
+        {/* Unsaved changes indicator */}
+        {hasUnsavedChanges && (
+          <div className="bg-orange-50 border-l-4 border-orange-400 p-3">
+            <p className="text-sm text-orange-700">You have unsaved changes</p>
+          </div>
+        )}
 
         {/* Content */}
         <div className="flex-1 min-h-0 py-6">
@@ -175,7 +215,10 @@ const CVTemplateEdit: React.FC = () => {
                         <Label htmlFor="pages_count">Number of Pages</Label>
                         <Select 
                           value={String(watch('pages_count'))} 
-                          onValueChange={(value) => setValue('pages_count', parseInt(value))}
+                          onValueChange={(value) => {
+                            setValue('pages_count', parseInt(value));
+                            setHasUnsavedChanges(true);
+                          }}
                         >
                           <SelectTrigger>
                             <SelectValue />
@@ -193,7 +236,10 @@ const CVTemplateEdit: React.FC = () => {
                         <Label htmlFor="orientation">Orientation</Label>
                         <Select 
                           value={watch('orientation')} 
-                          onValueChange={(value: CVOrientation) => setValue('orientation', value)}
+                          onValueChange={(value: CVOrientation) => {
+                            setValue('orientation', value);
+                            setHasUnsavedChanges(true);
+                          }}
                         >
                           <SelectTrigger>
                             <SelectValue />
@@ -210,7 +256,10 @@ const CVTemplateEdit: React.FC = () => {
                       <Switch
                         id="is_active"
                         checked={watch('is_active')}
-                        onCheckedChange={(checked) => setValue('is_active', checked)}
+                        onCheckedChange={(checked) => {
+                          setValue('is_active', checked);
+                          setHasUnsavedChanges(true);
+                        }}
                       />
                       <Label htmlFor="is_active">Active Template</Label>
                     </div>
@@ -227,11 +276,17 @@ const CVTemplateEdit: React.FC = () => {
             </TabsContent>
 
             <TabsContent value="sections">
-              <SectionManager templateId={id!} />
+              <SectionManager 
+                templateId={id!} 
+                onSectionsChange={() => setHasUnsavedChanges(true)}
+              />
             </TabsContent>
 
             <TabsContent value="fields">
-              <FieldMapper templateId={id!} />
+              <FieldMapper 
+                templateId={id!} 
+                onFieldsChange={() => setHasUnsavedChanges(true)}
+              />
             </TabsContent>
           </Tabs>
         </div>

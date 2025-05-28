@@ -1,15 +1,12 @@
 
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Slider } from '@/components/ui/slider';
 import { Input } from '@/components/ui/input';
 import { CVTemplate } from '@/types/cv-templates';
 import { Palette, Type, Layout, Ruler } from 'lucide-react';
-import { useCVTemplates } from '@/hooks/use-cv-templates';
-import { useToast } from '@/hooks/use-toast';
 
 interface TemplateBuilderProps {
   template: CVTemplate;
@@ -18,9 +15,6 @@ interface TemplateBuilderProps {
 
 const TemplateBuilder: React.FC<TemplateBuilderProps> = ({ template, onLayoutUpdate }) => {
   const [layoutConfig, setLayoutConfig] = useState(template.layout_config || {});
-  const [isSaving, setIsSaving] = useState(false);
-  const { updateTemplate } = useCVTemplates();
-  const { toast } = useToast();
 
   const updateLayoutConfig = (key: string, value: any) => {
     const newConfig = {
@@ -32,31 +26,6 @@ const TemplateBuilder: React.FC<TemplateBuilderProps> = ({ template, onLayoutUpd
     // Notify parent component of changes
     if (onLayoutUpdate) {
       onLayoutUpdate(newConfig);
-    }
-  };
-
-  const handleSaveLayout = async () => {
-    try {
-      setIsSaving(true);
-      const success = await updateTemplate(template.id, {
-        layout_config: layoutConfig
-      });
-      
-      if (success) {
-        toast({
-          title: "Success",
-          description: "Layout configuration saved successfully"
-        });
-      }
-    } catch (error) {
-      console.error('Error saving layout configuration:', error);
-      toast({
-        title: "Error",
-        description: "Failed to save layout configuration",
-        variant: "destructive"
-      });
-    } finally {
-      setIsSaving(false);
     }
   };
 
@@ -299,12 +268,6 @@ const TemplateBuilder: React.FC<TemplateBuilderProps> = ({ template, onLayoutUpd
           </div>
         </CardContent>
       </Card>
-
-      <div className="flex justify-end">
-        <Button onClick={handleSaveLayout} disabled={isSaving}>
-          {isSaving ? 'Saving...' : 'Save Layout Configuration'}
-        </Button>
-      </div>
     </div>
   );
 };

@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -9,9 +9,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Eye, EyeOff, Edit } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
 
 interface FieldMapperProps {
   templateId: string;
+  onFieldsChange?: () => void;
 }
 
 interface FieldMapping {
@@ -25,9 +28,8 @@ interface FieldMapping {
   section_type: string;
 }
 
-const FIELD_MAPPINGS: FieldMapping[] = [
+const DEFAULT_FIELD_MAPPINGS = [
   {
-    id: '1',
     original_field_name: 'first_name',
     display_name: 'First Name',
     is_masked: false,
@@ -36,7 +38,6 @@ const FIELD_MAPPINGS: FieldMapping[] = [
     section_type: 'general'
   },
   {
-    id: '2',
     original_field_name: 'last_name',
     display_name: 'Last Name',
     is_masked: false,
@@ -45,7 +46,6 @@ const FIELD_MAPPINGS: FieldMapping[] = [
     section_type: 'general'
   },
   {
-    id: '3',
     original_field_name: 'employee_id',
     display_name: 'Employee ID',
     is_masked: true,
@@ -55,7 +55,6 @@ const FIELD_MAPPINGS: FieldMapping[] = [
     section_type: 'general'
   },
   {
-    id: '4',
     original_field_name: 'company_name',
     display_name: 'Organization',
     is_masked: false,
@@ -64,7 +63,6 @@ const FIELD_MAPPINGS: FieldMapping[] = [
     section_type: 'experience'
   },
   {
-    id: '5',
     original_field_name: 'designation',
     display_name: 'Position',
     is_masked: false,
@@ -74,16 +72,94 @@ const FIELD_MAPPINGS: FieldMapping[] = [
   }
 ];
 
-const FieldMapper: React.FC<FieldMapperProps> = ({ templateId }) => {
-  const [fieldMappings, setFieldMappings] = useState<FieldMapping[]>(FIELD_MAPPINGS);
+const FieldMapper: React.FC<FieldMapperProps> = ({ templateId, onFieldsChange }) => {
+  const [fieldMappings, setFieldMappings] = useState<FieldMapping[]>([]);
   const [editingField, setEditingField] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const { toast } = useToast();
 
-  const updateFieldMapping = (id: string, updates: Partial<FieldMapping>) => {
-    setFieldMappings(mappings => 
-      mappings.map(mapping => 
-        mapping.id === id ? { ...mapping, ...updates } : mapping
-      )
-    );
+  useEffect(() => {
+    loadFieldMappings();
+  }, [templateId]);
+
+  const loadFieldMappings = async () => {
+    try {
+      setIsLoading(true);
+      const { data, error } = await supabase
+        .from('cv_template_field_mappings')
+        .select('*')
+        .eq('template_id', templateId)
+        .order('field_order');
+
+      if (error) throw error;
+
+      if (!data || data.length === 0) {
+        // Initialize with default field mappings
+        await initializeDefaultMappings();
+      } else {
+        setFieldMappings(data as FieldMapping[]);
+      }
+    } catch (error) {
+      console.error('Error loading field mappings:', error);
+      toast({
+        title: "Error",
+        description: "Failed to load field mappings",
+        variant: "destructive"
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const initializeDefaultMappings = async () => {
+    try {
+      const mappingsToInsert = DEFAULT_FIELD_MAPPINGS.map(mapping => ({
+        ...mapping,
+        template_id: templateId
+      }));
+
+      const { data, error } = await supabase
+        .from('cv_template_field_mappings')
+        .insert(mappingsToInsert)
+        .select();
+
+      if (error) throw error;
+
+      setFieldMappings(data as FieldMapping[]);
+      onFieldsChange?.();
+    } catch (error) {
+      console.error('Error initializing field mappings:', error);
+      toast({
+        title: "Error",
+        description: "Failed to initialize field mappings",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const updateFieldMapping = async (id: string, updates: Partial<FieldMapping>) => {
+    try {
+      const { error } = await supabase
+        .from('cv_template_field_mappings')
+        .update(updates)
+        .eq('id', id);
+
+      if (error) throw error;
+
+      setFieldMappings(mappings => 
+        mappings.map(mapping => 
+          mapping.id === id ? { ...mapping, ...updates } : mapping
+        )
+      );
+      onFieldsChange?.();
+    } catch (error) {
+      console.error('Error updating field mapping:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update field mapping",
+        variant: "destructive"
+      });
+    }
   };
 
   const getSectionBadgeColor = (sectionType: string) => {
@@ -104,6 +180,10 @@ const FieldMapper: React.FC<FieldMapperProps> = ({ templateId }) => {
     acc[mapping.section_type].push(mapping);
     return acc;
   }, {} as Record<string, FieldMapping[]>);
+
+  if (isLoading) {
+    return <div>Loading field mappings...</div>;
+  }
 
   return (
     <div className="space-y-6">
@@ -260,10 +340,6 @@ const FieldMapper: React.FC<FieldMapperProps> = ({ templateId }) => {
           </div>
         </CardContent>
       </Card>
-
-      <div className="flex justify-end">
-        <Button>Save Field Mappings</Button>
-      </div>
     </div>
   );
 };

@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -7,9 +8,12 @@ import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Plus, Trash2, GripVertical, Settings } from 'lucide-react';
 import { CVSectionType } from '@/types/cv-templates';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
 
 interface SectionManagerProps {
   templateId: string;
+  onSectionsChange?: () => void;
 }
 
 interface SectionConfig {
@@ -33,51 +37,127 @@ const SECTION_TYPES: { value: CVSectionType; label: string }[] = [
   { value: 'projects', label: 'Projects' },
 ];
 
-const SectionManager: React.FC<SectionManagerProps> = ({ templateId }) => {
-  const [sections, setSections] = useState<SectionConfig[]>([
-    {
-      id: '1',
-      section_type: 'general',
-      display_order: 1,
-      is_required: true,
-      field_mapping: {},
-      styling_config: {}
-    },
-    {
-      id: '2',
-      section_type: 'experience',
-      display_order: 2,
-      is_required: false,
-      field_mapping: {},
-      styling_config: {}
-    }
-  ]);
-
+const SectionManager: React.FC<SectionManagerProps> = ({ templateId, onSectionsChange }) => {
+  const [sections, setSections] = useState<SectionConfig[]>([]);
   const [newSectionType, setNewSectionType] = useState<CVSectionType>('skills');
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
+  const { toast } = useToast();
 
-  const addSection = () => {
-    const newSection: SectionConfig = {
-      id: Date.now().toString(),
-      section_type: newSectionType,
-      display_order: sections.length + 1,
-      is_required: false,
-      field_mapping: {},
-      styling_config: {}
-    };
-    setSections([...sections, newSection]);
+  useEffect(() => {
+    loadSections();
+  }, [templateId]);
+
+  const loadSections = async () => {
+    try {
+      setIsLoading(true);
+      const { data, error } = await supabase
+        .from('cv_template_sections')
+        .select('*')
+        .eq('template_id', templateId)
+        .order('display_order');
+
+      if (error) throw error;
+
+      setSections(data || []);
+    } catch (error) {
+      console.error('Error loading sections:', error);
+      toast({
+        title: "Error",
+        description: "Failed to load template sections",
+        variant: "destructive"
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const removeSection = (id: string) => {
-    setSections(sections.filter(section => section.id !== id));
+  const addSection = async () => {
+    try {
+      const newSection = {
+        template_id: templateId,
+        section_type: newSectionType,
+        display_order: sections.length + 1,
+        is_required: false,
+        field_mapping: {},
+        styling_config: {}
+      };
+
+      const { data, error } = await supabase
+        .from('cv_template_sections')
+        .insert([newSection])
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      setSections([...sections, data]);
+      onSectionsChange?.();
+      
+      toast({
+        title: "Success",
+        description: "Section added successfully"
+      });
+    } catch (error) {
+      console.error('Error adding section:', error);
+      toast({
+        title: "Error",
+        description: "Failed to add section",
+        variant: "destructive"
+      });
+    }
   };
 
-  const updateSection = (id: string, updates: Partial<SectionConfig>) => {
-    setSections(sections.map(section => 
-      section.id === id ? { ...section, ...updates } : section
-    ));
+  const removeSection = async (id: string) => {
+    try {
+      const { error } = await supabase
+        .from('cv_template_sections')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
+
+      setSections(sections.filter(section => section.id !== id));
+      onSectionsChange?.();
+      
+      toast({
+        title: "Success",
+        description: "Section removed successfully"
+      });
+    } catch (error) {
+      console.error('Error removing section:', error);
+      toast({
+        title: "Error",
+        description: "Failed to remove section",
+        variant: "destructive"
+      });
+    }
   };
 
-  const moveSection = (id: string, direction: 'up' | 'down') => {
+  const updateSection = async (id: string, updates: Partial<SectionConfig>) => {
+    try {
+      const { error } = await supabase
+        .from('cv_template_sections')
+        .update(updates)
+        .eq('id', id);
+
+      if (error) throw error;
+
+      setSections(sections.map(section => 
+        section.id === id ? { ...section, ...updates } : section
+      ));
+      onSectionsChange?.();
+    } catch (error) {
+      console.error('Error updating section:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update section",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const moveSection = async (id: string, direction: 'up' | 'down') => {
     const index = sections.findIndex(section => section.id === id);
     if ((direction === 'up' && index > 0) || (direction === 'down' && index < sections.length - 1)) {
       const newSections = [...sections];
@@ -89,7 +169,30 @@ const SectionManager: React.FC<SectionManagerProps> = ({ templateId }) => {
         section.display_order = idx + 1;
       });
       
-      setSections(newSections);
+      try {
+        // Update all sections with new display orders
+        const updates = newSections.map(section => ({
+          id: section.id,
+          display_order: section.display_order
+        }));
+
+        for (const update of updates) {
+          await supabase
+            .from('cv_template_sections')
+            .update({ display_order: update.display_order })
+            .eq('id', update.id);
+        }
+
+        setSections(newSections);
+        onSectionsChange?.();
+      } catch (error) {
+        console.error('Error moving section:', error);
+        toast({
+          title: "Error",
+          description: "Failed to move section",
+          variant: "destructive"
+        });
+      }
     }
   };
 
@@ -101,6 +204,10 @@ const SectionManager: React.FC<SectionManagerProps> = ({ templateId }) => {
     const usedTypes = sections.map(s => s.section_type);
     return SECTION_TYPES.filter(type => !usedTypes.includes(type.value));
   };
+
+  if (isLoading) {
+    return <div>Loading sections...</div>;
+  }
 
   return (
     <div className="space-y-6">
@@ -225,10 +332,6 @@ const SectionManager: React.FC<SectionManagerProps> = ({ templateId }) => {
           )}
         </CardContent>
       </Card>
-
-      <div className="flex justify-end">
-        <Button>Save Section Configuration</Button>
-      </div>
     </div>
   );
 };
