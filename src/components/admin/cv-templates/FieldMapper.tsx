@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -97,13 +96,12 @@ const FieldMapper: React.FC<FieldMapperProps> = ({ templateId, onFieldsChange })
         // Initialize with default field mappings
         await initializeDefaultMappings();
       } else {
-        // Add section_type to existing data if missing, defaulting to 'general'
-        const mappingsWithSectionType = data.map(mapping => ({
+        // Now section_type exists in the database, so we can access it directly
+        const mappingsWithDefaults = data.map(mapping => ({
           ...mapping,
-          section_type: mapping.section_type || 'general',
           visibility_rules: mapping.visibility_rules || {}
         })) as FieldMapping[];
-        setFieldMappings(mappingsWithSectionType);
+        setFieldMappings(mappingsWithDefaults);
       }
     } catch (error) {
       console.error('Error loading field mappings:', error);
@@ -131,12 +129,11 @@ const FieldMapper: React.FC<FieldMapperProps> = ({ templateId, onFieldsChange })
 
       if (error) throw error;
 
-      const mappingsWithSectionType = data.map(mapping => ({
+      const mappingsWithDefaults = data.map(mapping => ({
         ...mapping,
-        section_type: mapping.section_type || 'general',
         visibility_rules: mapping.visibility_rules || {}
       })) as FieldMapping[];
-      setFieldMappings(mappingsWithSectionType);
+      setFieldMappings(mappingsWithDefaults);
       onFieldsChange?.();
     } catch (error) {
       console.error('Error initializing field mappings:', error);

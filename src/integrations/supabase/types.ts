@@ -101,6 +101,7 @@ export type Database = {
           is_masked: boolean
           mask_value: string | null
           original_field_name: string
+          section_type: string
           template_id: string
           updated_at: string
           visibility_rules: Json | null
@@ -113,6 +114,7 @@ export type Database = {
           is_masked?: boolean
           mask_value?: string | null
           original_field_name: string
+          section_type?: string
           template_id: string
           updated_at?: string
           visibility_rules?: Json | null
@@ -125,6 +127,7 @@ export type Database = {
           is_masked?: boolean
           mask_value?: string | null
           original_field_name?: string
+          section_type?: string
           template_id?: string
           updated_at?: string
           visibility_rules?: Json | null
