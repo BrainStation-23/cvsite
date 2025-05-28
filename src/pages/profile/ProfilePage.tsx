@@ -191,6 +191,8 @@ const ProfilePage: React.FC = () => {
           deleteProject={deleteProject}
           deleteTechnicalSkill={deleteTechnicalSkill}
           deleteSpecializedSkill={deleteSpecializedSkill}
+          saveTechnicalSkill={saveTechnicalSkill}
+          saveSpecializedSkill={saveSpecializedSkill}
           reorderTechnicalSkills={reorderTechnicalSkills}
         />
       )}
