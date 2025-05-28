@@ -1,7 +1,8 @@
+
 import React from 'react';
 import DashboardLayout from '../../components/Layout/DashboardLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Users, Settings, Database, Shield } from 'lucide-react';
+import { Users, Settings, Database, Shield, FileText } from 'lucide-react';
 
 const AdminDashboard: React.FC = () => {
   const modules = [
@@ -16,6 +17,12 @@ const AdminDashboard: React.FC = () => {
       description: 'View and edit employee profiles',
       icon: <Database className="h-10 w-10 text-cvsite-teal" />,
       link: '/admin/employee-data',
+    },
+    {
+      title: 'CV Templates',
+      description: 'Create and manage CV templates',
+      icon: <FileText className="h-10 w-10 text-cvsite-teal" />,
+      link: '/admin/cv-templates',
     },
     {
       title: 'Platform Settings',

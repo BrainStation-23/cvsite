@@ -47,6 +47,181 @@ export type Database = {
           },
         ]
       }
+      cv_exports: {
+        Row: {
+          export_format: string
+          export_url: string | null
+          exported_at: string
+          exported_by: string
+          id: string
+          profile_id: string
+          template_id: string
+        }
+        Insert: {
+          export_format: string
+          export_url?: string | null
+          exported_at?: string
+          exported_by: string
+          id?: string
+          profile_id: string
+          template_id: string
+        }
+        Update: {
+          export_format?: string
+          export_url?: string | null
+          exported_at?: string
+          exported_by?: string
+          id?: string
+          profile_id?: string
+          template_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cv_exports_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cv_exports_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "cv_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      cv_template_field_mappings: {
+        Row: {
+          created_at: string
+          display_name: string
+          field_order: number
+          id: string
+          is_masked: boolean
+          mask_value: string | null
+          original_field_name: string
+          template_id: string
+          updated_at: string
+          visibility_rules: Json | null
+        }
+        Insert: {
+          created_at?: string
+          display_name: string
+          field_order?: number
+          id?: string
+          is_masked?: boolean
+          mask_value?: string | null
+          original_field_name: string
+          template_id: string
+          updated_at?: string
+          visibility_rules?: Json | null
+        }
+        Update: {
+          created_at?: string
+          display_name?: string
+          field_order?: number
+          id?: string
+          is_masked?: boolean
+          mask_value?: string | null
+          original_field_name?: string
+          template_id?: string
+          updated_at?: string
+          visibility_rules?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cv_template_field_mappings_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "cv_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      cv_template_sections: {
+        Row: {
+          created_at: string
+          display_order: number
+          field_mapping: Json | null
+          id: string
+          is_required: boolean
+          section_type: string
+          styling_config: Json | null
+          template_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          display_order?: number
+          field_mapping?: Json | null
+          id?: string
+          is_required?: boolean
+          section_type: string
+          styling_config?: Json | null
+          template_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          display_order?: number
+          field_mapping?: Json | null
+          id?: string
+          is_required?: boolean
+          section_type?: string
+          styling_config?: Json | null
+          template_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cv_template_sections_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "cv_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      cv_templates: {
+        Row: {
+          created_at: string
+          created_by: string
+          description: string | null
+          id: string
+          is_active: boolean
+          layout_config: Json | null
+          name: string
+          orientation: string
+          pages_count: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          layout_config?: Json | null
+          name: string
+          orientation?: string
+          pages_count?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          layout_config?: Json | null
+          name?: string
+          orientation?: string
+          pages_count?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       degrees: {
         Row: {
           created_at: string

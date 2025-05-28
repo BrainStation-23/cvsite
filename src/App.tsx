@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -18,6 +19,8 @@ import UserManagement from "./pages/admin/UserManagement";
 import EmployeeData from "./pages/employee/EmployeeData";
 import ViewProfilePage from "./pages/employee/ViewProfilePage";
 import PlatformSettings from "./pages/admin/PlatformSettings";
+import CVTemplates from "./pages/admin/CVTemplates";
+import CVTemplateCreate from "./pages/admin/CVTemplateCreate";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();

@@ -1,0 +1,179 @@
+
+import { useState, useEffect } from 'react';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
+import { CVTemplate, CVTemplateSection, CVTemplateFieldMapping } from '@/types/cv-templates';
+
+interface CreateTemplateData {
+  name: string;
+  description?: string;
+  pages_count: number;
+  orientation: 'portrait' | 'landscape';
+  is_active: boolean;
+  layout_config: Record<string, any>;
+}
+
+export const useCVTemplates = () => {
+  const [templates, setTemplates] = useState<CVTemplate[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isCreating, setIsCreating] = useState(false);
+  const [isUpdating, setIsUpdating] = useState(false);
+  const { toast } = useToast();
+
+  const fetchTemplates = async () => {
+    try {
+      setIsLoading(true);
+      const { data, error } = await supabase
+        .from('cv_templates')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      setTemplates(data || []);
+    } catch (error) {
+      console.error('Error fetching CV templates:', error);
+      toast({
+        title: "Error",
+        description: "Failed to fetch CV templates",
+        variant: "destructive"
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const createTemplate = async (templateData: CreateTemplateData): Promise<boolean> => {
+    try {
+      setIsCreating(true);
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) {
+        toast({
+          title: "Error",
+          description: "You must be logged in to create templates",
+          variant: "destructive"
+        });
+        return false;
+      }
+
+      const { error } = await supabase
+        .from('cv_templates')
+        .insert([{
+          ...templateData,
+          created_by: user.id
+        }]);
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: "CV template created successfully"
+      });
+
+      await fetchTemplates();
+      return true;
+    } catch (error) {
+      console.error('Error creating CV template:', error);
+      toast({
+        title: "Error",
+        description: "Failed to create CV template",
+        variant: "destructive"
+      });
+      return false;
+    } finally {
+      setIsCreating(false);
+    }
+  };
+
+  const updateTemplate = async (id: string, templateData: Partial<CreateTemplateData>): Promise<boolean> => {
+    try {
+      setIsUpdating(true);
+      const { error } = await supabase
+        .from('cv_templates')
+        .update({
+          ...templateData,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', id);
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: "CV template updated successfully"
+      });
+
+      await fetchTemplates();
+      return true;
+    } catch (error) {
+      console.error('Error updating CV template:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update CV template",
+        variant: "destructive"
+      });
+      return false;
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
+  const deleteTemplate = async (id: string): Promise<boolean> => {
+    try {
+      const { error } = await supabase
+        .from('cv_templates')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: "CV template deleted successfully"
+      });
+
+      await fetchTemplates();
+      return true;
+    } catch (error) {
+      console.error('Error deleting CV template:', error);
+      toast({
+        title: "Error",
+        description: "Failed to delete CV template",
+        variant: "destructive"
+      });
+      return false;
+    }
+  };
+
+  const getTemplate = async (id: string): Promise<CVTemplate | null> => {
+    try {
+      const { data, error } = await supabase
+        .from('cv_templates')
+        .select('*')
+        .eq('id', id)
+        .single();
+
+      if (error) throw error;
+      return data;
+    } catch (error) {
+      console.error('Error fetching CV template:', error);
+      return null;
+    }
+  };
+
+  useEffect(() => {
+    fetchTemplates();
+  }, []);
+
+  return {
+    templates,
+    isLoading,
+    isCreating,
+    isUpdating,
+    createTemplate,
+    updateTemplate,
+    deleteTemplate,
+    getTemplate,
+    refetch: fetchTemplates
+  };
+};
