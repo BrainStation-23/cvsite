@@ -49,6 +49,7 @@ interface ProfileTabsProps {
   saveTechnicalSkill: (skill: Skill) => Promise<boolean>;
   saveSpecializedSkill: (skill: Skill) => Promise<boolean>;
   reorderTechnicalSkills: (skills: Skill[]) => Promise<boolean>;
+  profileId?: string;
 }
 
 export const ProfileTabs: React.FC<ProfileTabsProps> = ({
@@ -88,7 +89,8 @@ export const ProfileTabs: React.FC<ProfileTabsProps> = ({
   deleteSpecializedSkill,
   saveTechnicalSkill,
   saveSpecializedSkill,
-  reorderTechnicalSkills
+  reorderTechnicalSkills,
+  profileId
 }) => {
   return (
     <Tabs defaultValue="general" className="w-full">
@@ -134,6 +136,7 @@ export const ProfileTabs: React.FC<ProfileTabsProps> = ({
           experiences={experiences}
           isEditing={isEditing}
           isSaving={isSaving}
+          profileId={profileId}
           onSave={saveExperience}
           onUpdate={updateExperience}
           onDelete={deleteExperience}

@@ -630,6 +630,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      calculate_experience_duration: {
+        Args: { start_date: string; end_date: string; is_current: boolean }
+        Returns: number
+      }
       get_employee_profiles: {
         Args: {
           search_query?: string
@@ -644,6 +648,10 @@ export type Database = {
           sort_by?: string
           sort_order?: string
         }
+        Returns: Json
+      }
+      get_experiences_by_company: {
+        Args: { profile_uuid: string }
         Returns: Json
       }
       has_any_role: {

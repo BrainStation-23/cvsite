@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import DashboardLayout from '../../components/Layout/DashboardLayout';
@@ -215,6 +214,7 @@ const ViewProfilePage: React.FC = () => {
           saveTechnicalSkill={saveTechnicalSkill}
           saveSpecializedSkill={saveSpecializedSkill}
           reorderTechnicalSkills={reorderTechnicalSkills}
+          profileId={profileId}
         />
       </div>
     </DashboardLayout>
