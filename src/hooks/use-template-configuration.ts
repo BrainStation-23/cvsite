@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
@@ -29,63 +29,64 @@ export const useTemplateConfiguration = (templateId: string) => {
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
 
-  useEffect(() => {
-    const fetchConfiguration = async () => {
-      try {
-        setIsLoading(true);
+  const fetchConfiguration = useCallback(async () => {
+    if (!templateId) return;
+    
+    try {
+      setIsLoading(true);
 
-        // Fetch template sections
-        const { data: sectionsData, error: sectionsError } = await supabase
-          .from('cv_template_sections')
-          .select('*')
-          .eq('template_id', templateId)
-          .order('display_order');
+      // Fetch template sections
+      const { data: sectionsData, error: sectionsError } = await supabase
+        .from('cv_template_sections')
+        .select('*')
+        .eq('template_id', templateId)
+        .order('display_order');
 
-        if (sectionsError) throw sectionsError;
+      if (sectionsError) throw sectionsError;
 
-        // Fetch field mappings
-        const { data: fieldMappingsData, error: fieldMappingsError } = await supabase
-          .from('cv_template_field_mappings')
-          .select('*')
-          .eq('template_id', templateId)
-          .order('field_order');
+      // Fetch field mappings
+      const { data: fieldMappingsData, error: fieldMappingsError } = await supabase
+        .from('cv_template_field_mappings')
+        .select('*')
+        .eq('template_id', templateId)
+        .order('field_order');
 
-        if (fieldMappingsError) throw fieldMappingsError;
+      if (fieldMappingsError) throw fieldMappingsError;
 
-        // Cast Json types to Record<string, any> to match our interfaces
-        const processedSections = (sectionsData || []).map(section => ({
-          ...section,
-          field_mapping: section.field_mapping as Record<string, any>,
-          styling_config: section.styling_config as Record<string, any>
-        }));
+      // Cast Json types to Record<string, any> to match our interfaces
+      const processedSections = (sectionsData || []).map(section => ({
+        ...section,
+        field_mapping: section.field_mapping as Record<string, any>,
+        styling_config: section.styling_config as Record<string, any>
+      }));
 
-        const processedFieldMappings = (fieldMappingsData || []).map(mapping => ({
-          ...mapping,
-          visibility_rules: mapping.visibility_rules as Record<string, any>
-        }));
+      const processedFieldMappings = (fieldMappingsData || []).map(mapping => ({
+        ...mapping,
+        visibility_rules: mapping.visibility_rules as Record<string, any>
+      }));
 
-        setSections(processedSections);
-        setFieldMappings(processedFieldMappings);
-      } catch (error) {
-        console.error('Error fetching template configuration:', error);
-        toast({
-          title: "Error",
-          description: "Failed to load template configuration",
-          variant: "destructive"
-        });
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    if (templateId) {
-      fetchConfiguration();
+      setSections(processedSections);
+      setFieldMappings(processedFieldMappings);
+    } catch (error) {
+      console.error('Error fetching template configuration:', error);
+      toast({
+        title: "Error",
+        description: "Failed to load template configuration",
+        variant: "destructive"
+      });
+    } finally {
+      setIsLoading(false);
     }
   }, [templateId, toast]);
+
+  useEffect(() => {
+    fetchConfiguration();
+  }, [fetchConfiguration]);
 
   return {
     sections,
     fieldMappings,
-    isLoading
+    isLoading,
+    refetch: fetchConfiguration
   };
 };

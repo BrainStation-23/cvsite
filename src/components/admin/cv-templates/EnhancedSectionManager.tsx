@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -312,201 +311,194 @@ const EnhancedSectionManager: React.FC<EnhancedSectionManagerProps> = ({ templat
   };
 
   if (isLoading) {
-    return <div>Loading sections...</div>;
+    return <div className="p-4 text-sm text-gray-500">Loading sections...</div>;
   }
 
   return (
-    <div className="space-y-6">
-      {/* Add New Section */}
+    <div className="space-y-4">
+      {/* Add New Section - Compact Version */}
       <Card>
-        <CardHeader>
-          <CardTitle>Add New Section</CardTitle>
+        <CardHeader className="pb-3">
+          <CardTitle className="text-sm">Add Section</CardTitle>
         </CardHeader>
-        <CardContent>
-          <div className="flex gap-4 items-end">
-            <div className="flex-1">
-              <Label>Section Type</Label>
-              <Select value={newSectionType} onValueChange={(value: CVSectionType) => setNewSectionType(value)}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {getAvailableSectionTypes().map(type => (
-                    <SelectItem key={type.value} value={type.value}>
-                      {type.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <Button onClick={addSection} disabled={getAvailableSectionTypes().length === 0}>
-              <Plus className="h-4 w-4 mr-2" />
-              Add Section
-            </Button>
+        <CardContent className="space-y-3">
+          <div>
+            <Label className="text-xs">Section Type</Label>
+            <Select value={newSectionType} onValueChange={(value: CVSectionType) => setNewSectionType(value)}>
+              <SelectTrigger className="h-8 text-sm">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {getAvailableSectionTypes().map(type => (
+                  <SelectItem key={type.value} value={type.value}>
+                    {type.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
+          <Button 
+            onClick={addSection} 
+            disabled={getAvailableSectionTypes().length === 0}
+            size="sm"
+            className="w-full h-7 text-xs"
+          >
+            <Plus className="h-3 w-3 mr-1" />
+            Add Section
+          </Button>
         </CardContent>
       </Card>
 
-      {/* Existing Sections */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Template Sections</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            {sections.map((section, index) => (
-              <Card key={section.id} className="border-l-4 border-l-blue-500">
-                <CardContent className="p-4">
-                  <div className="flex items-center justify-between mb-4">
-                    <div className="flex items-center gap-3">
-                      <div className="flex flex-col gap-1">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => moveSection(section.id, 'up')}
-                          disabled={index === 0}
-                          className="h-4 w-8 p-0"
-                        >
-                          ↑
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => moveSection(section.id, 'down')}
-                          disabled={index === sections.length - 1}
-                          className="h-4 w-8 p-0"
-                        >
-                          ↓
-                        </Button>
-                      </div>
-                      <GripVertical className="h-4 w-4 text-gray-400" />
+      {/* Existing Sections - Compact Version */}
+      <div className="space-y-3">
+        {sections.map((section, index) => (
+          <Card key={section.id} className="border-l-4 border-l-blue-500">
+            <CardContent className="p-3">
+              <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center gap-2">
+                  <div className="flex flex-col gap-0.5">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => moveSection(section.id, 'up')}
+                      disabled={index === 0}
+                      className="h-3 w-6 p-0 text-xs"
+                    >
+                      ↑
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => moveSection(section.id, 'down')}
+                      disabled={index === sections.length - 1}
+                      className="h-3 w-6 p-0 text-xs"
+                    >
+                      ↓
+                    </Button>
+                  </div>
+                  <div>
+                    <h4 className="font-medium text-sm">{getSectionLabel(section.section_type)}</h4>
+                    <p className="text-xs text-gray-500">Order: {section.display_order}</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="flex items-center space-x-1">
+                    <Switch
+                      checked={section.is_required}
+                      onCheckedChange={(checked) => updateSection(section.id, { is_required: checked })}
+                    />
+                    <Label className="text-xs">Required</Label>
+                  </div>
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    onClick={() => toggleSectionExpanded(section.id)}
+                    className="h-6 w-6 p-0"
+                  >
+                    {expandedSections.has(section.id) ? (
+                      <ChevronDown className="h-3 w-3" />
+                    ) : (
+                      <ChevronRight className="h-3 w-3" />
+                    )}
+                  </Button>
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    onClick={() => removeSection(section.id)}
+                    className="text-red-600 hover:text-red-700 h-6 w-6 p-0"
+                  >
+                    <Trash2 className="h-3 w-3" />
+                  </Button>
+                </div>
+              </div>
+
+              <Collapsible open={expandedSections.has(section.id)}>
+                <CollapsibleContent>
+                  <div className="space-y-3 pt-2 border-t">
+                    {/* Section Configuration - Compact */}
+                    <div className="grid grid-cols-1 gap-2">
                       <div>
-                        <h4 className="font-medium">{getSectionLabel(section.section_type)}</h4>
-                        <p className="text-sm text-gray-500">Order: {section.display_order}</p>
+                        <Label className="text-xs">Display Style</Label>
+                        <Select 
+                          value={section.styling_config.display_style || 'default'} 
+                          onValueChange={(value) => updateSectionStyling(section.id, { display_style: value })}
+                        >
+                          <SelectTrigger className="h-7 text-xs">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {DISPLAY_STYLES.map(style => (
+                              <SelectItem key={style.value} value={style.value}>
+                                {style.label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div>
+                        <Label className="text-xs">Items per Column</Label>
+                        <Input 
+                          type="number" 
+                          value={section.styling_config.items_per_column || 1}
+                          onChange={(e) => updateSectionStyling(section.id, { items_per_column: parseInt(e.target.value) })}
+                          min={1} 
+                          max={3} 
+                          className="h-7 text-xs" 
+                        />
                       </div>
                     </div>
-                    <div className="flex items-center gap-3">
-                      <div className="flex items-center space-x-2">
-                        <Switch
-                          checked={section.is_required}
-                          onCheckedChange={(checked) => updateSection(section.id, { is_required: checked })}
-                        />
-                        <Label className="text-sm">Required</Label>
+
+                    {/* Field Configuration - Compact */}
+                    <div>
+                      <Label className="text-xs font-medium mb-2 block">Fields</Label>
+                      <div className="space-y-2">
+                        {(section.styling_config.fields || []).map((field, fieldIndex) => (
+                          <div key={field.field} className="border rounded p-2 bg-gray-50">
+                            <div className="flex items-center justify-between mb-1">
+                              <div className="flex items-center gap-2">
+                                <Checkbox
+                                  checked={field.enabled}
+                                  onCheckedChange={(checked) => updateFieldConfig(section.id, fieldIndex, { enabled: !!checked })}
+                                />
+                                <span className="font-medium text-xs">{field.label}</span>
+                              </div>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => updateFieldConfig(section.id, fieldIndex, { masked: !field.masked })}
+                                className="h-5 w-5 p-0"
+                              >
+                                {field.masked ? <EyeOff className="h-2.5 w-2.5" /> : <Eye className="h-2.5 w-2.5" />}
+                              </Button>
+                            </div>
+                            
+                            {field.masked && (
+                              <div className="mt-1">
+                                <Input
+                                  value={field.mask_value || ''}
+                                  onChange={(e) => updateFieldConfig(section.id, fieldIndex, { mask_value: e.target.value })}
+                                  placeholder="e.g., EMP-***"
+                                  className="h-6 text-xs"
+                                />
+                              </div>
+                            )}
+                          </div>
+                        ))}
                       </div>
-                      <Button 
-                        variant="ghost" 
-                        size="sm" 
-                        onClick={() => toggleSectionExpanded(section.id)}
-                      >
-                        {expandedSections.has(section.id) ? (
-                          <ChevronDown className="h-4 w-4" />
-                        ) : (
-                          <ChevronRight className="h-4 w-4" />
-                        )}
-                      </Button>
-                      <Button 
-                        variant="ghost" 
-                        size="sm" 
-                        onClick={() => removeSection(section.id)}
-                        className="text-red-600 hover:text-red-700"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
                     </div>
                   </div>
+                </CollapsibleContent>
+              </Collapsible>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
 
-                  <Collapsible open={expandedSections.has(section.id)}>
-                    <CollapsibleContent>
-                      <div className="space-y-4 pt-4 border-t">
-                        {/* Section Configuration */}
-                        <div className="grid grid-cols-2 gap-4">
-                          <div>
-                            <Label className="text-sm">Display Style</Label>
-                            <Select 
-                              value={section.styling_config.display_style || 'default'} 
-                              onValueChange={(value) => updateSectionStyling(section.id, { display_style: value })}
-                            >
-                              <SelectTrigger className="h-8">
-                                <SelectValue />
-                              </SelectTrigger>
-                              <SelectContent>
-                                {DISPLAY_STYLES.map(style => (
-                                  <SelectItem key={style.value} value={style.value}>
-                                    {style.label}
-                                  </SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
-                          </div>
-                          <div>
-                            <Label className="text-sm">Items per Column</Label>
-                            <Input 
-                              type="number" 
-                              value={section.styling_config.items_per_column || 1}
-                              onChange={(e) => updateSectionStyling(section.id, { items_per_column: parseInt(e.target.value) })}
-                              min={1} 
-                              max={3} 
-                              className="h-8" 
-                            />
-                          </div>
-                        </div>
-
-                        {/* Field Configuration */}
-                        <div>
-                          <Label className="text-sm font-medium mb-3 block">Field Configuration</Label>
-                          <div className="space-y-3">
-                            {(section.styling_config.fields || []).map((field, fieldIndex) => (
-                              <div key={field.field} className="border rounded-lg p-3 bg-gray-50">
-                                <div className="flex items-center justify-between mb-2">
-                                  <div className="flex items-center gap-3">
-                                    <Checkbox
-                                      checked={field.enabled}
-                                      onCheckedChange={(checked) => updateFieldConfig(section.id, fieldIndex, { enabled: !!checked })}
-                                    />
-                                    <span className="font-medium text-sm">{field.label}</span>
-                                  </div>
-                                  <div className="flex items-center gap-2">
-                                    <Button
-                                      variant="ghost"
-                                      size="sm"
-                                      onClick={() => updateFieldConfig(section.id, fieldIndex, { masked: !field.masked })}
-                                      className="h-7 w-7 p-0"
-                                    >
-                                      {field.masked ? <EyeOff className="h-3 w-3" /> : <Eye className="h-3 w-3" />}
-                                    </Button>
-                                  </div>
-                                </div>
-                                
-                                {field.masked && (
-                                  <div className="mt-2">
-                                    <Label className="text-xs">Mask Value</Label>
-                                    <Input
-                                      value={field.mask_value || ''}
-                                      onChange={(e) => updateFieldConfig(section.id, fieldIndex, { mask_value: e.target.value })}
-                                      placeholder="e.g., EMP-***"
-                                      className="h-7 text-xs"
-                                    />
-                                  </div>
-                                )}
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      </div>
-                    </CollapsibleContent>
-                  </Collapsible>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-
-          {sections.length === 0 && (
-            <div className="text-center py-8 text-gray-500">
-              <p>No sections added yet. Use the form above to add sections to your template.</p>
-            </div>
-          )}
-        </CardContent>
-      </Card>
+      {sections.length === 0 && (
+        <div className="text-center py-6 text-gray-500">
+          <p className="text-sm">No sections added yet. Use the form above to add sections to your template.</p>
+        </div>
+      )}
     </div>
   );
 };

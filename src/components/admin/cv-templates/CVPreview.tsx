@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { CVTemplate } from '@/types/cv-templates';
 import { createCVStyles } from './cv-preview-styles';
 import { PageDistributor } from './PageDistributor';
@@ -12,10 +12,17 @@ interface CVPreviewProps {
 }
 
 const CVPreview: React.FC<CVPreviewProps> = ({ template, profile }) => {
-  const { sections, fieldMappings, isLoading } = useTemplateConfiguration(template.id);
+  const { sections, fieldMappings, isLoading, refetch } = useTemplateConfiguration(template.id);
   const [overflowWarning, setOverflowWarning] = useState<string | null>(null);
   const { toast } = useToast();
   const styles = createCVStyles(template);
+
+  // Force refetch when template changes
+  useEffect(() => {
+    if (template.id) {
+      refetch?.();
+    }
+  }, [template, refetch]);
 
   const handleOverflow = (overflowInfo: { requiredPages: number; overflowHeight: number }) => {
     const warningMessage = `Content overflow detected! The current content requires ${overflowInfo.requiredPages} pages but template is configured for ${template.pages_count} pages. Consider reducing content or increasing page count.`;
