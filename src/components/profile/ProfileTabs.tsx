@@ -93,99 +93,119 @@ export const ProfileTabs: React.FC<ProfileTabsProps> = ({
   profileId
 }) => {
   return (
-    <Tabs defaultValue="general" className="w-full">
-      <TabsList className="grid w-full grid-cols-7">
-        <TabsTrigger value="general">General</TabsTrigger>
-        <TabsTrigger value="skills">Skills</TabsTrigger>
-        <TabsTrigger value="experience">Experience</TabsTrigger>
-        <TabsTrigger value="education">Education</TabsTrigger>
-        <TabsTrigger value="training">Training</TabsTrigger>
-        <TabsTrigger value="achievements">Achievements</TabsTrigger>
-        <TabsTrigger value="projects">Projects</TabsTrigger>
-      </TabsList>
+    <Tabs defaultValue="general" className="w-full h-full flex flex-col">
+      {/* Compact tabs header */}
+      <div className="flex-shrink-0">
+        <TabsList className="grid w-full grid-cols-7 h-10 bg-gray-100 dark:bg-gray-800 rounded-md p-1">
+          <TabsTrigger value="general" className="text-xs py-2 px-3 data-[state=active]:bg-white dark:data-[state=active]:bg-gray-700">
+            General
+          </TabsTrigger>
+          <TabsTrigger value="skills" className="text-xs py-2 px-3 data-[state=active]:bg-white dark:data-[state=active]:bg-gray-700">
+            Skills
+          </TabsTrigger>
+          <TabsTrigger value="experience" className="text-xs py-2 px-3 data-[state=active]:bg-white dark:data-[state=active]:bg-gray-700">
+            Experience
+          </TabsTrigger>
+          <TabsTrigger value="education" className="text-xs py-2 px-3 data-[state=active]:bg-white dark:data-[state=active]:bg-gray-700">
+            Education
+          </TabsTrigger>
+          <TabsTrigger value="training" className="text-xs py-2 px-3 data-[state=active]:bg-white dark:data-[state=active]:bg-gray-700">
+            Training
+          </TabsTrigger>
+          <TabsTrigger value="achievements" className="text-xs py-2 px-3 data-[state=active]:bg-white dark:data-[state=active]:bg-gray-700">
+            Achievements
+          </TabsTrigger>
+          <TabsTrigger value="projects" className="text-xs py-2 px-3 data-[state=active]:bg-white dark:data-[state=active]:bg-gray-700">
+            Projects
+          </TabsTrigger>
+        </TabsList>
+      </div>
       
-      <TabsContent value="general" className="mt-6">
-        <GeneralInfoTab 
-          form={form} 
-          isEditing={isEditing} 
-          onImageUpdate={onImageUpdate} 
-        />
-      </TabsContent>
-      
-      <TabsContent value="skills" className="mt-6">
-        <SkillsTab
-          technicalSkills={technicalSkills}
-          specializedSkills={specializedSkills}
-          isEditing={isEditing}
-          newTechnicalSkill={newTechnicalSkill}
-          newSpecializedSkill={newSpecializedSkill}
-          setNewTechnicalSkill={setNewTechnicalSkill}
-          setNewSpecializedSkill={setNewSpecializedSkill}
-          handleAddTechnicalSkill={handleAddTechnicalSkill}
-          handleAddSpecializedSkill={handleAddSpecializedSkill}
-          deleteTechnicalSkill={deleteTechnicalSkill}
-          deleteSpecializedSkill={deleteSpecializedSkill}
-          saveTechnicalSkill={saveTechnicalSkill}
-          saveSpecializedSkill={saveSpecializedSkill}
-          onReorderTechnicalSkills={reorderTechnicalSkills}
-        />
-      </TabsContent>
-      
-      <TabsContent value="experience">
-        <ExperienceTab
-          experiences={experiences}
-          isEditing={isEditing}
-          isSaving={isSaving}
-          profileId={profileId}
-          onSave={saveExperience}
-          onUpdate={updateExperience}
-          onDelete={deleteExperience}
-        />
-      </TabsContent>
-      
-      <TabsContent value="education">
-        <EducationTab
-          education={education}
-          isEditing={isEditing}
-          isSaving={isSaving}
-          onSave={saveEducation}
-          onUpdate={updateEducation}
-          onDelete={deleteEducation}
-        />
-      </TabsContent>
-      
-      <TabsContent value="training">
-        <TrainingTab
-          trainings={trainings}
-          isEditing={isEditing}
-          isSaving={isSaving}
-          onSave={saveTraining}
-          onUpdate={updateTraining}
-          onDelete={deleteTraining}
-        />
-      </TabsContent>
-      
-      <TabsContent value="achievements">
-        <AchievementsTab
-          achievements={achievements}
-          isEditing={isEditing}
-          isSaving={isSaving}
-          onSave={saveAchievement}
-          onUpdate={updateAchievement}
-          onDelete={deleteAchievement}
-        />
-      </TabsContent>
-      
-      <TabsContent value="projects">
-        <ProjectsTab
-          projects={projects}
-          isEditing={isEditing}
-          isSaving={isSaving}
-          onSave={saveProject}
-          onUpdate={updateProject}
-          onDelete={deleteProject}
-        />
-      </TabsContent>
+      {/* Scrollable content area */}
+      <div className="flex-1 min-h-0 mt-4">
+        <TabsContent value="general" className="mt-0 h-full overflow-auto">
+          <GeneralInfoTab 
+            form={form} 
+            isEditing={isEditing} 
+            onImageUpdate={onImageUpdate} 
+          />
+        </TabsContent>
+        
+        <TabsContent value="skills" className="mt-0 h-full overflow-auto">
+          <SkillsTab
+            technicalSkills={technicalSkills}
+            specializedSkills={specializedSkills}
+            isEditing={isEditing}
+            newTechnicalSkill={newTechnicalSkill}
+            newSpecializedSkill={newSpecializedSkill}
+            setNewTechnicalSkill={setNewTechnicalSkill}
+            setNewSpecializedSkill={setNewSpecializedSkill}
+            handleAddTechnicalSkill={handleAddTechnicalSkill}
+            handleAddSpecializedSkill={handleAddSpecializedSkill}
+            deleteTechnicalSkill={deleteTechnicalSkill}
+            deleteSpecializedSkill={deleteSpecializedSkill}
+            saveTechnicalSkill={saveTechnicalSkill}
+            saveSpecializedSkill={saveSpecializedSkill}
+            onReorderTechnicalSkills={reorderTechnicalSkills}
+          />
+        </TabsContent>
+        
+        <TabsContent value="experience" className="mt-0 h-full overflow-auto">
+          <ExperienceTab
+            experiences={experiences}
+            isEditing={isEditing}
+            isSaving={isSaving}
+            profileId={profileId}
+            onSave={saveExperience}
+            onUpdate={updateExperience}
+            onDelete={deleteExperience}
+          />
+        </TabsContent>
+        
+        <TabsContent value="education" className="mt-0 h-full overflow-auto">
+          <EducationTab
+            education={education}
+            isEditing={isEditing}
+            isSaving={isSaving}
+            onSave={saveEducation}
+            onUpdate={updateEducation}
+            onDelete={deleteEducation}
+          />
+        </TabsContent>
+        
+        <TabsContent value="training" className="mt-0 h-full overflow-auto">
+          <TrainingTab
+            trainings={trainings}
+            isEditing={isEditing}
+            isSaving={isSaving}
+            onSave={saveTraining}
+            onUpdate={updateTraining}
+            onDelete={deleteTraining}
+          />
+        </TabsContent>
+        
+        <TabsContent value="achievements" className="mt-0 h-full overflow-auto">
+          <AchievementsTab
+            achievements={achievements}
+            isEditing={isEditing}
+            isSaving={isSaving}
+            onSave={saveAchievement}
+            onUpdate={updateAchievement}
+            onDelete={deleteAchievement}
+          />
+        </TabsContent>
+        
+        <TabsContent value="projects" className="mt-0 h-full overflow-auto">
+          <ProjectsTab
+            projects={projects}
+            isEditing={isEditing}
+            isSaving={isSaving}
+            onSave={saveProject}
+            onUpdate={updateProject}
+            onDelete={deleteProject}
+          />
+        </TabsContent>
+      </div>
     </Tabs>
   );
 };

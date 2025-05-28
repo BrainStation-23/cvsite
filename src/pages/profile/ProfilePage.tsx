@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import DashboardLayout from '../../components/Layout/DashboardLayout';
 import { Button } from '@/components/ui/button';
@@ -8,6 +7,7 @@ import { useForm } from 'react-hook-form';
 import { ProfileTabs } from '@/components/profile/ProfileTabs';
 import { GeneralInfoFormData } from '@/components/profile/GeneralInfoTab';
 import { Skill } from '@/types';
+import { Edit3, Save, X } from 'lucide-react';
 
 const ProfilePage: React.FC = () => {
   const { toast } = useToast();
@@ -122,80 +122,95 @@ const ProfilePage: React.FC = () => {
 
   return (
     <DashboardLayout>
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-semibold text-cvsite-navy dark:text-white"></h1>
-        {!isEditing ? (
-          <Button 
-            onClick={() => setIsEditing(true)}
-            variant="outline"
-          >
-            Edit Profile
-          </Button>
-        ) : (
-          <div className="space-x-2">
+      <div className="flex flex-col h-full">
+        {/* Compact header */}
+        <div className="flex-shrink-0 flex justify-between items-center py-4 px-1 border-b border-gray-200 dark:border-gray-700">
+          <h1 className="text-xl font-semibold text-cvsite-navy dark:text-white">Profile</h1>
+          {!isEditing ? (
             <Button 
-              onClick={form.handleSubmit(handleUpdateProfile)}
-              variant="default"
-              disabled={isSaving || isLoading}
-            >
-              {isSaving ? "Saving..." : "Save Changes"}
-            </Button>
-            <Button 
-              onClick={() => setIsEditing(false)}
+              onClick={() => setIsEditing(true)}
               variant="outline"
-              disabled={isSaving}
+              size="sm"
+              className="h-8"
             >
-              Cancel
+              <Edit3 className="h-4 w-4 mr-2" />
+              Edit
             </Button>
-          </div>
-        )}
-      </div>
-
-      {isLoading ? (
-        <div className="flex justify-center items-center h-64">
-          <p>Loading profile information...</p>
+          ) : (
+            <div className="flex items-center space-x-2">
+              <Button 
+                onClick={form.handleSubmit(handleUpdateProfile)}
+                variant="default"
+                size="sm"
+                className="h-8"
+                disabled={isSaving || isLoading}
+              >
+                <Save className="h-4 w-4 mr-2" />
+                {isSaving ? "Saving..." : "Save"}
+              </Button>
+              <Button 
+                onClick={() => setIsEditing(false)}
+                variant="outline"
+                size="sm"
+                className="h-8"
+                disabled={isSaving}
+              >
+                <X className="h-4 w-4 mr-2" />
+                Cancel
+              </Button>
+            </div>
+          )}
         </div>
-      ) : (
-        <ProfileTabs
-          form={form}
-          isEditing={isEditing}
-          onImageUpdate={handleImageUpdate}
-          technicalSkills={technicalSkills}
-          specializedSkills={specializedSkills}
-          experiences={experiences}
-          education={education}
-          trainings={trainings}
-          achievements={achievements}
-          projects={projects}
-          isSaving={isSaving}
-          newTechnicalSkill={newTechnicalSkill}
-          newSpecializedSkill={newSpecializedSkill}
-          setNewTechnicalSkill={setNewTechnicalSkill}
-          setNewSpecializedSkill={setNewSpecializedSkill}
-          handleAddTechnicalSkill={handleAddTechnicalSkill}
-          handleAddSpecializedSkill={handleAddSpecializedSkill}
-          saveExperience={saveExperience}
-          updateExperience={updateExperience}
-          deleteExperience={deleteExperience}
-          saveEducation={saveEducation}
-          updateEducation={updateEducation}
-          deleteEducation={deleteEducation}
-          saveTraining={saveTraining}
-          updateTraining={updateTraining}
-          deleteTraining={deleteTraining}
-          saveAchievement={saveAchievement}
-          updateAchievement={updateAchievement}
-          deleteAchievement={deleteAchievement}
-          saveProject={saveProject}
-          updateProject={updateProject}
-          deleteProject={deleteProject}
-          deleteTechnicalSkill={deleteTechnicalSkill}
-          deleteSpecializedSkill={deleteSpecializedSkill}
-          saveTechnicalSkill={saveTechnicalSkill}
-          saveSpecializedSkill={saveSpecializedSkill}
-          reorderTechnicalSkills={reorderTechnicalSkills}
-        />
-      )}
+
+        {/* Content area */}
+        <div className="flex-1 min-h-0 py-4">
+          {isLoading ? (
+            <div className="flex justify-center items-center h-64">
+              <p>Loading profile information...</p>
+            </div>
+          ) : (
+            <ProfileTabs
+              form={form}
+              isEditing={isEditing}
+              onImageUpdate={handleImageUpdate}
+              technicalSkills={technicalSkills}
+              specializedSkills={specializedSkills}
+              experiences={experiences}
+              education={education}
+              trainings={trainings}
+              achievements={achievements}
+              projects={projects}
+              isSaving={isSaving}
+              newTechnicalSkill={newTechnicalSkill}
+              newSpecializedSkill={newSpecializedSkill}
+              setNewTechnicalSkill={setNewTechnicalSkill}
+              setNewSpecializedSkill={setNewSpecializedSkill}
+              handleAddTechnicalSkill={handleAddTechnicalSkill}
+              handleAddSpecializedSkill={handleAddSpecializedSkill}
+              saveExperience={saveExperience}
+              updateExperience={updateExperience}
+              deleteExperience={deleteExperience}
+              saveEducation={saveEducation}
+              updateEducation={updateEducation}
+              deleteEducation={deleteEducation}
+              saveTraining={saveTraining}
+              updateTraining={updateTraining}
+              deleteTraining={deleteTraining}
+              saveAchievement={saveAchievement}
+              updateAchievement={updateAchievement}
+              deleteAchievement={deleteAchievement}
+              saveProject={saveProject}
+              updateProject={updateProject}
+              deleteProject={deleteProject}
+              deleteTechnicalSkill={deleteTechnicalSkill}
+              deleteSpecializedSkill={deleteSpecializedSkill}
+              saveTechnicalSkill={saveTechnicalSkill}
+              saveSpecializedSkill={saveSpecializedSkill}
+              reorderTechnicalSkills={reorderTechnicalSkills}
+            />
+          )}
+        </div>
+      </div>
     </DashboardLayout>
   );
 };
