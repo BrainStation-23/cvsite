@@ -42,7 +42,7 @@ export const SkillCard: React.FC<SkillCardProps> = ({
 
   const style = {
     transform: CSS.Transform.toString(transform),
-    transition,
+    transition: isDragging ? 'none' : transition,
   };
 
   const handleSaveEdit = () => {
@@ -67,7 +67,7 @@ export const SkillCard: React.FC<SkillCardProps> = ({
       ref={setNodeRef}
       style={style}
       className={`transition-all duration-200 hover:shadow-md ${
-        isDragging ? 'ring-2 ring-cvsite-teal shadow-lg' : ''
+        isDragging ? 'ring-2 ring-cvsite-teal shadow-lg opacity-90' : ''
       } ${isDraggable && isEditing && !isEditingSkill ? 'cursor-grab active:cursor-grabbing' : ''}`}
     >
       <CardContent className="p-4">
@@ -77,13 +77,13 @@ export const SkillCard: React.FC<SkillCardProps> = ({
               <div
                 {...attributes}
                 {...listeners}
-                className="cursor-grab active:cursor-grabbing touch-none"
+                className="cursor-grab active:cursor-grabbing touch-none flex-shrink-0"
               >
                 <GripVertical className="h-4 w-4 text-gray-400 hover:text-gray-600" />
               </div>
             )}
             
-            <div className="flex-1">
+            <div className="flex-1 min-w-0">
               {isEditingSkill ? (
                 <div className="space-y-2">
                   <Input
@@ -112,7 +112,7 @@ export const SkillCard: React.FC<SkillCardProps> = ({
                 </div>
               ) : (
                 <div>
-                  <h4 className="font-medium text-sm">{skill.name}</h4>
+                  <h4 className="font-medium text-sm truncate">{skill.name}</h4>
                   <div className="flex items-center space-x-2 mt-2">
                     <span className="text-xs text-gray-600">Proficiency:</span>
                     <div className="flex space-x-1">
@@ -139,7 +139,7 @@ export const SkillCard: React.FC<SkillCardProps> = ({
           </div>
 
           {isEditing && (
-            <div className="flex items-center space-x-1">
+            <div className="flex items-center space-x-1 flex-shrink-0">
               {isEditingSkill ? (
                 <>
                   <Button

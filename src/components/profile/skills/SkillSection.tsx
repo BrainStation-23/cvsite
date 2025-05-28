@@ -14,6 +14,8 @@ import {
   useSensor,
   useSensors,
   DragEndEvent,
+  DragStartEvent,
+  DragOverlay,
 } from '@dnd-kit/core';
 import {
   arrayMove,
@@ -52,22 +54,42 @@ export const SkillSection: React.FC<SkillSectionProps> = ({
   onReorderSkills
 }) => {
   const [showAddForm, setShowAddForm] = useState(false);
+  const [activeId, setActiveId] = useState<string | null>(null);
+  const [localSkills, setLocalSkills] = useState<Skill[]>(skills);
+
+  // Update local skills when props change
+  React.useEffect(() => {
+    setLocalSkills(skills);
+  }, [skills]);
 
   const sensors = useSensors(
-    useSensor(PointerSensor),
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 8,
+      },
+    }),
     useSensor(KeyboardSensor, {
       coordinateGetter: sortableKeyboardCoordinates,
     })
   );
 
+  const handleDragStart = (event: DragStartEvent) => {
+    setActiveId(event.active.id as string);
+  };
+
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
+    setActiveId(null);
 
     if (over && active.id !== over.id && onReorderSkills) {
-      const oldIndex = skills.findIndex((skill) => skill.id === active.id);
-      const newIndex = skills.findIndex((skill) => skill.id === over.id);
+      const oldIndex = localSkills.findIndex((skill) => skill.id === active.id);
+      const newIndex = localSkills.findIndex((skill) => skill.id === over.id);
 
-      const reorderedSkills = arrayMove(skills, oldIndex, newIndex);
+      // Optimistic update - update UI immediately
+      const reorderedSkills = arrayMove(localSkills, oldIndex, newIndex);
+      setLocalSkills(reorderedSkills);
+
+      // Then update the database
       onReorderSkills(reorderedSkills);
     }
   };
@@ -77,6 +99,8 @@ export const SkillSection: React.FC<SkillSectionProps> = ({
     setShowAddForm(false);
     setNewSkill({ name: '', proficiency: 1, priority: 0 });
   };
+
+  const activeSkill = activeId ? localSkills.find(skill => skill.id === activeId) : null;
 
   return (
     <Card>
@@ -144,20 +168,21 @@ export const SkillSection: React.FC<SkillSectionProps> = ({
           </Card>
         )}
 
-        {skills.length > 0 ? (
+        {localSkills.length > 0 ? (
           <div className="space-y-2">
             {isDraggable && isEditing ? (
               <DndContext
                 sensors={sensors}
                 collisionDetection={closestCenter}
+                onDragStart={handleDragStart}
                 onDragEnd={handleDragEnd}
                 modifiers={[restrictToVerticalAxis, restrictToParentElement]}
               >
                 <SortableContext 
-                  items={skills.map(skill => skill.id)} 
+                  items={localSkills.map(skill => skill.id)} 
                   strategy={verticalListSortingStrategy}
                 >
-                  {skills.map((skill) => (
+                  {localSkills.map((skill) => (
                     <SkillCard
                       key={skill.id}
                       skill={skill}
@@ -168,9 +193,20 @@ export const SkillSection: React.FC<SkillSectionProps> = ({
                     />
                   ))}
                 </SortableContext>
+                <DragOverlay>
+                  {activeSkill ? (
+                    <SkillCard
+                      skill={activeSkill}
+                      isEditing={isEditing}
+                      isDraggable={false}
+                      onUpdate={onUpdateSkill}
+                      onDelete={onDeleteSkill}
+                    />
+                  ) : null}
+                </DragOverlay>
               </DndContext>
             ) : (
-              skills.map((skill) => (
+              localSkills.map((skill) => (
                 <SkillCard
                   key={skill.id}
                   skill={skill}
