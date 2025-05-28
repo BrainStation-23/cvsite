@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import DashboardLayout from '../../components/Layout/DashboardLayout';
@@ -105,10 +106,11 @@ const CVTemplatePreview: React.FC = () => {
         </div>
 
         {/* Content */}
-        <div className="flex-1 min-h-0 py-6">
-          <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 h-full">
-            {/* Controls */}
-            <div className="lg:col-span-1 space-y-6">
+        <div className="flex-1 min-h-0 py-6 flex flex-col">
+          {/* Top Section - Controls and Template Info */}
+          <div className="flex-shrink-0 mb-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Preview Options */}
               <Card>
                 <CardHeader>
                   <CardTitle>Preview Options</CardTitle>
@@ -129,6 +131,7 @@ const CVTemplatePreview: React.FC = () => {
                 </CardContent>
               </Card>
 
+              {/* Template Info */}
               <Card>
                 <CardHeader>
                   <CardTitle>Template Info</CardTitle>
@@ -152,24 +155,24 @@ const CVTemplatePreview: React.FC = () => {
                 </CardContent>
               </Card>
             </div>
+          </div>
 
-            {/* Preview */}
-            <div className="lg:col-span-3">
-              <Card className="h-full">
-                <CardContent className="p-6 h-full">
-                  {selectedProfile ? (
-                    <CVPreview template={template} profile={selectedProfile} />
-                  ) : (
-                    <div className="flex items-center justify-center h-full text-gray-500">
-                      <div className="text-center">
-                        <p className="text-lg font-medium">No Profile Selected</p>
-                        <p className="text-sm mt-2">Choose an employee profile to preview the CV template</p>
-                      </div>
+          {/* Bottom Section - Preview taking remaining space */}
+          <div className="flex-1 min-h-0">
+            <Card className="h-full">
+              <CardContent className="p-6 h-full overflow-auto">
+                {selectedProfile ? (
+                  <CVPreview template={template} profile={selectedProfile} />
+                ) : (
+                  <div className="flex items-center justify-center h-full text-gray-500">
+                    <div className="text-center">
+                      <p className="text-lg font-medium">No Profile Selected</p>
+                      <p className="text-sm mt-2">Choose an employee profile to preview the CV template</p>
                     </div>
-                  )}
-                </CardContent>
-              </Card>
-            </div>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
           </div>
         </div>
       </div>
