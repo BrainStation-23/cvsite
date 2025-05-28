@@ -22,46 +22,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const fetchUserProfile = async (supabaseUser: SupabaseUser) => {
     try {
-      // First try to get existing role
-      let { data: roleData, error: roleError } = await supabase
+      // Get user role
+      const { data: roleData, error: roleError } = await supabase
         .from('user_roles')
         .select('role')
         .eq('user_id', supabaseUser.id)
         .single();
 
-      // If no role exists, create one (default to employee)
-      if (roleError && roleError.code === 'PGRST116') {
-        const { data: newRoleData, error: createRoleError } = await supabase
-          .from('user_roles')
-          .insert([{ user_id: supabaseUser.id, role: 'employee' }])
-          .select('role')
-          .single();
-
-        if (createRoleError) {
-          console.error('Error creating user role:', createRoleError);
-          throw createRoleError;
-        }
-        roleData = newRoleData;
-      } else if (roleError) {
+      if (roleError) {
         console.error('Error fetching user role:', roleError);
-        throw roleError;
+        setUser(null);
+        return;
       }
 
       const userRole = roleData.role as UserRole;
-
-      // Create or update profile if needed
-      const { error: profileError } = await supabase
-        .from('profiles')
-        .upsert([{
-          id: supabaseUser.id,
-          first_name: supabaseUser.user_metadata.first_name || supabaseUser.user_metadata.name?.split(' ')[0] || '',
-          last_name: supabaseUser.user_metadata.last_name || supabaseUser.user_metadata.name?.split(' ').slice(1).join(' ') || '',
-          employee_id: supabaseUser.user_metadata.employee_id || null
-        }]);
-
-      if (profileError) {
-        console.error('Error upserting profile:', profileError);
-      }
 
       setUser({
         id: supabaseUser.id,
