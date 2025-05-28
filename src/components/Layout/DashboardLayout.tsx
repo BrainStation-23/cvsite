@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
@@ -121,9 +122,9 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
       </aside>
 
       {/* Main content */}
-      <div className={`flex-1 ${isSidebarOpen ? 'ml-64' : 'ml-16'} transition-margin duration-300 ease-in-out`}>
+      <div className={`flex-1 ${isSidebarOpen ? 'ml-64' : 'ml-16'} transition-margin duration-300 ease-in-out flex flex-col`}>
         {/* Header */}
-        <header className="bg-white dark:bg-gray-800 shadow-md py-4 px-6">
+        <header className="bg-white dark:bg-gray-800 shadow-md py-4 px-6 flex-shrink-0">
           <div className="flex justify-between items-center">
             <h2 className="text-xl font-semibold text-cvsite-navy dark:text-white">
               {getPageTitle()}
@@ -140,7 +141,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
         </header>
 
         {/* Content */}
-        <main className="p-6 h-[calc(100vh-72px)] overflow-auto">
+        <main className="flex-1 overflow-hidden">
           {children}
         </main>
       </div>

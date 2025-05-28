@@ -12,41 +12,46 @@ import ReferenceSettings from '@/components/admin/reference/ReferenceSettings';
 const PlatformSettings: React.FC = () => {
   return (
     <DashboardLayout>
-      
-      <Tabs defaultValue="universities" className="w-full">
-        <TabsList className="mb-4">
-          <TabsTrigger value="universities">Universities</TabsTrigger>
-          <TabsTrigger value="departments">Departments</TabsTrigger>
-          <TabsTrigger value="degrees">Degrees</TabsTrigger>
-          <TabsTrigger value="designations">Designations</TabsTrigger>
-          <TabsTrigger value="references">References</TabsTrigger>
-          <TabsTrigger value="sbus">SBUs</TabsTrigger>
-        </TabsList>
-        
-        <TabsContent value="universities">
-          <UniversitySettings />
-        </TabsContent>
-        
-        <TabsContent value="departments">
-          <DepartmentSettings />
-        </TabsContent>
-        
-        <TabsContent value="degrees">
-          <DegreeSettings />
-        </TabsContent>
-        
-        <TabsContent value="designations">
-          <DesignationSettings />
-        </TabsContent>
-        
-        <TabsContent value="references">
-          <ReferenceSettings />
-        </TabsContent>
-        
-        <TabsContent value="sbus">
-          <SettingCategory title="SBUs" table="sbus" />
-        </TabsContent>
-      </Tabs>
+      <div className="flex flex-col h-full">
+        <Tabs defaultValue="universities" className="flex flex-col h-full">
+          <div className="sticky top-0 bg-white dark:bg-gray-900 z-10 border-b">
+            <TabsList className="w-full justify-start">
+              <TabsTrigger value="universities">Universities</TabsTrigger>
+              <TabsTrigger value="departments">Departments</TabsTrigger>
+              <TabsTrigger value="degrees">Degrees</TabsTrigger>
+              <TabsTrigger value="designations">Designations</TabsTrigger>
+              <TabsTrigger value="references">References</TabsTrigger>
+              <TabsTrigger value="sbus">SBUs</TabsTrigger>
+            </TabsList>
+          </div>
+          
+          <div className="flex-1 overflow-auto">
+            <TabsContent value="universities" className="mt-0 p-6">
+              <UniversitySettings />
+            </TabsContent>
+            
+            <TabsContent value="departments" className="mt-0 p-6">
+              <DepartmentSettings />
+            </TabsContent>
+            
+            <TabsContent value="degrees" className="mt-0 p-6">
+              <DegreeSettings />
+            </TabsContent>
+            
+            <TabsContent value="designations" className="mt-0 p-6">
+              <DesignationSettings />
+            </TabsContent>
+            
+            <TabsContent value="references" className="mt-0 p-6">
+              <ReferenceSettings />
+            </TabsContent>
+            
+            <TabsContent value="sbus" className="mt-0 p-6">
+              <SettingCategory title="SBUs" table="sbus" />
+            </TabsContent>
+          </div>
+        </Tabs>
+      </div>
     </DashboardLayout>
   );
 };
