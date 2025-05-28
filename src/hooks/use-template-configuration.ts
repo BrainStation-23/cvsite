@@ -52,8 +52,20 @@ export const useTemplateConfiguration = (templateId: string) => {
 
         if (fieldMappingsError) throw fieldMappingsError;
 
-        setSections(sectionsData || []);
-        setFieldMappings(fieldMappingsData || []);
+        // Cast Json types to Record<string, any> to match our interfaces
+        const processedSections = (sectionsData || []).map(section => ({
+          ...section,
+          field_mapping: section.field_mapping as Record<string, any>,
+          styling_config: section.styling_config as Record<string, any>
+        }));
+
+        const processedFieldMappings = (fieldMappingsData || []).map(mapping => ({
+          ...mapping,
+          visibility_rules: mapping.visibility_rules as Record<string, any>
+        }));
+
+        setSections(processedSections);
+        setFieldMappings(processedFieldMappings);
       } catch (error) {
         console.error('Error fetching template configuration:', error);
         toast({

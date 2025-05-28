@@ -1,5 +1,12 @@
 import React from 'react';
 import { DynamicSectionRenderer } from './DynamicSectionRenderer';
+import { GeneralInfoSection } from './sections/GeneralInfoSection';
+import { ExperienceSection } from './sections/ExperienceSection';
+import { EducationSection } from './sections/EducationSection';
+import { SkillsSection } from './sections/SkillsSection';
+import { ProjectsSection } from './sections/ProjectsSection';
+import { TrainingsSection } from './sections/TrainingsSection';
+import { AchievementsSection } from './sections/AchievementsSection';
 
 interface TemplateSection {
   id: string;
