@@ -1,4 +1,3 @@
-
 import React from 'react';
 import DashboardLayout from '../../components/Layout/DashboardLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -22,12 +21,7 @@ const EmployeeDashboard: React.FC = () => {
 
   return (
     <DashboardLayout>
-      <h1 className="text-2xl font-semibold mb-6 text-cvsite-navy dark:text-white">Employee Dashboard</h1>
-      <p className="mb-6 text-gray-600 dark:text-gray-300">
-        Welcome to the CVSite employee dashboard. From here you can manage your profile information.
-      </p>
-      
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {modules.map((module, index) => (
           <Card key={index} className="hover:shadow-lg transition-shadow">
             <CardHeader className="pb-2">

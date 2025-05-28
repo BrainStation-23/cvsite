@@ -123,7 +123,7 @@ const ProfilePage: React.FC = () => {
   return (
     <DashboardLayout>
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-semibold text-cvsite-navy dark:text-white">My Profile</h1>
+        <h1 className="text-2xl font-semibold text-cvsite-navy dark:text-white"></h1>
         {!isEditing ? (
           <Button 
             onClick={() => setIsEditing(true)}

@@ -1,6 +1,5 @@
-
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import {
   User,
@@ -21,8 +20,32 @@ interface DashboardLayoutProps {
 const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   
+  const getPageTitle = () => {
+    const path = location.pathname;
+    const role = user?.role || '';
+    
+    // Remove role prefix and split path
+    const pathWithoutRole = path.replace(`/${role}`, '');
+    const segments = pathWithoutRole.split('/').filter(Boolean);
+    
+    if (segments.length === 0 || segments[0] === 'dashboard') {
+      return `${role.charAt(0).toUpperCase() + role.slice(1)} Dashboard`;
+    }
+
+    // Convert path segments to title case
+    const title = segments
+      .map(segment => segment.split('-')
+        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(' ')
+      )
+      .join(' - ');
+
+    return title;
+  };
+
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
   };
@@ -103,7 +126,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
         <header className="bg-white dark:bg-gray-800 shadow-md py-4 px-6">
           <div className="flex justify-between items-center">
             <h2 className="text-xl font-semibold text-cvsite-navy dark:text-white">
-              {user?.role.charAt(0).toUpperCase() + user?.role.slice(1)} Dashboard
+              {getPageTitle()}
             </h2>
             <div className="flex items-center space-x-3">
               <span className="text-sm text-gray-600 dark:text-gray-300">

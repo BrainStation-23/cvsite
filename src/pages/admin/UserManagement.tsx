@@ -84,7 +84,7 @@ const UserManagement: React.FC = () => {
   return (
     <DashboardLayout>
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-semibold text-cvsite-navy dark:text-white">User Management</h1>
+        <h1 className="text-2xl font-semibold text-cvsite-navy dark:text-white"></h1>
         <div className="flex space-x-2">
           <Button 
             variant="outline" 

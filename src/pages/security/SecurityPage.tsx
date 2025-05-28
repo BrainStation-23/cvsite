@@ -51,7 +51,6 @@ const SecurityPage: React.FC = () => {
 
   return (
     <DashboardLayout>
-      <h1 className="text-2xl font-semibold mb-6 text-cvsite-navy dark:text-white">Security</h1>
       
       <Card className="max-w-2xl">
         <CardHeader>

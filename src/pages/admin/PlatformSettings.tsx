@@ -12,7 +12,6 @@ import ReferenceSettings from '@/components/admin/reference/ReferenceSettings';
 const PlatformSettings: React.FC = () => {
   return (
     <DashboardLayout>
-      <h1 className="text-2xl font-semibold mb-6 text-cvsite-navy dark:text-white">Platform Settings</h1>
       
       <Tabs defaultValue="universities" className="w-full">
         <TabsList className="mb-4">
