@@ -34,9 +34,8 @@ const CVTemplatePreview: React.FC = () => {
   }, [id, getTemplate]);
 
   useEffect(() => {
-    // Fetch employee profiles when component mounts - only once
     fetchProfiles();
-  }, []); // Empty dependency array to run only once
+  }, []);
 
   useEffect(() => {
     if (selectedProfileId && profiles) {
@@ -54,7 +53,6 @@ const CVTemplatePreview: React.FC = () => {
   };
 
   const handleExport = () => {
-    // TODO: Implement PDF export functionality
     console.log('Exporting CV...');
   };
 
@@ -160,17 +158,19 @@ const CVTemplatePreview: React.FC = () => {
           {/* Bottom Section - Preview taking remaining space */}
           <div className="flex-1 min-h-0">
             <Card className="h-full">
-              <CardContent className="p-6 h-full overflow-auto">
-                {selectedProfile ? (
-                  <CVPreview template={template} profile={selectedProfile} />
-                ) : (
-                  <div className="flex items-center justify-center h-full text-gray-500">
-                    <div className="text-center">
-                      <p className="text-lg font-medium">No Profile Selected</p>
-                      <p className="text-sm mt-2">Choose an employee profile to preview the CV template</p>
+              <CardContent className="p-6 h-full">
+                <div className="h-full overflow-auto">
+                  {selectedProfile ? (
+                    <CVPreview template={template} profile={selectedProfile} />
+                  ) : (
+                    <div className="flex items-center justify-center h-full text-gray-500">
+                      <div className="text-center">
+                        <p className="text-lg font-medium">No Profile Selected</p>
+                        <p className="text-sm mt-2">Choose an employee profile to preview the CV template</p>
+                      </div>
                     </div>
-                  </div>
-                )}
+                  )}
+                </div>
               </CardContent>
             </Card>
           </div>
