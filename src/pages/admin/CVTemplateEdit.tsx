@@ -34,6 +34,7 @@ const CVTemplateEdit: React.FC = () => {
   const [template, setTemplate] = useState<CVTemplate | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [isFormInitialized, setIsFormInitialized] = useState(false);
   const { toast } = useToast();
 
   const { register, handleSubmit, setValue, watch, formState: { errors } } = useForm<EditTemplateForm>();
@@ -43,11 +44,15 @@ const CVTemplateEdit: React.FC = () => {
       const templateData = await getTemplate(id);
       if (templateData) {
         setTemplate(templateData);
-        setValue('name', templateData.name);
-        setValue('description', templateData.description || '');
-        setValue('pages_count', templateData.pages_count);
-        setValue('orientation', templateData.orientation);
-        setValue('is_active', templateData.is_active);
+        // Only set form values if form hasn't been initialized yet
+        if (!isFormInitialized) {
+          setValue('name', templateData.name);
+          setValue('description', templateData.description || '');
+          setValue('pages_count', templateData.pages_count);
+          setValue('orientation', templateData.orientation);
+          setValue('is_active', templateData.is_active);
+          setIsFormInitialized(true);
+        }
       }
       setIsLoading(false);
     }
@@ -55,17 +60,19 @@ const CVTemplateEdit: React.FC = () => {
 
   useEffect(() => {
     loadTemplate();
-  }, [id, getTemplate, setValue]);
+  }, [id, getTemplate]);
 
   // Watch for form changes to detect unsaved changes
   useEffect(() => {
+    if (!isFormInitialized) return; // Don't track changes until form is initialized
+    
     const subscription = watch((value, { name, type }) => {
       if (template && type === 'change') {
         setHasUnsavedChanges(true);
       }
     });
     return () => subscription.unsubscribe();
-  }, [watch, template]);
+  }, [watch, template, isFormInitialized]);
 
   const onSubmit = async (data: EditTemplateForm) => {
     if (id && template) {
@@ -80,8 +87,11 @@ const CVTemplateEdit: React.FC = () => {
           title: "Success",
           description: "Template saved successfully"
         });
-        // Reload template to get updated data
-        await loadTemplate();
+        // Reload template to get updated data, but don't reinitialize form
+        const updatedTemplate = await getTemplate(id);
+        if (updatedTemplate) {
+          setTemplate(updatedTemplate);
+        }
       }
     }
   };
