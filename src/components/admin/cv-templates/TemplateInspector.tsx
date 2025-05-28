@@ -7,6 +7,7 @@ import PreviewControls from './PreviewControls';
 import TemplateBuilder from './TemplateBuilder';
 import EnhancedSectionManager from './EnhancedSectionManager';
 import { CVTemplate } from '@/types/cv-templates';
+import { EmployeeProfile } from '@/hooks/types/employee-profiles';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -16,8 +17,9 @@ interface TemplateInspectorProps {
   template: CVTemplate;
   onTemplateUpdate: (updates: Partial<CVTemplate>) => void;
   onConfigurationChange: () => void;
-  selectedProfileId?: string;
-  onProfileChange?: (profileId: string) => void;
+  selectedProfileId: string;
+  onProfileChange: (profileId: string) => void;
+  profiles: EmployeeProfile[];
 }
 
 const TemplateInspector: React.FC<TemplateInspectorProps> = ({
@@ -25,7 +27,8 @@ const TemplateInspector: React.FC<TemplateInspectorProps> = ({
   onTemplateUpdate,
   onConfigurationChange,
   selectedProfileId,
-  onProfileChange
+  onProfileChange,
+  profiles
 }) => {
   const [activeTab, setActiveTab] = useState('controls');
 
@@ -61,6 +64,7 @@ const TemplateInspector: React.FC<TemplateInspectorProps> = ({
                 template={template}
                 selectedProfileId={selectedProfileId}
                 onProfileChange={onProfileChange}
+                profiles={profiles}
               />
             </TabsContent>
 

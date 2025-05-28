@@ -5,23 +5,28 @@ import { Card } from '@/components/ui/card';
 import CVPreview from './CVPreview';
 import TemplateInspector from './TemplateInspector';
 import { CVTemplate } from '@/types/cv-templates';
+import { EmployeeProfile } from '@/hooks/types/employee-profiles';
 
 interface LivePreviewLayoutProps {
   template: CVTemplate;
   selectedProfile: any;
   onTemplateUpdate: (updates: Partial<CVTemplate>) => void;
   onSectionsChange: () => void;
+  selectedProfileId: string;
+  onProfileChange: (profileId: string) => void;
+  profiles: EmployeeProfile[];
 }
 
 const LivePreviewLayout: React.FC<LivePreviewLayoutProps> = ({
   template,
   selectedProfile,
   onTemplateUpdate,
-  onSectionsChange
+  onSectionsChange,
+  selectedProfileId,
+  onProfileChange,
+  profiles
 }) => {
   const [previewKey, setPreviewKey] = useState(0);
-  const [selectedProfileId, setSelectedProfileId] = useState<string>('');
-  const [currentSelectedProfile, setCurrentSelectedProfile] = useState<any>(selectedProfile);
 
   const handleConfigurationChange = () => {
     // Force preview to re-render when configuration changes
@@ -31,14 +36,10 @@ const LivePreviewLayout: React.FC<LivePreviewLayoutProps> = ({
 
   const handleProfileChange = (profileId: string) => {
     console.log('Profile changed to:', profileId);
-    setSelectedProfileId(profileId);
-    // The profile data will be passed from the parent component
-    // For now, we'll trigger a re-render
+    onProfileChange(profileId);
+    // Force preview to re-render when profile changes
     setPreviewKey(prev => prev + 1);
   };
-
-  // Use the selectedProfile from props if available, otherwise use the local state
-  const profileToDisplay = selectedProfile || currentSelectedProfile;
 
   return (
     <div className="h-full w-full">
@@ -46,12 +47,12 @@ const LivePreviewLayout: React.FC<LivePreviewLayoutProps> = ({
         {/* Live Preview Panel */}
         <ResizablePanel defaultSize={70} minSize={50}>
           <div className="h-full p-6 overflow-auto bg-gray-50">
-            {profileToDisplay ? (
+            {selectedProfile ? (
               <div className="flex justify-center">
                 <CVPreview 
                   key={previewKey}
                   template={template} 
-                  profile={profileToDisplay} 
+                  profile={selectedProfile} 
                 />
               </div>
             ) : (
@@ -76,6 +77,7 @@ const LivePreviewLayout: React.FC<LivePreviewLayoutProps> = ({
               onConfigurationChange={handleConfigurationChange}
               selectedProfileId={selectedProfileId}
               onProfileChange={handleProfileChange}
+              profiles={profiles}
             />
           </div>
         </ResizablePanel>

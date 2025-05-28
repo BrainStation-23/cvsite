@@ -9,6 +9,7 @@ import { useCVTemplates } from '@/hooks/use-cv-templates';
 import { CVTemplate } from '@/types/cv-templates';
 import LivePreviewLayout from '@/components/admin/cv-templates/LivePreviewLayout';
 import { useEmployeeProfiles } from '@/hooks/use-employee-profiles';
+import { useEmployeeProfile } from '@/hooks/use-employee-profile';
 import { useToast } from '@/hooks/use-toast';
 
 interface EditTemplateForm {
@@ -26,10 +27,38 @@ const CVTemplateEdit: React.FC = () => {
   const { profiles, fetchProfiles } = useEmployeeProfiles();
   const [template, setTemplate] = useState<CVTemplate | null>(null);
   const [selectedProfileId, setSelectedProfileId] = useState('');
-  const [selectedProfile, setSelectedProfile] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const { toast } = useToast();
+
+  // Fetch detailed profile data for the selected profile
+  const {
+    isLoading: profileLoading,
+    generalInfo,
+    technicalSkills,
+    specializedSkills,
+    experiences,
+    education,
+    trainings,
+    achievements,
+    projects
+  } = useEmployeeProfile(selectedProfileId);
+
+  // Construct the full profile object for the CV preview
+  const selectedProfile = selectedProfileId ? {
+    id: selectedProfileId,
+    first_name: generalInfo.firstName,
+    last_name: generalInfo.lastName,
+    biography: generalInfo.biography,
+    profile_image: generalInfo.profileImage,
+    technical_skills: technicalSkills,
+    specialized_skills: specializedSkills,
+    experiences: experiences,
+    education: education,
+    trainings: trainings,
+    achievements: achievements,
+    projects: projects
+  } : null;
 
   const loadTemplate = async () => {
     if (id) {
@@ -46,19 +75,16 @@ const CVTemplateEdit: React.FC = () => {
     fetchProfiles();
   }, [id]);
 
-  useEffect(() => {
-    if (selectedProfileId && profiles) {
-      const profile = profiles.find(p => p.id === selectedProfileId);
-      console.log('Setting selected profile:', profile);
-      setSelectedProfile(profile || null);
-    }
-  }, [selectedProfileId, profiles]);
-
   const handleTemplateUpdate = (updates: Partial<CVTemplate>) => {
     if (template) {
       setTemplate(prev => ({ ...prev!, ...updates }));
       setHasUnsavedChanges(true);
     }
+  };
+
+  const handleProfileChange = (profileId: string) => {
+    console.log('Profile changed to:', profileId);
+    setSelectedProfileId(profileId);
   };
 
   const handleSaveAll = async () => {
@@ -152,6 +178,9 @@ const CVTemplateEdit: React.FC = () => {
             selectedProfile={selectedProfile}
             onTemplateUpdate={handleTemplateUpdate}
             onSectionsChange={handleSectionsChange}
+            selectedProfileId={selectedProfileId}
+            onProfileChange={handleProfileChange}
+            profiles={profiles || []}
           />
         </div>
       </div>

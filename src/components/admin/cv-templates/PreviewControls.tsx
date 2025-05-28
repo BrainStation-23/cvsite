@@ -5,13 +5,14 @@ import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Download, Eye, RefreshCw } from 'lucide-react';
 import { CVTemplate } from '@/types/cv-templates';
-import { useEmployeeProfiles } from '@/hooks/use-employee-profiles';
+import { EmployeeProfile } from '@/hooks/types/employee-profiles';
 import { EmployeeCombobox } from './EmployeeCombobox';
 
 interface PreviewControlsProps {
   template: CVTemplate;
-  selectedProfileId?: string;
-  onProfileChange?: (profileId: string) => void;
+  selectedProfileId: string;
+  onProfileChange: (profileId: string) => void;
+  profiles: EmployeeProfile[];
   onExport?: () => void;
 }
 
@@ -19,14 +20,10 @@ const PreviewControls: React.FC<PreviewControlsProps> = ({
   template,
   selectedProfileId,
   onProfileChange,
+  profiles,
   onExport
 }) => {
-  const { profiles, isLoading: profilesLoading, fetchProfiles } = useEmployeeProfiles();
-  const [selectedProfile, setSelectedProfile] = useState(null);
-
-  useEffect(() => {
-    fetchProfiles();
-  }, []);
+  const [selectedProfile, setSelectedProfile] = useState<EmployeeProfile | null>(null);
 
   useEffect(() => {
     if (selectedProfileId && profiles) {
@@ -36,10 +33,10 @@ const PreviewControls: React.FC<PreviewControlsProps> = ({
   }, [selectedProfileId, profiles]);
 
   const handleProfileChange = (profileId: string) => {
-    console.log('Profile selected:', profileId);
+    console.log('Profile selected in PreviewControls:', profileId);
     const profile = profiles?.find(p => p.id === profileId);
     setSelectedProfile(profile || null);
-    onProfileChange?.(profileId);
+    onProfileChange(profileId);
   };
 
   const handleExport = () => {
@@ -58,25 +55,16 @@ const PreviewControls: React.FC<PreviewControlsProps> = ({
             <Label className="text-xs">Employee Profile</Label>
             <div className="mt-1">
               <EmployeeCombobox
-                profiles={profiles || []}
-                value={selectedProfileId || ''}
+                profiles={profiles}
+                value={selectedProfileId}
                 onValueChange={handleProfileChange}
                 placeholder="Select employee..."
-                isLoading={profilesLoading}
+                isLoading={false}
               />
             </div>
           </div>
           
           <div className="flex gap-2">
-            <Button 
-              size="sm" 
-              variant="outline" 
-              onClick={() => fetchProfiles()}
-              className="h-7 text-xs"
-            >
-              <RefreshCw className="h-3 w-3 mr-1" />
-              Refresh
-            </Button>
             <Button 
               size="sm" 
               onClick={handleExport} 
