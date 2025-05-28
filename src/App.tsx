@@ -21,6 +21,8 @@ import ViewProfilePage from "./pages/employee/ViewProfilePage";
 import PlatformSettings from "./pages/admin/PlatformSettings";
 import CVTemplates from "./pages/admin/CVTemplates";
 import CVTemplateCreate from "./pages/admin/CVTemplateCreate";
+import CVTemplateEdit from "./pages/admin/CVTemplateEdit";
+import CVTemplatePreview from "./pages/admin/CVTemplatePreview";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -100,6 +102,22 @@ const App = () => (
               element={
                 <ProtectedRoute allowedRoles={['admin']}>
                   <CVTemplateCreate />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/admin/cv-templates/:id/edit" 
+              element={
+                <ProtectedRoute allowedRoles={['admin']}>
+                  <CVTemplateEdit />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/admin/cv-templates/:id/preview" 
+              element={
+                <ProtectedRoute allowedRoles={['admin']}>
+                  <CVTemplatePreview />
                 </ProtectedRoute>
               } 
             />

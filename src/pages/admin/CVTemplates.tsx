@@ -13,7 +13,7 @@ import { CVTemplate } from '@/types/cv-templates';
 const CVTemplates: React.FC = () => {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
-  const { templates, isLoading, deleteTemplate } = useCVTemplates();
+  const { templates, isLoading, deleteTemplate, createTemplate } = useCVTemplates();
 
   const filteredTemplates = templates?.filter(template =>
     template.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -23,6 +23,22 @@ const CVTemplates: React.FC = () => {
   const handleDeleteTemplate = async (id: string) => {
     if (window.confirm('Are you sure you want to delete this template?')) {
       await deleteTemplate(id);
+    }
+  };
+
+  const handleDuplicateTemplate = async (template: any) => {
+    const duplicatedTemplate = {
+      name: `${template.name} (Copy)`,
+      description: template.description,
+      pages_count: template.pages_count,
+      orientation: template.orientation as 'portrait' | 'landscape',
+      is_active: false,
+      layout_config: template.layout_config || {}
+    };
+
+    const success = await createTemplate(duplicatedTemplate);
+    if (success) {
+      console.log('Template duplicated successfully');
     }
   };
 
@@ -115,7 +131,7 @@ const CVTemplates: React.FC = () => {
                       <Button 
                         variant="outline" 
                         size="sm"
-                        onClick={() => {/* TODO: Implement duplicate */}}
+                        onClick={() => handleDuplicateTemplate(template)}
                       >
                         <Copy className="h-4 w-4" />
                       </Button>
