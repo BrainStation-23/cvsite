@@ -7,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Slider } from '@/components/ui/slider';
 import { Input } from '@/components/ui/input';
 import { CVTemplate } from '@/types/cv-templates';
-import { Palette, Type, Layout, Spacing } from 'lucide-react';
+import { Palette, Type, Layout, Ruler } from 'lucide-react';
 
 interface TemplateBuilderProps {
   template: CVTemplate;
@@ -229,7 +229,7 @@ const TemplateBuilder: React.FC<TemplateBuilderProps> = ({ template }) => {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Spacing className="h-5 w-5" />
+            <Ruler className="h-5 w-5" />
             Spacing
           </CardTitle>
         </CardHeader>
