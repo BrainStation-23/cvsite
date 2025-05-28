@@ -4,18 +4,18 @@ import { useParams, useNavigate } from 'react-router-dom';
 import DashboardLayout from '../../components/Layout/DashboardLayout';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
 import { ArrowLeft, Download, Edit } from 'lucide-react';
 import { useCVTemplates } from '@/hooks/use-cv-templates';
 import { useEmployeeProfiles } from '@/hooks/use-employee-profiles';
+import { EmployeeCombobox } from '@/components/admin/cv-templates/EmployeeCombobox';
 import CVPreview from '@/components/admin/cv-templates/CVPreview';
 
 const CVTemplatePreview: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { getTemplate } = useCVTemplates();
-  const { profiles } = useEmployeeProfiles();
+  const { profiles, isLoading: profilesLoading, fetchProfiles } = useEmployeeProfiles();
   const [template, setTemplate] = useState(null);
   const [selectedProfileId, setSelectedProfileId] = useState('');
   const [selectedProfile, setSelectedProfile] = useState(null);
@@ -32,6 +32,11 @@ const CVTemplatePreview: React.FC = () => {
 
     loadTemplate();
   }, [id, getTemplate]);
+
+  useEffect(() => {
+    // Fetch employee profiles when component mounts
+    fetchProfiles();
+  }, [fetchProfiles]);
 
   useEffect(() => {
     if (selectedProfileId && profiles) {
@@ -112,18 +117,15 @@ const CVTemplatePreview: React.FC = () => {
                 <CardContent className="space-y-4">
                   <div>
                     <Label htmlFor="profile">Select Employee Profile</Label>
-                    <Select value={selectedProfileId} onValueChange={setSelectedProfileId}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Choose a profile..." />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {profiles?.map((profile) => (
-                          <SelectItem key={profile.id} value={profile.id}>
-                            {profile.first_name} {profile.last_name} ({profile.employee_id})
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                    <div className="mt-2">
+                      <EmployeeCombobox
+                        profiles={profiles || []}
+                        value={selectedProfileId}
+                        onValueChange={setSelectedProfileId}
+                        placeholder="Search and select employee..."
+                        isLoading={profilesLoading}
+                      />
+                    </div>
                   </div>
                 </CardContent>
               </Card>
