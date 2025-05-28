@@ -47,7 +47,10 @@ export const useCVTemplates = () => {
       // Convert Supabase response to proper CVTemplate type
       const typedTemplates: CVTemplate[] = (data || []).map((template: SupabaseCVTemplate) => ({
         ...template,
-        orientation: template.orientation as 'portrait' | 'landscape'
+        orientation: template.orientation as 'portrait' | 'landscape',
+        layout_config: (template.layout_config && typeof template.layout_config === 'object') 
+          ? template.layout_config as Record<string, any>
+          : {}
       }));
       
       setTemplates(typedTemplates);
@@ -179,7 +182,10 @@ export const useCVTemplates = () => {
       // Convert Supabase response to proper CVTemplate type
       const typedTemplate: CVTemplate = {
         ...data,
-        orientation: data.orientation as 'portrait' | 'landscape'
+        orientation: data.orientation as 'portrait' | 'landscape',
+        layout_config: (data.layout_config && typeof data.layout_config === 'object') 
+          ? data.layout_config as Record<string, any>
+          : {}
       };
       
       return typedTemplate;
