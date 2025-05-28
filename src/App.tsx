@@ -59,6 +59,14 @@ function App() {
               }
             />
             <Route
+              path="/admin/dashboard"
+              element={
+                <ProtectedRoute allowedRoles={['admin']}>
+                  <AdminDashboard />
+                </ProtectedRoute>
+              }
+            />
+            <Route
               path="/admin-dashboard"
               element={
                 <ProtectedRoute allowedRoles={['admin']}>
@@ -91,6 +99,22 @@ function App() {
               }
             />
             <Route
+              path="/admin/user-management"
+              element={
+                <ProtectedRoute allowedRoles={['admin']}>
+                  <UserManagement />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/employee-data"
+              element={
+                <ProtectedRoute allowedRoles={['admin', 'manager']}>
+                  <EmployeeData />
+                </ProtectedRoute>
+              }
+            />
+            <Route
               path="/admin/platform-settings"
               element={
                 <ProtectedRoute allowedRoles={['admin']}>
@@ -119,6 +143,14 @@ function App() {
               element={
                 <ProtectedRoute allowedRoles={['admin']}>
                   <CVTemplateEdit />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/security"
+              element={
+                <ProtectedRoute>
+                  <SecurityPage />
                 </ProtectedRoute>
               }
             />
