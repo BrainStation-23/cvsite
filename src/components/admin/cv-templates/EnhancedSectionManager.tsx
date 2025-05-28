@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -80,16 +81,19 @@ const EnhancedSectionManager: React.FC<EnhancedSectionManagerProps> = ({ templat
 
       if (error) throw error;
 
-      const typedSections = (data || []).map(section => ({
-        ...section,
-        section_type: section.section_type as CVSectionType,
-        field_mapping: section.field_mapping || {},
-        styling_config: {
-          display_style: section.styling_config?.display_style || 'default',
-          items_per_column: section.styling_config?.items_per_column || 1,
-          fields: section.styling_config?.fields || []
-        }
-      })) as SectionConfig[];
+      const typedSections = (data || []).map(section => {
+        const stylingConfig = section.styling_config as any || {};
+        return {
+          ...section,
+          section_type: section.section_type as CVSectionType,
+          field_mapping: section.field_mapping as Record<string, any> || {},
+          styling_config: {
+            display_style: stylingConfig.display_style || 'default',
+            items_per_column: stylingConfig.items_per_column || 1,
+            fields: (stylingConfig.fields as FieldConfig[]) || []
+          }
+        } as SectionConfig;
+      });
 
       setSections(typedSections);
     } catch (error) {
@@ -111,7 +115,7 @@ const EnhancedSectionManager: React.FC<EnhancedSectionManagerProps> = ({ templat
       });
 
       if (error) throw error;
-      return data || [];
+      return (data as FieldConfig[]) || [];
     } catch (error) {
       console.error('Error getting default fields:', error);
       return [];
@@ -146,8 +150,12 @@ const EnhancedSectionManager: React.FC<EnhancedSectionManagerProps> = ({ templat
       const typedSection = {
         ...data,
         section_type: data.section_type as CVSectionType,
-        field_mapping: data.field_mapping || {},
-        styling_config: { display_style: 'default', items_per_column: 1, fields: defaultFields }
+        field_mapping: data.field_mapping as Record<string, any> || {},
+        styling_config: { 
+          display_style: 'default', 
+          items_per_column: 1, 
+          fields: defaultFields 
+        }
       } as SectionConfig;
 
       setSections([...sections, typedSection]);
@@ -195,9 +203,15 @@ const EnhancedSectionManager: React.FC<EnhancedSectionManagerProps> = ({ templat
 
   const updateSection = async (id: string, updates: Partial<SectionConfig>) => {
     try {
+      // Convert styling_config to proper format for database
+      const dbUpdates: any = { ...updates };
+      if (updates.styling_config) {
+        dbUpdates.styling_config = updates.styling_config as any;
+      }
+
       const { error } = await supabase
         .from('cv_template_sections')
-        .update(updates)
+        .update(dbUpdates)
         .eq('id', id);
 
       if (error) throw error;
