@@ -10,7 +10,8 @@ import {
   Home,
   Shield,
   Database,
-  Menu
+  Menu,
+  FileText
 } from 'lucide-react';
 
 interface DashboardLayoutProps {
@@ -71,6 +72,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
     navLinks.push(
       { to: '/admin/user-management', icon: <Users className="w-5 h-5" />, label: 'User Management' },
       { to: '/admin/employee-data', icon: <Database className="w-5 h-5" />, label: 'Employee Data' },
+      { to: '/admin/cv-templates', icon: <FileText className="w-5 h-5" />, label: 'CV Templates' },
       { to: '/admin/platform-settings', icon: <Settings className="w-5 h-5" />, label: 'Platform Settings' }
     );
   } else if (user?.role === 'manager') {

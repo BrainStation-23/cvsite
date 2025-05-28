@@ -87,6 +87,22 @@ const App = () => (
                 </ProtectedRoute>
               } 
             />
+            <Route 
+              path="/admin/cv-templates" 
+              element={
+                <ProtectedRoute allowedRoles={['admin']}>
+                  <CVTemplates />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/admin/cv-templates/create" 
+              element={
+                <ProtectedRoute allowedRoles={['admin']}>
+                  <CVTemplateCreate />
+                </ProtectedRoute>
+              } 
+            />
             
             {/* Manager Routes */}
             <Route 
