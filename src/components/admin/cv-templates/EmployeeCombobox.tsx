@@ -16,13 +16,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
-
-interface EmployeeProfile {
-  id: string;
-  first_name: string;
-  last_name: string;
-  employee_id: string;
-}
+import { EmployeeProfile } from '@/hooks/types/employee-profiles';
 
 interface EmployeeComboboxProps {
   profiles: EmployeeProfile[];
@@ -46,7 +40,7 @@ export const EmployeeCombobox: React.FC<EmployeeComboboxProps> = ({
   const selectedProfile = profiles.find(profile => profile.id === value);
 
   const displayValue = selectedProfile 
-    ? `${selectedProfile.first_name} ${selectedProfile.last_name} (${selectedProfile.employee_id})`
+    ? `${selectedProfile.first_name || ''} ${selectedProfile.last_name || ''} ${selectedProfile.employee_id ? `(${selectedProfile.employee_id})` : ''}`.trim()
     : placeholder;
 
   return (
@@ -77,7 +71,7 @@ export const EmployeeCombobox: React.FC<EmployeeComboboxProps> = ({
               {profiles.map((profile) => (
                 <CommandItem
                   key={profile.id}
-                  value={`${profile.first_name} ${profile.last_name} ${profile.employee_id}`}
+                  value={`${profile.first_name || ''} ${profile.last_name || ''} ${profile.employee_id || ''}`}
                   onSelect={() => {
                     onValueChange(profile.id === value ? "" : profile.id);
                     setOpen(false);
@@ -91,11 +85,13 @@ export const EmployeeCombobox: React.FC<EmployeeComboboxProps> = ({
                   />
                   <div className="flex flex-col">
                     <span className="font-medium">
-                      {profile.first_name} {profile.last_name}
+                      {profile.first_name || ''} {profile.last_name || ''}
                     </span>
-                    <span className="text-sm text-gray-500">
-                      ID: {profile.employee_id}
-                    </span>
+                    {profile.employee_id && (
+                      <span className="text-sm text-gray-500">
+                        ID: {profile.employee_id}
+                      </span>
+                    )}
                   </div>
                 </CommandItem>
               ))}
