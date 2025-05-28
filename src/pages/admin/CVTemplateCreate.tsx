@@ -1,5 +1,6 @@
 
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import DashboardLayout from '../../components/Layout/DashboardLayout';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -22,6 +23,7 @@ interface CreateTemplateForm {
 }
 
 const CVTemplateCreate: React.FC = () => {
+  const navigate = useNavigate();
   const { createTemplate, isCreating } = useCVTemplates();
   const { register, handleSubmit, setValue, watch, formState: { errors } } = useForm<CreateTemplateForm>({
     defaultValues: {
@@ -37,14 +39,23 @@ const CVTemplateCreate: React.FC = () => {
   const watchedIsActive = watch('is_active');
 
   const onSubmit = async (data: CreateTemplateForm) => {
+    console.log('Form submitted with data:', data);
+    
     const success = await createTemplate({
       ...data,
       layout_config: {}
     });
     
     if (success) {
-      window.location.href = '/admin/cv-templates';
+      console.log('Template created successfully, navigating back...');
+      navigate('/admin/cv-templates');
+    } else {
+      console.log('Template creation failed');
     }
+  };
+
+  const handleBack = () => {
+    navigate('/admin/cv-templates');
   };
 
   return (
@@ -55,7 +66,7 @@ const CVTemplateCreate: React.FC = () => {
           <Button 
             variant="ghost" 
             size="sm"
-            onClick={() => window.location.href = '/admin/cv-templates'}
+            onClick={handleBack}
           >
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back to Templates
@@ -148,7 +159,7 @@ const CVTemplateCreate: React.FC = () => {
                 <Button 
                   type="button" 
                   variant="outline"
-                  onClick={() => window.location.href = '/admin/cv-templates'}
+                  onClick={handleBack}
                 >
                   Cancel
                 </Button>

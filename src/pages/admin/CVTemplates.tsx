@@ -1,5 +1,6 @@
 
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import DashboardLayout from '../../components/Layout/DashboardLayout';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -10,6 +11,7 @@ import { useCVTemplates } from '@/hooks/use-cv-templates';
 import { CVTemplate } from '@/types/cv-templates';
 
 const CVTemplates: React.FC = () => {
+  const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
   const { templates, isLoading, deleteTemplate } = useCVTemplates();
 
@@ -24,6 +26,10 @@ const CVTemplates: React.FC = () => {
     }
   };
 
+  const handleCreateTemplate = () => {
+    navigate('/admin/cv-templates/create');
+  };
+
   return (
     <DashboardLayout>
       <div className="flex flex-col h-full">
@@ -34,7 +40,7 @@ const CVTemplates: React.FC = () => {
             <p className="text-sm text-gray-500 dark:text-gray-400">Manage and create CV templates</p>
           </div>
           <Button 
-            onClick={() => window.location.href = '/admin/cv-templates/create'}
+            onClick={handleCreateTemplate}
             className="h-9"
           >
             <Plus className="h-4 w-4 mr-2" />
@@ -94,7 +100,7 @@ const CVTemplates: React.FC = () => {
                         variant="outline" 
                         size="sm" 
                         className="flex-1"
-                        onClick={() => window.location.href = `/admin/cv-templates/${template.id}/preview`}
+                        onClick={() => navigate(`/admin/cv-templates/${template.id}/preview`)}
                       >
                         <Eye className="h-4 w-4 mr-1" />
                         Preview
@@ -102,7 +108,7 @@ const CVTemplates: React.FC = () => {
                       <Button 
                         variant="outline" 
                         size="sm"
-                        onClick={() => window.location.href = `/admin/cv-templates/${template.id}/edit`}
+                        onClick={() => navigate(`/admin/cv-templates/${template.id}/edit`)}
                       >
                         <Edit className="h-4 w-4" />
                       </Button>

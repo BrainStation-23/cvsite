@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -69,9 +68,22 @@ export const useCVTemplates = () => {
   const createTemplate = async (templateData: CreateTemplateData): Promise<boolean> => {
     try {
       setIsCreating(true);
-      const { data: { user } } = await supabase.auth.getUser();
+      console.log('Starting template creation...');
+      
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
+      
+      if (userError) {
+        console.error('Auth error:', userError);
+        toast({
+          title: "Authentication Error",
+          description: "Please log in again to create templates",
+          variant: "destructive"
+        });
+        return false;
+      }
       
       if (!user) {
+        console.error('No user found');
         toast({
           title: "Error",
           description: "You must be logged in to create templates",
@@ -80,14 +92,23 @@ export const useCVTemplates = () => {
         return false;
       }
 
-      const { error } = await supabase
+      console.log('User authenticated, creating template...');
+
+      const { data, error } = await supabase
         .from('cv_templates')
         .insert([{
           ...templateData,
           created_by: user.id
-        }]);
+        }])
+        .select()
+        .single();
 
-      if (error) throw error;
+      if (error) {
+        console.error('Template creation error:', error);
+        throw error;
+      }
+
+      console.log('Template created successfully:', data);
 
       toast({
         title: "Success",
@@ -96,11 +117,11 @@ export const useCVTemplates = () => {
 
       await fetchTemplates();
       return true;
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error creating CV template:', error);
       toast({
         title: "Error",
-        description: "Failed to create CV template",
+        description: error.message || "Failed to create CV template",
         variant: "destructive"
       });
       return false;
