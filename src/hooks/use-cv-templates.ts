@@ -13,6 +13,20 @@ interface CreateTemplateData {
   layout_config: Record<string, any>;
 }
 
+// Type for Supabase response to handle the string -> union type conversion
+interface SupabaseCVTemplate {
+  id: string;
+  name: string;
+  description?: string;
+  pages_count: number;
+  orientation: string;
+  layout_config: any;
+  is_active: boolean;
+  created_by: string;
+  created_at: string;
+  updated_at: string;
+}
+
 export const useCVTemplates = () => {
   const [templates, setTemplates] = useState<CVTemplate[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -29,7 +43,14 @@ export const useCVTemplates = () => {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setTemplates(data || []);
+      
+      // Convert Supabase response to proper CVTemplate type
+      const typedTemplates: CVTemplate[] = (data || []).map((template: SupabaseCVTemplate) => ({
+        ...template,
+        orientation: template.orientation as 'portrait' | 'landscape'
+      }));
+      
+      setTemplates(typedTemplates);
     } catch (error) {
       console.error('Error fetching CV templates:', error);
       toast({
@@ -154,7 +175,14 @@ export const useCVTemplates = () => {
         .single();
 
       if (error) throw error;
-      return data;
+      
+      // Convert Supabase response to proper CVTemplate type
+      const typedTemplate: CVTemplate = {
+        ...data,
+        orientation: data.orientation as 'portrait' | 'landscape'
+      };
+      
+      return typedTemplate;
     } catch (error) {
       console.error('Error fetching CV template:', error);
       return null;
