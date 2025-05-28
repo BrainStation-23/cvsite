@@ -97,7 +97,13 @@ const FieldMapper: React.FC<FieldMapperProps> = ({ templateId, onFieldsChange })
         // Initialize with default field mappings
         await initializeDefaultMappings();
       } else {
-        setFieldMappings(data as FieldMapping[]);
+        // Add section_type to existing data if missing, defaulting to 'general'
+        const mappingsWithSectionType = data.map(mapping => ({
+          ...mapping,
+          section_type: mapping.section_type || 'general',
+          visibility_rules: mapping.visibility_rules || {}
+        })) as FieldMapping[];
+        setFieldMappings(mappingsWithSectionType);
       }
     } catch (error) {
       console.error('Error loading field mappings:', error);
@@ -125,7 +131,12 @@ const FieldMapper: React.FC<FieldMapperProps> = ({ templateId, onFieldsChange })
 
       if (error) throw error;
 
-      setFieldMappings(data as FieldMapping[]);
+      const mappingsWithSectionType = data.map(mapping => ({
+        ...mapping,
+        section_type: mapping.section_type || 'general',
+        visibility_rules: mapping.visibility_rules || {}
+      })) as FieldMapping[];
+      setFieldMappings(mappingsWithSectionType);
       onFieldsChange?.();
     } catch (error) {
       console.error('Error initializing field mappings:', error);

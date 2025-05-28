@@ -59,7 +59,15 @@ const SectionManager: React.FC<SectionManagerProps> = ({ templateId, onSectionsC
 
       if (error) throw error;
 
-      setSections(data || []);
+      // Type-cast the data to ensure compatibility
+      const typedSections = (data || []).map(section => ({
+        ...section,
+        section_type: section.section_type as CVSectionType,
+        field_mapping: section.field_mapping || {},
+        styling_config: section.styling_config || {}
+      })) as SectionConfig[];
+
+      setSections(typedSections);
     } catch (error) {
       console.error('Error loading sections:', error);
       toast({
@@ -91,7 +99,14 @@ const SectionManager: React.FC<SectionManagerProps> = ({ templateId, onSectionsC
 
       if (error) throw error;
 
-      setSections([...sections, data]);
+      const typedSection = {
+        ...data,
+        section_type: data.section_type as CVSectionType,
+        field_mapping: data.field_mapping || {},
+        styling_config: data.styling_config || {}
+      } as SectionConfig;
+
+      setSections([...sections, typedSection]);
       onSectionsChange?.();
       
       toast({
