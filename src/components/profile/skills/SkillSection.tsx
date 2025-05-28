@@ -6,6 +6,25 @@ import { Input } from '@/components/ui/input';
 import { PlusCircle } from 'lucide-react';
 import { Skill } from '@/types';
 import { SkillCard } from './SkillCard';
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+} from '@dnd-kit/core';
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  verticalListSortingStrategy,
+} from '@dnd-kit/sortable';
+import {
+  restrictToVerticalAxis,
+  restrictToParentElement,
+} from '@dnd-kit/modifiers';
 
 interface SkillSectionProps {
   title: string;
@@ -32,35 +51,25 @@ export const SkillSection: React.FC<SkillSectionProps> = ({
   onDeleteSkill,
   onReorderSkills
 }) => {
-  const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
   const [showAddForm, setShowAddForm] = useState(false);
 
-  const handleDragStart = (e: React.DragEvent, index: number) => {
-    setDraggedIndex(index);
-    e.dataTransfer.effectAllowed = 'move';
-  };
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
 
-  const handleDragOver = (e: React.DragEvent) => {
-    e.preventDefault();
-    e.dataTransfer.dropEffect = 'move';
-  };
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
 
-  const handleDrop = (e: React.DragEvent, dropIndex: number) => {
-    e.preventDefault();
-    
-    if (draggedIndex === null || draggedIndex === dropIndex || !onReorderSkills) {
-      setDraggedIndex(null);
-      return;
+    if (over && active.id !== over.id && onReorderSkills) {
+      const oldIndex = skills.findIndex((skill) => skill.id === active.id);
+      const newIndex = skills.findIndex((skill) => skill.id === over.id);
+
+      const reorderedSkills = arrayMove(skills, oldIndex, newIndex);
+      onReorderSkills(reorderedSkills);
     }
-
-    const reorderedSkills = [...skills];
-    const draggedSkill = reorderedSkills[draggedIndex];
-    
-    reorderedSkills.splice(draggedIndex, 1);
-    reorderedSkills.splice(dropIndex, 0, draggedSkill);
-    
-    onReorderSkills(reorderedSkills);
-    setDraggedIndex(null);
   };
 
   const handleAddSkill = () => {
@@ -137,21 +146,41 @@ export const SkillSection: React.FC<SkillSectionProps> = ({
 
         {skills.length > 0 ? (
           <div className="space-y-2">
-            {skills.map((skill, index) => (
-              <SkillCard
-                key={skill.id}
-                skill={skill}
-                isEditing={isEditing}
-                isDraggable={isDraggable}
-                onUpdate={onUpdateSkill}
-                onDelete={onDeleteSkill}
-                onDragStart={isDraggable ? handleDragStart : undefined}
-                onDragOver={isDraggable ? handleDragOver : undefined}
-                onDrop={isDraggable ? handleDrop : undefined}
-                index={index}
-                isDraggedOver={draggedIndex === index}
-              />
-            ))}
+            {isDraggable && isEditing ? (
+              <DndContext
+                sensors={sensors}
+                collisionDetection={closestCenter}
+                onDragEnd={handleDragEnd}
+                modifiers={[restrictToVerticalAxis, restrictToParentElement]}
+              >
+                <SortableContext 
+                  items={skills.map(skill => skill.id)} 
+                  strategy={verticalListSortingStrategy}
+                >
+                  {skills.map((skill) => (
+                    <SkillCard
+                      key={skill.id}
+                      skill={skill}
+                      isEditing={isEditing}
+                      isDraggable={isDraggable}
+                      onUpdate={onUpdateSkill}
+                      onDelete={onDeleteSkill}
+                    />
+                  ))}
+                </SortableContext>
+              </DndContext>
+            ) : (
+              skills.map((skill) => (
+                <SkillCard
+                  key={skill.id}
+                  skill={skill}
+                  isEditing={isEditing}
+                  isDraggable={false}
+                  onUpdate={onUpdateSkill}
+                  onDelete={onDeleteSkill}
+                />
+              ))
+            )}
           </div>
         ) : (
           <div className="text-center py-8 text-gray-500 dark:text-gray-400">

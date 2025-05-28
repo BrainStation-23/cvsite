@@ -5,6 +5,10 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Trash2, Edit, Check, X, GripVertical } from 'lucide-react';
 import { Skill } from '@/types';
+import {
+  useSortable,
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 
 interface SkillCardProps {
   skill: Skill;
@@ -12,11 +16,6 @@ interface SkillCardProps {
   isDraggable?: boolean;
   onUpdate: (skill: Skill) => void;
   onDelete: (id: string) => void;
-  onDragStart?: (e: React.DragEvent, index: number) => void;
-  onDragOver?: (e: React.DragEvent) => void;
-  onDrop?: (e: React.DragEvent, index: number) => void;
-  index?: number;
-  isDraggedOver?: boolean;
 }
 
 export const SkillCard: React.FC<SkillCardProps> = ({
@@ -25,14 +24,26 @@ export const SkillCard: React.FC<SkillCardProps> = ({
   isDraggable = false,
   onUpdate,
   onDelete,
-  onDragStart,
-  onDragOver,
-  onDrop,
-  index = 0,
-  isDraggedOver = false
 }) => {
   const [isEditingSkill, setIsEditingSkill] = useState(false);
   const [editedSkill, setEditedSkill] = useState(skill);
+
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ 
+    id: skill.id,
+    disabled: !isDraggable || !isEditing || isEditingSkill
+  });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+  };
 
   const handleSaveEdit = () => {
     onUpdate(editedSkill);
@@ -53,19 +64,23 @@ export const SkillCard: React.FC<SkillCardProps> = ({
 
   return (
     <Card 
+      ref={setNodeRef}
+      style={style}
       className={`transition-all duration-200 hover:shadow-md ${
-        isDraggedOver ? 'ring-2 ring-cvsite-teal' : ''
-      } ${isDraggable && isEditing ? 'cursor-move' : ''}`}
-      draggable={isDraggable && isEditing}
-      onDragStart={isDraggable && onDragStart ? (e) => onDragStart(e, index) : undefined}
-      onDragOver={isDraggable && onDragOver ? onDragOver : undefined}
-      onDrop={isDraggable && onDrop ? (e) => onDrop(e, index) : undefined}
+        isDragging ? 'ring-2 ring-cvsite-teal shadow-lg' : ''
+      } ${isDraggable && isEditing && !isEditingSkill ? 'cursor-grab active:cursor-grabbing' : ''}`}
     >
       <CardContent className="p-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-3 flex-1">
-            {isDraggable && isEditing && (
-              <GripVertical className="h-4 w-4 text-gray-400" />
+            {isDraggable && isEditing && !isEditingSkill && (
+              <div
+                {...attributes}
+                {...listeners}
+                className="cursor-grab active:cursor-grabbing touch-none"
+              >
+                <GripVertical className="h-4 w-4 text-gray-400 hover:text-gray-600" />
+              </div>
             )}
             
             <div className="flex-1">
