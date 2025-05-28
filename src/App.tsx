@@ -1,204 +1,142 @@
 
-import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import { AuthProvider } from "./contexts/AuthContext";
-import ProtectedRoute from "./components/ProtectedRoute";
-
-// Pages
-import Login from "./pages/Login";
-import Callback from "./pages/auth/Callback";
-import AdminDashboard from "./pages/dashboard/AdminDashboard";
-import ManagerDashboard from "./pages/dashboard/ManagerDashboard";
-import EmployeeDashboard from "./pages/dashboard/EmployeeDashboard";
-import ProfilePage from "./pages/profile/ProfilePage";
-import SecurityPage from "./pages/security/SecurityPage";
-import UserManagement from "./pages/admin/UserManagement";
-import EmployeeData from "./pages/employee/EmployeeData";
-import ViewProfilePage from "./pages/employee/ViewProfilePage";
-import PlatformSettings from "./pages/admin/PlatformSettings";
-import CVTemplates from "./pages/admin/CVTemplates";
-import CVTemplateCreate from "./pages/admin/CVTemplateCreate";
-import CVTemplateEdit from "./pages/admin/CVTemplateEdit";
-import CVTemplatePreview from "./pages/admin/CVTemplatePreview";
-import NotFound from "./pages/NotFound";
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { Toaster } from '@/components/ui/sonner';
+import { AuthProvider } from '@/contexts/AuthContext';
+import ProtectedRoute from '@/components/ProtectedRoute';
+import Index from '@/pages/Index';
+import Login from '@/pages/Login';
+import Callback from '@/pages/auth/Callback';
+import ProfilePage from '@/pages/profile/ProfilePage';
+import EmployeeData from '@/pages/employee/EmployeeData';
+import ViewProfilePage from '@/pages/employee/ViewProfilePage';
+import AdminDashboard from '@/pages/dashboard/AdminDashboard';
+import EmployeeDashboard from '@/pages/dashboard/EmployeeDashboard';
+import ManagerDashboard from '@/pages/dashboard/ManagerDashboard';
+import UserManagement from '@/pages/admin/UserManagement';
+import PlatformSettings from '@/pages/admin/PlatformSettings';
+import CVTemplates from '@/pages/admin/CVTemplates';
+import CVTemplateCreate from '@/pages/admin/CVTemplateCreate';
+import CVTemplateEdit from '@/pages/admin/CVTemplateEdit';
+import SecurityPage from '@/pages/security/SecurityPage';
+import NotFound from '@/pages/NotFound';
+import './App.css';
 
 const queryClient = new QueryClient();
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <AuthProvider>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
+function App() {
+  return (
+    <QueryClientProvider client={queryClient}>
+      <AuthProvider>
+        <Router>
           <Routes>
-            {/* Public Routes */}
+            <Route path="/" element={<Index />} />
             <Route path="/login" element={<Login />} />
             <Route path="/auth/callback" element={<Callback />} />
-            <Route path="/" element={<Navigate to="/login" replace />} />
-            
-            {/* Admin Routes */}
-            <Route 
-              path="/admin/dashboard" 
+            <Route
+              path="/profile"
               element={
-                <ProtectedRoute allowedRoles={['admin']}>
-                  <AdminDashboard />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/admin/profile" 
-              element={
-                <ProtectedRoute allowedRoles={['admin']}>
+                <ProtectedRoute>
                   <ProfilePage />
                 </ProtectedRoute>
-              } 
+              }
             />
-            <Route 
-              path="/admin/security" 
+            <Route
+              path="/employee-data"
               element={
-                <ProtectedRoute allowedRoles={['admin']}>
-                  <SecurityPage />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/admin/user-management" 
-              element={
-                <ProtectedRoute allowedRoles={['admin']}>
-                  <UserManagement />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/admin/employee-data" 
-              element={
-                <ProtectedRoute allowedRoles={['admin']}>
+                <ProtectedRoute allowedRoles={['admin', 'manager']}>
                   <EmployeeData />
                 </ProtectedRoute>
-              } 
+              }
             />
-            <Route 
-              path="/admin/platform-settings" 
-              element={
-                <ProtectedRoute allowedRoles={['admin']}>
-                  <PlatformSettings />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/admin/cv-templates" 
-              element={
-                <ProtectedRoute allowedRoles={['admin']}>
-                  <CVTemplates />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/admin/cv-templates/create" 
-              element={
-                <ProtectedRoute allowedRoles={['admin']}>
-                  <CVTemplateCreate />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/admin/cv-templates/:id/edit" 
-              element={
-                <ProtectedRoute allowedRoles={['admin']}>
-                  <CVTemplateEdit />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/admin/cv-templates/:id/preview" 
-              element={
-                <ProtectedRoute allowedRoles={['admin']}>
-                  <CVTemplatePreview />
-                </ProtectedRoute>
-              } 
-            />
-            
-            {/* Manager Routes */}
-            <Route 
-              path="/manager/dashboard" 
-              element={
-                <ProtectedRoute allowedRoles={['manager']}>
-                  <ManagerDashboard />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/manager/profile" 
-              element={
-                <ProtectedRoute allowedRoles={['manager']}>
-                  <ProfilePage />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/manager/security" 
-              element={
-                <ProtectedRoute allowedRoles={['manager']}>
-                  <SecurityPage />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/manager/employee-data" 
-              element={
-                <ProtectedRoute allowedRoles={['manager']}>
-                  <EmployeeData />
-                </ProtectedRoute>
-              } 
-            />
-            
-            {/* Employee Routes */}
-            <Route 
-              path="/employee/dashboard" 
-              element={
-                <ProtectedRoute allowedRoles={['employee']}>
-                  <EmployeeDashboard />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/employee/profile" 
-              element={
-                <ProtectedRoute allowedRoles={['employee']}>
-                  <ProfilePage />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/employee/security" 
-              element={
-                <ProtectedRoute allowedRoles={['employee']}>
-                  <SecurityPage />
-                </ProtectedRoute>
-              } 
-            />
-            
-            {/* View Profile Route - accessible by admin and manager */}
-            <Route 
-              path="/employee/profile/:profileId" 
+            <Route
+              path="/employee/:id"
               element={
                 <ProtectedRoute allowedRoles={['admin', 'manager']}>
                   <ViewProfilePage />
                 </ProtectedRoute>
-              } 
+              }
             />
-            
-            {/* Fallback Route */}
+            <Route
+              path="/admin-dashboard"
+              element={
+                <ProtectedRoute allowedRoles={['admin']}>
+                  <AdminDashboard />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/employee-dashboard"
+              element={
+                <ProtectedRoute allowedRoles={['employee']}>
+                  <EmployeeDashboard />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/manager-dashboard"
+              element={
+                <ProtectedRoute allowedRoles={['manager']}>
+                  <ManagerDashboard />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/users"
+              element={
+                <ProtectedRoute allowedRoles={['admin']}>
+                  <UserManagement />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/platform-settings"
+              element={
+                <ProtectedRoute allowedRoles={['admin']}>
+                  <PlatformSettings />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/cv-templates"
+              element={
+                <ProtectedRoute allowedRoles={['admin']}>
+                  <CVTemplates />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/cv-templates/create"
+              element={
+                <ProtectedRoute allowedRoles={['admin']}>
+                  <CVTemplateCreate />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/cv-templates/:id/edit"
+              element={
+                <ProtectedRoute allowedRoles={['admin']}>
+                  <CVTemplateEdit />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/security"
+              element={
+                <ProtectedRoute>
+                  <SecurityPage />
+                </ProtectedRoute>
+              }
+            />
             <Route path="*" element={<NotFound />} />
           </Routes>
-        </BrowserRouter>
-      </TooltipProvider>
-    </AuthProvider>
-  </QueryClientProvider>
-);
+        </Router>
+        <Toaster />
+      </AuthProvider>
+    </QueryClientProvider>
+  );
+}
 
 export default App;
