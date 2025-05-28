@@ -115,7 +115,7 @@ const EnhancedSectionManager: React.FC<EnhancedSectionManagerProps> = ({ templat
       });
 
       if (error) throw error;
-      return (data as FieldConfig[]) || [];
+      return (data as unknown as FieldConfig[]) || [];
     } catch (error) {
       console.error('Error getting default fields:', error);
       return [];
@@ -141,7 +141,10 @@ const EnhancedSectionManager: React.FC<EnhancedSectionManagerProps> = ({ templat
 
       const { data, error } = await supabase
         .from('cv_template_sections')
-        .insert([newSection])
+        .insert([{
+          ...newSection,
+          styling_config: newSection.styling_config as any
+        }])
         .select()
         .single();
 
