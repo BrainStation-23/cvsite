@@ -8,19 +8,56 @@ import { Slider } from '@/components/ui/slider';
 import { Input } from '@/components/ui/input';
 import { CVTemplate } from '@/types/cv-templates';
 import { Palette, Type, Layout, Ruler } from 'lucide-react';
+import { useCVTemplates } from '@/hooks/use-cv-templates';
+import { useToast } from '@/hooks/use-toast';
 
 interface TemplateBuilderProps {
   template: CVTemplate;
+  onLayoutUpdate?: (layoutConfig: Record<string, any>) => void;
 }
 
-const TemplateBuilder: React.FC<TemplateBuilderProps> = ({ template }) => {
+const TemplateBuilder: React.FC<TemplateBuilderProps> = ({ template, onLayoutUpdate }) => {
   const [layoutConfig, setLayoutConfig] = useState(template.layout_config || {});
+  const [isSaving, setIsSaving] = useState(false);
+  const { updateTemplate } = useCVTemplates();
+  const { toast } = useToast();
 
   const updateLayoutConfig = (key: string, value: any) => {
-    setLayoutConfig(prev => ({
-      ...prev,
+    const newConfig = {
+      ...layoutConfig,
       [key]: value
-    }));
+    };
+    setLayoutConfig(newConfig);
+    
+    // Notify parent component of changes
+    if (onLayoutUpdate) {
+      onLayoutUpdate(newConfig);
+    }
+  };
+
+  const handleSaveLayout = async () => {
+    try {
+      setIsSaving(true);
+      const success = await updateTemplate(template.id, {
+        layout_config: layoutConfig
+      });
+      
+      if (success) {
+        toast({
+          title: "Success",
+          description: "Layout configuration saved successfully"
+        });
+      }
+    } catch (error) {
+      console.error('Error saving layout configuration:', error);
+      toast({
+        title: "Error",
+        description: "Failed to save layout configuration",
+        variant: "destructive"
+      });
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   return (
@@ -264,7 +301,9 @@ const TemplateBuilder: React.FC<TemplateBuilderProps> = ({ template }) => {
       </Card>
 
       <div className="flex justify-end">
-        <Button>Save Layout Configuration</Button>
+        <Button onClick={handleSaveLayout} disabled={isSaving}>
+          {isSaving ? 'Saving...' : 'Save Layout Configuration'}
+        </Button>
       </div>
     </div>
   );

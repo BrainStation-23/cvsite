@@ -10,10 +10,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ArrowLeft, Save, Eye, Plus, Trash2, GripVertical } from 'lucide-react';
+import { ArrowLeft, Save, Eye } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { useCVTemplates } from '@/hooks/use-cv-templates';
-import { CVOrientation, CVSectionType } from '@/types/cv-templates';
+import { CVOrientation } from '@/types/cv-templates';
 import TemplateBuilder from '@/components/admin/cv-templates/TemplateBuilder';
 import SectionManager from '@/components/admin/cv-templates/SectionManager';
 import FieldMapper from '@/components/admin/cv-templates/FieldMapper';
@@ -35,22 +35,22 @@ const CVTemplateEdit: React.FC = () => {
 
   const { register, handleSubmit, setValue, watch, formState: { errors } } = useForm<EditTemplateForm>();
 
-  useEffect(() => {
-    const loadTemplate = async () => {
-      if (id) {
-        const templateData = await getTemplate(id);
-        if (templateData) {
-          setTemplate(templateData);
-          setValue('name', templateData.name);
-          setValue('description', templateData.description || '');
-          setValue('pages_count', templateData.pages_count);
-          setValue('orientation', templateData.orientation);
-          setValue('is_active', templateData.is_active);
-        }
-        setIsLoading(false);
+  const loadTemplate = async () => {
+    if (id) {
+      const templateData = await getTemplate(id);
+      if (templateData) {
+        setTemplate(templateData);
+        setValue('name', templateData.name);
+        setValue('description', templateData.description || '');
+        setValue('pages_count', templateData.pages_count);
+        setValue('orientation', templateData.orientation);
+        setValue('is_active', templateData.is_active);
       }
-    };
+      setIsLoading(false);
+    }
+  };
 
+  useEffect(() => {
     loadTemplate();
   }, [id, getTemplate, setValue]);
 
@@ -64,6 +64,15 @@ const CVTemplateEdit: React.FC = () => {
       if (success) {
         navigate('/admin/cv-templates');
       }
+    }
+  };
+
+  const handleLayoutUpdate = (layoutConfig: Record<string, any>) => {
+    if (template) {
+      setTemplate(prev => ({
+        ...prev,
+        layout_config: layoutConfig
+      }));
     }
   };
 
@@ -211,7 +220,10 @@ const CVTemplateEdit: React.FC = () => {
             </TabsContent>
 
             <TabsContent value="layout">
-              <TemplateBuilder template={template} />
+              <TemplateBuilder 
+                template={template} 
+                onLayoutUpdate={handleLayoutUpdate}
+              />
             </TabsContent>
 
             <TabsContent value="sections">

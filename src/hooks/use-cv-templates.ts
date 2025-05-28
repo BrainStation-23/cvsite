@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -133,15 +134,24 @@ export const useCVTemplates = () => {
   const updateTemplate = async (id: string, templateData: Partial<CreateTemplateData>): Promise<boolean> => {
     try {
       setIsUpdating(true);
-      const { error } = await supabase
+      console.log('Updating template with data:', templateData);
+      
+      const { data, error } = await supabase
         .from('cv_templates')
         .update({
           ...templateData,
           updated_at: new Date().toISOString()
         })
-        .eq('id', id);
+        .eq('id', id)
+        .select()
+        .single();
 
-      if (error) throw error;
+      if (error) {
+        console.error('Template update error:', error);
+        throw error;
+      }
+
+      console.log('Template updated successfully:', data);
 
       toast({
         title: "Success",
@@ -150,11 +160,11 @@ export const useCVTemplates = () => {
 
       await fetchTemplates();
       return true;
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error updating CV template:', error);
       toast({
         title: "Error",
-        description: "Failed to update CV template",
+        description: error.message || "Failed to update CV template",
         variant: "destructive"
       });
       return false;
