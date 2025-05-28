@@ -15,8 +15,7 @@ import { useForm } from 'react-hook-form';
 import { useCVTemplates } from '@/hooks/use-cv-templates';
 import { CVOrientation, CVTemplate } from '@/types/cv-templates';
 import TemplateBuilder from '@/components/admin/cv-templates/TemplateBuilder';
-import SectionManager from '@/components/admin/cv-templates/SectionManager';
-import FieldMapper from '@/components/admin/cv-templates/FieldMapper';
+import EnhancedSectionManager from '@/components/admin/cv-templates/EnhancedSectionManager';
 import { useToast } from '@/hooks/use-toast';
 
 interface EditTemplateForm {
@@ -44,7 +43,6 @@ const CVTemplateEdit: React.FC = () => {
       const templateData = await getTemplate(id);
       if (templateData) {
         setTemplate(templateData);
-        // Only set form values if form hasn't been initialized yet
         if (!isFormInitialized) {
           setValue('name', templateData.name);
           setValue('description', templateData.description || '');
@@ -62,9 +60,8 @@ const CVTemplateEdit: React.FC = () => {
     loadTemplate();
   }, [id, getTemplate]);
 
-  // Watch for form changes to detect unsaved changes
   useEffect(() => {
-    if (!isFormInitialized) return; // Don't track changes until form is initialized
+    if (!isFormInitialized) return;
     
     const subscription = watch((value, { name, type }) => {
       if (template && type === 'change') {
@@ -87,7 +84,6 @@ const CVTemplateEdit: React.FC = () => {
           title: "Success",
           description: "Template saved successfully"
         });
-        // Reload template to get updated data, but don't reinitialize form
         const updatedTemplate = await getTemplate(id);
         if (updatedTemplate) {
           setTemplate(updatedTemplate);
@@ -184,11 +180,10 @@ const CVTemplateEdit: React.FC = () => {
         {/* Content */}
         <div className="flex-1 min-h-0 py-6">
           <Tabs defaultValue="basic" className="w-full">
-            <TabsList className="grid w-full grid-cols-4">
+            <TabsList className="grid w-full grid-cols-3">
               <TabsTrigger value="basic">Basic Info</TabsTrigger>
               <TabsTrigger value="layout">Layout</TabsTrigger>
-              <TabsTrigger value="sections">Sections</TabsTrigger>
-              <TabsTrigger value="fields">Field Mapping</TabsTrigger>
+              <TabsTrigger value="sections">Sections & Fields</TabsTrigger>
             </TabsList>
 
             <TabsContent value="basic" className="space-y-6">
@@ -286,16 +281,9 @@ const CVTemplateEdit: React.FC = () => {
             </TabsContent>
 
             <TabsContent value="sections">
-              <SectionManager 
+              <EnhancedSectionManager 
                 templateId={id!} 
                 onSectionsChange={() => setHasUnsavedChanges(true)}
-              />
-            </TabsContent>
-
-            <TabsContent value="fields">
-              <FieldMapper 
-                templateId={id!} 
-                onFieldsChange={() => setHasUnsavedChanges(true)}
               />
             </TabsContent>
           </Tabs>

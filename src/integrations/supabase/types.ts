@@ -812,6 +812,10 @@ export type Database = {
         Args: { start_date: string; end_date: string; is_current: boolean }
         Returns: number
       }
+      get_default_fields_for_section: {
+        Args: { section_type_param: string }
+        Returns: Json
+      }
       get_employee_profiles: {
         Args: {
           search_query?: string
