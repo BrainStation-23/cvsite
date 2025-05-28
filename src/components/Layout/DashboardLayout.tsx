@@ -10,8 +10,7 @@ import {
   Home,
   Shield,
   Database,
-  Menu,
-  X
+  Menu
 } from 'lucide-react';
 
 interface DashboardLayoutProps {
@@ -92,7 +91,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
             onClick={toggleSidebar}
             className="p-1 rounded hover:bg-cvsite-teal"
           >
-            {isSidebarOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+            {isSidebarOpen ? <Menu className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
           </button>
         </div>
         <nav className="mt-5">
