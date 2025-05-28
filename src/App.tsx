@@ -67,6 +67,14 @@ function App() {
               }
             />
             <Route
+              path="/employee/profile/:profileId"
+              element={
+                <ProtectedRoute allowedRoles={['admin', 'manager']}>
+                  <ViewProfilePage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
               path="/employee-data"
               element={
                 <ProtectedRoute allowedRoles={['admin', 'manager']}>
