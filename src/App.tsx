@@ -43,6 +43,30 @@ function App() {
               }
             />
             <Route
+              path="/admin/profile"
+              element={
+                <ProtectedRoute allowedRoles={['admin']}>
+                  <ProfilePage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/manager/profile"
+              element={
+                <ProtectedRoute allowedRoles={['manager']}>
+                  <ProfilePage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/employee/profile"
+              element={
+                <ProtectedRoute allowedRoles={['employee']}>
+                  <ProfilePage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
               path="/employee-data"
               element={
                 <ProtectedRoute allowedRoles={['admin', 'manager']}>
@@ -149,7 +173,7 @@ function App() {
             <Route
               path="/admin/security"
               element={
-                <ProtectedRoute>
+                <ProtectedRoute allowedRoles={['admin']}>
                   <SecurityPage />
                 </ProtectedRoute>
               }
