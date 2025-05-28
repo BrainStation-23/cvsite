@@ -45,7 +45,9 @@ export function useExperienceGrouped(profileId?: string) {
       if (error) throw error;
       
       if (data) {
-        setGroupedExperiences(data || []);
+        // Properly cast the JSON response to our expected type
+        const typedData = data as CompanyExperience[];
+        setGroupedExperiences(typedData || []);
       }
     } catch (error) {
       console.error('Error fetching grouped experiences:', error);
