@@ -66,6 +66,7 @@ export function useProfile() {
     saveSpecializedSkill: skillsHook.saveSpecializedSkill,
     deleteTechnicalSkill: skillsHook.deleteTechnicalSkill,
     deleteSpecializedSkill: skillsHook.deleteSpecializedSkill,
+    reorderTechnicalSkills: skillsHook.reorderTechnicalSkills,
     saveExperience: experienceHook.saveExperience,
     updateExperience: experienceHook.updateExperience,
     deleteExperience: experienceHook.deleteExperience,
