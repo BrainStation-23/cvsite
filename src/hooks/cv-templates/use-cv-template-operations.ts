@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -30,6 +29,7 @@ interface SupabaseCVTemplate {
 export const useCVTemplateOperations = () => {
   const [isCreating, setIsCreating] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   const { toast } = useToast();
 
   const convertSupabaseTemplate = (template: SupabaseCVTemplate): CVTemplate => ({
@@ -147,6 +147,7 @@ export const useCVTemplateOperations = () => {
 
   const deleteTemplate = async (id: string): Promise<boolean> => {
     try {
+      setIsDeleting(true);
       const { error } = await supabase
         .from('cv_templates')
         .delete()
@@ -168,12 +169,15 @@ export const useCVTemplateOperations = () => {
         variant: "destructive"
       });
       return false;
+    } finally {
+      setIsDeleting(false);
     }
   };
 
   return {
     isCreating,
     isUpdating,
+    isDeleting,
     createTemplate,
     updateTemplate,
     deleteTemplate,
