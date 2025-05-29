@@ -146,7 +146,7 @@ export function useProjects(profileId?: string) {
       setIsSaving(true);
       
       // Convert partial project data to database format
-      const dbData: Partial<ProjectDB> = {};
+      const dbData: any = {};
       
       if (project.name) dbData.name = project.name;
       if (project.role) dbData.role = project.role;
