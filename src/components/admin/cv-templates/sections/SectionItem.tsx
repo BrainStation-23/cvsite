@@ -2,7 +2,6 @@
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Collapsible, CollapsibleContent } from '@/components/ui/collapsible';
 import { Trash2, ChevronDown, ChevronRight } from 'lucide-react';
@@ -43,6 +42,30 @@ interface SectionItemProps {
   getSectionLabel: (type: CVSectionType) => string;
 }
 
+// Define default fields for each section type
+const getDefaultFields = (sectionType: string): FieldConfig[] => {
+  switch (sectionType) {
+    case 'general':
+      return [
+        { field: 'first_name', label: 'First Name', enabled: true, masked: false, order: 1 },
+        { field: 'last_name', label: 'Last Name', enabled: true, masked: false, order: 2 },
+        { field: 'employee_id', label: 'Employee ID', enabled: true, masked: false, order: 3 },
+        { field: 'profile_image', label: 'Profile Image', enabled: true, masked: false, order: 4 },
+        { field: 'biography', label: 'Biography', enabled: true, masked: false, order: 5 },
+      ];
+    case 'experience':
+      return [
+        { field: 'company_name', label: 'Company Name', enabled: true, masked: false, order: 1 },
+        { field: 'designation', label: 'Designation', enabled: true, masked: false, order: 2 },
+        { field: 'start_date', label: 'Start Date', enabled: true, masked: false, order: 3 },
+        { field: 'end_date', label: 'End Date', enabled: true, masked: false, order: 4 },
+        { field: 'description', label: 'Description', enabled: true, masked: false, order: 5 },
+      ];
+    default:
+      return [];
+  }
+};
+
 const SectionItem: React.FC<SectionItemProps> = ({
   section,
   index,
@@ -62,10 +85,21 @@ const SectionItem: React.FC<SectionItemProps> = ({
   };
 
   const updateFieldConfig = (fieldIndex: number, fieldUpdates: Partial<FieldConfig>) => {
-    const updatedFields = [...(section.styling_config.fields || [])];
+    // Initialize fields if they don't exist
+    let currentFields = section.styling_config.fields || [];
+    if (currentFields.length === 0) {
+      currentFields = getDefaultFields(section.section_type);
+    }
+    
+    const updatedFields = [...currentFields];
     updatedFields[fieldIndex] = { ...updatedFields[fieldIndex], ...fieldUpdates };
     updateSectionStyling({ fields: updatedFields });
   };
+
+  // Get fields to display (use existing or default)
+  const fieldsToDisplay = section.styling_config.fields?.length > 0 
+    ? section.styling_config.fields 
+    : getDefaultFields(section.section_type);
 
   return (
     <Card className="border-l-4 border-l-blue-500">
@@ -97,13 +131,6 @@ const SectionItem: React.FC<SectionItemProps> = ({
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <div className="flex items-center space-x-1">
-              <Switch
-                checked={section.is_required}
-                onCheckedChange={(checked) => onUpdateSection({ is_required: checked })}
-              />
-              <Label className="text-xs">Required</Label>
-            </div>
             <Button 
               variant="ghost" 
               size="sm" 
@@ -138,8 +165,9 @@ const SectionItem: React.FC<SectionItemProps> = ({
               />
 
               <SectionFieldConfig
-                fields={section.styling_config.fields || []}
+                fields={fieldsToDisplay}
                 onUpdateField={updateFieldConfig}
+                sectionType={section.section_type}
               />
             </div>
           </CollapsibleContent>

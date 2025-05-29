@@ -37,6 +37,7 @@ const CVTemplateEdit: React.FC = () => {
   // Construct the full profile object for the CV preview
   const selectedProfile = selectedProfileId ? {
     id: selectedProfileId,
+    employee_id: selectedProfileId, // Use profile ID as employee ID for now
     first_name: generalInfo.firstName,
     last_name: generalInfo.lastName,
     biography: generalInfo.biography,

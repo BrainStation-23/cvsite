@@ -33,6 +33,15 @@ export function useEmployeeProfile(profileId: string) {
     setIsLoading(true);
     
     try {
+      // Fetch profile data first to get employee_id
+      const { data: profileData, error: profileError } = await supabase
+        .from('profiles')
+        .select('employee_id')
+        .eq('id', profileId)
+        .maybeSingle();
+
+      if (profileError) throw profileError;
+
       // Fetch general information
       const { data: generalData, error: generalError } = await supabase
         .from('general_information')

@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { DynamicSectionRenderer } from './DynamicSectionRenderer';
 import { GeneralInfoSection } from './sections/GeneralInfoSection';
@@ -44,33 +45,42 @@ export const CVPageRenderer: React.FC<CVPageRendererProps> = ({
   sections = [],
   fieldMappings = []
 }) => {
+  // Enhance profile data to ensure all fields are available
+  const enhancedProfile = {
+    ...profile,
+    // Make sure we have employee_id from profiles table
+    employee_id: profile.employee_id || profile.id,
+    // Ensure profile image is available
+    profile_image: profile.profile_image || profile.profileImage,
+  };
+
   // If no sections configured, fall back to default behavior
   if (sections.length === 0) {
-    const sections = [
-      <GeneralInfoSection key="general" profile={profile} styles={styles} />,
-      <ExperienceSection key="experience" profile={profile} styles={styles} />,
-      <EducationSection key="education" profile={profile} styles={styles} />,
-      <SkillsSection key="skills" profile={profile} styles={styles} />,
-      <ProjectsSection key="projects" profile={profile} styles={styles} />,
-      <TrainingsSection key="trainings" profile={profile} styles={styles} />,
-      <AchievementsSection key="achievements" profile={profile} styles={styles} />
+    const defaultSections = [
+      <GeneralInfoSection key="general" profile={enhancedProfile} styles={styles} />,
+      <ExperienceSection key="experience" profile={enhancedProfile} styles={styles} />,
+      <EducationSection key="education" profile={enhancedProfile} styles={styles} />,
+      <SkillsSection key="skills" profile={enhancedProfile} styles={styles} />,
+      <ProjectsSection key="projects" profile={enhancedProfile} styles={styles} />,
+      <TrainingsSection key="trainings" profile={enhancedProfile} styles={styles} />,
+      <AchievementsSection key="achievements" profile={enhancedProfile} styles={styles} />
     ].filter(Boolean);
   
     // Simple logic to distribute content across pages
-    const sectionsPerPage = Math.ceil(sections.length / totalPages);
+    const sectionsPerPage = Math.ceil(defaultSections.length / totalPages);
     const startIndex = (pageNumber - 1) * sectionsPerPage;
     const endIndex = startIndex + sectionsPerPage;
-    const pageSections = sections.slice(startIndex, endIndex);
+    const pageSections = defaultSections.slice(startIndex, endIndex);
   
     return (
       <div style={styles.baseStyles} key={pageNumber}>
         {pageNumber === 1 && (
-          <GeneralInfoSection profile={profile} styles={styles} />
+          <GeneralInfoSection profile={enhancedProfile} styles={styles} />
         )}
         {pageNumber > 1 && pageSections.map((section, index) => (
           <div key={index}>{section}</div>
         ))}
-        {pageNumber === 1 && sections.slice(1, sectionsPerPage).map((section, index) => (
+        {pageNumber === 1 && defaultSections.slice(1, sectionsPerPage).map((section, index) => (
           <div key={index}>{section}</div>
         ))}
       </div>
@@ -88,7 +98,7 @@ export const CVPageRenderer: React.FC<CVPageRendererProps> = ({
       <DynamicSectionRenderer
         sections={pageSections}
         fieldMappings={fieldMappings}
-        profile={profile}
+        profile={enhancedProfile}
         styles={styles}
       />
     </div>
