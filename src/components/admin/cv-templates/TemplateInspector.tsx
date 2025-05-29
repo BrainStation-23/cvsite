@@ -4,9 +4,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Label } from '@/components/ui/label';
 import TemplateBuilder from './TemplateBuilder';
-import EnhancedSectionManager from './EnhancedSectionManager';
+import SectionManager from './SectionManager';
 import { CVTemplate } from '@/types/cv-templates';
-import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
@@ -140,7 +139,7 @@ const TemplateInspector: React.FC<TemplateInspectorProps> = ({
             </TabsContent>
 
             <TabsContent value="sections" className="p-4 m-0">
-              <EnhancedSectionManager 
+              <SectionManager 
                 templateId={template.id} 
                 onSectionsChange={onConfigurationChange}
               />
