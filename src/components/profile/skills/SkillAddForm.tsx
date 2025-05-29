@@ -2,7 +2,6 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Plus } from 'lucide-react';
 import { Skill } from '@/types';
 
 interface SkillAddFormProps {
@@ -21,7 +20,6 @@ export const SkillAddForm: React.FC<SkillAddFormProps> = ({
   setNewSkill,
   onAddSkill,
   onCancel,
-  onShowForm,
   isEditing
 }) => {
   const handleAddSkill = () => {
@@ -29,24 +27,10 @@ export const SkillAddForm: React.FC<SkillAddFormProps> = ({
     setNewSkill({ name: '', proficiency: 1, priority: 0 });
   };
 
-  if (!isEditing) return null;
-
-  if (!showAddForm) {
-    return (
-      <Button 
-        variant="outline" 
-        size="sm" 
-        onClick={onShowForm}
-        className="h-9 text-cvsite-teal border-cvsite-teal hover:bg-cvsite-teal hover:text-white"
-      >
-        <Plus className="mr-2 h-4 w-4" />
-        Add Skill
-      </Button>
-    );
-  }
+  if (!isEditing || !showAddForm) return null;
 
   return (
-    <div className="mt-4 p-4 border-2 border-dashed border-cvsite-teal/30 bg-cvsite-teal/5 rounded-lg">
+    <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
       <div className="space-y-3">
         <Input
           placeholder="Enter skill name"
@@ -56,7 +40,7 @@ export const SkillAddForm: React.FC<SkillAddFormProps> = ({
         />
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-2">
-            <span className="text-sm text-gray-600">Proficiency:</span>
+            <span className="text-sm text-gray-600 dark:text-gray-400">Proficiency:</span>
             <div className="flex space-x-1">
               {Array.from({ length: 10 }).map((_, i) => (
                 <button

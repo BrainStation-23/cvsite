@@ -1,6 +1,8 @@
 
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Plus } from 'lucide-react';
 import { Skill } from '@/types';
 import { SkillAddForm } from './SkillAddForm';
 import { SkillList } from './SkillList';
@@ -45,20 +47,40 @@ export const SkillSection: React.FC<SkillSectionProps> = ({
   return (
     <Card>
       <CardHeader className="pb-4">
-        <div className="flex items-center justify-between">
-          <CardTitle className="text-lg">{title}</CardTitle>
-          <SkillAddForm
-            showAddForm={showAddForm}
-            newSkill={newSkill}
-            setNewSkill={setNewSkill}
-            onAddSkill={handleAddSkill}
-            onCancel={handleCancel}
-            onShowForm={() => setShowAddForm(true)}
-            isEditing={isEditing}
-          />
-        </div>
+        <CardTitle className="text-lg">{title}</CardTitle>
       </CardHeader>
       <CardContent className="space-y-3">
+        {/* Add skill section - now inside the card content */}
+        {isEditing && (
+          <div className="space-y-3">
+            {!showAddForm ? (
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={() => setShowAddForm(true)}
+                className="w-full h-9 text-cvsite-teal border-cvsite-teal hover:bg-cvsite-teal hover:text-white border-dashed"
+              >
+                <Plus className="mr-2 h-4 w-4" />
+                Add {title.slice(0, -1)}
+              </Button>
+            ) : (
+              <SkillAddForm
+                showAddForm={showAddForm}
+                newSkill={newSkill}
+                setNewSkill={setNewSkill}
+                onAddSkill={handleAddSkill}
+                onCancel={handleCancel}
+                onShowForm={() => setShowAddForm(true)}
+                isEditing={isEditing}
+              />
+            )}
+            {/* Separator line when add form is shown or skills exist */}
+            {(showAddForm || skills.length > 0) && (
+              <div className="border-t border-gray-200 dark:border-gray-700"></div>
+            )}
+          </div>
+        )}
+
         <SkillList
           skills={skills}
           isEditing={isEditing}
