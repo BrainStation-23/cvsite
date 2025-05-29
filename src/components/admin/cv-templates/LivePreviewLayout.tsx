@@ -21,10 +21,7 @@ const LivePreviewLayout: React.FC<LivePreviewLayoutProps> = ({
   template,
   selectedProfile,
   onTemplateUpdate,
-  onSectionsChange,
-  selectedProfileId,
-  onProfileChange,
-  profiles
+  onSectionsChange
 }) => {
   const [previewKey, setPreviewKey] = useState(0);
 
@@ -32,13 +29,6 @@ const LivePreviewLayout: React.FC<LivePreviewLayoutProps> = ({
     // Force preview to re-render when configuration changes
     setPreviewKey(prev => prev + 1);
     onSectionsChange?.();
-  };
-
-  const handleProfileChange = (profileId: string) => {
-    console.log('Profile changed to:', profileId);
-    onProfileChange(profileId);
-    // Force preview to re-render when profile changes
-    setPreviewKey(prev => prev + 1);
   };
 
   return (
@@ -59,7 +49,7 @@ const LivePreviewLayout: React.FC<LivePreviewLayoutProps> = ({
               <Card className="h-full flex items-center justify-center">
                 <div className="text-center text-gray-500">
                   <p className="text-lg font-medium">No Profile Selected</p>
-                  <p className="text-sm mt-2">Choose an employee profile from the inspector to preview the CV template</p>
+                  <p className="text-sm mt-2">Choose an employee profile from the header to preview the CV template</p>
                 </div>
               </Card>
             )}
@@ -75,9 +65,6 @@ const LivePreviewLayout: React.FC<LivePreviewLayoutProps> = ({
               template={template}
               onTemplateUpdate={onTemplateUpdate}
               onConfigurationChange={handleConfigurationChange}
-              selectedProfileId={selectedProfileId}
-              onProfileChange={handleProfileChange}
-              profiles={profiles}
             />
           </div>
         </ResizablePanel>

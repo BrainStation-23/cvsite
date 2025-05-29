@@ -3,11 +3,9 @@ import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Label } from '@/components/ui/label';
-import PreviewControls from './PreviewControls';
 import TemplateBuilder from './TemplateBuilder';
 import EnhancedSectionManager from './EnhancedSectionManager';
 import { CVTemplate } from '@/types/cv-templates';
-import { EmployeeProfile } from '@/hooks/types/employee-profiles';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -17,20 +15,14 @@ interface TemplateInspectorProps {
   template: CVTemplate;
   onTemplateUpdate: (updates: Partial<CVTemplate>) => void;
   onConfigurationChange: () => void;
-  selectedProfileId: string;
-  onProfileChange: (profileId: string) => void;
-  profiles: EmployeeProfile[];
 }
 
 const TemplateInspector: React.FC<TemplateInspectorProps> = ({
   template,
   onTemplateUpdate,
-  onConfigurationChange,
-  selectedProfileId,
-  onProfileChange,
-  profiles
+  onConfigurationChange
 }) => {
-  const [activeTab, setActiveTab] = useState('controls');
+  const [activeTab, setActiveTab] = useState('basic');
 
   const handleBasicInfoChange = (field: string, value: any) => {
     onTemplateUpdate({ [field]: value });
@@ -50,8 +42,7 @@ const TemplateInspector: React.FC<TemplateInspectorProps> = ({
       <div className="flex-1 overflow-hidden">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="h-full flex flex-col">
           <div className="flex-shrink-0 px-4 pt-4">
-            <TabsList className="grid w-full grid-cols-4 text-xs">
-              <TabsTrigger value="controls" className="text-xs">Controls</TabsTrigger>
+            <TabsList className="grid w-full grid-cols-3 text-xs">
               <TabsTrigger value="basic" className="text-xs">Basic</TabsTrigger>
               <TabsTrigger value="layout" className="text-xs">Layout</TabsTrigger>
               <TabsTrigger value="sections" className="text-xs">Sections</TabsTrigger>
@@ -59,31 +50,12 @@ const TemplateInspector: React.FC<TemplateInspectorProps> = ({
           </div>
 
           <div className="flex-1 overflow-auto">
-            <TabsContent value="controls" className="p-4 m-0">
-              <PreviewControls 
-                template={template}
-                selectedProfileId={selectedProfileId}
-                onProfileChange={onProfileChange}
-                profiles={profiles}
-              />
-            </TabsContent>
-
             <TabsContent value="basic" className="p-4 m-0">
               <Card>
                 <CardHeader>
                   <CardTitle className="text-sm">Basic Information</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <div>
-                    <Label className="text-xs">Template Name</Label>
-                    <Input
-                      value={template.name}
-                      onChange={(e) => handleBasicInfoChange('name', e.target.value)}
-                      placeholder="Enter template name"
-                      className="h-8 text-sm"
-                    />
-                  </div>
-
                   <div>
                     <Label className="text-xs">Description</Label>
                     <Textarea
@@ -137,6 +109,24 @@ const TemplateInspector: React.FC<TemplateInspectorProps> = ({
                       onCheckedChange={(checked) => handleBasicInfoChange('is_active', checked)}
                     />
                     <Label className="text-xs">Active Template</Label>
+                  </div>
+
+                  <div className="pt-4 border-t">
+                    <h4 className="text-xs font-medium mb-3">Template Info</h4>
+                    <div className="space-y-2">
+                      <div className="text-xs">
+                        <span className="font-medium">Pages:</span> {template.pages_count}
+                      </div>
+                      <div className="text-xs">
+                        <span className="font-medium">Orientation:</span> {template.orientation}
+                      </div>
+                      <div className="text-xs">
+                        <span className="font-medium">Status:</span> 
+                        <span className={`ml-1 ${template.is_active ? 'text-green-600' : 'text-red-600'}`}>
+                          {template.is_active ? 'Active' : 'Inactive'}
+                        </span>
+                      </div>
+                    </div>
                   </div>
                 </CardContent>
               </Card>

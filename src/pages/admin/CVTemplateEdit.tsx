@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useCVTemplates } from '@/hooks/use-cv-templates';
@@ -106,6 +105,18 @@ const CVTemplateEdit: React.FC = () => {
     navigate('/admin/cv-templates');
   };
 
+  const handleTemplateNameChange = (name: string) => {
+    if (template) {
+      setTemplate(prev => ({ ...prev!, name }));
+      setHasUnsavedChanges(true);
+    }
+  };
+
+  const handleExport = () => {
+    // TODO: Implement export functionality
+    console.log('Export functionality to be implemented');
+  };
+
   if (isLoading) {
     return (
       <div className="flex justify-center items-center h-screen">
@@ -130,6 +141,11 @@ const CVTemplateEdit: React.FC = () => {
       isSaving={isUpdating}
       onBack={handleBack}
       onSave={handleSaveAll}
+      onTemplateNameChange={handleTemplateNameChange}
+      selectedProfileId={selectedProfileId}
+      onProfileChange={handleProfileChange}
+      profiles={profiles || []}
+      onExport={handleExport}
     >
       <LivePreviewLayout
         template={template}

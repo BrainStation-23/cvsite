@@ -1,7 +1,10 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Save } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { ArrowLeft, Save, Download } from 'lucide-react';
+import { EmployeeCombobox } from './EmployeeCombobox';
+import { EmployeeProfile } from '@/hooks/types/employee-profiles';
 
 interface TemplateEditorLayoutProps {
   children: React.ReactNode;
@@ -10,6 +13,11 @@ interface TemplateEditorLayoutProps {
   isSaving: boolean;
   onBack: () => void;
   onSave: () => void;
+  onTemplateNameChange: (name: string) => void;
+  selectedProfileId: string;
+  onProfileChange: (profileId: string) => void;
+  profiles: EmployeeProfile[];
+  onExport?: () => void;
 }
 
 const TemplateEditorLayout: React.FC<TemplateEditorLayoutProps> = ({
@@ -18,8 +26,34 @@ const TemplateEditorLayout: React.FC<TemplateEditorLayoutProps> = ({
   hasUnsavedChanges,
   isSaving,
   onBack,
-  onSave
+  onSave,
+  onTemplateNameChange,
+  selectedProfileId,
+  onProfileChange,
+  profiles,
+  onExport
 }) => {
+  const [isEditingName, setIsEditingName] = useState(false);
+  const [editedName, setEditedName] = useState(templateName);
+
+  const handleNameSave = () => {
+    onTemplateNameChange(editedName);
+    setIsEditingName(false);
+  };
+
+  const handleNameCancel = () => {
+    setEditedName(templateName);
+    setIsEditingName(false);
+  };
+
+  const handleNameKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      handleNameSave();
+    } else if (e.key === 'Escape') {
+      handleNameCancel();
+    }
+  };
+
   return (
     <div className="h-screen w-full bg-white dark:bg-gray-900 flex flex-col animate-fade-in">
       {/* Header */}
@@ -34,14 +68,58 @@ const TemplateEditorLayout: React.FC<TemplateEditorLayoutProps> = ({
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back to Templates
           </Button>
-          <div>
+          <div className="flex flex-col">
             <h1 className="text-xl font-semibold text-cvsite-navy dark:text-white">
               Template Editor
             </h1>
-            <p className="text-sm text-gray-500 dark:text-gray-400">{templateName}</p>
+            <div className="flex items-center gap-2 mt-1">
+              {isEditingName ? (
+                <Input
+                  value={editedName}
+                  onChange={(e) => setEditedName(e.target.value)}
+                  onBlur={handleNameSave}
+                  onKeyDown={handleNameKeyDown}
+                  className="h-7 text-sm font-medium"
+                  autoFocus
+                />
+              ) : (
+                <button
+                  onClick={() => setIsEditingName(true)}
+                  className="text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 font-medium"
+                >
+                  {templateName}
+                </button>
+              )}
+            </div>
           </div>
         </div>
-        <div className="flex gap-3">
+
+        <div className="flex items-center gap-3">
+          {/* Employee Selection */}
+          <div className="flex items-center gap-2">
+            <span className="text-xs text-gray-500 dark:text-gray-400">Preview:</span>
+            <div className="w-48">
+              <EmployeeCombobox
+                profiles={profiles}
+                value={selectedProfileId}
+                onValueChange={onProfileChange}
+                placeholder="Select employee..."
+                isLoading={false}
+              />
+            </div>
+          </div>
+
+          {/* Action Buttons */}
+          <Button 
+            size="sm"
+            variant="outline"
+            onClick={onExport} 
+            disabled={!selectedProfileId}
+          >
+            <Download className="h-4 w-4 mr-2" />
+            Export
+          </Button>
+          
           <Button 
             onClick={onSave} 
             disabled={isSaving}
