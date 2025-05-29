@@ -38,7 +38,7 @@ export const FieldProcessor: React.FC<FieldProcessorProps> = ({
 
   // Apply masking if configured
   let processedValue = value;
-  if (isMasked && value) {
+  if (isMasked && value !== null && value !== undefined) {
     if (maskValue) {
       // Use custom mask pattern
       processedValue = maskValue;
@@ -46,7 +46,7 @@ export const FieldProcessor: React.FC<FieldProcessorProps> = ({
       // Default masking - show only first few characters
       if (typeof value === 'string' && value.length > 3) {
         processedValue = value.substring(0, 3) + '***';
-      } else {
+      } else if (value) {
         processedValue = '***';
       }
     }
@@ -70,11 +70,11 @@ const checkVisibilityRules = (value: any, rules: Record<string, any>, fieldMappi
   }
 
   // Implement basic visibility rules
-  if (rules.showIfNotEmpty && (!value || value === '')) {
+  if (rules.showIfNotEmpty && (!value || value === '' || value === null || value === undefined)) {
     return false;
   }
 
-  if (rules.showIfEmpty && value && value !== '') {
+  if (rules.showIfEmpty && value && value !== '' && value !== null && value !== undefined) {
     return false;
   }
 
