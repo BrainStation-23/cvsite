@@ -1,6 +1,5 @@
 
 import React from 'react';
-import { DeviconService } from '@/utils/deviconUtils';
 
 interface ProjectsSectionProps {
   profile: any;
@@ -10,18 +9,10 @@ interface ProjectsSectionProps {
 export const ProjectsSection: React.FC<ProjectsSectionProps> = ({ profile, styles }) => {
   if (!profile.projects || profile.projects.length === 0) return null;
   
-  // Sort projects by display_order, then by start_date
-  const sortedProjects = [...profile.projects].sort((a, b) => {
-    if (a.display_order !== undefined && b.display_order !== undefined) {
-      return a.display_order - b.display_order;
-    }
-    return new Date(b.start_date).getTime() - new Date(a.start_date).getTime();
-  });
-  
   return (
     <div style={styles.sectionStyles}>
       <h2 style={styles.sectionTitleStyles}>Projects</h2>
-      {sortedProjects.map((project: any, index: number) => (
+      {profile.projects.map((project: any, index: number) => (
         <div key={index} style={styles.itemStyles}>
           <div style={styles.itemTitleStyles}>{project.name}</div>
           <div style={styles.itemSubtitleStyles}>
@@ -39,16 +30,6 @@ export const ProjectsSection: React.FC<ProjectsSectionProps> = ({ profile, style
                   </span>
                 ))}
               </div>
-            </div>
-          )}
-          {project.url && (
-            <div style={{ marginTop: '3pt' }}>
-              <a 
-                href={project.url} 
-                style={{ color: '#10b981', fontSize: '0.85em', textDecoration: 'none' }}
-              >
-                View Project →
-              </a>
             </div>
           )}
         </div>
