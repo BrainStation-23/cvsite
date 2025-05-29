@@ -38,7 +38,7 @@ export const SkillAddForm: React.FC<SkillAddFormProps> = ({
           onChange={(e) => setNewSkill({ ...newSkill, name: e.target.value })}
           className="border-cvsite-teal/30 focus:border-cvsite-teal"
         />
-        <div className="flex items-center justify-between">
+        <div className="space-y-3">
           <div className="flex items-center space-x-2">
             <span className="text-sm text-gray-600 dark:text-gray-400">Proficiency:</span>
             <div className="flex space-x-1">
