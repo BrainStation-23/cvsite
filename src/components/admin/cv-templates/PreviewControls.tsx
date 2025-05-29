@@ -85,9 +85,6 @@ const PreviewControls: React.FC<PreviewControlsProps> = ({
         </CardHeader>
         <CardContent className="space-y-2">
           <div className="text-xs">
-            <span className="font-medium">Pages:</span> {template.pages_count}
-          </div>
-          <div className="text-xs">
             <span className="font-medium">Orientation:</span> {template.orientation}
           </div>
           <div className="text-xs">

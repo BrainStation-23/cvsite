@@ -1,33 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Label } from '@/components/ui/label';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { 
-  Trash2, 
-  Settings, 
-  ChevronDown, 
-  ChevronRight, 
-  Eye, 
-  EyeOff,
-  User,
-  Code,
-  Wrench,
-  Briefcase,
-  GraduationCap,
-  Award,
-  Trophy,
-  FolderOpen,
-  Target,
-  GripVertical
-} from 'lucide-react';
 import { CVSectionType } from '@/types/cv-templates';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import SectionFieldConfig from './sections/SectionFieldConfig';
+import SortableSectionItem from './sections/SortableSectionItem';
+import AddSectionPanel from './sections/AddSectionPanel';
+import { SECTION_TYPES } from './sections/SectionConstants';
 import {
   DndContext,
   closestCenter,
@@ -43,10 +20,6 @@ import {
   sortableKeyboardCoordinates,
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
-import {
-  useSortable,
-} from '@dnd-kit/sortable';
-import { CSS } from '@dnd-kit/utilities';
 
 interface SectionManagerProps {
   templateId: string;
@@ -75,171 +48,11 @@ interface SectionConfig {
   };
 }
 
-const SECTION_TYPES: { 
-  value: CVSectionType; 
-  label: string; 
-  icon: React.ComponentType<{ className?: string }>;
-  description: string;
-}[] = [
-  { value: 'general', label: 'General Information', icon: User, description: 'Name, contact, bio' },
-  { value: 'skills', label: 'Skills', icon: Target, description: 'General skills overview' },
-  { value: 'technical_skills', label: 'Technical Skills', icon: Code, description: 'Programming, tools' },
-  { value: 'specialized_skills', label: 'Specialized Skills', icon: Wrench, description: 'Domain expertise' },
-  { value: 'experience', label: 'Work Experience', icon: Briefcase, description: 'Employment history' },
-  { value: 'education', label: 'Education', icon: GraduationCap, description: 'Academic background' },
-  { value: 'training', label: 'Training & Certifications', icon: Award, description: 'Courses, certificates' },
-  { value: 'achievements', label: 'Achievements', icon: Trophy, description: 'Awards, recognition' },
-  { value: 'projects', label: 'Projects', icon: FolderOpen, description: 'Portfolio work' },
-];
-
-const DISPLAY_STYLES = [
-  { value: 'default', label: 'Default' },
-  { value: 'compact', label: 'Compact' },
-  { value: 'detailed', label: 'Detailed' },
-  { value: 'timeline', label: 'Timeline' },
-];
-
-interface SortableSectionItemProps {
-  section: SectionConfig;
-  index: number;
-  expandedSections: Set<string>;
-  onToggleExpanded: (id: string) => void;
-  onUpdateSection: (id: string, updates: Partial<SectionConfig>) => void;
-  onUpdateSectionStyling: (id: string, styleUpdates: Partial<SectionConfig['styling_config']>) => void;
-  onUpdateFieldConfig: (sectionId: string, fieldIndex: number, fieldUpdates: Partial<FieldConfig>) => void;
-  onReorderFields: (sectionId: string, reorderedFields: FieldConfig[]) => void;
-  onRemoveSection: (id: string) => void;
-  getSectionLabel: (type: CVSectionType) => string;
-}
-
-const SortableSectionItem: React.FC<SortableSectionItemProps> = ({
-  section,
-  expandedSections,
-  onToggleExpanded,
-  onUpdateSection,
-  onUpdateSectionStyling,
-  onUpdateFieldConfig,
-  onReorderFields,
-  onRemoveSection,
-  getSectionLabel
-}) => {
-  const {
-    attributes,
-    listeners,
-    setNodeRef,
-    transform,
-    transition,
-    isDragging,
-  } = useSortable({ id: section.id });
-
-  const style = {
-    transform: CSS.Transform.toString(transform),
-    transition,
-    opacity: isDragging ? 0.5 : 1,
-  };
-
-  const showItemsPerColumn = section.section_type !== 'general';
-
-  return (
-    <div ref={setNodeRef} style={style}>
-      <Card className="border-l-4 border-l-blue-500">
-        <CardContent className="p-3">
-          <div className="flex items-center justify-between mb-2">
-            <div className="flex items-center gap-2">
-              <div 
-                {...attributes} 
-                {...listeners}
-                className="cursor-grab active:cursor-grabbing p-1 hover:bg-gray-100 rounded"
-              >
-                <GripVertical className="h-4 w-4 text-gray-400" />
-              </div>
-              <div>
-                <h4 className="font-medium text-sm">{getSectionLabel(section.section_type)}</h4>
-                <p className="text-xs text-gray-500">Order: {section.display_order}</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-2">
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                onClick={() => onToggleExpanded(section.id)}
-                className="h-6 w-6 p-0"
-              >
-                {expandedSections.has(section.id) ? (
-                  <ChevronDown className="h-3 w-3" />
-                ) : (
-                  <ChevronRight className="h-3 w-3" />
-                )}
-              </Button>
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                onClick={() => onRemoveSection(section.id)}
-                className="text-red-600 hover:text-red-700 h-6 w-6 p-0"
-              >
-                <Trash2 className="h-3 w-3" />
-              </Button>
-            </div>
-          </div>
-
-          <Collapsible open={expandedSections.has(section.id)}>
-            <CollapsibleContent>
-              <div className="space-y-3 pt-2 border-t">
-                {/* Section Configuration */}
-                <div className="grid grid-cols-1 gap-2">
-                  <div>
-                    <Label className="text-xs">Display Style</Label>
-                    <Select 
-                      value={section.styling_config.display_style || 'default'} 
-                      onValueChange={(value) => onUpdateSectionStyling(section.id, { display_style: value })}
-                    >
-                      <SelectTrigger className="h-7 text-xs">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {DISPLAY_STYLES.map(style => (
-                          <SelectItem key={style.value} value={style.value}>
-                            {style.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  {showItemsPerColumn && (
-                    <div>
-                      <Label className="text-xs">Items per Column</Label>
-                      <Input 
-                        type="number" 
-                        value={section.styling_config.items_per_column || 1}
-                        onChange={(e) => onUpdateSectionStyling(section.id, { items_per_column: parseInt(e.target.value) })}
-                        min={1} 
-                        max={3} 
-                        className="h-7 text-xs" 
-                      />
-                    </div>
-                  )}
-                </div>
-
-                {/* Field Configuration */}
-                <SectionFieldConfig
-                  fields={section.styling_config.fields || []}
-                  onUpdateField={(fieldIndex, fieldUpdates) => onUpdateFieldConfig(section.id, fieldIndex, fieldUpdates)}
-                  onReorderFields={(reorderedFields) => onReorderFields(section.id, reorderedFields)}
-                  sectionType={section.section_type}
-                />
-              </div>
-            </CollapsibleContent>
-          </Collapsible>
-        </CardContent>
-      </Card>
-    </div>
-  );
-};
-
 const SectionManager: React.FC<SectionManagerProps> = ({ templateId, onSectionsChange }) => {
   const [sections, setSections] = useState<SectionConfig[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set());
+  const [isAddSectionOpen, setIsAddSectionOpen] = useState(false);
   const { toast } = useToast();
 
   const sensors = useSensors(
@@ -293,12 +106,20 @@ const SectionManager: React.FC<SectionManagerProps> = ({ templateId, onSectionsC
 
   const getDefaultFields = async (sectionType: CVSectionType): Promise<FieldConfig[]> => {
     try {
-      const { data, error } = await supabase.rpc('get_default_fields_for_section', {
+      const { data, error } = await supabase.rpc('get_section_fields', {
         section_type_param: sectionType
       });
 
       if (error) throw error;
-      return (data as unknown as FieldConfig[]) || [];
+      
+      return (data || []).map((field: any) => ({
+        field: field.field_name,
+        label: field.display_label,
+        enabled: field.default_enabled,
+        masked: field.default_masked,
+        mask_value: field.default_mask_value,
+        order: field.default_order
+      }));
     } catch (error) {
       console.error('Error getting default fields:', error);
       return [];
@@ -345,6 +166,7 @@ const SectionManager: React.FC<SectionManagerProps> = ({ templateId, onSectionsC
       } as SectionConfig;
 
       setSections([...sections, typedSection]);
+      setIsAddSectionOpen(false);
       onSectionsChange?.();
       
       toast({
@@ -450,14 +272,12 @@ const SectionManager: React.FC<SectionManagerProps> = ({ templateId, onSectionsC
 
       const newSections = arrayMove(sections, oldIndex, newIndex);
       
-      // Update display_order for all sections
       newSections.forEach((section, idx) => {
         section.display_order = idx + 1;
       });
 
       setSections(newSections);
 
-      // Update database
       try {
         const updates = newSections.map(section => ({
           id: section.id,
@@ -479,7 +299,6 @@ const SectionManager: React.FC<SectionManagerProps> = ({ templateId, onSectionsC
           description: "Failed to update section order",
           variant: "destructive"
         });
-        // Revert on error
         loadSections();
       }
     }
@@ -512,37 +331,13 @@ const SectionManager: React.FC<SectionManagerProps> = ({ templateId, onSectionsC
 
   return (
     <div className="space-y-4">
-      {/* Add New Section - Grid Layout */}
-      {availableSections.length > 0 && (
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm">Add Section</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 gap-2">
-              {availableSections.map(sectionType => {
-                const Icon = sectionType.icon;
-                return (
-                  <Button
-                    key={sectionType.value}
-                    variant="outline"
-                    onClick={() => addSection(sectionType.value)}
-                    className="h-auto p-3 text-left justify-start"
-                  >
-                    <Icon className="h-4 w-4 mr-3 text-blue-600" />
-                    <div>
-                      <div className="font-medium text-sm">{sectionType.label}</div>
-                      <div className="text-xs text-gray-500">{sectionType.description}</div>
-                    </div>
-                  </Button>
-                );
-              })}
-            </div>
-          </CardContent>
-        </Card>
-      )}
+      <AddSectionPanel
+        isOpen={isAddSectionOpen}
+        onOpenChange={setIsAddSectionOpen}
+        availableSectionTypes={availableSections}
+        onAddSection={addSection}
+      />
 
-      {/* Existing Sections with Drag and Drop */}
       <DndContext
         sensors={sensors}
         collisionDetection={closestCenter}
@@ -550,11 +345,10 @@ const SectionManager: React.FC<SectionManagerProps> = ({ templateId, onSectionsC
       >
         <SortableContext items={sections.map(s => s.id)} strategy={verticalListSortingStrategy}>
           <div className="space-y-3">
-            {sections.map((section, index) => (
+            {sections.map((section) => (
               <SortableSectionItem
                 key={section.id}
                 section={section}
-                index={index}
                 expandedSections={expandedSections}
                 onToggleExpanded={toggleSectionExpanded}
                 onUpdateSection={updateSection}
@@ -577,7 +371,7 @@ const SectionManager: React.FC<SectionManagerProps> = ({ templateId, onSectionsC
 
       {sections.length === 0 && availableSections.length > 0 && (
         <div className="text-center py-6 text-gray-500">
-          <p className="text-sm">No sections added yet. Use the buttons above to add sections to your template.</p>
+          <p className="text-sm">No sections added yet. Use the "Add Section" button above to add sections to your template.</p>
         </div>
       )}
     </div>

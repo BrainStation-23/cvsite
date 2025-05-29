@@ -66,40 +66,20 @@ const TemplateInspector: React.FC<TemplateInspectorProps> = ({
                     />
                   </div>
 
-                  <div className="grid grid-cols-2 gap-2">
-                    <div>
-                      <Label className="text-xs">Pages</Label>
-                      <Select 
-                        value={String(template.pages_count)} 
-                        onValueChange={(value) => handleBasicInfoChange('pages_count', parseInt(value))}
-                      >
-                        <SelectTrigger className="h-8 text-sm">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="1">1 Page</SelectItem>
-                          <SelectItem value="2">2 Pages</SelectItem>
-                          <SelectItem value="3">3 Pages</SelectItem>
-                          <SelectItem value="4">4 Pages</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-
-                    <div>
-                      <Label className="text-xs">Orientation</Label>
-                      <Select 
-                        value={template.orientation} 
-                        onValueChange={(value) => handleBasicInfoChange('orientation', value)}
-                      >
-                        <SelectTrigger className="h-8 text-sm">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="portrait">Portrait</SelectItem>
-                          <SelectItem value="landscape">Landscape</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
+                  <div>
+                    <Label className="text-xs">Orientation</Label>
+                    <Select 
+                      value={template.orientation} 
+                      onValueChange={(value) => handleBasicInfoChange('orientation', value)}
+                    >
+                      <SelectTrigger className="h-8 text-sm">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="portrait">Portrait</SelectItem>
+                        <SelectItem value="landscape">Landscape</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
 
                   <div className="flex items-center space-x-2">
@@ -114,9 +94,6 @@ const TemplateInspector: React.FC<TemplateInspectorProps> = ({
                     <h4 className="text-xs font-medium mb-3">Template Info</h4>
                     <div className="space-y-2">
                       <div className="text-xs">
-                        <span className="font-medium">Pages:</span> {template.pages_count}
-                      </div>
-                      <div className="text-xs">
                         <span className="font-medium">Orientation:</span> {template.orientation}
                       </div>
                       <div className="text-xs">
@@ -124,6 +101,10 @@ const TemplateInspector: React.FC<TemplateInspectorProps> = ({
                         <span className={`ml-1 ${template.is_active ? 'text-green-600' : 'text-red-600'}`}>
                           {template.is_active ? 'Active' : 'Inactive'}
                         </span>
+                      </div>
+                      <div className="text-xs">
+                        <span className="font-medium">Note:</span> 
+                        <span className="ml-1 text-gray-600">Pages are calculated automatically based on content</span>
                       </div>
                     </div>
                   </div>

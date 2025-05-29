@@ -13,7 +13,8 @@ interface CVPreviewProps {
 
 const CVPreview: React.FC<CVPreviewProps> = ({ template, profile }) => {
   const { sections, fieldMappings, isLoading, refetch } = useTemplateConfiguration(template.id);
-  const [overflowWarning, setOverflowWarning] = useState<string | null>(null);
+  const [currentPageCount, setCurrentPageCount] = useState(1);
+  const [previewKey, setPreviewKey] = useState(0);
   const { toast } = useToast();
   const styles = createCVStyles(template);
 
@@ -24,16 +25,13 @@ const CVPreview: React.FC<CVPreviewProps> = ({ template, profile }) => {
     }
   }, [template, refetch]);
 
-  const handleOverflow = (overflowInfo: { requiredPages: number; overflowHeight: number }) => {
-    const warningMessage = `Content overflow detected! The current content requires ${overflowInfo.requiredPages} pages but template is configured for ${template.pages_count} pages. Consider reducing content or increasing page count.`;
-    
-    setOverflowWarning(warningMessage);
-    
-    toast({
-      title: "Content Overflow Warning",
-      description: `Content needs ${overflowInfo.requiredPages} pages but template allows ${template.pages_count}`,
-      variant: "destructive"
-    });
+  // Force re-render when sections or field mappings change
+  useEffect(() => {
+    setPreviewKey(prev => prev + 1);
+  }, [sections, fieldMappings]);
+
+  const handlePagesCalculated = (pageCount: number) => {
+    setCurrentPageCount(pageCount);
   };
 
   if (isLoading) {
@@ -52,29 +50,27 @@ const CVPreview: React.FC<CVPreviewProps> = ({ template, profile }) => {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minHeight: 'fit-content' }}>
-      {overflowWarning && (
-        <div style={{
-          backgroundColor: '#fee2e2',
-          border: '1px solid #fecaca',
-          borderRadius: '8px',
-          padding: '12px',
-          margin: '0 0 20px 0',
-          width: '210mm',
-          color: '#991b1b',
-          fontSize: '14px'
-        }}>
-          <strong>⚠️ Layout Warning:</strong><br />
-          {overflowWarning}
-        </div>
-      )}
+      <div style={{
+        backgroundColor: '#f3f4f6',
+        border: '1px solid #d1d5db',
+        borderRadius: '8px',
+        padding: '12px',
+        margin: '0 0 20px 0',
+        width: '210mm',
+        color: '#374151',
+        fontSize: '14px',
+        textAlign: 'center'
+      }}>
+        <strong>📄 Pages:</strong> {currentPageCount} page{currentPageCount > 1 ? 's' : ''} (automatically calculated based on content)
+      </div>
       
       <PageDistributor
+        key={previewKey}
         sections={sections}
         fieldMappings={fieldMappings}
         profile={profile}
         styles={styles}
-        totalPages={template.pages_count}
-        onOverflow={handleOverflow}
+        onPagesCalculated={handlePagesCalculated}
         layoutConfig={template.layout_config}
       />
     </div>

@@ -1,10 +1,11 @@
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Eye, EyeOff, GripVertical } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
 import {
   DndContext,
   closestCenter,
@@ -40,46 +41,6 @@ interface SectionFieldConfigProps {
   onReorderFields: (reorderedFields: FieldConfig[]) => void;
   sectionType?: string;
 }
-
-// Define default fields for each section type
-const getDefaultFields = (sectionType: string): FieldConfig[] => {
-  switch (sectionType) {
-    case 'general':
-      return [
-        { field: 'profile_image', label: 'Profile Image', enabled: true, masked: false, order: 1 },
-        { field: 'first_name', label: 'First Name', enabled: true, masked: false, order: 2 },
-        { field: 'last_name', label: 'Last Name', enabled: true, masked: false, order: 3 },
-        { field: 'employee_id', label: 'Employee ID', enabled: true, masked: false, order: 4 },
-        { field: 'biography', label: 'Biography', enabled: true, masked: false, order: 5 },
-      ];
-    case 'experience':
-      return [
-        { field: 'company_name', label: 'Company Name', enabled: true, masked: false, order: 1 },
-        { field: 'designation', label: 'Designation', enabled: true, masked: false, order: 2 },
-        { field: 'start_date', label: 'Start Date', enabled: true, masked: false, order: 3 },
-        { field: 'end_date', label: 'End Date', enabled: true, masked: false, order: 4 },
-        { field: 'description', label: 'Description', enabled: true, masked: false, order: 5 },
-      ];
-    case 'education':
-      return [
-        { field: 'university', label: 'University', enabled: true, masked: false, order: 1 },
-        { field: 'degree', label: 'Degree', enabled: true, masked: false, order: 2 },
-        { field: 'department', label: 'Department', enabled: true, masked: false, order: 3 },
-        { field: 'start_date', label: 'Start Date', enabled: true, masked: false, order: 4 },
-        { field: 'end_date', label: 'End Date', enabled: true, masked: false, order: 5 },
-        { field: 'gpa', label: 'GPA', enabled: true, masked: false, order: 6 },
-      ];
-    case 'skills':
-    case 'technical_skills':
-    case 'specialized_skills':
-      return [
-        { field: 'name', label: 'Skill Name', enabled: true, masked: false, order: 1 },
-        { field: 'proficiency', label: 'Proficiency', enabled: true, masked: false, order: 2 },
-      ];
-    default:
-      return [];
-  }
-};
 
 interface SortableFieldItemProps {
   field: FieldConfig;
@@ -154,8 +115,44 @@ const SectionFieldConfig: React.FC<SectionFieldConfigProps> = ({
   onReorderFields,
   sectionType = ''
 }) => {
+  const [defaultFields, setDefaultFields] = useState<FieldConfig[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    if (sectionType && fields.length === 0) {
+      loadDefaultFields();
+    }
+  }, [sectionType, fields.length]);
+
+  const loadDefaultFields = async () => {
+    try {
+      setIsLoading(true);
+      const { data, error } = await supabase.rpc('get_section_fields', {
+        section_type_param: sectionType
+      });
+
+      if (error) throw error;
+      
+      const fieldConfigs = (data || []).map((field: any) => ({
+        field: field.field_name,
+        label: field.display_label,
+        enabled: field.default_enabled,
+        masked: field.default_masked,
+        mask_value: field.default_mask_value,
+        order: field.default_order
+      }));
+
+      setDefaultFields(fieldConfigs);
+    } catch (error) {
+      console.error('Error loading default fields:', error);
+      setDefaultFields([]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   // Use provided fields or default fields for the section type
-  const fieldsToRender = fields.length > 0 ? fields : getDefaultFields(sectionType);
+  const fieldsToRender = fields.length > 0 ? fields : defaultFields;
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -182,6 +179,15 @@ const SectionFieldConfig: React.FC<SectionFieldConfigProps> = ({
       onReorderFields(fieldsWithUpdatedOrder);
     }
   };
+
+  if (isLoading) {
+    return (
+      <div>
+        <Label className="text-xs font-medium mb-2 block">Fields</Label>
+        <div className="text-xs text-gray-500">Loading fields...</div>
+      </div>
+    );
+  }
 
   return (
     <div>
