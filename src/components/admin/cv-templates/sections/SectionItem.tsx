@@ -96,6 +96,10 @@ const SectionItem: React.FC<SectionItemProps> = ({
     updateSectionStyling({ fields: updatedFields });
   };
 
+  const reorderFields = (reorderedFields: FieldConfig[]) => {
+    updateSectionStyling({ fields: reorderedFields });
+  };
+
   // Get fields to display (use existing or default)
   const fieldsToDisplay = section.styling_config.fields?.length > 0 
     ? section.styling_config.fields 
@@ -168,6 +172,7 @@ const SectionItem: React.FC<SectionItemProps> = ({
               <SectionFieldConfig
                 fields={fieldsToDisplay}
                 onUpdateField={updateFieldConfig}
+                onReorderFields={reorderFields}
                 sectionType={section.section_type}
               />
             </div>
