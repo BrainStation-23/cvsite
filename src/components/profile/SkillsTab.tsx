@@ -49,6 +49,7 @@ export const SkillsTab: React.FC<SkillsTabProps> = ({
         onUpdateSkill={saveTechnicalSkill}
         onDeleteSkill={deleteTechnicalSkill}
         onReorderSkills={onReorderTechnicalSkills}
+        skillType="technical"
       />
       
       <SkillSection
@@ -61,6 +62,7 @@ export const SkillsTab: React.FC<SkillsTabProps> = ({
         onAddSkill={handleAddSpecializedSkill}
         onUpdateSkill={saveSpecializedSkill}
         onDeleteSkill={deleteSpecializedSkill}
+        skillType="specialized"
       />
     </div>
   );

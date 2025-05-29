@@ -18,6 +18,7 @@ interface SkillSectionProps {
   onUpdateSkill: (skill: Skill) => void;
   onDeleteSkill: (id: string) => void;
   onReorderSkills?: (reorderedSkills: Skill[]) => void;
+  skillType?: 'technical' | 'specialized';
 }
 
 export const SkillSection: React.FC<SkillSectionProps> = ({
@@ -30,7 +31,8 @@ export const SkillSection: React.FC<SkillSectionProps> = ({
   onAddSkill,
   onUpdateSkill,
   onDeleteSkill,
-  onReorderSkills
+  onReorderSkills,
+  skillType = 'specialized'
 }) => {
   const [showAddForm, setShowAddForm] = useState(false);
 
@@ -72,6 +74,7 @@ export const SkillSection: React.FC<SkillSectionProps> = ({
                 onCancel={handleCancel}
                 onShowForm={() => setShowAddForm(true)}
                 isEditing={isEditing}
+                skillType={skillType}
               />
             )}
             {/* Separator line when add form is shown or skills exist */}
@@ -89,6 +92,7 @@ export const SkillSection: React.FC<SkillSectionProps> = ({
           onDeleteSkill={onDeleteSkill}
           onReorderSkills={onReorderSkills}
           title={title}
+          skillType={skillType}
         />
       </CardContent>
     </Card>

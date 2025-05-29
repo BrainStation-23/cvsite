@@ -9,6 +9,7 @@ import {
   useSortable,
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
+import { TechnicalSkillInput } from './TechnicalSkillInput';
 
 interface SkillCardProps {
   skill: Skill;
@@ -16,6 +17,7 @@ interface SkillCardProps {
   isDraggable?: boolean;
   onUpdate: (skill: Skill) => void;
   onDelete: (id: string) => void;
+  skillType?: 'technical' | 'specialized';
 }
 
 export const SkillCard: React.FC<SkillCardProps> = ({
@@ -24,6 +26,7 @@ export const SkillCard: React.FC<SkillCardProps> = ({
   isDraggable = false,
   onUpdate,
   onDelete,
+  skillType = 'specialized'
 }) => {
   const [editedSkill, setEditedSkill] = useState(skill);
   const [hasChanges, setHasChanges] = useState(false);
@@ -65,12 +68,8 @@ export const SkillCard: React.FC<SkillCardProps> = ({
     setHasChanges(false);
   };
 
-  const handleQuickProficiencyUpdate = (newProficiency: number) => {
-    if (isEditing) {
-      const updatedSkill = { ...skill, proficiency: newProficiency };
-      onUpdate(updatedSkill);
-      setEditedSkill(updatedSkill);
-    }
+  const getDeviconUrl = (techName: string) => {
+    return `https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/${techName.toLowerCase()}/${techName.toLowerCase()}-original.svg`;
   };
 
   return (
@@ -97,12 +96,22 @@ export const SkillCard: React.FC<SkillCardProps> = ({
             <div className="flex-1 min-w-0">
               {isEditing ? (
                 <div className="space-y-3">
-                  <Input
-                    value={editedSkill.name}
-                    onChange={(e) => handleNameChange(e.target.value)}
-                    className="text-sm font-medium"
-                    placeholder="Skill name"
-                  />
+                  {skillType === 'technical' ? (
+                    <TechnicalSkillInput
+                      value={editedSkill.name}
+                      onChange={handleNameChange}
+                      placeholder="Technical skill name"
+                      className="text-sm font-medium"
+                    />
+                  ) : (
+                    <Input
+                      value={editedSkill.name}
+                      onChange={(e) => handleNameChange(e.target.value)}
+                      className="text-sm font-medium"
+                      placeholder="Skill name"
+                    />
+                  )}
+                  
                   <div className="flex items-center space-x-2">
                     <span className="text-sm text-gray-600 whitespace-nowrap">Proficiency:</span>
                     <div className="flex space-x-1">
@@ -147,8 +156,20 @@ export const SkillCard: React.FC<SkillCardProps> = ({
                 </div>
               ) : (
                 <div>
-                  <h4 className="font-medium text-sm truncate">{skill.name}</h4>
-                  <div className="flex items-center space-x-2 mt-2">
+                  <div className="flex items-center space-x-2 mb-2">
+                    {skillType === 'technical' && (
+                      <img 
+                        src={getDeviconUrl(skill.name)} 
+                        alt={skill.name}
+                        className="w-5 h-5 flex-shrink-0"
+                        onError={(e) => {
+                          e.currentTarget.style.display = 'none';
+                        }}
+                      />
+                    )}
+                    <h4 className="font-medium text-sm truncate capitalize">{skill.name}</h4>
+                  </div>
+                  <div className="flex items-center space-x-2">
                     <span className="text-xs text-gray-600">Proficiency:</span>
                     <div className="flex space-x-1">
                       {Array.from({ length: 10 }).map((_, i) => (

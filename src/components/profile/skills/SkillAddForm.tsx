@@ -3,6 +3,7 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Skill } from '@/types';
+import { TechnicalSkillInput } from './TechnicalSkillInput';
 
 interface SkillAddFormProps {
   showAddForm: boolean;
@@ -12,6 +13,7 @@ interface SkillAddFormProps {
   onCancel: () => void;
   onShowForm: () => void;
   isEditing: boolean;
+  skillType?: 'technical' | 'specialized';
 }
 
 export const SkillAddForm: React.FC<SkillAddFormProps> = ({
@@ -20,7 +22,8 @@ export const SkillAddForm: React.FC<SkillAddFormProps> = ({
   setNewSkill,
   onAddSkill,
   onCancel,
-  isEditing
+  isEditing,
+  skillType = 'specialized'
 }) => {
   const handleAddSkill = () => {
     onAddSkill();
@@ -32,12 +35,22 @@ export const SkillAddForm: React.FC<SkillAddFormProps> = ({
   return (
     <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
       <div className="space-y-3">
-        <Input
-          placeholder="Enter skill name"
-          value={newSkill.name}
-          onChange={(e) => setNewSkill({ ...newSkill, name: e.target.value })}
-          className="border-cvsite-teal/30 focus:border-cvsite-teal"
-        />
+        {skillType === 'technical' ? (
+          <TechnicalSkillInput
+            value={newSkill.name}
+            onChange={(value) => setNewSkill({ ...newSkill, name: value })}
+            placeholder="Enter technical skill name"
+            className="border-cvsite-teal/30 focus:border-cvsite-teal"
+          />
+        ) : (
+          <Input
+            placeholder="Enter skill name"
+            value={newSkill.name}
+            onChange={(e) => setNewSkill({ ...newSkill, name: e.target.value })}
+            className="border-cvsite-teal/30 focus:border-cvsite-teal"
+          />
+        )}
+        
         <div className="space-y-3">
           <div className="flex items-center space-x-2">
             <span className="text-sm text-gray-600 dark:text-gray-400">Proficiency:</span>
@@ -57,6 +70,7 @@ export const SkillAddForm: React.FC<SkillAddFormProps> = ({
             </div>
             <span className="text-sm text-gray-500">{newSkill.proficiency}/10</span>
           </div>
+          
           <div className="flex space-x-2">
             <Button
               size="sm"

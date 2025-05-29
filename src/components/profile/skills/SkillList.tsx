@@ -32,6 +32,7 @@ interface SkillListProps {
   onDeleteSkill: (id: string) => void;
   onReorderSkills?: (reorderedSkills: Skill[]) => void;
   title: string;
+  skillType?: 'technical' | 'specialized';
 }
 
 export const SkillList: React.FC<SkillListProps> = ({
@@ -41,7 +42,8 @@ export const SkillList: React.FC<SkillListProps> = ({
   onUpdateSkill,
   onDeleteSkill,
   onReorderSkills,
-  title
+  title,
+  skillType = 'specialized'
 }) => {
   const [activeId, setActiveId] = useState<string | null>(null);
   const [localSkills, setLocalSkills] = useState<Skill[]>(skills);
@@ -118,6 +120,7 @@ export const SkillList: React.FC<SkillListProps> = ({
                 isDraggable={isDraggable}
                 onUpdate={onUpdateSkill}
                 onDelete={onDeleteSkill}
+                skillType={skillType}
               />
             ))}
           </SortableContext>
@@ -129,6 +132,7 @@ export const SkillList: React.FC<SkillListProps> = ({
                 isDraggable={false}
                 onUpdate={onUpdateSkill}
                 onDelete={onDeleteSkill}
+                skillType={skillType}
               />
             ) : null}
           </DragOverlay>
@@ -142,6 +146,7 @@ export const SkillList: React.FC<SkillListProps> = ({
             isDraggable={false}
             onUpdate={onUpdateSkill}
             onDelete={onDeleteSkill}
+            skillType={skillType}
           />
         ))
       )}
