@@ -65,12 +65,6 @@ export const GeneralInfoSection: React.FC<GeneralInfoSectionProps> = ({
     }
   };
 
-  // Get field order for proper layout
-  const getFieldOrder = (fieldName: string) => {
-    const config = fieldConfigs.find(f => f.field === fieldName);
-    return config?.order || 0;
-  };
-
   // Apply display style classes
   const getDisplayStyleClasses = () => {
     switch (displayStyle) {
@@ -85,13 +79,33 @@ export const GeneralInfoSection: React.FC<GeneralInfoSectionProps> = ({
 
   const displayStyleClasses = getDisplayStyleClasses();
 
-  // Create an array of fields with their order for proper layout
-  const fieldsToRender = [
-    { name: 'profile_image', order: getFieldOrder('profile_image') || 1 },
-    { name: 'name', order: Math.max(getFieldOrder('first_name'), getFieldOrder('last_name')) || 2 },
-    { name: 'employee_id', order: getFieldOrder('employee_id') || 3 },
-    { name: 'biography', order: getFieldOrder('biography') || 4 },
-  ].sort((a, b) => a.order - b.order);
+  // Sort fields by their configured order, or use default order if no configuration
+  const getOrderedFields = () => {
+    if (fieldConfigs.length === 0) {
+      // Default order if no configuration
+      return [
+        { name: 'profile_image', order: 1 },
+        { name: 'name', order: 2 },
+        { name: 'employee_id', order: 3 },
+        { name: 'biography', order: 4 },
+      ];
+    }
+
+    // Use configuration order and map to display fields
+    const enabledFields = fieldConfigs.filter(f => f.enabled);
+    const orderedFields = [...enabledFields].sort((a, b) => a.order - b.order);
+    
+    return orderedFields.map(field => {
+      // Handle composite fields like name
+      if (field.field === 'first_name' || field.field === 'last_name') {
+        return { name: 'name', order: field.order };
+      }
+      return { name: field.field, order: field.order };
+    }).filter((field, index, self) => 
+      // Remove duplicates (like multiple name entries)
+      self.findIndex(f => f.name === field.name) === index
+    );
+  };
 
   const renderField = (fieldName: string) => {
     switch (fieldName) {
@@ -133,7 +147,7 @@ export const GeneralInfoSection: React.FC<GeneralInfoSectionProps> = ({
         break;
 
       case 'employee_id':
-        // Use employee_id from profiles table, not the profile ID
+        // Use employee_id from profiles table
         const employeeId = profile.employee_id;
         if (isFieldEnabled('employee_id') && employeeId) {
           return (
@@ -157,9 +171,11 @@ export const GeneralInfoSection: React.FC<GeneralInfoSectionProps> = ({
     return null;
   };
 
+  const orderedFields = getOrderedFields();
+
   return (
     <div style={{ ...styles.headerStyles, ...displayStyleClasses }}>
-      {fieldsToRender.map(field => renderField(field.name)).filter(Boolean)}
+      {orderedFields.map(field => renderField(field.name)).filter(Boolean)}
     </div>
   );
 };

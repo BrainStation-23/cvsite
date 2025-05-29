@@ -27,6 +27,7 @@ import {
 import { CVSectionType } from '@/types/cv-templates';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import SectionFieldConfig from './sections/SectionFieldConfig';
 import {
   DndContext,
   closestCenter,
@@ -106,6 +107,7 @@ interface SortableSectionItemProps {
   onUpdateSection: (id: string, updates: Partial<SectionConfig>) => void;
   onUpdateSectionStyling: (id: string, styleUpdates: Partial<SectionConfig['styling_config']>) => void;
   onUpdateFieldConfig: (sectionId: string, fieldIndex: number, fieldUpdates: Partial<FieldConfig>) => void;
+  onReorderFields: (sectionId: string, reorderedFields: FieldConfig[]) => void;
   onRemoveSection: (id: string) => void;
   getSectionLabel: (type: CVSectionType) => string;
 }
@@ -117,6 +119,7 @@ const SortableSectionItem: React.FC<SortableSectionItemProps> = ({
   onUpdateSection,
   onUpdateSectionStyling,
   onUpdateFieldConfig,
+  onReorderFields,
   onRemoveSection,
   getSectionLabel
 }) => {
@@ -134,6 +137,8 @@ const SortableSectionItem: React.FC<SortableSectionItemProps> = ({
     transition,
     opacity: isDragging ? 0.5 : 1,
   };
+
+  const showItemsPerColumn = section.section_type !== 'general';
 
   return (
     <div ref={setNodeRef} style={style}>
@@ -200,57 +205,28 @@ const SortableSectionItem: React.FC<SortableSectionItemProps> = ({
                       </SelectContent>
                     </Select>
                   </div>
-                  <div>
-                    <Label className="text-xs">Items per Column</Label>
-                    <Input 
-                      type="number" 
-                      value={section.styling_config.items_per_column || 1}
-                      onChange={(e) => onUpdateSectionStyling(section.id, { items_per_column: parseInt(e.target.value) })}
-                      min={1} 
-                      max={3} 
-                      className="h-7 text-xs" 
-                    />
-                  </div>
+                  {showItemsPerColumn && (
+                    <div>
+                      <Label className="text-xs">Items per Column</Label>
+                      <Input 
+                        type="number" 
+                        value={section.styling_config.items_per_column || 1}
+                        onChange={(e) => onUpdateSectionStyling(section.id, { items_per_column: parseInt(e.target.value) })}
+                        min={1} 
+                        max={3} 
+                        className="h-7 text-xs" 
+                      />
+                    </div>
+                  )}
                 </div>
 
                 {/* Field Configuration */}
-                <div>
-                  <Label className="text-xs font-medium mb-2 block">Fields</Label>
-                  <div className="space-y-2">
-                    {(section.styling_config.fields || []).map((field, fieldIndex) => (
-                      <div key={field.field} className="border rounded p-2 bg-gray-50">
-                        <div className="flex items-center justify-between mb-1">
-                          <div className="flex items-center gap-2">
-                            <Checkbox
-                              checked={field.enabled}
-                              onCheckedChange={(checked) => onUpdateFieldConfig(section.id, fieldIndex, { enabled: !!checked })}
-                            />
-                            <span className="font-medium text-xs">{field.label}</span>
-                          </div>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => onUpdateFieldConfig(section.id, fieldIndex, { masked: !field.masked })}
-                            className="h-5 w-5 p-0"
-                          >
-                            {field.masked ? <EyeOff className="h-2.5 w-2.5" /> : <Eye className="h-2.5 w-2.5" />}
-                          </Button>
-                        </div>
-                        
-                        {field.masked && (
-                          <div className="mt-1">
-                            <Input
-                              value={field.mask_value || ''}
-                              onChange={(e) => onUpdateFieldConfig(section.id, fieldIndex, { mask_value: e.target.value })}
-                              placeholder="e.g., EMP-***"
-                              className="h-6 text-xs"
-                            />
-                          </div>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                </div>
+                <SectionFieldConfig
+                  fields={section.styling_config.fields || []}
+                  onUpdateField={(fieldIndex, fieldUpdates) => onUpdateFieldConfig(section.id, fieldIndex, fieldUpdates)}
+                  onReorderFields={(reorderedFields) => onReorderFields(section.id, reorderedFields)}
+                  sectionType={section.section_type}
+                />
               </div>
             </CollapsibleContent>
           </Collapsible>
@@ -461,6 +437,10 @@ const SectionManager: React.FC<SectionManagerProps> = ({ templateId, onSectionsC
     updateSectionStyling(sectionId, { fields: updatedFields });
   };
 
+  const reorderFields = (sectionId: string, reorderedFields: FieldConfig[]) => {
+    updateSectionStyling(sectionId, { fields: reorderedFields });
+  };
+
   const handleDragEnd = async (event: DragEndEvent) => {
     const { active, over } = event;
 
@@ -580,6 +560,7 @@ const SectionManager: React.FC<SectionManagerProps> = ({ templateId, onSectionsC
                 onUpdateSection={updateSection}
                 onUpdateSectionStyling={updateSectionStyling}
                 onUpdateFieldConfig={updateFieldConfig}
+                onReorderFields={reorderFields}
                 onRemoveSection={removeSection}
                 getSectionLabel={getSectionLabel}
               />
