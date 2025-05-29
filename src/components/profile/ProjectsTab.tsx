@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -165,8 +164,14 @@ export const ProjectsTab: React.FC<ProjectsTabProps> = ({
   const [technologies, setTechnologies] = useState<string[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
 
+  const isDragDisabled = !isEditing || isAdding || editingId !== null;
+
   const sensors = useSensors(
-    useSensor(PointerSensor),
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 8,
+      },
+    }),
     useSensor(KeyboardSensor, {
       coordinateGetter: sortableKeyboardCoordinates,
     })
@@ -532,10 +537,9 @@ export const ProjectsTab: React.FC<ProjectsTabProps> = ({
         
         {filteredProjects.length > 0 ? (
           <DndContext
-            sensors={sensors}
+            sensors={isDragDisabled ? [] : sensors}
             collisionDetection={closestCenter}
             onDragEnd={handleDragEnd}
-            disabled={!isEditing || isAdding || editingId !== null}
           >
             <Accordion type="single" collapsible className="space-y-4">
               {editingId ? (
