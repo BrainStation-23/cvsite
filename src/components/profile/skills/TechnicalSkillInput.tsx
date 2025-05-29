@@ -93,7 +93,19 @@ export const TechnicalSkillInput: React.FC<TechnicalSkillInputProps> = ({
   const handleInputChange = (inputValue: string) => {
     setSearchValue(inputValue);
     onChange(inputValue);
-    setOpen(inputValue.length > 0 && !isLoading);
+    // Only open dropdown if we have input and not loading
+    if (inputValue.length > 0 && !isLoading) {
+      setOpen(true);
+    } else {
+      setOpen(false);
+    }
+  };
+
+  const handleInputFocus = () => {
+    // Open dropdown on focus if we have search value and not loading
+    if (searchValue.length > 0 && !isLoading) {
+      setOpen(true);
+    }
   };
 
   const getDeviconUrl = (techName: string) => {
@@ -115,9 +127,9 @@ export const TechnicalSkillInput: React.FC<TechnicalSkillInputProps> = ({
           <Input
             value={searchValue}
             onChange={(e) => handleInputChange(e.target.value)}
+            onFocus={handleInputFocus}
             placeholder={placeholder}
             className={cn("pr-8", className)}
-            onFocus={() => setOpen(searchValue.length > 0 && !isLoading)}
           />
           {isLoading ? (
             <Loader className="absolute right-2 top-2.5 h-4 w-4 text-muted-foreground animate-spin" />
@@ -127,13 +139,7 @@ export const TechnicalSkillInput: React.FC<TechnicalSkillInputProps> = ({
         </div>
       </PopoverTrigger>
       <PopoverContent className="w-[350px] p-0" align="start">
-        <Command>
-          <CommandInput 
-            placeholder="Search technologies..." 
-            value={searchValue}
-            onValueChange={handleInputChange}
-            className="border-none focus:ring-0"
-          />
+        <Command shouldFilter={false}>
           <CommandList>
             {isLoading ? (
               <div className="py-6 text-center text-sm">
