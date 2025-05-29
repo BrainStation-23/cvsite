@@ -1,16 +1,10 @@
+
 import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Switch } from '@/components/ui/switch';
-import { Label } from '@/components/ui/label';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { Plus, Trash2, GripVertical, Settings, ChevronDown, ChevronRight, Eye, EyeOff } from 'lucide-react';
 import { CVSectionType } from '@/types/cv-templates';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import SectionAddForm from './sections/SectionAddForm';
+import SectionItem from './sections/SectionItem';
 
 interface EnhancedSectionManagerProps {
   templateId: string;
@@ -51,14 +45,10 @@ const SECTION_TYPES: { value: CVSectionType; label: string }[] = [
   { value: 'projects', label: 'Projects' },
 ];
 
-const DISPLAY_STYLES = [
-  { value: 'default', label: 'Default' },
-  { value: 'compact', label: 'Compact' },
-  { value: 'detailed', label: 'Detailed' },
-  { value: 'timeline', label: 'Timeline' },
-];
-
-const EnhancedSectionManager: React.FC<EnhancedSectionManagerProps> = ({ templateId, onSectionsChange }) => {
+const EnhancedSectionManager: React.FC<EnhancedSectionManagerProps> = ({ 
+  templateId, 
+  onSectionsChange 
+}) => {
   const [sections, setSections] = useState<SectionConfig[]>([]);
   const [newSectionType, setNewSectionType] = useState<CVSectionType>('skills');
   const [isLoading, setIsLoading] = useState(true);
@@ -205,7 +195,6 @@ const EnhancedSectionManager: React.FC<EnhancedSectionManagerProps> = ({ templat
 
   const updateSection = async (id: string, updates: Partial<SectionConfig>) => {
     try {
-      // Convert styling_config to proper format for database
       const dbUpdates: any = { ...updates };
       if (updates.styling_config) {
         dbUpdates.styling_config = updates.styling_config as any;
@@ -230,28 +219,6 @@ const EnhancedSectionManager: React.FC<EnhancedSectionManagerProps> = ({ templat
         variant: "destructive"
       });
     }
-  };
-
-  const updateSectionStyling = (id: string, styleUpdates: Partial<SectionConfig['styling_config']>) => {
-    const section = sections.find(s => s.id === id);
-    if (!section) return;
-
-    const updatedStylingConfig = {
-      ...section.styling_config,
-      ...styleUpdates
-    };
-
-    updateSection(id, { styling_config: updatedStylingConfig });
-  };
-
-  const updateFieldConfig = (sectionId: string, fieldIndex: number, fieldUpdates: Partial<FieldConfig>) => {
-    const section = sections.find(s => s.id === sectionId);
-    if (!section) return;
-
-    const updatedFields = [...(section.styling_config.fields || [])];
-    updatedFields[fieldIndex] = { ...updatedFields[fieldIndex], ...fieldUpdates };
-
-    updateSectionStyling(sectionId, { fields: updatedFields });
   };
 
   const moveSection = async (id: string, direction: 'up' | 'down') => {
@@ -316,181 +283,26 @@ const EnhancedSectionManager: React.FC<EnhancedSectionManagerProps> = ({ templat
 
   return (
     <div className="space-y-4">
-      {/* Add New Section - Compact Version */}
-      <Card>
-        <CardHeader className="pb-3">
-          <CardTitle className="text-sm">Add Section</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-3">
-          <div>
-            <Label className="text-xs">Section Type</Label>
-            <Select value={newSectionType} onValueChange={(value: CVSectionType) => setNewSectionType(value)}>
-              <SelectTrigger className="h-8 text-sm">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {getAvailableSectionTypes().map(type => (
-                  <SelectItem key={type.value} value={type.value}>
-                    {type.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          <Button 
-            onClick={addSection} 
-            disabled={getAvailableSectionTypes().length === 0}
-            size="sm"
-            className="w-full h-7 text-xs"
-          >
-            <Plus className="h-3 w-3 mr-1" />
-            Add Section
-          </Button>
-        </CardContent>
-      </Card>
+      <SectionAddForm
+        newSectionType={newSectionType}
+        onSectionTypeChange={(value: CVSectionType) => setNewSectionType(value)}
+        onAddSection={addSection}
+        availableSectionTypes={getAvailableSectionTypes()}
+      />
 
-      {/* Existing Sections - Compact Version */}
       <div className="space-y-3">
         {sections.map((section, index) => (
-          <Card key={section.id} className="border-l-4 border-l-blue-500">
-            <CardContent className="p-3">
-              <div className="flex items-center justify-between mb-2">
-                <div className="flex items-center gap-2">
-                  <div className="flex flex-col gap-0.5">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => moveSection(section.id, 'up')}
-                      disabled={index === 0}
-                      className="h-3 w-6 p-0 text-xs"
-                    >
-                      ↑
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => moveSection(section.id, 'down')}
-                      disabled={index === sections.length - 1}
-                      className="h-3 w-6 p-0 text-xs"
-                    >
-                      ↓
-                    </Button>
-                  </div>
-                  <div>
-                    <h4 className="font-medium text-sm">{getSectionLabel(section.section_type)}</h4>
-                    <p className="text-xs text-gray-500">Order: {section.display_order}</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="flex items-center space-x-1">
-                    <Switch
-                      checked={section.is_required}
-                      onCheckedChange={(checked) => updateSection(section.id, { is_required: checked })}
-                    />
-                    <Label className="text-xs">Required</Label>
-                  </div>
-                  <Button 
-                    variant="ghost" 
-                    size="sm" 
-                    onClick={() => toggleSectionExpanded(section.id)}
-                    className="h-6 w-6 p-0"
-                  >
-                    {expandedSections.has(section.id) ? (
-                      <ChevronDown className="h-3 w-3" />
-                    ) : (
-                      <ChevronRight className="h-3 w-3" />
-                    )}
-                  </Button>
-                  <Button 
-                    variant="ghost" 
-                    size="sm" 
-                    onClick={() => removeSection(section.id)}
-                    className="text-red-600 hover:text-red-700 h-6 w-6 p-0"
-                  >
-                    <Trash2 className="h-3 w-3" />
-                  </Button>
-                </div>
-              </div>
-
-              <Collapsible open={expandedSections.has(section.id)}>
-                <CollapsibleContent>
-                  <div className="space-y-3 pt-2 border-t">
-                    {/* Section Configuration - Compact */}
-                    <div className="grid grid-cols-1 gap-2">
-                      <div>
-                        <Label className="text-xs">Display Style</Label>
-                        <Select 
-                          value={section.styling_config.display_style || 'default'} 
-                          onValueChange={(value) => updateSectionStyling(section.id, { display_style: value })}
-                        >
-                          <SelectTrigger className="h-7 text-xs">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {DISPLAY_STYLES.map(style => (
-                              <SelectItem key={style.value} value={style.value}>
-                                {style.label}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      <div>
-                        <Label className="text-xs">Items per Column</Label>
-                        <Input 
-                          type="number" 
-                          value={section.styling_config.items_per_column || 1}
-                          onChange={(e) => updateSectionStyling(section.id, { items_per_column: parseInt(e.target.value) })}
-                          min={1} 
-                          max={3} 
-                          className="h-7 text-xs" 
-                        />
-                      </div>
-                    </div>
-
-                    {/* Field Configuration - Compact */}
-                    <div>
-                      <Label className="text-xs font-medium mb-2 block">Fields</Label>
-                      <div className="space-y-2">
-                        {(section.styling_config.fields || []).map((field, fieldIndex) => (
-                          <div key={field.field} className="border rounded p-2 bg-gray-50">
-                            <div className="flex items-center justify-between mb-1">
-                              <div className="flex items-center gap-2">
-                                <Checkbox
-                                  checked={field.enabled}
-                                  onCheckedChange={(checked) => updateFieldConfig(section.id, fieldIndex, { enabled: !!checked })}
-                                />
-                                <span className="font-medium text-xs">{field.label}</span>
-                              </div>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => updateFieldConfig(section.id, fieldIndex, { masked: !field.masked })}
-                                className="h-5 w-5 p-0"
-                              >
-                                {field.masked ? <EyeOff className="h-2.5 w-2.5" /> : <Eye className="h-2.5 w-2.5" />}
-                              </Button>
-                            </div>
-                            
-                            {field.masked && (
-                              <div className="mt-1">
-                                <Input
-                                  value={field.mask_value || ''}
-                                  onChange={(e) => updateFieldConfig(section.id, fieldIndex, { mask_value: e.target.value })}
-                                  placeholder="e.g., EMP-***"
-                                  className="h-6 text-xs"
-                                />
-                              </div>
-                            )}
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                </CollapsibleContent>
-              </Collapsible>
-            </CardContent>
-          </Card>
+          <SectionItem
+            key={section.id}
+            section={section}
+            index={index}
+            isExpanded={expandedSections.has(section.id)}
+            onToggleExpanded={() => toggleSectionExpanded(section.id)}
+            onUpdateSection={(updates) => updateSection(section.id, updates)}
+            onRemoveSection={() => removeSection(section.id)}
+            onMoveSection={(direction) => moveSection(section.id, direction)}
+            getSectionLabel={getSectionLabel}
+          />
         ))}
       </div>
 

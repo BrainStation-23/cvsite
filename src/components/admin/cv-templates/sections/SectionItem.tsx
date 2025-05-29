@@ -1,0 +1,152 @@
+
+import React from 'react';
+import { Card, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Switch } from '@/components/ui/switch';
+import { Label } from '@/components/ui/label';
+import { Collapsible, CollapsibleContent } from '@/components/ui/collapsible';
+import { Trash2, ChevronDown, ChevronRight } from 'lucide-react';
+import { CVSectionType } from '@/types/cv-templates';
+import SectionControls from './SectionControls';
+import SectionFieldConfig from './SectionFieldConfig';
+
+interface FieldConfig {
+  field: string;
+  label: string;
+  enabled: boolean;
+  masked: boolean;
+  mask_value?: string;
+  order: number;
+}
+
+interface SectionConfig {
+  id: string;
+  section_type: CVSectionType;
+  display_order: number;
+  is_required: boolean;
+  field_mapping: Record<string, any>;
+  styling_config: {
+    display_style?: string;
+    items_per_column?: number;
+    fields?: FieldConfig[];
+  };
+}
+
+interface SectionItemProps {
+  section: SectionConfig;
+  index: number;
+  isExpanded: boolean;
+  onToggleExpanded: () => void;
+  onUpdateSection: (updates: Partial<SectionConfig>) => void;
+  onRemoveSection: () => void;
+  onMoveSection: (direction: 'up' | 'down') => void;
+  getSectionLabel: (type: CVSectionType) => string;
+}
+
+const SectionItem: React.FC<SectionItemProps> = ({
+  section,
+  index,
+  isExpanded,
+  onToggleExpanded,
+  onUpdateSection,
+  onRemoveSection,
+  onMoveSection,
+  getSectionLabel
+}) => {
+  const updateSectionStyling = (styleUpdates: Partial<SectionConfig['styling_config']>) => {
+    const updatedStylingConfig = {
+      ...section.styling_config,
+      ...styleUpdates
+    };
+    onUpdateSection({ styling_config: updatedStylingConfig });
+  };
+
+  const updateFieldConfig = (fieldIndex: number, fieldUpdates: Partial<FieldConfig>) => {
+    const updatedFields = [...(section.styling_config.fields || [])];
+    updatedFields[fieldIndex] = { ...updatedFields[fieldIndex], ...fieldUpdates };
+    updateSectionStyling({ fields: updatedFields });
+  };
+
+  return (
+    <Card className="border-l-4 border-l-blue-500">
+      <CardContent className="p-3">
+        <div className="flex items-center justify-between mb-2">
+          <div className="flex items-center gap-2">
+            <div className="flex flex-col gap-0.5">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => onMoveSection('up')}
+                disabled={index === 0}
+                className="h-3 w-6 p-0 text-xs"
+              >
+                ↑
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => onMoveSection('down')}
+                className="h-3 w-6 p-0 text-xs"
+              >
+                ↓
+              </Button>
+            </div>
+            <div>
+              <h4 className="font-medium text-sm">{getSectionLabel(section.section_type)}</h4>
+              <p className="text-xs text-gray-500">Order: {section.display_order}</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="flex items-center space-x-1">
+              <Switch
+                checked={section.is_required}
+                onCheckedChange={(checked) => onUpdateSection({ is_required: checked })}
+              />
+              <Label className="text-xs">Required</Label>
+            </div>
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={onToggleExpanded}
+              className="h-6 w-6 p-0"
+            >
+              {isExpanded ? (
+                <ChevronDown className="h-3 w-3" />
+              ) : (
+                <ChevronRight className="h-3 w-3" />
+              )}
+            </Button>
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={onRemoveSection}
+              className="text-red-600 hover:text-red-700 h-6 w-6 p-0"
+            >
+              <Trash2 className="h-3 w-3" />
+            </Button>
+          </div>
+        </div>
+
+        <Collapsible open={isExpanded}>
+          <CollapsibleContent>
+            <div className="space-y-3 pt-2 border-t">
+              <SectionControls
+                displayStyle={section.styling_config.display_style || 'default'}
+                itemsPerColumn={section.styling_config.items_per_column || 1}
+                onDisplayStyleChange={(value) => updateSectionStyling({ display_style: value })}
+                onItemsPerColumnChange={(value) => updateSectionStyling({ items_per_column: value })}
+              />
+
+              <SectionFieldConfig
+                fields={section.styling_config.fields || []}
+                onUpdateField={updateFieldConfig}
+              />
+            </div>
+          </CollapsibleContent>
+        </Collapsible>
+      </CardContent>
+    </Card>
+  );
+};
+
+export default SectionItem;
