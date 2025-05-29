@@ -92,6 +92,81 @@ export type Database = {
           },
         ]
       }
+      cv_field_display_config: {
+        Row: {
+          created_at: string
+          default_enabled: boolean
+          default_mask_value: string | null
+          default_masked: boolean
+          default_order: number
+          display_label: string
+          field_name: string
+          field_type: string
+          id: string
+          is_system_field: boolean
+          section_type: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          default_enabled?: boolean
+          default_mask_value?: string | null
+          default_masked?: boolean
+          default_order?: number
+          display_label: string
+          field_name: string
+          field_type?: string
+          id?: string
+          is_system_field?: boolean
+          section_type: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          default_enabled?: boolean
+          default_mask_value?: string | null
+          default_masked?: boolean
+          default_order?: number
+          display_label?: string
+          field_name?: string
+          field_type?: string
+          id?: string
+          is_system_field?: boolean
+          section_type?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      cv_section_table_mappings: {
+        Row: {
+          created_at: string
+          description: string | null
+          display_name: string
+          id: string
+          section_type: string
+          table_name: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          display_name: string
+          id?: string
+          section_type: string
+          table_name: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          display_name?: string
+          id?: string
+          section_type?: string
+          table_name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       cv_template_field_mappings: {
         Row: {
           created_at: string
@@ -815,10 +890,6 @@ export type Database = {
         Args: { start_date: string; end_date: string; is_current: boolean }
         Returns: number
       }
-      get_default_fields_for_section: {
-        Args: { section_type_param: string }
-        Returns: Json
-      }
       get_employee_profiles: {
         Args: {
           search_query?: string
@@ -838,6 +909,18 @@ export type Database = {
       get_experiences_by_company: {
         Args: { profile_uuid: string }
         Returns: Json
+      }
+      get_section_fields: {
+        Args: { section_type_param: string }
+        Returns: {
+          field_name: string
+          display_label: string
+          default_enabled: boolean
+          default_masked: boolean
+          default_mask_value: string
+          default_order: number
+          field_type: string
+        }[]
       }
       has_any_role: {
         Args: { roles: string[] }

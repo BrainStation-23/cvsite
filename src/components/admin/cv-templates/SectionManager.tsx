@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { CVSectionType } from '@/types/cv-templates';
 import { supabase } from '@/integrations/supabase/client';
@@ -107,12 +106,20 @@ const SectionManager: React.FC<SectionManagerProps> = ({ templateId, onSectionsC
 
   const getDefaultFields = async (sectionType: CVSectionType): Promise<FieldConfig[]> => {
     try {
-      const { data, error } = await supabase.rpc('get_default_fields_for_section', {
+      const { data, error } = await supabase.rpc('get_section_fields', {
         section_type_param: sectionType
       });
 
       if (error) throw error;
-      return (data as unknown as FieldConfig[]) || [];
+      
+      return (data || []).map((field: any) => ({
+        field: field.field_name,
+        label: field.display_label,
+        enabled: field.default_enabled,
+        masked: field.default_masked,
+        mask_value: field.default_mask_value,
+        order: field.default_order
+      }));
     } catch (error) {
       console.error('Error getting default fields:', error);
       return [];
