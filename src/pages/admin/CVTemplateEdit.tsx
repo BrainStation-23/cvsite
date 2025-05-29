@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useCVTemplates } from '@/hooks/use-cv-templates';
@@ -37,7 +36,8 @@ const CVTemplateEdit: React.FC = () => {
   // Construct the full profile object for the CV preview
   const selectedProfile = selectedProfileId ? {
     id: selectedProfileId,
-    employee_id: selectedProfileId, // Use profile ID as employee ID for now
+    // Get employee_id from the profiles data
+    employee_id: profiles?.find(p => p.id === selectedProfileId)?.employee_id || selectedProfileId,
     first_name: generalInfo.firstName,
     last_name: generalInfo.lastName,
     biography: generalInfo.biography,

@@ -36,7 +36,7 @@ export function useEmployeeProfile(profileId: string) {
       // Fetch profile data first to get employee_id
       const { data: profileData, error: profileError } = await supabase
         .from('profiles')
-        .select('employee_id')
+        .select('employee_id, first_name, last_name')
         .eq('id', profileId)
         .maybeSingle();
 
@@ -53,10 +53,18 @@ export function useEmployeeProfile(profileId: string) {
 
       if (generalData) {
         setGeneralInfo({
-          firstName: generalData.first_name || '',
-          lastName: generalData.last_name || '',
+          firstName: generalData.first_name || profileData?.first_name || '',
+          lastName: generalData.last_name || profileData?.last_name || '',
           biography: generalData.biography,
           profileImage: generalData.profile_image
+        });
+      } else if (profileData) {
+        // Fallback to profiles table data if no general_information exists
+        setGeneralInfo({
+          firstName: profileData.first_name || '',
+          lastName: profileData.last_name || '',
+          biography: null,
+          profileImage: null
         });
       }
 

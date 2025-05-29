@@ -49,12 +49,6 @@ export const GeneralInfoSection: React.FC<GeneralInfoSectionProps> = ({
     return config ? config.enabled : true; // Default to enabled if no config
   };
 
-  // Helper function to get field mask value
-  const getFieldMaskValue = (fieldName: string) => {
-    const config = fieldConfigs.find(f => f.field === fieldName);
-    return config?.masked ? config.mask_value : undefined;
-  };
-
   // Helper function to apply masking
   const applyMasking = (value: any, fieldName: string) => {
     const config = fieldConfigs.find(f => f.field === fieldName);
@@ -71,6 +65,12 @@ export const GeneralInfoSection: React.FC<GeneralInfoSectionProps> = ({
     }
   };
 
+  // Get field order for proper layout
+  const getFieldOrder = (fieldName: string) => {
+    const config = fieldConfigs.find(f => f.field === fieldName);
+    return config?.order || 0;
+  };
+
   // Apply display style classes
   const getDisplayStyleClasses = () => {
     switch (displayStyle) {
@@ -85,47 +85,81 @@ export const GeneralInfoSection: React.FC<GeneralInfoSectionProps> = ({
 
   const displayStyleClasses = getDisplayStyleClasses();
 
+  // Create an array of fields with their order for proper layout
+  const fieldsToRender = [
+    { name: 'profile_image', order: getFieldOrder('profile_image') || 1 },
+    { name: 'name', order: Math.max(getFieldOrder('first_name'), getFieldOrder('last_name')) || 2 },
+    { name: 'employee_id', order: getFieldOrder('employee_id') || 3 },
+    { name: 'biography', order: getFieldOrder('biography') || 4 },
+  ].sort((a, b) => a.order - b.order);
+
+  const renderField = (fieldName: string) => {
+    switch (fieldName) {
+      case 'profile_image':
+        if (isFieldEnabled('profile_image') && profile.profile_image) {
+          return (
+            <div key="profile_image" style={{ marginBottom: '10pt', textAlign: 'center' }}>
+              <img 
+                src={profile.profile_image} 
+                alt="Profile" 
+                style={{ 
+                  width: '100px', 
+                  height: '100px', 
+                  borderRadius: '50%', 
+                  objectFit: 'cover' 
+                }} 
+              />
+            </div>
+          );
+        }
+        break;
+
+      case 'name':
+        const hasFirstName = isFieldEnabled('first_name') && profile.first_name;
+        const hasLastName = isFieldEnabled('last_name') && profile.last_name;
+        
+        if (hasFirstName || hasLastName) {
+          return (
+            <div key="name" style={styles.nameStyles}>
+              {hasFirstName && (
+                <span>{applyMasking(profile.first_name, 'first_name')} </span>
+              )}
+              {hasLastName && (
+                <span>{applyMasking(profile.last_name, 'last_name')}</span>
+              )}
+            </div>
+          );
+        }
+        break;
+
+      case 'employee_id':
+        // Use employee_id from profiles table, not the profile ID
+        const employeeId = profile.employee_id;
+        if (isFieldEnabled('employee_id') && employeeId) {
+          return (
+            <p key="employee_id" style={styles.titleStyles}>
+              Employee ID: {applyMasking(employeeId, 'employee_id')}
+            </p>
+          );
+        }
+        break;
+
+      case 'biography':
+        if (isFieldEnabled('biography') && profile.biography) {
+          return (
+            <p key="biography" style={{ marginTop: '10pt', fontSize: '0.9em', fontStyle: 'italic' }}>
+              {applyMasking(profile.biography, 'biography')}
+            </p>
+          );
+        }
+        break;
+    }
+    return null;
+  };
+
   return (
     <div style={{ ...styles.headerStyles, ...displayStyleClasses }}>
-      {/* Name */}
-      <div style={styles.nameStyles}>
-        {isFieldEnabled('first_name') && profile.first_name && (
-          <span>{applyMasking(profile.first_name, 'first_name')} </span>
-        )}
-        {isFieldEnabled('last_name') && profile.last_name && (
-          <span>{applyMasking(profile.last_name, 'last_name')}</span>
-        )}
-      </div>
-
-      {/* Employee ID */}
-      {isFieldEnabled('employee_id') && profile.employee_id && (
-        <p style={styles.titleStyles}>
-          Employee ID: {applyMasking(profile.employee_id, 'employee_id')}
-        </p>
-      )}
-
-      {/* Profile Image */}
-      {isFieldEnabled('profile_image') && profile.profile_image && (
-        <div style={{ marginBottom: '10pt', textAlign: 'center' }}>
-          <img 
-            src={profile.profile_image} 
-            alt="Profile" 
-            style={{ 
-              width: '100px', 
-              height: '100px', 
-              borderRadius: '50%', 
-              objectFit: 'cover' 
-            }} 
-          />
-        </div>
-      )}
-
-      {/* Biography */}
-      {isFieldEnabled('biography') && profile.biography && (
-        <p style={{ marginTop: '10pt', fontSize: '0.9em', fontStyle: 'italic' }}>
-          {applyMasking(profile.biography, 'biography')}
-        </p>
-      )}
+      {fieldsToRender.map(field => renderField(field.name)).filter(Boolean)}
     </div>
   );
 };

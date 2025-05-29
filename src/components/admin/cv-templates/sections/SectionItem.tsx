@@ -47,10 +47,10 @@ const getDefaultFields = (sectionType: string): FieldConfig[] => {
   switch (sectionType) {
     case 'general':
       return [
-        { field: 'first_name', label: 'First Name', enabled: true, masked: false, order: 1 },
-        { field: 'last_name', label: 'Last Name', enabled: true, masked: false, order: 2 },
-        { field: 'employee_id', label: 'Employee ID', enabled: true, masked: false, order: 3 },
-        { field: 'profile_image', label: 'Profile Image', enabled: true, masked: false, order: 4 },
+        { field: 'profile_image', label: 'Profile Image', enabled: true, masked: false, order: 1 },
+        { field: 'first_name', label: 'First Name', enabled: true, masked: false, order: 2 },
+        { field: 'last_name', label: 'Last Name', enabled: true, masked: false, order: 3 },
+        { field: 'employee_id', label: 'Employee ID', enabled: true, masked: false, order: 4 },
         { field: 'biography', label: 'Biography', enabled: true, masked: false, order: 5 },
       ];
     case 'experience':
@@ -162,6 +162,7 @@ const SectionItem: React.FC<SectionItemProps> = ({
                 itemsPerColumn={section.styling_config.items_per_column || 1}
                 onDisplayStyleChange={(value) => updateSectionStyling({ display_style: value })}
                 onItemsPerColumnChange={(value) => updateSectionStyling({ items_per_column: value })}
+                sectionType={section.section_type}
               />
 
               <SectionFieldConfig
