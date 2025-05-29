@@ -82,10 +82,9 @@ export const DynamicSectionRenderer: React.FC<DynamicSectionRendererProps> = ({
         }
         break;
       case 'projects':
-        if (section.is_required || (profile.projects && profile.projects.length > 0)) {
-          return <ProjectsSection key={section.id} {...commonProps} />;
-        }
-        break;
+        // Always render projects section if configured, regardless of data
+        // The section component will handle empty data display
+        return <ProjectsSection key={section.id} {...commonProps} />;
       case 'training':
         if (section.is_required || (profile.trainings && profile.trainings.length > 0)) {
           return <TrainingsSection key={section.id} {...commonProps} />;

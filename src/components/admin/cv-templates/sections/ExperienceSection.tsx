@@ -36,11 +36,19 @@ export const ExperienceSection: React.FC<ExperienceSectionProps> = ({
   // Sort field mappings by field_order for consistent display
   const sortedFieldMappings = [...fieldMappings].sort((a, b) => a.field_order - b.field_order);
 
-  // Create a mapping of field names to their order for rendering
-  const fieldOrderMap = new Map();
-  sortedFieldMappings.forEach((mapping) => {
-    fieldOrderMap.set(mapping.original_field_name, mapping.field_order);
-  });
+  // Helper function to format date
+  const formatDate = (dateString: string) => {
+    if (!dateString) return '';
+    try {
+      const date = new Date(dateString);
+      return date.toLocaleDateString('en-US', { 
+        year: 'numeric', 
+        month: 'short' 
+      });
+    } catch {
+      return dateString;
+    }
+  };
 
   // Define all possible fields with their render functions
   const fieldRenderers = {
@@ -84,7 +92,7 @@ export const ExperienceSection: React.FC<ExperienceSectionProps> = ({
       <FieldProcessor
         key="start_date"
         fieldName="start_date"
-        value={exp.start_date}
+        value={formatDate(exp.start_date)}
         fieldMappings={sortedFieldMappings}
         sectionType="experience"
       >
@@ -101,7 +109,7 @@ export const ExperienceSection: React.FC<ExperienceSectionProps> = ({
       <FieldProcessor
         key="end_date"
         fieldName="end_date"
-        value={exp.is_current ? 'Present' : exp.end_date}
+        value={exp.is_current ? 'Present' : formatDate(exp.end_date)}
         fieldMappings={sortedFieldMappings}
         sectionType="experience"
       >
@@ -118,7 +126,7 @@ export const ExperienceSection: React.FC<ExperienceSectionProps> = ({
       <FieldProcessor
         key="date_range"
         fieldName="date_range"
-        value={`${exp.start_date || ''} - ${exp.is_current ? 'Present' : (exp.end_date || '')}`}
+        value={`${formatDate(exp.start_date)} - ${exp.is_current ? 'Present' : formatDate(exp.end_date)}`}
         fieldMappings={sortedFieldMappings}
         sectionType="experience"
       >

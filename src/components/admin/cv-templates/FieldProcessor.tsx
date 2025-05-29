@@ -31,7 +31,16 @@ export const FieldProcessor: React.FC<FieldProcessorProps> = ({
     mapping => mapping.original_field_name === fieldName && mapping.section_type === sectionType
   );
 
-  // If no mapping found, use defaults and show the field
+  // If no mapping found, check if we have any field mappings for this section
+  // If we do have mappings but this field isn't included, it means it's disabled
+  const sectionHasFieldMappings = fieldMappings.some(mapping => mapping.section_type === sectionType);
+  
+  // If section has field mappings but this field doesn't have a mapping, it's disabled
+  if (sectionHasFieldMappings && !fieldMapping) {
+    return <>{children(null, fieldName, false)}</>;
+  }
+
+  // Use defaults if no mapping found and no other mappings exist for this section
   const displayName = fieldMapping?.display_name || fieldName;
   const isMasked = fieldMapping?.is_masked || false;
   const maskValue = fieldMapping?.mask_value;
@@ -59,7 +68,8 @@ export const FieldProcessor: React.FC<FieldProcessorProps> = ({
 };
 
 const checkVisibilityRules = (value: any, rules: Record<string, any>, fieldMapping?: FieldMapping): boolean => {
-  // If no field mapping exists, show the field by default
+  // If no field mapping exists but we're here, it means no field mappings exist for the section
+  // In this case, show the field by default
   if (!fieldMapping) {
     return true;
   }
@@ -69,7 +79,7 @@ const checkVisibilityRules = (value: any, rules: Record<string, any>, fieldMappi
     return true;
   }
 
-  // Implement basic visibility rules
+  // Implement visibility rules
   if (rules.showIfNotEmpty && (!value || value === '' || value === null || value === undefined)) {
     return false;
   }
@@ -83,6 +93,11 @@ const checkVisibilityRules = (value: any, rules: Record<string, any>, fieldMappi
   }
 
   if (rules.visible === false) {
+    return false;
+  }
+
+  // Check for explicit enabled/disabled state
+  if (rules.enabled === false || rules.disabled === true) {
     return false;
   }
 
