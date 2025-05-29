@@ -79,103 +79,119 @@ export const GeneralInfoSection: React.FC<GeneralInfoSectionProps> = ({
 
   const displayStyleClasses = getDisplayStyleClasses();
 
-  // Sort fields by their configured order, or use default order if no configuration
-  const getOrderedFields = () => {
-    if (fieldConfigs.length === 0) {
-      // Default order if no configuration
-      return [
-        { name: 'profile_image', order: 1 },
-        { name: 'name', order: 2 },
-        { name: 'employee_id', order: 3 },
-        { name: 'biography', order: 4 },
-      ];
-    }
-
-    // Use configuration order and map to display fields
-    const enabledFields = fieldConfigs.filter(f => f.enabled);
-    const orderedFields = [...enabledFields].sort((a, b) => a.order - b.order);
-    
-    return orderedFields.map(field => {
-      // Handle composite fields like name
-      if (field.field === 'first_name' || field.field === 'last_name') {
-        return { name: 'name', order: field.order };
-      }
-      return { name: field.field, order: field.order };
-    }).filter((field, index, self) => 
-      // Remove duplicates (like multiple name entries)
-      self.findIndex(f => f.name === field.name) === index
-    );
-  };
-
-  const renderField = (fieldName: string) => {
-    switch (fieldName) {
-      case 'profile_image':
-        if (isFieldEnabled('profile_image') && profile.profile_image) {
-          return (
-            <div key="profile_image" style={{ marginBottom: '10pt', textAlign: 'center' }}>
-              <img 
-                src={profile.profile_image} 
-                alt="Profile" 
-                style={{ 
-                  width: '100px', 
-                  height: '100px', 
-                  borderRadius: '50%', 
-                  objectFit: 'cover' 
-                }} 
-              />
-            </div>
-          );
-        }
-        break;
-
-      case 'name':
-        const hasFirstName = isFieldEnabled('first_name') && profile.first_name;
-        const hasLastName = isFieldEnabled('last_name') && profile.last_name;
-        
-        if (hasFirstName || hasLastName) {
-          return (
-            <div key="name" style={styles.nameStyles}>
-              {hasFirstName && (
-                <span>{applyMasking(profile.first_name, 'first_name')} </span>
-              )}
-              {hasLastName && (
-                <span>{applyMasking(profile.last_name, 'last_name')}</span>
-              )}
-            </div>
-          );
-        }
-        break;
-
-      case 'employee_id':
-        // Use employee_id from profiles table
-        const employeeId = profile.employee_id;
-        if (isFieldEnabled('employee_id') && employeeId) {
-          return (
-            <p key="employee_id" style={styles.titleStyles}>
-              Employee ID: {applyMasking(employeeId, 'employee_id')}
-            </p>
-          );
-        }
-        break;
-
-      case 'biography':
-        if (isFieldEnabled('biography') && profile.biography) {
-          return (
-            <p key="biography" style={{ marginTop: '10pt', fontSize: '0.9em', fontStyle: 'italic' }}>
-              {applyMasking(profile.biography, 'biography')}
-            </p>
-          );
-        }
-        break;
+  // Render profile image
+  const renderProfileImage = () => {
+    if (isFieldEnabled('profile_image') && profile.profile_image) {
+      return (
+        <div style={{ 
+          display: 'flex', 
+          justifyContent: 'center', 
+          alignItems: 'flex-start',
+          paddingRight: '20pt'
+        }}>
+          <img 
+            src={profile.profile_image} 
+            alt="Profile" 
+            style={{ 
+              width: '120px', 
+              height: '120px', 
+              borderRadius: '50%', 
+              objectFit: 'cover',
+              border: '2px solid #e5e7eb'
+            }} 
+          />
+        </div>
+      );
     }
     return null;
   };
 
-  const orderedFields = getOrderedFields();
+  // Render name and biography section
+  const renderNameAndBio = () => {
+    const hasFirstName = isFieldEnabled('first_name') && profile.first_name;
+    const hasLastName = isFieldEnabled('last_name') && profile.last_name;
+    const hasBiography = isFieldEnabled('biography') && profile.biography;
+    const hasEmployeeId = isFieldEnabled('employee_id') && profile.employee_id;
+
+    return (
+      <div style={{ 
+        display: 'flex', 
+        flexDirection: 'column', 
+        justifyContent: 'flex-start',
+        paddingLeft: '10pt'
+      }}>
+        {/* Name */}
+        {(hasFirstName || hasLastName) && (
+          <div style={{
+            ...styles.nameStyles,
+            marginBottom: '8pt',
+            fontSize: '24pt',
+            fontWeight: 'bold',
+            color: styles.primaryColor || '#1f2937'
+          }}>
+            {hasFirstName && (
+              <span>{applyMasking(profile.first_name, 'first_name')} </span>
+            )}
+            {hasLastName && (
+              <span>{applyMasking(profile.last_name, 'last_name')}</span>
+            )}
+          </div>
+        )}
+
+        {/* Employee ID */}
+        {hasEmployeeId && (
+          <div style={{
+            ...styles.titleStyles,
+            marginBottom: '12pt',
+            fontSize: '12pt',
+            color: styles.secondaryColor || '#6b7280',
+            fontWeight: '500'
+          }}>
+            Employee ID: {applyMasking(profile.employee_id, 'employee_id')}
+          </div>
+        )}
+
+        {/* Biography */}
+        {hasBiography && (
+          <div style={{ 
+            fontSize: '11pt', 
+            lineHeight: '1.4',
+            color: styles.primaryColor || '#1f2937',
+            textAlign: 'justify'
+          }}>
+            {applyMasking(profile.biography, 'biography')}
+          </div>
+        )}
+      </div>
+    );
+  };
 
   return (
-    <div style={{ ...styles.headerStyles, ...displayStyleClasses }}>
-      {orderedFields.map(field => renderField(field.name)).filter(Boolean)}
+    <div style={{ 
+      ...styles.headerStyles, 
+      ...displayStyleClasses,
+      display: 'flex',
+      alignItems: 'flex-start',
+      gap: '20pt',
+      marginBottom: '20pt',
+      paddingBottom: '15pt',
+      borderBottom: `2px solid ${styles.accentColor || '#3b82f6'}`
+    }}>
+      {/* Left column - Profile Image */}
+      <div style={{ 
+        flex: '0 0 auto',
+        minWidth: '140px'
+      }}>
+        {renderProfileImage()}
+      </div>
+
+      {/* Right column - Name and Biography */}
+      <div style={{ 
+        flex: '1 1 auto',
+        minWidth: '0'
+      }}>
+        {renderNameAndBio()}
+      </div>
     </div>
   );
 };
