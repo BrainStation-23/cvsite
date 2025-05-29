@@ -5,21 +5,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
 import { Check, ChevronDown, Loader } from 'lucide-react';
 import { cn } from '@/lib/utils';
-
-interface DeviconTechnology {
-  name: string;
-  altnames: string[];
-  tags: string[];
-  versions: {
-    svg: string[];
-    font: string[];
-  };
-  color: string;
-  aliases: Array<{
-    base: string;
-    alias: string;
-  }>;
-}
+import { DeviconService, DeviconTechnology } from '@/utils/deviconUtils';
 
 interface TechnicalSkillInputProps {
   value: string;
@@ -44,41 +30,17 @@ export const TechnicalSkillInput: React.FC<TechnicalSkillInputProps> = ({
   useEffect(() => {
     const fetchTechnologies = async () => {
       setIsLoading(true);
-      setError(null);
-      try {
-        const response = await fetch('https://raw.githubusercontent.com/devicons/devicon/master/devicon.json');
-        if (!response.ok) {
-          throw new Error('Failed to fetch technologies');
-        }
-        const data: DeviconTechnology[] = await response.json();
-        setTechnologies(data);
-      } catch (err) {
-        console.error('Error fetching technologies:', err);
-        setError('Failed to load technologies');
-        // Fallback to a basic list if API fails
-        setTechnologies([
-          { name: 'javascript', altnames: ['js'], tags: ['programming'], versions: { svg: ['original'], font: ['plain'] }, color: '#f7df1e', aliases: [] },
-          { name: 'typescript', altnames: ['ts'], tags: ['programming'], versions: { svg: ['original'], font: ['plain'] }, color: '#3178c6', aliases: [] },
-          { name: 'react', altnames: ['reactjs'], tags: ['framework'], versions: { svg: ['original'], font: ['plain'] }, color: '#61dafb', aliases: [] },
-          { name: 'nodejs', altnames: ['node'], tags: ['runtime'], versions: { svg: ['original'], font: ['plain'] }, color: '#339933', aliases: [] },
-          { name: 'python', altnames: [], tags: ['programming'], versions: { svg: ['original'], font: ['plain'] }, color: '#3776ab', aliases: [] }
-        ]);
-      } finally {
-        setIsLoading(false);
-      }
+      const result = await DeviconService.getTechnologies();
+      setTechnologies(result.technologies);
+      setError(result.error);
+      setIsLoading(false);
     };
 
     fetchTechnologies();
   }, []);
 
-  // Filter technologies based on search input
-  const filteredTechnologies = technologies.filter(tech => {
-    const searchTerm = searchValue.toLowerCase();
-    // Search in name, altnames, and tags
-    return tech.name.toLowerCase().includes(searchTerm) ||
-           tech.altnames.some(alt => alt.toLowerCase().includes(searchTerm)) ||
-           tech.tags.some(tag => tag.toLowerCase().includes(searchTerm));
-  }).slice(0, 15); // Limit to 15 results for performance
+  // Filter technologies based on search input using the utility
+  const filteredTechnologies = DeviconService.filterTechnologies(searchValue, technologies, 15);
 
   useEffect(() => {
     setSearchValue(value);
@@ -94,18 +56,6 @@ export const TechnicalSkillInput: React.FC<TechnicalSkillInputProps> = ({
     setSearchValue(inputValue);
     onChange(inputValue);
     setOpen(inputValue.length > 0 && !isLoading);
-  };
-
-  const getDeviconUrl = (techName: string) => {
-    return `https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/${techName}/${techName}-original.svg`;
-  };
-
-  const getDisplayName = (tech: DeviconTechnology) => {
-    // Use the most common altname if available, otherwise use the name
-    if (tech.altnames.length > 0) {
-      return tech.altnames[0];
-    }
-    return tech.name;
   };
 
   return (
@@ -156,7 +106,7 @@ export const TechnicalSkillInput: React.FC<TechnicalSkillInputProps> = ({
                     className="flex items-center space-x-3 cursor-pointer"
                   >
                     <img 
-                      src={getDeviconUrl(tech.name)} 
+                      src={DeviconService.getDeviconUrl(tech.name)} 
                       alt={tech.name}
                       className="w-5 h-5 flex-shrink-0"
                       onError={(e) => {
@@ -165,7 +115,7 @@ export const TechnicalSkillInput: React.FC<TechnicalSkillInputProps> = ({
                       }}
                     />
                     <div className="flex-1 min-w-0">
-                      <div className="font-medium capitalize">{getDisplayName(tech)}</div>
+                      <div className="font-medium capitalize">{DeviconService.getDisplayName(tech)}</div>
                       {tech.altnames.length > 1 && (
                         <div className="text-xs text-gray-500 truncate">
                           {tech.altnames.slice(1, 3).join(', ')}

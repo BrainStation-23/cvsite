@@ -10,6 +10,7 @@ import {
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { TechnicalSkillInput } from './TechnicalSkillInput';
+import { DeviconService } from '@/utils/deviconUtils';
 
 interface SkillCardProps {
   skill: Skill;
@@ -66,10 +67,6 @@ export const SkillCard: React.FC<SkillCardProps> = ({
   const handleCancel = () => {
     setEditedSkill(skill);
     setHasChanges(false);
-  };
-
-  const getDeviconUrl = (techName: string) => {
-    return `https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/${techName.toLowerCase()}/${techName.toLowerCase()}-original.svg`;
   };
 
   return (
@@ -159,7 +156,7 @@ export const SkillCard: React.FC<SkillCardProps> = ({
                   <div className="flex items-center space-x-2 mb-2">
                     {skillType === 'technical' && (
                       <img 
-                        src={getDeviconUrl(skill.name)} 
+                        src={DeviconService.getDeviconUrl(skill.name)} 
                         alt={skill.name}
                         className="w-5 h-5 flex-shrink-0"
                         onError={(e) => {
