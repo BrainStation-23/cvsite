@@ -31,7 +31,7 @@ export const FieldProcessor: React.FC<FieldProcessorProps> = ({
     mapping => mapping.original_field_name === fieldName && mapping.section_type === sectionType
   );
 
-  // If no mapping found, use defaults
+  // If no mapping found, use defaults and show the field
   const displayName = fieldMapping?.display_name || fieldName;
   const isMasked = fieldMapping?.is_masked || false;
   const maskValue = fieldMapping?.mask_value;
@@ -52,25 +52,37 @@ export const FieldProcessor: React.FC<FieldProcessorProps> = ({
     }
   }
 
-  // Check visibility rules (simplified for now)
-  const shouldShow = checkVisibilityRules(value, fieldMapping?.visibility_rules || {});
+  // Check visibility rules
+  const shouldShow = checkVisibilityRules(value, fieldMapping?.visibility_rules || {}, fieldMapping);
 
   return <>{children(processedValue, displayName, shouldShow)}</>;
 };
 
-const checkVisibilityRules = (value: any, rules: Record<string, any>): boolean => {
+const checkVisibilityRules = (value: any, rules: Record<string, any>, fieldMapping?: FieldMapping): boolean => {
+  // If no field mapping exists, show the field by default
+  if (!fieldMapping) {
+    return true;
+  }
+
   // If no rules, show the field
   if (!rules || Object.keys(rules).length === 0) {
     return true;
   }
 
   // Implement basic visibility rules
-  // This can be extended based on requirements
   if (rules.showIfNotEmpty && (!value || value === '')) {
     return false;
   }
 
   if (rules.showIfEmpty && value && value !== '') {
+    return false;
+  }
+
+  if (rules.hidden === true) {
+    return false;
+  }
+
+  if (rules.visible === false) {
     return false;
   }
 

@@ -14,6 +14,7 @@ interface CVPreviewProps {
 const CVPreview: React.FC<CVPreviewProps> = ({ template, profile }) => {
   const { sections, fieldMappings, isLoading, refetch } = useTemplateConfiguration(template.id);
   const [overflowWarning, setOverflowWarning] = useState<string | null>(null);
+  const [previewKey, setPreviewKey] = useState(0);
   const { toast } = useToast();
   const styles = createCVStyles(template);
 
@@ -23,6 +24,11 @@ const CVPreview: React.FC<CVPreviewProps> = ({ template, profile }) => {
       refetch?.();
     }
   }, [template, refetch]);
+
+  // Force re-render when sections or field mappings change
+  useEffect(() => {
+    setPreviewKey(prev => prev + 1);
+  }, [sections, fieldMappings]);
 
   const handleOverflow = (overflowInfo: { requiredPages: number; overflowHeight: number }) => {
     const warningMessage = `Content overflow detected! The current content requires ${overflowInfo.requiredPages} pages but template is configured for ${template.pages_count} pages. Consider reducing content or increasing page count.`;
@@ -69,6 +75,7 @@ const CVPreview: React.FC<CVPreviewProps> = ({ template, profile }) => {
       )}
       
       <PageDistributor
+        key={previewKey}
         sections={sections}
         fieldMappings={fieldMappings}
         profile={profile}

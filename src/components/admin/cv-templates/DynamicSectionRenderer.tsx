@@ -64,11 +64,9 @@ export const DynamicSectionRenderer: React.FC<DynamicSectionRendererProps> = ({
       case 'general':
         return <GeneralInfoSection key={section.id} {...commonProps} />;
       case 'experience':
-        // Check if section is required or has data
-        if (section.is_required || (profile.experiences && profile.experiences.length > 0)) {
-          return <ExperienceSection key={section.id} {...commonProps} />;
-        }
-        break;
+        // Always render experience section if configured, regardless of data
+        // The section component will handle empty data display
+        return <ExperienceSection key={section.id} {...commonProps} />;
       case 'education':
         if (section.is_required || (profile.education && profile.education.length > 0)) {
           return <EducationSection key={section.id} {...commonProps} />;
