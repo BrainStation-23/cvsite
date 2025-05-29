@@ -95,12 +95,12 @@ export const SkillCard: React.FC<SkillCardProps> = ({
                   <div className="flex items-center space-x-2">
                     <span className="text-sm text-gray-600">Proficiency:</span>
                     <div className="flex space-x-1">
-                      {Array.from({ length: 5 }).map((_, i) => (
+                      {Array.from({ length: 10 }).map((_, i) => (
                         <button
                           key={i}
                           type="button"
                           onClick={() => setEditedSkill({ ...editedSkill, proficiency: i + 1 })}
-                          className={`w-6 h-6 rounded transition-colors ${
+                          className={`w-5 h-5 rounded transition-colors ${
                             i < editedSkill.proficiency 
                               ? 'bg-cvsite-teal hover:bg-cvsite-teal/80' 
                               : 'bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600'
@@ -116,13 +116,13 @@ export const SkillCard: React.FC<SkillCardProps> = ({
                   <div className="flex items-center space-x-2 mt-2">
                     <span className="text-xs text-gray-600">Proficiency:</span>
                     <div className="flex space-x-1">
-                      {Array.from({ length: 5 }).map((_, i) => (
+                      {Array.from({ length: 10 }).map((_, i) => (
                         <button
                           key={i}
                           type="button"
                           onClick={() => handleProficiencyClick(i + 1)}
                           disabled={!isEditing}
-                          className={`w-5 h-5 rounded transition-colors ${
+                          className={`w-4 h-4 rounded transition-colors ${
                             i < skill.proficiency 
                               ? 'bg-cvsite-teal' 
                               : 'bg-gray-200 dark:bg-gray-700'

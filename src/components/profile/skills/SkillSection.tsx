@@ -132,12 +132,12 @@ export const SkillSection: React.FC<SkillSectionProps> = ({
                   <div className="flex items-center space-x-2">
                     <span className="text-sm text-gray-600">Proficiency:</span>
                     <div className="flex space-x-1">
-                      {Array.from({ length: 5 }).map((_, i) => (
+                      {Array.from({ length: 10 }).map((_, i) => (
                         <button
                           key={i}
                           type="button"
                           onClick={() => setNewSkill({ ...newSkill, proficiency: i + 1 })}
-                          className={`w-6 h-6 rounded transition-colors ${
+                          className={`w-5 h-5 rounded transition-colors ${
                             i < newSkill.proficiency 
                               ? 'bg-cvsite-teal hover:bg-cvsite-teal/80' 
                               : 'bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600'
