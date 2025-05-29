@@ -3,20 +3,23 @@ import React, { useState, useEffect } from 'react';
 import { Input } from '@/components/ui/input';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
-import { Check, ChevronDown } from 'lucide-react';
+import { Check, ChevronDown, Loader } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
-// Devicon technology list - this will be the source of truth for technical skills
-const DEVICON_TECHNOLOGIES = [
-  'javascript', 'typescript', 'react', 'vue', 'angular', 'nodejs', 'python', 'java', 'csharp', 'cplusplus',
-  'html5', 'css3', 'sass', 'bootstrap', 'tailwindcss', 'mysql', 'postgresql', 'mongodb', 'redis', 'docker',
-  'kubernetes', 'aws', 'azure', 'googlecloud', 'git', 'github', 'gitlab', 'jenkins', 'terraform', 'ansible',
-  'nginx', 'apache', 'linux', 'ubuntu', 'windows', 'macos', 'vscode', 'intellij', 'eclipse', 'figma',
-  'photoshop', 'illustrator', 'sketch', 'firebase', 'supabase', 'vercel', 'netlify', 'heroku', 'digitalocean',
-  'express', 'nextjs', 'nuxtjs', 'svelte', 'flutter', 'reactnative', 'ionic', 'electron', 'graphql', 'rest',
-  'jest', 'cypress', 'selenium', 'mocha', 'chai', 'webpack', 'vite', 'rollup', 'babel', 'eslint',
-  'prettier', 'redux', 'mobx', 'rxjs', 'lodash', 'jquery', 'd3js', 'threejs', 'socketio', 'webrtc'
-];
+interface DeviconTechnology {
+  name: string;
+  altnames: string[];
+  tags: string[];
+  versions: {
+    svg: string[];
+    font: string[];
+  };
+  color: string;
+  aliases: Array<{
+    base: string;
+    alias: string;
+  }>;
+}
 
 interface TechnicalSkillInputProps {
   value: string;
@@ -33,11 +36,49 @@ export const TechnicalSkillInput: React.FC<TechnicalSkillInputProps> = ({
 }) => {
   const [open, setOpen] = useState(false);
   const [searchValue, setSearchValue] = useState(value);
+  const [technologies, setTechnologies] = useState<DeviconTechnology[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  // Fetch technologies from Devicon API
+  useEffect(() => {
+    const fetchTechnologies = async () => {
+      setIsLoading(true);
+      setError(null);
+      try {
+        const response = await fetch('https://raw.githubusercontent.com/devicons/devicon/master/devicon.json');
+        if (!response.ok) {
+          throw new Error('Failed to fetch technologies');
+        }
+        const data: DeviconTechnology[] = await response.json();
+        setTechnologies(data);
+      } catch (err) {
+        console.error('Error fetching technologies:', err);
+        setError('Failed to load technologies');
+        // Fallback to a basic list if API fails
+        setTechnologies([
+          { name: 'javascript', altnames: ['js'], tags: ['programming'], versions: { svg: ['original'], font: ['plain'] }, color: '#f7df1e', aliases: [] },
+          { name: 'typescript', altnames: ['ts'], tags: ['programming'], versions: { svg: ['original'], font: ['plain'] }, color: '#3178c6', aliases: [] },
+          { name: 'react', altnames: ['reactjs'], tags: ['framework'], versions: { svg: ['original'], font: ['plain'] }, color: '#61dafb', aliases: [] },
+          { name: 'nodejs', altnames: ['node'], tags: ['runtime'], versions: { svg: ['original'], font: ['plain'] }, color: '#339933', aliases: [] },
+          { name: 'python', altnames: [], tags: ['programming'], versions: { svg: ['original'], font: ['plain'] }, color: '#3776ab', aliases: [] }
+        ]);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchTechnologies();
+  }, []);
 
   // Filter technologies based on search input
-  const filteredTechnologies = DEVICON_TECHNOLOGIES.filter(tech =>
-    tech.toLowerCase().includes(searchValue.toLowerCase())
-  ).slice(0, 10); // Limit to 10 results for performance
+  const filteredTechnologies = technologies.filter(tech => {
+    const searchTerm = searchValue.toLowerCase();
+    // Search in name, altnames, and tags
+    return tech.name.toLowerCase().includes(searchTerm) ||
+           tech.altnames.some(alt => alt.toLowerCase().includes(searchTerm)) ||
+           tech.tags.some(tag => tag.toLowerCase().includes(searchTerm));
+  }).slice(0, 15); // Limit to 15 results for performance
 
   useEffect(() => {
     setSearchValue(value);
@@ -52,11 +93,19 @@ export const TechnicalSkillInput: React.FC<TechnicalSkillInputProps> = ({
   const handleInputChange = (inputValue: string) => {
     setSearchValue(inputValue);
     onChange(inputValue);
-    setOpen(inputValue.length > 0);
+    setOpen(inputValue.length > 0 && !isLoading);
   };
 
   const getDeviconUrl = (techName: string) => {
     return `https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/${techName}/${techName}-original.svg`;
+  };
+
+  const getDisplayName = (tech: DeviconTechnology) => {
+    // Use the most common altname if available, otherwise use the name
+    if (tech.altnames.length > 0) {
+      return tech.altnames[0];
+    }
+    return tech.name;
   };
 
   return (
@@ -68,14 +117,16 @@ export const TechnicalSkillInput: React.FC<TechnicalSkillInputProps> = ({
             onChange={(e) => handleInputChange(e.target.value)}
             placeholder={placeholder}
             className={cn("pr-8", className)}
-            onFocus={() => setOpen(searchValue.length > 0)}
+            onFocus={() => setOpen(searchValue.length > 0 && !isLoading)}
           />
-          {searchValue && (
+          {isLoading ? (
+            <Loader className="absolute right-2 top-2.5 h-4 w-4 text-muted-foreground animate-spin" />
+          ) : searchValue && (
             <ChevronDown className="absolute right-2 top-2.5 h-4 w-4 text-muted-foreground" />
           )}
         </div>
       </PopoverTrigger>
-      <PopoverContent className="w-[300px] p-0" align="start">
+      <PopoverContent className="w-[350px] p-0" align="start">
         <Command>
           <CommandInput 
             placeholder="Search technologies..." 
@@ -84,34 +135,60 @@ export const TechnicalSkillInput: React.FC<TechnicalSkillInputProps> = ({
             className="border-none focus:ring-0"
           />
           <CommandList>
-            <CommandEmpty>No technology found.</CommandEmpty>
-            <CommandGroup>
-              {filteredTechnologies.map((tech) => (
-                <CommandItem
-                  key={tech}
-                  value={tech}
-                  onSelect={() => handleSelect(tech)}
-                  className="flex items-center space-x-3 cursor-pointer"
-                >
-                  <img 
-                    src={getDeviconUrl(tech)} 
-                    alt={tech}
-                    className="w-5 h-5 flex-shrink-0"
-                    onError={(e) => {
-                      // Fallback if icon doesn't exist
-                      e.currentTarget.style.display = 'none';
-                    }}
-                  />
-                  <span className="flex-1 capitalize">{tech}</span>
-                  <Check
-                    className={cn(
-                      "ml-auto h-4 w-4",
-                      value === tech ? "opacity-100" : "opacity-0"
-                    )}
-                  />
-                </CommandItem>
-              ))}
-            </CommandGroup>
+            {isLoading ? (
+              <div className="py-6 text-center text-sm">
+                <Loader className="mx-auto h-4 w-4 animate-spin mb-2" />
+                Loading technologies...
+              </div>
+            ) : error ? (
+              <div className="py-6 text-center text-sm text-red-500">
+                {error}
+              </div>
+            ) : filteredTechnologies.length === 0 ? (
+              <CommandEmpty>No technology found.</CommandEmpty>
+            ) : (
+              <CommandGroup>
+                {filteredTechnologies.map((tech) => (
+                  <CommandItem
+                    key={tech.name}
+                    value={tech.name}
+                    onSelect={() => handleSelect(tech.name)}
+                    className="flex items-center space-x-3 cursor-pointer"
+                  >
+                    <img 
+                      src={getDeviconUrl(tech.name)} 
+                      alt={tech.name}
+                      className="w-5 h-5 flex-shrink-0"
+                      onError={(e) => {
+                        // Fallback if icon doesn't exist
+                        e.currentTarget.style.display = 'none';
+                      }}
+                    />
+                    <div className="flex-1 min-w-0">
+                      <div className="font-medium capitalize">{getDisplayName(tech)}</div>
+                      {tech.altnames.length > 1 && (
+                        <div className="text-xs text-gray-500 truncate">
+                          {tech.altnames.slice(1, 3).join(', ')}
+                        </div>
+                      )}
+                    </div>
+                    <div className="flex flex-wrap gap-1">
+                      {tech.tags.slice(0, 2).map(tag => (
+                        <span key={tag} className="text-xs bg-gray-100 text-gray-600 px-1 rounded">
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+                    <Check
+                      className={cn(
+                        "ml-auto h-4 w-4 flex-shrink-0",
+                        value === tech.name ? "opacity-100" : "opacity-0"
+                      )}
+                    />
+                  </CommandItem>
+                ))}
+              </CommandGroup>
+            )}
           </CommandList>
         </Command>
       </PopoverContent>
