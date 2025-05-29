@@ -26,8 +26,7 @@ interface PageDistributorProps {
   fieldMappings: FieldMapping[];
   profile: any;
   styles: any;
-  totalPages: number;
-  onOverflow?: (overflowInfo: { requiredPages: number; overflowHeight: number }) => void;
+  onPagesCalculated?: (pageCount: number) => void;
   layoutConfig?: Record<string, any>;
 }
 
@@ -36,40 +35,33 @@ export const PageDistributor: React.FC<PageDistributorProps> = ({
   fieldMappings,
   profile,
   styles,
-  totalPages,
-  onOverflow,
+  onPagesCalculated,
   layoutConfig = {}
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
-  const [measuredHeight, setMeasuredHeight] = useState(0);
+  const [calculatedPages, setCalculatedPages] = useState(1);
 
-  // Calculate if content overflows
+  // Calculate required pages based on content
   useEffect(() => {
-    if (containerRef.current && onOverflow) {
+    if (containerRef.current) {
       const contentHeight = containerRef.current.scrollHeight;
       const pageHeight = 297 * 3.779528; // Convert mm to px (approximately)
-      const availableHeight = pageHeight * totalPages;
+      const requiredPages = Math.max(1, Math.ceil(contentHeight / pageHeight));
       
-      setMeasuredHeight(contentHeight);
-      
-      if (contentHeight > availableHeight) {
-        const requiredPages = Math.ceil(contentHeight / pageHeight);
-        const overflowHeight = contentHeight - availableHeight;
-        
-        onOverflow({ requiredPages, overflowHeight });
-      }
+      setCalculatedPages(requiredPages);
+      onPagesCalculated?.(requiredPages);
     }
-  }, [sections, profile, totalPages, onOverflow]);
+  }, [sections, profile, onPagesCalculated]);
 
   const layoutType = layoutConfig.layoutType || 'single-column';
 
   return (
     <div ref={containerRef}>
-      {Array.from({ length: totalPages }, (_, index) => (
+      {Array.from({ length: calculatedPages }, (_, index) => (
         <CVPageRenderer
           key={index}
           pageNumber={index + 1}
-          totalPages={totalPages}
+          totalPages={calculatedPages}
           profile={profile}
           styles={styles}
           sections={sections}

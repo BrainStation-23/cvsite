@@ -79,6 +79,7 @@ export const CVPageRenderer: React.FC<CVPageRendererProps> = ({
     <AchievementsSection key="achievements" profile={enhancedProfile} styles={styles} />
   ].filter(Boolean);
 
+  // Distribute sections across pages evenly
   const sectionsPerPage = Math.ceil(defaultSections.length / totalPages);
   const startIndex = (pageNumber - 1) * sectionsPerPage;
   const endIndex = startIndex + sectionsPerPage;

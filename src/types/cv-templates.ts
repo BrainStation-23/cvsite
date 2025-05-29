@@ -1,9 +1,7 @@
-
 export interface CVTemplate {
   id: string;
   name: string;
   description?: string;
-  pages_count: number;
   orientation: 'portrait' | 'landscape';
   layout_config: Record<string, any>;
   is_active: boolean;

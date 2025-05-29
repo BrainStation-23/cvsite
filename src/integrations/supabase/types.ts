@@ -271,7 +271,6 @@ export type Database = {
           layout_config: Json | null
           name: string
           orientation: string
-          pages_count: number
           updated_at: string
         }
         Insert: {
@@ -283,7 +282,6 @@ export type Database = {
           layout_config?: Json | null
           name: string
           orientation?: string
-          pages_count?: number
           updated_at?: string
         }
         Update: {
@@ -295,7 +293,6 @@ export type Database = {
           layout_config?: Json | null
           name?: string
           orientation?: string
-          pages_count?: number
           updated_at?: string
         }
         Relationships: []
