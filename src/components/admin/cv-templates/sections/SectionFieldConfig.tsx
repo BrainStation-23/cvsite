@@ -54,11 +54,13 @@ const getDefaultFields = (sectionType: string): FieldConfig[] => {
       ];
     case 'experience':
       return [
-        { field: 'company_name', label: 'Company Name', enabled: true, masked: false, order: 1 },
-        { field: 'designation', label: 'Designation', enabled: true, masked: false, order: 2 },
+        { field: 'designation', label: 'Designation', enabled: true, masked: false, order: 1 },
+        { field: 'company_name', label: 'Company Name', enabled: true, masked: false, order: 2 },
         { field: 'start_date', label: 'Start Date', enabled: true, masked: false, order: 3 },
         { field: 'end_date', label: 'End Date', enabled: true, masked: false, order: 4 },
-        { field: 'description', label: 'Description', enabled: true, masked: false, order: 5 },
+        { field: 'date_range', label: 'Date Range', enabled: true, masked: false, order: 5 },
+        { field: 'is_current', label: 'Current Position', enabled: true, masked: false, order: 6 },
+        { field: 'description', label: 'Description', enabled: true, masked: false, order: 7 },
       ];
     case 'education':
       return [
@@ -75,6 +77,17 @@ const getDefaultFields = (sectionType: string): FieldConfig[] => {
       return [
         { field: 'name', label: 'Skill Name', enabled: true, masked: false, order: 1 },
         { field: 'proficiency', label: 'Proficiency', enabled: true, masked: false, order: 2 },
+      ];
+    case 'projects':
+      return [
+        { field: 'name', label: 'Project Name', enabled: true, masked: false, order: 1 },
+        { field: 'role', label: 'Role', enabled: true, masked: false, order: 2 },
+        { field: 'start_date', label: 'Start Date', enabled: true, masked: false, order: 3 },
+        { field: 'end_date', label: 'End Date', enabled: true, masked: false, order: 4 },
+        { field: 'date_range', label: 'Date Range', enabled: true, masked: false, order: 5 },
+        { field: 'technologies_used', label: 'Technologies', enabled: true, masked: false, order: 6 },
+        { field: 'description', label: 'Description', enabled: true, masked: false, order: 7 },
+        { field: 'url', label: 'URL', enabled: true, masked: false, order: 8 },
       ];
     default:
       return [];

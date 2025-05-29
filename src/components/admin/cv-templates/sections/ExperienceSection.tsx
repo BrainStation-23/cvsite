@@ -144,6 +144,28 @@ export const ExperienceSection: React.FC<ExperienceSectionProps> = ({
         )}
       </FieldProcessor>
     ),
+    is_current: (exp: any, index: number) => (
+      <FieldProcessor
+        key="is_current"
+        fieldName="is_current"
+        value={exp.is_current ? 'Current Position' : ''}
+        fieldMappings={sortedFieldMappings}
+        sectionType="experience"
+      >
+        {(processedValue, displayName, shouldShow) => (
+          shouldShow && processedValue && (
+            <div style={{ 
+              fontSize: '0.8em', 
+              color: '#28a745',
+              fontWeight: 'bold',
+              marginBottom: '4pt'
+            }}>
+              {processedValue}
+            </div>
+          )
+        )}
+      </FieldProcessor>
+    ),
     description: (exp: any, index: number) => (
       <FieldProcessor
         key="description"
