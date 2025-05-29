@@ -9,7 +9,18 @@ export const useCVTemplateFetching = () => {
   const [templates, setTemplates] = useState<CVTemplate[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
-  const { convertSupabaseTemplate } = useCVTemplateOperations();
+
+  const convertSupabaseTemplate = (data: any): CVTemplate => ({
+    id: data.id,
+    name: data.name,
+    description: data.description,
+    orientation: data.orientation,
+    layout_config: data.layout_config || {},
+    is_active: data.is_active,
+    created_by: data.created_by,
+    created_at: data.created_at,
+    updated_at: data.updated_at
+  });
 
   const fetchTemplates = async () => {
     try {

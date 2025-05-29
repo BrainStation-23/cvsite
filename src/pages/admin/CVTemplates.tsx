@@ -72,10 +72,6 @@ const CVTemplates: React.FC = () => {
                 <CardContent>
                   <div className="space-y-3">
                     <div className="flex justify-between text-sm">
-                      <span className="text-gray-600">Pages:</span>
-                      <span className="font-medium">{template.pages_count}</span>
-                    </div>
-                    <div className="flex justify-between text-sm">
                       <span className="text-gray-600">Orientation:</span>
                       <span className="font-medium capitalize">{template.orientation}</span>
                     </div>
