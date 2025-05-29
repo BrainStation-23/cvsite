@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useCVTemplates } from '@/hooks/use-cv-templates';
@@ -14,6 +15,7 @@ const CVTemplateEdit: React.FC = () => {
   const { getTemplate, updateTemplate, isUpdating } = useCVTemplates();
   const { profiles, fetchProfiles } = useEmployeeProfiles();
   const [template, setTemplate] = useState<CVTemplate | null>(null);
+  const [originalTemplate, setOriginalTemplate] = useState<CVTemplate | null>(null);
   const [selectedProfileId, setSelectedProfileId] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
@@ -53,6 +55,7 @@ const CVTemplateEdit: React.FC = () => {
       const templateData = await getTemplate(id);
       if (templateData) {
         setTemplate(templateData);
+        setOriginalTemplate(templateData);
       }
       setIsLoading(false);
     }
@@ -88,8 +91,20 @@ const CVTemplateEdit: React.FC = () => {
         const updatedTemplate = await getTemplate(id);
         if (updatedTemplate) {
           setTemplate(updatedTemplate);
+          setOriginalTemplate(updatedTemplate);
         }
       }
+    }
+  };
+
+  const handleDiscardChanges = () => {
+    if (originalTemplate) {
+      setTemplate({ ...originalTemplate });
+      setHasUnsavedChanges(false);
+      toast({
+        title: "Changes Discarded",
+        description: "Template reverted to last saved state"
+      });
     }
   };
 
@@ -141,6 +156,7 @@ const CVTemplateEdit: React.FC = () => {
       isSaving={isUpdating}
       onBack={handleBack}
       onSave={handleSaveAll}
+      onDiscard={handleDiscardChanges}
       onTemplateNameChange={handleTemplateNameChange}
       selectedProfileId={selectedProfileId}
       onProfileChange={handleProfileChange}

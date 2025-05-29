@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { ArrowLeft, Save, Download } from 'lucide-react';
+import { ArrowLeft, Save, Download, RotateCcw } from 'lucide-react';
 import { EmployeeCombobox } from './EmployeeCombobox';
 import { EmployeeProfile } from '@/hooks/types/employee-profiles';
 
@@ -13,6 +13,7 @@ interface TemplateEditorLayoutProps {
   isSaving: boolean;
   onBack: () => void;
   onSave: () => void;
+  onDiscard: () => void;
   onTemplateNameChange: (name: string) => void;
   selectedProfileId: string;
   onProfileChange: (profileId: string) => void;
@@ -27,6 +28,7 @@ const TemplateEditorLayout: React.FC<TemplateEditorLayoutProps> = ({
   isSaving,
   onBack,
   onSave,
+  onDiscard,
   onTemplateNameChange,
   selectedProfileId,
   onProfileChange,
@@ -119,18 +121,31 @@ const TemplateEditorLayout: React.FC<TemplateEditorLayoutProps> = ({
             <Download className="h-4 w-4 mr-2" />
             Export
           </Button>
+
+          {hasUnsavedChanges && (
+            <Button 
+              size="sm"
+              variant="outline"
+              onClick={onDiscard}
+              disabled={isSaving}
+              className="text-gray-600 hover:text-gray-800"
+            >
+              <RotateCcw className="h-4 w-4 mr-2" />
+              Discard
+            </Button>
+          )}
           
           <Button 
             onClick={onSave} 
-            disabled={isSaving}
-            className={`transition-all duration-200 ${
+            disabled={isSaving || !hasUnsavedChanges}
+            className={`transition-colors duration-200 ${
               hasUnsavedChanges 
-                ? 'bg-orange-600 hover:bg-orange-700 animate-pulse' 
+                ? 'bg-orange-600 hover:bg-orange-700' 
                 : ''
             }`}
           >
             <Save className="h-4 w-4 mr-2" />
-            {isSaving ? 'Saving...' : hasUnsavedChanges ? 'Save Changes *' : 'Save'}
+            {isSaving ? 'Saving...' : 'Save'}
           </Button>
         </div>
       </div>
