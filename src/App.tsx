@@ -8,6 +8,7 @@ import ProtectedRoute from '@/components/ProtectedRoute';
 import Index from '@/pages/Index';
 import Login from '@/pages/Login';
 import Callback from '@/pages/auth/Callback';
+import FrontChannelLogout from './pages/auth/FrontChannelLogout';
 import ProfilePage from '@/pages/profile/ProfilePage';
 import EmployeeData from '@/pages/employee/EmployeeData';
 import ViewProfilePage from '@/pages/employee/ViewProfilePage';
@@ -23,6 +24,7 @@ import SecurityPage from '@/pages/security/SecurityPage';
 import NotFound from '@/pages/NotFound';
 import './App.css';
 
+
 const queryClient = new QueryClient();
 
 function App() {
@@ -34,6 +36,7 @@ function App() {
             <Route path="/" element={<Index />} />
             <Route path="/login" element={<Login />} />
             <Route path="/auth/callback" element={<Callback />} />
+            <Route path="/auth/logout" element={<FrontChannelLogout />} />
             <Route
               path="/profile"
               element={
