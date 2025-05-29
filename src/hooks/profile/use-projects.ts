@@ -17,6 +17,7 @@ type ProjectDB = {
   is_current?: boolean;
   technologies_used?: string[];
   url?: string;
+  display_order?: number;
   created_at: string;
   updated_at: string;
 };
@@ -67,6 +68,7 @@ export function useProjects(profileId?: string) {
         .from('projects')
         .select('*')
         .eq('profile_id', targetProfileId)
+        .order('display_order', { ascending: true })
         .order('start_date', { ascending: false });
       
       if (error) throw error;
@@ -95,8 +97,23 @@ export function useProjects(profileId?: string) {
     try {
       setIsSaving(true);
       
+      // Get the next display order
+      const { data: existingProjects } = await supabase
+        .from('projects')
+        .select('display_order')
+        .eq('profile_id', targetProfileId)
+        .order('display_order', { ascending: false })
+        .limit(1);
+      
+      const nextDisplayOrder = existingProjects && existingProjects.length > 0 
+        ? (existingProjects[0].display_order || 0) + 1 
+        : 1;
+      
       // Convert to database format
-      const dbData = mapToProjectDB(project, targetProfileId);
+      const dbData = {
+        ...mapToProjectDB(project, targetProfileId),
+        display_order: nextDisplayOrder
+      };
       
       const { data, error } = await supabase
         .from('projects')
@@ -222,6 +239,46 @@ export function useProjects(profileId?: string) {
     }
   };
 
+  // Reorder projects
+  const reorderProjects = async (reorderedProjects: Project[]) => {
+    if (!targetProfileId) return false;
+    
+    try {
+      setIsSaving(true);
+      
+      // Update display_order for all projects
+      const updates = reorderedProjects.map((project, index) => 
+        supabase
+          .from('projects')
+          .update({ display_order: index + 1 })
+          .eq('id', project.id)
+          .eq('profile_id', targetProfileId)
+      );
+      
+      await Promise.all(updates);
+      
+      // Update local state
+      setProjects(reorderedProjects);
+      
+      toast({
+        title: 'Success',
+        description: 'Projects have been reordered',
+      });
+      
+      return true;
+    } catch (error) {
+      console.error('Error reordering projects:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to reorder projects',
+        variant: 'destructive'
+      });
+      return false;
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
   // Load projects data
   useEffect(() => {
     if (targetProfileId) {
@@ -235,6 +292,7 @@ export function useProjects(profileId?: string) {
     isSaving,
     saveProject,
     updateProject,
-    deleteProject
+    deleteProject,
+    reorderProjects
   };
 }

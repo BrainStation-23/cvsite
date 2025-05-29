@@ -527,6 +527,7 @@ export type Database = {
         Row: {
           created_at: string
           description: string
+          display_order: number | null
           end_date: string | null
           id: string
           is_current: boolean | null
@@ -541,6 +542,7 @@ export type Database = {
         Insert: {
           created_at?: string
           description: string
+          display_order?: number | null
           end_date?: string | null
           id?: string
           is_current?: boolean | null
@@ -555,6 +557,7 @@ export type Database = {
         Update: {
           created_at?: string
           description?: string
+          display_order?: number | null
           end_date?: string | null
           id?: string
           is_current?: boolean | null
