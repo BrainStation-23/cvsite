@@ -9,19 +9,10 @@ interface ProjectsSectionProps {
 export const ProjectsSection: React.FC<ProjectsSectionProps> = ({ profile, styles }) => {
   if (!profile.projects || profile.projects.length === 0) return null;
   
-  // Sort projects by display_order if available
-  const sortedProjects = [...profile.projects].sort((a, b) => {
-    if (a.display_order !== undefined && b.display_order !== undefined) {
-      return a.display_order - b.display_order;
-    }
-    // Fallback to start_date sorting if display_order is not available
-    return new Date(b.start_date).getTime() - new Date(a.start_date).getTime();
-  });
-  
   return (
     <div style={styles.sectionStyles}>
       <h2 style={styles.sectionTitleStyles}>Projects</h2>
-      {sortedProjects.map((project: any, index: number) => (
+      {profile.projects.map((project: any, index: number) => (
         <div key={index} style={styles.itemStyles}>
           <div style={styles.itemTitleStyles}>{project.name}</div>
           <div style={styles.itemSubtitleStyles}>

@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { UseFormReturn } from 'react-hook-form';
@@ -43,7 +44,6 @@ interface ProfileTabsProps {
   saveProject: (project: Omit<Project, 'id'>) => Promise<boolean>;
   updateProject: (id: string, project: Partial<Project>) => Promise<boolean>;
   deleteProject: (id: string) => Promise<boolean>;
-  reorderProjects: (projects: Project[]) => Promise<boolean>;
   deleteTechnicalSkill: (id: string) => Promise<boolean>;
   deleteSpecializedSkill: (id: string) => Promise<boolean>;
   saveTechnicalSkill: (skill: Skill) => Promise<boolean>;
@@ -85,7 +85,6 @@ export const ProfileTabs: React.FC<ProfileTabsProps> = ({
   saveProject,
   updateProject,
   deleteProject,
-  reorderProjects,
   deleteTechnicalSkill,
   deleteSpecializedSkill,
   saveTechnicalSkill,
@@ -204,7 +203,6 @@ export const ProfileTabs: React.FC<ProfileTabsProps> = ({
             onSave={saveProject}
             onUpdate={updateProject}
             onDelete={deleteProject}
-            onReorder={reorderProjects}
           />
         </TabsContent>
       </div>

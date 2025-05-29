@@ -17,7 +17,6 @@ type ProjectDB = {
   is_current?: boolean;
   technologies_used?: string[];
   url?: string;
-  display_order?: number;
   created_at: string;
   updated_at: string;
 };
@@ -36,7 +35,7 @@ const mapToProject = (data: ProjectDB): Project => ({
 });
 
 // Map from application model to database format
-const mapToProjectDB = (project: Omit<Project, 'id'>, profileId: string, displayOrder: number = 0) => ({
+const mapToProjectDB = (project: Omit<Project, 'id'>, profileId: string) => ({
   profile_id: profileId,
   name: project.name,
   role: project.role,
@@ -45,8 +44,7 @@ const mapToProjectDB = (project: Omit<Project, 'id'>, profileId: string, display
   end_date: project.endDate ? project.endDate.toISOString().split('T')[0] : null,
   is_current: project.isCurrent || false,
   technologies_used: project.technologiesUsed,
-  url: project.url || null,
-  display_order: displayOrder
+  url: project.url || null
 });
 
 export function useProjects(profileId?: string) {
@@ -69,7 +67,7 @@ export function useProjects(profileId?: string) {
         .from('projects')
         .select('*')
         .eq('profile_id', targetProfileId)
-        .order('display_order', { ascending: true });
+        .order('start_date', { ascending: false });
       
       if (error) throw error;
       
@@ -97,11 +95,8 @@ export function useProjects(profileId?: string) {
     try {
       setIsSaving(true);
       
-      // Get the highest display order to add new project at the end
-      const maxOrder = projects.length > 0 ? Math.max(...projects.map((_, index) => index)) + 1 : 0;
-      
       // Convert to database format
-      const dbData = mapToProjectDB(project, targetProfileId, maxOrder);
+      const dbData = mapToProjectDB(project, targetProfileId);
       
       const { data, error } = await supabase
         .from('projects')
@@ -227,52 +222,6 @@ export function useProjects(profileId?: string) {
     }
   };
 
-  // Reorder projects
-  const reorderProjects = async (reorderedProjects: Project[]) => {
-    if (!targetProfileId) return false;
-    
-    try {
-      setIsSaving(true);
-      
-      // Update display order for all projects
-      const updates = reorderedProjects.map((project, index) => ({
-        id: project.id,
-        display_order: index
-      }));
-      
-      // Update each project's display order in the database
-      for (const update of updates) {
-        const { error } = await supabase
-          .from('projects')
-          .update({ display_order: update.display_order })
-          .eq('id', update.id)
-          .eq('profile_id', targetProfileId);
-        
-        if (error) throw error;
-      }
-      
-      // Update local state
-      setProjects(reorderedProjects);
-      
-      toast({
-        title: 'Success',
-        description: 'Project order has been updated',
-      });
-      
-      return true;
-    } catch (error) {
-      console.error('Error reordering projects:', error);
-      toast({
-        title: 'Error',
-        description: 'Failed to update project order',
-        variant: 'destructive'
-      });
-      return false;
-    } finally {
-      setIsSaving(false);
-    }
-  };
-
   // Load projects data
   useEffect(() => {
     if (targetProfileId) {
@@ -286,7 +235,6 @@ export function useProjects(profileId?: string) {
     isSaving,
     saveProject,
     updateProject,
-    deleteProject,
-    reorderProjects
+    deleteProject
   };
 }

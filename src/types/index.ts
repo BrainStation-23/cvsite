@@ -1,4 +1,3 @@
-
 export type UserRole = "admin" | "manager" | "employee";
 
 export interface User {
@@ -78,7 +77,6 @@ export interface Project {
   description: string;
   technologiesUsed: string[];
   url?: string;
-  displayOrder?: number;
 }
 
 export interface PlatformSettings {
