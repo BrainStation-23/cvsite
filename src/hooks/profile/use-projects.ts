@@ -17,6 +17,7 @@ type ProjectDB = {
   is_current?: boolean;
   technologies_used?: string[];
   url?: string;
+  display_order?: number;
   created_at: string;
   updated_at: string;
 };
@@ -31,7 +32,8 @@ const mapToProject = (data: ProjectDB): Project => ({
   endDate: data.end_date ? new Date(data.end_date) : undefined,
   isCurrent: data.is_current || false,
   technologiesUsed: data.technologies_used || [],
-  url: data.url
+  url: data.url,
+  displayOrder: data.display_order || 0
 });
 
 // Map from application model to database format
@@ -44,7 +46,8 @@ const mapToProjectDB = (project: Omit<Project, 'id'>, profileId: string) => ({
   end_date: project.endDate ? project.endDate.toISOString().split('T')[0] : null,
   is_current: project.isCurrent || false,
   technologies_used: project.technologiesUsed,
-  url: project.url || null
+  url: project.url || null,
+  display_order: project.displayOrder || 0
 });
 
 export function useProjects(profileId?: string) {
@@ -67,6 +70,7 @@ export function useProjects(profileId?: string) {
         .from('projects')
         .select('*')
         .eq('profile_id', targetProfileId)
+        .order('display_order', { ascending: true })
         .order('start_date', { ascending: false });
       
       if (error) throw error;
@@ -95,8 +99,12 @@ export function useProjects(profileId?: string) {
     try {
       setIsSaving(true);
       
+      // Set display order to be the highest + 1
+      const maxOrder = Math.max(...projects.map(p => p.displayOrder || 0), 0);
+      const projectWithOrder = { ...project, displayOrder: maxOrder + 1 };
+      
       // Convert to database format
-      const dbData = mapToProjectDB(project, targetProfileId);
+      const dbData = mapToProjectDB(projectWithOrder, targetProfileId);
       
       const { data, error } = await supabase
         .from('projects')
@@ -154,6 +162,7 @@ export function useProjects(profileId?: string) {
       if (project.isCurrent !== undefined) dbData.is_current = project.isCurrent;
       if (project.technologiesUsed !== undefined) dbData.technologies_used = project.technologiesUsed;
       if (project.url !== undefined) dbData.url = project.url;
+      if (project.displayOrder !== undefined) dbData.display_order = project.displayOrder;
       
       dbData.updated_at = new Date().toISOString();
       
@@ -181,6 +190,48 @@ export function useProjects(profileId?: string) {
       toast({
         title: 'Error',
         description: 'Failed to update project',
+        variant: 'destructive'
+      });
+      return false;
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  // Reorder projects
+  const reorderProjects = async (reorderedProjects: Project[]) => {
+    if (!targetProfileId) return false;
+    
+    try {
+      setIsSaving(true);
+      
+      // Update display order for all projects
+      const updates = reorderedProjects.map((project, index) => ({
+        id: project.id,
+        display_order: index + 1
+      }));
+      
+      // Batch update in database
+      for (const update of updates) {
+        await supabase
+          .from('projects')
+          .update({ display_order: update.display_order })
+          .eq('id', update.id)
+          .eq('profile_id', targetProfileId);
+      }
+      
+      // Update local state
+      setProjects(reorderedProjects.map((project, index) => ({
+        ...project,
+        displayOrder: index + 1
+      })));
+      
+      return true;
+    } catch (error) {
+      console.error('Error reordering projects:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to reorder projects',
         variant: 'destructive'
       });
       return false;
@@ -235,6 +286,7 @@ export function useProjects(profileId?: string) {
     isSaving,
     saveProject,
     updateProject,
-    deleteProject
+    deleteProject,
+    reorderProjects
   };
 }
