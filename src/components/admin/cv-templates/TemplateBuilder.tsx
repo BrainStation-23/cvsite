@@ -1,12 +1,13 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Slider } from '@/components/ui/slider';
-import { Input } from '@/components/ui/input';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Button } from '@/components/ui/button';
 import { CVTemplate } from '@/types/cv-templates';
-import { Palette, Type, Layout, Ruler, Grid, Columns, SidebarOpen } from 'lucide-react';
+import { TemplateStylePresets, STYLE_PRESETS, StylePreset } from './TemplateStylePresets';
+import { LayoutPresets, LAYOUT_PRESETS, LayoutPreset } from './LayoutPresets';
+import CustomizationPanel from './CustomizationPanel';
+import { Sparkles, Settings } from 'lucide-react';
 
 interface TemplateBuilderProps {
   template: CVTemplate;
@@ -15,6 +16,25 @@ interface TemplateBuilderProps {
 
 const TemplateBuilder: React.FC<TemplateBuilderProps> = ({ template, onLayoutUpdate }) => {
   const [layoutConfig, setLayoutConfig] = useState(template.layout_config || {});
+  const [selectedStylePreset, setSelectedStylePreset] = useState<string>('');
+  const [selectedLayoutPreset, setSelectedLayoutPreset] = useState<string>('');
+  const [activeTab, setActiveTab] = useState('presets');
+
+  // Initialize presets based on current config
+  useEffect(() => {
+    const currentLayoutType = layoutConfig.layoutType || 'single-column';
+    setSelectedLayoutPreset(currentLayoutType);
+    
+    // Try to match current colors to a preset
+    const matchingPreset = STYLE_PRESETS.find(preset => 
+      preset.config.primaryColor === layoutConfig.primaryColor &&
+      preset.config.secondaryColor === layoutConfig.secondaryColor &&
+      preset.config.accentColor === layoutConfig.accentColor
+    );
+    if (matchingPreset) {
+      setSelectedStylePreset(matchingPreset.id);
+    }
+  }, [layoutConfig]);
 
   const updateLayoutConfig = (key: string, value: any) => {
     const newConfig = {
@@ -23,285 +43,127 @@ const TemplateBuilder: React.FC<TemplateBuilderProps> = ({ template, onLayoutUpd
     };
     setLayoutConfig(newConfig);
     
-    // Notify parent component of changes
     if (onLayoutUpdate) {
       onLayoutUpdate(newConfig);
     }
   };
 
-  const getLayoutIcon = (layoutType: string) => {
-    switch (layoutType) {
-      case 'two-column':
-        return <Columns className="h-4 w-4" />;
-      case 'sidebar':
-        return <SidebarOpen className="h-4 w-4" />;
-      default:
-        return <Grid className="h-4 w-4" />;
+  const handleStylePresetSelect = (preset: StylePreset) => {
+    setSelectedStylePreset(preset.id);
+    
+    // Apply all preset values
+    const updatedConfig = {
+      ...layoutConfig,
+      ...preset.config
+    };
+    setLayoutConfig(updatedConfig);
+    
+    if (onLayoutUpdate) {
+      onLayoutUpdate(updatedConfig);
+    }
+  };
+
+  const handleLayoutPresetSelect = (preset: LayoutPreset) => {
+    setSelectedLayoutPreset(preset.id);
+    
+    // Apply layout preset values
+    const updatedConfig = {
+      ...layoutConfig,
+      ...preset.config
+    };
+    setLayoutConfig(updatedConfig);
+    
+    if (onLayoutUpdate) {
+      onLayoutUpdate(updatedConfig);
+    }
+  };
+
+  const resetToDefaults = () => {
+    const defaultConfig = {
+      layoutType: 'single-column',
+      primaryColor: '#1f2937',
+      secondaryColor: '#6b7280',
+      accentColor: '#3b82f6',
+      primaryFont: 'Arial',
+      baseFontSize: 12,
+      headingSize: 16,
+      subheadingSize: 14,
+      lineHeight: 1.4,
+      margin: 20,
+      columnGap: 10,
+      sectionSpacing: 16,
+      itemSpacing: 8
+    };
+    
+    setLayoutConfig(defaultConfig);
+    setSelectedStylePreset('professional');
+    setSelectedLayoutPreset('single-column');
+    
+    if (onLayoutUpdate) {
+      onLayoutUpdate(defaultConfig);
     }
   };
 
   return (
-    <div className="space-y-6">
-      {/* Page Layout */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Layout className="h-5 w-5" />
-            Page Layout
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div>
-            <Label className="flex items-center gap-2 mb-2">
-              {getLayoutIcon(layoutConfig.layoutType || 'single-column')}
-              Layout Type
-            </Label>
-            <Select 
-              value={layoutConfig.layoutType || 'single-column'} 
-              onValueChange={(value) => updateLayoutConfig('layoutType', value)}
-            >
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="single-column">
-                  <div className="flex items-center gap-2">
-                    <Grid className="h-4 w-4" />
-                    Single Column
-                  </div>
-                </SelectItem>
-                <SelectItem value="two-column">
-                  <div className="flex items-center gap-2">
-                    <Columns className="h-4 w-4" />
-                    Two Column
-                  </div>
-                </SelectItem>
-                <SelectItem value="sidebar">
-                  <div className="flex items-center gap-2">
-                    <SidebarOpen className="h-4 w-4" />
-                    Sidebar Layout
-                  </div>
-                </SelectItem>
-              </SelectContent>
-            </Select>
-            <p className="text-xs text-gray-500 mt-1">
-              {layoutConfig.layoutType === 'two-column' && 'Content split evenly across two columns'}
-              {layoutConfig.layoutType === 'sidebar' && 'Skills in sidebar, other content in main area'}
-              {(!layoutConfig.layoutType || layoutConfig.layoutType === 'single-column') && 'Traditional single column layout'}
-            </p>
-          </div>
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <div>
+          <h3 className="text-sm font-medium">Style Your Template</h3>
+          <p className="text-xs text-gray-500">Make it look exactly how you want</p>
+        </div>
+        <Button 
+          variant="outline" 
+          size="sm" 
+          onClick={resetToDefaults}
+          className="text-xs"
+        >
+          Reset to Default
+        </Button>
+      </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <Label>Margin (mm)</Label>
-              <Slider
-                value={[layoutConfig.margin || 20]}
-                onValueChange={([value]) => updateLayoutConfig('margin', value)}
-                max={50}
-                min={10}
-                step={5}
-                className="mt-2"
-              />
-              <span className="text-sm text-gray-500">{layoutConfig.margin || 20}mm</span>
-            </div>
-            <div>
-              <Label>Column Gap (mm)</Label>
-              <Slider
-                value={[layoutConfig.columnGap || 10]}
-                onValueChange={([value]) => updateLayoutConfig('columnGap', value)}
-                max={30}
-                min={5}
-                step={2}
-                className="mt-2"
-                disabled={layoutConfig.layoutType === 'single-column'}
-              />
-              <span className="text-sm text-gray-500">
-                {layoutConfig.columnGap || 10}mm
-                {layoutConfig.layoutType === 'single-column' && ' (disabled for single column)'}
-              </span>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+        <TabsList className="grid w-full grid-cols-2 text-xs">
+          <TabsTrigger value="presets" className="flex items-center gap-1">
+            <Sparkles className="h-3 w-3" />
+            Quick Styles
+          </TabsTrigger>
+          <TabsTrigger value="custom" className="flex items-center gap-1">
+            <Settings className="h-3 w-3" />
+            Customize
+          </TabsTrigger>
+        </TabsList>
 
-      {/* Typography */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Type className="h-5 w-5" />
-            Typography
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <Label>Primary Font</Label>
-              <Select 
-                value={layoutConfig.primaryFont || 'Arial'} 
-                onValueChange={(value) => updateLayoutConfig('primaryFont', value)}
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="Arial">Arial</SelectItem>
-                  <SelectItem value="Helvetica">Helvetica</SelectItem>
-                  <SelectItem value="Times New Roman">Times New Roman</SelectItem>
-                  <SelectItem value="Calibri">Calibri</SelectItem>
-                  <SelectItem value="Georgia">Georgia</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div>
-              <Label>Base Font Size (pt)</Label>
-              <Slider
-                value={[layoutConfig.baseFontSize || 12]}
-                onValueChange={([value]) => updateLayoutConfig('baseFontSize', value)}
-                max={16}
-                min={8}
-                step={1}
-                className="mt-2"
-              />
-              <span className="text-sm text-gray-500">{layoutConfig.baseFontSize || 12}pt</span>
-            </div>
-          </div>
+        <TabsContent value="presets" className="space-y-4 mt-4">
+          <LayoutPresets
+            selectedLayout={selectedLayoutPreset}
+            onLayoutSelect={handleLayoutPresetSelect}
+          />
           
-          <div className="grid grid-cols-3 gap-4">
-            <div>
-              <Label>Heading Size (pt)</Label>
-              <Slider
-                value={[layoutConfig.headingSize || 16]}
-                onValueChange={([value]) => updateLayoutConfig('headingSize', value)}
-                max={24}
-                min={12}
-                step={1}
-                className="mt-2"
-              />
-              <span className="text-sm text-gray-500">{layoutConfig.headingSize || 16}pt</span>
-            </div>
-            <div>
-              <Label>Subheading Size (pt)</Label>
-              <Slider
-                value={[layoutConfig.subheadingSize || 14]}
-                onValueChange={([value]) => updateLayoutConfig('subheadingSize', value)}
-                max={20}
-                min={10}
-                step={1}
-                className="mt-2"
-              />
-              <span className="text-sm text-gray-500">{layoutConfig.subheadingSize || 14}pt</span>
-            </div>
-            <div>
-              <Label>Line Height</Label>
-              <Slider
-                value={[layoutConfig.lineHeight || 1.4]}
-                onValueChange={([value]) => updateLayoutConfig('lineHeight', value)}
-                max={2.0}
-                min={1.0}
-                step={0.1}
-                className="mt-2"
-              />
-              <span className="text-sm text-gray-500">{layoutConfig.lineHeight || 1.4}</span>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+          <TemplateStylePresets
+            selectedPreset={selectedStylePreset}
+            onPresetSelect={handleStylePresetSelect}
+          />
+        </TabsContent>
 
-      {/* Colors */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Palette className="h-5 w-5" />
-            Color Scheme
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid grid-cols-3 gap-4">
-            <div>
-              <Label>Primary Color</Label>
-              <div className="flex gap-2 mt-2">
-                <Input
-                  type="color"
-                  value={layoutConfig.primaryColor || '#1f2937'}
-                  onChange={(e) => updateLayoutConfig('primaryColor', e.target.value)}
-                  className="w-12 h-8 p-1"
-                />
-                <Input
-                  value={layoutConfig.primaryColor || '#1f2937'}
-                  onChange={(e) => updateLayoutConfig('primaryColor', e.target.value)}
-                  placeholder="#1f2937"
-                />
-              </div>
-            </div>
-            <div>
-              <Label>Secondary Color</Label>
-              <div className="flex gap-2 mt-2">
-                <Input
-                  type="color"
-                  value={layoutConfig.secondaryColor || '#6b7280'}
-                  onChange={(e) => updateLayoutConfig('secondaryColor', e.target.value)}
-                  className="w-12 h-8 p-1"
-                />
-                <Input
-                  value={layoutConfig.secondaryColor || '#6b7280'}
-                  onChange={(e) => updateLayoutConfig('secondaryColor', e.target.value)}
-                  placeholder="#6b7280"
-                />
-              </div>
-            </div>
-            <div>
-              <Label>Accent Color</Label>
-              <div className="flex gap-2 mt-2">
-                <Input
-                  type="color"
-                  value={layoutConfig.accentColor || '#3b82f6'}
-                  onChange={(e) => updateLayoutConfig('accentColor', e.target.value)}
-                  className="w-12 h-8 p-1"
-                />
-                <Input
-                  value={layoutConfig.accentColor || '#3b82f6'}
-                  onChange={(e) => updateLayoutConfig('accentColor', e.target.value)}
-                  placeholder="#3b82f6"
-                />
-              </div>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+        <TabsContent value="custom" className="mt-4">
+          <CustomizationPanel
+            layoutConfig={layoutConfig}
+            onConfigUpdate={updateLayoutConfig}
+          />
+        </TabsContent>
+      </Tabs>
 
-      {/* Spacing */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Ruler className="h-5 w-5" />
-            Spacing
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
+      {/* Live Preview Info */}
+      <Card className="bg-blue-50 border-blue-200">
+        <CardContent className="p-3">
+          <div className="flex items-start gap-2">
+            <div className="w-2 h-2 bg-blue-500 rounded-full mt-1.5 flex-shrink-0"></div>
             <div>
-              <Label>Section Spacing (pt)</Label>
-              <Slider
-                value={[layoutConfig.sectionSpacing || 16]}
-                onValueChange={([value]) => updateLayoutConfig('sectionSpacing', value)}
-                max={40}
-                min={8}
-                step={2}
-                className="mt-2"
-              />
-              <span className="text-sm text-gray-500">{layoutConfig.sectionSpacing || 16}pt</span>
-            </div>
-            <div>
-              <Label>Item Spacing (pt)</Label>
-              <Slider
-                value={[layoutConfig.itemSpacing || 8]}
-                onValueChange={([value]) => updateLayoutConfig('itemSpacing', value)}
-                max={20}
-                min={4}
-                step={1}
-                className="mt-2"
-              />
-              <span className="text-sm text-gray-500">{layoutConfig.itemSpacing || 8}pt</span>
+              <p className="text-xs font-medium text-blue-900">Live Preview</p>
+              <p className="text-xs text-blue-700">
+                Changes are applied instantly to the preview on the left. 
+                Don't forget to save your template when you're happy with the design!
+              </p>
             </div>
           </div>
         </CardContent>
