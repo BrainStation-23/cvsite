@@ -81,6 +81,7 @@ export function useProfile() {
     deleteAchievement: achievementsHook.deleteAchievement,
     saveProject: projectsHook.saveProject,
     updateProject: projectsHook.updateProject,
-    deleteProject: projectsHook.deleteProject
+    deleteProject: projectsHook.deleteProject,
+    reorderProjects: projectsHook.reorderProjects
   };
 }

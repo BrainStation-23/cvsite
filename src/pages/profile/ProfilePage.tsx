@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import DashboardLayout from '../../components/Layout/DashboardLayout';
 import { Button } from '@/components/ui/button';
@@ -46,7 +47,8 @@ const ProfilePage: React.FC = () => {
     deleteAchievement,
     saveProject,
     updateProject,
-    deleteProject
+    deleteProject,
+    reorderProjects
   } = useProfile();
 
   // Updated form to match the GeneralInfoFormData interface
@@ -202,6 +204,7 @@ const ProfilePage: React.FC = () => {
               saveProject={saveProject}
               updateProject={updateProject}
               deleteProject={deleteProject}
+              reorderProjects={reorderProjects}
               deleteTechnicalSkill={deleteTechnicalSkill}
               deleteSpecializedSkill={deleteSpecializedSkill}
               saveTechnicalSkill={saveTechnicalSkill}
