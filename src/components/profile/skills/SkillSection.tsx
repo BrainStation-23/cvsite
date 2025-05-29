@@ -1,32 +1,9 @@
 
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { PlusCircle, Plus } from 'lucide-react';
 import { Skill } from '@/types';
-import { SkillCard } from './SkillCard';
-import {
-  DndContext,
-  closestCenter,
-  KeyboardSensor,
-  PointerSensor,
-  useSensor,
-  useSensors,
-  DragEndEvent,
-  DragStartEvent,
-  DragOverlay,
-} from '@dnd-kit/core';
-import {
-  arrayMove,
-  SortableContext,
-  sortableKeyboardCoordinates,
-  verticalListSortingStrategy,
-} from '@dnd-kit/sortable';
-import {
-  restrictToVerticalAxis,
-  restrictToParentElement,
-} from '@dnd-kit/modifiers';
+import { SkillAddForm } from './SkillAddForm';
+import { SkillList } from './SkillList';
 
 interface SkillSectionProps {
   title: string;
@@ -54,181 +31,43 @@ export const SkillSection: React.FC<SkillSectionProps> = ({
   onReorderSkills
 }) => {
   const [showAddForm, setShowAddForm] = useState(false);
-  const [activeId, setActiveId] = useState<string | null>(null);
-  const [localSkills, setLocalSkills] = useState<Skill[]>(skills);
 
-  // Update local skills when props change
-  React.useEffect(() => {
-    setLocalSkills(skills);
-  }, [skills]);
-
-  const sensors = useSensors(
-    useSensor(PointerSensor, {
-      activationConstraint: {
-        distance: 8,
-      },
-    }),
-    useSensor(KeyboardSensor, {
-      coordinateGetter: sortableKeyboardCoordinates,
-    })
-  );
-
-  const handleDragStart = (event: DragStartEvent) => {
-    setActiveId(event.active.id as string);
-  };
-
-  const handleDragEnd = (event: DragEndEvent) => {
-    const { active, over } = event;
-    setActiveId(null);
-
-    if (over && active.id !== over.id && onReorderSkills) {
-      const oldIndex = localSkills.findIndex((skill) => skill.id === active.id);
-      const newIndex = localSkills.findIndex((skill) => skill.id === over.id);
-
-      // Optimistic update - update UI immediately
-      const reorderedSkills = arrayMove(localSkills, oldIndex, newIndex);
-      setLocalSkills(reorderedSkills);
-
-      // Then update the database
-      onReorderSkills(reorderedSkills);
-    }
+  const handleCancel = () => {
+    setShowAddForm(false);
+    setNewSkill({ name: '', proficiency: 1, priority: 0 });
   };
 
   const handleAddSkill = () => {
     onAddSkill();
     setShowAddForm(false);
-    setNewSkill({ name: '', proficiency: 1, priority: 0 });
   };
-
-  const activeSkill = activeId ? localSkills.find(skill => skill.id === activeId) : null;
 
   return (
     <Card>
       <CardHeader className="pb-4">
         <div className="flex items-center justify-between">
           <CardTitle className="text-lg">{title}</CardTitle>
-          {isEditing && !showAddForm && (
-            <Button 
-              variant="outline" 
-              size="sm" 
-              onClick={() => setShowAddForm(true)}
-              className="h-9 text-cvsite-teal border-cvsite-teal hover:bg-cvsite-teal hover:text-white"
-            >
-              <Plus className="mr-2 h-4 w-4" />
-              Add Skill
-            </Button>
-          )}
+          <SkillAddForm
+            showAddForm={showAddForm}
+            newSkill={newSkill}
+            setNewSkill={setNewSkill}
+            onAddSkill={handleAddSkill}
+            onCancel={handleCancel}
+            onShowForm={() => setShowAddForm(true)}
+            isEditing={isEditing}
+          />
         </div>
-        
-        {showAddForm && isEditing && (
-          <div className="mt-4 p-4 border-2 border-dashed border-cvsite-teal/30 bg-cvsite-teal/5 rounded-lg">
-            <div className="space-y-3">
-              <Input
-                placeholder="Enter skill name"
-                value={newSkill.name}
-                onChange={(e) => setNewSkill({ ...newSkill, name: e.target.value })}
-                className="border-cvsite-teal/30 focus:border-cvsite-teal"
-              />
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-2">
-                  <span className="text-sm text-gray-600">Proficiency:</span>
-                  <div className="flex space-x-1">
-                    {Array.from({ length: 10 }).map((_, i) => (
-                      <button
-                        key={i}
-                        type="button"
-                        onClick={() => setNewSkill({ ...newSkill, proficiency: i + 1 })}
-                        className={`w-5 h-5 rounded transition-colors ${
-                          i < newSkill.proficiency 
-                            ? 'bg-cvsite-teal hover:bg-cvsite-teal/80' 
-                            : 'bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600'
-                        }`}
-                      />
-                    ))}
-                  </div>
-                  <span className="text-sm text-gray-500">{newSkill.proficiency}/10</span>
-                </div>
-                <div className="flex space-x-2">
-                  <Button
-                    size="sm"
-                    onClick={handleAddSkill}
-                    disabled={!newSkill.name.trim()}
-                    className="bg-cvsite-teal hover:bg-cvsite-teal/90"
-                  >
-                    Add
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => setShowAddForm(false)}
-                  >
-                    Cancel
-                  </Button>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
       </CardHeader>
       <CardContent className="space-y-3">
-        {localSkills.length > 0 ? (
-          <div className="space-y-2">
-            {isDraggable && isEditing ? (
-              <DndContext
-                sensors={sensors}
-                collisionDetection={closestCenter}
-                onDragStart={handleDragStart}
-                onDragEnd={handleDragEnd}
-                modifiers={[restrictToVerticalAxis, restrictToParentElement]}
-              >
-                <SortableContext 
-                  items={localSkills.map(skill => skill.id)} 
-                  strategy={verticalListSortingStrategy}
-                >
-                  {localSkills.map((skill) => (
-                    <SkillCard
-                      key={skill.id}
-                      skill={skill}
-                      isEditing={isEditing}
-                      isDraggable={isDraggable}
-                      onUpdate={onUpdateSkill}
-                      onDelete={onDeleteSkill}
-                    />
-                  ))}
-                </SortableContext>
-                <DragOverlay>
-                  {activeSkill ? (
-                    <SkillCard
-                      skill={activeSkill}
-                      isEditing={isEditing}
-                      isDraggable={false}
-                      onUpdate={onUpdateSkill}
-                      onDelete={onDeleteSkill}
-                    />
-                  ) : null}
-                </DragOverlay>
-              </DndContext>
-            ) : (
-              localSkills.map((skill) => (
-                <SkillCard
-                  key={skill.id}
-                  skill={skill}
-                  isEditing={isEditing}
-                  isDraggable={false}
-                  onUpdate={onUpdateSkill}
-                  onDelete={onDeleteSkill}
-                />
-              ))
-            )}
-          </div>
-        ) : (
-          <div className="text-center py-8 text-gray-500 dark:text-gray-400">
-            <p>No {title.toLowerCase()} added yet.</p>
-            {isEditing && (
-              <p className="text-sm mt-1">Click "Add Skill" to get started.</p>
-            )}
-          </div>
-        )}
+        <SkillList
+          skills={skills}
+          isEditing={isEditing}
+          isDraggable={isDraggable}
+          onUpdateSkill={onUpdateSkill}
+          onDeleteSkill={onDeleteSkill}
+          onReorderSkills={onReorderSkills}
+          title={title}
+        />
       </CardContent>
     </Card>
   );
