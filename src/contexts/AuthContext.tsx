@@ -31,19 +31,41 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       if (roleError) {
         console.error('Error fetching user role:', roleError);
+        
+        // If user doesn't have a role, this might be a new OAuth user
+        // The callback should have handled this, but let's be safe
+        if (roleError.code === 'PGRST116') {
+          console.log('No user role found - this might be a new OAuth user');
+          setUser(null);
+          return;
+        }
+        
         setUser(null);
         return;
       }
 
       const userRole = roleData.role as UserRole;
 
+      // Get profile data for display name and employee ID
+      const { data: profileData } = await supabase
+        .from('profiles')
+        .select('first_name, last_name, employee_id')
+        .eq('id', supabaseUser.id)
+        .single();
+
       setUser({
         id: supabaseUser.id,
         email: supabaseUser.email || '',
-        firstName: supabaseUser.user_metadata.first_name || supabaseUser.user_metadata.name?.split(' ')[0] || '',
-        lastName: supabaseUser.user_metadata.last_name || supabaseUser.user_metadata.name?.split(' ').slice(1).join(' ') || '',
+        firstName: profileData?.first_name || 
+                  supabaseUser.user_metadata.first_name || 
+                  supabaseUser.user_metadata.name?.split(' ')[0] || '',
+        lastName: profileData?.last_name || 
+                 supabaseUser.user_metadata.last_name || 
+                 supabaseUser.user_metadata.name?.split(' ').slice(1).join(' ') || '',
         role: userRole,
-        profileImageUrl: supabaseUser.user_metadata.avatar_url || supabaseUser.user_metadata.picture || '/placeholder.svg',
+        profileImageUrl: supabaseUser.user_metadata.avatar_url || 
+                        supabaseUser.user_metadata.picture || 
+                        '/placeholder.svg',
       });
     } catch (error) {
       console.error('Error setting up user profile:', error);
