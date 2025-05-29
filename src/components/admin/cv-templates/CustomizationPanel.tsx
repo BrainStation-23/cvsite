@@ -17,7 +17,7 @@ const CustomizationPanel: React.FC<CustomizationPanelProps> = ({
   onConfigUpdate
 }) => {
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       <div>
         <h4 className="text-sm font-medium mb-2">Fine-tune Your Style</h4>
         <p className="text-xs text-gray-500 mb-4">
@@ -27,61 +27,64 @@ const CustomizationPanel: React.FC<CustomizationPanelProps> = ({
 
       {/* Colors */}
       <Card>
-        <CardHeader className="pb-3">
+        <CardHeader className="pb-4">
           <CardTitle className="text-sm flex items-center gap-2">
             <Palette className="h-4 w-4" />
             Colors
           </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-3">
-          <div className="grid grid-cols-3 gap-3">
-            <div>
-              <Label className="text-xs">Primary</Label>
-              <div className="flex gap-1 mt-1">
-                <Input
-                  type="color"
-                  value={layoutConfig.primaryColor || '#1f2937'}
-                  onChange={(e) => onConfigUpdate('primaryColor', e.target.value)}
-                  className="w-8 h-8 p-1 rounded border"
-                />
-                <Input
-                  value={layoutConfig.primaryColor || '#1f2937'}
-                  onChange={(e) => onConfigUpdate('primaryColor', e.target.value)}
-                  className="text-xs h-8"
-                />
-              </div>
+        <CardContent className="space-y-4">
+          <div>
+            <Label className="text-xs font-medium text-gray-700 mb-2 block">Primary Color</Label>
+            <div className="flex gap-2">
+              <Input
+                type="color"
+                value={layoutConfig.primaryColor || '#1f2937'}
+                onChange={(e) => onConfigUpdate('primaryColor', e.target.value)}
+                className="w-12 h-10 p-1 rounded border cursor-pointer"
+              />
+              <Input
+                value={layoutConfig.primaryColor || '#1f2937'}
+                onChange={(e) => onConfigUpdate('primaryColor', e.target.value)}
+                className="text-xs h-10 flex-1"
+                placeholder="#1f2937"
+              />
             </div>
-            <div>
-              <Label className="text-xs">Secondary</Label>
-              <div className="flex gap-1 mt-1">
-                <Input
-                  type="color"
-                  value={layoutConfig.secondaryColor || '#6b7280'}
-                  onChange={(e) => onConfigUpdate('secondaryColor', e.target.value)}
-                  className="w-8 h-8 p-1 rounded border"
-                />
-                <Input
-                  value={layoutConfig.secondaryColor || '#6b7280'}
-                  onChange={(e) => onConfigUpdate('secondaryColor', e.target.value)}
-                  className="text-xs h-8"
-                />
-              </div>
+          </div>
+
+          <div>
+            <Label className="text-xs font-medium text-gray-700 mb-2 block">Secondary Color</Label>
+            <div className="flex gap-2">
+              <Input
+                type="color"
+                value={layoutConfig.secondaryColor || '#6b7280'}
+                onChange={(e) => onConfigUpdate('secondaryColor', e.target.value)}
+                className="w-12 h-10 p-1 rounded border cursor-pointer"
+              />
+              <Input
+                value={layoutConfig.secondaryColor || '#6b7280'}
+                onChange={(e) => onConfigUpdate('secondaryColor', e.target.value)}
+                className="text-xs h-10 flex-1"
+                placeholder="#6b7280"
+              />
             </div>
-            <div>
-              <Label className="text-xs">Accent</Label>
-              <div className="flex gap-1 mt-1">
-                <Input
-                  type="color"
-                  value={layoutConfig.accentColor || '#3b82f6'}
-                  onChange={(e) => onConfigUpdate('accentColor', e.target.value)}
-                  className="w-8 h-8 p-1 rounded border"
-                />
-                <Input
-                  value={layoutConfig.accentColor || '#3b82f6'}
-                  onChange={(e) => onConfigUpdate('accentColor', e.target.value)}
-                  className="text-xs h-8"
-                />
-              </div>
+          </div>
+
+          <div>
+            <Label className="text-xs font-medium text-gray-700 mb-2 block">Accent Color</Label>
+            <div className="flex gap-2">
+              <Input
+                type="color"
+                value={layoutConfig.accentColor || '#3b82f6'}
+                onChange={(e) => onConfigUpdate('accentColor', e.target.value)}
+                className="w-12 h-10 p-1 rounded border cursor-pointer"
+              />
+              <Input
+                value={layoutConfig.accentColor || '#3b82f6'}
+                onChange={(e) => onConfigUpdate('accentColor', e.target.value)}
+                className="text-xs h-10 flex-1"
+                placeholder="#3b82f6"
+              />
             </div>
           </div>
         </CardContent>
@@ -89,20 +92,20 @@ const CustomizationPanel: React.FC<CustomizationPanelProps> = ({
 
       {/* Typography */}
       <Card>
-        <CardHeader className="pb-3">
+        <CardHeader className="pb-4">
           <CardTitle className="text-sm flex items-center gap-2">
             <Type className="h-4 w-4" />
             Typography
           </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-3">
+        <CardContent className="space-y-4">
           <div>
-            <Label className="text-xs">Font Family</Label>
+            <Label className="text-xs font-medium text-gray-700 mb-2 block">Font Family</Label>
             <Select 
               value={layoutConfig.primaryFont || 'Arial'} 
               onValueChange={(value) => onConfigUpdate('primaryFont', value)}
             >
-              <SelectTrigger className="h-8 text-xs mt-1">
+              <SelectTrigger className="h-10 text-sm">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -115,30 +118,38 @@ const CustomizationPanel: React.FC<CustomizationPanelProps> = ({
             </Select>
           </div>
           
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-2 gap-4">
             <div>
-              <Label className="text-xs">Base Size</Label>
+              <Label className="text-xs font-medium text-gray-700 mb-3 block">Base Font Size</Label>
               <Slider
                 value={[layoutConfig.baseFontSize || 12]}
                 onValueChange={([value]) => onConfigUpdate('baseFontSize', value)}
                 max={16}
                 min={8}
                 step={1}
-                className="mt-2"
+                className="mb-2"
               />
-              <span className="text-xs text-gray-500">{layoutConfig.baseFontSize || 12}pt</span>
+              <div className="text-center">
+                <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded">
+                  {layoutConfig.baseFontSize || 12}pt
+                </span>
+              </div>
             </div>
             <div>
-              <Label className="text-xs">Line Height</Label>
+              <Label className="text-xs font-medium text-gray-700 mb-3 block">Line Height</Label>
               <Slider
                 value={[layoutConfig.lineHeight || 1.4]}
                 onValueChange={([value]) => onConfigUpdate('lineHeight', value)}
                 max={2.0}
                 min={1.0}
                 step={0.1}
-                className="mt-2"
+                className="mb-2"
               />
-              <span className="text-xs text-gray-500">{layoutConfig.lineHeight || 1.4}</span>
+              <div className="text-center">
+                <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded">
+                  {layoutConfig.lineHeight || 1.4}
+                </span>
+              </div>
             </div>
           </div>
         </CardContent>
@@ -146,52 +157,64 @@ const CustomizationPanel: React.FC<CustomizationPanelProps> = ({
 
       {/* Spacing */}
       <Card>
-        <CardHeader className="pb-3">
+        <CardHeader className="pb-4">
           <CardTitle className="text-sm flex items-center gap-2">
             <Ruler className="h-4 w-4" />
-            Spacing
+            Spacing & Layout
           </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-3">
-          <div className="grid grid-cols-2 gap-3">
+        <CardContent className="space-y-4">
+          <div className="grid grid-cols-2 gap-4">
             <div>
-              <Label className="text-xs">Page Margin</Label>
+              <Label className="text-xs font-medium text-gray-700 mb-3 block">Page Margin</Label>
               <Slider
                 value={[layoutConfig.margin || 20]}
                 onValueChange={([value]) => onConfigUpdate('margin', value)}
                 max={40}
                 min={10}
                 step={2}
-                className="mt-2"
+                className="mb-2"
               />
-              <span className="text-xs text-gray-500">{layoutConfig.margin || 20}mm</span>
+              <div className="text-center">
+                <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded">
+                  {layoutConfig.margin || 20}mm
+                </span>
+              </div>
             </div>
             <div>
-              <Label className="text-xs">Section Gap</Label>
+              <Label className="text-xs font-medium text-gray-700 mb-3 block">Section Spacing</Label>
               <Slider
                 value={[layoutConfig.sectionSpacing || 16]}
                 onValueChange={([value]) => onConfigUpdate('sectionSpacing', value)}
                 max={30}
                 min={8}
                 step={2}
-                className="mt-2"
+                className="mb-2"
               />
-              <span className="text-xs text-gray-500">{layoutConfig.sectionSpacing || 16}pt</span>
+              <div className="text-center">
+                <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded">
+                  {layoutConfig.sectionSpacing || 16}pt
+                </span>
+              </div>
             </div>
           </div>
           
           {(layoutConfig.layoutType === 'two-column' || layoutConfig.layoutType === 'sidebar') && (
             <div>
-              <Label className="text-xs">Column Gap</Label>
+              <Label className="text-xs font-medium text-gray-700 mb-3 block">Column Gap</Label>
               <Slider
                 value={[layoutConfig.columnGap || 10]}
                 onValueChange={([value]) => onConfigUpdate('columnGap', value)}
                 max={20}
                 min={5}
                 step={1}
-                className="mt-2"
+                className="mb-2"
               />
-              <span className="text-xs text-gray-500">{layoutConfig.columnGap || 10}mm</span>
+              <div className="text-center">
+                <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded">
+                  {layoutConfig.columnGap || 10}mm
+                </span>
+              </div>
             </div>
           )}
         </CardContent>
