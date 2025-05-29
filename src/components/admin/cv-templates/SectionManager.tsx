@@ -22,7 +22,8 @@ import {
   Trophy,
   FolderOpen,
   Target,
-  GripVertical
+  GripVertical,
+  Plus
 } from 'lucide-react';
 import { CVSectionType } from '@/types/cv-templates';
 import { supabase } from '@/integrations/supabase/client';
@@ -240,6 +241,7 @@ const SectionManager: React.FC<SectionManagerProps> = ({ templateId, onSectionsC
   const [sections, setSections] = useState<SectionConfig[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set());
+  const [isAddSectionOpen, setIsAddSectionOpen] = useState(false);
   const { toast } = useToast();
 
   const sensors = useSensors(
@@ -345,6 +347,7 @@ const SectionManager: React.FC<SectionManagerProps> = ({ templateId, onSectionsC
       } as SectionConfig;
 
       setSections([...sections, typedSection]);
+      setIsAddSectionOpen(false); // Close the add section panel after adding
       onSectionsChange?.();
       
       toast({
@@ -512,34 +515,50 @@ const SectionManager: React.FC<SectionManagerProps> = ({ templateId, onSectionsC
 
   return (
     <div className="space-y-4">
-      {/* Add New Section - Grid Layout */}
+      {/* Collapsible Add New Section */}
       {availableSections.length > 0 && (
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm">Add Section</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 gap-2">
-              {availableSections.map(sectionType => {
-                const Icon = sectionType.icon;
-                return (
-                  <Button
-                    key={sectionType.value}
-                    variant="outline"
-                    onClick={() => addSection(sectionType.value)}
-                    className="h-auto p-3 text-left justify-start"
-                  >
-                    <Icon className="h-4 w-4 mr-3 text-blue-600" />
-                    <div>
-                      <div className="font-medium text-sm">{sectionType.label}</div>
-                      <div className="text-xs text-gray-500">{sectionType.description}</div>
-                    </div>
-                  </Button>
-                );
-              })}
-            </div>
-          </CardContent>
-        </Card>
+        <Collapsible open={isAddSectionOpen} onOpenChange={setIsAddSectionOpen}>
+          <Card>
+            <CollapsibleTrigger asChild>
+              <CardHeader className="pb-3 cursor-pointer hover:bg-gray-50">
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-sm flex items-center gap-2">
+                    <Plus className="h-4 w-4" />
+                    Add Section
+                  </CardTitle>
+                  {isAddSectionOpen ? (
+                    <ChevronDown className="h-4 w-4" />
+                  ) : (
+                    <ChevronRight className="h-4 w-4" />
+                  )}
+                </div>
+              </CardHeader>
+            </CollapsibleTrigger>
+            <CollapsibleContent>
+              <CardContent>
+                <div className="grid grid-cols-1 gap-2">
+                  {availableSections.map(sectionType => {
+                    const Icon = sectionType.icon;
+                    return (
+                      <Button
+                        key={sectionType.value}
+                        variant="outline"
+                        onClick={() => addSection(sectionType.value)}
+                        className="h-auto p-3 text-left justify-start"
+                      >
+                        <Icon className="h-4 w-4 mr-3 text-blue-600" />
+                        <div>
+                          <div className="font-medium text-sm">{sectionType.label}</div>
+                          <div className="text-xs text-gray-500">{sectionType.description}</div>
+                        </div>
+                      </Button>
+                    );
+                  })}
+                </div>
+              </CardContent>
+            </CollapsibleContent>
+          </Card>
+        </Collapsible>
       )}
 
       {/* Existing Sections with Drag and Drop */}
@@ -577,7 +596,7 @@ const SectionManager: React.FC<SectionManagerProps> = ({ templateId, onSectionsC
 
       {sections.length === 0 && availableSections.length > 0 && (
         <div className="text-center py-6 text-gray-500">
-          <p className="text-sm">No sections added yet. Use the buttons above to add sections to your template.</p>
+          <p className="text-sm">No sections added yet. Use the "Add Section" button above to add sections to your template.</p>
         </div>
       )}
     </div>
