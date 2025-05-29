@@ -64,7 +64,7 @@ function App() {
                 <Route 
                   path="/admin/dashboard" 
                   element={
-                    <ProtectedRoute requiredRole="admin">
+                    <ProtectedRoute allowedRoles={["admin"]}>
                       <AdminDashboard />
                     </ProtectedRoute>
                   } 
@@ -72,7 +72,7 @@ function App() {
                 <Route 
                   path="/manager/dashboard" 
                   element={
-                    <ProtectedRoute requiredRole={["admin", "manager"]}>
+                    <ProtectedRoute allowedRoles={["admin", "manager"]}>
                       <ManagerDashboard />
                     </ProtectedRoute>
                   } 
@@ -80,7 +80,7 @@ function App() {
                 <Route 
                   path="/employee/dashboard" 
                   element={
-                    <ProtectedRoute requiredRole={["admin", "manager", "employee"]}>
+                    <ProtectedRoute allowedRoles={["admin", "manager", "employee"]}>
                       <EmployeeDashboard />
                     </ProtectedRoute>
                   } 
@@ -90,7 +90,7 @@ function App() {
                 <Route 
                   path="/profile" 
                   element={
-                    <ProtectedRoute requiredRole={["admin", "manager", "employee"]}>
+                    <ProtectedRoute allowedRoles={["admin", "manager", "employee"]}>
                       <ProfilePage />
                     </ProtectedRoute>
                   } 
@@ -98,7 +98,7 @@ function App() {
                 <Route 
                   path="/employee/profile/:employeeId" 
                   element={
-                    <ProtectedRoute requiredRole={["admin", "manager"]}>
+                    <ProtectedRoute allowedRoles={["admin", "manager"]}>
                       <ViewProfilePage />
                     </ProtectedRoute>
                   } 
@@ -108,7 +108,7 @@ function App() {
                 <Route 
                   path="/admin/users" 
                   element={
-                    <ProtectedRoute requiredRole="admin">
+                    <ProtectedRoute allowedRoles={["admin"]}>
                       <UserManagement />
                     </ProtectedRoute>
                   } 
@@ -116,7 +116,7 @@ function App() {
                 <Route 
                   path="/admin/settings" 
                   element={
-                    <ProtectedRoute requiredRole="admin">
+                    <ProtectedRoute allowedRoles={["admin"]}>
                       <PlatformSettings />
                     </ProtectedRoute>
                   } 
@@ -124,7 +124,7 @@ function App() {
                 <Route 
                   path="/admin/cv-templates" 
                   element={
-                    <ProtectedRoute requiredRole="admin">
+                    <ProtectedRoute allowedRoles={["admin"]}>
                       <CVTemplates />
                     </ProtectedRoute>
                   } 
@@ -132,7 +132,7 @@ function App() {
                 <Route 
                   path="/admin/cv-templates/create" 
                   element={
-                    <ProtectedRoute requiredRole="admin">
+                    <ProtectedRoute allowedRoles={["admin"]}>
                       <CVTemplateCreate />
                     </ProtectedRoute>
                   } 
@@ -140,7 +140,7 @@ function App() {
                 <Route 
                   path="/admin/cv-templates/:templateId/edit" 
                   element={
-                    <ProtectedRoute requiredRole="admin">
+                    <ProtectedRoute allowedRoles={["admin"]}>
                       <CVTemplateEdit />
                     </ProtectedRoute>
                   } 
@@ -150,7 +150,7 @@ function App() {
                 <Route 
                   path="/employee/data" 
                   element={
-                    <ProtectedRoute requiredRole={["admin", "manager"]}>
+                    <ProtectedRoute allowedRoles={["admin", "manager"]}>
                       <EmployeeData />
                     </ProtectedRoute>
                   } 
@@ -160,7 +160,7 @@ function App() {
                 <Route 
                   path="/security" 
                   element={
-                    <ProtectedRoute requiredRole={["admin", "manager", "employee"]}>
+                    <ProtectedRoute allowedRoles={["admin", "manager", "employee"]}>
                       <SecurityPage />
                     </ProtectedRoute>
                   } 
