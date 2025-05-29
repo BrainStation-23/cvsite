@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Trash2, Edit, Check, X, GripVertical } from 'lucide-react';
+import { Trash2, Check, X, GripVertical } from 'lucide-react';
 import { Skill } from '@/types';
 import {
   useSortable,
@@ -25,8 +25,8 @@ export const SkillCard: React.FC<SkillCardProps> = ({
   onUpdate,
   onDelete,
 }) => {
-  const [isEditingSkill, setIsEditingSkill] = useState(false);
   const [editedSkill, setEditedSkill] = useState(skill);
+  const [hasChanges, setHasChanges] = useState(false);
 
   const {
     attributes,
@@ -37,7 +37,7 @@ export const SkillCard: React.FC<SkillCardProps> = ({
     isDragging,
   } = useSortable({ 
     id: skill.id,
-    disabled: !isDraggable || !isEditing || isEditingSkill
+    disabled: !isDraggable || !isEditing
   });
 
   const style = {
@@ -45,20 +45,31 @@ export const SkillCard: React.FC<SkillCardProps> = ({
     transition: isDragging ? 'none' : transition,
   };
 
-  const handleSaveEdit = () => {
+  const handleNameChange = (name: string) => {
+    setEditedSkill({ ...editedSkill, name });
+    setHasChanges(name !== skill.name || editedSkill.proficiency !== skill.proficiency);
+  };
+
+  const handleProficiencyChange = (proficiency: number) => {
+    setEditedSkill({ ...editedSkill, proficiency });
+    setHasChanges(editedSkill.name !== skill.name || proficiency !== skill.proficiency);
+  };
+
+  const handleSave = () => {
     onUpdate(editedSkill);
-    setIsEditingSkill(false);
+    setHasChanges(false);
   };
 
-  const handleCancelEdit = () => {
+  const handleCancel = () => {
     setEditedSkill(skill);
-    setIsEditingSkill(false);
+    setHasChanges(false);
   };
 
-  const handleProficiencyClick = (newProficiency: number) => {
-    if (isEditing && !isEditingSkill) {
+  const handleQuickProficiencyUpdate = (newProficiency: number) => {
+    if (isEditing) {
       const updatedSkill = { ...skill, proficiency: newProficiency };
       onUpdate(updatedSkill);
+      setEditedSkill(updatedSkill);
     }
   };
 
@@ -68,12 +79,12 @@ export const SkillCard: React.FC<SkillCardProps> = ({
       style={style}
       className={`transition-all duration-200 hover:shadow-md ${
         isDragging ? 'ring-2 ring-cvsite-teal shadow-lg opacity-90' : ''
-      } ${isDraggable && isEditing && !isEditingSkill ? 'cursor-grab active:cursor-grabbing' : ''}`}
+      } ${isDraggable && isEditing ? 'cursor-grab active:cursor-grabbing' : ''}`}
     >
       <CardContent className="p-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-3 flex-1">
-            {isDraggable && isEditing && !isEditingSkill && (
+            {isDraggable && isEditing && (
               <div
                 {...attributes}
                 {...listeners}
@@ -84,22 +95,22 @@ export const SkillCard: React.FC<SkillCardProps> = ({
             )}
             
             <div className="flex-1 min-w-0">
-              {isEditingSkill ? (
-                <div className="space-y-2">
+              {isEditing ? (
+                <div className="space-y-3">
                   <Input
                     value={editedSkill.name}
-                    onChange={(e) => setEditedSkill({ ...editedSkill, name: e.target.value })}
-                    className="text-sm"
+                    onChange={(e) => handleNameChange(e.target.value)}
+                    className="text-sm font-medium"
                     placeholder="Skill name"
                   />
                   <div className="flex items-center space-x-2">
-                    <span className="text-sm text-gray-600">Proficiency:</span>
+                    <span className="text-sm text-gray-600 whitespace-nowrap">Proficiency:</span>
                     <div className="flex space-x-1">
                       {Array.from({ length: 10 }).map((_, i) => (
                         <button
                           key={i}
                           type="button"
-                          onClick={() => setEditedSkill({ ...editedSkill, proficiency: i + 1 })}
+                          onClick={() => handleProficiencyChange(i + 1)}
                           className={`w-5 h-5 rounded transition-colors ${
                             i < editedSkill.proficiency 
                               ? 'bg-cvsite-teal hover:bg-cvsite-teal/80' 
@@ -108,7 +119,31 @@ export const SkillCard: React.FC<SkillCardProps> = ({
                         />
                       ))}
                     </div>
+                    <span className="text-sm text-gray-500 ml-2">{editedSkill.proficiency}/10</span>
                   </div>
+                  
+                  {hasChanges && (
+                    <div className="flex items-center space-x-2 pt-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={handleSave}
+                        className="h-7 px-3 text-xs bg-green-50 border-green-200 text-green-700 hover:bg-green-100"
+                      >
+                        <Check className="h-3 w-3 mr-1" />
+                        Save
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={handleCancel}
+                        className="h-7 px-3 text-xs"
+                      >
+                        <X className="h-3 w-3 mr-1" />
+                        Cancel
+                      </Button>
+                    </div>
+                  )}
                 </div>
               ) : (
                 <div>
@@ -117,21 +152,17 @@ export const SkillCard: React.FC<SkillCardProps> = ({
                     <span className="text-xs text-gray-600">Proficiency:</span>
                     <div className="flex space-x-1">
                       {Array.from({ length: 10 }).map((_, i) => (
-                        <button
+                        <div
                           key={i}
-                          type="button"
-                          onClick={() => handleProficiencyClick(i + 1)}
-                          disabled={!isEditing}
                           className={`w-4 h-4 rounded transition-colors ${
                             i < skill.proficiency 
                               ? 'bg-cvsite-teal' 
                               : 'bg-gray-200 dark:bg-gray-700'
-                          } ${
-                            isEditing ? 'hover:scale-110 cursor-pointer' : ''
                           }`}
                         />
                       ))}
                     </div>
+                    <span className="text-xs text-gray-500 ml-2">{skill.proficiency}/10</span>
                   </div>
                 </div>
               )}
@@ -140,45 +171,14 @@ export const SkillCard: React.FC<SkillCardProps> = ({
 
           {isEditing && (
             <div className="flex items-center space-x-1 flex-shrink-0">
-              {isEditingSkill ? (
-                <>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={handleSaveEdit}
-                    className="h-8 w-8 p-0 text-green-600 hover:text-green-700"
-                  >
-                    <Check className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={handleCancelEdit}
-                    className="h-8 w-8 p-0 text-gray-600 hover:text-gray-700"
-                  >
-                    <X className="h-4 w-4" />
-                  </Button>
-                </>
-              ) : (
-                <>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => setIsEditingSkill(true)}
-                    className="h-8 w-8 p-0 text-blue-600 hover:text-blue-700"
-                  >
-                    <Edit className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => onDelete(skill.id)}
-                    className="h-8 w-8 p-0 text-red-600 hover:text-red-700"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                </>
-              )}
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => onDelete(skill.id)}
+                className="h-8 w-8 p-0 text-red-600 hover:text-red-700 hover:bg-red-50"
+              >
+                <Trash2 className="h-4 w-4" />
+              </Button>
             </div>
           )}
         </div>

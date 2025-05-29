@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { PlusCircle } from 'lucide-react';
+import { PlusCircle, Plus } from 'lucide-react';
 import { Skill } from '@/types';
 import { SkillCard } from './SkillCard';
 import {
@@ -104,70 +104,73 @@ export const SkillSection: React.FC<SkillSectionProps> = ({
 
   return (
     <Card>
-      <CardHeader className="flex flex-row items-center justify-between pb-4">
-        <CardTitle className="text-lg">{title}</CardTitle>
-        {isEditing && (
-          <Button 
-            variant="outline" 
-            size="sm" 
-            onClick={() => setShowAddForm(!showAddForm)}
-            className="h-9"
-          >
-            <PlusCircle className="mr-2 h-4 w-4" />
-            Add Skill
-          </Button>
+      <CardHeader className="pb-4">
+        <div className="flex items-center justify-between">
+          <CardTitle className="text-lg">{title}</CardTitle>
+          {isEditing && !showAddForm && (
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={() => setShowAddForm(true)}
+              className="h-9 text-cvsite-teal border-cvsite-teal hover:bg-cvsite-teal hover:text-white"
+            >
+              <Plus className="mr-2 h-4 w-4" />
+              Add Skill
+            </Button>
+          )}
+        </div>
+        
+        {showAddForm && isEditing && (
+          <div className="mt-4 p-4 border-2 border-dashed border-cvsite-teal/30 bg-cvsite-teal/5 rounded-lg">
+            <div className="space-y-3">
+              <Input
+                placeholder="Enter skill name"
+                value={newSkill.name}
+                onChange={(e) => setNewSkill({ ...newSkill, name: e.target.value })}
+                className="border-cvsite-teal/30 focus:border-cvsite-teal"
+              />
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-2">
+                  <span className="text-sm text-gray-600">Proficiency:</span>
+                  <div className="flex space-x-1">
+                    {Array.from({ length: 10 }).map((_, i) => (
+                      <button
+                        key={i}
+                        type="button"
+                        onClick={() => setNewSkill({ ...newSkill, proficiency: i + 1 })}
+                        className={`w-5 h-5 rounded transition-colors ${
+                          i < newSkill.proficiency 
+                            ? 'bg-cvsite-teal hover:bg-cvsite-teal/80' 
+                            : 'bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600'
+                        }`}
+                      />
+                    ))}
+                  </div>
+                  <span className="text-sm text-gray-500">{newSkill.proficiency}/10</span>
+                </div>
+                <div className="flex space-x-2">
+                  <Button
+                    size="sm"
+                    onClick={handleAddSkill}
+                    disabled={!newSkill.name.trim()}
+                    className="bg-cvsite-teal hover:bg-cvsite-teal/90"
+                  >
+                    Add
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => setShowAddForm(false)}
+                  >
+                    Cancel
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </div>
         )}
       </CardHeader>
       <CardContent className="space-y-3">
-        {showAddForm && isEditing && (
-          <Card className="border-2 border-dashed border-cvsite-teal/30 bg-cvsite-teal/5">
-            <CardContent className="p-4">
-              <div className="space-y-3">
-                <Input
-                  placeholder="Enter skill name"
-                  value={newSkill.name}
-                  onChange={(e) => setNewSkill({ ...newSkill, name: e.target.value })}
-                />
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-2">
-                    <span className="text-sm text-gray-600">Proficiency:</span>
-                    <div className="flex space-x-1">
-                      {Array.from({ length: 10 }).map((_, i) => (
-                        <button
-                          key={i}
-                          type="button"
-                          onClick={() => setNewSkill({ ...newSkill, proficiency: i + 1 })}
-                          className={`w-5 h-5 rounded transition-colors ${
-                            i < newSkill.proficiency 
-                              ? 'bg-cvsite-teal hover:bg-cvsite-teal/80' 
-                              : 'bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600'
-                          }`}
-                        />
-                      ))}
-                    </div>
-                  </div>
-                  <div className="flex space-x-2">
-                    <Button
-                      size="sm"
-                      onClick={handleAddSkill}
-                      disabled={!newSkill.name.trim()}
-                    >
-                      Add
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => setShowAddForm(false)}
-                    >
-                      Cancel
-                    </Button>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        )}
-
         {localSkills.length > 0 ? (
           <div className="space-y-2">
             {isDraggable && isEditing ? (
