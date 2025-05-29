@@ -69,33 +69,35 @@ export const CVPageRenderer: React.FC<CVPageRendererProps> = ({
     profile_image: profile.profile_image || profile.profileImage,
   };
 
-  const defaultSections = [
-    <GeneralInfoSection key="general" profile={enhancedProfile} styles={styles} />,
-    <ExperienceSection key="experience" profile={enhancedProfile} styles={styles} />,
-    <EducationSection key="education" profile={enhancedProfile} styles={styles} />,
-    <SkillsSection key="skills" profile={enhancedProfile} styles={styles} />,
-    <ProjectsSection key="projects" profile={enhancedProfile} styles={styles} />,
-    <TrainingsSection key="trainings" profile={enhancedProfile} styles={styles} />,
-    <AchievementsSection key="achievements" profile={enhancedProfile} styles={styles} />
-  ].filter(Boolean);
+  // For single page or first page, show all content
+  if (totalPages === 1 || pageNumber === 1) {
+    return (
+      <div style={styles.baseStyles} key={pageNumber}>
+        <GeneralInfoSection profile={enhancedProfile} styles={styles} />
+        <ExperienceSection profile={enhancedProfile} styles={styles} />
+        <EducationSection profile={enhancedProfile} styles={styles} />
+        <SkillsSection profile={enhancedProfile} styles={styles} />
+        <ProjectsSection profile={enhancedProfile} styles={styles} />
+        <TrainingsSection profile={enhancedProfile} styles={styles} />
+        <AchievementsSection profile={enhancedProfile} styles={styles} />
+      </div>
+    );
+  }
 
-  // Distribute sections across pages evenly
-  const sectionsPerPage = Math.ceil(defaultSections.length / totalPages);
-  const startIndex = (pageNumber - 1) * sectionsPerPage;
-  const endIndex = startIndex + sectionsPerPage;
-  const pageSections = defaultSections.slice(startIndex, endIndex);
-
+  // For multiple pages, this is handled by the content distribution logic
+  // Return empty pages for now (this will be improved with proper content splitting)
   return (
     <div style={styles.baseStyles} key={pageNumber}>
-      {pageNumber === 1 && (
-        <GeneralInfoSection profile={enhancedProfile} styles={styles} />
-      )}
-      {pageNumber > 1 && pageSections.map((section, index) => (
-        <div key={index}>{section}</div>
-      ))}
-      {pageNumber === 1 && defaultSections.slice(1, sectionsPerPage).map((section, index) => (
-        <div key={index}>{section}</div>
-      ))}
+      <div style={{ 
+        display: 'flex', 
+        justifyContent: 'center', 
+        alignItems: 'center', 
+        height: '100%',
+        color: '#666',
+        fontSize: '14px'
+      }}>
+        Page {pageNumber} (Content distribution in progress...)
+      </div>
     </div>
   );
 };

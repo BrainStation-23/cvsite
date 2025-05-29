@@ -49,85 +49,100 @@ export const LayoutAwarePageRenderer: React.FC<LayoutAwarePageRendererProps> = (
   // Sort sections by display order
   const sortedSections = [...sections].sort((a, b) => a.display_order - b.display_order);
 
-  // Calculate sections for this page
+  // For single page or when measuring content, show all sections
+  if (totalPages === 1) {
+    return (
+      <div style={styles.baseStyles} key={pageNumber}>
+        {renderLayoutContent(sortedSections, fieldMappings, enhancedProfile, styles, layoutType)}
+      </div>
+    );
+  }
+
+  // For multiple pages, distribute sections evenly
   const sectionsPerPage = Math.ceil(sortedSections.length / totalPages);
   const startIndex = (pageNumber - 1) * sectionsPerPage;
   const endIndex = startIndex + sectionsPerPage;
   const pageSections = sortedSections.slice(startIndex, endIndex);
 
-  // Split sections based on layout type
-  const renderLayoutContent = () => {
-    switch (layoutType) {
-      case 'two-column':
-        const midPoint = Math.ceil(pageSections.length / 2);
-        const leftSections = pageSections.slice(0, midPoint);
-        const rightSections = pageSections.slice(midPoint);
-        
-        return (
-          <>
-            <div style={{ gridColumn: '1' }}>
-              <DynamicSectionRenderer
-                sections={leftSections}
-                fieldMappings={fieldMappings}
-                profile={enhancedProfile}
-                styles={styles}
-              />
-            </div>
-            <div style={{ gridColumn: '2' }}>
-              <DynamicSectionRenderer
-                sections={rightSections}
-                fieldMappings={fieldMappings}
-                profile={enhancedProfile}
-                styles={styles}
-              />
-            </div>
-          </>
-        );
-
-      case 'sidebar':
-        const sidebarSections = pageSections.filter(s => 
-          ['skills', 'technical_skills', 'specialized_skills'].includes(s.section_type)
-        );
-        const mainSections = pageSections.filter(s => 
-          !['skills', 'technical_skills', 'specialized_skills'].includes(s.section_type)
-        );
-        
-        return (
-          <>
-            <div style={{ gridColumn: '1' }}>
-              <DynamicSectionRenderer
-                sections={sidebarSections}
-                fieldMappings={fieldMappings}
-                profile={enhancedProfile}
-                styles={styles}
-              />
-            </div>
-            <div style={{ gridColumn: '2' }}>
-              <DynamicSectionRenderer
-                sections={mainSections}
-                fieldMappings={fieldMappings}
-                profile={enhancedProfile}
-                styles={styles}
-              />
-            </div>
-          </>
-        );
-
-      default: // single-column
-        return (
-          <DynamicSectionRenderer
-            sections={pageSections}
-            fieldMappings={fieldMappings}
-            profile={enhancedProfile}
-            styles={styles}
-          />
-        );
-    }
-  };
-
   return (
     <div style={styles.baseStyles} key={pageNumber}>
-      {renderLayoutContent()}
+      {renderLayoutContent(pageSections, fieldMappings, enhancedProfile, styles, layoutType)}
     </div>
   );
 };
+
+// Helper function to render content based on layout type
+function renderLayoutContent(
+  sections: any[], 
+  fieldMappings: FieldMapping[], 
+  profile: any, 
+  styles: any, 
+  layoutType: string
+) {
+  switch (layoutType) {
+    case 'two-column':
+      const midPoint = Math.ceil(sections.length / 2);
+      const leftSections = sections.slice(0, midPoint);
+      const rightSections = sections.slice(midPoint);
+      
+      return (
+        <>
+          <div style={{ gridColumn: '1' }}>
+            <DynamicSectionRenderer
+              sections={leftSections}
+              fieldMappings={fieldMappings}
+              profile={profile}
+              styles={styles}
+            />
+          </div>
+          <div style={{ gridColumn: '2' }}>
+            <DynamicSectionRenderer
+              sections={rightSections}
+              fieldMappings={fieldMappings}
+              profile={profile}
+              styles={styles}
+            />
+          </div>
+        </>
+      );
+
+    case 'sidebar':
+      const sidebarSections = sections.filter(s => 
+        ['skills', 'technical_skills', 'specialized_skills'].includes(s.section_type)
+      );
+      const mainSections = sections.filter(s => 
+        !['skills', 'technical_skills', 'specialized_skills'].includes(s.section_type)
+      );
+      
+      return (
+        <>
+          <div style={{ gridColumn: '1' }}>
+            <DynamicSectionRenderer
+              sections={sidebarSections}
+              fieldMappings={fieldMappings}
+              profile={profile}
+              styles={styles}
+            />
+          </div>
+          <div style={{ gridColumn: '2' }}>
+            <DynamicSectionRenderer
+              sections={mainSections}
+              fieldMappings={fieldMappings}
+              profile={profile}
+              styles={styles}
+            />
+          </div>
+        </>
+      );
+
+    default: // single-column
+      return (
+        <DynamicSectionRenderer
+          sections={sections}
+          fieldMappings={fieldMappings}
+          profile={profile}
+          styles={styles}
+        />
+      );
+  }
+}

@@ -38,30 +38,84 @@ export const PageDistributor: React.FC<PageDistributorProps> = ({
   onPagesCalculated,
   layoutConfig = {}
 }) => {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const [calculatedPages, setCalculatedPages] = useState(1);
+  const measureRef = useRef<HTMLDivElement>(null);
+  const [pageCount, setPageCount] = useState(1);
+  const [isCalculating, setIsCalculating] = useState(true);
 
   // Calculate required pages based on content
   useEffect(() => {
-    if (containerRef.current) {
-      const contentHeight = containerRef.current.scrollHeight;
-      const pageHeight = 297 * 3.779528; // Convert mm to px (approximately)
-      const requiredPages = Math.max(1, Math.ceil(contentHeight / pageHeight));
-      
-      setCalculatedPages(requiredPages);
-      onPagesCalculated?.(requiredPages);
+    if (!measureRef.current || !profile || sections.length === 0) {
+      setPageCount(1);
+      setIsCalculating(false);
+      onPagesCalculated?.(1);
+      return;
     }
-  }, [sections, profile, onPagesCalculated]);
+
+    const calculatePages = () => {
+      const container = measureRef.current;
+      if (!container) return;
+
+      // Get the height of the content without multiple pages
+      const contentHeight = container.firstElementChild?.scrollHeight || 0;
+      
+      // A4 page height in pixels (297mm converted to pixels at 96 DPI)
+      const pageHeight = 297 * 3.779528; // ~1122px
+      
+      // Account for margins/padding from styles
+      const effectivePageHeight = pageHeight - (40 * 3.779528); // Subtract margins
+      
+      // Calculate required pages with a maximum limit to prevent infinite loops
+      const calculatedPages = Math.max(1, Math.min(20, Math.ceil(contentHeight / effectivePageHeight)));
+      
+      console.log('Page calculation:', {
+        contentHeight,
+        pageHeight,
+        effectivePageHeight,
+        calculatedPages
+      });
+
+      if (calculatedPages !== pageCount) {
+        setPageCount(calculatedPages);
+        onPagesCalculated?.(calculatedPages);
+      }
+      
+      setIsCalculating(false);
+    };
+
+    // Use requestAnimationFrame to ensure the DOM is ready
+    const timeoutId = setTimeout(() => {
+      requestAnimationFrame(calculatePages);
+    }, 100);
+
+    return () => clearTimeout(timeoutId);
+  }, [sections, profile, pageCount, onPagesCalculated]);
 
   const layoutType = layoutConfig.layoutType || 'single-column';
 
+  // If still calculating, show a single page to measure content
+  if (isCalculating) {
+    return (
+      <div ref={measureRef} style={{ visibility: 'hidden', position: 'absolute', top: '-9999px' }}>
+        <CVPageRenderer
+          pageNumber={1}
+          totalPages={1}
+          profile={profile}
+          styles={styles}
+          sections={sections}
+          fieldMappings={fieldMappings}
+          layoutType={layoutType}
+        />
+      </div>
+    );
+  }
+
   return (
-    <div ref={containerRef}>
-      {Array.from({ length: calculatedPages }, (_, index) => (
+    <div>
+      {Array.from({ length: pageCount }, (_, index) => (
         <CVPageRenderer
           key={index}
           pageNumber={index + 1}
-          totalPages={calculatedPages}
+          totalPages={pageCount}
           profile={profile}
           styles={styles}
           sections={sections}
