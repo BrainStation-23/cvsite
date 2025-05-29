@@ -6,7 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Slider } from '@/components/ui/slider';
 import { Input } from '@/components/ui/input';
 import { CVTemplate } from '@/types/cv-templates';
-import { Palette, Type, Layout, Ruler } from 'lucide-react';
+import { Palette, Type, Layout, Ruler, Grid, Columns, SidebarOpen } from 'lucide-react';
 
 interface TemplateBuilderProps {
   template: CVTemplate;
@@ -29,6 +29,17 @@ const TemplateBuilder: React.FC<TemplateBuilderProps> = ({ template, onLayoutUpd
     }
   };
 
+  const getLayoutIcon = (layoutType: string) => {
+    switch (layoutType) {
+      case 'two-column':
+        return <Columns className="h-4 w-4" />;
+      case 'sidebar':
+        return <SidebarOpen className="h-4 w-4" />;
+      default:
+        return <Grid className="h-4 w-4" />;
+    }
+  };
+
   return (
     <div className="space-y-6">
       {/* Page Layout */}
@@ -40,6 +51,46 @@ const TemplateBuilder: React.FC<TemplateBuilderProps> = ({ template, onLayoutUpd
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
+          <div>
+            <Label className="flex items-center gap-2 mb-2">
+              {getLayoutIcon(layoutConfig.layoutType || 'single-column')}
+              Layout Type
+            </Label>
+            <Select 
+              value={layoutConfig.layoutType || 'single-column'} 
+              onValueChange={(value) => updateLayoutConfig('layoutType', value)}
+            >
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="single-column">
+                  <div className="flex items-center gap-2">
+                    <Grid className="h-4 w-4" />
+                    Single Column
+                  </div>
+                </SelectItem>
+                <SelectItem value="two-column">
+                  <div className="flex items-center gap-2">
+                    <Columns className="h-4 w-4" />
+                    Two Column
+                  </div>
+                </SelectItem>
+                <SelectItem value="sidebar">
+                  <div className="flex items-center gap-2">
+                    <SidebarOpen className="h-4 w-4" />
+                    Sidebar Layout
+                  </div>
+                </SelectItem>
+              </SelectContent>
+            </Select>
+            <p className="text-xs text-gray-500 mt-1">
+              {layoutConfig.layoutType === 'two-column' && 'Content split evenly across two columns'}
+              {layoutConfig.layoutType === 'sidebar' && 'Skills in sidebar, other content in main area'}
+              {(!layoutConfig.layoutType || layoutConfig.layoutType === 'single-column') && 'Traditional single column layout'}
+            </p>
+          </div>
+
           <div className="grid grid-cols-2 gap-4">
             <div>
               <Label>Margin (mm)</Label>
@@ -62,26 +113,13 @@ const TemplateBuilder: React.FC<TemplateBuilderProps> = ({ template, onLayoutUpd
                 min={5}
                 step={2}
                 className="mt-2"
+                disabled={layoutConfig.layoutType === 'single-column'}
               />
-              <span className="text-sm text-gray-500">{layoutConfig.columnGap || 10}mm</span>
+              <span className="text-sm text-gray-500">
+                {layoutConfig.columnGap || 10}mm
+                {layoutConfig.layoutType === 'single-column' && ' (disabled for single column)'}
+              </span>
             </div>
-          </div>
-          
-          <div>
-            <Label>Layout Type</Label>
-            <Select 
-              value={layoutConfig.layoutType || 'single-column'} 
-              onValueChange={(value) => updateLayoutConfig('layoutType', value)}
-            >
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="single-column">Single Column</SelectItem>
-                <SelectItem value="two-column">Two Column</SelectItem>
-                <SelectItem value="sidebar">Sidebar Layout</SelectItem>
-              </SelectContent>
-            </Select>
           </div>
         </CardContent>
       </Card>

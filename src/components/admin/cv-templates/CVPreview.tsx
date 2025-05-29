@@ -75,6 +75,7 @@ const CVPreview: React.FC<CVPreviewProps> = ({ template, profile }) => {
         styles={styles}
         totalPages={template.pages_count}
         onOverflow={handleOverflow}
+        layoutConfig={template.layout_config}
       />
     </div>
   );

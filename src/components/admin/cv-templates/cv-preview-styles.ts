@@ -7,6 +7,30 @@ export const createCVStyles = (template: CVTemplate) => {
   const pageWidth = template.orientation === 'portrait' ? '210mm' : '297mm';
   const pageHeight = template.orientation === 'portrait' ? '297mm' : '210mm';
   
+  // Layout type specific styles
+  const getLayoutStyles = () => {
+    switch (layoutConfig.layoutType) {
+      case 'two-column':
+        return {
+          display: 'grid',
+          gridTemplateColumns: '1fr 1fr',
+          gap: `${layoutConfig.columnGap || 10}mm`,
+          alignItems: 'start'
+        };
+      case 'sidebar':
+        return {
+          display: 'grid',
+          gridTemplateColumns: '1fr 2fr',
+          gap: `${layoutConfig.columnGap || 10}mm`,
+          alignItems: 'start'
+        };
+      default: // single-column
+        return {
+          display: 'block'
+        };
+    }
+  };
+  
   return {
     baseStyles: {
       width: pageWidth,
@@ -15,19 +39,21 @@ export const createCVStyles = (template: CVTemplate) => {
       backgroundColor: 'white',
       boxShadow: '0 0 10px rgba(0,0,0,0.1)',
       padding: `${layoutConfig.margin || 20}mm`,
-      fontFamily: layoutConfig.primaryFont || 'Arial, sans-serif',
+      fontFamily: `${layoutConfig.primaryFont || 'Arial'}, sans-serif`,
       fontSize: `${layoutConfig.baseFontSize || 12}pt`,
       lineHeight: layoutConfig.lineHeight || 1.4,
       color: '#333',
       position: 'relative' as const,
-      pageBreakAfter: 'always' as const
+      pageBreakAfter: 'always' as const,
+      ...getLayoutStyles()
     },
 
     headerStyles: {
-      textAlign: 'center' as const,
+      textAlign: layoutConfig.layoutType === 'single-column' ? 'center' as const : 'left' as const,
       marginBottom: `${layoutConfig.sectionSpacing || 16}pt`,
       borderBottom: `2px solid ${layoutConfig.primaryColor || '#1f2937'}`,
-      paddingBottom: '10pt'
+      paddingBottom: '10pt',
+      gridColumn: layoutConfig.layoutType === 'two-column' ? '1 / -1' : 'auto'
     },
 
     nameStyles: {
@@ -44,7 +70,8 @@ export const createCVStyles = (template: CVTemplate) => {
     },
 
     sectionStyles: {
-      marginBottom: `${layoutConfig.sectionSpacing || 16}pt`
+      marginBottom: `${layoutConfig.sectionSpacing || 16}pt`,
+      breakInside: 'avoid' as const
     },
 
     sectionTitleStyles: {
@@ -82,6 +109,11 @@ export const createCVStyles = (template: CVTemplate) => {
       padding: '2pt 6pt',
       borderRadius: '3pt',
       fontSize: '0.8em'
+    },
+
+    // Add layout-specific container styles
+    layoutContainerStyles: {
+      ...getLayoutStyles()
     }
   };
 };
