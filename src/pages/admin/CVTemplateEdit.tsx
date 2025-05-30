@@ -7,6 +7,7 @@ import TemplateEditorLayout from '@/components/admin/cv-templates/TemplateEditor
 import { useEmployeeProfiles } from '@/hooks/use-employee-profiles';
 import { useEmployeeData } from '@/hooks/use-employee-data';
 import { useToast } from '@/hooks/use-toast';
+import { useTemplateConfiguration } from '@/hooks/use-template-configuration';
 
 const CVTemplateEdit: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -25,6 +26,9 @@ const CVTemplateEdit: React.FC = () => {
     data: selectedProfile,
     isLoading: profileLoading
   } = useEmployeeData(selectedProfileId);
+
+  // Get template configuration for export
+  const { sections: templateSections, fieldMappings: templateFieldMappings } = useTemplateConfiguration(id || '');
 
   const loadTemplate = async () => {
     if (id) {
@@ -105,8 +109,8 @@ const CVTemplateEdit: React.FC = () => {
   };
 
   const handleExport = () => {
-    // TODO: Implement export functionality
-    console.log('Export functionality to be implemented');
+    // Export will now be handled by the ExportDropdown component
+    console.log('Export triggered from template editor');
   };
 
   if (isLoading) {

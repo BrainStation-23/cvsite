@@ -1,10 +1,11 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ArrowLeft, Save, Download, RotateCcw } from 'lucide-react';
 import { EmployeeCombobox } from './EmployeeCombobox';
 import { EmployeeProfile } from '@/hooks/types/employee-profiles';
+import ExportDropdown from './ExportDropdown';
+import { useTemplateConfiguration } from '@/hooks/use-template-configuration';
 
 interface TemplateEditorLayoutProps {
   children: React.ReactNode;
@@ -18,6 +19,7 @@ interface TemplateEditorLayoutProps {
   selectedProfileId: string;
   onProfileChange: (profileId: string) => void;
   profiles: EmployeeProfile[];
+  templateId?: string;
   onExport?: () => void;
 }
 
@@ -33,6 +35,7 @@ const TemplateEditorLayout: React.FC<TemplateEditorLayoutProps> = ({
   selectedProfileId,
   onProfileChange,
   profiles,
+  templateId,
   onExport
 }) => {
   const [isEditingName, setIsEditingName] = useState(false);
@@ -55,6 +58,21 @@ const TemplateEditorLayout: React.FC<TemplateEditorLayoutProps> = ({
       handleNameCancel();
     }
   };
+
+  // Get template configuration for export
+  const { sections: templateSections, fieldMappings: templateFieldMappings } = useTemplateConfiguration(templateId || '');
+
+  // Create a template object for export
+  const templateForExport = {
+    id: templateId,
+    name: templateName,
+    orientation: 'portrait', // TODO: get from actual template data
+    layout_config: {},
+    is_active: true
+  };
+
+  // Find the selected profile
+  const selectedProfile = profiles.find(p => p.id === selectedProfileId);
 
   return (
     <div className="h-screen w-full bg-white dark:bg-gray-900 flex flex-col animate-fade-in">
@@ -112,15 +130,14 @@ const TemplateEditorLayout: React.FC<TemplateEditorLayoutProps> = ({
           </div>
 
           {/* Action Buttons */}
-          <Button 
-            size="sm"
-            variant="outline"
-            onClick={onExport} 
-            disabled={!selectedProfileId}
-          >
-            <Download className="h-4 w-4 mr-2" />
-            Export
-          </Button>
+          <ExportDropdown
+            template={templateForExport}
+            profile={selectedProfile}
+            sections={templateSections || []}
+            fieldMappings={templateFieldMappings || []}
+            styles={{}} // TODO: get actual styles
+            disabled={!selectedProfile}
+          />
 
           {hasUnsavedChanges && (
             <Button 
