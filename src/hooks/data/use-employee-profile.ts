@@ -1,11 +1,11 @@
 
-import { useGeneralInfoFetch } from './profile/use-general-info-fetch';
-import { useSkillsFetch } from './profile/use-skills-fetch';
-import { useExperienceFetch } from './profile/use-experience-fetch';
-import { useEducationFetch } from './profile/use-education-fetch';
-import { useTrainingFetch } from './profile/use-training-fetch';
-import { useAchievementsFetch } from './profile/use-achievements-fetch';
-import { useProjectsFetch } from './profile/use-projects-fetch';
+import { useGeneralInfoFetch } from '../profile/use-general-info-fetch';
+import { useSkillsFetch } from '../profile/use-skills-fetch';
+import { useExperienceFetch } from '../profile/use-experience-fetch';
+import { useEducationFetch } from '../profile/use-education-fetch';
+import { useTrainingFetch } from '../profile/use-training-fetch';
+import { useAchievementsFetch } from '../profile/use-achievements-fetch';
+import { useProjectsFetch } from '../profile/use-projects-fetch';
 
 export function useEmployeeProfile(profileId: string) {
   const generalInfoHook = useGeneralInfoFetch(profileId);

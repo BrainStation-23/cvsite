@@ -1,6 +1,6 @@
 
-import { useCVTemplateFetching } from './cv-templates/use-cv-template-fetching';
-import { useCVTemplateOperations } from './cv-templates/use-cv-template-operations';
+import { useCVTemplateFetching } from './use-cv-template-fetching';
+import { useCVTemplateOperations } from './use-cv-template-operations';
 
 export const useCVTemplates = () => {
   const {

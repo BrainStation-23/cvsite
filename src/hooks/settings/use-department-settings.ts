@@ -1,7 +1,7 @@
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/hooks/use-toast';
+import { useToast } from '@/hooks/ui/use-toast';
 
 export interface DepartmentItem {
   id: string;
@@ -108,34 +108,10 @@ export const useDepartmentSettings = () => {
       queryClient.invalidateQueries({ queryKey: ['department-search'] });
     },
   });
-
-  // Bulk import mutation
-  const bulkImportMutation = useMutation({
-    mutationFn: async (departments: DepartmentFormData[]) => {
-      if (departments.length === 0) {
-        throw new Error('No departments to import');
-      }
-
-      const { data, error } = await supabase
-        .from('departments')
-        .insert(
-          departments.map(department => ({
-            name: department.name,
-            full_form: department.full_form || null
-          }))
-        )
-        .select();
-      
-      if (error) throw error;
-      return data;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['departments'] });
-      queryClient.invalidateQueries({ queryKey: ['department-search'] });
-    },
-  });
   
   const addItem = (department: DepartmentFormData) => {
+    if (!department.name.trim()) return;
+    
     addDepartmentMutation.mutate(department, {
       onSuccess: () => {
         toast({
@@ -145,7 +121,11 @@ export const useDepartmentSettings = () => {
       },
       onError: (error) => {
         if (error instanceof Error && error.message.includes("already exists")) {
-          console.log(error.message);
+          toast({
+            title: "Department already exists",
+            description: error.message,
+            variant: "destructive"
+          });
         } else {
           toast({
             title: "Error",
@@ -162,7 +142,7 @@ export const useDepartmentSettings = () => {
       onSuccess: () => {
         toast({
           title: "Department updated",
-          description: `"${department.name}" has been updated.`,
+          description: `Department has been updated to "${department.name}".`,
         });
       },
       onError: (error) => {
@@ -193,24 +173,6 @@ export const useDepartmentSettings = () => {
     });
   };
 
-  const bulkImportItems = (departments: DepartmentFormData[]) => {
-    bulkImportMutation.mutate(departments, {
-      onSuccess: (result) => {
-        toast({
-          title: "Import successful",
-          description: `${result.length} departments imported successfully.`,
-        });
-      },
-      onError: (error) => {
-        toast({
-          title: "Import failed",
-          description: error instanceof Error ? error.message : 'Unknown error',
-          variant: "destructive"
-        });
-      }
-    });
-  };
-
   return {
     items,
     isLoading,
@@ -218,10 +180,8 @@ export const useDepartmentSettings = () => {
     addItem,
     updateItem,
     removeItem,
-    bulkImportItems,
     isAddingItem: addDepartmentMutation.isPending,
     isUpdatingItem: updateDepartmentMutation.isPending,
-    isRemovingItem: deleteDepartmentMutation.isPending,
-    isBulkImporting: bulkImportMutation.isPending
+    isRemovingItem: deleteDepartmentMutation.isPending
   };
 };
