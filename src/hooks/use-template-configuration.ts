@@ -27,7 +27,6 @@ export const useTemplateConfiguration = (templateId: string) => {
   const [sections, setSections] = useState<TemplateSection[]>([]);
   const [fieldMappings, setFieldMappings] = useState<FieldMapping[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [configVersion, setConfigVersion] = useState(0);
   const { toast } = useToast();
 
   const fetchConfiguration = useCallback(async () => {
@@ -68,7 +67,6 @@ export const useTemplateConfiguration = (templateId: string) => {
 
       setSections(processedSections);
       setFieldMappings(processedFieldMappings);
-      setConfigVersion(prev => prev + 1);
     } catch (error) {
       console.error('Error fetching template configuration:', error);
       toast({
@@ -81,7 +79,6 @@ export const useTemplateConfiguration = (templateId: string) => {
     }
   }, [templateId, toast]);
 
-  // Fetch on mount and when templateId changes
   useEffect(() => {
     fetchConfiguration();
   }, [fetchConfiguration]);
@@ -90,7 +87,6 @@ export const useTemplateConfiguration = (templateId: string) => {
     sections,
     fieldMappings,
     isLoading,
-    configVersion, // This will change when data is refetched
     refetch: fetchConfiguration
   };
 };

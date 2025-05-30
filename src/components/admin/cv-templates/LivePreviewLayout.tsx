@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from '@/components/ui/resizable';
 import { Card } from '@/components/ui/card';
 import CVPreview from './CVPreview';
@@ -23,8 +23,11 @@ const LivePreviewLayout: React.FC<LivePreviewLayoutProps> = ({
   onTemplateUpdate,
   onSectionsChange
 }) => {
+  const [previewKey, setPreviewKey] = useState(0);
+
   const handleConfigurationChange = () => {
-    // Notify parent that sections changed for save state tracking
+    // Force preview to re-render when configuration changes
+    setPreviewKey(prev => prev + 1);
     onSectionsChange?.();
   };
 
@@ -37,6 +40,7 @@ const LivePreviewLayout: React.FC<LivePreviewLayoutProps> = ({
             {selectedProfile ? (
               <div className="flex justify-center">
                 <CVPreview 
+                  key={previewKey}
                   template={template} 
                   profile={selectedProfile} 
                 />

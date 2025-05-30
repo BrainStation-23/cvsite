@@ -87,8 +87,11 @@ const CVTemplateEdit: React.FC = () => {
   };
 
   const handleSectionsChange = () => {
-    // Mark as having unsaved changes for save state tracking
     setHasUnsavedChanges(true);
+    // Refetch profile data when sections change to ensure preview updates
+    if (selectedProfileId) {
+      refetchProfile();
+    }
   };
 
   const handleBack = () => {
