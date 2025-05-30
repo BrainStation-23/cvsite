@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import DashboardLayout from '../../components/Layout/DashboardLayout';
@@ -37,7 +36,6 @@ const CVTemplates: React.FC = () => {
     const success = await createTemplate({
       name: templateName,
       description: 'A professional CV template with default sections',
-      pages_count: 1,
       orientation: 'portrait',
       is_active: true,
       layout_config: {
