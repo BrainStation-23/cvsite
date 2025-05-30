@@ -41,10 +41,8 @@ export const ProjectsSection: React.FC<ProjectsSectionProps> = ({
     .filter(mapping => mapping.section_type === 'projects')
     .map(mapping => mapping.original_field_name);
 
-  // If no field mappings exist for projects section, don't show anything
-  if (enabledFields.length === 0) {
-    return null;
-  }
+  // Check if we have any field mappings configured for projects section
+  const hasFieldMappings = enabledFields.length > 0;
 
   // Define all possible fields with their render functions
   const fieldRenderers = {
@@ -216,19 +214,29 @@ export const ProjectsSection: React.FC<ProjectsSectionProps> = ({
     <div style={styles.sectionStyles}>
       <h2 style={styles.sectionTitleStyles}>{sectionTitle}</h2>
       {sortedProjects.map((project: any, index: number) => {
-        // Get the ordered fields based on field mappings (only enabled fields)
-        const orderedFields = enabledFields.filter(fieldName => 
-          fieldRenderers[fieldName as keyof typeof fieldRenderers]
-        );
-
-        // If no enabled fields, don't render this project
-        if (orderedFields.length === 0) {
-          return null;
+        // Determine which fields to render
+        let fieldsToRender: string[];
+        
+        if (hasFieldMappings) {
+          // Use only enabled fields from field mappings when they exist
+          fieldsToRender = enabledFields.filter(fieldName => 
+            fieldRenderers[fieldName as keyof typeof fieldRenderers]
+          );
+        } else {
+          // Use default field order when no field mappings are configured
+          fieldsToRender = [
+            'name',
+            'role', 
+            'date_range',
+            'description',
+            'technologies_used',
+            'url'
+          ];
         }
 
         return (
           <div key={index} style={styles.itemStyles}>
-            {orderedFields.map((fieldName) => {
+            {fieldsToRender.map((fieldName) => {
               const renderer = fieldRenderers[fieldName as keyof typeof fieldRenderers];
               return renderer ? renderer(project, index) : null;
             })}
