@@ -12,15 +12,8 @@ interface FieldMapping {
   section_type: string;
 }
 
-interface ProjectFieldRenderersProps {
-  project: any;
-  index: number;
-  fieldMappings: FieldMapping[];
-  styles: any;
-}
-
 export const ProjectFieldRenderers = {
-  name: (project: any, index: number, fieldMappings: FieldMapping[]) => (
+  name: (project: any, index: number, fieldMappings: FieldMapping[], styles: any) => (
     <FieldProcessor
       key="name"
       fieldName="name"
@@ -38,7 +31,7 @@ export const ProjectFieldRenderers = {
     </FieldProcessor>
   ),
 
-  role: (project: any, index: number, fieldMappings: FieldMapping[]) => (
+  role: (project: any, index: number, fieldMappings: FieldMapping[], styles: any) => (
     <FieldProcessor
       key="role"
       fieldName="role"
@@ -56,7 +49,7 @@ export const ProjectFieldRenderers = {
     </FieldProcessor>
   ),
 
-  start_date: (project: any, index: number, fieldMappings: FieldMapping[]) => (
+  start_date: (project: any, index: number, fieldMappings: FieldMapping[], styles: any) => (
     <FieldProcessor
       key="start_date"
       fieldName="start_date"
@@ -74,7 +67,7 @@ export const ProjectFieldRenderers = {
     </FieldProcessor>
   ),
 
-  end_date: (project: any, index: number, fieldMappings: FieldMapping[]) => (
+  end_date: (project: any, index: number, fieldMappings: FieldMapping[], styles: any) => (
     <FieldProcessor
       key="end_date"
       fieldName="end_date"
@@ -92,7 +85,7 @@ export const ProjectFieldRenderers = {
     </FieldProcessor>
   ),
 
-  date_range: (project: any, index: number, fieldMappings: FieldMapping[]) => (
+  date_range: (project: any, index: number, fieldMappings: FieldMapping[], styles: any) => (
     <FieldProcessor
       key="date_range"
       fieldName="date_range"
@@ -115,7 +108,7 @@ export const ProjectFieldRenderers = {
     </FieldProcessor>
   ),
 
-  description: (project: any, index: number, fieldMappings: FieldMapping[]) => (
+  description: (project: any, index: number, fieldMappings: FieldMapping[], styles: any) => (
     <FieldProcessor
       key="description"
       fieldName="description"
@@ -162,7 +155,7 @@ export const ProjectFieldRenderers = {
     </FieldProcessor>
   ),
 
-  url: (project: any, index: number, fieldMappings: FieldMapping[]) => (
+  url: (project: any, index: number, fieldMappings: FieldMapping[], styles: any) => (
     <FieldProcessor
       key="url"
       fieldName="url"

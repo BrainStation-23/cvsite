@@ -57,12 +57,8 @@ export const ProjectItem: React.FC<ProjectItemProps> = ({
         const renderer = ProjectFieldRenderers[fieldName as keyof typeof ProjectFieldRenderers];
         if (!renderer) return null;
         
-        // Handle special case for technologies_used which needs styles
-        if (fieldName === 'technologies_used') {
-          return renderer(project, index, fieldMappings, styles);
-        }
-        
-        return renderer(project, index, fieldMappings);
+        // All renderers now receive the same 4 arguments: project, index, fieldMappings, styles
+        return renderer(project, index, fieldMappings, styles);
       })}
     </div>
   );
