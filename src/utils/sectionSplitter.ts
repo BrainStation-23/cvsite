@@ -1,3 +1,4 @@
+
 interface SectionItem {
   id: string;
   content: any;
@@ -12,9 +13,15 @@ interface SectionSplit {
 }
 
 export class SectionSplitter {
-  private static readonly A4_CONTENT_HEIGHT = 257 * 3.779528; // 257mm in pixels at 96 DPI
+  // Updated to handle both portrait and landscape modes
+  private static readonly A4_PORTRAIT_HEIGHT = 257 * 3.779528; // 257mm content height in pixels at 96 DPI
+  private static readonly A4_LANDSCAPE_HEIGHT = 167 * 3.779528; // 167mm content height in pixels at 96 DPI (297-40-40-50 for margins and header)
   private static readonly SECTION_TITLE_HEIGHT = 30; // Estimated height for section titles
   private static readonly ITEM_MARGIN = 16; // Margin between items
+
+  static getContentHeight(orientation: string = 'portrait'): number {
+    return orientation === 'landscape' ? this.A4_LANDSCAPE_HEIGHT : this.A4_PORTRAIT_HEIGHT;
+  }
 
   static canSectionFit(sectionHeight: number, availableHeight: number): boolean {
     return sectionHeight <= availableHeight;
@@ -196,7 +203,7 @@ export class SectionSplitter {
     return baseHeight + departmentHeight + gpaHeight;
   }
 
-  static estimateSectionHeight(sectionType: string, data: any[]): number {
+  static estimateSectionHeight(sectionType: string, data: any[], orientation: string = 'portrait'): number {
     const titleHeight = this.SECTION_TITLE_HEIGHT;
     let contentHeight = 0;
 
@@ -211,7 +218,8 @@ export class SectionSplitter {
         contentHeight = data.reduce((sum, item) => sum + this.estimateEducationItemHeight(item) + this.ITEM_MARGIN, 0);
         break;
       case 'general':
-        contentHeight = 80; // Fixed height for general info
+        // Adjust general info height based on orientation
+        contentHeight = orientation === 'landscape' ? 60 : 80; // Smaller for landscape
         break;
       case 'technical_skills':
       case 'specialized_skills':

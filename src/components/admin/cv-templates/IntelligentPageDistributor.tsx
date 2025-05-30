@@ -53,7 +53,9 @@ export const IntelligentPageDistributor: React.FC<IntelligentPageDistributorProp
   onPagesCalculated,
   layoutConfig = {}
 }) => {
-  const A4_CONTENT_HEIGHT = 257 * 3.779528; // 257mm in pixels at 96 DPI
+  // Get orientation from styles or default to portrait
+  const orientation = styles.baseStyles?.orientation || 'portrait';
+  const A4_CONTENT_HEIGHT = SectionSplitter.getContentHeight(orientation);
   const MAX_PAGES = 20;
 
   const distributedPages = useMemo((): PageContent[] => {
@@ -148,7 +150,11 @@ export const IntelligentPageDistributor: React.FC<IntelligentPageDistributorProp
         }
       } else {
         // For non-splittable sections
-        const estimatedHeight = SectionSplitter.estimateSectionHeight(section.section_type, Array.isArray(sectionData) ? sectionData : [sectionData]);
+        const estimatedHeight = SectionSplitter.estimateSectionHeight(
+          section.section_type, 
+          Array.isArray(sectionData) ? sectionData : [sectionData],
+          orientation
+        );
         
         if (currentPageHeight + estimatedHeight > A4_CONTENT_HEIGHT && currentPage.sections.length > 0) {
           // Start new page
@@ -182,7 +188,7 @@ export const IntelligentPageDistributor: React.FC<IntelligentPageDistributorProp
 
     onPagesCalculated?.(pages.length);
     return pages;
-  }, [sections, profile, fieldMappings, onPagesCalculated]);
+  }, [sections, profile, fieldMappings, onPagesCalculated, orientation]);
 
   const layoutType = layoutConfig.layoutType || 'single-column';
 
