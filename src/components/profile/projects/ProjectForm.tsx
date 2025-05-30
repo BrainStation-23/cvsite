@@ -2,7 +2,6 @@
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
 import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form';
 import { CalendarIcon, X } from 'lucide-react';
 import { useForm } from 'react-hook-form';
@@ -11,6 +10,7 @@ import { format } from 'date-fns';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
 import { Checkbox } from '@/components/ui/checkbox';
+import { RichTextEditor } from '@/components/ui/rich-text-editor';
 
 interface ProjectFormProps {
   project?: Project;
@@ -36,12 +36,12 @@ export const ProjectForm: React.FC<ProjectFormProps> = ({
   const [technologies, setTechnologies] = useState<string[]>(
     project?.technologiesUsed || []
   );
+  const [description, setDescription] = useState<string>(project?.description || '');
 
   const form = useForm({
     defaultValues: {
       name: project?.name || '',
       role: project?.role || '',
-      description: project?.description || '',
       url: project?.url || ''
     }
   });
@@ -67,6 +67,7 @@ export const ProjectForm: React.FC<ProjectFormProps> = ({
   const handleSubmit = async (data: any) => {
     const projectData = {
       ...data,
+      description: description,
       startDate: startDate || new Date(),
       endDate: isCurrent ? undefined : endDate,
       isCurrent: isCurrent,
@@ -191,24 +192,20 @@ export const ProjectForm: React.FC<ProjectFormProps> = ({
             </FormItem>
           </div>
           
-          <FormField
-            control={form.control}
-            name="description"
-            rules={{ required: 'Description is required' }}
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Description</FormLabel>
-                <FormControl>
-                  <Textarea 
-                    {...field} 
-                    placeholder="Describe the project and your contributions" 
-                    rows={4}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
+          <FormItem>
+            <FormLabel>Description</FormLabel>
+            <FormControl>
+              <RichTextEditor
+                value={description}
+                onChange={setDescription}
+                placeholder="Describe the project and your contributions"
+                className="min-h-[150px]"
+              />
+            </FormControl>
+            {!description && (
+              <p className="text-sm text-destructive">Description is required</p>
             )}
-          />
+          </FormItem>
           
           <FormItem>
             <FormLabel>Technologies Used</FormLabel>
@@ -265,7 +262,7 @@ export const ProjectForm: React.FC<ProjectFormProps> = ({
             <Button type="button" variant="outline" onClick={onCancel}>
               Cancel
             </Button>
-            <Button type="submit" disabled={isSaving}>
+            <Button type="submit" disabled={isSaving || !description.trim()}>
               {isSaving ? "Saving..." : isEditing ? "Save Changes" : "Save Project"}
             </Button>
           </div>

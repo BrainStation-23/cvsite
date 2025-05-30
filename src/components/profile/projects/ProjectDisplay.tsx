@@ -43,7 +43,10 @@ export const ProjectDisplay: React.FC<ProjectDisplayProps> = ({
       <AccordionContent>
         <div className="mt-2 space-y-4">
           <div>
-            <p className="text-sm text-muted-foreground whitespace-pre-line">{project.description}</p>
+            <div 
+              className="text-sm text-muted-foreground prose prose-sm max-w-none dark:prose-invert"
+              dangerouslySetInnerHTML={{ __html: project.description }}
+            />
             
             {project.technologiesUsed && project.technologiesUsed.length > 0 && (
               <div className="mt-3">
