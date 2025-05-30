@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
@@ -79,6 +80,32 @@ const ReferenceSettings: React.FC = () => {
     if (result.valid && result.valid.length > 0) {
       bulkImport(result.valid);
     }
+  };
+
+  const handleEdit = (id: string, name: string, email: string, designation: string, company: string) => {
+    setEditingId(id);
+    setEditItem({ name, email, designation, company });
+  };
+
+  const handleSaveEdit = () => {
+    if (editingId && editItem.name.trim()) {
+      updateItem(editingId, editItem);
+      setEditingId(null);
+      setEditItem({ name: '', email: '', designation: '', company: '' });
+    }
+  };
+
+  const handleCancelEdit = () => {
+    setEditingId(null);
+    setEditItem({ name: '', email: '', designation: '', company: '' });
+  };
+
+  const handleEditItemChange = (field: string, value: string) => {
+    setEditItem({ ...editItem, [field]: value });
+  };
+
+  const handleDelete = (id: string, name: string) => {
+    removeItem(id, name);
   };
 
   return (

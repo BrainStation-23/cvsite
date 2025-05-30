@@ -1,7 +1,7 @@
-
 import { useState, useEffect } from 'react';
-import { useToast } from '@/hooks/use-toast';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/ui/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import { Education } from '@/types';
 
@@ -47,6 +47,7 @@ const mapToEducationDB = (edu: Omit<Education, 'id'>, profileId: string) => ({
 export function useEducation(profileId?: string) {
   const { user } = useAuth();
   const { toast } = useToast();
+  const queryClient = useQueryClient();
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [education, setEducation] = useState<Education[]>([]);
@@ -86,137 +87,158 @@ export function useEducation(profileId?: string) {
   };
 
   // Save education
-  const saveEducation = async (educationData: Omit<Education, 'id'>) => {
-    if (!targetProfileId) return false;
-    
-    try {
-      setIsSaving(true);
+  const saveEducation = useMutation(
+    async (educationData: Omit<Education, 'id'>) => {
+      if (!targetProfileId) return false;
       
-      // Convert to database format
-      const dbData = mapToEducationDB(educationData, targetProfileId);
-      
-      const { data, error } = await supabase
-        .from('education')
-        .insert(dbData)
-        .select();
-      
-      if (error) throw error;
-      
-      // Update local state with the new education entry
-      if (data && data.length > 0) {
-        const newEducation = mapToEducation(data[0] as EducationDB);
-        setEducation(prev => [...prev, newEducation]);
+      try {
+        setIsSaving(true);
+        
+        // Convert to database format
+        const dbData = mapToEducationDB(educationData, targetProfileId);
+        
+        const { data, error } = await supabase
+          .from('education')
+          .insert(dbData)
+          .select();
+        
+        if (error) throw error;
+        
+        // Update local state with the new education entry
+        if (data && data.length > 0) {
+          const newEducation = mapToEducation(data[0] as EducationDB);
+          setEducation(prev => [...prev, newEducation]);
+        }
+        
+        toast({
+          title: 'Success',
+          description: 'Education has been added',
+        });
+        
+        return true;
+      } catch (error) {
+        console.error('Error saving education:', error);
+        toast({
+          title: 'Error',
+          description: 'Failed to add education',
+          variant: 'destructive'
+        });
+        return false;
+      } finally {
+        setIsSaving(false);
       }
-      
-      toast({
-        title: 'Success',
-        description: 'Education has been added',
-      });
-      
-      return true;
-    } catch (error) {
-      console.error('Error saving education:', error);
-      toast({
-        title: 'Error',
-        description: 'Failed to add education',
-        variant: 'destructive'
-      });
-      return false;
-    } finally {
-      setIsSaving(false);
+    },
+    {
+      onSuccess: () => {
+        queryClient.invalidateQueries(['education']);
+      }
     }
-  };
+  );
 
   // Update education
-  const updateEducation = async (id: string, educationData: Partial<Education>) => {
-    if (!targetProfileId) return false;
-    
-    try {
-      setIsSaving(true);
+  const updateEducation = useMutation(
+    async (id: string, educationData: Partial<Education>) => {
+      if (!targetProfileId) return false;
       
-      // Convert partial education data to database format
-      const dbData: Partial<EducationDB> = {};
-      
-      if (educationData.university) dbData.university = educationData.university;
-      if (educationData.degree !== undefined) dbData.degree = educationData.degree || null;
-      if (educationData.department !== undefined) dbData.department = educationData.department || null;
-      if (educationData.gpa !== undefined) dbData.gpa = educationData.gpa || null;
-      if (educationData.startDate) dbData.start_date = educationData.startDate.toISOString().split('T')[0];
-      
-      if (educationData.endDate) {
-        dbData.end_date = educationData.endDate.toISOString().split('T')[0];
-      } else if (educationData.endDate === null) {
-        dbData.end_date = null;
+      try {
+        setIsSaving(true);
+        
+        // Convert partial education data to database format
+        const dbData: Partial<EducationDB> = {};
+        
+        if (educationData.university) dbData.university = educationData.university;
+        if (educationData.degree !== undefined) dbData.degree = educationData.degree || null;
+        if (educationData.department !== undefined) dbData.department = educationData.department || null;
+        if (educationData.gpa !== undefined) dbData.gpa = educationData.gpa || null;
+        if (educationData.startDate) dbData.start_date = educationData.startDate.toISOString().split('T')[0];
+        
+        if (educationData.endDate) {
+          dbData.end_date = educationData.endDate.toISOString().split('T')[0];
+        } else if (educationData.endDate === null) {
+          dbData.end_date = null;
+        }
+        
+        if (educationData.isCurrent !== undefined) dbData.is_current = educationData.isCurrent;
+        
+        dbData.updated_at = new Date().toISOString();
+        
+        const { error } = await supabase
+          .from('education')
+          .update(dbData)
+          .eq('id', id)
+          .eq('profile_id', targetProfileId);
+        
+        if (error) throw error;
+        
+        // Update local state
+        setEducation(prev => 
+          prev.map(edu => edu.id === id ? { ...edu, ...educationData } : edu)
+        );
+        
+        toast({
+          title: 'Success',
+          description: 'Education has been updated',
+        });
+        
+        return true;
+      } catch (error) {
+        console.error('Error updating education:', error);
+        toast({
+          title: 'Error',
+          description: 'Failed to update education',
+          variant: 'destructive'
+        });
+        return false;
+      } finally {
+        setIsSaving(false);
       }
-      
-      if (educationData.isCurrent !== undefined) dbData.is_current = educationData.isCurrent;
-      
-      dbData.updated_at = new Date().toISOString();
-      
-      const { error } = await supabase
-        .from('education')
-        .update(dbData)
-        .eq('id', id)
-        .eq('profile_id', targetProfileId);
-      
-      if (error) throw error;
-      
-      // Update local state
-      setEducation(prev => 
-        prev.map(edu => edu.id === id ? { ...edu, ...educationData } : edu)
-      );
-      
-      toast({
-        title: 'Success',
-        description: 'Education has been updated',
-      });
-      
-      return true;
-    } catch (error) {
-      console.error('Error updating education:', error);
-      toast({
-        title: 'Error',
-        description: 'Failed to update education',
-        variant: 'destructive'
-      });
-      return false;
-    } finally {
-      setIsSaving(false);
+    },
+    {
+      onSuccess: () => {
+        queryClient.invalidateQueries(['education']);
+      }
     }
-  };
+  );
 
   // Delete education
-  const deleteEducation = async (id: string) => {
-    if (!targetProfileId) return false;
-    
-    try {
-      const { error } = await supabase
-        .from('education')
-        .delete()
-        .eq('id', id)
-        .eq('profile_id', targetProfileId);
+  const deleteEducation = useMutation(
+    async (id: string) => {
+      if (!targetProfileId) return false;
       
-      if (error) throw error;
-      
-      // Update local state
-      setEducation(prev => prev.filter(edu => edu.id !== id));
-      
-      toast({
-        title: 'Success',
-        description: 'Education has been removed',
-      });
-      
-      return true;
-    } catch (error) {
-      console.error('Error deleting education:', error);
-      toast({
-        title: 'Error',
-        description: 'Failed to remove education',
-        variant: 'destructive'
-      });
-      return false;
+      try {
+        const { error } = await supabase
+          .from('education')
+          .delete()
+          .eq('id', id)
+          .eq('profile_id', targetProfileId);
+        
+        if (error) throw error;
+        
+        // Update local state
+        setEducation(prev => prev.filter(edu => edu.id !== id));
+        
+        toast({
+          title: 'Success',
+          description: 'Education has been removed',
+        });
+        
+        return true;
+      } catch (error) {
+        console.error('Error deleting education:', error);
+        toast({
+          title: 'Error',
+          description: 'Failed to remove education',
+          variant: 'destructive'
+        });
+        return false;
+      }
+    },
+    {
+      onSuccess: () => {
+        queryClient.invalidateQueries(['education']);
+      }
     }
-  };
+  );
 
   // Load education data
   useEffect(() => {

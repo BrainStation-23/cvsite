@@ -1,56 +1,55 @@
-
-import { useState, useEffect } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/hooks/use-toast';
-import { Experience } from '@/types';
+import { useAuth } from '@/contexts/AuthContext';
+import { useToast } from '@/hooks/ui/use-toast';
 
-export function useExperienceFetch(profileId: string) {
-  const { toast } = useToast();
-  const [isLoading, setIsLoading] = useState(true);
-  const [experiences, setExperiences] = useState<Experience[]>([]);
-
-  const fetchExperiences = async () => {
-    if (!profileId) return;
-
-    try {
-      const { data: expData, error: expError } = await supabase
-        .from('experiences')
-        .select('*')
-        .eq('profile_id', profileId)
-        .order('start_date', { ascending: false });
-
-      if (expError) throw expError;
-
-      if (expData) {
-        setExperiences(expData.map(exp => ({
-          id: exp.id,
-          companyName: exp.company_name,
-          designation: exp.designation || '',
-          description: exp.description || '',
-          startDate: new Date(exp.start_date),
-          endDate: exp.end_date ? new Date(exp.end_date) : undefined,
-          isCurrent: exp.is_current || false
-        })));
-      }
-    } catch (error) {
-      console.error('Error fetching experiences:', error);
-      toast({
-        title: 'Error',
-        description: 'Failed to load experiences',
-        variant: 'destructive'
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchExperiences();
-  }, [profileId]);
-
-  return {
-    isLoading,
-    experiences,
-    refetch: fetchExperiences
-  };
+export interface ExperienceItem {
+  id: string;
+  profile_id: string;
+  company: string;
+  designation: string;
+  start_date: string;
+  end_date: string | null;
+  description: string | null;
+  is_current: boolean;
+  created_at: string;
+  updated_at: string;
 }
+
+const fetchExperiences = async (profileId: string | undefined) => {
+  if (!profileId) {
+    return null;
+  }
+
+  const { data, error } = await supabase
+    .from('experiences')
+    .select('*')
+    .eq('profile_id', profileId)
+    .order('start_date', { ascending: false });
+
+  if (error) {
+    throw error;
+  }
+
+  return data as ExperienceItem[];
+};
+
+export const useExperienceFetch = () => {
+  const { profile } = useAuth();
+  const { toast } = useToast();
+
+  const query = useQuery({
+    queryKey: ['experiences', profile?.id],
+    queryFn: () => fetchExperiences(profile?.id),
+    onError: (error: any) => {
+      toast({
+        title: "Error fetching experiences",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  return query;
+};
+

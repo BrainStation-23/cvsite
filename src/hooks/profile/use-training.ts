@@ -1,222 +1,135 @@
-
-import { useState, useEffect } from 'react';
-import { useToast } from '@/hooks/use-toast';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/ui/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
-import { Training } from '@/types';
 
-// Type for database training record format
-type TrainingDB = {
+export interface TrainingItem {
   id: string;
-  profile_id: string;
   title: string;
-  provider: string;
-  description?: string;
-  certification_date: string;
-  certificate_url?: string;
+  institution: string;
+  start_date: string | null;
+  end_date: string | null;
+  description: string | null;
+  profile_id: string;
   created_at: string;
   updated_at: string;
-};
+}
 
-// Map from database format to application model
-const mapToTraining = (data: TrainingDB): Training => ({
-  id: data.id,
-  title: data.title,
-  provider: data.provider,
-  description: data.description || '',
-  date: new Date(data.certification_date),
-  certificateUrl: data.certificate_url
-});
+export interface TrainingFormData {
+  title: string;
+  institution: string;
+  start_date?: string | null;
+  end_date?: string | null;
+  description?: string | null;
+}
 
-// Map from application model to database format
-const mapToTrainingDB = (training: Omit<Training, 'id'>, profileId: string) => ({
-  profile_id: profileId,
-  title: training.title,
-  provider: training.provider,
-  description: training.description || null,
-  certification_date: training.date.toISOString().split('T')[0],
-  certificate_url: training.certificateUrl || null
-});
-
-export function useTraining(profileId?: string) {
+export const useTraining = () => {
   const { user } = useAuth();
   const { toast } = useToast();
-  const [isLoading, setIsLoading] = useState(true);
-  const [isSaving, setIsSaving] = useState(false);
-  const [trainings, setTrainings] = useState<Training[]>([]);
+  const queryClient = useQueryClient();
 
-  // Use provided profileId or fallback to auth user id
-  const targetProfileId = profileId || user?.id;
+  const addTrainingMutation = useMutation({
+    mutationFn: async (training: TrainingFormData) => {
+      if (!user) throw new Error('Not authenticated');
 
-  // Fetch trainings
-  const fetchTrainings = async () => {
-    if (!targetProfileId) return;
-    
-    try {
-      setIsLoading(true);
       const { data, error } = await supabase
         .from('trainings')
-        .select('*')
-        .eq('profile_id', targetProfileId)
-        .order('certification_date', { ascending: false });
-      
-      if (error) throw error;
-      
-      if (data) {
-        // Map database records to application model format
-        const mappedData = data.map(mapToTraining);
-        setTrainings(mappedData);
-      }
-    } catch (error) {
-      console.error('Error fetching trainings:', error);
-      toast({
-        title: 'Error',
-        description: 'Failed to load training information',
-        variant: 'destructive'
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  // Save training
-  const saveTraining = async (training: Omit<Training, 'id'>) => {
-    if (!targetProfileId) return false;
-    
-    try {
-      setIsSaving(true);
-      
-      // Convert to database format
-      const dbData = mapToTrainingDB(training, targetProfileId);
-      
-      const { data, error } = await supabase
-        .from('trainings')
-        .insert(dbData)
+        .insert({
+          ...training,
+          profile_id: user.id,
+        })
         .select();
-      
-      if (error) throw error;
-      
-      // Update local state with the new training entry
-      if (data && data.length > 0) {
-        const newTraining = mapToTraining(data[0] as TrainingDB);
-        setTrainings(prev => [...prev, newTraining]);
-      }
-      
-      toast({
-        title: 'Success',
-        description: 'Training has been added',
-      });
-      
-      return true;
-    } catch (error) {
-      console.error('Error saving training:', error);
-      toast({
-        title: 'Error',
-        description: 'Failed to add training',
-        variant: 'destructive'
-      });
-      return false;
-    } finally {
-      setIsSaving(false);
-    }
-  };
 
-  // Update training
-  const updateTraining = async (id: string, training: Partial<Training>) => {
-    if (!targetProfileId) return false;
-    
-    try {
-      setIsSaving(true);
-      
-      // Convert partial training data to database format
-      const dbData: Partial<TrainingDB> = {};
-      
-      if (training.title) dbData.title = training.title;
-      if (training.provider) dbData.provider = training.provider;
-      if (training.description !== undefined) dbData.description = training.description;
-      if (training.date) dbData.certification_date = training.date.toISOString().split('T')[0];
-      if (training.certificateUrl !== undefined) dbData.certificate_url = training.certificateUrl;
-      
-      dbData.updated_at = new Date().toISOString();
-      
-      const { error } = await supabase
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['trainings'] });
+      toast({
+        title: "Training added",
+        description: "Your training has been added.",
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: `Failed to add training: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        variant: "destructive"
+      });
+    },
+  });
+
+  const updateTrainingMutation = useMutation({
+    mutationFn: async ({ id, training }: { id: string; training: TrainingFormData }) => {
+      if (!user) throw new Error('Not authenticated');
+
+      const { data, error } = await supabase
         .from('trainings')
-        .update(dbData)
+        .update(training)
         .eq('id', id)
-        .eq('profile_id', targetProfileId);
-      
-      if (error) throw error;
-      
-      // Update local state
-      setTrainings(prev => 
-        prev.map(item => item.id === id ? { ...item, ...training } : item)
-      );
-      
-      toast({
-        title: 'Success',
-        description: 'Training has been updated',
-      });
-      
-      return true;
-    } catch (error) {
-      console.error('Error updating training:', error);
-      toast({
-        title: 'Error',
-        description: 'Failed to update training',
-        variant: 'destructive'
-      });
-      return false;
-    } finally {
-      setIsSaving(false);
-    }
-  };
+        .eq('profile_id', user.id)
+        .select();
 
-  // Delete training
-  const deleteTraining = async (id: string) => {
-    if (!targetProfileId) return false;
-    
-    try {
-      const { error } = await supabase
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['trainings'] });
+      toast({
+        title: "Training updated",
+        description: "Your training has been updated.",
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: `Failed to update training: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        variant: "destructive"
+      });
+    },
+  });
+
+  const deleteTrainingMutation = useMutation({
+    mutationFn: async (id: string) => {
+      if (!user) throw new Error('Not authenticated');
+
+      const { data, error } = await supabase
         .from('trainings')
         .delete()
         .eq('id', id)
-        .eq('profile_id', targetProfileId);
-      
-      if (error) throw error;
-      
-      // Update local state
-      setTrainings(prev => prev.filter(item => item.id !== id));
-      
-      toast({
-        title: 'Success',
-        description: 'Training has been removed',
-      });
-      
-      return true;
-    } catch (error) {
-      console.error('Error deleting training:', error);
-      toast({
-        title: 'Error',
-        description: 'Failed to remove training',
-        variant: 'destructive'
-      });
-      return false;
-    }
-  };
+        .eq('profile_id', user.id);
 
-  // Load trainings data
-  useEffect(() => {
-    if (targetProfileId) {
-      fetchTrainings();
-    }
-  }, [targetProfileId]);
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['trainings'] });
+      toast({
+        title: "Training removed",
+        description: "Your training has been removed.",
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: `Failed to remove training: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        variant: "destructive"
+      });
+    },
+  });
 
   return {
-    trainings,
-    isLoading,
-    isSaving,
-    saveTraining,
-    updateTraining,
-    deleteTraining
+    addTraining: async (training: TrainingFormData) => {
+      await addTrainingMutation.mutateAsync(training);
+    },
+    updateTraining: async (id: string, training: TrainingFormData) => {
+      await updateTrainingMutation.mutateAsync({ id, training });
+    },
+    deleteTraining: async (id: string) => {
+      await deleteTrainingMutation.mutateAsync(id);
+    },
+    isAdding: addTrainingMutation.isLoading,
+    isUpdating: updateTrainingMutation.isLoading,
+    isRemoving: deleteTrainingMutation.isLoading,
   };
-}
+};

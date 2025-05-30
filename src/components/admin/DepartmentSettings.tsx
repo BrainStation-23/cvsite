@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
@@ -193,7 +194,7 @@ const DepartmentSettings: React.FC = () => {
         />
 
         {pagination && (
-          <UniversityPagination
+          <DepartmentPagination
             pagination={pagination}
             onPageChange={setPage}
             onPerPageChange={(newPerPage) => {

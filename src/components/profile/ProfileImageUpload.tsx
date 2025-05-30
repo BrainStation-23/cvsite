@@ -1,258 +1,141 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { AspectRatio } from '@/components/ui/aspect-ratio';
-import { Camera, Trash2, Upload } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
+import { Label } from '@/components/ui/label';
+import { Card, CardContent } from '@/components/ui/card';
+import { Upload, X } from 'lucide-react';
+import { useToast } from '@/hooks/ui/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/contexts/AuthContext';
 
 interface ProfileImageUploadProps {
+  userId: string;
+  onUploadComplete: () => void;
   currentImageUrl?: string | null;
-  profileId?: string;
-  onImageUpdate: (imageUrl: string | null) => void;
-  isEditing: boolean;
-  userName: string;
 }
 
-export const ProfileImageUpload: React.FC<ProfileImageUploadProps> = ({
-  currentImageUrl,
-  profileId,
-  onImageUpdate,
-  isEditing,
-  userName
-}) => {
-  const { user } = useAuth();
+const ProfileImageUpload: React.FC<ProfileImageUploadProps> = ({ userId, onUploadComplete, currentImageUrl }) => {
+  const [image, setImage] = useState<File | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(currentImageUrl || null);
+  const [isUploading, setIsUploading] = useState(false);
   const { toast } = useToast();
-  const [uploading, setUploading] = useState(false);
-  const [deleting, setDeleting] = useState(false);
 
-  // Use provided profileId or fallback to auth user id
-  const targetProfileId = profileId || user?.id;
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setImage(file);
+      setPreviewUrl(URL.createObjectURL(file));
+    }
+  };
 
-  const uploadImage = async (file: File) => {
-    if (!targetProfileId) {
+  const handleUpload = async () => {
+    if (!image) {
       toast({
-        title: 'Error',
-        description: 'User not authenticated',
-        variant: 'destructive'
+        title: "Error",
+        description: "Please select an image to upload.",
+        variant: "destructive"
       });
       return;
     }
 
+    setIsUploading(true);
+
     try {
-      setUploading(true);
+      const fileExt = image.name.split('.').pop();
+      const filePath = `avatars/${userId}.${fileExt}`;
 
-      // Create file name with user ID and timestamp
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${targetProfileId}/profile-${Date.now()}.${fileExt}`;
+      const { error: storageError } = await supabase.storage
+        .from('avatars')
+        .upload(filePath, image, {
+          cacheControl: '3600',
+          upsert: false
+        });
 
-      // Delete existing image if it exists
-      if (currentImageUrl) {
-        await deleteCurrentImage();
+      if (storageError) {
+        throw storageError;
       }
 
-      // Upload new image
-      const { error: uploadError } = await supabase.storage
-        .from('profile-images')
-        .upload(fileName, file);
+      const { data, error: updateError } = await supabase
+        .from('profiles')
+        .update({ avatar_url: filePath })
+        .eq('id', userId)
+        .select();
 
-      if (uploadError) throw uploadError;
-
-      // Get public URL
-      const { data: { publicUrl } } = supabase.storage
-        .from('profile-images')
-        .getPublicUrl(fileName);
-
-      // Update the image URL in the parent component
-      onImageUpdate(publicUrl);
-
-      toast({
-        title: 'Success',
-        description: 'Profile image uploaded successfully',
-      });
-    } catch (error) {
-      console.error('Error uploading image:', error);
-      toast({
-        title: 'Error',
-        description: 'Failed to upload image',
-        variant: 'destructive'
-      });
-    } finally {
-      setUploading(false);
-    }
-  };
-
-  const deleteCurrentImage = async () => {
-    if (!currentImageUrl || !targetProfileId) return;
-
-    try {
-      // Extract file path from URL
-      const url = new URL(currentImageUrl);
-      const filePath = url.pathname.split('/profile-images/')[1];
-      
-      if (filePath) {
-        const { error } = await supabase.storage
-          .from('profile-images')
-          .remove([filePath]);
-
-        if (error) {
-          console.error('Error deleting file from storage:', error);
-        }
+      if (updateError) {
+        throw updateError;
       }
-    } catch (error) {
-      console.error('Error parsing image URL:', error);
-    }
-  };
-
-  const handleRemoveImage = async () => {
-    try {
-      setDeleting(true);
-      
-      await deleteCurrentImage();
-      onImageUpdate(null);
 
       toast({
-        title: 'Success',
-        description: 'Profile image removed successfully',
+        title: "Success",
+        description: "Profile image uploaded successfully!",
       });
-    } catch (error) {
-      console.error('Error removing image:', error);
+      onUploadComplete();
+    } catch (error: any) {
       toast({
-        title: 'Error',
-        description: 'Failed to remove image',
-        variant: 'destructive'
+        title: "Error",
+        description: error.message || "Failed to upload profile image.",
+        variant: "destructive"
       });
     } finally {
-      setDeleting(false);
+      setIsUploading(false);
     }
   };
 
-  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
-
-    // Validate file type
-    if (!file.type.startsWith('image/')) {
-      toast({
-        title: 'Error',
-        description: 'Please select an image file',
-        variant: 'destructive'
-      });
-      return;
-    }
-
-    // Validate file size (max 5MB)
-    if (file.size > 5 * 1024 * 1024) {
-      toast({
-        title: 'Error',
-        description: 'Image size must be less than 5MB',
-        variant: 'destructive'
-      });
-      return;
-    }
-
-    uploadImage(file);
-  };
-
-  const getInitials = (name: string) => {
-    return name
-      .split(' ')
-      .map(word => word[0])
-      .join('')
-      .toUpperCase()
-      .slice(0, 2);
+  const handleRemove = () => {
+    setImage(null);
+    setPreviewUrl(null);
   };
 
   return (
-    <div className="flex flex-col items-center space-y-6">
-      {/* Profile Image Preview */}
-      <div className="relative w-64">
-        <AspectRatio ratio={3/4} className="bg-gray-100 dark:bg-gray-800 rounded-lg overflow-hidden border-2 border-gray-200 dark:border-gray-700">
-          {currentImageUrl ? (
+    <Card>
+      <CardContent className="flex flex-col space-y-4">
+        {previewUrl && (
+          <div className="relative w-32 h-32 rounded-full overflow-hidden">
             <img
-              src={currentImageUrl}
-              alt={userName}
-              className="w-full h-full object-cover"
-              style={{ objectPosition: 'center' }}
+              src={previewUrl}
+              alt="Profile Preview"
+              className="object-cover w-full h-full"
             />
-          ) : (
-            <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-900">
-              <div className="text-center">
-                <div className="text-3xl font-bold text-gray-400 dark:text-gray-500 mb-2">
-                  {getInitials(userName)}
-                </div>
-                <p className="text-sm text-gray-500 dark:text-gray-400">No image uploaded</p>
-              </div>
-            </div>
-          )}
-        </AspectRatio>
-        
-        {/* Camera overlay button for editing */}
-        {isEditing && (
-          <div className="absolute top-3 right-3">
-            <label htmlFor="profile-image-upload">
-              <Button
-                type="button"
-                size="sm"
-                className="rounded-full h-10 w-10 p-0 shadow-lg"
-                disabled={uploading}
-                asChild
-              >
-                <span className="cursor-pointer">
-                  <Camera className="h-4 w-4" />
-                </span>
-              </Button>
-            </label>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="absolute top-0 right-0 p-1 bg-background/50 text-muted-foreground hover:text-foreground rounded-full"
+              onClick={handleRemove}
+            >
+              <X className="h-4 w-4" />
+            </Button>
           </div>
         )}
-      </div>
-
-      {/* Action Buttons */}
-      {isEditing && (
-        <div className="flex flex-col sm:flex-row gap-3 w-full max-w-xs">
-          <label htmlFor="profile-image-upload" className="flex-1">
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              disabled={uploading}
-              className="w-full"
-              asChild
-            >
-              <span className="cursor-pointer flex items-center justify-center gap-2">
-                <Upload className="h-4 w-4" />
-                {uploading ? 'Uploading...' : 'Upload Image'}
-              </span>
-            </Button>
-          </label>
-          
-          {currentImageUrl && (
-            <Button
-              type="button"
-              variant="destructive"
-              size="sm"
-              onClick={handleRemoveImage}
-              disabled={deleting || uploading}
-              className="flex-1"
-            >
-              <Trash2 className="h-4 w-4 mr-2" />
-              {deleting ? 'Removing...' : 'Remove'}
-            </Button>
-          )}
+        <div>
+          <Label htmlFor="profile-image">Upload Image</Label>
+          <Input
+            type="file"
+            id="profile-image"
+            accept="image/*"
+            onChange={handleImageChange}
+            disabled={isUploading}
+            className="hidden"
+          />
+          <Button asChild variant="outline" disabled={isUploading}>
+            <Label htmlFor="profile-image" className="cursor-pointer">
+              {isUploading ? (
+                <>Uploading...</>
+              ) : (
+                <>
+                  <Upload className="mr-2 h-4 w-4" />
+                  Choose Image
+                </>
+              )}
+            </Label>
+          </Button>
         </div>
-      )}
-
-      {/* Hidden file input */}
-      <Input
-        id="profile-image-upload"
-        type="file"
-        accept="image/*"
-        onChange={handleFileSelect}
-        className="hidden"
-        disabled={uploading}
-      />
-    </div>
+        {image && (
+          <Button onClick={handleUpload} disabled={isUploading}>
+            {isUploading ? 'Uploading...' : 'Upload'}
+          </Button>
+        )}
+      </CardContent>
+    </Card>
   );
 };
+
+export default ProfileImageUpload;

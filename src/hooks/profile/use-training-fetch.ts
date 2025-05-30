@@ -1,55 +1,49 @@
-
-import { useState, useEffect } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/hooks/use-toast';
-import { Training } from '@/types';
+import { useAuth } from '@/contexts/AuthContext';
+import { useToast } from '@/hooks/ui/use-toast';
 
-export function useTrainingFetch(profileId: string) {
+export interface Training {
+  id: string;
+  user_id: string;
+  title: string;
+  institution: string;
+  start_date: string | null;
+  end_date: string | null;
+  description: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+const useTrainingFetch = () => {
+  const { user } = useAuth();
   const { toast } = useToast();
-  const [isLoading, setIsLoading] = useState(true);
-  const [trainings, setTrainings] = useState<Training[]>([]);
 
-  const fetchTrainings = async () => {
-    if (!profileId) return;
+  return useQuery({
+    queryKey: ['trainings', user?.id],
+    queryFn: async (): Promise<Training[]> => {
+      if (!user?.id) {
+        return [];
+      }
 
-    try {
-      const { data: trainingData, error: trainingError } = await supabase
+      const { data, error } = await supabase
         .from('trainings')
         .select('*')
-        .eq('profile_id', profileId)
-        .order('certification_date', { ascending: false });
+        .eq('user_id', user.id)
+        .order('start_date', { ascending: false });
 
-      if (trainingError) throw trainingError;
-
-      if (trainingData) {
-        setTrainings(trainingData.map(training => ({
-          id: training.id,
-          title: training.title,
-          provider: training.provider,
-          description: training.description || '',
-          date: new Date(training.certification_date),
-          certificateUrl: training.certificate_url
-        })));
+      if (error) {
+        toast({
+          title: 'Error fetching trainings',
+          description: error.message,
+          variant: 'destructive',
+        });
+        throw error;
       }
-    } catch (error) {
-      console.error('Error fetching trainings:', error);
-      toast({
-        title: 'Error',
-        description: 'Failed to load trainings',
-        variant: 'destructive'
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
-  useEffect(() => {
-    fetchTrainings();
-  }, [profileId]);
+      return data || [];
+    },
+  });
+};
 
-  return {
-    isLoading,
-    trainings,
-    refetch: fetchTrainings
-  };
-}
+export default useTrainingFetch;

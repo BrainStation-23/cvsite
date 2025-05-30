@@ -1,58 +1,58 @@
-
-import { useState, useEffect } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/hooks/use-toast';
-import { Project } from '@/types';
+import { useAuth } from '@/contexts/AuthContext';
+import { useToast } from '@/hooks/ui/use-toast';
 
-export function useProjectsFetch(profileId: string) {
+export interface Project {
+  id: string;
+  created_at: string;
+  updated_at: string;
+  name: string;
+  description: string;
+  start_date: string | null;
+  end_date: string | null;
+  user_id: string;
+}
+
+const useProjectsFetch = () => {
+  const { user } = useAuth();
   const { toast } = useToast();
-  const [isLoading, setIsLoading] = useState(true);
-  const [projects, setProjects] = useState<Project[]>([]);
 
-  const fetchProjects = async () => {
-    if (!profileId) return;
-
-    try {
-      const { data: projectData, error: projectError } = await supabase
-        .from('projects')
-        .select('*')
-        .eq('profile_id', profileId)
-        .order('start_date', { ascending: false });
-
-      if (projectError) throw projectError;
-
-      if (projectData) {
-        setProjects(projectData.map(project => ({
-          id: project.id,
-          name: project.name,
-          role: project.role,
-          description: project.description,
-          startDate: new Date(project.start_date),
-          endDate: project.end_date ? new Date(project.end_date) : undefined,
-          isCurrent: project.is_current || false,
-          technologiesUsed: project.technologies_used || [],
-          url: project.url
-        })));
-      }
-    } catch (error) {
-      console.error('Error fetching projects:', error);
-      toast({
-        title: 'Error',
-        description: 'Failed to load projects',
-        variant: 'destructive'
-      });
-    } finally {
-      setIsLoading(false);
+  const fetchProjects = async (): Promise<Project[]> => {
+    if (!user) {
+      return [];
     }
+
+    const { data, error } = await supabase
+      .from('projects')
+      .select('*')
+      .eq('user_id', user.id)
+      .order('start_date', { ascending: false });
+
+    if (error) {
+      toast({
+        title: 'Error fetching projects',
+        description: error.message,
+        variant: 'destructive',
+      });
+      return [];
+    }
+
+    return data || [];
   };
 
-  useEffect(() => {
-    fetchProjects();
-  }, [profileId]);
+  const {
+    data: projects,
+    isLoading,
+    error,
+  } = useQuery(['projects'], fetchProjects);
 
   return {
+    projects: projects || [],
     isLoading,
-    projects,
-    refetch: fetchProjects
+    error,
   };
-}
+};
+
+export default useProjectsFetch;
+

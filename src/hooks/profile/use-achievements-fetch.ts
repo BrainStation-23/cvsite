@@ -1,53 +1,60 @@
-
-import { useState, useEffect } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/hooks/use-toast';
-import { Achievement } from '@/types';
+import { useAuth } from '@/contexts/AuthContext';
+import { useToast } from '@/hooks/ui/use-toast';
 
-export function useAchievementsFetch(profileId: string) {
+interface Achievement {
+  id: string;
+  created_at: string;
+  user_id: string;
+  name: string;
+  institution: string;
+  date_obtained: string;
+  description: string;
+}
+
+const useAchievementsFetch = () => {
+  const { user } = useAuth();
   const { toast } = useToast();
-  const [isLoading, setIsLoading] = useState(true);
-  const [achievements, setAchievements] = useState<Achievement[]>([]);
 
-  const fetchAchievements = async () => {
-    if (!profileId) return;
+  const fetchAchievements = async (): Promise<Achievement[]> => {
+    if (!user) {
+      return [];
+    }
 
     try {
-      const { data: achievementData, error: achievementError } = await supabase
+      const { data, error } = await supabase
         .from('achievements')
         .select('*')
-        .eq('profile_id', profileId)
-        .order('date', { ascending: false });
+        .eq('user_id', user.id)
+        .order('date_obtained', { ascending: false });
 
-      if (achievementError) throw achievementError;
-
-      if (achievementData) {
-        setAchievements(achievementData.map(achievement => ({
-          id: achievement.id,
-          title: achievement.title,
-          description: achievement.description,
-          date: new Date(achievement.date)
-        })));
+      if (error) {
+        throw new Error(error.message);
       }
-    } catch (error) {
-      console.error('Error fetching achievements:', error);
+
+      return data || [];
+    } catch (error: any) {
       toast({
-        title: 'Error',
-        description: 'Failed to load achievements',
-        variant: 'destructive'
+        title: 'Error fetching achievements',
+        description: error.message,
+        variant: 'destructive',
       });
-    } finally {
-      setIsLoading(false);
+      return [];
     }
   };
 
-  useEffect(() => {
-    fetchAchievements();
-  }, [profileId]);
+  const {
+    data: achievements,
+    isLoading,
+    error,
+  } = useQuery(['achievements'], fetchAchievements);
 
   return {
-    isLoading,
     achievements,
-    refetch: fetchAchievements
+    isLoading,
+    error,
   };
-}
+};
+
+export default useAchievementsFetch;

@@ -108,6 +108,32 @@ export const useDepartmentSettings = () => {
       queryClient.invalidateQueries({ queryKey: ['department-search'] });
     },
   });
+
+  // Bulk import mutation
+  const bulkImportMutation = useMutation({
+    mutationFn: async (departments: DepartmentFormData[]) => {
+      if (departments.length === 0) {
+        throw new Error('No departments to import');
+      }
+
+      const { data, error } = await supabase
+        .from('departments')
+        .insert(
+          departments.map(department => ({
+            name: department.name,
+            full_form: department.full_form || null
+          }))
+        )
+        .select();
+      
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['departments'] });
+      queryClient.invalidateQueries({ queryKey: ['department-search'] });
+    },
+  });
   
   const addItem = (department: DepartmentFormData) => {
     if (!department.name.trim()) return;
@@ -173,6 +199,24 @@ export const useDepartmentSettings = () => {
     });
   };
 
+  const bulkImportItems = (departments: DepartmentFormData[]) => {
+    bulkImportMutation.mutate(departments, {
+      onSuccess: (result) => {
+        toast({
+          title: "Import successful",
+          description: `${result.length} departments imported successfully.`,
+        });
+      },
+      onError: (error) => {
+        toast({
+          title: "Import failed",
+          description: error instanceof Error ? error.message : 'Unknown error',
+          variant: "destructive"
+        });
+      }
+    });
+  };
+
   return {
     items,
     isLoading,
@@ -180,8 +224,10 @@ export const useDepartmentSettings = () => {
     addItem,
     updateItem,
     removeItem,
+    bulkImportItems,
     isAddingItem: addDepartmentMutation.isPending,
     isUpdatingItem: updateDepartmentMutation.isPending,
-    isRemovingItem: deleteDepartmentMutation.isPending
+    isRemovingItem: deleteDepartmentMutation.isPending,
+    isBulkImporting: bulkImportMutation.isPending
   };
 };

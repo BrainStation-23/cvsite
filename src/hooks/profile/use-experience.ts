@@ -1,7 +1,7 @@
-
 import { useState, useEffect } from 'react';
-import { useToast } from '@/hooks/use-toast';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/ui/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import { Experience } from '@/types';
 
@@ -45,6 +45,7 @@ const mapToExperienceDB = (exp: Omit<Experience, 'id'>, profileId: string) => ({
 export function useExperience(profileId?: string) {
   const { user } = useAuth();
   const { toast } = useToast();
+  const queryClient = useQueryClient();
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [experiences, setExperiences] = useState<Experience[]>([]);
@@ -84,138 +85,159 @@ export function useExperience(profileId?: string) {
   };
 
   // Save experience
-  const saveExperience = async (experience: Omit<Experience, 'id'>) => {
-    if (!targetProfileId) return false;
-    
-    try {
-      setIsSaving(true);
+  const saveExperience = useMutation(
+    async (experience: Omit<Experience, 'id'>) => {
+      if (!targetProfileId) return false;
       
-      // Convert to database format
-      const dbData = mapToExperienceDB(experience, targetProfileId);
-      
-      const { data, error } = await supabase
-        .from('experiences')
-        .insert(dbData)
-        .select();
-      
-      if (error) throw error;
-      
-      // Update local state with the new experience entry
-      if (data && data.length > 0) {
-        const newExperience = mapToExperience(data[0] as ExperienceDB);
-        setExperiences(prev => [...prev, newExperience]);
+      try {
+        setIsSaving(true);
+        
+        // Convert to database format
+        const dbData = mapToExperienceDB(experience, targetProfileId);
+        
+        const { data, error } = await supabase
+          .from('experiences')
+          .insert(dbData)
+          .select();
+        
+        if (error) throw error;
+        
+        // Update local state with the new experience entry
+        if (data && data.length > 0) {
+          const newExperience = mapToExperience(data[0] as ExperienceDB);
+          setExperiences(prev => [...prev, newExperience]);
+        }
+        
+        toast({
+          title: 'Success',
+          description: 'Experience has been added',
+        });
+        
+        return true;
+      } catch (error) {
+        console.error('Error saving experience:', error);
+        toast({
+          title: 'Error',
+          description: 'Failed to add experience',
+          variant: 'destructive'
+        });
+        return false;
+      } finally {
+        setIsSaving(false);
       }
-      
-      toast({
-        title: 'Success',
-        description: 'Experience has been added',
-      });
-      
-      return true;
-    } catch (error) {
-      console.error('Error saving experience:', error);
-      toast({
-        title: 'Error',
-        description: 'Failed to add experience',
-        variant: 'destructive'
-      });
-      return false;
-    } finally {
-      setIsSaving(false);
+    },
+    {
+      onSuccess: () => {
+        queryClient.invalidateQueries(['experiences']);
+      }
     }
-  };
+  );
 
   // Update experience
-  const updateExperience = async (id: string, experience: Partial<Experience>) => {
-    if (!targetProfileId) return false;
-    
-    try {
-      setIsSaving(true);
+  const updateExperience = useMutation(
+    async (id: string, experience: Partial<Experience>) => {
+      if (!targetProfileId) return false;
       
-      // Convert partial experience data to database format
-      const dbData: Partial<ExperienceDB> = {};
-      
-      if (experience.companyName) dbData.company_name = experience.companyName;
-      if (experience.designation) {
-        dbData.designation = experience.designation;
+      try {
+        setIsSaving(true);
+        
+        // Convert partial experience data to database format
+        const dbData: Partial<ExperienceDB> = {};
+        
+        if (experience.companyName) dbData.company_name = experience.companyName;
+        if (experience.designation) {
+          dbData.designation = experience.designation;
+        }
+        if (experience.description !== undefined) dbData.description = experience.description;
+        if (experience.startDate) dbData.start_date = experience.startDate.toISOString().split('T')[0];
+        
+        if (experience.endDate) {
+          dbData.end_date = experience.endDate.toISOString().split('T')[0];
+        } else if (experience.endDate === null) {
+          dbData.end_date = null;
+        }
+        
+        if (experience.isCurrent !== undefined) dbData.is_current = experience.isCurrent;
+        
+        dbData.updated_at = new Date().toISOString();
+        
+        const { error } = await supabase
+          .from('experiences')
+          .update(dbData)
+          .eq('id', id)
+          .eq('profile_id', targetProfileId);
+        
+        if (error) throw error;
+        
+        // Update local state
+        setExperiences(prev => 
+          prev.map(exp => exp.id === id ? { ...exp, ...experience } : exp)
+        );
+        
+        toast({
+          title: 'Success',
+          description: 'Experience has been updated',
+        });
+        
+        return true;
+      } catch (error) {
+        console.error('Error updating experience:', error);
+        toast({
+          title: 'Error',
+          description: 'Failed to update experience',
+          variant: 'destructive'
+        });
+        return false;
+      } finally {
+        setIsSaving(false);
       }
-      if (experience.description !== undefined) dbData.description = experience.description;
-      if (experience.startDate) dbData.start_date = experience.startDate.toISOString().split('T')[0];
-      
-      if (experience.endDate) {
-        dbData.end_date = experience.endDate.toISOString().split('T')[0];
-      } else if (experience.endDate === null) {
-        dbData.end_date = null;
+    },
+    {
+      onSuccess: () => {
+        queryClient.invalidateQueries(['experiences']);
       }
-      
-      if (experience.isCurrent !== undefined) dbData.is_current = experience.isCurrent;
-      
-      dbData.updated_at = new Date().toISOString();
-      
-      const { error } = await supabase
-        .from('experiences')
-        .update(dbData)
-        .eq('id', id)
-        .eq('profile_id', targetProfileId);
-      
-      if (error) throw error;
-      
-      // Update local state
-      setExperiences(prev => 
-        prev.map(exp => exp.id === id ? { ...exp, ...experience } : exp)
-      );
-      
-      toast({
-        title: 'Success',
-        description: 'Experience has been updated',
-      });
-      
-      return true;
-    } catch (error) {
-      console.error('Error updating experience:', error);
-      toast({
-        title: 'Error',
-        description: 'Failed to update experience',
-        variant: 'destructive'
-      });
-      return false;
-    } finally {
-      setIsSaving(false);
     }
-  };
+  );
 
   // Delete experience
-  const deleteExperience = async (id: string) => {
-    if (!targetProfileId) return false;
-    
-    try {
-      const { error } = await supabase
-        .from('experiences')
-        .delete()
-        .eq('id', id)
-        .eq('profile_id', targetProfileId);
+  const deleteExperience = useMutation(
+    async (id: string) => {
+      if (!targetProfileId) return false;
       
-      if (error) throw error;
-      
-      // Update local state
-      setExperiences(prev => prev.filter(exp => exp.id !== id));
-      
-      toast({
-        title: 'Success',
-        description: 'Experience has been removed',
-      });
-      
-      return true;
-    } catch (error) {
-      console.error('Error deleting experience:', error);
-      toast({
-        title: 'Error',
-        description: 'Failed to remove experience',
-        variant: 'destructive'
-      });
-      return false;
+      try {
+        const { error } = await supabase
+          .from('experiences')
+          .delete()
+          .eq('id', id)
+          .eq('profile_id', targetProfileId);
+        
+        if (error) throw error;
+        
+        // Update local state
+        setExperiences(prev => prev.filter(exp => exp.id !== id));
+        
+        toast({
+          title: 'Success',
+          description: 'Experience has been removed',
+        });
+        
+        return true;
+      } catch (error) {
+        console.error('Error deleting experience:', error);
+        toast({
+          title: 'Error',
+          description: 'Failed to remove experience',
+          variant: 'destructive'
+        });
+        return false;
+      }
+    },
+    {
+      onSuccess: () => {
+        queryClient.invalidateQueries(['experiences']);
+      }
     }
-  };
+  );
 
   // Load experiences data
   useEffect(() => {

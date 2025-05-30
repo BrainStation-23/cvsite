@@ -3,9 +3,9 @@ import React, { useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Download, Upload } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
+import { useToast } from '@/hooks/ui/use-toast';
 import { exportUniversitiesToCSV, parseUniversitiesCSV, validateCSVData } from '@/utils/csvUtils';
-import { UniversityItem, UniversityFormData } from '@/hooks/use-university-settings';
+import { UniversityItem, UniversityFormData } from '@/hooks/settings/use-university-settings';
 import UniversityImportDialog from './UniversityImportDialog';
 import UniversityCSVValidation from './UniversityCSVValidation';
 

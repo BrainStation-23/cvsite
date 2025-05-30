@@ -1,57 +1,47 @@
-
-import { useState, useEffect } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/hooks/use-toast';
-import { Education } from '@/types';
+import { useAuth } from '@/contexts/AuthContext';
+import { useToast } from '@/hooks/ui/use-toast';
 
-export function useEducationFetch(profileId: string) {
+interface Education {
+  id: string;
+  start_date: string;
+  end_date: string | null;
+  institution: string;
+  degree: string;
+  description: string | null;
+}
+
+const useEducationFetch = () => {
+  const { user } = useAuth();
   const { toast } = useToast();
-  const [isLoading, setIsLoading] = useState(true);
-  const [education, setEducation] = useState<Education[]>([]);
 
-  const fetchEducation = async () => {
-    if (!profileId) return;
+  return useQuery({
+    queryKey: ['education', user?.id],
+    queryFn: async (): Promise<Education[]> => {
+      if (!user) {
+        return [];
+      }
 
-    try {
-      const { data: eduData, error: eduError } = await supabase
+      const { data, error } = await supabase
         .from('education')
         .select('*')
-        .eq('profile_id', profileId)
+        .eq('user_id', user.id)
         .order('start_date', { ascending: false });
 
-      if (eduError) throw eduError;
-
-      if (eduData) {
-        setEducation(eduData.map(edu => ({
-          id: edu.id,
-          university: edu.university,
-          degree: edu.degree || '',
-          department: edu.department || undefined,
-          gpa: edu.gpa || undefined,
-          startDate: new Date(edu.start_date),
-          endDate: edu.end_date ? new Date(edu.end_date) : undefined,
-          isCurrent: edu.is_current || false
-        })));
+      if (error) {
+        toast({
+          title: 'Error fetching education',
+          description: error.message,
+          variant: 'destructive',
+        });
+        throw error;
       }
-    } catch (error) {
-      console.error('Error fetching education:', error);
-      toast({
-        title: 'Error',
-        description: 'Failed to load education',
-        variant: 'destructive'
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
-  useEffect(() => {
-    fetchEducation();
-  }, [profileId]);
+      return data || [];
+    },
+  });
+};
 
-  return {
-    isLoading,
-    education,
-    refetch: fetchEducation
-  };
-}
+export default useEducationFetch;
+
