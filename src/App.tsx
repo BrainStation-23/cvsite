@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -18,7 +17,6 @@ import ManagerDashboard from '@/pages/dashboard/ManagerDashboard';
 import UserManagement from '@/pages/admin/UserManagement';
 import PlatformSettings from '@/pages/admin/PlatformSettings';
 import CVTemplates from '@/pages/admin/CVTemplates';
-import CVTemplateCreate from '@/pages/admin/CVTemplateCreate';
 import CVTemplateEdit from '@/pages/admin/CVTemplateEdit';
 import SecurityPage from '@/pages/security/SecurityPage';
 import NotFound from '@/pages/NotFound';
@@ -102,6 +100,22 @@ function App() {
               }
             />
             <Route
+              path="/employee/dashboard"
+              element={
+                <ProtectedRoute allowedRoles={['employee']}>
+                  <EmployeeDashboard />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/manager/dashboard"
+              element={
+                <ProtectedRoute allowedRoles={['manager']}>
+                  <ManagerDashboard />
+                </ProtectedRoute>
+              }
+            />
+            <Route
               path="/admin-dashboard"
               element={
                 <ProtectedRoute allowedRoles={['admin']}>
@@ -150,6 +164,14 @@ function App() {
               }
             />
             <Route
+              path="/manager/employee-data"
+              element={
+                <ProtectedRoute allowedRoles={['manager']}>
+                  <EmployeeData />
+                </ProtectedRoute>
+              }
+            />
+            <Route
               path="/admin/platform-settings"
               element={
                 <ProtectedRoute allowedRoles={['admin']}>
@@ -166,14 +188,6 @@ function App() {
               }
             />
             <Route
-              path="/admin/cv-templates/create"
-              element={
-                <ProtectedRoute allowedRoles={['admin']}>
-                  <CVTemplateCreate />
-                </ProtectedRoute>
-              }
-            />
-            <Route
               path="/admin/cv-templates/:id/edit"
               element={
                 <ProtectedRoute allowedRoles={['admin']}>
@@ -185,6 +199,22 @@ function App() {
               path="/admin/security"
               element={
                 <ProtectedRoute allowedRoles={['admin']}>
+                  <SecurityPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/manager/security"
+              element={
+                <ProtectedRoute allowedRoles={['manager']}>
+                  <SecurityPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/employee/security"
+              element={
+                <ProtectedRoute allowedRoles={['employee']}>
                   <SecurityPage />
                 </ProtectedRoute>
               }

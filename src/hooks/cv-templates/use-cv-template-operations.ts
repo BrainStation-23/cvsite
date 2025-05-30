@@ -6,7 +6,6 @@ import { CVTemplate } from '@/types/cv-templates';
 interface CreateTemplateData {
   name: string;
   description?: string;
-  pages_count: number;
   orientation: 'portrait' | 'landscape';
   is_active: boolean;
   layout_config: Record<string, any>;
@@ -17,7 +16,6 @@ interface SupabaseCVTemplate {
   id: string;
   name: string;
   description?: string;
-  pages_count: number;
   orientation: string;
   layout_config: any;
   is_active: boolean;

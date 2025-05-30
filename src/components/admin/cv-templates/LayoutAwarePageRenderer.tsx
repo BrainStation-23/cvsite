@@ -46,6 +46,11 @@ export const LayoutAwarePageRenderer: React.FC<LayoutAwarePageRendererProps> = (
     profile_image: profile.profile_image || profile.profileImage,
   };
 
+  // If no sections configured, don't render anything (parent should handle this case)
+  if (!sections || sections.length === 0) {
+    return null;
+  }
+
   // Sort sections by display order
   const sortedSections = [...sections].sort((a, b) => a.display_order - b.display_order);
 
@@ -79,6 +84,11 @@ function renderLayoutContent(
   styles: any, 
   layoutType: string
 ) {
+  // If no sections, return null
+  if (!sections || sections.length === 0) {
+    return null;
+  }
+
   switch (layoutType) {
     case 'two-column':
       const midPoint = Math.ceil(sections.length / 2);

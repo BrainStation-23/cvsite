@@ -1,13 +1,6 @@
 
 import React from 'react';
 import { LayoutAwarePageRenderer } from './LayoutAwarePageRenderer';
-import { GeneralInfoSection } from './sections/GeneralInfoSection';
-import { ExperienceSection } from './sections/ExperienceSection';
-import { EducationSection } from './sections/EducationSection';
-import { SkillsSection } from './sections/SkillsSection';
-import { ProjectsSection } from './sections/ProjectsSection';
-import { TrainingsSection } from './sections/TrainingsSection';
-import { AchievementsSection } from './sections/AchievementsSection';
 
 interface TemplateSection {
   id: string;
@@ -47,57 +40,44 @@ export const CVPageRenderer: React.FC<CVPageRendererProps> = ({
   fieldMappings = [],
   layoutType = 'single-column'
 }) => {
-  // If sections are configured, use the layout-aware renderer
-  if (sections.length > 0) {
-    return (
-      <LayoutAwarePageRenderer
-        pageNumber={pageNumber}
-        totalPages={totalPages}
-        profile={profile}
-        styles={styles}
-        sections={sections}
-        fieldMappings={fieldMappings}
-        layoutType={layoutType}
-      />
-    );
-  }
-
-  // Fallback to default sections if no configuration
-  const enhancedProfile = {
-    ...profile,
-    employee_id: profile.employee_id || profile.id,
-    profile_image: profile.profile_image || profile.profileImage,
-  };
-
-  // For single page or first page, show all content
-  if (totalPages === 1 || pageNumber === 1) {
+  // If no sections are configured, show a message instead of default content
+  if (sections.length === 0) {
     return (
       <div style={styles.baseStyles} key={pageNumber}>
-        <GeneralInfoSection profile={enhancedProfile} styles={styles} />
-        <ExperienceSection profile={enhancedProfile} styles={styles} />
-        <EducationSection profile={enhancedProfile} styles={styles} />
-        <SkillsSection profile={enhancedProfile} styles={styles} />
-        <ProjectsSection profile={enhancedProfile} styles={styles} />
-        <TrainingsSection profile={enhancedProfile} styles={styles} />
-        <AchievementsSection profile={enhancedProfile} styles={styles} />
+        <div style={{ 
+          display: 'flex', 
+          flexDirection: 'column',
+          justifyContent: 'center', 
+          alignItems: 'center', 
+          height: '100%',
+          color: '#666',
+          fontSize: '14px',
+          textAlign: 'center',
+          padding: '40px'
+        }}>
+          <div style={{ fontSize: '48px', marginBottom: '16px', opacity: 0.3 }}>📄</div>
+          <h3 style={{ margin: '0 0 8px 0', fontSize: '16px', fontWeight: 'bold' }}>
+            No Sections Configured
+          </h3>
+          <p style={{ margin: 0, opacity: 0.7, maxWidth: '300px', lineHeight: '1.4' }}>
+            Add sections using the Template Inspector to see content in this preview.
+            Use the "Sections" tab to configure which profile data should be displayed.
+          </p>
+        </div>
       </div>
     );
   }
 
-  // For multiple pages, this is handled by the content distribution logic
-  // Return empty pages for now (this will be improved with proper content splitting)
+  // Use the layout-aware renderer when sections are configured
   return (
-    <div style={styles.baseStyles} key={pageNumber}>
-      <div style={{ 
-        display: 'flex', 
-        justifyContent: 'center', 
-        alignItems: 'center', 
-        height: '100%',
-        color: '#666',
-        fontSize: '14px'
-      }}>
-        Page {pageNumber} (Content distribution in progress...)
-      </div>
-    </div>
+    <LayoutAwarePageRenderer
+      pageNumber={pageNumber}
+      totalPages={totalPages}
+      profile={profile}
+      styles={styles}
+      sections={sections}
+      fieldMappings={fieldMappings}
+      layoutType={layoutType}
+    />
   );
 };

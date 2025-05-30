@@ -1,4 +1,6 @@
+
 import React from 'react';
+import { Link } from 'react-router-dom';
 import DashboardLayout from '../../components/Layout/DashboardLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { User, Shield } from 'lucide-react';
@@ -32,12 +34,12 @@ const EmployeeDashboard: React.FC = () => {
             </CardHeader>
             <CardContent>
               <p className="text-sm text-gray-500 dark:text-gray-400">{module.description}</p>
-              <a 
-                href={module.link}
-                className="mt-4 inline-block text-cvsite-teal hover:text-cvsite-navy dark:hover:text-cvsite-light-blue"
+              <Link 
+                to={module.link}
+                className="mt-4 inline-block text-cvsite-teal hover:text-cvsite-navy dark:hover:text-cvsite-light-blue transition-colors"
               >
                 Access &rarr;
-              </a>
+              </Link>
             </CardContent>
           </Card>
         ))}

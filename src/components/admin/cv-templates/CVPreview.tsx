@@ -48,26 +48,48 @@ const CVPreview: React.FC<CVPreviewProps> = ({ template, profile }) => {
     );
   }
 
+  // Show information about sections configuration
+  const sectionsCount = sections?.length || 0;
+  const hasProfile = profile && Object.keys(profile).length > 0;
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minHeight: 'fit-content' }}>
       <div style={{
-        backgroundColor: '#f3f4f6',
-        border: '1px solid #d1d5db',
+        backgroundColor: sectionsCount === 0 ? '#fef3c7' : '#f3f4f6',
+        border: `1px solid ${sectionsCount === 0 ? '#f59e0b' : '#d1d5db'}`,
         borderRadius: '8px',
         padding: '12px',
         margin: '0 0 20px 0',
         width: '210mm',
-        color: '#374151',
+        color: sectionsCount === 0 ? '#92400e' : '#374151',
         fontSize: '14px',
         textAlign: 'center'
       }}>
-        <strong>📄 Pages:</strong> {currentPageCount} page{currentPageCount > 1 ? 's' : ''} (automatically calculated based on content)
+        {sectionsCount === 0 ? (
+          <div>
+            <strong>⚠️ No sections configured</strong>
+            <br />
+            <span style={{ fontSize: '12px' }}>
+              Add sections in the Template Inspector → Sections tab to see CV content
+            </span>
+          </div>
+        ) : (
+          <div>
+            <strong>📄 Pages:</strong> {currentPageCount} page{currentPageCount > 1 ? 's' : ''} | 
+            <strong> Sections:</strong> {sectionsCount} configured
+            {!hasProfile && (
+              <span style={{ color: '#ef4444', marginLeft: '8px' }}>
+                | No profile selected
+              </span>
+            )}
+          </div>
+        )}
       </div>
       
       <PageDistributor
         key={previewKey}
-        sections={sections}
-        fieldMappings={fieldMappings}
+        sections={sections || []}
+        fieldMappings={fieldMappings || []}
         profile={profile}
         styles={styles}
         onPagesCalculated={handlePagesCalculated}

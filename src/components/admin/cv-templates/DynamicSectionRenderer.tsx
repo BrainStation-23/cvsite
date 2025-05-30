@@ -60,47 +60,47 @@ export const DynamicSectionRenderer: React.FC<DynamicSectionRendererProps> = ({
       sectionConfig: section
     };
 
+    // Only render sections that are explicitly configured
+    // Each section component should handle its own field configuration and visibility
     switch (section.section_type) {
       case 'general':
         return <GeneralInfoSection key={section.id} {...commonProps} />;
       case 'experience':
-        // Always render experience section if configured, regardless of data
-        // The section component will handle empty data display
         return <ExperienceSection key={section.id} {...commonProps} />;
       case 'education':
-        if (section.is_required || (profile.education && profile.education.length > 0)) {
-          return <EducationSection key={section.id} {...commonProps} />;
-        }
-        break;
+        return <EducationSection key={section.id} {...commonProps} />;
       case 'skills':
       case 'technical_skills':
       case 'specialized_skills':
-        if (section.is_required || 
-           (profile.technical_skills && profile.technical_skills.length > 0) ||
-           (profile.specialized_skills && profile.specialized_skills.length > 0)) {
-          return <SkillsSection key={section.id} {...commonProps} />;
-        }
-        break;
+        return <SkillsSection key={section.id} {...commonProps} />;
       case 'projects':
-        // Always render projects section if configured, regardless of data
-        // The section component will handle empty data display
         return <ProjectsSection key={section.id} {...commonProps} />;
       case 'training':
-        if (section.is_required || (profile.trainings && profile.trainings.length > 0)) {
-          return <TrainingsSection key={section.id} {...commonProps} />;
-        }
-        break;
+        return <TrainingsSection key={section.id} {...commonProps} />;
       case 'achievements':
-        if (section.is_required || (profile.achievements && profile.achievements.length > 0)) {
-          return <AchievementsSection key={section.id} {...commonProps} />;
-        }
-        break;
+        return <AchievementsSection key={section.id} {...commonProps} />;
       default:
         console.warn(`Unknown section type: ${section.section_type}`);
-        break;
+        return (
+          <div key={section.id} style={{ 
+            padding: '8px', 
+            backgroundColor: '#f9f9f9', 
+            border: '1px dashed #ccc',
+            margin: '8px 0',
+            fontSize: '12px',
+            color: '#666',
+            textAlign: 'center'
+          }}>
+            Unknown section type: {section.section_type}
+          </div>
+        );
     }
-    return null;
   };
+
+  // If no sections are provided, return nothing
+  if (!sections || sections.length === 0) {
+    return null;
+  }
 
   // Sort sections by display_order and render
   const sortedSections = [...sections].sort((a, b) => a.display_order - b.display_order);
