@@ -47,10 +47,11 @@ export const SortableProjectItem: React.FC<SortableProjectItemProps> = ({
     if (success) {
       onCancelEdit();
     }
+    return success;
   };
 
   const handleDelete = async () => {
-    await onDelete(project.id);
+    return await onDelete(project.id);
   };
 
   const isCurrentlyEditing = editingId === project.id;

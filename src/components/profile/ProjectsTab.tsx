@@ -93,6 +93,7 @@ export const ProjectsTab: React.FC<ProjectsTabProps> = ({
     if (success) {
       setIsAdding(false);
     }
+    return success;
   };
 
   const handleStartEdit = (projectId: string) => {
