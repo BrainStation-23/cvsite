@@ -1,11 +1,10 @@
-
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Edit, Trash2 } from 'lucide-react';
 import { DesignationCombobox } from '@/components/admin/designation/DesignationCombobox';
-import { ReferenceItem, ReferenceFormData } from '@/hooks/use-reference-settings';
+import { ReferenceItem, ReferenceFormData } from '@/hooks/settings/use-reference-settings';
 
 interface ReferenceTableProps {
   references: ReferenceItem[];

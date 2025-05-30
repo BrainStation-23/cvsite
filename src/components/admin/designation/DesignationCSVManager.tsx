@@ -2,9 +2,9 @@
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Download } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
+import { useToast } from '@/hooks/ui/use-toast';
 import { exportDesignationsToCSV } from '@/utils/designationCsvUtils';
-import { DesignationItem } from '@/hooks/use-designation-settings';
+import { DesignationItem } from '@/hooks/settings/use-designation-settings';
 import DesignationImportDialog from './DesignationImportDialog';
 
 interface DesignationCSVManagerProps {

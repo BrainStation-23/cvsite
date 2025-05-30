@@ -1,17 +1,17 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { PlusCircle } from 'lucide-react';
-import { useDepartmentSettings, DepartmentFormData } from '@/hooks/use-department-settings';
-import { useDepartmentSearch } from '@/hooks/use-department-search';
+import { Separator } from '@/components/ui/separator';
 import DepartmentAddForm from './department/DepartmentAddForm';
+import { useDepartmentSettings, DepartmentFormData } from '@/hooks/settings/use-department-settings';
+import { useDepartmentSearch } from '@/hooks/search/use-department-search';
 import DepartmentSearchFilters from './department/DepartmentSearchFilters';
+import DepartmentPagination from './department/DepartmentPagination';
 import DepartmentTable from './department/DepartmentTable';
 import DepartmentCSVManager from './department/DepartmentCSVManager';
 import DepartmentCSVValidation from './department/DepartmentCSVValidation';
+import { Button } from '@/components/ui/button';
+import { PlusCircle } from 'lucide-react';
 import DepartmentDeleteDialog from './department/DepartmentDeleteDialog';
-import UniversityPagination from './university/UniversityPagination';
 
 type SortColumn = 'name' | 'full_form' | 'created_at';
 type SortOrder = 'asc' | 'desc';

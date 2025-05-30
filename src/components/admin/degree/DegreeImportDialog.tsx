@@ -1,13 +1,13 @@
-
 import React, { useRef, useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Upload, Download, FileText, AlertCircle, CheckCircle } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { useToast } from '@/hooks/use-toast';
+import { useToast } from '@/hooks/ui/use-toast';
 import { parseDegreeCSV, validateDegreeCSVData, downloadDegreeCSVTemplate } from '@/utils/degreeCsvUtils';
 import { DegreeItem } from '@/utils/degreeCsvUtils';
+import DegreeCSVValidation from './DegreeCSVValidation';
 
 interface DegreeImportDialogProps {
   degrees: DegreeItem[];

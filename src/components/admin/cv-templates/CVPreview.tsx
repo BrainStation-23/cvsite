@@ -1,10 +1,9 @@
-
 import React, { useState, useEffect } from 'react';
 import { CVTemplate } from '@/types/cv-templates';
 import { createCVStyles } from './cv-preview-styles';
 import { PageDistributor } from './PageDistributor';
-import { useTemplateConfiguration } from '@/hooks/use-template-configuration';
-import { useToast } from '@/hooks/use-toast';
+import { useTemplateConfiguration } from '@/hooks/templates/use-template-configuration';
+import { useToast } from '@/hooks/ui/use-toast';
 
 interface CVPreviewProps {
   template: CVTemplate;

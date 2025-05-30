@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Check, ChevronsUpDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -16,7 +15,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
-import { useDegreeSearch } from '@/hooks/use-degree-search';
+import { useDegreeSearch } from '@/hooks/search/use-degree-search';
 
 interface DegreeComboboxProps {
   value?: string;

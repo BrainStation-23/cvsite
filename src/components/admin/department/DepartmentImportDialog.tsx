@@ -1,18 +1,26 @@
-
 import React, { useRef } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Upload, Download, FileText, AlertCircle, CheckCircle } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { useToast } from '@/hooks/use-toast';
+import { useToast } from '@/hooks/ui/use-toast';
+import { DepartmentFormData } from '@/hooks/settings/use-department-settings';
 import { parseDepartmentsCSV, validateDepartmentCSVData, downloadDepartmentCSVTemplate } from '@/utils/departmentCsvUtils';
-import { DepartmentItem } from '@/hooks/use-department-settings';
+import DepartmentCSVValidation from './DepartmentCSVValidation';
 
 interface DepartmentImportDialogProps {
   departments: DepartmentItem[];
   onValidationResult: (result: any) => void;
   isBulkImporting: boolean;
+}
+
+interface DepartmentItem {
+  id: string;
+  name: string;
+  full_form: string | null;
+  created_at: string;
+  updated_at: string;
 }
 
 const DepartmentImportDialog: React.FC<DepartmentImportDialogProps> = ({

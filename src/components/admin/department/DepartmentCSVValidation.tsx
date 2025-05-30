@@ -1,10 +1,9 @@
-
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { X } from 'lucide-react';
-import { DepartmentFormData } from '@/hooks/use-department-settings';
+import { DepartmentFormData } from '@/hooks/settings/use-department-settings';
 
 interface DepartmentCSVValidationProps {
   validationResult: {

@@ -1,13 +1,12 @@
-
 import React, { useRef } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
-import { Upload, Download, FileText, AlertCircle, CheckCircle } from 'lucide-react';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { useToast } from '@/hooks/use-toast';
-import { parseDesignationsCSV, validateDesignationCSVData, downloadDesignationCSVTemplate } from '@/utils/designationCsvUtils';
-import { DesignationItem } from '@/hooks/use-designation-settings';
+import { Upload, Download } from 'lucide-react';
+import { useToast } from '@/hooks/ui/use-toast';
+import { DesignationItem } from '@/hooks/settings/use-designation-settings';
+import { parseDesignationCSV, validateDesignationCSVData, downloadDesignationCSVTemplate } from '@/utils/designationCsvUtils';
+import DesignationCSVValidation from './DesignationCSVValidation';
 
 interface DesignationImportDialogProps {
   designations: DesignationItem[];
@@ -32,7 +31,7 @@ const DesignationImportDialog: React.FC<DesignationImportDialogProps> = ({
     if (!file) return;
 
     try {
-      const parsedData = await parseDesignationsCSV(file);
+      const parsedData = await parseDesignationCSV(file);
       
       if (parsedData.length === 0) {
         toast({

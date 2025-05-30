@@ -4,10 +4,10 @@ import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Upload, Download } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
+import { useToast } from '@/hooks/ui/use-toast';
 import { parseReferencesCSV, validateReferenceCSVData, downloadReferenceCSVTemplate } from '@/utils/referenceCsvUtils';
-import { ReferenceItem } from '@/hooks/use-reference-settings';
-import { useDesignationSettings } from '@/hooks/use-designation-settings';
+import { ReferenceItem } from '@/hooks/settings/use-reference-settings';
+import { useDesignationSettings } from '@/hooks/settings/use-designation-settings';
 import ReferenceCSVValidation from './ReferenceCSVValidation';
 
 interface ReferenceImportDialogProps {

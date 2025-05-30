@@ -1,11 +1,10 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Plus } from 'lucide-react';
 import { DesignationCombobox } from '@/components/admin/designation/DesignationCombobox';
-import { ReferenceFormData } from '@/hooks/use-reference-settings';
+import { ReferenceFormData } from '@/hooks/settings/use-reference-settings';
 
 interface ReferenceAddFormProps {
   onSubmit: (formData: ReferenceFormData) => void;

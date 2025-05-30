@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
@@ -8,8 +7,8 @@ import DesignationSearchFilters from './designation/DesignationSearchFilters';
 import DesignationPagination from './designation/DesignationPagination';
 import DesignationCSVManager from './designation/DesignationCSVManager';
 import DesignationCSVValidation from './designation/DesignationCSVValidation';
-import { useDesignationSettings } from '@/hooks/use-designation-settings';
-import { useDesignationSearch } from '@/hooks/use-designation-search';
+import { useDesignationSettings } from '@/hooks/settings/use-designation-settings';
+import { useDesignationSearch } from '@/hooks/search/use-designation-search';
 import { DesignationFormData } from '@/utils/designationCsvUtils';
 
 const DesignationSettings: React.FC = () => {
