@@ -17,7 +17,6 @@ import ManagerDashboard from '@/pages/dashboard/ManagerDashboard';
 import UserManagement from '@/pages/admin/UserManagement';
 import PlatformSettings from '@/pages/admin/PlatformSettings';
 import CVTemplates from '@/pages/admin/CVTemplates';
-import CVTemplateCreate from '@/pages/admin/CVTemplateCreate';
 import CVTemplateEdit from '@/pages/admin/CVTemplateEdit';
 import SecurityPage from '@/pages/security/SecurityPage';
 import NotFound from '@/pages/NotFound';
