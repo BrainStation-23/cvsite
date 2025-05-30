@@ -64,7 +64,7 @@ export const ExperienceSection: React.FC<ExperienceSectionProps> = ({
   });
 
   // Helper function to format date
-  const formatDate = (dateString: string) => {
+  const formatDate = (dateString: string | Date) => {
     if (!dateString) return '';
     try {
       const date = new Date(dateString);
@@ -73,7 +73,7 @@ export const ExperienceSection: React.FC<ExperienceSectionProps> = ({
         month: 'short' 
       });
     } catch {
-      return dateString;
+      return dateString.toString();
     }
   };
 
@@ -122,7 +122,9 @@ export const ExperienceSection: React.FC<ExperienceSectionProps> = ({
       );
     },
     date_range: (exp: any, index: number) => {
-      const dateRange = `${formatDate(exp.start_date)} - ${exp.is_current ? 'Present' : formatDate(exp.end_date)}`;
+      const startDate = formatDate(exp.start_date);
+      const endDate = exp.is_current ? 'Present' : formatDate(exp.end_date);
+      const dateRange = `${startDate} - ${endDate}`;
       const maskedValue = applyMasking(dateRange, 'date_range');
       return (
         <FieldProcessor
@@ -159,14 +161,15 @@ export const ExperienceSection: React.FC<ExperienceSectionProps> = ({
         >
           {(processedValue, displayName, shouldShow) => (
             shouldShow && processedValue && (
-              <div style={{ 
-                marginTop: '4pt', 
-                fontSize: '0.9em',
-                lineHeight: '1.4',
-                textAlign: 'justify'
-              }}>
-                {processedValue}
-              </div>
+              <div 
+                style={{ 
+                  marginTop: '4pt', 
+                  fontSize: '0.9em',
+                  lineHeight: '1.4',
+                  textAlign: 'justify'
+                }}
+                dangerouslySetInnerHTML={{ __html: processedValue }}
+              />
             )
           )}
         </FieldProcessor>

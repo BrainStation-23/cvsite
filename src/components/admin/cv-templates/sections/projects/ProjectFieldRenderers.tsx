@@ -12,6 +12,20 @@ interface FieldMapping {
   section_type: string;
 }
 
+// Helper function to format date
+const formatDate = (dateString: string | Date) => {
+  if (!dateString) return '';
+  try {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', { 
+      year: 'numeric', 
+      month: 'short' 
+    });
+  } catch {
+    return dateString.toString();
+  }
+};
+
 export const ProjectFieldRenderers = {
   name: (project: any, index: number, fieldMappings: FieldMapping[], styles: any, applyMasking: (value: any, fieldName: string) => any) => {
     const maskedValue = applyMasking(project.name, 'name');
@@ -56,7 +70,8 @@ export const ProjectFieldRenderers = {
   },
 
   start_date: (project: any, index: number, fieldMappings: FieldMapping[], styles: any, applyMasking: (value: any, fieldName: string) => any) => {
-    const maskedValue = applyMasking(project.start_date, 'start_date');
+    const formattedDate = formatDate(project.start_date);
+    const maskedValue = applyMasking(formattedDate, 'start_date');
     return (
       <FieldProcessor
         key="start_date"
@@ -77,7 +92,7 @@ export const ProjectFieldRenderers = {
   },
 
   end_date: (project: any, index: number, fieldMappings: FieldMapping[], styles: any, applyMasking: (value: any, fieldName: string) => any) => {
-    const dateValue = project.is_current ? 'Present' : project.end_date;
+    const dateValue = project.is_current ? 'Present' : formatDate(project.end_date);
     const maskedValue = applyMasking(dateValue, 'end_date');
     return (
       <FieldProcessor
@@ -99,7 +114,9 @@ export const ProjectFieldRenderers = {
   },
 
   date_range: (project: any, index: number, fieldMappings: FieldMapping[], styles: any, applyMasking: (value: any, fieldName: string) => any) => {
-    const dateRange = `${project.start_date || ''} - ${project.is_current ? 'Present' : (project.end_date || '')}`;
+    const startDate = formatDate(project.start_date);
+    const endDate = project.is_current ? 'Present' : formatDate(project.end_date);
+    const dateRange = `${startDate} - ${endDate}`;
     const maskedValue = applyMasking(dateRange, 'date_range');
     return (
       <FieldProcessor
@@ -137,14 +154,15 @@ export const ProjectFieldRenderers = {
       >
         {(processedValue, displayName, shouldShow) => (
           shouldShow && processedValue && (
-            <div style={{ 
-              marginTop: '4pt', 
-              fontSize: '0.9em',
-              lineHeight: '1.4',
-              textAlign: 'justify'
-            }}>
-              {processedValue}
-            </div>
+            <div 
+              style={{ 
+                marginTop: '4pt', 
+                fontSize: '0.9em',
+                lineHeight: '1.4',
+                textAlign: 'justify'
+              }}
+              dangerouslySetInnerHTML={{ __html: processedValue }}
+            />
           )
         )}
       </FieldProcessor>
