@@ -1,7 +1,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/hooks/ui/use-toast';
+import { useToast } from '@/hooks/use-toast';
 
 export function useEmployeeData(profileId: string) {
   const [data, setData] = useState<any>(null);

@@ -1,7 +1,7 @@
+
 import { useState, useEffect } from 'react';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/hooks/ui/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import { Achievement } from '@/types';
 
@@ -35,7 +35,6 @@ const mapToAchievementDB = (achievement: Omit<Achievement, 'id'>, profileId: str
 export function useAchievements(profileId?: string) {
   const { user } = useAuth();
   const { toast } = useToast();
-  const queryClient = useQueryClient();
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [achievements, setAchievements] = useState<Achievement[]>([]);

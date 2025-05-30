@@ -1,18 +1,16 @@
 
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Separator } from '@/components/ui/separator';
 import { Button } from '@/components/ui/button';
 import { PlusCircle } from 'lucide-react';
-import { useUniversitySettings, UniversityFormData, SortColumn, SortOrder } from '@/hooks/settings/use-university-settings';
-import { useUniversitySearch } from '@/hooks/search/use-university-search';
+import { useUniversitySettings, UniversityFormData } from '@/hooks/use-university-settings';
+import { useUniversitySearch } from '@/hooks/use-university-search';
 import UniversityAddForm from './university/UniversityAddForm';
 import UniversityTable from './university/UniversityTable';
-import UniversitySearchFilters from './university/UniversitySearchFilters';
-import UniversityPagination from './university/UniversityPagination';
-import UniversityCSVManager from './university/UniversityCSVManager';
-import UniversityCSVValidation from './university/UniversityCSVValidation';
 import UniversityDeleteDialog from './university/UniversityDeleteDialog';
+import UniversityCSVManager from './university/UniversityCSVManager';
+import UniversitySearchFilters, { SortColumn, SortOrder } from './university/UniversitySearchFilters';
+import UniversityPagination from './university/UniversityPagination';
 
 const UniversitySettings: React.FC = () => {
   const [isAdding, setIsAdding] = useState(false);

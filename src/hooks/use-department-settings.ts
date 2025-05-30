@@ -1,7 +1,7 @@
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/hooks/ui/use-toast';
+import { useToast } from '@/hooks/use-toast';
 
 export interface DepartmentItem {
   id: string;
@@ -136,8 +136,6 @@ export const useDepartmentSettings = () => {
   });
   
   const addItem = (department: DepartmentFormData) => {
-    if (!department.name.trim()) return;
-    
     addDepartmentMutation.mutate(department, {
       onSuccess: () => {
         toast({
@@ -147,11 +145,7 @@ export const useDepartmentSettings = () => {
       },
       onError: (error) => {
         if (error instanceof Error && error.message.includes("already exists")) {
-          toast({
-            title: "Department already exists",
-            description: error.message,
-            variant: "destructive"
-          });
+          console.log(error.message);
         } else {
           toast({
             title: "Error",
@@ -168,7 +162,7 @@ export const useDepartmentSettings = () => {
       onSuccess: () => {
         toast({
           title: "Department updated",
-          description: `Department has been updated to "${department.name}".`,
+          description: `"${department.name}" has been updated.`,
         });
       },
       onError: (error) => {

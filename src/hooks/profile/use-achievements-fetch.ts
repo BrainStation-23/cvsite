@@ -1,62 +1,53 @@
 
-import { useQuery } from '@tanstack/react-query';
+import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/contexts/AuthContext';
-import { useToast } from '@/hooks/ui/use-toast';
+import { useToast } from '@/hooks/use-toast';
+import { Achievement } from '@/types';
 
-interface Achievement {
-  id: string;
-  title: string;
-  description: string;
-  date: string;
-  profile_id: string;
-  created_at: string;
-  updated_at: string;
-}
-
-const useAchievementsFetch = () => {
-  const { user } = useAuth();
+export function useAchievementsFetch(profileId: string) {
   const { toast } = useToast();
+  const [isLoading, setIsLoading] = useState(true);
+  const [achievements, setAchievements] = useState<Achievement[]>([]);
 
-  const fetchAchievements = async (): Promise<Achievement[]> => {
-    if (!user) {
-      return [];
-    }
+  const fetchAchievements = async () => {
+    if (!profileId) return;
 
     try {
-      const { data, error } = await supabase
+      const { data: achievementData, error: achievementError } = await supabase
         .from('achievements')
         .select('*')
-        .eq('profile_id', user.id)
+        .eq('profile_id', profileId)
         .order('date', { ascending: false });
 
-      if (error) {
-        throw new Error(error.message);
-      }
+      if (achievementError) throw achievementError;
 
-      return data || [];
-    } catch (error: any) {
+      if (achievementData) {
+        setAchievements(achievementData.map(achievement => ({
+          id: achievement.id,
+          title: achievement.title,
+          description: achievement.description,
+          date: new Date(achievement.date)
+        })));
+      }
+    } catch (error) {
+      console.error('Error fetching achievements:', error);
       toast({
-        title: 'Error fetching achievements',
-        description: error.message,
-        variant: 'destructive',
+        title: 'Error',
+        description: 'Failed to load achievements',
+        variant: 'destructive'
       });
-      return [];
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  const query = useQuery({
-    queryKey: ['achievements', user?.id],
-    queryFn: fetchAchievements,
-    enabled: !!user?.id,
-  });
+  useEffect(() => {
+    fetchAchievements();
+  }, [profileId]);
 
   return {
-    achievements: query.data || [],
-    isLoading: query.isLoading,
-    error: query.error,
-    refetch: query.refetch,
+    isLoading,
+    achievements,
+    refetch: fetchAchievements
   };
-};
-
-export default useAchievementsFetch;
+}

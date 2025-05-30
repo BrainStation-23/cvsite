@@ -1,14 +1,13 @@
 
 import React, { useRef } from 'react';
-import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Upload, Download, FileText, AlertCircle, CheckCircle } from 'lucide-react';
-import { useToast } from '@/hooks/ui/use-toast';
-import { DesignationItem } from '@/hooks/settings/use-designation-settings';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { useToast } from '@/hooks/use-toast';
 import { parseDesignationsCSV, validateDesignationCSVData, downloadDesignationCSVTemplate } from '@/utils/designationCsvUtils';
-import DesignationCSVValidation from './DesignationCSVValidation';
+import { DesignationItem } from '@/hooks/use-designation-settings';
 
 interface DesignationImportDialogProps {
   designations: DesignationItem[];

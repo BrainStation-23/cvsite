@@ -2,9 +2,9 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Download } from 'lucide-react';
-import { useToast } from '@/hooks/ui/use-toast';
+import { useToast } from '@/hooks/use-toast';
 import { exportDepartmentsToCSV } from '@/utils/departmentCsvUtils';
-import { DepartmentItem } from '@/hooks/settings/use-department-settings';
+import { DepartmentItem } from '@/hooks/use-department-settings';
 import DepartmentImportDialog from './DepartmentImportDialog';
 
 interface DepartmentCSVManagerProps {

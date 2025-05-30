@@ -1,15 +1,14 @@
 
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Separator } from '@/components/ui/separator';
+import { useReferenceSettings } from '@/hooks/use-reference-settings';
+import { useReferenceSearch } from '@/hooks/use-reference-search';
 import ReferenceAddForm from './ReferenceAddForm';
-import ReferenceTable from './ReferenceTable';
 import ReferenceSearchFilters from './ReferenceSearchFilters';
+import ReferenceTable from './ReferenceTable';
 import ReferencePagination from './ReferencePagination';
 import ReferenceCSVManager from './ReferenceCSVManager';
-import ReferenceCSVValidation from './ReferenceCSVValidation';
-import { useReferenceSettings, ReferenceFormData, ReferenceItem } from '@/hooks/settings/use-reference-settings';
-import { useReferenceSearch } from '@/hooks/search/use-reference-search';
+import { ReferenceFormData, ReferenceItem } from '@/hooks/use-reference-settings';
 
 type SortColumn = 'name' | 'email' | 'designation' | 'company' | 'created_at';
 type SortOrder = 'asc' | 'desc';
@@ -21,9 +20,8 @@ const ReferenceSettings: React.FC = () => {
   const [itemsPerPage] = useState(10);
   const [sortBy, setSortBy] = useState<SortColumn>('name');
   const [sortOrder, setSortOrder] = useState<SortOrder>('asc');
-  const [validationResult, setValidationResult] = useState<any>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [editItem, setEditItem] = useState({
+  const [editItem, setEditItem] = useState<ReferenceFormData>({
     name: '',
     email: '',
     designation: '',
@@ -76,41 +74,56 @@ const ReferenceSettings: React.FC = () => {
     setCurrentPage(1);
   };
 
-  const handleValidationResult = (result: any) => {
-    if (result.valid && result.valid.length > 0) {
-      bulkImport(result.valid);
-    }
-  };
-
   const handleEdit = (id: string, reference: ReferenceItem) => {
     setEditingId(id);
-    setEditItem({ 
-      name: reference.name, 
-      email: reference.email || '', 
-      designation: reference.designation || '', 
-      company: reference.company || '' 
+    setEditItem({
+      name: reference.name,
+      email: reference.email,
+      designation: reference.designation,
+      company: reference.company
     });
   };
 
   const handleSaveEdit = () => {
-    if (editingId && editItem.name.trim()) {
+    if (editingId) {
       updateItem(editingId, editItem);
       setEditingId(null);
-      setEditItem({ name: '', email: '', designation: '', company: '' });
+      setEditItem({
+        name: '',
+        email: '',
+        designation: '',
+        company: ''
+      });
     }
   };
 
   const handleCancelEdit = () => {
     setEditingId(null);
-    setEditItem({ name: '', email: '', designation: '', company: '' });
+    setEditItem({
+      name: '',
+      email: '',
+      designation: '',
+      company: ''
+    });
   };
 
-  const handleEditItemChange = (field: string, value: string) => {
-    setEditItem({ ...editItem, [field]: value });
+  const handleEditItemChange = (field: keyof ReferenceFormData, value: string) => {
+    setEditItem(prev => ({
+      ...prev,
+      [field]: value
+    }));
   };
 
   const handleDelete = (id: string, name: string) => {
-    removeItem(id, name);
+    if (window.confirm(`Are you sure you want to delete "${name}"?`)) {
+      removeItem(id, name);
+    }
+  };
+
+  const handleValidationResult = (result: any) => {
+    if (result.valid && result.valid.length > 0) {
+      bulkImport(result.valid);
+    }
   };
 
   return (

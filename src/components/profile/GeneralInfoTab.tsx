@@ -1,10 +1,11 @@
+
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { UseFormReturn } from 'react-hook-form';
-import ProfileImageUpload from './ProfileImageUpload';
+import { ProfileImageUpload } from './ProfileImageUpload';
 
 // Define this type consistently across all files
 export interface GeneralInfoFormData {

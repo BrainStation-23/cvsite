@@ -122,7 +122,7 @@ const TemplateInspector: React.FC<TemplateInspectorProps> = ({
             <TabsContent value="sections" className="p-4 m-0">
               <SectionManager 
                 templateId={template.id} 
-                refetch={onConfigurationChange}
+                onSectionsChange={onConfigurationChange}
               />
             </TabsContent>
           </div>

@@ -2,9 +2,9 @@
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Download } from 'lucide-react';
-import { useToast } from '@/hooks/ui/use-toast';
+import { useToast } from '@/hooks/use-toast';
 import { exportReferencesToCSV } from '@/utils/referenceCsvUtils';
-import { ReferenceItem } from '@/hooks/settings/use-reference-settings';
+import { ReferenceItem } from '@/hooks/use-reference-settings';
 import ReferenceImportDialog from './ReferenceImportDialog';
 
 interface ReferenceCSVManagerProps {

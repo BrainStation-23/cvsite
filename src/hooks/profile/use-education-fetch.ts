@@ -1,66 +1,57 @@
 
-import { useQuery } from '@tanstack/react-query';
+import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/contexts/AuthContext';
-import { useToast } from '@/hooks/ui/use-toast';
+import { useToast } from '@/hooks/use-toast';
+import { Education } from '@/types';
 
-interface Education {
-  id: string;
-  university: string;
-  degree: string;
-  department: string;
-  start_date: string;
-  end_date: string | null;
-  is_current: boolean;
-  gpa: string | null;
-  profile_id: string;
-  created_at: string;
-  updated_at: string;
-}
-
-const useEducationFetch = () => {
-  const { user } = useAuth();
+export function useEducationFetch(profileId: string) {
   const { toast } = useToast();
+  const [isLoading, setIsLoading] = useState(true);
+  const [education, setEducation] = useState<Education[]>([]);
 
-  const fetchEducation = async (): Promise<Education[]> => {
-    if (!user) {
-      return [];
-    }
+  const fetchEducation = async () => {
+    if (!profileId) return;
 
     try {
-      const { data, error } = await supabase
+      const { data: eduData, error: eduError } = await supabase
         .from('education')
         .select('*')
-        .eq('profile_id', user.id)
+        .eq('profile_id', profileId)
         .order('start_date', { ascending: false });
 
-      if (error) {
-        throw new Error(error.message);
-      }
+      if (eduError) throw eduError;
 
-      return data || [];
-    } catch (error: any) {
+      if (eduData) {
+        setEducation(eduData.map(edu => ({
+          id: edu.id,
+          university: edu.university,
+          degree: edu.degree || '',
+          department: edu.department || undefined,
+          gpa: edu.gpa || undefined,
+          startDate: new Date(edu.start_date),
+          endDate: edu.end_date ? new Date(edu.end_date) : undefined,
+          isCurrent: edu.is_current || false
+        })));
+      }
+    } catch (error) {
+      console.error('Error fetching education:', error);
       toast({
-        title: 'Error fetching education',
-        description: error.message,
-        variant: 'destructive',
+        title: 'Error',
+        description: 'Failed to load education',
+        variant: 'destructive'
       });
-      return [];
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  const query = useQuery({
-    queryKey: ['education', user?.id],
-    queryFn: fetchEducation,
-    enabled: !!user?.id,
-  });
+  useEffect(() => {
+    fetchEducation();
+  }, [profileId]);
 
   return {
-    data: query.data || [],
-    isLoading: query.isLoading,
-    error: query.error,
-    refetch: query.refetch,
+    isLoading,
+    education,
+    refetch: fetchEducation
   };
-};
-
-export default useEducationFetch;
+}

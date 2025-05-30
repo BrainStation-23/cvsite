@@ -1,9 +1,10 @@
+
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Edit, Trash2 } from 'lucide-react';
-import { DesignationItem } from '@/hooks/settings/use-designation-settings';
+import { DesignationItem } from '@/hooks/use-designation-settings';
 
 interface DesignationTableProps {
   designations: DesignationItem[];

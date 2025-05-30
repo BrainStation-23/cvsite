@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Check, ChevronsUpDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -15,7 +16,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
-import { useDesignationSearch } from '@/hooks/search/use-designation-search';
+import { useDesignationSearch } from '@/hooks/use-designation-search';
 
 interface DesignationComboboxProps {
   value?: string;

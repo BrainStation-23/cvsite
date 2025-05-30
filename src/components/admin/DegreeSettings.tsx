@@ -8,8 +8,8 @@ import DegreeSearchFilters from './degree/DegreeSearchFilters';
 import DegreePagination from './degree/DegreePagination';
 import DegreeCSVManager from './degree/DegreeCSVManager';
 import DegreeCSVValidation from './degree/DegreeCSVValidation';
-import { useDegreeSettings } from '@/hooks/settings/use-degree-settings';
-import { useDegreeSearch } from '@/hooks/search/use-degree-search';
+import { useDegreeSettings } from '@/hooks/use-degree-settings';
+import { useDegreeSearch } from '@/hooks/use-degree-search';
 import { DegreeFormData } from '@/utils/degreeCsvUtils';
 
 const DegreeSettings: React.FC = () => {

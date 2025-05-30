@@ -1,75 +1,73 @@
 
-import { useQuery } from '@tanstack/react-query';
+import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/contexts/AuthContext';
-import { useToast } from '@/hooks/ui/use-toast';
+import { useToast } from '@/hooks/use-toast';
+import { Skill } from '@/types';
 
-interface Skill {
-  id: string;
-  name: string;
-  created_at: string;
-}
-
-const useSkillsFetch = () => {
-  const { user } = useAuth();
+export function useSkillsFetch(profileId: string) {
   const { toast } = useToast();
+  const [isLoading, setIsLoading] = useState(true);
+  const [technicalSkills, setTechnicalSkills] = useState<Skill[]>([]);
+  const [specializedSkills, setSpecializedSkills] = useState<Skill[]>([]);
 
-  return useQuery({
-    queryKey: ['skills', user?.id],
-    queryFn: async () => {
-      if (!user?.id) {
-        return [];
+  const fetchSkills = async () => {
+    if (!profileId) return;
+
+    try {
+      // Fetch technical skills with priority ordering
+      const { data: techSkillsData, error: techSkillsError } = await supabase
+        .from('technical_skills')
+        .select('*')
+        .eq('profile_id', profileId)
+        .order('priority', { ascending: true });
+
+      if (techSkillsError) throw techSkillsError;
+
+      if (techSkillsData) {
+        setTechnicalSkills(techSkillsData.map(skill => ({
+          id: skill.id,
+          name: skill.name,
+          proficiency: skill.proficiency,
+          priority: skill.priority || 0
+        })));
       }
 
-      // Fetch both technical and specialized skills
-      const [technicalSkillsResult, specializedSkillsResult] = await Promise.all([
-        supabase
-          .from('technical_skills')
-          .select('*')
-          .eq('profile_id', user.id)
-          .order('name', { ascending: true }),
-        supabase
-          .from('specialized_skills')
-          .select('*')
-          .eq('profile_id', user.id)
-          .order('name', { ascending: true })
-      ]);
+      // Fetch specialized skills
+      const { data: specSkillsData, error: specSkillsError } = await supabase
+        .from('specialized_skills')
+        .select('*')
+        .eq('profile_id', profileId);
 
-      if (technicalSkillsResult.error) {
-        toast({
-          title: 'Error fetching technical skills',
-          description: technicalSkillsResult.error.message,
-          variant: 'destructive',
-        });
-        throw technicalSkillsResult.error;
+      if (specSkillsError) throw specSkillsError;
+
+      if (specSkillsData) {
+        setSpecializedSkills(specSkillsData.map(skill => ({
+          id: skill.id,
+          name: skill.name,
+          proficiency: skill.proficiency,
+          priority: 0 // Specialized skills don't use priority ordering
+        })));
       }
+    } catch (error) {
+      console.error('Error fetching skills:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to load skills',
+        variant: 'destructive'
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
-      if (specializedSkillsResult.error) {
-        toast({
-          title: 'Error fetching specialized skills',
-          description: specializedSkillsResult.error.message,
-          variant: 'destructive',
-        });
-        throw specializedSkillsResult.error;
-      }
+  useEffect(() => {
+    fetchSkills();
+  }, [profileId]);
 
-      // Transform the data to match the expected format
-      const technicalSkills = (technicalSkillsResult.data || []).map(skill => ({
-        id: skill.id,
-        name: skill.name,
-        created_at: skill.created_at
-      }));
-
-      const specializedSkills = (specializedSkillsResult.data || []).map(skill => ({
-        id: skill.id,
-        name: skill.name,
-        created_at: skill.created_at
-      }));
-
-      return [...technicalSkills, ...specializedSkills];
-    },
-    enabled: !!user?.id,
-  });
-};
-
-export default useSkillsFetch;
+  return {
+    isLoading,
+    technicalSkills,
+    specializedSkills,
+    refetch: fetchSkills
+  };
+}

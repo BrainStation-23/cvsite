@@ -1,9 +1,10 @@
+
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Edit, Trash2 } from 'lucide-react';
-import { DepartmentItem } from '@/hooks/settings/use-department-settings';
+import { DepartmentItem } from '@/hooks/use-department-settings';
 
 interface DepartmentTableProps {
   departments: DepartmentItem[];
