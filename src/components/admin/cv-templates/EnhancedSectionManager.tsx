@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { CVSectionType } from '@/types/cv-templates';
 import { supabase } from '@/integrations/supabase/client';
@@ -34,7 +35,6 @@ interface SectionConfig {
 
 const SECTION_TYPES: { value: CVSectionType; label: string }[] = [
   { value: 'general', label: 'General Information' },
-  { value: 'skills', label: 'Skills' },
   { value: 'technical_skills', label: 'Technical Skills' },
   { value: 'specialized_skills', label: 'Specialized Skills' },
   { value: 'experience', label: 'Work Experience' },
@@ -49,7 +49,7 @@ const EnhancedSectionManager: React.FC<EnhancedSectionManagerProps> = ({
   onSectionsChange 
 }) => {
   const [sections, setSections] = useState<SectionConfig[]>([]);
-  const [newSectionType, setNewSectionType] = useState<CVSectionType>('skills');
+  const [newSectionType, setNewSectionType] = useState<CVSectionType>('technical_skills');
   const [isLoading, setIsLoading] = useState(true);
   const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set());
   const { toast } = useToast();
