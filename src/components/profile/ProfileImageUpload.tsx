@@ -9,12 +9,20 @@ import { useToast } from '@/hooks/ui/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 
 interface ProfileImageUploadProps {
-  userId: string;
-  onUploadComplete: () => void;
   currentImageUrl?: string | null;
+  profileId?: string;
+  onImageUpdate: (imageUrl: string | null) => void;
+  isEditing: boolean;
+  userName: string;
 }
 
-const ProfileImageUpload: React.FC<ProfileImageUploadProps> = ({ userId, onUploadComplete, currentImageUrl }) => {
+const ProfileImageUpload: React.FC<ProfileImageUploadProps> = ({ 
+  currentImageUrl, 
+  profileId, 
+  onImageUpdate, 
+  isEditing, 
+  userName 
+}) => {
   const [image, setImage] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(currentImageUrl || null);
   const [isUploading, setIsUploading] = useState(false);
@@ -38,11 +46,20 @@ const ProfileImageUpload: React.FC<ProfileImageUploadProps> = ({ userId, onUploa
       return;
     }
 
+    if (!profileId) {
+      toast({
+        title: "Error",
+        description: "Profile ID is required to upload image.",
+        variant: "destructive"
+      });
+      return;
+    }
+
     setIsUploading(true);
 
     try {
       const fileExt = image.name.split('.').pop();
-      const filePath = `avatars/${userId}.${fileExt}`;
+      const filePath = `avatars/${profileId}.${fileExt}`;
 
       const { error: storageError } = await supabase.storage
         .from('avatars')
@@ -55,12 +72,11 @@ const ProfileImageUpload: React.FC<ProfileImageUploadProps> = ({ userId, onUploa
         throw storageError;
       }
 
-      // Update the general_information table instead of profiles
-      const { data, error: updateError } = await supabase
+      // Update the general_information table
+      const { error: updateError } = await supabase
         .from('general_information')
         .update({ profile_image: filePath })
-        .eq('profile_id', userId)
-        .select();
+        .eq('profile_id', profileId);
 
       if (updateError) {
         throw updateError;
@@ -70,7 +86,8 @@ const ProfileImageUpload: React.FC<ProfileImageUploadProps> = ({ userId, onUploa
         title: "Success",
         description: "Profile image uploaded successfully!",
       });
-      onUploadComplete();
+      
+      onImageUpdate(filePath);
     } catch (error: any) {
       toast({
         title: "Error",
@@ -85,13 +102,37 @@ const ProfileImageUpload: React.FC<ProfileImageUploadProps> = ({ userId, onUploa
   const handleRemove = () => {
     setImage(null);
     setPreviewUrl(null);
+    onImageUpdate(null);
   };
+
+  if (!isEditing) {
+    return (
+      <div className="flex flex-col items-center space-y-4">
+        {previewUrl ? (
+          <div className="w-32 h-32 rounded-full overflow-hidden">
+            <img
+              src={previewUrl}
+              alt={`${userName} Profile`}
+              className="object-cover w-full h-full"
+            />
+          </div>
+        ) : (
+          <div className="w-32 h-32 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
+            <span className="text-2xl font-bold text-gray-500 dark:text-gray-400">
+              {userName.split(' ').map(n => n[0]).join('').toUpperCase()}
+            </span>
+          </div>
+        )}
+        <p className="text-sm text-gray-600 dark:text-gray-400 text-center">{userName}</p>
+      </div>
+    );
+  }
 
   return (
     <Card>
-      <CardContent className="flex flex-col space-y-4">
+      <CardContent className="flex flex-col space-y-4 p-4">
         {previewUrl && (
-          <div className="relative w-32 h-32 rounded-full overflow-hidden">
+          <div className="relative w-32 h-32 rounded-full overflow-hidden mx-auto">
             <img
               src={previewUrl}
               alt="Profile Preview"

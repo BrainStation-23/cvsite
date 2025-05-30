@@ -30,20 +30,20 @@ export function useEmployeeProfile(profileId: string) {
     experienceHook.refetch();
     educationHook.refetch();
     trainingHook.refetch();
-    achievementsHook.refetch();
-    projectsHook.refetch();
+    if (achievementsHook.refetch) achievementsHook.refetch();
+    if (projectsHook.refetch) projectsHook.refetch();
   };
 
   return {
     isLoading,
     generalInfo: generalInfoHook.generalInfo,
-    technicalSkills: skillsHook.technicalSkills,
-    specializedSkills: skillsHook.specializedSkills,
-    experiences: experienceHook.data,
-    education: educationHook.education,
-    trainings: trainingHook.trainings,
-    achievements: achievementsHook.achievements,
-    projects: projectsHook.projects,
+    technicalSkills: skillsHook.data || [],
+    specializedSkills: skillsHook.data || [],
+    experiences: experienceHook.data || [],
+    education: educationHook.data || [],
+    trainings: trainingHook.data || [],
+    achievements: achievementsHook.achievements || [],
+    projects: projectsHook.projects || [],
     refetch
   };
 }

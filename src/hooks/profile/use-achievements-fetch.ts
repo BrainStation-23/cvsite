@@ -1,3 +1,4 @@
+
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
@@ -5,12 +6,12 @@ import { useToast } from '@/hooks/ui/use-toast';
 
 interface Achievement {
   id: string;
-  created_at: string;
-  user_id: string;
-  name: string;
-  institution: string;
-  date_obtained: string;
+  title: string;
   description: string;
+  date: string;
+  profile_id: string;
+  created_at: string;
+  updated_at: string;
 }
 
 const useAchievementsFetch = () => {
@@ -26,8 +27,8 @@ const useAchievementsFetch = () => {
       const { data, error } = await supabase
         .from('achievements')
         .select('*')
-        .eq('user_id', user.id)
-        .order('date_obtained', { ascending: false });
+        .eq('profile_id', user.id)
+        .order('date', { ascending: false });
 
       if (error) {
         throw new Error(error.message);
@@ -44,16 +45,17 @@ const useAchievementsFetch = () => {
     }
   };
 
-  const {
-    data: achievements,
-    isLoading,
-    error,
-  } = useQuery(['achievements'], fetchAchievements);
+  const query = useQuery({
+    queryKey: ['achievements', user?.id],
+    queryFn: fetchAchievements,
+    enabled: !!user?.id,
+  });
 
   return {
-    achievements,
-    isLoading,
-    error,
+    achievements: query.data || [],
+    isLoading: query.isLoading,
+    error: query.error,
+    refetch: query.refetch,
   };
 };
 

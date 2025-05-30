@@ -1,3 +1,4 @@
+
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
@@ -6,7 +7,7 @@ import { useToast } from '@/hooks/ui/use-toast';
 export interface ExperienceItem {
   id: string;
   profile_id: string;
-  company: string;
+  company_name: string;
   designation: string;
   start_date: string;
   end_date: string | null;
@@ -18,7 +19,7 @@ export interface ExperienceItem {
 
 const fetchExperiences = async (profileId: string | undefined) => {
   if (!profileId) {
-    return null;
+    return [];
   }
 
   const { data, error } = await supabase
@@ -35,21 +36,28 @@ const fetchExperiences = async (profileId: string | undefined) => {
 };
 
 export const useExperienceFetch = () => {
-  const { profile } = useAuth();
+  const { user } = useAuth();
   const { toast } = useToast();
 
   const query = useQuery({
-    queryKey: ['experiences', profile?.id],
-    queryFn: () => fetchExperiences(profile?.id),
-    onError: (error: any) => {
-      toast({
-        title: "Error fetching experiences",
-        description: error.message,
-        variant: "destructive",
-      });
+    queryKey: ['experiences', user?.id],
+    queryFn: () => fetchExperiences(user?.id),
+    enabled: !!user?.id,
+    meta: {
+      onError: (error: any) => {
+        toast({
+          title: "Error fetching experiences",
+          description: error.message,
+          variant: "destructive",
+        });
+      },
     },
   });
 
-  return query;
+  return {
+    data: query.data || [],
+    isLoading: query.isLoading,
+    error: query.error,
+    refetch: query.refetch,
+  };
 };
-
