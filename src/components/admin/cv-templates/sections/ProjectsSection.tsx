@@ -74,16 +74,16 @@ export const ProjectsSection: React.FC<ProjectsSectionProps> = ({
   const sectionTitle = sectionTitleMapping?.display_name || 'Projects';
 
   // Get ordered fields based on section config, or use default order
-  const getOrderedFields = () => {
+  const getOrderedFields = (): FieldConfig[] => {
     if (fieldConfigs.length === 0) {
-      // Default order if no configuration
+      // Default order if no configuration - ensure all properties match FieldConfig interface
       return [
-        { field: 'name', order: 1, enabled: true },
-        { field: 'role', order: 2, enabled: true },
-        { field: 'date_range', order: 3, enabled: true },
-        { field: 'description', order: 4, enabled: true },
-        { field: 'technologies_used', order: 5, enabled: true },
-        { field: 'url', order: 6, enabled: true }
+        { field: 'name', label: 'Name', order: 1, enabled: true, masked: false },
+        { field: 'role', label: 'Role', order: 2, enabled: true, masked: false },
+        { field: 'date_range', label: 'Date Range', order: 3, enabled: true, masked: false },
+        { field: 'description', label: 'Description', order: 4, enabled: true, masked: false },
+        { field: 'technologies_used', label: 'Technologies', order: 5, enabled: true, masked: false },
+        { field: 'url', label: 'URL', order: 6, enabled: true, masked: false }
       ];
     }
 
