@@ -83,9 +83,10 @@ export const IntelligentPageDistributor: React.FC<IntelligentPageDistributorProp
         continue; // Skip empty sections
       }
 
-      // For sections that can be split (experience, projects, education)
+      // For sections that can be split (experience, projects, education, achievements)
       if (canSectionBeSplit(section.section_type) && Array.isArray(sectionData)) {
-        let remainingItems = sectionData;
+        // Filter out any undefined or null items before processing
+        let remainingItems = sectionData.filter(item => item != null);
         let isFirstPart = true;
 
         while (remainingItems.length > 0 && pages.length < MAX_PAGES) {
@@ -102,6 +103,9 @@ export const IntelligentPageDistributor: React.FC<IntelligentPageDistributorProp
             case 'education':
               split = SectionSplitter.splitEducationSection(remainingItems, availableHeight, sectionTitle);
               break;
+            case 'achievements':
+              split = SectionSplitter.splitAchievementsSection(remainingItems, availableHeight, sectionTitle);
+              break;
             default:
               split = { pageItems: remainingItems, remainingItems: [], sectionTitle };
           }
@@ -112,8 +116,13 @@ export const IntelligentPageDistributor: React.FC<IntelligentPageDistributorProp
               currentPage.sections.push(section);
             }
             
+            // Ensure we only include valid items (filter out any undefined values)
+            const validItems = split.pageItems
+              .map(item => item.content)
+              .filter(item => item != null);
+            
             currentPage.partialSections[section.id] = {
-              items: split.pageItems.map(item => item.content),
+              items: validItems,
               startIndex: sectionData.length - remainingItems.length,
               totalItems: sectionData.length,
               isPartial: remainingItems.length > split.pageItems.length,
@@ -122,7 +131,7 @@ export const IntelligentPageDistributor: React.FC<IntelligentPageDistributorProp
 
             const usedHeight = split.pageItems.reduce((sum, item) => sum + item.estimatedHeight, 0) + 30; // +30 for title
             currentPageHeight += usedHeight;
-            remainingItems = split.remainingItems.map(item => item.content);
+            remainingItems = split.remainingItems.map(item => item.content).filter(item => item != null);
             isFirstPart = false;
           }
 

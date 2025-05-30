@@ -1,4 +1,3 @@
-
 interface SectionItem {
   id: string;
   content: any;
@@ -135,6 +134,45 @@ export class SectionSplitter {
       remainingItems,
       sectionTitle: pageItems.length > 0 ? sectionTitle : undefined,
       continuationTitle: remainingItems.length > 0 ? `${sectionTitle} (continued)` : undefined
+    };
+  }
+
+  static splitAchievementsSection(achievements: any[], availableHeight: number, sectionTitle: string) {
+    const ACHIEVEMENT_HEIGHT = 60; // Estimated height per achievement
+    const TITLE_HEIGHT = 30;
+    
+    let usedHeight = TITLE_HEIGHT; // Start with title height
+    const pageItems = [];
+    
+    for (const achievement of achievements) {
+      if (usedHeight + ACHIEVEMENT_HEIGHT <= availableHeight) {
+        pageItems.push({
+          content: achievement,
+          estimatedHeight: ACHIEVEMENT_HEIGHT
+        });
+        usedHeight += ACHIEVEMENT_HEIGHT;
+      } else {
+        break;
+      }
+    }
+    
+    // If we couldn't fit any items but this is the first section on the page, take at least one
+    if (pageItems.length === 0 && usedHeight === TITLE_HEIGHT && achievements.length > 0) {
+      pageItems.push({
+        content: achievements[0],
+        estimatedHeight: ACHIEVEMENT_HEIGHT
+      });
+    }
+    
+    const remainingItems = achievements.slice(pageItems.length).map(achievement => ({
+      content: achievement,
+      estimatedHeight: ACHIEVEMENT_HEIGHT
+    }));
+    
+    return {
+      pageItems,
+      remainingItems,
+      sectionTitle
     };
   }
 

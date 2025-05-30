@@ -42,7 +42,14 @@ export const AchievementsSection: React.FC<AchievementsSectionProps> = ({
   sectionConfig,
   customTitle
 }) => {
-  if (!profile.achievements || profile.achievements.length === 0) return null;
+  // Filter out any undefined or null achievements and ensure they have required properties
+  const validAchievements = (profile.achievements || []).filter((achievement: any) => 
+    achievement && 
+    typeof achievement === 'object' && 
+    achievement.title !== undefined
+  );
+
+  if (validAchievements.length === 0) return null;
 
   const defaultFields: FieldConfig[] = [
     { field: 'title', label: 'Title', order: 1, enabled: true, masked: false },
@@ -62,9 +69,10 @@ export const AchievementsSection: React.FC<AchievementsSectionProps> = ({
     defaultFields
   });
 
-  // Define field renderers
+  // Define field renderers with null checks
   const fieldRenderers = {
     title: (achievement: any, index: number) => {
+      if (!achievement || !achievement.title) return null;
       const maskedValue = applyMasking(achievement.title, 'title');
       return (
         <FieldProcessor
@@ -83,6 +91,7 @@ export const AchievementsSection: React.FC<AchievementsSectionProps> = ({
       );
     },
     date: (achievement: any, index: number) => {
+      if (!achievement || !achievement.date) return null;
       const maskedValue = applyMasking(achievement.date, 'date');
       return (
         <FieldProcessor
@@ -101,6 +110,7 @@ export const AchievementsSection: React.FC<AchievementsSectionProps> = ({
       );
     },
     description: (achievement: any, index: number) => {
+      if (!achievement || !achievement.description) return null;
       const maskedValue = applyMasking(achievement.description, 'description');
       return (
         <FieldProcessor
@@ -125,8 +135,8 @@ export const AchievementsSection: React.FC<AchievementsSectionProps> = ({
   return (
     <div style={styles.sectionStyles}>
       <h2 style={styles.sectionTitleStyles}>{customTitle || sectionTitle || 'Achievements'}</h2>
-      {profile.achievements.map((achievement: any, index: number) => (
-        <div key={index} style={styles.itemStyles}>
+      {validAchievements.map((achievement: any, index: number) => (
+        <div key={achievement.id || index} style={styles.itemStyles}>
           {orderedFields.map((fieldConfig) => {
             const fieldName = fieldConfig.field;
             const renderer = fieldRenderers[fieldName as keyof typeof fieldRenderers];
