@@ -30,8 +30,8 @@ export function useEmployeeProfile(profileId: string) {
     experienceHook.refetch();
     educationHook.refetch();
     trainingHook.refetch();
-    if (achievementsHook.refetch) achievementsHook.refetch();
-    if (projectsHook.refetch) projectsHook.refetch();
+    achievementsHook.refetch();
+    projectsHook.refetch();
   };
 
   return {

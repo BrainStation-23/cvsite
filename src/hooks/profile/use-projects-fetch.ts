@@ -1,3 +1,4 @@
+
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
@@ -11,7 +12,12 @@ export interface Project {
   description: string;
   start_date: string | null;
   end_date: string | null;
-  user_id: string;
+  profile_id: string;
+  role: string;
+  is_current: boolean;
+  technologies_used: string[] | null;
+  url: string | null;
+  display_order: number | null;
 }
 
 const useProjectsFetch = () => {
@@ -26,7 +32,7 @@ const useProjectsFetch = () => {
     const { data, error } = await supabase
       .from('projects')
       .select('*')
-      .eq('user_id', user.id)
+      .eq('profile_id', user.id)
       .order('start_date', { ascending: false });
 
     if (error) {
@@ -41,18 +47,18 @@ const useProjectsFetch = () => {
     return data || [];
   };
 
-  const {
-    data: projects,
-    isLoading,
-    error,
-  } = useQuery(['projects'], fetchProjects);
+  const query = useQuery({
+    queryKey: ['projects', user?.id],
+    queryFn: fetchProjects,
+    enabled: !!user?.id,
+  });
 
   return {
-    projects: projects || [],
-    isLoading,
-    error,
+    projects: query.data || [],
+    isLoading: query.isLoading,
+    error: query.error,
+    refetch: query.refetch,
   };
 };
 
 export default useProjectsFetch;
-

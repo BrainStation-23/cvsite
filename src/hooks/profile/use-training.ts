@@ -1,3 +1,4 @@
+
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/ui/use-toast';
@@ -6,10 +7,10 @@ import { useAuth } from '@/contexts/AuthContext';
 export interface TrainingItem {
   id: string;
   title: string;
-  institution: string;
-  start_date: string | null;
-  end_date: string | null;
+  provider: string;
+  certification_date: string;
   description: string | null;
+  certificate_url: string | null;
   profile_id: string;
   created_at: string;
   updated_at: string;
@@ -17,10 +18,10 @@ export interface TrainingItem {
 
 export interface TrainingFormData {
   title: string;
-  institution: string;
-  start_date?: string | null;
-  end_date?: string | null;
+  provider: string;
+  certification_date: string;
   description?: string | null;
+  certificate_url?: string | null;
 }
 
 export const useTraining = () => {
@@ -128,8 +129,8 @@ export const useTraining = () => {
     deleteTraining: async (id: string) => {
       await deleteTrainingMutation.mutateAsync(id);
     },
-    isAdding: addTrainingMutation.isLoading,
-    isUpdating: updateTrainingMutation.isLoading,
-    isRemoving: deleteTrainingMutation.isLoading,
+    isAdding: addTrainingMutation.isPending,
+    isUpdating: updateTrainingMutation.isPending,
+    isRemoving: deleteTrainingMutation.isPending,
   };
 };

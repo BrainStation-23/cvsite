@@ -1,3 +1,4 @@
+
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
@@ -20,26 +21,55 @@ const useSkillsFetch = () => {
         return [];
       }
 
-      const { data, error } = await supabase
-        .from('skills')
-        .select('*')
-        .eq('user_id', user.id)
-        .order('name', { ascending: true });
+      // Fetch both technical and specialized skills
+      const [technicalSkillsResult, specializedSkillsResult] = await Promise.all([
+        supabase
+          .from('technical_skills')
+          .select('*')
+          .eq('profile_id', user.id)
+          .order('name', { ascending: true }),
+        supabase
+          .from('specialized_skills')
+          .select('*')
+          .eq('profile_id', user.id)
+          .order('name', { ascending: true })
+      ]);
 
-      if (error) {
+      if (technicalSkillsResult.error) {
         toast({
-          title: 'Error fetching skills',
-          description: error.message,
+          title: 'Error fetching technical skills',
+          description: technicalSkillsResult.error.message,
           variant: 'destructive',
         });
-        throw error;
+        throw technicalSkillsResult.error;
       }
 
-      return data as Skill[];
+      if (specializedSkillsResult.error) {
+        toast({
+          title: 'Error fetching specialized skills',
+          description: specializedSkillsResult.error.message,
+          variant: 'destructive',
+        });
+        throw specializedSkillsResult.error;
+      }
+
+      // Transform the data to match the expected format
+      const technicalSkills = (technicalSkillsResult.data || []).map(skill => ({
+        id: skill.id,
+        name: skill.name,
+        created_at: skill.created_at
+      }));
+
+      const specializedSkills = (specializedSkillsResult.data || []).map(skill => ({
+        id: skill.id,
+        name: skill.name,
+        created_at: skill.created_at
+      }));
+
+      return [...technicalSkills, ...specializedSkills];
     },
     enabled: !!user?.id,
   });
 };
 
 export default useSkillsFetch;
-
