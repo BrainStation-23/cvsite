@@ -12,11 +12,25 @@ interface FieldMapping {
   section_type: string;
 }
 
+interface FieldConfig {
+  field: string;
+  label: string;
+  enabled: boolean;
+  masked: boolean;
+  mask_value?: string;
+  order: number;
+}
+
 interface ProjectsSectionProps {
   profile: any;
   styles: any;
   fieldMappings?: FieldMapping[];
-  sectionConfig?: any;
+  sectionConfig?: {
+    styling_config?: {
+      display_style?: string;
+      fields?: FieldConfig[];
+    };
+  };
 }
 
 export const ProjectsSection: React.FC<ProjectsSectionProps> = ({ 
@@ -27,22 +41,59 @@ export const ProjectsSection: React.FC<ProjectsSectionProps> = ({
 }) => {
   if (!profile.projects || profile.projects.length === 0) return null;
   
+  // Get field configurations from section config
+  const fieldConfigs = sectionConfig?.styling_config?.fields || [];
+  const displayStyle = sectionConfig?.styling_config?.display_style || 'default';
+
+  // Helper function to check if a field is enabled
+  const isFieldEnabled = (fieldName: string) => {
+    const config = fieldConfigs.find(f => f.field === fieldName);
+    return config ? config.enabled : true; // Default to enabled if no config
+  };
+
+  // Helper function to apply masking
+  const applyMasking = (value: any, fieldName: string) => {
+    const config = fieldConfigs.find(f => f.field === fieldName);
+    if (!config?.masked || !value) return value;
+
+    if (config.mask_value) {
+      return config.mask_value;
+    } else {
+      // Default masking
+      if (typeof value === 'string' && value.length > 3) {
+        return value.substring(0, 3) + '***';
+      }
+      return '***';
+    }
+  };
+
   // Get section title from field mappings or use default
   const sectionTitleMapping = fieldMappings.find(
     mapping => mapping.original_field_name === 'section_title' && mapping.section_type === 'projects'
   );
   const sectionTitle = sectionTitleMapping?.display_name || 'Projects';
 
-  // Sort field mappings by field_order for consistent display
-  const sortedFieldMappings = [...fieldMappings].sort((a, b) => a.field_order - b.field_order);
+  // Get ordered fields based on section config, or use default order
+  const getOrderedFields = () => {
+    if (fieldConfigs.length === 0) {
+      // Default order if no configuration
+      return [
+        { field: 'name', order: 1, enabled: true },
+        { field: 'role', order: 2, enabled: true },
+        { field: 'date_range', order: 3, enabled: true },
+        { field: 'description', order: 4, enabled: true },
+        { field: 'technologies_used', order: 5, enabled: true },
+        { field: 'url', order: 6, enabled: true }
+      ];
+    }
 
-  // Get only the fields that are enabled (have field mappings)
-  const enabledFields = sortedFieldMappings
-    .filter(mapping => mapping.section_type === 'projects')
-    .map(mapping => mapping.original_field_name);
+    // Use configuration order and filter enabled fields
+    return [...fieldConfigs]
+      .filter(f => f.enabled)
+      .sort((a, b) => a.order - b.order);
+  };
 
-  // Check if we have any field mappings configured for projects section
-  const hasFieldMappings = enabledFields.length > 0;
+  const orderedFields = getOrderedFields();
 
   // Sort projects by display_order, then by start_date as fallback
   const sortedProjects = [...profile.projects].sort((a, b) => {
@@ -60,9 +111,11 @@ export const ProjectsSection: React.FC<ProjectsSectionProps> = ({
           key={index}
           project={project}
           index={index}
-          fieldMappings={sortedFieldMappings}
+          orderedFields={orderedFields}
+          fieldMappings={fieldMappings}
           styles={styles}
-          hasFieldMappings={hasFieldMappings}
+          isFieldEnabled={isFieldEnabled}
+          applyMasking={applyMasking}
         />
       ))}
     </div>

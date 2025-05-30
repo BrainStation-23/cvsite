@@ -12,53 +12,44 @@ interface FieldMapping {
   section_type: string;
 }
 
+interface FieldConfig {
+  field: string;
+  label: string;
+  enabled: boolean;
+  masked: boolean;
+  mask_value?: string;
+  order: number;
+}
+
 interface ProjectItemProps {
   project: any;
   index: number;
+  orderedFields: FieldConfig[];
   fieldMappings: FieldMapping[];
   styles: any;
-  hasFieldMappings: boolean;
+  isFieldEnabled: (fieldName: string) => boolean;
+  applyMasking: (value: any, fieldName: string) => any;
 }
 
 export const ProjectItem: React.FC<ProjectItemProps> = ({
   project,
   index,
+  orderedFields,
   fieldMappings,
   styles,
-  hasFieldMappings
+  isFieldEnabled,
+  applyMasking
 }) => {
-  // Determine which fields to render
-  let fieldsToRender: string[];
-  
-  if (hasFieldMappings) {
-    // Use only enabled fields from field mappings when they exist
-    const enabledFields = fieldMappings
-      .filter(mapping => mapping.section_type === 'projects')
-      .map(mapping => mapping.original_field_name);
-      
-    fieldsToRender = enabledFields.filter(fieldName => 
-      ProjectFieldRenderers[fieldName as keyof typeof ProjectFieldRenderers]
-    );
-  } else {
-    // Use default field order when no field mappings are configured
-    fieldsToRender = [
-      'name',
-      'role', 
-      'date_range',
-      'description',
-      'technologies_used',
-      'url'
-    ];
-  }
-
   return (
     <div style={styles.itemStyles}>
-      {fieldsToRender.map((fieldName) => {
+      {orderedFields.map((fieldConfig) => {
+        const fieldName = fieldConfig.field;
         const renderer = ProjectFieldRenderers[fieldName as keyof typeof ProjectFieldRenderers];
-        if (!renderer) return null;
         
-        // All renderers now receive the same 4 arguments: project, index, fieldMappings, styles
-        return renderer(project, index, fieldMappings, styles);
+        if (!renderer || !isFieldEnabled(fieldName)) return null;
+        
+        // All renderers receive: project, index, fieldMappings, styles, applyMasking
+        return renderer(project, index, fieldMappings, styles, applyMasking);
       })}
     </div>
   );
