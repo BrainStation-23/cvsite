@@ -11,7 +11,7 @@ interface CVPreviewProps {
 }
 
 const CVPreview: React.FC<CVPreviewProps> = ({ template, profile }) => {
-  const { sections, fieldMappings, isLoading } = useTemplateConfiguration(template.id);
+  const { sections, fieldMappings, isLoading, configVersion } = useTemplateConfiguration(template.id);
   const [currentPageCount, setCurrentPageCount] = useState(1);
   const styles = createCVStyles(template);
 
@@ -72,6 +72,7 @@ const CVPreview: React.FC<CVPreviewProps> = ({ template, profile }) => {
       </div>
       
       <PageDistributor
+        key={configVersion} // This will update when configuration changes
         sections={sections || []}
         fieldMappings={fieldMappings || []}
         profile={profile}

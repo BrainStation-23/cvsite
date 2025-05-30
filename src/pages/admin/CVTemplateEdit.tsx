@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useCVTemplates } from '@/hooks/use-cv-templates';
@@ -86,7 +87,7 @@ const CVTemplateEdit: React.FC = () => {
   };
 
   const handleSectionsChange = () => {
-    // Just mark as having unsaved changes, don't force any refreshes
+    // Mark as having unsaved changes for save state tracking
     setHasUnsavedChanges(true);
   };
 

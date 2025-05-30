@@ -24,7 +24,7 @@ const LivePreviewLayout: React.FC<LivePreviewLayoutProps> = ({
   onSectionsChange
 }) => {
   const handleConfigurationChange = () => {
-    // Just notify parent that sections changed, don't force refresh
+    // Notify parent that sections changed for save state tracking
     onSectionsChange?.();
   };
 
