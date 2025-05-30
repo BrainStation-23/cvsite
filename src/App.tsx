@@ -189,14 +189,6 @@ function App() {
               }
             />
             <Route
-              path="/admin/cv-templates/create"
-              element={
-                <ProtectedRoute allowedRoles={['admin']}>
-                  <CVTemplateCreate />
-                </ProtectedRoute>
-              }
-            />
-            <Route
               path="/admin/cv-templates/:id/edit"
               element={
                 <ProtectedRoute allowedRoles={['admin']}>

@@ -10,11 +10,48 @@ import { useCVTemplates } from '@/hooks/use-cv-templates';
 
 const CVTemplates: React.FC = () => {
   const navigate = useNavigate();
-  const { templates, getTemplates, deleteTemplate, isLoading, isDeleting, refetch } = useCVTemplates();
+  const { templates, getTemplates, deleteTemplate, createTemplate, isLoading, isDeleting, isCreating, refetch } = useCVTemplates();
+  const [templateCounter, setTemplateCounter] = useState(1);
 
   useEffect(() => {
     getTemplates();
   }, []);
+
+  useEffect(() => {
+    // Update counter based on existing templates
+    if (templates && templates.length > 0) {
+      const maxNumber = templates
+        .filter(t => t.name.startsWith('CV Template '))
+        .map(t => {
+          const match = t.name.match(/CV Template (\d+)/);
+          return match ? parseInt(match[1]) : 0;
+        })
+        .reduce((max, num) => Math.max(max, num), 0);
+      setTemplateCounter(maxNumber + 1);
+    }
+  }, [templates]);
+
+  const handleCreateTemplate = async () => {
+    const templateName = `CV Template ${templateCounter}`;
+    
+    const success = await createTemplate({
+      name: templateName,
+      description: 'A professional CV template with default sections',
+      pages_count: 1,
+      orientation: 'portrait',
+      is_active: true,
+      layout_config: {
+        layoutType: 'single-column',
+        margins: { top: 20, bottom: 20, left: 20, right: 20 },
+        spacing: { section: 15, item: 8 }
+      }
+    });
+
+    if (success) {
+      setTemplateCounter(prev => prev + 1);
+      await refetch();
+    }
+  };
 
   const handleEdit = (id: string) => {
     navigate(`/admin/cv-templates/${id}/edit`);
@@ -39,9 +76,9 @@ const CVTemplates: React.FC = () => {
               Manage CV templates for generating employee CVs
             </p>
           </div>
-          <Button onClick={() => navigate('/admin/cv-templates/create')}>
+          <Button onClick={handleCreateTemplate} disabled={isCreating}>
             <Plus className="h-4 w-4 mr-2" />
-            Create Template
+            {isCreating ? 'Creating...' : 'Create Template'}
           </Button>
         </div>
 
@@ -119,9 +156,9 @@ const CVTemplates: React.FC = () => {
                 <p className="text-gray-600 mb-4">
                   Get started by creating your first CV template.
                 </p>
-                <Button onClick={() => navigate('/admin/cv-templates/create')}>
+                <Button onClick={handleCreateTemplate} disabled={isCreating}>
                   <Plus className="h-4 w-4 mr-2" />
-                  Create Template
+                  {isCreating ? 'Creating...' : 'Create Template'}
                 </Button>
               </div>
             </CardContent>
