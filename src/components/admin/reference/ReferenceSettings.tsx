@@ -8,7 +8,7 @@ import ReferenceSearchFilters from './ReferenceSearchFilters';
 import ReferencePagination from './ReferencePagination';
 import ReferenceCSVManager from './ReferenceCSVManager';
 import ReferenceCSVValidation from './ReferenceCSVValidation';
-import { useReferenceSettings, ReferenceFormData } from '@/hooks/settings/use-reference-settings';
+import { useReferenceSettings, ReferenceFormData, ReferenceItem } from '@/hooks/settings/use-reference-settings';
 import { useReferenceSearch } from '@/hooks/search/use-reference-search';
 
 type SortColumn = 'name' | 'email' | 'designation' | 'company' | 'created_at';
@@ -82,9 +82,14 @@ const ReferenceSettings: React.FC = () => {
     }
   };
 
-  const handleEdit = (id: string, name: string, email: string, designation: string, company: string) => {
+  const handleEdit = (id: string, reference: ReferenceItem) => {
     setEditingId(id);
-    setEditItem({ name, email, designation, company });
+    setEditItem({ 
+      name: reference.name, 
+      email: reference.email || '', 
+      designation: reference.designation || '', 
+      company: reference.company || '' 
+    });
   };
 
   const handleSaveEdit = () => {

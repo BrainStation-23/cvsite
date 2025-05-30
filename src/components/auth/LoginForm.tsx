@@ -1,12 +1,14 @@
+
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Eye, EyeOff } from 'lucide-react';
 import { useToast } from '@/hooks/ui/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
-import { AzureLoginButton } from './AzureLoginButton';
+import AzureLoginButton from './AzureLoginButton';
 
 interface LoginFormProps {
   onSubmit: (email: string, password: string) => Promise<void>;
@@ -18,6 +20,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onSubmit, loading }) => {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [azureLoading, setAzureLoading] = useState(false);
+  const { toast } = useToast();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -61,7 +64,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onSubmit, loading }) => {
 
         <CardContent className="space-y-6">
           {/* Azure AD Login Button */}
-          <AzureLoginButton loading={azureLoading} setLoading={setAzureLoading} />
+          <AzureLoginButton />
 
           <div className="relative">
             <div className="absolute inset-0 flex items-center">

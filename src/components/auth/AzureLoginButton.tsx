@@ -1,27 +1,23 @@
+
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/ui/use-toast';
 
 const AzureLoginButton: React.FC = () => {
-  const { signInWithAzure } = useAuth();
   const { toast } = useToast();
 
   const handleAzureLogin = async () => {
-    try {
-      await signInWithAzure();
-    } catch (error: any) {
-      toast({
-        title: "Error",
-        description: error?.message || "Failed to sign in with Azure.",
-        variant: "destructive",
-      });
-    }
+    toast({
+      title: "Azure Login",
+      description: "Azure AD login is not yet configured. Please use email/password login.",
+      variant: "default",
+    });
   };
 
   return (
-    <Button onClick={handleAzureLogin}>
-      Sign In with Azure
+    <Button onClick={handleAzureLogin} variant="outline" className="w-full">
+      Sign In with Azure AD
     </Button>
   );
 };

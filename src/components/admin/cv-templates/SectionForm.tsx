@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/ui/use-toast';
 import { supabase } from '@/integrations/supabase/client';
@@ -17,17 +18,17 @@ const SectionForm: React.FC<SectionFormProps> = ({
   onSectionCreated,
   onCancel
 }) => {
-  const [name, setName] = useState('');
+  const [sectionType, setSectionType] = useState('general');
   const [isCreating, setIsCreating] = useState(false);
   const { toast } = useToast();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!name.trim()) {
+    if (!sectionType) {
       toast({
         title: "Error",
-        description: "Section name is required",
+        description: "Section type is required",
         variant: "destructive"
       });
       return;
@@ -40,9 +41,9 @@ const SectionForm: React.FC<SectionFormProps> = ({
         .from('cv_template_sections')
         .insert({
           template_id: templateId,
-          name: name.trim(),
-          type: 'custom',
-          order_index: 999
+          section_type: sectionType,
+          display_order: 999,
+          is_required: false
         });
 
       if (error) throw error;
@@ -71,12 +72,21 @@ const SectionForm: React.FC<SectionFormProps> = ({
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
-          <Input
-            placeholder="Section name"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            disabled={isCreating}
-          />
+          <Select value={sectionType} onValueChange={setSectionType}>
+            <SelectTrigger>
+              <SelectValue placeholder="Select section type" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="general">General Information</SelectItem>
+              <SelectItem value="technical_skills">Technical Skills</SelectItem>
+              <SelectItem value="specialized_skills">Specialized Skills</SelectItem>
+              <SelectItem value="experience">Experience</SelectItem>
+              <SelectItem value="education">Education</SelectItem>
+              <SelectItem value="trainings">Trainings</SelectItem>
+              <SelectItem value="achievements">Achievements</SelectItem>
+              <SelectItem value="projects">Projects</SelectItem>
+            </SelectContent>
+          </Select>
           <div className="flex gap-2">
             <Button type="submit" disabled={isCreating}>
               {isCreating ? 'Creating...' : 'Create Section'}

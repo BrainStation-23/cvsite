@@ -5,16 +5,16 @@ import { Trash2 } from 'lucide-react';
 import { useToast } from '@/hooks/ui/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 
-interface Section {
+interface TemplateSection {
   id: string;
-  name: string;
-  type: string;
-  order_index: number;
+  section_type: string;
+  display_order: number;
+  is_required: boolean;
 }
 
 interface SectionListProps {
   templateId: string;
-  sections: Section[];
+  sections: TemplateSection[];
   onSectionDeleted: () => void;
   refetch: () => void;
 }
@@ -27,8 +27,22 @@ const SectionList: React.FC<SectionListProps> = ({
 }) => {
   const { toast } = useToast();
 
-  const handleDeleteSection = async (sectionId: string, sectionName: string) => {
-    if (!confirm(`Are you sure you want to delete the "${sectionName}" section?`)) {
+  const getSectionLabel = (sectionType: string) => {
+    const labels: Record<string, string> = {
+      general: 'General Information',
+      technical_skills: 'Technical Skills',
+      specialized_skills: 'Specialized Skills',
+      experience: 'Experience',
+      education: 'Education',
+      trainings: 'Trainings',
+      achievements: 'Achievements',
+      projects: 'Projects'
+    };
+    return labels[sectionType] || sectionType;
+  };
+
+  const handleDeleteSection = async (sectionId: string, sectionType: string) => {
+    if (!confirm(`Are you sure you want to delete the "${getSectionLabel(sectionType)}" section?`)) {
       return;
     }
 
@@ -42,7 +56,7 @@ const SectionList: React.FC<SectionListProps> = ({
 
       toast({
         title: "Success",
-        description: `Section "${sectionName}" deleted successfully`,
+        description: `Section "${getSectionLabel(sectionType)}" deleted successfully`,
       });
 
       onSectionDeleted();
@@ -64,13 +78,13 @@ const SectionList: React.FC<SectionListProps> = ({
       {sections.map((section) => (
         <div key={section.id} className="flex items-center justify-between p-3 border rounded">
           <div>
-            <span className="font-medium">{section.name}</span>
-            <span className="text-sm text-gray-500 ml-2">({section.type})</span>
+            <span className="font-medium">{getSectionLabel(section.section_type)}</span>
+            <span className="text-sm text-gray-500 ml-2">(Order: {section.display_order})</span>
           </div>
           <Button
             variant="outline"
             size="sm"
-            onClick={() => handleDeleteSection(section.id, section.name)}
+            onClick={() => handleDeleteSection(section.id, section.section_type)}
           >
             <Trash2 className="h-4 w-4" />
           </Button>

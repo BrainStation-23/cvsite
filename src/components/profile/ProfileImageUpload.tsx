@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -54,10 +55,11 @@ const ProfileImageUpload: React.FC<ProfileImageUploadProps> = ({ userId, onUploa
         throw storageError;
       }
 
+      // Update the general_information table instead of profiles
       const { data, error: updateError } = await supabase
-        .from('profiles')
-        .update({ avatar_url: filePath })
-        .eq('id', userId)
+        .from('general_information')
+        .update({ profile_image: filePath })
+        .eq('profile_id', userId)
         .select();
 
       if (updateError) {
