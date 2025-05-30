@@ -79,6 +79,7 @@ export const useTemplateConfiguration = (templateId: string) => {
     }
   }, [templateId, toast]);
 
+  // Only fetch on mount and when templateId changes
   useEffect(() => {
     fetchConfiguration();
   }, [fetchConfiguration]);

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useCVTemplates } from '@/hooks/use-cv-templates';
@@ -87,11 +86,8 @@ const CVTemplateEdit: React.FC = () => {
   };
 
   const handleSectionsChange = () => {
+    // Just mark as having unsaved changes, don't force any refreshes
     setHasUnsavedChanges(true);
-    // Refetch profile data when sections change to ensure preview updates
-    if (selectedProfileId) {
-      refetchProfile();
-    }
   };
 
   const handleBack = () => {
