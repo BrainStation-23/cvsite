@@ -77,6 +77,13 @@ export class DOCXExporter extends BaseExporter {
       
       console.log('Total document elements:', documentChildren.length);
       
+      // Add a test paragraph if no content
+      if (documentChildren.length === 0) {
+        documentChildren.push(new Paragraph({
+          children: [new TextRun("No content available")]
+        }));
+      }
+      
       // Calculate page dimensions in twips (1/20th of a point)
       const pageWidth = orientation === 'portrait' ? 11906 : 16838; // A4 width in twips
       const pageHeight = orientation === 'portrait' ? 16838 : 11906; // A4 height in twips
@@ -148,7 +155,8 @@ export class DOCXExporter extends BaseExporter {
       // Render section content based on type
       switch (section.section_type) {
         case 'general':
-          elements.push(...this.renderGeneralSection(profile, styles));
+          const generalElements = await this.renderGeneralSection(profile, styles);
+          elements.push(...generalElements);
           break;
         case 'experience':
           elements.push(...this.renderExperienceSection(profile.experiences || [], styles, fieldMappings));
@@ -183,8 +191,8 @@ export class DOCXExporter extends BaseExporter {
     }
   }
 
-  private async renderGeneralSection(profile: any, styles: any): Promise<Paragraph[]> {
-    const elements: Paragraph[] = [];
+  private async renderGeneralSection(profile: any, styles: any): Promise<(Paragraph | Table)[]> {
+    const elements: (Paragraph | Table)[] = [];
     const baseStyles = styles?.baseStyles || {};
     
     try {
@@ -198,11 +206,12 @@ export class DOCXExporter extends BaseExporter {
           elements.push(new Paragraph({
             children: [
               new ImageRun({
-                data: imageBuffer,
+                data: new Uint8Array(imageBuffer),
                 transformation: {
                   width: 100,
                   height: 100,
                 },
+                type: 'jpg'
               })
             ],
             alignment: AlignmentType.CENTER,
@@ -289,12 +298,10 @@ export class DOCXExporter extends BaseExporter {
     const fontSize = (baseStyles.baseFontSize || 12) * 2;
     
     // Simple HTML parsing for basic formatting
-    // This is a basic implementation - for production, consider using a proper HTML parser
     let text = htmlContent;
     const runs: TextRun[] = [];
     
     // Remove HTML tags and extract text with basic formatting
-    // This is a simplified approach - strip HTML but preserve line breaks
     text = text
       .replace(/<br\s*\/?>/gi, '\n')
       .replace(/<\/p>/gi, '\n\n')
@@ -517,8 +524,8 @@ export class DOCXExporter extends BaseExporter {
     return elements;
   }
 
-  private renderSkillsSection(skills: any[], title: string, styles: any): Paragraph[] {
-    const elements: Paragraph[] = [];
+  private renderSkillsSection(skills: any[], title: string, styles: any): (Paragraph | Table)[] {
+    const elements: (Paragraph | Table)[] = [];
     const baseStyles = styles?.baseStyles || {};
     
     try {
@@ -527,8 +534,8 @@ export class DOCXExporter extends BaseExporter {
       // Create a properly formatted table for skills
       const skillRows: TableRow[] = [];
       
-      // Group skills into rows of 2-3 skills each for better formatting
-      const skillsPerRow = 2;
+      // Group skills into rows of 3 skills each for better formatting
+      const skillsPerRow = 3;
       for (let i = 0; i < skills.length; i += skillsPerRow) {
         const rowSkills = skills.slice(i, i + skillsPerRow);
         
@@ -550,7 +557,7 @@ export class DOCXExporter extends BaseExporter {
               })
             ],
             width: {
-              size: 50,
+              size: 33.33,
               type: WidthType.PERCENTAGE
             }
           });
@@ -561,7 +568,7 @@ export class DOCXExporter extends BaseExporter {
           cells.push(new TableCell({
             children: [new Paragraph({ children: [] })],
             width: {
-              size: 50,
+              size: 33.33,
               type: WidthType.PERCENTAGE
             }
           }));
