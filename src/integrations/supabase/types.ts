@@ -887,6 +887,10 @@ export type Database = {
         Args: { start_date: string; end_date: string; is_current: boolean }
         Returns: number
       }
+      get_employee_data: {
+        Args: { profile_uuid: string }
+        Returns: Json
+      }
       get_employee_profiles: {
         Args: {
           search_query?: string

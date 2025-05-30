@@ -6,7 +6,7 @@ import { CVTemplate } from '@/types/cv-templates';
 import LivePreviewLayout from '@/components/admin/cv-templates/LivePreviewLayout';
 import TemplateEditorLayout from '@/components/admin/cv-templates/TemplateEditorLayout';
 import { useEmployeeProfiles } from '@/hooks/use-employee-profiles';
-import { useEmployeeProfile } from '@/hooks/use-employee-profile';
+import { useEmployeeData } from '@/hooks/use-employee-data';
 import { useToast } from '@/hooks/use-toast';
 
 const CVTemplateEdit: React.FC = () => {
@@ -21,36 +21,12 @@ const CVTemplateEdit: React.FC = () => {
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const { toast } = useToast();
 
-  // Fetch detailed profile data for the selected profile
+  // Fetch employee data using the new RPC function
   const {
+    data: selectedProfile,
     isLoading: profileLoading,
-    generalInfo,
-    technicalSkills,
-    specializedSkills,
-    experiences,
-    education,
-    trainings,
-    achievements,
-    projects
-  } = useEmployeeProfile(selectedProfileId);
-
-  // Construct the full profile object for the CV preview
-  const selectedProfile = selectedProfileId ? {
-    id: selectedProfileId,
-    // Get employee_id from the profiles data
-    employee_id: profiles?.find(p => p.id === selectedProfileId)?.employee_id || selectedProfileId,
-    first_name: generalInfo.firstName,
-    last_name: generalInfo.lastName,
-    biography: generalInfo.biography,
-    profile_image: generalInfo.profileImage,
-    technical_skills: technicalSkills,
-    specialized_skills: specializedSkills,
-    experiences: experiences,
-    education: education,
-    trainings: trainings,
-    achievements: achievements,
-    projects: projects
-  } : null;
+    refetch: refetchProfile
+  } = useEmployeeData(selectedProfileId);
 
   const loadTemplate = async () => {
     if (id) {
@@ -112,6 +88,10 @@ const CVTemplateEdit: React.FC = () => {
 
   const handleSectionsChange = () => {
     setHasUnsavedChanges(true);
+    // Refetch profile data when sections change to ensure preview updates
+    if (selectedProfileId) {
+      refetchProfile();
+    }
   };
 
   const handleBack = () => {
