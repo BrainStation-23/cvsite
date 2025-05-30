@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { FieldProcessor } from '../FieldProcessor';
+import { ProjectItem } from './projects/ProjectItem';
 
 interface FieldMapping {
   original_field_name: string;
@@ -44,164 +44,6 @@ export const ProjectsSection: React.FC<ProjectsSectionProps> = ({
   // Check if we have any field mappings configured for projects section
   const hasFieldMappings = enabledFields.length > 0;
 
-  // Define all possible fields with their render functions
-  const fieldRenderers = {
-    name: (project: any, index: number) => (
-      <FieldProcessor
-        key="name"
-        fieldName="name"
-        value={project.name}
-        fieldMappings={sortedFieldMappings}
-        sectionType="projects"
-      >
-        {(processedValue, displayName, shouldShow) => (
-          shouldShow && processedValue && (
-            <div style={styles.itemTitleStyles}>{processedValue}</div>
-          )
-        )}
-      </FieldProcessor>
-    ),
-    role: (project: any, index: number) => (
-      <FieldProcessor
-        key="role"
-        fieldName="role"
-        value={project.role}
-        fieldMappings={sortedFieldMappings}
-        sectionType="projects"
-      >
-        {(processedValue, displayName, shouldShow) => (
-          shouldShow && processedValue && (
-            <span style={{ fontSize: '0.85em', color: '#666', fontWeight: 'bold' }}>
-              {processedValue}
-            </span>
-          )
-        )}
-      </FieldProcessor>
-    ),
-    start_date: (project: any, index: number) => (
-      <FieldProcessor
-        key="start_date"
-        fieldName="start_date"
-        value={project.start_date}
-        fieldMappings={sortedFieldMappings}
-        sectionType="projects"
-      >
-        {(processedValue, displayName, shouldShow) => (
-          shouldShow && processedValue && (
-            <span style={{ fontSize: '0.85em', color: '#666', fontStyle: 'italic' }}>
-              {processedValue}
-            </span>
-          )
-        )}
-      </FieldProcessor>
-    ),
-    end_date: (project: any, index: number) => (
-      <FieldProcessor
-        key="end_date"
-        fieldName="end_date"
-        value={project.is_current ? 'Present' : project.end_date}
-        fieldMappings={sortedFieldMappings}
-        sectionType="projects"
-      >
-        {(processedValue, displayName, shouldShow) => (
-          shouldShow && processedValue && (
-            <span style={{ fontSize: '0.85em', color: '#666', fontStyle: 'italic' }}>
-              {processedValue}
-            </span>
-          )
-        )}
-      </FieldProcessor>
-    ),
-    date_range: (project: any, index: number) => (
-      <FieldProcessor
-        key="date_range"
-        fieldName="date_range"
-        value={`${project.start_date || ''} - ${project.is_current ? 'Present' : (project.end_date || '')}`}
-        fieldMappings={sortedFieldMappings}
-        sectionType="projects"
-      >
-        {(processedValue, displayName, shouldShow) => (
-          shouldShow && (
-            <div style={{ 
-              fontSize: '0.85em', 
-              color: '#666',
-              marginBottom: '6pt',
-              fontStyle: 'italic'
-            }}>
-              {processedValue}
-            </div>
-          )
-        )}
-      </FieldProcessor>
-    ),
-    description: (project: any, index: number) => (
-      <FieldProcessor
-        key="description"
-        fieldName="description"
-        value={project.description}
-        fieldMappings={sortedFieldMappings}
-        sectionType="projects"
-      >
-        {(processedValue, displayName, shouldShow) => (
-          shouldShow && processedValue && (
-            <div style={{ 
-              marginTop: '4pt', 
-              fontSize: '0.9em',
-              lineHeight: '1.4',
-              textAlign: 'justify'
-            }}>
-              {processedValue}
-            </div>
-          )
-        )}
-      </FieldProcessor>
-    ),
-    technologies_used: (project: any, index: number) => (
-      <FieldProcessor
-        key="technologies_used"
-        fieldName="technologies_used"
-        value={project.technologies_used}
-        fieldMappings={sortedFieldMappings}
-        sectionType="projects"
-      >
-        {(processedValue, displayName, shouldShow) => (
-          shouldShow && processedValue && processedValue.length > 0 && (
-            <div style={{ marginTop: '5pt' }}>
-              <div style={styles.skillsContainerStyles}>
-                {processedValue.map((tech: string, techIndex: number) => (
-                  <span key={techIndex} style={{ ...styles.skillStyles, backgroundColor: '#10b981' }}>
-                    {tech}
-                  </span>
-                ))}
-              </div>
-            </div>
-          )
-        )}
-      </FieldProcessor>
-    ),
-    url: (project: any, index: number) => (
-      <FieldProcessor
-        key="url"
-        fieldName="url"
-        value={project.url}
-        fieldMappings={sortedFieldMappings}
-        sectionType="projects"
-      >
-        {(processedValue, displayName, shouldShow) => (
-          shouldShow && processedValue && (
-            <div style={{ 
-              marginTop: '4pt', 
-              fontSize: '0.85em',
-              color: '#0066cc'
-            }}>
-              <strong>URL:</strong> {processedValue}
-            </div>
-          )
-        )}
-      </FieldProcessor>
-    )
-  };
-
   // Sort projects by display_order, then by start_date as fallback
   const sortedProjects = [...profile.projects].sort((a, b) => {
     if (a.display_order !== undefined && b.display_order !== undefined) {
@@ -213,36 +55,16 @@ export const ProjectsSection: React.FC<ProjectsSectionProps> = ({
   return (
     <div style={styles.sectionStyles}>
       <h2 style={styles.sectionTitleStyles}>{sectionTitle}</h2>
-      {sortedProjects.map((project: any, index: number) => {
-        // Determine which fields to render
-        let fieldsToRender: string[];
-        
-        if (hasFieldMappings) {
-          // Use only enabled fields from field mappings when they exist
-          fieldsToRender = enabledFields.filter(fieldName => 
-            fieldRenderers[fieldName as keyof typeof fieldRenderers]
-          );
-        } else {
-          // Use default field order when no field mappings are configured
-          fieldsToRender = [
-            'name',
-            'role', 
-            'date_range',
-            'description',
-            'technologies_used',
-            'url'
-          ];
-        }
-
-        return (
-          <div key={index} style={styles.itemStyles}>
-            {fieldsToRender.map((fieldName) => {
-              const renderer = fieldRenderers[fieldName as keyof typeof fieldRenderers];
-              return renderer ? renderer(project, index) : null;
-            })}
-          </div>
-        );
-      })}
+      {sortedProjects.map((project: any, index: number) => (
+        <ProjectItem
+          key={index}
+          project={project}
+          index={index}
+          fieldMappings={sortedFieldMappings}
+          styles={styles}
+          hasFieldMappings={hasFieldMappings}
+        />
+      ))}
     </div>
   );
 };
