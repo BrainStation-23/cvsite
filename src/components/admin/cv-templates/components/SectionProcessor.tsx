@@ -129,8 +129,8 @@ function processSplittableSection({
         title: isFirstPart ? sectionTitle : `${sectionTitle} (continued)`
       };
 
-      // Fix: Properly calculate the used height by reducing to number type
-      const usedHeight = split.pageItems.reduce<number>((sum, item) => sum + item.estimatedHeight, 0) + 30;
+      // Fix: Properly calculate the used height by accessing estimatedHeight property
+      const usedHeight = split.pageItems.reduce((sum, item) => sum + item.estimatedHeight, 0) + 30;
       workingPageHeight += usedHeight;
       
       // Fix: Access content property from SectionItem objects
