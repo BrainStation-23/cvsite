@@ -29,6 +29,15 @@ interface LayoutAwarePageRendererProps {
   sections?: TemplateSection[];
   fieldMappings?: FieldMapping[];
   layoutType?: string;
+  partialSections?: {
+    [sectionId: string]: {
+      items: any[];
+      startIndex: number;
+      totalItems: number;
+      isPartial: boolean;
+      title: string;
+    };
+  };
 }
 
 export const LayoutAwarePageRenderer: React.FC<LayoutAwarePageRendererProps> = ({ 
@@ -38,7 +47,8 @@ export const LayoutAwarePageRenderer: React.FC<LayoutAwarePageRendererProps> = (
   styles,
   sections = [],
   fieldMappings = [],
-  layoutType = 'single-column'
+  layoutType = 'single-column',
+  partialSections = {}
 }) => {
   const enhancedProfile = {
     ...profile,
@@ -54,24 +64,9 @@ export const LayoutAwarePageRenderer: React.FC<LayoutAwarePageRendererProps> = (
   // Sort sections by display order
   const sortedSections = [...sections].sort((a, b) => a.display_order - b.display_order);
 
-  // For single page or when measuring content, show all sections
-  if (totalPages === 1) {
-    return (
-      <div style={styles.baseStyles} key={pageNumber}>
-        {renderLayoutContent(sortedSections, fieldMappings, enhancedProfile, styles, layoutType)}
-      </div>
-    );
-  }
-
-  // For multiple pages, distribute sections evenly
-  const sectionsPerPage = Math.ceil(sortedSections.length / totalPages);
-  const startIndex = (pageNumber - 1) * sectionsPerPage;
-  const endIndex = startIndex + sectionsPerPage;
-  const pageSections = sortedSections.slice(startIndex, endIndex);
-
   return (
     <div style={styles.baseStyles} key={pageNumber}>
-      {renderLayoutContent(pageSections, fieldMappings, enhancedProfile, styles, layoutType)}
+      {renderLayoutContent(sortedSections, fieldMappings, enhancedProfile, styles, layoutType, partialSections)}
     </div>
   );
 };
@@ -82,7 +77,8 @@ function renderLayoutContent(
   fieldMappings: FieldMapping[], 
   profile: any, 
   styles: any, 
-  layoutType: string
+  layoutType: string,
+  partialSections: any = {}
 ) {
   // If no sections, return null
   if (!sections || sections.length === 0) {
@@ -103,6 +99,7 @@ function renderLayoutContent(
               fieldMappings={fieldMappings}
               profile={profile}
               styles={styles}
+              partialSections={partialSections}
             />
           </div>
           <div style={{ gridColumn: '2' }}>
@@ -111,6 +108,7 @@ function renderLayoutContent(
               fieldMappings={fieldMappings}
               profile={profile}
               styles={styles}
+              partialSections={partialSections}
             />
           </div>
         </>
@@ -132,6 +130,7 @@ function renderLayoutContent(
               fieldMappings={fieldMappings}
               profile={profile}
               styles={styles}
+              partialSections={partialSections}
             />
           </div>
           <div style={{ gridColumn: '2' }}>
@@ -140,6 +139,7 @@ function renderLayoutContent(
               fieldMappings={fieldMappings}
               profile={profile}
               styles={styles}
+              partialSections={partialSections}
             />
           </div>
         </>
@@ -152,6 +152,7 @@ function renderLayoutContent(
           fieldMappings={fieldMappings}
           profile={profile}
           styles={styles}
+          partialSections={partialSections}
         />
       );
   }

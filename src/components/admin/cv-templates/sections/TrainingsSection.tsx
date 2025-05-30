@@ -32,13 +32,15 @@ interface TrainingsSectionProps {
       fields?: FieldConfig[];
     };
   };
+  customTitle?: string;
 }
 
 export const TrainingsSection: React.FC<TrainingsSectionProps> = ({ 
   profile, 
   styles, 
   fieldMappings = [],
-  sectionConfig 
+  sectionConfig,
+  customTitle
 }) => {
   if (!profile.trainings || profile.trainings.length === 0) return null;
 
@@ -145,7 +147,7 @@ export const TrainingsSection: React.FC<TrainingsSectionProps> = ({
 
   return (
     <div style={styles.sectionStyles}>
-      <h2 style={styles.sectionTitleStyles}>{sectionTitle || 'Training & Certifications'}</h2>
+      <h2 style={styles.sectionTitleStyles}>{customTitle || sectionTitle || 'Training & Certifications'}</h2>
       {profile.trainings.map((training: any, index: number) => (
         <div key={index} style={styles.itemStyles}>
           {orderedFields.map((fieldConfig) => {

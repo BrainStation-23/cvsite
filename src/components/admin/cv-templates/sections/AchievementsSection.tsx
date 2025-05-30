@@ -32,13 +32,15 @@ interface AchievementsSectionProps {
       fields?: FieldConfig[];
     };
   };
+  customTitle?: string;
 }
 
 export const AchievementsSection: React.FC<AchievementsSectionProps> = ({ 
   profile, 
   styles, 
   fieldMappings = [],
-  sectionConfig 
+  sectionConfig,
+  customTitle
 }) => {
   if (!profile.achievements || profile.achievements.length === 0) return null;
 
@@ -122,7 +124,7 @@ export const AchievementsSection: React.FC<AchievementsSectionProps> = ({
 
   return (
     <div style={styles.sectionStyles}>
-      <h2 style={styles.sectionTitleStyles}>{sectionTitle || 'Achievements'}</h2>
+      <h2 style={styles.sectionTitleStyles}>{customTitle || sectionTitle || 'Achievements'}</h2>
       {profile.achievements.map((achievement: any, index: number) => (
         <div key={index} style={styles.itemStyles}>
           {orderedFields.map((fieldConfig) => {

@@ -32,13 +32,15 @@ interface ProjectsSectionProps {
       fields?: FieldConfig[];
     };
   };
+  customTitle?: string;
 }
 
 export const ProjectsSection: React.FC<ProjectsSectionProps> = ({ 
   profile, 
   styles, 
   fieldMappings = [],
-  sectionConfig 
+  sectionConfig,
+  customTitle
 }) => {
   if (!profile.projects || profile.projects.length === 0) return null;
   
@@ -73,7 +75,7 @@ export const ProjectsSection: React.FC<ProjectsSectionProps> = ({
 
   return (
     <div style={styles.sectionStyles}>
-      <h2 style={styles.sectionTitleStyles}>{sectionTitle || 'Projects'}</h2>
+      <h2 style={styles.sectionTitleStyles}>{customTitle || sectionTitle || 'Projects'}</h2>
       {sortedProjects.map((project: any, index: number) => (
         <ProjectItem
           key={index}

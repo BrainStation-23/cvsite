@@ -32,13 +32,15 @@ interface EducationSectionProps {
       fields?: FieldConfig[];
     };
   };
+  customTitle?: string;
 }
 
 export const EducationSection: React.FC<EducationSectionProps> = ({ 
   profile, 
   styles, 
   fieldMappings = [],
-  sectionConfig 
+  sectionConfig,
+  customTitle
 }) => {
   if (!profile.education || profile.education.length === 0) return null;
 
@@ -172,7 +174,7 @@ export const EducationSection: React.FC<EducationSectionProps> = ({
 
   return (
     <div style={styles.sectionStyles}>
-      <h2 style={styles.sectionTitleStyles}>{sectionTitle || 'Education'}</h2>
+      <h2 style={styles.sectionTitleStyles}>{customTitle || sectionTitle || 'Education'}</h2>
       {profile.education.map((edu: any, index: number) => (
         <div key={index} style={styles.itemStyles}>
           {orderedFields.map((fieldConfig) => {
