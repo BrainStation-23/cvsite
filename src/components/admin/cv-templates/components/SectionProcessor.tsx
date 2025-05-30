@@ -129,8 +129,11 @@ function processSplittableSection({
         title: isFirstPart ? sectionTitle : `${sectionTitle} (continued)`
       };
 
+      // Fix: Access estimatedHeight property from SectionItem objects
       const usedHeight = split.pageItems.reduce((sum, item) => sum + item.estimatedHeight, 0) + 30;
       workingPageHeight += usedHeight;
+      
+      // Fix: Access content property from SectionItem objects
       remainingItems = split.remainingItems.map(item => item.content).filter(item => item != null);
       isFirstPart = false;
     }
