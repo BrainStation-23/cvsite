@@ -1,5 +1,5 @@
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useEffect } from 'react';
 import { SectionSplitter } from '@/utils/sectionSplitter';
 import { CVPageRenderer } from './CVPageRenderer';
 
@@ -60,7 +60,6 @@ export const IntelligentPageDistributor: React.FC<IntelligentPageDistributorProp
 
   const distributedPages = useMemo((): PageContent[] => {
     if (!profile || sections.length === 0) {
-      onPagesCalculated?.(1);
       return [{
         pageNumber: 1,
         sections: [],
@@ -186,9 +185,15 @@ export const IntelligentPageDistributor: React.FC<IntelligentPageDistributorProp
       });
     }
 
-    onPagesCalculated?.(pages.length);
     return pages;
-  }, [sections, profile, fieldMappings, onPagesCalculated, orientation]);
+  }, [sections, profile, fieldMappings, orientation]);
+
+  // Use useEffect to call onPagesCalculated to avoid setState during render
+  useEffect(() => {
+    if (onPagesCalculated) {
+      onPagesCalculated(distributedPages.length);
+    }
+  }, [distributedPages.length, onPagesCalculated]);
 
   const layoutType = layoutConfig.layoutType || 'single-column';
 
