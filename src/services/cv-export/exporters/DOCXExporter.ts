@@ -58,18 +58,6 @@ export class DOCXExporter extends BaseExporter {
       
       const documentChildren: (Paragraph | Table)[] = [];
       
-      // Add a test paragraph to ensure document isn't empty
-      documentChildren.push(new Paragraph({
-        children: [
-          new TextRun({
-            text: "CV Document",
-            bold: true,
-            size: 24
-          })
-        ],
-        spacing: { after: 240 }
-      }));
-      
       // Sort sections by display order
       const sortedSections = [...sections].sort((a, b) => a.display_order - b.display_order);
       console.log('Processing sections:', sortedSections.map(s => s.section_type));
@@ -134,26 +122,28 @@ export class DOCXExporter extends BaseExporter {
       const sectionTitle = this.getSectionTitle(section, fieldMappings);
       console.log(`Rendering section: ${section.section_type} with title: ${sectionTitle}`);
 
-      // Add section title
-      elements.push(new Paragraph({
-        children: [
-          new TextRun({
-            text: sectionTitle,
-            bold: true,
-            size: (styles?.baseStyles?.subheadingSize || 14) * 2,
-            color: this.parseColor(styles?.baseStyles?.primaryColor || '#1f2937')
-          })
-        ],
-        heading: HeadingLevel.HEADING_2,
-        spacing: { before: 240, after: 120 },
-        border: {
-          bottom: {
-            style: BorderStyle.SINGLE,
-            size: 1,
-            color: this.parseColor(styles?.baseStyles?.accentColor || '#3b82f6')
+      // Skip section title for general section (personal info goes at top without header)
+      if (section.section_type !== 'general') {
+        elements.push(new Paragraph({
+          children: [
+            new TextRun({
+              text: sectionTitle,
+              bold: true,
+              size: (styles?.baseStyles?.subheadingSize || 14) * 2,
+              color: this.parseColor(styles?.baseStyles?.primaryColor || '#1f2937')
+            })
+          ],
+          heading: HeadingLevel.HEADING_2,
+          spacing: { before: 240, after: 120 },
+          border: {
+            bottom: {
+              style: BorderStyle.SINGLE,
+              size: 1,
+              color: this.parseColor(styles?.baseStyles?.accentColor || '#3b82f6')
+            }
           }
-        }
-      }));
+        }));
+      }
 
       // Render section content based on type
       switch (section.section_type) {
@@ -193,11 +183,37 @@ export class DOCXExporter extends BaseExporter {
     }
   }
 
-  private renderGeneralSection(profile: any, styles: any): Paragraph[] {
+  private async renderGeneralSection(profile: any, styles: any): Promise<Paragraph[]> {
     const elements: Paragraph[] = [];
     const baseStyles = styles?.baseStyles || {};
     
     try {
+      // Profile Image (if available)
+      if (profile.profile_image) {
+        try {
+          // Fetch the image and convert to buffer
+          const response = await fetch(profile.profile_image);
+          const imageBuffer = await response.arrayBuffer();
+          
+          elements.push(new Paragraph({
+            children: [
+              new ImageRun({
+                data: imageBuffer,
+                transformation: {
+                  width: 100,
+                  height: 100,
+                },
+              })
+            ],
+            alignment: AlignmentType.CENTER,
+            spacing: { after: 120 }
+          }));
+        } catch (imageError) {
+          console.error('Error loading profile image:', imageError);
+          // Continue without image if it fails to load
+        }
+      }
+
       // Name
       if (profile.first_name || profile.last_name) {
         elements.push(new Paragraph({
@@ -214,7 +230,7 @@ export class DOCXExporter extends BaseExporter {
         }));
       }
 
-      // Job Title
+      // Job Title/Designation
       if (profile.designation?.name || profile.job_title) {
         elements.push(new Paragraph({
           children: [
@@ -225,7 +241,7 @@ export class DOCXExporter extends BaseExporter {
             })
           ],
           alignment: AlignmentType.CENTER,
-          spacing: { after: 240 }
+          spacing: { after: 120 }
         }));
       }
 
@@ -248,16 +264,15 @@ export class DOCXExporter extends BaseExporter {
         }));
       }
 
-      // Summary
-      if (profile.summary) {
+      // Biography/Summary
+      if (profile.biography || profile.summary) {
+        const bioText = profile.biography || profile.summary;
+        const richTextElements = this.parseRichText(bioText, baseStyles);
+        
         elements.push(new Paragraph({
-          children: [
-            new TextRun({
-              text: profile.summary,
-              size: (baseStyles.baseFontSize || 12) * 2
-            })
-          ],
-          spacing: { after: 240 }
+          children: richTextElements,
+          spacing: { after: 240 },
+          alignment: AlignmentType.JUSTIFIED
         }));
       }
     } catch (error) {
@@ -265,6 +280,50 @@ export class DOCXExporter extends BaseExporter {
     }
 
     return elements;
+  }
+
+  // Helper method to parse rich text content
+  private parseRichText(htmlContent: string, baseStyles: any): TextRun[] {
+    if (!htmlContent) return [];
+    
+    const fontSize = (baseStyles.baseFontSize || 12) * 2;
+    
+    // Simple HTML parsing for basic formatting
+    // This is a basic implementation - for production, consider using a proper HTML parser
+    let text = htmlContent;
+    const runs: TextRun[] = [];
+    
+    // Remove HTML tags and extract text with basic formatting
+    // This is a simplified approach - strip HTML but preserve line breaks
+    text = text
+      .replace(/<br\s*\/?>/gi, '\n')
+      .replace(/<\/p>/gi, '\n\n')
+      .replace(/<p[^>]*>/gi, '')
+      .replace(/<[^>]*>/g, '') // Remove all other HTML tags
+      .replace(/&nbsp;/g, ' ')
+      .replace(/&amp;/g, '&')
+      .replace(/&lt;/g, '<')
+      .replace(/&gt;/g, '>')
+      .trim();
+    
+    // Split by line breaks and create text runs
+    const lines = text.split('\n');
+    lines.forEach((line, index) => {
+      if (line.trim()) {
+        runs.push(new TextRun({
+          text: line.trim(),
+          size: fontSize
+        }));
+        if (index < lines.length - 1) {
+          runs.push(new TextRun({
+            text: '\n',
+            size: fontSize
+          }));
+        }
+      }
+    });
+    
+    return runs.length > 0 ? runs : [new TextRun({ text: text, size: fontSize })];
   }
 
   private renderExperienceSection(experiences: any[], styles: any, fieldMappings: any[]): Paragraph[] {
@@ -277,7 +336,7 @@ export class DOCXExporter extends BaseExporter {
         elements.push(new Paragraph({
           children: [
             new TextRun({
-              text: exp.job_title || '',
+              text: exp.designation || exp.job_title || '',
               bold: true,
               size: (baseStyles.baseFontSize || 12) * 2,
               color: this.parseColor(baseStyles.primaryColor || '#1f2937')
@@ -306,15 +365,11 @@ export class DOCXExporter extends BaseExporter {
           }));
         }
 
-        // Description
+        // Description with rich text parsing
         if (exp.description) {
+          const richTextElements = this.parseRichText(exp.description, baseStyles);
           elements.push(new Paragraph({
-            children: [
-              new TextRun({
-                text: exp.description,
-                size: (baseStyles.baseFontSize || 12) * 2
-              })
-            ],
+            children: richTextElements,
             spacing: { after: 120 }
           }));
         }
@@ -469,20 +524,63 @@ export class DOCXExporter extends BaseExporter {
     try {
       if (skills.length === 0) return elements;
 
-      const skillTexts = skills.map(skill => {
-        const proficiency = skill.proficiency ? ` (${skill.proficiency}/10)` : '';
-        return `${skill.name}${proficiency}`;
-      });
+      // Create a properly formatted table for skills
+      const skillRows: TableRow[] = [];
+      
+      // Group skills into rows of 2-3 skills each for better formatting
+      const skillsPerRow = 2;
+      for (let i = 0; i < skills.length; i += skillsPerRow) {
+        const rowSkills = skills.slice(i, i + skillsPerRow);
+        
+        const cells: TableCell[] = rowSkills.map(skill => {
+          const skillText = skill.proficiency 
+            ? `${skill.name} (${skill.proficiency}/10)` 
+            : skill.name;
+          
+          return new TableCell({
+            children: [
+              new Paragraph({
+                children: [
+                  new TextRun({
+                    text: skillText,
+                    size: (baseStyles.baseFontSize || 12) * 2
+                  })
+                ],
+                spacing: { before: 60, after: 60 }
+              })
+            ],
+            width: {
+              size: 50,
+              type: WidthType.PERCENTAGE
+            }
+          });
+        });
+        
+        // Fill remaining cells if needed
+        while (cells.length < skillsPerRow) {
+          cells.push(new TableCell({
+            children: [new Paragraph({ children: [] })],
+            width: {
+              size: 50,
+              type: WidthType.PERCENTAGE
+            }
+          }));
+        }
+        
+        skillRows.push(new TableRow({
+          children: cells
+        }));
+      }
 
-      elements.push(new Paragraph({
-        children: [
-          new TextRun({
-            text: skillTexts.join(' • '),
-            size: (baseStyles.baseFontSize || 12) * 2
-          })
-        ],
-        spacing: { after: 120 }
-      }));
+      if (skillRows.length > 0) {
+        elements.push(new Table({
+          rows: skillRows,
+          width: {
+            size: 100,
+            type: WidthType.PERCENTAGE
+          }
+        }));
+      }
     } catch (error) {
       console.error('Error rendering skills section:', error);
     }
