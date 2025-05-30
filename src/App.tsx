@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -102,6 +101,22 @@ function App() {
               }
             />
             <Route
+              path="/employee/dashboard"
+              element={
+                <ProtectedRoute allowedRoles={['employee']}>
+                  <EmployeeDashboard />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/manager/dashboard"
+              element={
+                <ProtectedRoute allowedRoles={['manager']}>
+                  <ManagerDashboard />
+                </ProtectedRoute>
+              }
+            />
+            <Route
               path="/admin-dashboard"
               element={
                 <ProtectedRoute allowedRoles={['admin']}>
@@ -150,6 +165,14 @@ function App() {
               }
             />
             <Route
+              path="/manager/employee-data"
+              element={
+                <ProtectedRoute allowedRoles={['manager']}>
+                  <EmployeeData />
+                </ProtectedRoute>
+              }
+            />
+            <Route
               path="/admin/platform-settings"
               element={
                 <ProtectedRoute allowedRoles={['admin']}>
@@ -185,6 +208,22 @@ function App() {
               path="/admin/security"
               element={
                 <ProtectedRoute allowedRoles={['admin']}>
+                  <SecurityPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/manager/security"
+              element={
+                <ProtectedRoute allowedRoles={['manager']}>
+                  <SecurityPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/employee/security"
+              element={
+                <ProtectedRoute allowedRoles={['employee']}>
                   <SecurityPage />
                 </ProtectedRoute>
               }
