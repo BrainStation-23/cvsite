@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useCVTemplates } from '@/hooks/use-cv-templates';
@@ -143,6 +144,11 @@ const CVTemplateEdit: React.FC = () => {
       onProfileChange={handleProfileChange}
       profiles={profiles || []}
       onExport={handleExport}
+      // Pass the template sections and field mappings for export
+      templateSections={templateSections}
+      templateFieldMappings={templateFieldMappings}
+      template={template}
+      selectedProfile={selectedProfile}
     >
       <LivePreviewLayout
         template={template}
