@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useCVTemplates } from '@/hooks/use-cv-templates';
@@ -24,8 +23,7 @@ const CVTemplateEdit: React.FC = () => {
   // Fetch employee data using the new RPC function
   const {
     data: selectedProfile,
-    isLoading: profileLoading,
-    refetch: refetchProfile
+    isLoading: profileLoading
   } = useEmployeeData(selectedProfileId);
 
   const loadTemplate = async () => {
@@ -88,10 +86,7 @@ const CVTemplateEdit: React.FC = () => {
 
   const handleSectionsChange = () => {
     setHasUnsavedChanges(true);
-    // Refetch profile data when sections change to ensure preview updates
-    if (selectedProfileId) {
-      refetchProfile();
-    }
+    // Removed refetchProfile() call - data will update automatically when selectedProfileId changes
   };
 
   const handleBack = () => {

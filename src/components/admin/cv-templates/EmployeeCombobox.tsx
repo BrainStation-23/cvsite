@@ -39,9 +39,20 @@ export const EmployeeCombobox: React.FC<EmployeeComboboxProps> = ({
 
   const selectedProfile = profiles.find(profile => profile.id === value);
 
-  const displayValue = selectedProfile 
-    ? `${selectedProfile.first_name || ''} ${selectedProfile.last_name || ''} ${selectedProfile.employee_id ? `(${selectedProfile.employee_id})` : ''}`.trim()
-    : placeholder;
+  const getDisplayValue = () => {
+    if (!selectedProfile) return placeholder;
+    
+    const firstName = selectedProfile.first_name || '';
+    const lastName = selectedProfile.last_name || '';
+    const employeeId = selectedProfile.employee_id;
+    
+    let displayText = `${firstName} ${lastName}`.trim();
+    if (employeeId) {
+      displayText += ` (${employeeId})`;
+    }
+    
+    return displayText;
+  };
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -50,17 +61,19 @@ export const EmployeeCombobox: React.FC<EmployeeComboboxProps> = ({
           variant="outline"
           role="combobox"
           aria-expanded={open}
-          className="w-full justify-between"
+          className="w-full justify-between min-w-0"
           disabled={disabled || isLoading}
         >
-          <div className="flex items-center gap-2">
-            <User className="h-4 w-4" />
-            <span className="truncate">{displayValue}</span>
+          <div className="flex items-center gap-2 min-w-0 flex-1">
+            <User className="h-4 w-4 flex-shrink-0" />
+            <span className="truncate text-left">
+              {getDisplayValue()}
+            </span>
           </div>
-          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+          <ChevronsUpDown className="ml-2 h-4 w-4 flex-shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-full p-0" align="start">
+      <PopoverContent className="w-full min-w-[var(--radix-popover-trigger-width)] p-0" align="start">
         <Command>
           <CommandInput placeholder="Search employees..." />
           <CommandList>
@@ -68,33 +81,39 @@ export const EmployeeCombobox: React.FC<EmployeeComboboxProps> = ({
               {isLoading ? "Loading employees..." : "No employee found."}
             </CommandEmpty>
             <CommandGroup>
-              {profiles.map((profile) => (
-                <CommandItem
-                  key={profile.id}
-                  value={`${profile.first_name || ''} ${profile.last_name || ''} ${profile.employee_id || ''}`}
-                  onSelect={() => {
-                    onValueChange(profile.id === value ? "" : profile.id);
-                    setOpen(false);
-                  }}
-                >
-                  <Check
-                    className={cn(
-                      "mr-2 h-4 w-4",
-                      value === profile.id ? "opacity-100" : "opacity-0"
-                    )}
-                  />
-                  <div className="flex flex-col">
-                    <span className="font-medium">
-                      {profile.first_name || ''} {profile.last_name || ''}
-                    </span>
-                    {profile.employee_id && (
-                      <span className="text-sm text-gray-500">
-                        ID: {profile.employee_id}
+              {profiles.map((profile) => {
+                const searchValue = `${profile.first_name || ''} ${profile.last_name || ''} ${profile.employee_id || ''}`;
+                const displayName = `${profile.first_name || ''} ${profile.last_name || ''}`.trim();
+                
+                return (
+                  <CommandItem
+                    key={profile.id}
+                    value={searchValue}
+                    onSelect={() => {
+                      onValueChange(profile.id === value ? "" : profile.id);
+                      setOpen(false);
+                    }}
+                    className="flex items-center gap-3"
+                  >
+                    <Check
+                      className={cn(
+                        "h-4 w-4 flex-shrink-0",
+                        value === profile.id ? "opacity-100" : "opacity-0"
+                      )}
+                    />
+                    <div className="flex flex-col min-w-0 flex-1">
+                      <span className="font-medium truncate">
+                        {displayName || 'Unnamed Employee'}
                       </span>
-                    )}
-                  </div>
-                </CommandItem>
-              ))}
+                      {profile.employee_id && (
+                        <span className="text-sm text-gray-500 truncate">
+                          ID: {profile.employee_id}
+                        </span>
+                      )}
+                    </div>
+                  </CommandItem>
+                );
+              })}
             </CommandGroup>
           </CommandList>
         </Command>
