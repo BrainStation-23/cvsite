@@ -1,3 +1,4 @@
+
 import { BaseExporter } from './BaseExporter';
 import { ExportOptions, ExportResult } from '../CVExportService';
 import { Document, Packer, Paragraph, TextRun, HeadingLevel, AlignmentType, BorderStyle, WidthType, Table, TableRow, TableCell, ImageRun } from 'docx';
@@ -273,16 +274,12 @@ export class DOCXExporter extends BaseExporter {
         }));
       }
 
-      // Biography/Summary
+      // Biography/Summary with rich text parsing
       if (profile.biography || profile.summary) {
         const bioText = profile.biography || profile.summary;
-        const richTextElements = this.parseRichText(bioText, baseStyles);
+        const richTextParagraphs = this.parseRichTextToDocx(bioText, baseStyles);
         
-        elements.push(new Paragraph({
-          children: richTextElements,
-          spacing: { after: 240 },
-          alignment: AlignmentType.JUSTIFIED
-        }));
+        elements.push(...richTextParagraphs);
       }
     } catch (error) {
       console.error('Error rendering general section:', error);
@@ -291,46 +288,154 @@ export class DOCXExporter extends BaseExporter {
     return elements;
   }
 
-  // Helper method to parse rich text content
-  private parseRichText(htmlContent: string, baseStyles: any): TextRun[] {
+  // New method to properly parse HTML to DOCX rich text
+  private parseRichTextToDocx(htmlContent: string, baseStyles: any): Paragraph[] {
     if (!htmlContent) return [];
     
     const fontSize = (baseStyles.baseFontSize || 12) * 2;
+    const paragraphs: Paragraph[] = [];
     
-    // Simple HTML parsing for basic formatting
-    let text = htmlContent;
+    // Split into paragraphs first
+    const htmlParagraphs = htmlContent
+      .split(/<\/p>/gi)
+      .map(p => p.replace(/<p[^>]*>/gi, '').trim())
+      .filter(p => p.length > 0);
+    
+    htmlParagraphs.forEach(paragraphHtml => {
+      const textRuns = this.parseHtmlToTextRuns(paragraphHtml, fontSize);
+      if (textRuns.length > 0) {
+        paragraphs.push(new Paragraph({
+          children: textRuns,
+          spacing: { after: 120 },
+          alignment: AlignmentType.JUSTIFIED
+        }));
+      }
+    });
+    
+    // If no paragraphs were created, create a single paragraph
+    if (paragraphs.length === 0) {
+      const textRuns = this.parseHtmlToTextRuns(htmlContent, fontSize);
+      if (textRuns.length > 0) {
+        paragraphs.push(new Paragraph({
+          children: textRuns,
+          spacing: { after: 120 },
+          alignment: AlignmentType.JUSTIFIED
+        }));
+      }
+    }
+    
+    return paragraphs;
+  }
+
+  // Parse HTML content to TextRuns with formatting
+  private parseHtmlToTextRuns(html: string, fontSize: number): TextRun[] {
     const runs: TextRun[] = [];
     
-    // Remove HTML tags and extract text with basic formatting
-    text = text
-      .replace(/<br\s*\/?>/gi, '\n')
-      .replace(/<\/p>/gi, '\n\n')
-      .replace(/<p[^>]*>/gi, '')
-      .replace(/<[^>]*>/g, '') // Remove all other HTML tags
-      .replace(/&nbsp;/g, ' ')
-      .replace(/&amp;/g, '&')
-      .replace(/&lt;/g, '<')
-      .replace(/&gt;/g, '>')
-      .trim();
+    // Handle line breaks first
+    const parts = html.split(/<br\s*\/?>/gi);
     
-    // Split by line breaks and create text runs
-    const lines = text.split('\n');
-    lines.forEach((line, index) => {
-      if (line.trim()) {
-        runs.push(new TextRun({
-          text: line.trim(),
-          size: fontSize
-        }));
-        if (index < lines.length - 1) {
+    parts.forEach((part, partIndex) => {
+      if (partIndex > 0) {
+        runs.push(new TextRun({ text: '\n', size: fontSize }));
+      }
+      
+      // Process formatting tags
+      let currentText = part;
+      let currentPos = 0;
+      
+      // Regular expression to find formatting tags
+      const formatRegex = /<(\/?)([^>]+)>/g;
+      let match;
+      
+      const formatStack: Array<{ tag: string; bold?: boolean; italic?: boolean; underline?: boolean }> = [];
+      
+      while ((match = formatRegex.exec(currentText)) !== null) {
+        const [fullMatch, isClosing, tagContent] = match;
+        const tagName = tagContent.toLowerCase().split(' ')[0];
+        
+        // Add text before this tag
+        if (match.index > currentPos) {
+          const textBefore = currentText.substring(currentPos, match.index);
+          if (textBefore.trim()) {
+            const currentFormat = this.getCurrentFormat(formatStack);
+            runs.push(new TextRun({
+              text: textBefore,
+              size: fontSize,
+              ...currentFormat
+            }));
+          }
+        }
+        
+        // Handle tag
+        if (isClosing === '/') {
+          // Remove last matching tag from stack
+          for (let i = formatStack.length - 1; i >= 0; i--) {
+            if (formatStack[i].tag === tagName) {
+              formatStack.splice(i, 1);
+              break;
+            }
+          }
+        } else {
+          // Add tag to stack
+          const formatProps: any = { tag: tagName };
+          switch (tagName) {
+            case 'strong':
+            case 'b':
+              formatProps.bold = true;
+              break;
+            case 'em':
+            case 'i':
+              formatProps.italic = true;
+              break;
+            case 'u':
+              formatProps.underline = true;
+              break;
+          }
+          formatStack.push(formatProps);
+        }
+        
+        currentPos = match.index + fullMatch.length;
+      }
+      
+      // Add remaining text
+      if (currentPos < currentText.length) {
+        const remainingText = currentText.substring(currentPos).replace(/<[^>]*>/g, '');
+        if (remainingText.trim()) {
+          const currentFormat = this.getCurrentFormat(formatStack);
           runs.push(new TextRun({
-            text: '\n',
+            text: remainingText,
+            size: fontSize,
+            ...currentFormat
+          }));
+        }
+      }
+      
+      // If no formatted content was found, just add the plain text
+      if (runs.length === 0 || (partIndex === 0 && currentPos === 0)) {
+        const plainText = currentText.replace(/<[^>]*>/g, '').trim();
+        if (plainText) {
+          runs.push(new TextRun({
+            text: plainText,
             size: fontSize
           }));
         }
       }
     });
     
-    return runs.length > 0 ? runs : [new TextRun({ text: text, size: fontSize })];
+    return runs;
+  }
+
+  // Get current formatting from stack
+  private getCurrentFormat(formatStack: Array<{ tag: string; bold?: boolean; italic?: boolean; underline?: boolean }>): object {
+    const format: any = {};
+    
+    formatStack.forEach(item => {
+      if (item.bold) format.bold = true;
+      if (item.italic) format.italics = true;
+      if (item.underline) format.underline = true;
+    });
+    
+    return format;
   }
 
   private renderExperienceSection(experiences: any[], styles: any, fieldMappings: any[]): Paragraph[] {
@@ -374,11 +479,8 @@ export class DOCXExporter extends BaseExporter {
 
         // Description with rich text parsing
         if (exp.description) {
-          const richTextElements = this.parseRichText(exp.description, baseStyles);
-          elements.push(new Paragraph({
-            children: richTextElements,
-            spacing: { after: 120 }
-          }));
+          const richTextParagraphs = this.parseRichTextToDocx(exp.description, baseStyles);
+          elements.push(...richTextParagraphs);
         }
       });
     } catch (error) {
@@ -486,17 +588,10 @@ export class DOCXExporter extends BaseExporter {
           }));
         }
 
-        // Description
+        // Description with rich text parsing
         if (project.description) {
-          elements.push(new Paragraph({
-            children: [
-              new TextRun({
-                text: project.description,
-                size: (baseStyles.baseFontSize || 12) * 2
-              })
-            ],
-            spacing: { after: 60 }
-          }));
+          const richTextParagraphs = this.parseRichTextToDocx(project.description, baseStyles);
+          elements.push(...richTextParagraphs);
         }
 
         // Technologies
