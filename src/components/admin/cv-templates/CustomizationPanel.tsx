@@ -1,10 +1,11 @@
+
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Slider } from '@/components/ui/slider';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Palette, Type, Ruler, Square } from 'lucide-react';
+import { Palette, Type, Ruler, Square, Move } from 'lucide-react';
 
 interface CustomizationPanelProps {
   layoutConfig: Record<string, any>;
@@ -175,138 +176,187 @@ const CustomizationPanel: React.FC<CustomizationPanelProps> = ({
             Spacing & Layout
           </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-6">
-          {/* Page Margins with Square Layout */}
-          <div>
-            <Label className="text-xs font-medium text-gray-700 mb-3 block flex items-center gap-2">
-              <Square className="h-3 w-3" />
-              Page Margins
-            </Label>
-            <div className="grid grid-cols-3 gap-2 max-w-48 mx-auto">
-              {/* Top */}
-              <div className="col-start-2">
-                <div className="text-center mb-1">
-                  <span className="text-xs text-gray-500">Top</span>
-                </div>
-                <Slider
-                  value={[getMarginValue('top')]}
-                  onValueChange={([value]) => handleMarginChange('top', value)}
-                  max={40}
-                  min={10}
-                  step={2}
-                  className="mb-1"
-                />
-                <div className="text-center">
-                  <span className="text-xs text-gray-500 bg-gray-100 px-1 py-0.5 rounded">
-                    {getMarginValue('top')}mm
-                  </span>
-                </div>
+        <CardContent className="space-y-8">
+          {/* Page Margins with Improved Square Layout */}
+          <div className="bg-gradient-to-br from-blue-50 to-indigo-50 p-6 rounded-lg border border-blue-200">
+            <div className="flex items-center gap-2 mb-4">
+              <div className="p-1.5 bg-blue-100 rounded-md">
+                <Square className="h-4 w-4 text-blue-600" />
               </div>
-
-              {/* Left */}
-              <div className="row-start-2 flex flex-col items-center">
-                <span className="text-xs text-gray-500 mb-2">Left</span>
-                <div className="h-20 flex items-center">
+              <div>
+                <Label className="text-sm font-semibold text-blue-900">Page Margins</Label>
+                <p className="text-xs text-blue-700">Adjust the spacing around your CV content</p>
+              </div>
+            </div>
+            
+            <div className="relative max-w-72 mx-auto">
+              {/* Top Margin */}
+              <div className="flex flex-col items-center mb-4">
+                <Label className="text-xs font-medium text-gray-600 mb-2 flex items-center gap-1">
+                  <Move className="h-3 w-3" />
+                  Top
+                </Label>
+                <div className="w-32">
                   <Slider
-                    value={[getMarginValue('left')]}
-                    onValueChange={([value]) => handleMarginChange('left', value)}
+                    value={[getMarginValue('top')]}
+                    onValueChange={([value]) => handleMarginChange('top', value)}
                     max={40}
                     min={10}
                     step={2}
-                    orientation="vertical"
-                    className="h-16"
+                    className="mb-2"
                   />
-                </div>
-                <span className="text-xs text-gray-500 bg-gray-100 px-1 py-0.5 rounded mt-2">
-                  {getMarginValue('left')}mm
-                </span>
-              </div>
-
-              {/* Center Square Visual */}
-              <div className="row-start-2 col-start-2 flex items-center justify-center">
-                <div className="w-12 h-12 border-2 border-dashed border-gray-300 rounded flex items-center justify-center">
-                  <span className="text-xs text-gray-400">Page</span>
+                  <div className="text-center">
+                    <span className="text-xs font-medium text-blue-700 bg-blue-100 px-2 py-1 rounded-md">
+                      {getMarginValue('top')}mm
+                    </span>
+                  </div>
                 </div>
               </div>
 
-              {/* Right */}
-              <div className="row-start-2 col-start-3 flex flex-col items-center">
-                <span className="text-xs text-gray-500 mb-2">Right</span>
-                <div className="h-20 flex items-center">
+              {/* Middle row with Left, Center, Right */}
+              <div className="flex items-center justify-between mb-4">
+                {/* Left Margin */}
+                <div className="flex flex-col items-center w-20">
+                  <Label className="text-xs font-medium text-gray-600 mb-2 flex items-center gap-1">
+                    <Move className="h-3 w-3" />
+                    Left
+                  </Label>
+                  <div className="flex flex-col items-center h-24">
+                    <Slider
+                      value={[getMarginValue('left')]}
+                      onValueChange={([value]) => handleMarginChange('left', value)}
+                      max={40}
+                      min={10}
+                      step={2}
+                      orientation="vertical"
+                      className="h-16 mb-2"
+                    />
+                    <span className="text-xs font-medium text-blue-700 bg-blue-100 px-2 py-1 rounded-md">
+                      {getMarginValue('left')}mm
+                    </span>
+                  </div>
+                </div>
+
+                {/* Center Visual */}
+                <div className="flex flex-col items-center">
+                  <div className="relative">
+                    <div className="w-16 h-16 bg-white border-2 border-dashed border-blue-300 rounded-lg flex items-center justify-center shadow-sm">
+                      <div className="text-center">
+                        <div className="w-8 h-8 bg-gradient-to-br from-blue-100 to-blue-200 rounded mb-1"></div>
+                        <span className="text-xs font-medium text-blue-600">CV</span>
+                      </div>
+                    </div>
+                    <div className="absolute -top-1 -left-1 w-18 h-18 border border-blue-200 rounded-lg opacity-30"></div>
+                  </div>
+                </div>
+
+                {/* Right Margin */}
+                <div className="flex flex-col items-center w-20">
+                  <Label className="text-xs font-medium text-gray-600 mb-2 flex items-center gap-1">
+                    <Move className="h-3 w-3" />
+                    Right
+                  </Label>
+                  <div className="flex flex-col items-center h-24">
+                    <Slider
+                      value={[getMarginValue('right')]}
+                      onValueChange={([value]) => handleMarginChange('right', value)}
+                      max={40}
+                      min={10}
+                      step={2}
+                      orientation="vertical"
+                      className="h-16 mb-2"
+                    />
+                    <span className="text-xs font-medium text-blue-700 bg-blue-100 px-2 py-1 rounded-md">
+                      {getMarginValue('right')}mm
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Bottom Margin */}
+              <div className="flex flex-col items-center">
+                <div className="w-32">
                   <Slider
-                    value={[getMarginValue('right')]}
-                    onValueChange={([value]) => handleMarginChange('right', value)}
+                    value={[getMarginValue('bottom')]}
+                    onValueChange={([value]) => handleMarginChange('bottom', value)}
                     max={40}
                     min={10}
                     step={2}
-                    orientation="vertical"
-                    className="h-16"
+                    className="mb-2"
                   />
+                  <div className="text-center">
+                    <span className="text-xs font-medium text-blue-700 bg-blue-100 px-2 py-1 rounded-md">
+                      {getMarginValue('bottom')}mm
+                    </span>
+                  </div>
                 </div>
-                <span className="text-xs text-gray-500 bg-gray-100 px-1 py-0.5 rounded mt-2">
-                  {getMarginValue('right')}mm
-                </span>
-              </div>
-
-              {/* Bottom */}
-              <div className="col-start-2 row-start-3">
-                <div className="text-center mb-1">
-                  <span className="text-xs text-gray-500">Bottom</span>
-                </div>
-                <Slider
-                  value={[getMarginValue('bottom')]}
-                  onValueChange={([value]) => handleMarginChange('bottom', value)}
-                  max={40}
-                  min={10}
-                  step={2}
-                  className="mb-1"
-                />
-                <div className="text-center">
-                  <span className="text-xs text-gray-500 bg-gray-100 px-1 py-0.5 rounded">
-                    {getMarginValue('bottom')}mm
-                  </span>
-                </div>
+                <Label className="text-xs font-medium text-gray-600 mt-2 flex items-center gap-1">
+                  <Move className="h-3 w-3" />
+                  Bottom
+                </Label>
               </div>
             </div>
           </div>
 
-          {/* Other Spacing Controls */}
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <Label className="text-xs font-medium text-gray-700 mb-3 block">Section Spacing</Label>
-              <Slider
-                value={[layoutConfig.sectionSpacing || 16]}
-                onValueChange={([value]) => onConfigUpdate('sectionSpacing', value)}
-                max={30}
-                min={8}
-                step={2}
-                className="mb-2"
-              />
-              <div className="text-center">
-                <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded">
-                  {layoutConfig.sectionSpacing || 16}pt
-                </span>
+          {/* Content Spacing Controls */}
+          <div className="bg-gradient-to-br from-gray-50 to-slate-50 p-6 rounded-lg border border-gray-200">
+            <div className="flex items-center gap-2 mb-4">
+              <div className="p-1.5 bg-gray-100 rounded-md">
+                <Ruler className="h-4 w-4 text-gray-600" />
+              </div>
+              <div>
+                <Label className="text-sm font-semibold text-gray-900">Content Spacing</Label>
+                <p className="text-xs text-gray-600">Control spacing between CV sections and elements</p>
               </div>
             </div>
             
-            {(layoutConfig.layoutType === 'two-column' || layoutConfig.layoutType === 'sidebar') && (
+            <div className="grid grid-cols-1 gap-6">
               <div>
-                <Label className="text-xs font-medium text-gray-700 mb-3 block">Column Gap</Label>
+                <Label className="text-xs font-medium text-gray-700 mb-3 block flex items-center gap-2">
+                  Section Spacing
+                  <span className="text-xs text-gray-500">(Space between sections)</span>
+                </Label>
                 <Slider
-                  value={[layoutConfig.columnGap || 10]}
-                  onValueChange={([value]) => onConfigUpdate('columnGap', value)}
-                  max={20}
-                  min={5}
-                  step={1}
-                  className="mb-2"
+                  value={[layoutConfig.sectionSpacing || 16]}
+                  onValueChange={([value]) => onConfigUpdate('sectionSpacing', value)}
+                  max={30}
+                  min={8}
+                  step={2}
+                  className="mb-3"
                 />
-                <div className="text-center">
-                  <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded">
-                    {layoutConfig.columnGap || 10}mm
+                <div className="flex justify-between items-center">
+                  <span className="text-xs text-gray-500">Tight</span>
+                  <span className="text-xs font-medium text-gray-700 bg-white px-3 py-1 rounded-full border shadow-sm">
+                    {layoutConfig.sectionSpacing || 16}pt
                   </span>
+                  <span className="text-xs text-gray-500">Spacious</span>
                 </div>
               </div>
-            )}
+              
+              {(layoutConfig.layoutType === 'two-column' || layoutConfig.layoutType === 'sidebar') && (
+                <div>
+                  <Label className="text-xs font-medium text-gray-700 mb-3 block flex items-center gap-2">
+                    Column Gap
+                    <span className="text-xs text-gray-500">(Space between columns)</span>
+                  </Label>
+                  <Slider
+                    value={[layoutConfig.columnGap || 10]}
+                    onValueChange={([value]) => onConfigUpdate('columnGap', value)}
+                    max={20}
+                    min={5}
+                    step={1}
+                    className="mb-3"
+                  />
+                  <div className="flex justify-between items-center">
+                    <span className="text-xs text-gray-500">Narrow</span>
+                    <span className="text-xs font-medium text-gray-700 bg-white px-3 py-1 rounded-full border shadow-sm">
+                      {layoutConfig.columnGap || 10}mm
+                    </span>
+                    <span className="text-xs text-gray-500">Wide</span>
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
         </CardContent>
       </Card>
