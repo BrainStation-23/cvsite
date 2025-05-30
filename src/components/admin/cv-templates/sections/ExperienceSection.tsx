@@ -77,6 +77,28 @@ export const ExperienceSection: React.FC<ExperienceSectionProps> = ({
     }
   };
 
+  // Helper function to clean HTML content for PDF rendering
+  const cleanHtmlContent = (htmlContent: string) => {
+    if (!htmlContent) return '';
+    
+    // Remove HTML tags for cleaner PDF output but preserve basic formatting
+    return htmlContent
+      .replace(/<strong>/g, '<b>')
+      .replace(/<\/strong>/g, '</b>')
+      .replace(/<em>/g, '<i>')
+      .replace(/<\/em>/g, '</i>')
+      .replace(/<u>/g, '<u>')
+      .replace(/<\/u>/g, '</u>')
+      .replace(/<ol>/g, '')
+      .replace(/<\/ol>/g, '')
+      .replace(/<ul>/g, '')
+      .replace(/<\/ul>/g, '')
+      .replace(/<li>/g, '• ')
+      .replace(/<\/li>/g, '<br>')
+      .replace(/<p>/g, '')
+      .replace(/<\/p>/g, '<br>');
+  };
+
   // Define field renderers
   const fieldRenderers = {
     company_name: (exp: any, index: number) => {
@@ -150,7 +172,8 @@ export const ExperienceSection: React.FC<ExperienceSectionProps> = ({
       );
     },
     description: (exp: any, index: number) => {
-      const maskedValue = applyMasking(exp.description, 'description');
+      const cleanedContent = cleanHtmlContent(exp.description || '');
+      const maskedValue = applyMasking(cleanedContent, 'description');
       return (
         <FieldProcessor
           key="description"

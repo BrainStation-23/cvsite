@@ -3,7 +3,6 @@ import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
 import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form';
 import { PlusCircle, X, CalendarIcon } from 'lucide-react';
 import { useForm } from 'react-hook-form';
@@ -14,6 +13,7 @@ import { Calendar } from '@/components/ui/calendar';
 import { Checkbox } from '@/components/ui/checkbox';
 import { DesignationCombobox } from '@/components/admin/designation/DesignationCombobox';
 import { ExperienceGroupedTab } from './experience/ExperienceGroupedTab';
+import { RichTextEditor } from '@/components/ui/rich-text-editor';
 
 interface ExperienceTabProps {
   experiences: Experience[];
@@ -261,10 +261,11 @@ export const ExperienceTab: React.FC<ExperienceTabProps> = ({
                   <FormItem>
                     <FormLabel>Description</FormLabel>
                     <FormControl>
-                      <Textarea 
-                        {...field} 
-                        placeholder="Describe your role and achievements" 
-                        rows={4}
+                      <RichTextEditor
+                        value={field.value || ''}
+                        onChange={field.onChange}
+                        placeholder="Describe your role and achievements"
+                        className="min-h-[120px]"
                       />
                     </FormControl>
                     <FormMessage />
