@@ -19,7 +19,6 @@ export const SECTION_TYPES: {
   description: string;
 }[] = [
   { value: 'general', label: 'General Information', icon: User, description: 'Name, contact, bio' },
-  { value: 'skills', label: 'Skills', icon: Target, description: 'General skills overview' },
   { value: 'technical_skills', label: 'Technical Skills', icon: Code, description: 'Programming, tools' },
   { value: 'specialized_skills', label: 'Specialized Skills', icon: Wrench, description: 'Domain expertise' },
   { value: 'experience', label: 'Work Experience', icon: Briefcase, description: 'Employment history' },

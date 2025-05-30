@@ -118,10 +118,10 @@ function renderLayoutContent(
 
     case 'sidebar':
       const sidebarSections = sections.filter(s => 
-        ['skills', 'technical_skills', 'specialized_skills'].includes(s.section_type)
+        ['technical_skills', 'specialized_skills'].includes(s.section_type)
       );
       const mainSections = sections.filter(s => 
-        !['skills', 'technical_skills', 'specialized_skills'].includes(s.section_type)
+        !['technical_skills', 'specialized_skills'].includes(s.section_type)
       );
       
       return (
