@@ -36,6 +36,16 @@ export const ProjectsSection: React.FC<ProjectsSectionProps> = ({
   // Sort field mappings by field_order for consistent display
   const sortedFieldMappings = [...fieldMappings].sort((a, b) => a.field_order - b.field_order);
 
+  // Get only the fields that are enabled (have field mappings)
+  const enabledFields = sortedFieldMappings
+    .filter(mapping => mapping.section_type === 'projects')
+    .map(mapping => mapping.original_field_name);
+
+  // If no field mappings exist for projects section, don't show anything
+  if (enabledFields.length === 0) {
+    return null;
+  }
+
   // Define all possible fields with their render functions
   const fieldRenderers = {
     name: (project: any, index: number) => (
@@ -170,6 +180,27 @@ export const ProjectsSection: React.FC<ProjectsSectionProps> = ({
           )
         )}
       </FieldProcessor>
+    ),
+    url: (project: any, index: number) => (
+      <FieldProcessor
+        key="url"
+        fieldName="url"
+        value={project.url}
+        fieldMappings={sortedFieldMappings}
+        sectionType="projects"
+      >
+        {(processedValue, displayName, shouldShow) => (
+          shouldShow && processedValue && (
+            <div style={{ 
+              marginTop: '4pt', 
+              fontSize: '0.85em',
+              color: '#0066cc'
+            }}>
+              <strong>URL:</strong> {processedValue}
+            </div>
+          )
+        )}
+      </FieldProcessor>
     )
   };
 
@@ -185,24 +216,19 @@ export const ProjectsSection: React.FC<ProjectsSectionProps> = ({
     <div style={styles.sectionStyles}>
       <h2 style={styles.sectionTitleStyles}>{sectionTitle}</h2>
       {sortedProjects.map((project: any, index: number) => {
-        // Get the ordered fields based on field mappings
-        const orderedFields = sortedFieldMappings
-          .filter(mapping => fieldRenderers[mapping.original_field_name as keyof typeof fieldRenderers])
-          .sort((a, b) => a.field_order - b.field_order)
-          .map(mapping => mapping.original_field_name);
+        // Get the ordered fields based on field mappings (only enabled fields)
+        const orderedFields = enabledFields.filter(fieldName => 
+          fieldRenderers[fieldName as keyof typeof fieldRenderers]
+        );
 
-        // If no field mappings exist, use default order
-        const fieldsToRender = orderedFields.length > 0 ? orderedFields : [
-          'name',
-          'role', 
-          'date_range',
-          'description',
-          'technologies_used'
-        ];
+        // If no enabled fields, don't render this project
+        if (orderedFields.length === 0) {
+          return null;
+        }
 
         return (
           <div key={index} style={styles.itemStyles}>
-            {fieldsToRender.map((fieldName) => {
+            {orderedFields.map((fieldName) => {
               const renderer = fieldRenderers[fieldName as keyof typeof fieldRenderers];
               return renderer ? renderer(project, index) : null;
             })}
