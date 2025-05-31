@@ -1,4 +1,3 @@
-
 import jsPDF from 'jspdf';
 import { FieldMaskingService } from '../docx/FieldMaskingService';
 import { FieldVisibilityService } from '../docx/FieldVisibilityService';
@@ -72,7 +71,9 @@ export class PDFDocumentBuilder {
       await this.renderSingleColumnLayout(profile, sortedSections, styles);
     }
 
-    return this.doc.output('arraybuffer');
+    // Convert ArrayBuffer to Uint8Array
+    const arrayBuffer = this.doc.output('arraybuffer');
+    return new Uint8Array(arrayBuffer);
   }
 
   private async renderSingleColumnLayout(profile: any, sections: any[], styles: any): Promise<void> {
