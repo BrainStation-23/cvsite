@@ -3,7 +3,7 @@ import { Paragraph, Table, TableRow, TableCell, TextRun, WidthType } from 'docx'
 import { BaseSectionRenderer } from './BaseSectionRenderer';
 
 export class SkillsSectionRenderer extends BaseSectionRenderer {
-  render(skills: any[], title: string, styles: any): (Paragraph | Table)[] {
+  render(skills: any[], styles: any): (Paragraph | Table)[] {
     const elements: (Paragraph | Table)[] = [];
     const baseStyles = styles?.baseStyles || {};
     

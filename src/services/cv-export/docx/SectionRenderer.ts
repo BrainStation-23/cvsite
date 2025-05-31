@@ -1,4 +1,3 @@
-
 import { Paragraph, Table } from 'docx';
 import { DocumentStyler } from './DocumentStyler';
 import { FieldMaskingService } from './FieldMaskingService';
@@ -99,11 +98,11 @@ export class SectionRenderer {
           elements.push(...projectElements);
           break;
         case 'technical_skills':
-          const techSkillsElements = this.skillsRenderer.render(profile.technical_skills || [], 'Technical Skills', styles);
+          const techSkillsElements = this.skillsRenderer.render(profile.technical_skills || [], styles);
           elements.push(...techSkillsElements);
           break;
         case 'specialized_skills':
-          const specSkillsElements = this.skillsRenderer.render(profile.specialized_skills || [], 'Specialized Skills', styles);
+          const specSkillsElements = this.skillsRenderer.render(profile.specialized_skills || [], styles);
           elements.push(...specSkillsElements);
           break;
         case 'training':
