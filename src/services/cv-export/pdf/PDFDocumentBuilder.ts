@@ -1,8 +1,11 @@
+
 import jsPDF from 'jspdf';
 import { FieldMaskingService } from '../docx/FieldMaskingService';
 import { FieldVisibilityService } from '../docx/FieldVisibilityService';
 import { PDFSectionRenderer } from './PDFSectionRenderer';
 import { PDFStyler } from './PDFStyler';
+import { PDFPageManager, ContentBlock } from './utils/PDFPageManager';
+import { ContentSplitter } from './utils/ContentSplitter';
 
 export class PDFDocumentBuilder {
   private doc: jsPDF;
@@ -10,19 +13,16 @@ export class PDFDocumentBuilder {
   private sectionRenderer: PDFSectionRenderer;
   private maskingService: FieldMaskingService;
   private visibilityService: FieldVisibilityService;
-  private currentY: number = 20;
-  private pageHeight: number;
-  private pageWidth: number;
+  private pageManager: PDFPageManager;
   private margins = { top: 20, bottom: 20, left: 20, right: 20 };
 
   constructor() {
     this.doc = new jsPDF();
-    this.pageHeight = this.doc.internal.pageSize.height;
-    this.pageWidth = this.doc.internal.pageSize.width;
     this.styler = new PDFStyler(this.doc);
     this.sectionRenderer = new PDFSectionRenderer(this.doc, this.styler);
     this.maskingService = new FieldMaskingService();
     this.visibilityService = new FieldVisibilityService();
+    this.pageManager = new PDFPageManager(this.doc, this.margins);
   }
 
   async build(
@@ -32,7 +32,7 @@ export class PDFDocumentBuilder {
     styles: any,
     layoutConfig: any = {}
   ): Promise<Uint8Array> {
-    console.log('PDFDocumentBuilder - Starting build with profile:', profile);
+    console.log('PDFDocumentBuilder - Starting build with intelligent page breaking');
     
     // Configure services
     this.maskingService.setFieldMappings(fieldMappings);
@@ -48,10 +48,9 @@ export class PDFDocumentBuilder {
     const orientation = styles?.baseStyles?.orientation || 'portrait';
     if (orientation === 'landscape') {
       this.doc = new jsPDF('landscape');
-      this.pageHeight = this.doc.internal.pageSize.height;
-      this.pageWidth = this.doc.internal.pageSize.width;
       this.styler = new PDFStyler(this.doc);
       this.sectionRenderer = new PDFSectionRenderer(this.doc, this.styler);
+      this.pageManager = new PDFPageManager(this.doc, this.margins);
     }
 
     // Configure styling
@@ -60,15 +59,15 @@ export class PDFDocumentBuilder {
     // Sort sections by display order
     const sortedSections = [...sections].sort((a, b) => a.display_order - b.display_order);
     
-    // Handle layout
+    // Handle layout with intelligent page breaking
     const layoutType = layoutConfig.layoutType || 'single-column';
     
     if (layoutType === 'two-column') {
-      await this.renderTwoColumnLayout(profile, sortedSections, styles);
+      await this.renderTwoColumnLayoutSmart(profile, sortedSections, styles);
     } else if (layoutType === 'sidebar') {
-      await this.renderSidebarLayout(profile, sortedSections, styles);
+      await this.renderSidebarLayoutSmart(profile, sortedSections, styles);
     } else {
-      await this.renderSingleColumnLayout(profile, sortedSections, styles);
+      await this.renderSingleColumnLayoutSmart(profile, sortedSections, styles);
     }
 
     // Convert ArrayBuffer to Uint8Array
@@ -76,89 +75,75 @@ export class PDFDocumentBuilder {
     return new Uint8Array(arrayBuffer);
   }
 
-  private async renderSingleColumnLayout(profile: any, sections: any[], styles: any): Promise<void> {
-    for (const section of sections) {
-      const sectionData = this.getSectionData(profile, section.section_type);
-      if (!sectionData || (Array.isArray(sectionData) && sectionData.length === 0)) {
-        continue;
+  private async renderSingleColumnLayoutSmart(profile: any, sections: any[], styles: any): Promise<void> {
+    // Create content blocks
+    const contentBlocks = ContentSplitter.createContentBlocks(sections, profile);
+    
+    // Split content across pages intelligently
+    const pageBlocks = this.pageManager.splitContentAcrossPages(contentBlocks);
+    
+    // Render each page
+    for (let pageIndex = 0; pageIndex < pageBlocks.length; pageIndex++) {
+      const blocks = pageBlocks[pageIndex];
+      
+      // Add new page if not the first page
+      if (pageIndex > 0) {
+        this.pageManager.addNewPage();
       }
-
-      // Check if we need a new page
-      if (this.currentY > this.pageHeight - 50) {
-        this.addNewPage();
+      
+      // Render blocks on current page
+      for (const block of blocks) {
+        await this.renderContentBlock(block, styles);
       }
-
-      const sectionHeight = await this.sectionRenderer.render(
-        section,
-        sectionData,
-        styles,
-        this.margins.left,
-        this.currentY,
-        this.pageWidth - this.margins.left - this.margins.right
-      );
-
-      this.currentY += sectionHeight + 10; // Add spacing between sections
     }
   }
 
-  private async renderTwoColumnLayout(profile: any, sections: any[], styles: any): Promise<void> {
-    const columnWidth = (this.pageWidth - this.margins.left - this.margins.right - 10) / 2;
-    const leftColumnX = this.margins.left;
-    const rightColumnX = this.margins.left + columnWidth + 10;
+  private async renderTwoColumnLayoutSmart(profile: any, sections: any[], styles: any): Promise<void> {
+    const columnWidth = (this.pageManager.getContentWidth() - 10) / 2;
+    const leftColumnX = this.pageManager.getContentX();
+    const rightColumnX = this.pageManager.getContentX() + columnWidth + 10;
     
     const midPoint = Math.ceil(sections.length / 2);
     const leftSections = sections.slice(0, midPoint);
     const rightSections = sections.slice(midPoint);
     
-    let leftY = this.margins.top;
-    let rightY = this.margins.top;
-
-    // Render left column
-    for (const section of leftSections) {
-      const sectionData = this.getSectionData(profile, section.section_type);
-      if (!sectionData || (Array.isArray(sectionData) && sectionData.length === 0)) {
-        continue;
+    // Create content blocks for each column
+    const leftBlocks = ContentSplitter.createContentBlocks(leftSections, profile);
+    const rightBlocks = ContentSplitter.createContentBlocks(rightSections, profile);
+    
+    // For simplicity, render columns sequentially with page breaks
+    // Left column first
+    if (leftBlocks.length > 0) {
+      const leftPageBlocks = this.pageManager.splitContentAcrossPages(leftBlocks);
+      for (let pageIndex = 0; pageIndex < leftPageBlocks.length; pageIndex++) {
+        const blocks = leftPageBlocks[pageIndex];
+        if (pageIndex > 0) this.pageManager.addNewPage();
+        
+        for (const block of blocks) {
+          await this.renderContentBlock(block, styles, leftColumnX, columnWidth);
+        }
       }
-
-      const sectionHeight = await this.sectionRenderer.render(
-        section,
-        sectionData,
-        styles,
-        leftColumnX,
-        leftY,
-        columnWidth
-      );
-
-      leftY += sectionHeight + 10;
     }
-
-    // Render right column
-    for (const section of rightSections) {
-      const sectionData = this.getSectionData(profile, section.section_type);
-      if (!sectionData || (Array.isArray(sectionData) && sectionData.length === 0)) {
-        continue;
+    
+    // Right column
+    if (rightBlocks.length > 0) {
+      const rightPageBlocks = this.pageManager.splitContentAcrossPages(rightBlocks);
+      for (let pageIndex = 0; pageIndex < rightPageBlocks.length; pageIndex++) {
+        const blocks = rightPageBlocks[pageIndex];
+        if (pageIndex > 0 || leftBlocks.length > 0) this.pageManager.addNewPage();
+        
+        for (const block of blocks) {
+          await this.renderContentBlock(block, styles, rightColumnX, columnWidth);
+        }
       }
-
-      const sectionHeight = await this.sectionRenderer.render(
-        section,
-        sectionData,
-        styles,
-        rightColumnX,
-        rightY,
-        columnWidth
-      );
-
-      rightY += sectionHeight + 10;
     }
-
-    this.currentY = Math.max(leftY, rightY);
   }
 
-  private async renderSidebarLayout(profile: any, sections: any[], styles: any): Promise<void> {
-    const sidebarWidth = (this.pageWidth - this.margins.left - this.margins.right) * 0.3;
-    const mainWidth = (this.pageWidth - this.margins.left - this.margins.right) * 0.7 - 10;
-    const sidebarX = this.margins.left;
-    const mainX = this.margins.left + sidebarWidth + 10;
+  private async renderSidebarLayoutSmart(profile: any, sections: any[], styles: any): Promise<void> {
+    const sidebarWidth = this.pageManager.getContentWidth() * 0.3;
+    const mainWidth = this.pageManager.getContentWidth() * 0.7 - 10;
+    const sidebarX = this.pageManager.getContentX();
+    const mainX = this.pageManager.getContentX() + sidebarWidth + 10;
     
     const sidebarSections = sections.filter(s => 
       ['technical_skills', 'specialized_skills'].includes(s.section_type)
@@ -167,75 +152,68 @@ export class PDFDocumentBuilder {
       !['technical_skills', 'specialized_skills'].includes(s.section_type)
     );
     
-    let sidebarY = this.margins.top;
-    let mainY = this.margins.top;
-
-    // Render sidebar
-    for (const section of sidebarSections) {
-      const sectionData = this.getSectionData(profile, section.section_type);
-      if (!sectionData || (Array.isArray(sectionData) && sectionData.length === 0)) {
-        continue;
+    // Create content blocks
+    const sidebarBlocks = ContentSplitter.createContentBlocks(sidebarSections, profile);
+    const mainBlocks = ContentSplitter.createContentBlocks(mainSections, profile);
+    
+    // Render sidebar first
+    if (sidebarBlocks.length > 0) {
+      const sidebarPageBlocks = this.pageManager.splitContentAcrossPages(sidebarBlocks);
+      for (let pageIndex = 0; pageIndex < sidebarPageBlocks.length; pageIndex++) {
+        const blocks = sidebarPageBlocks[pageIndex];
+        if (pageIndex > 0) this.pageManager.addNewPage();
+        
+        for (const block of blocks) {
+          await this.renderContentBlock(block, styles, sidebarX, sidebarWidth);
+        }
       }
-
-      const sectionHeight = await this.sectionRenderer.render(
-        section,
-        sectionData,
-        styles,
-        sidebarX,
-        sidebarY,
-        sidebarWidth
-      );
-
-      sidebarY += sectionHeight + 10;
     }
-
+    
     // Render main content
-    for (const section of mainSections) {
-      const sectionData = this.getSectionData(profile, section.section_type);
-      if (!sectionData || (Array.isArray(sectionData) && sectionData.length === 0)) {
-        continue;
+    if (mainBlocks.length > 0) {
+      const mainPageBlocks = this.pageManager.splitContentAcrossPages(mainBlocks);
+      for (let pageIndex = 0; pageIndex < mainPageBlocks.length; pageIndex++) {
+        const blocks = mainPageBlocks[pageIndex];
+        if (pageIndex > 0 || sidebarBlocks.length > 0) this.pageManager.addNewPage();
+        
+        for (const block of blocks) {
+          await this.renderContentBlock(block, styles, mainX, mainWidth);
+        }
       }
-
-      const sectionHeight = await this.sectionRenderer.render(
-        section,
-        sectionData,
-        styles,
-        mainX,
-        mainY,
-        mainWidth
-      );
-
-      mainY += sectionHeight + 10;
-    }
-
-    this.currentY = Math.max(sidebarY, mainY);
-  }
-
-  private getSectionData(profile: any, sectionType: string): any {
-    switch (sectionType) {
-      case 'general':
-        return profile;
-      case 'experience':
-        return profile.experiences || [];
-      case 'education':
-        return profile.education || [];
-      case 'projects':
-        return profile.projects || [];
-      case 'technical_skills':
-        return profile.technical_skills || [];
-      case 'specialized_skills':
-        return profile.specialized_skills || [];
-      case 'training':
-        return profile.trainings || [];
-      case 'achievements':
-        return profile.achievements || [];
-      default:
-        return null;
     }
   }
 
-  private addNewPage(): void {
-    this.doc.addPage();
-    this.currentY = this.margins.top;
+  private async renderContentBlock(
+    block: ContentBlock, 
+    styles: any, 
+    customX?: number, 
+    customWidth?: number
+  ): Promise<void> {
+    const x = customX !== undefined ? customX : this.pageManager.getContentX();
+    const width = customWidth !== undefined ? customWidth : this.pageManager.getContentWidth();
+    const y = this.pageManager.getCurrentY();
+    
+    // Ensure we have enough space
+    this.pageManager.ensureSpace(block.estimatedHeight, block.minHeight);
+    
+    // Find the section configuration
+    const sectionConfig = block.splitData?.sectionConfig;
+    if (!sectionConfig) {
+      console.warn('No section config found for block');
+      return;
+    }
+    
+    // Render the section
+    const actualHeight = await this.sectionRenderer.render(
+      sectionConfig,
+      block.content,
+      styles,
+      x,
+      this.pageManager.getCurrentY(),
+      width
+    );
+    
+    // Advance the page manager
+    this.pageManager.advanceY(actualHeight + 10); // Add spacing between sections
   }
 }

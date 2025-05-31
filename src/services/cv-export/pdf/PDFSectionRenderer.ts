@@ -64,14 +64,18 @@ export class PDFSectionRenderer {
   ): Promise<number> {
     let currentY = y;
     
-    // Get section title
-    const sectionTitle = this.maskingService.getSectionTitle(section);
+    // Get section title - handle continuation sections
+    let sectionTitle = this.maskingService.getSectionTitle(section);
+    if (section.splitData?.isContinuation) {
+      sectionTitle += ' (continued)';
+    }
     
-    // Add section title
+    // Add section title with better spacing
     const titleHeight = this.styler.addSectionTitle(sectionTitle, x, currentY, width);
-    currentY += titleHeight + 5;
+    currentY += titleHeight + 8; // Increased spacing after title
 
-    // Render based on section type
+    // Render based on section type with improved spacing
+    const contentStartY = currentY;
     switch (section.section_type) {
       case 'general':
         currentY += await this.generalRenderer.render(sectionData, x, currentY, width, section.section_type);
@@ -97,6 +101,12 @@ export class PDFSectionRenderer {
         break;
       default:
         console.warn(`Unknown section type: ${section.section_type}`);
+    }
+
+    // Ensure minimum spacing after content
+    const contentHeight = currentY - contentStartY;
+    if (contentHeight < 20) {
+      currentY += (20 - contentHeight);
     }
 
     return currentY - y;
