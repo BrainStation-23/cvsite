@@ -4,13 +4,15 @@ import DashboardLayout from '../../components/Layout/DashboardLayout';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Edit, Plus, Trash2, FileText } from 'lucide-react';
+import { Edit, Plus, Trash2, FileText, Settings } from 'lucide-react';
 import { useCVTemplates } from '@/hooks/use-cv-templates';
+import CVTemplateConfigDialog from '@/components/admin/cv-templates/CVTemplateConfigDialog';
 
 const CVTemplates: React.FC = () => {
   const navigate = useNavigate();
   const { templates, getTemplates, deleteTemplate, createTemplate, isLoading, isDeleting, isCreating, refetch } = useCVTemplates();
   const [templateCounter, setTemplateCounter] = useState(1);
+  const [isConfigOpen, setIsConfigOpen] = useState(false);
 
   useEffect(() => {
     getTemplates();
@@ -74,10 +76,20 @@ const CVTemplates: React.FC = () => {
               Manage CV templates for generating employee CVs
             </p>
           </div>
-          <Button onClick={handleCreateTemplate} disabled={isCreating}>
-            <Plus className="h-4 w-4 mr-2" />
-            {isCreating ? 'Creating...' : 'Create Template'}
-          </Button>
+          <div className="flex gap-2">
+            <Button 
+              variant="outline" 
+              onClick={() => setIsConfigOpen(true)}
+              className="flex items-center gap-2"
+            >
+              <Settings className="h-4 w-4" />
+              Configuration
+            </Button>
+            <Button onClick={handleCreateTemplate} disabled={isCreating}>
+              <Plus className="h-4 w-4 mr-2" />
+              {isCreating ? 'Creating...' : 'Create Template'}
+            </Button>
+          </div>
         </div>
 
         {isLoading ? (
@@ -163,6 +175,11 @@ const CVTemplates: React.FC = () => {
           </Card>
         )}
       </div>
+
+      <CVTemplateConfigDialog 
+        open={isConfigOpen} 
+        onOpenChange={setIsConfigOpen} 
+      />
     </DashboardLayout>
   );
 };
