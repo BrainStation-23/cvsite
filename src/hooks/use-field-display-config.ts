@@ -30,7 +30,11 @@ interface NewFieldConfig {
 
 export const useFieldDisplayConfig = () => {
   const [configs, setConfigs] = useState<FieldDisplayConfig[]>([]);
+  const [filteredConfigs, setFilteredConfigs] = useState<FieldDisplayConfig[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [sortBy, setSortBy] = useState<'field_name' | 'section_type' | 'display_label' | 'default_order'>('section_type');
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
   const { toast } = useToast();
 
   const loadConfigs = useCallback(async () => {
@@ -55,6 +59,42 @@ export const useFieldDisplayConfig = () => {
       setIsLoading(false);
     }
   }, [toast]);
+
+  // Filter and sort configs based on search and sort criteria
+  useEffect(() => {
+    let filtered = configs;
+
+    // Apply search filter
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase();
+      filtered = configs.filter(config =>
+        config.field_name.toLowerCase().includes(query) ||
+        config.section_type.toLowerCase().includes(query) ||
+        config.display_label.toLowerCase().includes(query) ||
+        config.field_type.toLowerCase().includes(query)
+      );
+    }
+
+    // Apply sorting
+    filtered = [...filtered].sort((a, b) => {
+      const aValue = a[sortBy];
+      const bValue = b[sortBy];
+      
+      if (typeof aValue === 'string' && typeof bValue === 'string') {
+        const comparison = aValue.localeCompare(bValue);
+        return sortOrder === 'asc' ? comparison : -comparison;
+      }
+      
+      if (typeof aValue === 'number' && typeof bValue === 'number') {
+        const comparison = aValue - bValue;
+        return sortOrder === 'asc' ? comparison : -comparison;
+      }
+      
+      return 0;
+    });
+
+    setFilteredConfigs(filtered);
+  }, [configs, searchQuery, sortBy, sortOrder]);
 
   const saveConfig = async (config: FieldDisplayConfig): Promise<boolean> => {
     try {
@@ -174,8 +214,14 @@ export const useFieldDisplayConfig = () => {
   }, [loadConfigs]);
 
   return {
-    configs,
+    configs: filteredConfigs,
     isLoading,
+    searchQuery,
+    setSearchQuery,
+    sortBy,
+    setSortBy,
+    sortOrder,
+    setSortOrder,
     saveConfig,
     addConfig,
     deleteConfig,

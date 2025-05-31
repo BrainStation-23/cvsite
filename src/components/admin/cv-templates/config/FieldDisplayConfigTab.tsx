@@ -5,9 +5,22 @@ import { Plus } from 'lucide-react';
 import { useFieldDisplayConfig } from '@/hooks/use-field-display-config';
 import FieldDisplayConfigItem from './FieldDisplayConfigItem';
 import AddFieldConfigForm from './AddFieldConfigForm';
+import FieldDisplaySearchControls from './FieldDisplaySearchControls';
 
 const FieldDisplayConfigTab: React.FC = () => {
-  const { configs, isLoading, saveConfig, addConfig, deleteConfig } = useFieldDisplayConfig();
+  const { 
+    configs, 
+    isLoading, 
+    searchQuery,
+    setSearchQuery,
+    sortBy,
+    setSortBy,
+    sortOrder,
+    setSortOrder,
+    saveConfig, 
+    addConfig, 
+    deleteConfig 
+  } = useFieldDisplayConfig();
   const [editingId, setEditingId] = useState<string | null>(null);
   const [isAdding, setIsAdding] = useState(false);
 
@@ -50,6 +63,15 @@ const FieldDisplayConfigTab: React.FC = () => {
         </Button>
       </div>
 
+      <FieldDisplaySearchControls
+        searchQuery={searchQuery}
+        onSearchChange={setSearchQuery}
+        sortBy={sortBy}
+        onSortByChange={setSortBy}
+        sortOrder={sortOrder}
+        onSortOrderChange={setSortOrder}
+      />
+
       {isAdding && (
         <AddFieldConfigForm
           onAdd={handleAdd}
@@ -60,19 +82,25 @@ const FieldDisplayConfigTab: React.FC = () => {
       )}
 
       <div className="space-y-2">
-        {configs.map((config) => (
-          <FieldDisplayConfigItem
-            key={config.id}
-            config={config}
-            isEditing={editingId === config.id}
-            onEdit={() => setEditingId(config.id)}
-            onSave={handleSave}
-            onCancel={() => setEditingId(null)}
-            onDelete={() => handleDelete(config.id)}
-            sectionTypes={sectionTypes}
-            fieldTypes={fieldTypes}
-          />
-        ))}
+        {configs.length === 0 && searchQuery ? (
+          <div className="text-center py-8 text-gray-500">
+            No configurations found matching "{searchQuery}"
+          </div>
+        ) : (
+          configs.map((config) => (
+            <FieldDisplayConfigItem
+              key={config.id}
+              config={config}
+              isEditing={editingId === config.id}
+              onEdit={() => setEditingId(config.id)}
+              onSave={handleSave}
+              onCancel={() => setEditingId(null)}
+              onDelete={() => handleDelete(config.id)}
+              sectionTypes={sectionTypes}
+              fieldTypes={fieldTypes}
+            />
+          ))
+        )}
       </div>
     </div>
   );
