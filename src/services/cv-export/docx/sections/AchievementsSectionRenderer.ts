@@ -9,18 +9,22 @@ export class AchievementsSectionRenderer extends BaseSectionRenderer {
     
     try {
       achievements.forEach((achievement) => {
-        // Apply masking to each field
-        const title = this.maskingService.applyMasking(achievement.title, 'title', 'achievements');
-        const description = this.maskingService.applyMasking(achievement.description, 'description', 'achievements');
+        // Check field visibility and apply masking
+        const showTitle = this.isFieldVisible('title', 'achievements');
+        const showDescription = this.isFieldVisible('description', 'achievements');
+        const showDate = this.isFieldVisible('date', 'achievements');
 
         // Achievement Title
-        if (title) {
-          elements.push(this.styler.createItemTitle(title, baseStyles));
+        if (showTitle) {
+          const title = this.applyFieldMasking(achievement.title, 'title', 'achievements');
+          if (title) {
+            elements.push(this.styler.createItemTitle(title, baseStyles));
+          }
         }
 
         // Date
-        if (achievement.date) {
-          const achievementDate = this.maskingService.applyMasking(
+        if (showDate && achievement.date) {
+          const achievementDate = this.applyFieldMasking(
             new Date(achievement.date).toLocaleDateString(), 
             'date', 
             'achievements'
@@ -29,8 +33,11 @@ export class AchievementsSectionRenderer extends BaseSectionRenderer {
         }
 
         // Description
-        if (description) {
-          elements.push(this.styler.createRegularText(description, baseStyles));
+        if (showDescription) {
+          const description = this.applyFieldMasking(achievement.description, 'description', 'achievements');
+          if (description) {
+            elements.push(this.styler.createRegularText(description, baseStyles));
+          }
         }
       });
     } catch (error) {

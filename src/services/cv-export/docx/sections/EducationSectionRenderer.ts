@@ -9,28 +9,45 @@ export class EducationSectionRenderer extends BaseSectionRenderer {
     
     try {
       education.forEach((edu) => {
-        // Apply masking to each field
-        const degree = this.maskingService.applyMasking(edu.degree?.name || edu.degree_name, 'degree', 'education');
-        const university = this.maskingService.applyMasking(edu.university?.name, 'university', 'education');
-        const gpa = this.maskingService.applyMasking(edu.gpa, 'gpa', 'education');
+        // Check field visibility and apply masking
+        const showDegree = this.isFieldVisible('degree', 'education');
+        const showUniversity = this.isFieldVisible('university', 'education');
+        const showGpa = this.isFieldVisible('gpa', 'education');
+        const showDateRange = this.isFieldVisible('date_range', 'education');
 
         // Degree and Institution
-        if (degree || university) {
-          const titleText = degree || '';
-          const universityText = university ? ` - ${university}` : '';
-          elements.push(this.styler.createItemTitle(`${titleText}${universityText}`, baseStyles));
+        if (showDegree || showUniversity) {
+          let titleText = '';
+          let universityText = '';
+          
+          if (showDegree) {
+            const degree = this.applyFieldMasking(edu.degree?.name || edu.degree_name, 'degree', 'education');
+            titleText = degree || '';
+          }
+          
+          if (showUniversity) {
+            const university = this.applyFieldMasking(edu.university?.name, 'university', 'education');
+            universityText = university ? ` - ${university}` : '';
+          }
+          
+          if (titleText || universityText) {
+            elements.push(this.styler.createItemTitle(`${titleText}${universityText}`, baseStyles));
+          }
         }
 
         // Date Range
-        if (edu.start_date || edu.end_date) {
+        if (showDateRange && (edu.start_date || edu.end_date)) {
           const dateRange = this.formatDateRange(edu.start_date, edu.end_date, false);
-          const maskedDateRange = this.maskingService.applyMasking(dateRange, 'date_range', 'education');
+          const maskedDateRange = this.applyFieldMasking(dateRange, 'date_range', 'education');
           elements.push(this.styler.createItemSubtitle(maskedDateRange, baseStyles));
         }
 
         // GPA
-        if (gpa) {
-          elements.push(this.styler.createRegularText(`GPA: ${gpa}`, baseStyles));
+        if (showGpa) {
+          const gpa = this.applyFieldMasking(edu.gpa, 'gpa', 'education');
+          if (gpa) {
+            elements.push(this.styler.createRegularText(`GPA: ${gpa}`, baseStyles));
+          }
         }
       });
     } catch (error) {

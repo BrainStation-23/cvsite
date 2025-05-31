@@ -1,6 +1,8 @@
+
 import { Paragraph, Table } from 'docx';
 import { DocumentStyler } from './DocumentStyler';
 import { FieldMaskingService } from './FieldMaskingService';
+import { FieldVisibilityService } from './FieldVisibilityService';
 import { GeneralSectionRenderer } from './sections/GeneralSectionRenderer';
 import { ExperienceSectionRenderer } from './sections/ExperienceSectionRenderer';
 import { EducationSectionRenderer } from './sections/EducationSectionRenderer';
@@ -12,6 +14,7 @@ import { AchievementsSectionRenderer } from './sections/AchievementsSectionRende
 export class SectionRenderer {
   private styler!: DocumentStyler;
   private maskingService!: FieldMaskingService;
+  private visibilityService!: FieldVisibilityService;
   
   private generalRenderer: GeneralSectionRenderer;
   private experienceRenderer: ExperienceSectionRenderer;
@@ -53,6 +56,18 @@ export class SectionRenderer {
     this.skillsRenderer.setMaskingService(maskingService);
     this.trainingRenderer.setMaskingService(maskingService);
     this.achievementsRenderer.setMaskingService(maskingService);
+  }
+
+  setVisibilityService(visibilityService: FieldVisibilityService): void {
+    this.visibilityService = visibilityService;
+    // Set visibility service for all section renderers
+    this.generalRenderer.setVisibilityService(visibilityService);
+    this.experienceRenderer.setVisibilityService(visibilityService);
+    this.educationRenderer.setVisibilityService(visibilityService);
+    this.projectsRenderer.setVisibilityService(visibilityService);
+    this.skillsRenderer.setVisibilityService(visibilityService);
+    this.trainingRenderer.setVisibilityService(visibilityService);
+    this.achievementsRenderer.setVisibilityService(visibilityService);
   }
 
   async renderSection(

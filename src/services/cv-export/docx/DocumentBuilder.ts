@@ -4,16 +4,22 @@ import { ExportOptions } from '../CVExportService';
 import { DocumentStyler } from './DocumentStyler';
 import { SectionRenderer } from './SectionRenderer';
 import { FieldMaskingService } from './FieldMaskingService';
+import { FieldVisibilityService } from './FieldVisibilityService';
+import { LayoutProcessor } from './LayoutProcessor';
 
 export class DocumentBuilder {
   private styler: DocumentStyler;
   private sectionRenderer: SectionRenderer;
   private maskingService: FieldMaskingService;
+  private visibilityService: FieldVisibilityService;
+  private layoutProcessor: LayoutProcessor;
 
   constructor() {
     this.styler = new DocumentStyler();
     this.sectionRenderer = new SectionRenderer();
     this.maskingService = new FieldMaskingService();
+    this.visibilityService = new FieldVisibilityService();
+    this.layoutProcessor = new LayoutProcessor();
   }
 
   async createDocument(options: ExportOptions): Promise<Document> {
@@ -27,21 +33,28 @@ export class DocumentBuilder {
       templateName: template?.name,
       profileName: `${profile.first_name} ${profile.last_name}`,
       sectionsCount: sections.length,
-      orientation: template?.orientation
+      orientation: template?.orientation,
+      layoutConfig: template?.layout_config
     });
 
-    const documentChildren: (Paragraph | Table)[] = [];
+    // Configure services
+    this.maskingService.setFieldMappings(fieldMappings || []);
+    this.visibilityService.setFieldMappings(fieldMappings || []);
+    this.visibilityService.setSectionConfigs(sections);
+    this.layoutProcessor.setLayoutConfig(template?.layout_config || {});
+    
+    // Configure section renderer
+    this.sectionRenderer.setMaskingService(this.maskingService);
+    this.sectionRenderer.setVisibilityService(this.visibilityService);
+    this.sectionRenderer.setStyler(this.styler);
     
     // Sort sections by display order
     const sortedSections = [...sections].sort((a, b) => a.display_order - b.display_order);
     console.log('Processing sections:', sortedSections.map(s => s.section_type));
     
-    // Configure masking service
-    this.maskingService.setFieldMappings(fieldMappings || []);
-    
-    // Configure section renderer
-    this.sectionRenderer.setMaskingService(this.maskingService);
-    this.sectionRenderer.setStyler(this.styler);
+    // Separate sections based on layout
+    const mainSections: (Paragraph | Table)[] = [];
+    const sidebarSections: (Paragraph | Table)[] = [];
     
     // Render each section
     for (const section of sortedSections) {
@@ -54,14 +67,22 @@ export class DocumentBuilder {
         );
         
         if (sectionElements.length > 0) {
-          documentChildren.push(...sectionElements);
-          console.log(`Added ${sectionElements.length} elements for section: ${section.section_type}`);
+          const placement = this.layoutProcessor.getSectionPlacement(section.section_type);
+          if (placement === 'sidebar') {
+            sidebarSections.push(...sectionElements);
+          } else {
+            mainSections.push(...sectionElements);
+          }
+          console.log(`Added ${sectionElements.length} elements for section: ${section.section_type} (${placement})`);
         }
       } catch (sectionError) {
         console.error(`Error rendering section ${section.section_type}:`, sectionError);
         // Continue with other sections even if one fails
       }
     }
+    
+    // Apply layout structure
+    const documentChildren = this.layoutProcessor.createLayoutStructure(mainSections, sidebarSections);
     
     console.log('Total document elements:', documentChildren.length);
     

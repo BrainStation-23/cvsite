@@ -9,21 +9,35 @@ export class TrainingSectionRenderer extends BaseSectionRenderer {
     
     try {
       trainings.forEach((training) => {
-        // Apply masking to each field
-        const title = this.maskingService.applyMasking(training.title, 'title', 'training');
-        const provider = this.maskingService.applyMasking(training.provider, 'provider', 'training');
-        const description = this.maskingService.applyMasking(training.description, 'description', 'training');
+        // Check field visibility and apply masking
+        const showTitle = this.isFieldVisible('title', 'training');
+        const showProvider = this.isFieldVisible('provider', 'training');
+        const showDescription = this.isFieldVisible('description', 'training');
+        const showCertificationDate = this.isFieldVisible('certification_date', 'training');
 
         // Training Title and Provider
-        if (title || provider) {
-          const titleText = title || '';
-          const providerText = provider ? ` - ${provider}` : '';
-          elements.push(this.styler.createItemTitle(`${titleText}${providerText}`, baseStyles));
+        if (showTitle || showProvider) {
+          let titleText = '';
+          let providerText = '';
+          
+          if (showTitle) {
+            const title = this.applyFieldMasking(training.title, 'title', 'training');
+            titleText = title || '';
+          }
+          
+          if (showProvider) {
+            const provider = this.applyFieldMasking(training.provider, 'provider', 'training');
+            providerText = provider ? ` - ${provider}` : '';
+          }
+          
+          if (titleText || providerText) {
+            elements.push(this.styler.createItemTitle(`${titleText}${providerText}`, baseStyles));
+          }
         }
 
         // Certification Date
-        if (training.certification_date) {
-          const certDate = this.maskingService.applyMasking(
+        if (showCertificationDate && training.certification_date) {
+          const certDate = this.applyFieldMasking(
             new Date(training.certification_date).toLocaleDateString(), 
             'certification_date', 
             'training'
@@ -32,8 +46,11 @@ export class TrainingSectionRenderer extends BaseSectionRenderer {
         }
 
         // Description
-        if (description) {
-          elements.push(this.styler.createRegularText(description, baseStyles));
+        if (showDescription) {
+          const description = this.applyFieldMasking(training.description, 'description', 'training');
+          if (description) {
+            elements.push(this.styler.createRegularText(description, baseStyles));
+          }
         }
       });
     } catch (error) {
