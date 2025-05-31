@@ -1,3 +1,4 @@
+
 import jsPDF from 'jspdf';
 import { PDFStyler } from './PDFStyler';
 import { FieldMaskingService } from '../docx/FieldMaskingService';
@@ -440,8 +441,8 @@ export class PDFSectionRenderer {
           const bullet = element.style?.bullet || '•';
           const itemHeight = this.styler.addText(
             `${bullet} ${element.content}`,
-            x, currentY, width,
-            { indent: 10 }
+            x + 10, currentY, width - 10,
+            {}
           );
           currentY += itemHeight + 2;
           break;
