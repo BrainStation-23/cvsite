@@ -1,22 +1,43 @@
 
 import { BaseExporter } from './BaseExporter';
 import { ExportOptions, ExportResult } from '../CVExportService';
+import { PDFDocumentBuilder } from '../pdf/PDFDocumentBuilder';
 
 export class PDFExporter extends BaseExporter {
   async export(options: ExportOptions): Promise<ExportResult> {
-    const { template, profile } = options;
+    const { template, profile, sections, fieldMappings, styles } = options;
     
     try {
-      // TODO: Implement PDF export using libraries like jsPDF, Puppeteer, or html2pdf
-      console.log('PDF Export - Template:', template.name);
+      console.log('PDF Export - Starting export with template:', template.name);
       console.log('PDF Export - Profile:', profile?.first_name, profile?.last_name);
+      console.log('PDF Export - Sections:', sections?.length || 0);
+      console.log('PDF Export - Field mappings:', fieldMappings?.length || 0);
       
-      // Placeholder implementation
-      const placeholderContent = this.generatePlaceholderPDF(profile, template);
-      const blob = new Blob([placeholderContent], { type: 'application/pdf' });
+      if (!profile) {
+        throw new Error('Profile data is required for PDF export');
+      }
+
+      if (!sections || sections.length === 0) {
+        throw new Error('At least one section must be configured for PDF export');
+      }
+
+      // Create PDF document builder
+      const pdfBuilder = new PDFDocumentBuilder();
+      
+      // Build the PDF document
+      const pdfArrayBuffer = await pdfBuilder.build(
+        profile,
+        sections,
+        fieldMappings || [],
+        styles,
+        template.layout_config || {}
+      );
+      
+      // Convert ArrayBuffer to Blob
+      const blob = new Blob([pdfArrayBuffer], { type: 'application/pdf' });
       const fileName = this.generateFileName(profile, 'pdf');
       
-      // For now, just download a placeholder file
+      // Download the file
       this.downloadFile(blob, fileName);
       
       return {
@@ -25,70 +46,11 @@ export class PDFExporter extends BaseExporter {
         url: URL.createObjectURL(blob)
       };
     } catch (error) {
+      console.error('PDF export failed:', error);
       return {
         success: false,
         error: error instanceof Error ? error.message : 'PDF export failed'
       };
     }
-  }
-
-  private generatePlaceholderPDF(profile: any, template: any): string {
-    return `%PDF-1.4
-1 0 obj
-<<
-/Type /Catalog
-/Pages 2 0 R
->>
-endobj
-
-2 0 obj
-<<
-/Type /Pages
-/Kids [3 0 R]
-/Count 1
->>
-endobj
-
-3 0 obj
-<<
-/Type /Page
-/Parent 2 0 R
-/MediaBox [0 0 612 792]
-/Contents 4 0 R
->>
-endobj
-
-4 0 obj
-<<
-/Length 100
->>
-stream
-BT
-/F1 12 Tf
-72 720 Td
-(CV Export - ${profile?.first_name || 'Unknown'} ${profile?.last_name || 'User'}) Tj
-0 -20 Td
-(Template: ${template?.name || 'Unknown Template'}) Tj
-0 -20 Td
-(This is a placeholder PDF. Implementation coming soon!) Tj
-ET
-endstream
-endobj
-
-xref
-0 5
-0000000000 65535 f 
-0000000009 00000 n 
-0000000058 00000 n 
-0000000115 00000 n 
-0000000207 00000 n 
-trailer
-<<
-/Size 5
-/Root 1 0 R
->>
-startxref
-358
-%%EOF`;
   }
 }
