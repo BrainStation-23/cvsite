@@ -1,3 +1,4 @@
+
 import PptxGenJS from 'pptxgenjs';
 import { FieldMaskingService } from '../docx/FieldMaskingService';
 import { FieldVisibilityService } from '../docx/FieldVisibilityService';
@@ -58,11 +59,12 @@ export class PPTDocumentBuilder {
       await this.slideRenderer.renderSection(section, sectionData, styles);
     }
 
-    // Generate and return the blob using the correct API
+    // Generate and return the blob using writeFile with blob output
     return new Promise((resolve, reject) => {
-      this.pres.write('blob')
-        .then((data: Blob) => {
-          resolve(data);
+      this.pres.writeFile({ fileName: 'temp', outputType: 'blob' })
+        .then((data: any) => {
+          // The data should be a Blob
+          resolve(data as Blob);
         })
         .catch((error: any) => {
           console.error('Error generating PPT blob:', error);
