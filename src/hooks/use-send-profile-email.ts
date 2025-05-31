@@ -1,7 +1,7 @@
 
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
 
 interface SendEmailData {
   profileId: string;
@@ -9,7 +9,6 @@ interface SendEmailData {
 
 export function useSendProfileEmail() {
   const [sendingProfiles, setSendingProfiles] = useState<Set<string>>(new Set());
-  const { toast } = useToast();
 
   const sendProfileEmail = async (data: SendEmailData) => {
     setSendingProfiles(prev => new Set([...prev, data.profileId]));
@@ -33,19 +32,12 @@ export function useSendProfileEmail() {
 
       console.log('Email sent successfully:', result);
       
-      toast({
-        title: "Email sent successfully",
-        description: `Profile completion email sent to ${result.sentTo}`,
-      });
+      toast.success(`Profile completion email sent to ${result.sentTo}`);
 
       return result;
     } catch (error: any) {
       console.error('Error in sendProfileEmail:', error);
-      toast({
-        title: "Failed to send email",
-        description: error.message || "There was an error sending the email",
-        variant: "destructive",
-      });
+      toast.error(error.message || "There was an error sending the email");
       throw error;
     } finally {
       setSendingProfiles(prev => {
