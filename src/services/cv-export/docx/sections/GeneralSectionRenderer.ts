@@ -16,10 +16,14 @@ export class GeneralSectionRenderer extends BaseSectionRenderer {
     const baseStyles = styles?.baseStyles || {};
     
     try {
+      console.log('GeneralSectionRenderer - Starting render with profile:', profile);
+      
       // Profile Image (if visible and not masked)
       if (this.isFieldVisible('profile_image', 'general')) {
         const profileImageValue = this.applyFieldMasking(profile.profile_image, 'profile_image', 'general');
-        if (profileImageValue && profileImageValue !== '***') {
+        console.log('Profile image after masking:', profileImageValue);
+        
+        if (profileImageValue && profileImageValue !== '***' && typeof profileImageValue === 'string' && profileImageValue.startsWith('http')) {
           try {
             const response = await fetch(profileImageValue);
             const imageBuffer = await response.arrayBuffer();
@@ -48,9 +52,13 @@ export class GeneralSectionRenderer extends BaseSectionRenderer {
       const showFirstName = this.isFieldVisible('first_name', 'general');
       const showLastName = this.isFieldVisible('last_name', 'general');
       
+      console.log('Name visibility - first:', showFirstName, 'last:', showLastName);
+      
       if (showFirstName || showLastName) {
         const firstName = showFirstName ? this.applyFieldMasking(profile.first_name, 'first_name', 'general') : '';
         const lastName = showLastName ? this.applyFieldMasking(profile.last_name, 'last_name', 'general') : '';
+        
+        console.log('Name after masking - first:', firstName, 'last:', lastName);
         
         if (firstName || lastName) {
           elements.push(new Paragraph({
@@ -120,6 +128,8 @@ export class GeneralSectionRenderer extends BaseSectionRenderer {
       // Biography/Summary with rich text parsing and masking
       if (this.isFieldVisible('biography', 'general')) {
         const biography = this.applyFieldMasking(profile.biography || profile.summary, 'biography', 'general');
+        console.log('Biography after masking:', biography);
+        
         if (biography) {
           const richTextParagraphs = this.richTextProcessor.parseRichTextToDocx(biography, baseStyles);
           elements.push(...richTextParagraphs);
