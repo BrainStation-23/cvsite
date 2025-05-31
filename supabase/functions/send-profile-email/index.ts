@@ -9,10 +9,7 @@ const corsHeaders = {
 };
 
 interface SendEmailRequest {
-  email: string;
-  firstName: string;
-  lastName: string;
-  employeeId: string;
+  profileId: string;
 }
 
 const handler = async (req: Request): Promise<Response> => {
@@ -33,9 +30,49 @@ const handler = async (req: Request): Promise<Response> => {
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
     const resend = new Resend(resendApiKey);
 
-    const { email, firstName, lastName, employeeId }: SendEmailRequest = await req.json();
+    const { profileId }: SendEmailRequest = await req.json();
 
-    console.log('Sending profile completion email to:', email);
+    console.log('Fetching user data for profile ID:', profileId);
+
+    // Fetch profile data
+    const { data: profile, error: profileError } = await supabase
+      .from('profiles')
+      .select('first_name, last_name, employee_id')
+      .eq('id', profileId)
+      .single();
+
+    if (profileError || !profile) {
+      console.error('Error fetching profile:', profileError);
+      return new Response(
+        JSON.stringify({ 
+          success: false, 
+          error: 'Profile not found' 
+        }),
+        {
+          status: 404,
+          headers: { 'Content-Type': 'application/json', ...corsHeaders },
+        }
+      );
+    }
+
+    // Fetch user email from auth.users using service role
+    const { data: { user }, error: userError } = await supabase.auth.admin.getUserById(profileId);
+
+    if (userError || !user || !user.email) {
+      console.error('Error fetching user email:', userError);
+      return new Response(
+        JSON.stringify({ 
+          success: false, 
+          error: 'User email not found' 
+        }),
+        {
+          status: 404,
+          headers: { 'Content-Type': 'application/json', ...corsHeaders },
+        }
+      );
+    }
+
+    console.log('Sending profile completion email to:', user.email);
 
     // Create the email content
     const emailHtml = `
@@ -68,7 +105,7 @@ const handler = async (req: Request): Promise<Response> => {
               <h1>Welcome to Our Employee Portal</h1>
             </div>
             <div class="content">
-              <h2>Hello ${firstName} ${lastName},</h2>
+              <h2>Hello ${profile.first_name || 'Employee'} ${profile.last_name || ''},</h2>
               <p>We hope this email finds you well. We're writing to remind you to complete your employee profile in our system.</p>
               
               <div class="instructions">
@@ -90,7 +127,7 @@ const handler = async (req: Request): Promise<Response> => {
                 <ol>
                   <li>Click the login button below</li>
                   <li>Use <strong>Microsoft Authentication</strong> to sign in</li>
-                  <li>Use your company email address: <strong>${email}</strong></li>
+                  <li>Use your company email address: <strong>${user.email}</strong></li>
                   <li>Once logged in, go to "My Profile" to complete your information</li>
                 </ol>
               </div>
@@ -101,7 +138,7 @@ const handler = async (req: Request): Promise<Response> => {
                 </a>
               </div>
 
-              <p><strong>Employee ID:</strong> ${employeeId}</p>
+              <p><strong>Employee ID:</strong> ${profile.employee_id || 'N/A'}</p>
               
               <p>Having a complete profile helps us:</p>
               <ul>
@@ -128,17 +165,51 @@ const handler = async (req: Request): Promise<Response> => {
 
     const emailResponse = await resend.emails.send({
       from: senderEmail,
-      to: [email],
-      subject: `Action Required: Complete Your Employee Profile - ${firstName} ${lastName}`,
+      to: [user.email],
+      subject: `Action Required: Complete Your Employee Profile - ${profile.first_name || 'Employee'} ${profile.last_name || ''}`,
       html: emailHtml,
     });
 
-    console.log('Email sent successfully:', emailResponse);
+    console.log('Resend response:', emailResponse);
+
+    // Check if Resend returned an error
+    if (emailResponse.error) {
+      console.error('Resend error:', emailResponse.error);
+      return new Response(
+        JSON.stringify({ 
+          success: false, 
+          error: emailResponse.error.message || 'Failed to send email',
+          resendError: emailResponse.error
+        }),
+        {
+          status: 400,
+          headers: { 'Content-Type': 'application/json', ...corsHeaders },
+        }
+      );
+    }
+
+    // Check if we have successful data
+    if (!emailResponse.data || !emailResponse.data.id) {
+      console.error('No email ID returned from Resend');
+      return new Response(
+        JSON.stringify({ 
+          success: false, 
+          error: 'Email sending failed - no confirmation ID received' 
+        }),
+        {
+          status: 500,
+          headers: { 'Content-Type': 'application/json', ...corsHeaders },
+        }
+      );
+    }
+
+    console.log('Email sent successfully with ID:', emailResponse.data.id);
 
     return new Response(JSON.stringify({ 
       success: true, 
       message: 'Profile completion email sent successfully',
-      emailId: emailResponse.data?.id 
+      emailId: emailResponse.data.id,
+      sentTo: user.email
     }), {
       status: 200,
       headers: {

@@ -67,15 +67,8 @@ const EmployeeData: React.FC = () => {
     try {
       console.log('Sending email to profile:', profile);
       
-      // Get user email from auth.users table - we'll need to fetch this
-      // For now, we'll construct a likely email from the profile data
-      const email = `${profile.first_name?.toLowerCase() || 'user'}.${profile.last_name?.toLowerCase() || 'user'}@company.com`;
-      
       await sendProfileEmail({
-        email,
-        firstName: profile.first_name || 'Employee',
-        lastName: profile.last_name || '',
-        employeeId: profile.employee_id || 'N/A'
+        profileId: profile.id
       });
     } catch (error) {
       console.error('Error sending email:', error);

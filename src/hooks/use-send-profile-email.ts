@@ -4,10 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
 interface SendEmailData {
-  email: string;
-  firstName: string;
-  lastName: string;
-  employeeId: string;
+  profileId: string;
 }
 
 export function useSendProfileEmail() {
@@ -18,7 +15,7 @@ export function useSendProfileEmail() {
     setIsSending(true);
     
     try {
-      console.log('Sending profile email to:', data.email);
+      console.log('Sending profile email for profile ID:', data.profileId);
       
       const { data: result, error } = await supabase.functions.invoke('send-profile-email', {
         body: data
@@ -29,15 +26,20 @@ export function useSendProfileEmail() {
         throw error;
       }
 
+      if (!result.success) {
+        console.error('Email sending failed:', result.error);
+        throw new Error(result.error || 'Failed to send email');
+      }
+
       console.log('Email sent successfully:', result);
       
       toast({
         title: "Email sent successfully",
-        description: `Profile completion email sent to ${data.firstName} ${data.lastName}`,
+        description: `Profile completion email sent to ${result.sentTo}`,
       });
 
       return result;
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error in sendProfileEmail:', error);
       toast({
         title: "Failed to send email",
