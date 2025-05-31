@@ -73,10 +73,10 @@ export class PDFSectionRenderer {
   private async renderGeneralSection(profile: any, x: number, y: number, width: number, styles: any): Promise<number> {
     let currentY = y;
     
-    // Profile Image
+    // Profile Image with high resolution
     if (profile.profile_image && this.visibilityService.isFieldVisible('profile_image', 'general')) {
       try {
-        const imageHeight = await this.addProfileImage(profile.profile_image, x, currentY, width);
+        const imageHeight = await this.addProfileImageHighRes(profile.profile_image, x, currentY, width);
         currentY += imageHeight + 10;
       } catch (error) {
         console.warn('Failed to load profile image:', error);
@@ -152,8 +152,8 @@ export class PDFSectionRenderer {
     if (this.visibilityService.isFieldVisible('biography', 'general')) {
       const biography = this.maskingService.applyMasking(profile.biography || profile.summary, 'biography', 'general');
       if (biography) {
-        const cleanBiography = this.cleanHtmlContent(biography);
-        const bioHeight = this.styler.addText(cleanBiography, x, currentY, width);
+        const cleanBiography = this.parseRichText(biography);
+        const bioHeight = this.renderRichTextContent(cleanBiography, x, currentY, width);
         currentY += bioHeight + 5;
       }
     }
@@ -190,8 +190,10 @@ export class PDFSectionRenderer {
         }
       }
 
-      // Date Range
-      if (this.visibilityService.isFieldVisible('start_date', sectionType) || this.visibilityService.isFieldVisible('end_date', sectionType)) {
+      // Date Range - Fixed to show properly
+      if (this.visibilityService.isFieldVisible('start_date', sectionType) || 
+          this.visibilityService.isFieldVisible('end_date', sectionType) ||
+          this.visibilityService.isFieldVisible('date_range', sectionType)) {
         const dateRange = this.formatDateRange(experience.start_date, experience.end_date, experience.is_current);
         if (dateRange) {
           const maskedDateRange = this.maskingService.applyMasking(dateRange, 'date_range', sectionType);
@@ -203,12 +205,12 @@ export class PDFSectionRenderer {
         }
       }
 
-      // Description
+      // Description with proper rich text parsing
       if (this.visibilityService.isFieldVisible('description', sectionType)) {
         const description = this.maskingService.applyMasking(experience.description, 'description', sectionType);
         if (description) {
-          const cleanDescription = this.cleanHtmlContent(description);
-          const descHeight = this.renderBulletPoints(cleanDescription, x, currentY, width);
+          const parsedContent = this.parseRichText(description);
+          const descHeight = this.renderRichTextContent(parsedContent, x, currentY, width);
           currentY += descHeight + 5;
         }
       }
@@ -261,12 +263,12 @@ export class PDFSectionRenderer {
         }
       }
 
-      // Description (convert rich text to plain text)
+      // Description with proper rich text parsing
       if (this.visibilityService.isFieldVisible('description', sectionType)) {
         const description = this.maskingService.applyMasking(project.description, 'description', sectionType);
         if (description) {
-          const cleanDescription = this.cleanHtmlContent(description);
-          const descHeight = this.styler.addText(cleanDescription, x, currentY, width);
+          const parsedContent = this.parseRichText(description);
+          const descHeight = this.renderRichTextContent(parsedContent, x, currentY, width);
           currentY += descHeight + 3;
         }
       }
@@ -289,41 +291,44 @@ export class PDFSectionRenderer {
     return currentY - y;
   }
 
-  private async addProfileImage(imageUrl: string, x: number, y: number, width: number): Promise<number> {
+  // High resolution image loading
+  private async addProfileImageHighRes(imageUrl: string, x: number, y: number, width: number): Promise<number> {
     return new Promise((resolve) => {
       const img = new Image();
       img.crossOrigin = 'anonymous';
       
       img.onload = () => {
         try {
-          // Create canvas to convert image to base64
+          // Create canvas with original dimensions to maintain quality
           const canvas = document.createElement('canvas');
           const ctx = canvas.getContext('2d');
           
-          // Set canvas size (maintain aspect ratio)
-          const maxWidth = 40;
-          const maxHeight = 50;
-          let { width: imgWidth, height: imgHeight } = img;
+          // Calculate display size while maintaining aspect ratio
+          const maxDisplayWidth = 40;
+          const maxDisplayHeight = 50;
+          const { width: imgWidth, height: imgHeight } = img;
           
-          // Calculate scaled dimensions
-          const ratio = Math.min(maxWidth / imgWidth, maxHeight / imgHeight);
-          imgWidth = imgWidth * ratio;
-          imgHeight = imgHeight * ratio;
+          // Calculate scaled display dimensions
+          const displayRatio = Math.min(maxDisplayWidth / imgWidth, maxDisplayHeight / imgHeight);
+          const displayWidth = imgWidth * displayRatio;
+          const displayHeight = imgHeight * displayRatio;
           
-          canvas.width = imgWidth;
-          canvas.height = imgHeight;
+          // Use higher canvas resolution for better quality
+          const scaleFactor = Math.min(2, Math.max(1, 300 / Math.max(imgWidth, imgHeight)));
+          canvas.width = imgWidth * scaleFactor;
+          canvas.height = imgHeight * scaleFactor;
           
-          // Draw image to canvas
-          ctx?.drawImage(img, 0, 0, imgWidth, imgHeight);
+          // Draw image at high resolution
+          ctx?.drawImage(img, 0, 0, canvas.width, canvas.height);
           
-          // Get base64 data
-          const dataUrl = canvas.toDataURL('image/jpeg', 0.8);
+          // Get high quality base64 data
+          const dataUrl = canvas.toDataURL('image/png', 1.0); // Use PNG and max quality
           
-          // Add image to PDF (centered)
-          const imageX = x + (width - imgWidth) / 2;
-          this.doc.addImage(dataUrl, 'JPEG', imageX, y, imgWidth, imgHeight);
+          // Add image to PDF (centered) with display dimensions
+          const imageX = x + (width - displayWidth) / 2;
+          this.doc.addImage(dataUrl, 'PNG', imageX, y, displayWidth, displayHeight);
           
-          resolve(imgHeight);
+          resolve(displayHeight);
         } catch (error) {
           console.warn('Error processing profile image:', error);
           resolve(0);
@@ -337,6 +342,113 @@ export class PDFSectionRenderer {
       
       img.src = imageUrl;
     });
+  }
+
+  // Enhanced rich text parser
+  private parseRichText(htmlContent: string): Array<{type: string, content: string, style?: any}> {
+    if (!htmlContent) return [];
+    
+    const elements: Array<{type: string, content: string, style?: any}> = [];
+    
+    // Parse paragraphs
+    const paragraphRegex = /<p>(.*?)<\/p>/gis;
+    const listRegex = /<(ul|ol)>(.*?)<\/\1>/gis;
+    
+    let lastIndex = 0;
+    let match;
+    
+    // Process paragraphs
+    while ((match = paragraphRegex.exec(htmlContent)) !== null) {
+      const [fullMatch, content] = match;
+      const cleanContent = this.cleanHtmlTags(content);
+      
+      if (cleanContent.trim()) {
+        // Check for bold content
+        const isBold = content.includes('<strong>') || content.includes('<b>');
+        elements.push({
+          type: 'paragraph',
+          content: cleanContent,
+          style: isBold ? { bold: true } : undefined
+        });
+      }
+    }
+    
+    // Reset regex
+    htmlContent.replace(paragraphRegex, '');
+    
+    // Process lists
+    while ((match = listRegex.exec(htmlContent)) !== null) {
+      const [fullMatch, listType, listContent] = match;
+      const listItems = listContent.match(/<li>(.*?)<\/li>/gis) || [];
+      
+      listItems.forEach(item => {
+        const cleanItem = this.cleanHtmlTags(item.replace(/<\/?li>/gi, ''));
+        if (cleanItem.trim()) {
+          elements.push({
+            type: 'listItem',
+            content: cleanItem,
+            style: { bullet: listType === 'ul' ? '•' : '1.' }
+          });
+        }
+      });
+    }
+    
+    // If no structured content found, treat as plain text
+    if (elements.length === 0) {
+      const cleanContent = this.cleanHtmlTags(htmlContent);
+      if (cleanContent.trim()) {
+        elements.push({
+          type: 'paragraph',
+          content: cleanContent
+        });
+      }
+    }
+    
+    return elements;
+  }
+
+  private cleanHtmlTags(content: string): string {
+    if (!content) return '';
+    
+    return content
+      .replace(/<[^>]*>/g, '') // Remove HTML tags
+      .replace(/&nbsp;/g, ' ')
+      .replace(/&amp;/g, '&')
+      .replace(/&lt;/g, '<')
+      .replace(/&gt;/g, '>')
+      .replace(/&quot;/g, '"')
+      .replace(/&#39;/g, "'")
+      .replace(/\s+/g, ' ') // Normalize whitespace
+      .trim();
+  }
+
+  private renderRichTextContent(elements: Array<{type: string, content: string, style?: any}>, x: number, y: number, width: number): number {
+    let currentY = y;
+    
+    for (const element of elements) {
+      switch (element.type) {
+        case 'paragraph':
+          const paragraphHeight = this.styler.addText(
+            element.content,
+            x, currentY, width,
+            element.style || {}
+          );
+          currentY += paragraphHeight + 3;
+          break;
+          
+        case 'listItem':
+          const bullet = element.style?.bullet || '•';
+          const itemHeight = this.styler.addText(
+            `${bullet} ${element.content}`,
+            x, currentY, width,
+            { indent: 10 }
+          );
+          currentY += itemHeight + 2;
+          break;
+      }
+    }
+    
+    return currentY - y;
   }
 
   private async renderEducationSection(education: any[], x: number, y: number, width: number, sectionType: string): Promise<number> {
@@ -461,65 +573,5 @@ export class PDFSectionRenderer {
       return end;
     }
     return '';
-  }
-
-  private cleanHtmlContent(content: string): string {
-    if (!content) return '';
-    
-    // Remove HTML tags and decode entities
-    const cleaned = content
-      .replace(/<[^>]*>/g, '') // Remove HTML tags
-      .replace(/&nbsp;/g, ' ')
-      .replace(/&amp;/g, '&')
-      .replace(/&lt;/g, '<')
-      .replace(/&gt;/g, '>')
-      .replace(/&quot;/g, '"')
-      .replace(/&#39;/g, "'")
-      .replace(/\s+/g, ' ') // Normalize whitespace
-      .trim();
-    
-    return cleaned;
-  }
-
-  private renderBulletPoints(content: string, x: number, y: number, width: number): number {
-    if (!content) return 0;
-    
-    let currentY = y;
-    
-    // Check if content contains HTML list tags
-    if (content.includes('<ul>') || content.includes('<ol>')) {
-      // Extract list items
-      const listItemRegex = /<li>(.*?)<\/li>/gi;
-      const matches = content.matchAll(listItemRegex);
-      
-      for (const match of matches) {
-        const itemText = this.cleanHtmlContent(match[1]);
-        if (itemText.trim()) {
-          const itemHeight = this.styler.addBulletPoint(itemText, x, currentY, width);
-          currentY += itemHeight;
-        }
-      }
-    } else {
-      // Treat as regular text with manual bullet points
-      const lines = content.split('\n').filter(line => line.trim());
-      
-      for (const line of lines) {
-        const cleanLine = line.trim();
-        if (cleanLine) {
-          if (cleanLine.startsWith('•') || cleanLine.startsWith('-') || cleanLine.startsWith('*')) {
-            // Already has bullet point
-            const text = cleanLine.substring(1).trim();
-            const itemHeight = this.styler.addBulletPoint(text, x, currentY, width);
-            currentY += itemHeight;
-          } else {
-            // Add bullet point
-            const itemHeight = this.styler.addBulletPoint(cleanLine, x, currentY, width);
-            currentY += itemHeight;
-          }
-        }
-      }
-    }
-    
-    return currentY - y;
   }
 }
