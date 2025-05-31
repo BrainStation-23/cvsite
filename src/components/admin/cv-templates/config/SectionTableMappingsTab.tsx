@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -23,7 +22,7 @@ const SectionTableMappingsTab: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [isAdding, setIsAdding] = useState(false);
-  const [newMapping, setNewMapping] = useState<Partial<SectionTableMapping>>({
+  const [newMapping, setNewMapping] = useState({
     section_type: 'general',
     table_name: '',
     display_name: '',
@@ -99,9 +98,26 @@ const SectionTableMappingsTab: React.FC = () => {
 
   const handleAdd = async () => {
     try {
+      // Validate required fields
+      if (!newMapping.table_name.trim() || !newMapping.display_name.trim()) {
+        toast({
+          title: "Error",
+          description: "Table name and display name are required",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      const mappingToInsert = {
+        section_type: newMapping.section_type,
+        table_name: newMapping.table_name,
+        display_name: newMapping.display_name,
+        description: newMapping.description || null
+      };
+
       const { error } = await supabase
         .from('cv_section_table_mappings')
-        .insert([newMapping]);
+        .insert(mappingToInsert);
 
       if (error) throw error;
 
@@ -210,7 +226,7 @@ const SectionTableMappingsTab: React.FC = () => {
             <div>
               <Label>Display Name</Label>
               <Input
-                value={newMapping.display_name || ''}
+                value={newMapping.display_name}
                 onChange={(e) => setNewMapping({...newMapping, display_name: e.target.value})}
                 placeholder="e.g., General Information"
               />
@@ -218,7 +234,7 @@ const SectionTableMappingsTab: React.FC = () => {
             <div>
               <Label>Description</Label>
               <Textarea
-                value={newMapping.description || ''}
+                value={newMapping.description}
                 onChange={(e) => setNewMapping({...newMapping, description: e.target.value})}
                 placeholder="Description of this section mapping..."
                 rows={2}

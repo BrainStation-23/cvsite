@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -28,7 +27,7 @@ const FieldDisplayConfigTab: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [isAdding, setIsAdding] = useState(false);
-  const [newConfig, setNewConfig] = useState<Partial<FieldDisplayConfig>>({
+  const [newConfig, setNewConfig] = useState({
     field_name: '',
     section_type: 'general',
     display_label: '',
@@ -36,7 +35,8 @@ const FieldDisplayConfigTab: React.FC = () => {
     default_masked: false,
     default_order: 0,
     field_type: 'text',
-    is_system_field: false
+    is_system_field: false,
+    default_mask_value: ''
   });
   const { toast } = useToast();
 
@@ -111,9 +111,31 @@ const FieldDisplayConfigTab: React.FC = () => {
 
   const handleAdd = async () => {
     try {
+      // Validate required fields
+      if (!newConfig.field_name.trim() || !newConfig.display_label.trim()) {
+        toast({
+          title: "Error",
+          description: "Field name and display label are required",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      const configToInsert = {
+        field_name: newConfig.field_name,
+        section_type: newConfig.section_type,
+        display_label: newConfig.display_label,
+        default_enabled: newConfig.default_enabled,
+        default_masked: newConfig.default_masked,
+        default_order: newConfig.default_order,
+        field_type: newConfig.field_type,
+        is_system_field: newConfig.is_system_field,
+        default_mask_value: newConfig.default_mask_value || null
+      };
+
       const { error } = await supabase
         .from('cv_field_display_config')
-        .insert([newConfig]);
+        .insert(configToInsert);
 
       if (error) throw error;
 
@@ -126,7 +148,8 @@ const FieldDisplayConfigTab: React.FC = () => {
         default_masked: false,
         default_order: 0,
         field_type: 'text',
-        is_system_field: false
+        is_system_field: false,
+        default_mask_value: ''
       });
       toast({
         title: "Success",
@@ -193,7 +216,7 @@ const FieldDisplayConfigTab: React.FC = () => {
               <div>
                 <Label>Field Name</Label>
                 <Input
-                  value={newConfig.field_name || ''}
+                  value={newConfig.field_name}
                   onChange={(e) => setNewConfig({...newConfig, field_name: e.target.value})}
                   placeholder="e.g., first_name"
                 />
@@ -217,7 +240,7 @@ const FieldDisplayConfigTab: React.FC = () => {
               <div>
                 <Label>Display Label</Label>
                 <Input
-                  value={newConfig.display_label || ''}
+                  value={newConfig.display_label}
                   onChange={(e) => setNewConfig({...newConfig, display_label: e.target.value})}
                   placeholder="e.g., First Name"
                 />
@@ -242,14 +265,14 @@ const FieldDisplayConfigTab: React.FC = () => {
                 <Label>Default Order</Label>
                 <Input
                   type="number"
-                  value={newConfig.default_order || 0}
-                  onChange={(e) => setNewConfig({...newConfig, default_order: parseInt(e.target.value)})}
+                  value={newConfig.default_order}
+                  onChange={(e) => setNewConfig({...newConfig, default_order: parseInt(e.target.value) || 0})}
                 />
               </div>
               <div>
                 <Label>Default Mask Value</Label>
                 <Input
-                  value={newConfig.default_mask_value || ''}
+                  value={newConfig.default_mask_value}
                   onChange={(e) => setNewConfig({...newConfig, default_mask_value: e.target.value})}
                   placeholder="e.g., ***"
                 />
