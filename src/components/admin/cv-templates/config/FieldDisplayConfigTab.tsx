@@ -29,7 +29,7 @@ const FieldDisplayConfigTab: React.FC = () => {
     'experience', 'education', 'training', 'achievements', 'projects'
   ];
 
-  const fieldTypes = ['text', 'number', 'date', 'boolean', 'array', 'image'];
+  const fieldTypes = ['text', 'number', 'date', 'boolean', 'array', 'image', 'richtext'];
 
   const handleSave = async (config: any) => {
     const success = await saveConfig(config);
