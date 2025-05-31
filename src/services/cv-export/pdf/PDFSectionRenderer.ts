@@ -1,4 +1,3 @@
-
 import jsPDF from 'jspdf';
 import { PDFStyler } from './PDFStyler';
 import { FieldMaskingService } from '../docx/FieldMaskingService';
@@ -74,6 +73,16 @@ export class PDFSectionRenderer {
   private async renderGeneralSection(profile: any, x: number, y: number, width: number, styles: any): Promise<number> {
     let currentY = y;
     
+    // Profile Image
+    if (profile.profile_image && this.visibilityService.isFieldVisible('profile_image', 'general')) {
+      try {
+        const imageHeight = await this.addProfileImage(profile.profile_image, x, currentY, width);
+        currentY += imageHeight + 10;
+      } catch (error) {
+        console.warn('Failed to load profile image:', error);
+      }
+    }
+
     // Name
     const showFirstName = this.visibilityService.isFieldVisible('first_name', 'general');
     const showLastName = this.visibilityService.isFieldVisible('last_name', 'general');
@@ -156,21 +165,28 @@ export class PDFSectionRenderer {
     let currentY = y;
     
     for (const experience of experiences) {
-      // Company Name
-      if (this.visibilityService.isFieldVisible('company_name', sectionType)) {
-        const companyName = this.maskingService.applyMasking(experience.company_name, 'company_name', sectionType);
-        if (companyName) {
-          const companyHeight = this.styler.addText(companyName, x, currentY, width, { bold: true });
-          currentY += companyHeight;
+      // Company Name and Designation on same line
+      const showCompanyName = this.visibilityService.isFieldVisible('company_name', sectionType);
+      const showDesignation = this.visibilityService.isFieldVisible('designation', sectionType);
+      
+      if (showCompanyName || showDesignation) {
+        let titleLine = '';
+        
+        if (showDesignation) {
+          const designation = this.maskingService.applyMasking(experience.designation, 'designation', sectionType);
+          titleLine = designation || '';
         }
-      }
-
-      // Position
-      if (this.visibilityService.isFieldVisible('position', sectionType)) {
-        const position = this.maskingService.applyMasking(experience.position, 'position', sectionType);
-        if (position) {
-          const positionHeight = this.styler.addText(position, x, currentY, width, { italic: true });
-          currentY += positionHeight;
+        
+        if (showCompanyName) {
+          const companyName = this.maskingService.applyMasking(experience.company_name, 'company_name', sectionType);
+          if (companyName) {
+            titleLine += (titleLine ? ' at ' : '') + companyName;
+          }
+        }
+        
+        if (titleLine) {
+          const titleHeight = this.styler.addText(titleLine, x, currentY, width, { bold: true });
+          currentY += titleHeight + 2;
         }
       }
 
@@ -178,18 +194,22 @@ export class PDFSectionRenderer {
       if (this.visibilityService.isFieldVisible('start_date', sectionType) || this.visibilityService.isFieldVisible('end_date', sectionType)) {
         const dateRange = this.formatDateRange(experience.start_date, experience.end_date, experience.is_current);
         if (dateRange) {
-          const dateHeight = this.styler.addText(dateRange, x, currentY, width, { fontSize: this.styler.getFontSize('small') });
-          currentY += dateHeight;
+          const maskedDateRange = this.maskingService.applyMasking(dateRange, 'date_range', sectionType);
+          const dateHeight = this.styler.addText(maskedDateRange, x, currentY, width, { 
+            fontSize: this.styler.getFontSize('small'),
+            italic: true 
+          });
+          currentY += dateHeight + 3;
         }
       }
 
-      // Job Responsibilities
-      if (this.visibilityService.isFieldVisible('job_responsibilities', sectionType)) {
-        const responsibilities = this.maskingService.applyMasking(experience.job_responsibilities, 'job_responsibilities', sectionType);
-        if (responsibilities) {
-          const cleanResponsibilities = this.cleanHtmlContent(responsibilities);
-          const respHeight = this.renderBulletPoints(cleanResponsibilities, x, currentY, width);
-          currentY += respHeight;
+      // Description
+      if (this.visibilityService.isFieldVisible('description', sectionType)) {
+        const description = this.maskingService.applyMasking(experience.description, 'description', sectionType);
+        if (description) {
+          const cleanDescription = this.cleanHtmlContent(description);
+          const descHeight = this.renderBulletPoints(cleanDescription, x, currentY, width);
+          currentY += descHeight + 5;
         }
       }
 
@@ -197,6 +217,126 @@ export class PDFSectionRenderer {
     }
 
     return currentY - y;
+  }
+
+  private async renderProjectsSection(projects: any[], x: number, y: number, width: number, sectionType: string): Promise<number> {
+    let currentY = y;
+    
+    for (const project of projects) {
+      // Project Name
+      if (this.visibilityService.isFieldVisible('name', sectionType)) {
+        const name = this.maskingService.applyMasking(project.name, 'name', sectionType);
+        if (name) {
+          const nameHeight = this.styler.addText(name, x, currentY, width, { bold: true });
+          currentY += nameHeight + 2;
+        }
+      }
+
+      // Role and Date Range on same line
+      const showRole = this.visibilityService.isFieldVisible('role', sectionType);
+      const showDateRange = this.visibilityService.isFieldVisible('date_range', sectionType);
+      
+      if (showRole || showDateRange) {
+        let subtitleLine = '';
+        
+        if (showRole) {
+          const role = this.maskingService.applyMasking(project.role, 'role', sectionType);
+          subtitleLine = role || '';
+        }
+        
+        if (showDateRange && (project.start_date || project.end_date)) {
+          const dateRange = this.formatDateRange(project.start_date, project.end_date, project.is_current);
+          if (dateRange) {
+            const maskedDateRange = this.maskingService.applyMasking(dateRange, 'date_range', sectionType);
+            subtitleLine += (subtitleLine ? ' • ' : '') + maskedDateRange;
+          }
+        }
+        
+        if (subtitleLine) {
+          const subtitleHeight = this.styler.addText(subtitleLine, x, currentY, width, { 
+            fontSize: this.styler.getFontSize('small'),
+            italic: true 
+          });
+          currentY += subtitleHeight + 3;
+        }
+      }
+
+      // Description (convert rich text to plain text)
+      if (this.visibilityService.isFieldVisible('description', sectionType)) {
+        const description = this.maskingService.applyMasking(project.description, 'description', sectionType);
+        if (description) {
+          const cleanDescription = this.cleanHtmlContent(description);
+          const descHeight = this.styler.addText(cleanDescription, x, currentY, width);
+          currentY += descHeight + 3;
+        }
+      }
+
+      // Technologies Used
+      if (this.visibilityService.isFieldVisible('technologies_used', sectionType)) {
+        const technologies = this.maskingService.applyMasking(project.technologies_used, 'technologies_used', sectionType);
+        if (technologies && Array.isArray(technologies) && technologies.length > 0) {
+          const techText = `Technologies: ${technologies.join(', ')}`;
+          const techHeight = this.styler.addText(techText, x, currentY, width, { 
+            fontSize: this.styler.getFontSize('small') 
+          });
+          currentY += techHeight + 3;
+        }
+      }
+
+      currentY += 10; // Space between projects
+    }
+
+    return currentY - y;
+  }
+
+  private async addProfileImage(imageUrl: string, x: number, y: number, width: number): Promise<number> {
+    return new Promise((resolve) => {
+      const img = new Image();
+      img.crossOrigin = 'anonymous';
+      
+      img.onload = () => {
+        try {
+          // Create canvas to convert image to base64
+          const canvas = document.createElement('canvas');
+          const ctx = canvas.getContext('2d');
+          
+          // Set canvas size (maintain aspect ratio)
+          const maxWidth = 40;
+          const maxHeight = 50;
+          let { width: imgWidth, height: imgHeight } = img;
+          
+          // Calculate scaled dimensions
+          const ratio = Math.min(maxWidth / imgWidth, maxHeight / imgHeight);
+          imgWidth = imgWidth * ratio;
+          imgHeight = imgHeight * ratio;
+          
+          canvas.width = imgWidth;
+          canvas.height = imgHeight;
+          
+          // Draw image to canvas
+          ctx?.drawImage(img, 0, 0, imgWidth, imgHeight);
+          
+          // Get base64 data
+          const dataUrl = canvas.toDataURL('image/jpeg', 0.8);
+          
+          // Add image to PDF (centered)
+          const imageX = x + (width - imgWidth) / 2;
+          this.doc.addImage(dataUrl, 'JPEG', imageX, y, imgWidth, imgHeight);
+          
+          resolve(imgHeight);
+        } catch (error) {
+          console.warn('Error processing profile image:', error);
+          resolve(0);
+        }
+      };
+      
+      img.onerror = () => {
+        console.warn('Failed to load profile image');
+        resolve(0);
+      };
+      
+      img.src = imageUrl;
+    });
   }
 
   private async renderEducationSection(education: any[], x: number, y: number, width: number, sectionType: string): Promise<number> {
@@ -231,44 +371,6 @@ export class PDFSectionRenderer {
       }
 
       currentY += 10; // Space between education entries
-    }
-
-    return currentY - y;
-  }
-
-  private async renderProjectsSection(projects: any[], x: number, y: number, width: number, sectionType: string): Promise<number> {
-    let currentY = y;
-    
-    for (const project of projects) {
-      // Project Name
-      if (this.visibilityService.isFieldVisible('name', sectionType)) {
-        const name = this.maskingService.applyMasking(project.name, 'name', sectionType);
-        if (name) {
-          const nameHeight = this.styler.addText(name, x, currentY, width, { bold: true });
-          currentY += nameHeight;
-        }
-      }
-
-      // Role
-      if (this.visibilityService.isFieldVisible('role', sectionType)) {
-        const role = this.maskingService.applyMasking(project.role, 'role', sectionType);
-        if (role) {
-          const roleHeight = this.styler.addText(role, x, currentY, width, { italic: true });
-          currentY += roleHeight;
-        }
-      }
-
-      // Description
-      if (this.visibilityService.isFieldVisible('description', sectionType)) {
-        const description = this.maskingService.applyMasking(project.description, 'description', sectionType);
-        if (description) {
-          const cleanDescription = this.cleanHtmlContent(description);
-          const descHeight = this.styler.addText(cleanDescription, x, currentY, width);
-          currentY += descHeight;
-        }
-      }
-
-      currentY += 10; // Space between projects
     }
 
     return currentY - y;
