@@ -1,54 +1,50 @@
 
 import { BaseExporter } from './BaseExporter';
 import { ExportOptions, ExportResult } from '../CVExportService';
-import { PPTDocumentBuilder } from '../ppt/PPTDocumentBuilder';
 
 export class PPTExporter extends BaseExporter {
   async export(options: ExportOptions): Promise<ExportResult> {
-    const { template, profile, sections, fieldMappings, styles } = options;
+    const { template, profile } = options;
     
     try {
-      console.log('PPT Export - Starting export with template:', template.name);
+      // TODO: Implement PPT export using libraries like PptxGenJS
+      console.log('PPT Export - Template:', template.name);
       console.log('PPT Export - Profile:', profile?.first_name, profile?.last_name);
-      console.log('PPT Export - Sections:', sections?.length || 0);
-      console.log('PPT Export - Field mappings:', fieldMappings?.length || 0);
       
-      if (!profile) {
-        throw new Error('Profile data is required for PPT export');
-      }
-
-      if (!sections || sections.length === 0) {
-        throw new Error('At least one section must be configured for PPT export');
-      }
-
-      // Create PPT document builder
-      const pptBuilder = new PPTDocumentBuilder();
-      
-      // Build the PPT document
-      const pptBlob = await pptBuilder.build(
-        profile,
-        sections,
-        fieldMappings || [],
-        styles,
-        template.layout_config || {}
-      );
-      
+      // Placeholder implementation
+      const placeholderContent = this.generatePlaceholderPPT(profile, template);
+      const blob = new Blob([placeholderContent], { 
+        type: 'application/vnd.openxmlformats-officedocument.presentationml.presentation' 
+      });
       const fileName = this.generateFileName(profile, 'pptx');
       
-      // Download the file
-      this.downloadFile(pptBlob, fileName);
+      this.downloadFile(blob, fileName);
       
       return {
         success: true,
-        blob: pptBlob,
-        url: URL.createObjectURL(pptBlob)
+        blob,
+        url: URL.createObjectURL(blob)
       };
     } catch (error) {
-      console.error('PPT export failed:', error);
       return {
         success: false,
         error: error instanceof Error ? error.message : 'PPT export failed'
       };
     }
+  }
+
+  private generatePlaceholderPPT(profile: any, template: any): string {
+    return `PPT Placeholder for ${profile?.first_name || 'Unknown'} ${profile?.last_name || 'User'}
+Template: ${template?.name || 'Unknown Template'}
+
+This is a placeholder PowerPoint file.
+Real implementation will use PptxGenJS library.
+
+Slides to create:
+1. Title slide with name and contact
+2. Professional summary
+3. Work experience
+4. Education & Skills
+5. Projects & Achievements`;
   }
 }
