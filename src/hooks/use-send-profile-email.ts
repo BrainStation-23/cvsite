@@ -8,11 +8,11 @@ interface SendEmailData {
 }
 
 export function useSendProfileEmail() {
-  const [isSending, setIsSending] = useState(false);
+  const [sendingProfiles, setSendingProfiles] = useState<Set<string>>(new Set());
   const { toast } = useToast();
 
   const sendProfileEmail = async (data: SendEmailData) => {
-    setIsSending(true);
+    setSendingProfiles(prev => new Set([...prev, data.profileId]));
     
     try {
       console.log('Sending profile email for profile ID:', data.profileId);
@@ -48,12 +48,18 @@ export function useSendProfileEmail() {
       });
       throw error;
     } finally {
-      setIsSending(false);
+      setSendingProfiles(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(data.profileId);
+        return newSet;
+      });
     }
   };
 
+  const isProfileSending = (profileId: string) => sendingProfiles.has(profileId);
+
   return {
     sendProfileEmail,
-    isSending
+    isProfileSending
   };
 }

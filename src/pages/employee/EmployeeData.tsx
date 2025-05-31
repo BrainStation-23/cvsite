@@ -1,3 +1,4 @@
+
 import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import DashboardLayout from '../../components/Layout/DashboardLayout';
@@ -27,7 +28,7 @@ import {
 
 const EmployeeData: React.FC = () => {
   const navigate = useNavigate();
-  const { sendProfileEmail, isSending } = useSendProfileEmail();
+  const { sendProfileEmail, isProfileSending } = useSendProfileEmail();
   
   const {
     profiles,
@@ -260,10 +261,10 @@ const EmployeeData: React.FC = () => {
                                     variant="outline" 
                                     size="sm"
                                     onClick={() => handleSendEmail(profile)}
-                                    disabled={isSending}
+                                    disabled={isProfileSending(profile.id)}
                                     className="h-8 px-3"
                                   >
-                                    {isSending ? (
+                                    {isProfileSending(profile.id) ? (
                                       <Loader2 className="h-4 w-4 animate-spin" />
                                     ) : (
                                       <Mail className="h-4 w-4" />
