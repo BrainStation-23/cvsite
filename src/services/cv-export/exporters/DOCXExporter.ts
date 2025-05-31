@@ -1,4 +1,3 @@
-
 import { BaseExporter } from './BaseExporter';
 import { ExportOptions, ExportResult } from '../CVExportService';
 import { Document, Packer, Paragraph, TextRun, HeadingLevel, AlignmentType, BorderStyle, WidthType, Table, TableRow, TableCell, ImageRun } from 'docx';
@@ -12,6 +11,7 @@ export class DOCXExporter extends BaseExporter {
       console.log('DOCX Export - Template:', template?.name);
       console.log('DOCX Export - Profile:', profile?.first_name, profile?.last_name);
       console.log('DOCX Export - Sections count:', sections?.length);
+      console.log('DOCX Export - Field mappings count:', fieldMappings?.length);
       
       if (!profile) {
         throw new Error('Profile data is required for export');
@@ -156,7 +156,7 @@ export class DOCXExporter extends BaseExporter {
       // Render section content based on type
       switch (section.section_type) {
         case 'general':
-          const generalElements = await this.renderGeneralSection(profile, styles);
+          const generalElements = await this.renderGeneralSection(profile, styles, fieldMappings);
           elements.push(...generalElements);
           break;
         case 'experience':
@@ -192,16 +192,17 @@ export class DOCXExporter extends BaseExporter {
     }
   }
 
-  private async renderGeneralSection(profile: any, styles: any): Promise<(Paragraph | Table)[]> {
+  private async renderGeneralSection(profile: any, styles: any, fieldMappings: any[]): Promise<(Paragraph | Table)[]> {
     const elements: (Paragraph | Table)[] = [];
     const baseStyles = styles?.baseStyles || {};
     
     try {
-      // Profile Image (if available)
-      if (profile.profile_image) {
+      // Profile Image (if available and not masked)
+      const profileImageValue = this.applyFieldMasking(profile.profile_image, 'profile_image', 'general', fieldMappings);
+      if (profileImageValue && profileImageValue !== '***') {
         try {
           // Fetch the image and convert to buffer
-          const response = await fetch(profile.profile_image);
+          const response = await fetch(profileImageValue);
           const imageBuffer = await response.arrayBuffer();
           
           elements.push(new Paragraph({
@@ -225,11 +226,14 @@ export class DOCXExporter extends BaseExporter {
       }
 
       // Name
-      if (profile.first_name || profile.last_name) {
+      const firstName = this.applyFieldMasking(profile.first_name, 'first_name', 'general', fieldMappings);
+      const lastName = this.applyFieldMasking(profile.last_name, 'last_name', 'general', fieldMappings);
+      
+      if (firstName || lastName) {
         elements.push(new Paragraph({
           children: [
             new TextRun({
-              text: `${profile.first_name || ''} ${profile.last_name || ''}`.trim(),
+              text: `${firstName || ''} ${lastName || ''}`.trim(),
               bold: true,
               size: (baseStyles.headingSize || 16) * 2,
               color: this.parseColor(baseStyles.primaryColor || '#1f2937')
@@ -241,11 +245,12 @@ export class DOCXExporter extends BaseExporter {
       }
 
       // Job Title/Designation
-      if (profile.designation?.name || profile.job_title) {
+      const designation = this.applyFieldMasking(profile.designation?.name || profile.job_title, 'designation', 'general', fieldMappings);
+      if (designation) {
         elements.push(new Paragraph({
           children: [
             new TextRun({
-              text: profile.designation?.name || profile.job_title,
+              text: designation,
               size: (baseStyles.subheadingSize || 14) * 2,
               color: this.parseColor(baseStyles.secondaryColor || '#6b7280')
             })
@@ -257,9 +262,13 @@ export class DOCXExporter extends BaseExporter {
 
       // Contact Information
       const contactInfo: string[] = [];
-      if (profile.email) contactInfo.push(`Email: ${profile.email}`);
-      if (profile.phone) contactInfo.push(`Phone: ${profile.phone}`);
-      if (profile.location) contactInfo.push(`Location: ${profile.location}`);
+      const email = this.applyFieldMasking(profile.email, 'email', 'general', fieldMappings);
+      const phone = this.applyFieldMasking(profile.phone, 'phone', 'general', fieldMappings);
+      const location = this.applyFieldMasking(profile.location, 'location', 'general', fieldMappings);
+      
+      if (email) contactInfo.push(`Email: ${email}`);
+      if (phone) contactInfo.push(`Phone: ${phone}`);
+      if (location) contactInfo.push(`Location: ${location}`);
 
       if (contactInfo.length > 0) {
         elements.push(new Paragraph({
@@ -274,11 +283,10 @@ export class DOCXExporter extends BaseExporter {
         }));
       }
 
-      // Biography/Summary with rich text parsing
-      if (profile.biography || profile.summary) {
-        const bioText = profile.biography || profile.summary;
-        const richTextParagraphs = this.parseRichTextToDocx(bioText, baseStyles);
-        
+      // Biography/Summary with rich text parsing and masking
+      const biography = this.applyFieldMasking(profile.biography || profile.summary, 'biography', 'general', fieldMappings);
+      if (biography) {
+        const richTextParagraphs = this.parseRichTextToDocx(biography, baseStyles);
         elements.push(...richTextParagraphs);
       }
     } catch (error) {
@@ -288,15 +296,106 @@ export class DOCXExporter extends BaseExporter {
     return elements;
   }
 
-  // New method to properly parse HTML to DOCX rich text
+  // Helper function to apply field masking based on field mappings
+  private applyFieldMasking(value: any, fieldName: string, sectionType: string, fieldMappings: any[]): any {
+    if (!value || !fieldMappings) return value;
+    
+    const fieldMapping = fieldMappings.find(
+      mapping => mapping.original_field_name === fieldName && mapping.section_type === sectionType
+    );
+    
+    if (!fieldMapping || !fieldMapping.is_masked) return value;
+    
+    // Apply masking
+    if (fieldMapping.mask_value) {
+      return fieldMapping.mask_value;
+    } else {
+      // Default masking
+      if (typeof value === 'string' && value.length > 3) {
+        return value.substring(0, 3) + '***';
+      }
+      return '***';
+    }
+  }
+
+  // Enhanced method to properly parse HTML to DOCX rich text with better list support
   private parseRichTextToDocx(htmlContent: string, baseStyles: any): Paragraph[] {
     if (!htmlContent) return [];
     
     const fontSize = (baseStyles.baseFontSize || 12) * 2;
     const paragraphs: Paragraph[] = [];
     
+    // Handle lists specially
+    const listRegex = /<(ul|ol)>(.*?)<\/\1>/gis;
+    const listMatches = Array.from(htmlContent.matchAll(listRegex));
+    
+    let lastIndex = 0;
+    
+    for (const match of listMatches) {
+      const [fullMatch, listType, listContent] = match;
+      const matchIndex = match.index || 0;
+      
+      // Process content before the list
+      if (matchIndex > lastIndex) {
+        const beforeListContent = htmlContent.substring(lastIndex, matchIndex);
+        const beforeParagraphs = this.parseRegularContent(beforeListContent, fontSize);
+        paragraphs.push(...beforeParagraphs);
+      }
+      
+      // Process the list
+      const listParagraphs = this.parseListContent(listContent, listType, fontSize);
+      paragraphs.push(...listParagraphs);
+      
+      lastIndex = matchIndex + fullMatch.length;
+    }
+    
+    // Process remaining content after the last list
+    if (lastIndex < htmlContent.length) {
+      const remainingContent = htmlContent.substring(lastIndex);
+      const remainingParagraphs = this.parseRegularContent(remainingContent, fontSize);
+      paragraphs.push(...remainingParagraphs);
+    }
+    
+    // If no lists were found, parse as regular content
+    if (listMatches.length === 0) {
+      return this.parseRegularContent(htmlContent, fontSize);
+    }
+    
+    return paragraphs;
+  }
+
+  // Parse list content with proper bullet points
+  private parseListContent(listContent: string, listType: string, fontSize: number): Paragraph[] {
+    const paragraphs: Paragraph[] = [];
+    const listItems = listContent.match(/<li>(.*?)<\/li>/gis) || [];
+    
+    listItems.forEach((item, index) => {
+      const itemContent = item.replace(/<\/?li>/gi, '').trim();
+      const textRuns = this.parseHtmlToTextRuns(itemContent, fontSize);
+      
+      if (textRuns.length > 0) {
+        // Add bullet point or number
+        const bullet = listType === 'ol' ? `${index + 1}. ` : '• ';
+        const bulletRun = new TextRun({ text: bullet, size: fontSize });
+        
+        paragraphs.push(new Paragraph({
+          children: [bulletRun, ...textRuns],
+          spacing: { after: 60 },
+          alignment: AlignmentType.JUSTIFIED,
+          indent: { left: 360 } // Indent list items
+        }));
+      }
+    });
+    
+    return paragraphs;
+  }
+
+  // Parse regular content (non-list)
+  private parseRegularContent(content: string, fontSize: number): Paragraph[] {
+    const paragraphs: Paragraph[] = [];
+    
     // Split into paragraphs first
-    const htmlParagraphs = htmlContent
+    const htmlParagraphs = content
       .split(/<\/p>/gi)
       .map(p => p.replace(/<p[^>]*>/gi, '').trim())
       .filter(p => p.length > 0);
@@ -313,8 +412,8 @@ export class DOCXExporter extends BaseExporter {
     });
     
     // If no paragraphs were created, create a single paragraph
-    if (paragraphs.length === 0) {
-      const textRuns = this.parseHtmlToTextRuns(htmlContent, fontSize);
+    if (paragraphs.length === 0 && content.trim()) {
+      const textRuns = this.parseHtmlToTextRuns(content, fontSize);
       if (textRuns.length > 0) {
         paragraphs.push(new Paragraph({
           children: textRuns,
@@ -444,30 +543,39 @@ export class DOCXExporter extends BaseExporter {
     
     try {
       experiences.forEach((exp, index) => {
+        // Apply masking to each field
+        const designation = this.applyFieldMasking(exp.designation || exp.job_title, 'designation', 'experience', fieldMappings);
+        const companyName = this.applyFieldMasking(exp.company_name, 'company_name', 'experience', fieldMappings);
+        const description = this.applyFieldMasking(exp.description, 'description', 'experience', fieldMappings);
+
         // Job Title and Company
-        elements.push(new Paragraph({
-          children: [
-            new TextRun({
-              text: exp.designation || exp.job_title || '',
-              bold: true,
-              size: (baseStyles.baseFontSize || 12) * 2,
-              color: this.parseColor(baseStyles.primaryColor || '#1f2937')
-            }),
-            new TextRun({
-              text: exp.company_name ? ` at ${exp.company_name}` : '',
-              size: (baseStyles.baseFontSize || 12) * 2
-            })
-          ],
-          spacing: { before: 120, after: 60 }
-        }));
+        if (designation || companyName) {
+          elements.push(new Paragraph({
+            children: [
+              new TextRun({
+                text: designation || '',
+                bold: true,
+                size: (baseStyles.baseFontSize || 12) * 2,
+                color: this.parseColor(baseStyles.primaryColor || '#1f2937')
+              }),
+              new TextRun({
+                text: companyName ? ` at ${companyName}` : '',
+                size: (baseStyles.baseFontSize || 12) * 2
+              })
+            ],
+            spacing: { before: 120, after: 60 }
+          }));
+        }
 
         // Date Range
         if (exp.start_date || exp.end_date) {
           const dateRange = this.formatDateRange(exp.start_date, exp.end_date, exp.is_current);
+          const maskedDateRange = this.applyFieldMasking(dateRange, 'date_range', 'experience', fieldMappings);
+          
           elements.push(new Paragraph({
             children: [
               new TextRun({
-                text: dateRange,
+                text: maskedDateRange,
                 size: (baseStyles.baseFontSize || 12) * 2,
                 color: this.parseColor(baseStyles.secondaryColor || '#6b7280'),
                 italics: true
@@ -477,9 +585,9 @@ export class DOCXExporter extends BaseExporter {
           }));
         }
 
-        // Description with rich text parsing
-        if (exp.description) {
-          const richTextParagraphs = this.parseRichTextToDocx(exp.description, baseStyles);
+        // Description with rich text parsing and masking
+        if (description) {
+          const richTextParagraphs = this.parseRichTextToDocx(description, baseStyles);
           elements.push(...richTextParagraphs);
         }
       });
@@ -496,30 +604,39 @@ export class DOCXExporter extends BaseExporter {
     
     try {
       education.forEach((edu, index) => {
+        // Apply masking to each field
+        const degree = this.applyFieldMasking(edu.degree?.name || edu.degree_name, 'degree', 'education', fieldMappings);
+        const university = this.applyFieldMasking(edu.university?.name, 'university', 'education', fieldMappings);
+        const gpa = this.applyFieldMasking(edu.gpa, 'gpa', 'education', fieldMappings);
+
         // Degree and Institution
-        elements.push(new Paragraph({
-          children: [
-            new TextRun({
-              text: edu.degree?.name || edu.degree_name || '',
-              bold: true,
-              size: (baseStyles.baseFontSize || 12) * 2,
-              color: this.parseColor(baseStyles.primaryColor || '#1f2937')
-            }),
-            new TextRun({
-              text: edu.university?.name ? ` - ${edu.university.name}` : '',
-              size: (baseStyles.baseFontSize || 12) * 2
-            })
-          ],
-          spacing: { before: 120, after: 60 }
-        }));
+        if (degree || university) {
+          elements.push(new Paragraph({
+            children: [
+              new TextRun({
+                text: degree || '',
+                bold: true,
+                size: (baseStyles.baseFontSize || 12) * 2,
+                color: this.parseColor(baseStyles.primaryColor || '#1f2937')
+              }),
+              new TextRun({
+                text: university ? ` - ${university}` : '',
+                size: (baseStyles.baseFontSize || 12) * 2
+              })
+            ],
+            spacing: { before: 120, after: 60 }
+          }));
+        }
 
         // Date Range
         if (edu.start_date || edu.end_date) {
           const dateRange = this.formatDateRange(edu.start_date, edu.end_date, false);
+          const maskedDateRange = this.applyFieldMasking(dateRange, 'date_range', 'education', fieldMappings);
+          
           elements.push(new Paragraph({
             children: [
               new TextRun({
-                text: dateRange,
+                text: maskedDateRange,
                 size: (baseStyles.baseFontSize || 12) * 2,
                 color: this.parseColor(baseStyles.secondaryColor || '#6b7280'),
                 italics: true
@@ -530,11 +647,11 @@ export class DOCXExporter extends BaseExporter {
         }
 
         // GPA
-        if (edu.gpa) {
+        if (gpa) {
           elements.push(new Paragraph({
             children: [
               new TextRun({
-                text: `GPA: ${edu.gpa}`,
+                text: `GPA: ${gpa}`,
                 size: (baseStyles.baseFontSize || 12) * 2
               })
             ],
@@ -555,30 +672,40 @@ export class DOCXExporter extends BaseExporter {
     
     try {
       projects.forEach((project, index) => {
+        // Apply masking to each field
+        const name = this.applyFieldMasking(project.name, 'name', 'projects', fieldMappings);
+        const role = this.applyFieldMasking(project.role, 'role', 'projects', fieldMappings);
+        const description = this.applyFieldMasking(project.description, 'description', 'projects', fieldMappings);
+        const technologies = this.applyFieldMasking(project.technologies_used, 'technologies_used', 'projects', fieldMappings);
+
         // Project Name and Role
-        elements.push(new Paragraph({
-          children: [
-            new TextRun({
-              text: project.name || '',
-              bold: true,
-              size: (baseStyles.baseFontSize || 12) * 2,
-              color: this.parseColor(baseStyles.primaryColor || '#1f2937')
-            }),
-            new TextRun({
-              text: project.role ? ` (${project.role})` : '',
-              size: (baseStyles.baseFontSize || 12) * 2
-            })
-          ],
-          spacing: { before: 120, after: 60 }
-        }));
+        if (name || role) {
+          elements.push(new Paragraph({
+            children: [
+              new TextRun({
+                text: name || '',
+                bold: true,
+                size: (baseStyles.baseFontSize || 12) * 2,
+                color: this.parseColor(baseStyles.primaryColor || '#1f2937')
+              }),
+              new TextRun({
+                text: role ? ` (${role})` : '',
+                size: (baseStyles.baseFontSize || 12) * 2
+              })
+            ],
+            spacing: { before: 120, after: 60 }
+          }));
+        }
 
         // Date Range
         if (project.start_date || project.end_date) {
           const dateRange = this.formatDateRange(project.start_date, project.end_date, false);
+          const maskedDateRange = this.applyFieldMasking(dateRange, 'date_range', 'projects', fieldMappings);
+          
           elements.push(new Paragraph({
             children: [
               new TextRun({
-                text: dateRange,
+                text: maskedDateRange,
                 size: (baseStyles.baseFontSize || 12) * 2,
                 color: this.parseColor(baseStyles.secondaryColor || '#6b7280'),
                 italics: true
@@ -588,17 +715,17 @@ export class DOCXExporter extends BaseExporter {
           }));
         }
 
-        // Description with rich text parsing
-        if (project.description) {
-          const richTextParagraphs = this.parseRichTextToDocx(project.description, baseStyles);
+        // Description with rich text parsing and masking
+        if (description) {
+          const richTextParagraphs = this.parseRichTextToDocx(description, baseStyles);
           elements.push(...richTextParagraphs);
         }
 
         // Technologies
-        if (project.technologies_used && project.technologies_used.length > 0) {
-          const techText = Array.isArray(project.technologies_used) 
-            ? project.technologies_used.join(', ')
-            : project.technologies_used;
+        if (technologies && technologies.length > 0) {
+          const techText = Array.isArray(technologies) 
+            ? technologies.join(', ')
+            : technologies;
           
           elements.push(new Paragraph({
             children: [
@@ -696,29 +823,38 @@ export class DOCXExporter extends BaseExporter {
     
     try {
       trainings.forEach((training, index) => {
-        // Training Title and Provider
-        elements.push(new Paragraph({
-          children: [
-            new TextRun({
-              text: training.title || '',
-              bold: true,
-              size: (baseStyles.baseFontSize || 12) * 2,
-              color: this.parseColor(baseStyles.primaryColor || '#1f2937')
-            }),
-            new TextRun({
-              text: training.provider ? ` - ${training.provider}` : '',
-              size: (baseStyles.baseFontSize || 12) * 2
-            })
-          ],
-          spacing: { before: 120, after: 60 }
-        }));
+        // Apply masking to each field
+        const title = this.applyFieldMasking(training.title, 'title', 'training', fieldMappings);
+        const provider = this.applyFieldMasking(training.provider, 'provider', 'training', fieldMappings);
+        const description = this.applyFieldMasking(training.description, 'description', 'training', fieldMappings);
 
-        // Certification Date
-        if (training.certification_date) {
+        // Training Title and Provider
+        if (title || provider) {
           elements.push(new Paragraph({
             children: [
               new TextRun({
-                text: new Date(training.certification_date).toLocaleDateString(),
+                text: title || '',
+                bold: true,
+                size: (baseStyles.baseFontSize || 12) * 2,
+                color: this.parseColor(baseStyles.primaryColor || '#1f2937')
+              }),
+              new TextRun({
+                text: provider ? ` - ${provider}` : '',
+                size: (baseStyles.baseFontSize || 12) * 2
+              })
+            ],
+            spacing: { before: 120, after: 60 }
+          }));
+        }
+
+        // Certification Date
+        if (training.certification_date) {
+          const certDate = this.applyFieldMasking(new Date(training.certification_date).toLocaleDateString(), 'certification_date', 'training', fieldMappings);
+          
+          elements.push(new Paragraph({
+            children: [
+              new TextRun({
+                text: certDate,
                 size: (baseStyles.baseFontSize || 12) * 2,
                 color: this.parseColor(baseStyles.secondaryColor || '#6b7280'),
                 italics: true
@@ -729,11 +865,11 @@ export class DOCXExporter extends BaseExporter {
         }
 
         // Description
-        if (training.description) {
+        if (description) {
           elements.push(new Paragraph({
             children: [
               new TextRun({
-                text: training.description,
+                text: description,
                 size: (baseStyles.baseFontSize || 12) * 2
               })
             ],
@@ -754,25 +890,33 @@ export class DOCXExporter extends BaseExporter {
     
     try {
       achievements.forEach((achievement, index) => {
-        // Achievement Title
-        elements.push(new Paragraph({
-          children: [
-            new TextRun({
-              text: achievement.title || '',
-              bold: true,
-              size: (baseStyles.baseFontSize || 12) * 2,
-              color: this.parseColor(baseStyles.primaryColor || '#1f2937')
-            })
-          ],
-          spacing: { before: 120, after: 60 }
-        }));
+        // Apply masking to each field
+        const title = this.applyFieldMasking(achievement.title, 'title', 'achievements', fieldMappings);
+        const description = this.applyFieldMasking(achievement.description, 'description', 'achievements', fieldMappings);
 
-        // Date
-        if (achievement.date) {
+        // Achievement Title
+        if (title) {
           elements.push(new Paragraph({
             children: [
               new TextRun({
-                text: new Date(achievement.date).toLocaleDateString(),
+                text: title,
+                bold: true,
+                size: (baseStyles.baseFontSize || 12) * 2,
+                color: this.parseColor(baseStyles.primaryColor || '#1f2937')
+              })
+            ],
+            spacing: { before: 120, after: 60 }
+          }));
+        }
+
+        // Date
+        if (achievement.date) {
+          const achievementDate = this.applyFieldMasking(new Date(achievement.date).toLocaleDateString(), 'date', 'achievements', fieldMappings);
+          
+          elements.push(new Paragraph({
+            children: [
+              new TextRun({
+                text: achievementDate,
                 size: (baseStyles.baseFontSize || 12) * 2,
                 color: this.parseColor(baseStyles.secondaryColor || '#6b7280'),
                 italics: true
@@ -783,11 +927,11 @@ export class DOCXExporter extends BaseExporter {
         }
 
         // Description
-        if (achievement.description) {
+        if (description) {
           elements.push(new Paragraph({
             children: [
               new TextRun({
-                text: achievement.description,
+                text: description,
                 size: (baseStyles.baseFontSize || 12) * 2
               })
             ],
