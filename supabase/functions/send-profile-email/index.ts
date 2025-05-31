@@ -34,10 +34,10 @@ const handler = async (req: Request): Promise<Response> => {
 
     console.log('Fetching user data for profile ID:', profileId);
 
-    // Fetch profile data
+    // Fetch profile data including email
     const { data: profile, error: profileError } = await supabase
       .from('profiles')
-      .select('first_name, last_name, employee_id')
+      .select('first_name, last_name, employee_id, email')
       .eq('id', profileId)
       .single();
 
@@ -55,15 +55,12 @@ const handler = async (req: Request): Promise<Response> => {
       );
     }
 
-    // Fetch user email from auth.users using service role
-    const { data: { user }, error: userError } = await supabase.auth.admin.getUserById(profileId);
-
-    if (userError || !user || !user.email) {
-      console.error('Error fetching user email:', userError);
+    if (!profile.email) {
+      console.error('No email found for profile:', profileId);
       return new Response(
         JSON.stringify({ 
           success: false, 
-          error: 'User email not found' 
+          error: 'No email found for this profile' 
         }),
         {
           status: 404,
@@ -72,7 +69,7 @@ const handler = async (req: Request): Promise<Response> => {
       );
     }
 
-    console.log('Sending profile completion email to:', user.email);
+    console.log('Sending profile completion email to:', profile.email);
 
     // Create the email content
     const emailHtml = `
@@ -127,7 +124,7 @@ const handler = async (req: Request): Promise<Response> => {
                 <ol>
                   <li>Click the login button below</li>
                   <li>Use <strong>Microsoft Authentication</strong> to sign in</li>
-                  <li>Use your company email address: <strong>${user.email}</strong></li>
+                  <li>Use your company email address: <strong>${profile.email}</strong></li>
                   <li>Once logged in, go to "My Profile" to complete your information</li>
                 </ol>
               </div>
@@ -165,7 +162,7 @@ const handler = async (req: Request): Promise<Response> => {
 
     const emailResponse = await resend.emails.send({
       from: senderEmail,
-      to: [user.email],
+      to: [profile.email],
       subject: `Action Required: Complete Your Employee Profile - ${profile.first_name || 'Employee'} ${profile.last_name || ''}`,
       html: emailHtml,
     });
@@ -209,7 +206,7 @@ const handler = async (req: Request): Promise<Response> => {
       success: true, 
       message: 'Profile completion email sent successfully',
       emailId: emailResponse.data.id,
-      sentTo: user.email
+      sentTo: profile.email
     }), {
       status: 200,
       headers: {
