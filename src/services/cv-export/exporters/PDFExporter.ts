@@ -1,74 +1,52 @@
 
 import { BaseExporter } from './BaseExporter';
 import { ExportOptions, ExportResult } from '../CVExportService';
-import { CVToPDFService } from '../pdf/CVToPDFService';
+import { PDFDocumentBuilder } from '../pdf/PDFDocumentBuilder';
 
 export class PDFExporter extends BaseExporter {
   async export(options: ExportOptions): Promise<ExportResult> {
     const { template, profile, sections, fieldMappings, styles } = options;
     
     try {
-      console.log('PDFExporter - Starting export with template:', template.name);
-      console.log('PDFExporter - Profile:', profile?.first_name, profile?.last_name);
-      console.log('PDFExporter - Sections count:', sections?.length || 0);
-      console.log('PDFExporter - Field mappings count:', fieldMappings?.length || 0);
+      console.log('PDF Export - Starting export with template:', template.name);
+      console.log('PDF Export - Profile:', profile?.first_name, profile?.last_name);
+      console.log('PDF Export - Sections:', sections?.length || 0);
+      console.log('PDF Export - Field mappings:', fieldMappings?.length || 0);
       
       if (!profile) {
         throw new Error('Profile data is required for PDF export');
       }
 
       if (!sections || sections.length === 0) {
-        console.warn('PDFExporter - No sections configured, creating empty CV');
+        throw new Error('At least one section must be configured for PDF export');
       }
 
-      // Validate that we have some content to export
-      const hasBasicInfo = profile.first_name || profile.last_name || profile.employee_id;
-      const hasDataSections = sections?.some((section: any) => {
-        const sectionType = section.section_type;
-        const sectionData = profile[sectionType] || profile[sectionType.replace('_', '')];
-        return sectionData && (Array.isArray(sectionData) ? sectionData.length > 0 : true);
-      });
-
-      if (!hasBasicInfo && !hasDataSections) {
-        throw new Error('No content available to export - profile appears to be empty');
-      }
-
-      console.log('PDFExporter - Content validation passed, proceeding with PDF generation');
-
-      // Generate PDF using the new HTML-based approach
-      const pdfBlob = await CVToPDFService.exportCV({
-        template,
+      // Create PDF document builder
+      const pdfBuilder = new PDFDocumentBuilder();
+      
+      // Build the PDF document
+      const pdfArrayBuffer = await pdfBuilder.build(
         profile,
-        sections: sections || [],
-        fieldMappings: fieldMappings || [],
-        format: 'a4',
-        orientation: template.orientation || 'portrait',
-        hidePreviewInfo: true,
-        margin: [15, 15, 15, 15]
-      });
+        sections,
+        fieldMappings || [],
+        styles,
+        template.layout_config || {}
+      );
       
-      console.log('PDFExporter - PDF generated successfully, size:', pdfBlob.size);
-      
-      if (pdfBlob.size === 0) {
-        throw new Error('Generated PDF is empty - no content was rendered');
-      }
-      
-      if (pdfBlob.size < 1000) {
-        console.warn('PDFExporter - Warning: PDF size is very small, might indicate rendering issues');
-      }
-      
+      // Convert ArrayBuffer to Blob
+      const blob = new Blob([pdfArrayBuffer], { type: 'application/pdf' });
       const fileName = this.generateFileName(profile, 'pdf');
       
       // Download the file
-      this.downloadFile(pdfBlob, fileName);
+      this.downloadFile(blob, fileName);
       
       return {
         success: true,
-        blob: pdfBlob,
-        url: URL.createObjectURL(pdfBlob)
+        blob,
+        url: URL.createObjectURL(blob)
       };
     } catch (error) {
-      console.error('PDFExporter - Export failed:', error);
+      console.error('PDF export failed:', error);
       return {
         success: false,
         error: error instanceof Error ? error.message : 'PDF export failed'
