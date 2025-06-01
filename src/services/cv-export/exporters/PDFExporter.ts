@@ -1,14 +1,14 @@
 
 import { BaseExporter } from './BaseExporter';
 import { ExportOptions, ExportResult } from '../CVExportService';
-import { PDFDocumentBuilder } from '../pdf/PDFDocumentBuilder';
+import { CVToPDFService } from '../pdf/CVToPDFService';
 
 export class PDFExporter extends BaseExporter {
   async export(options: ExportOptions): Promise<ExportResult> {
     const { template, profile, sections, fieldMappings, styles } = options;
     
     try {
-      console.log('PDF Export - Starting export with template:', template.name);
+      console.log('PDF Export - Starting HTML-to-PDF export with template:', template.name);
       console.log('PDF Export - Profile:', profile?.first_name, profile?.last_name);
       console.log('PDF Export - Sections:', sections?.length || 0);
       console.log('PDF Export - Field mappings:', fieldMappings?.length || 0);
@@ -21,29 +21,26 @@ export class PDFExporter extends BaseExporter {
         throw new Error('At least one section must be configured for PDF export');
       }
 
-      // Create PDF document builder
-      const pdfBuilder = new PDFDocumentBuilder();
-      
-      // Build the PDF document
-      const pdfArrayBuffer = await pdfBuilder.build(
+      // Generate PDF using HTML-to-PDF approach
+      const pdfBlob = await CVToPDFService.exportCV({
+        template,
         profile,
         sections,
-        fieldMappings || [],
-        styles,
-        template.layout_config || {}
-      );
+        fieldMappings: fieldMappings || [],
+        format: 'a4',
+        orientation: template.orientation || 'portrait',
+        hidePreviewInfo: true
+      });
       
-      // Convert ArrayBuffer to Blob
-      const blob = new Blob([pdfArrayBuffer], { type: 'application/pdf' });
       const fileName = this.generateFileName(profile, 'pdf');
       
       // Download the file
-      this.downloadFile(blob, fileName);
+      this.downloadFile(pdfBlob, fileName);
       
       return {
         success: true,
-        blob,
-        url: URL.createObjectURL(blob)
+        blob: pdfBlob,
+        url: URL.createObjectURL(pdfBlob)
       };
     } catch (error) {
       console.error('PDF export failed:', error);
