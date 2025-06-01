@@ -21,7 +21,21 @@ export class PDFExporter extends BaseExporter {
         console.warn('PDFExporter - No sections configured, creating empty CV');
       }
 
-      // Generate PDF using HTML-to-PDF approach
+      // Validate that we have some content to export
+      const hasBasicInfo = profile.first_name || profile.last_name || profile.employee_id;
+      const hasDataSections = sections?.some((section: any) => {
+        const sectionType = section.section_type;
+        const sectionData = profile[sectionType] || profile[sectionType.replace('_', '')];
+        return sectionData && (Array.isArray(sectionData) ? sectionData.length > 0 : true);
+      });
+
+      if (!hasBasicInfo && !hasDataSections) {
+        throw new Error('No content available to export - profile appears to be empty');
+      }
+
+      console.log('PDFExporter - Content validation passed, proceeding with PDF generation');
+
+      // Generate PDF using the new HTML-based approach
       const pdfBlob = await CVToPDFService.exportCV({
         template,
         profile,
@@ -30,13 +44,17 @@ export class PDFExporter extends BaseExporter {
         format: 'a4',
         orientation: template.orientation || 'portrait',
         hidePreviewInfo: true,
-        margin: [10, 10, 10, 10]
+        margin: [15, 15, 15, 15]
       });
       
-      console.log('PDFExporter - PDF generated, size:', pdfBlob.size);
+      console.log('PDFExporter - PDF generated successfully, size:', pdfBlob.size);
       
       if (pdfBlob.size === 0) {
-        throw new Error('Generated PDF is empty');
+        throw new Error('Generated PDF is empty - no content was rendered');
+      }
+      
+      if (pdfBlob.size < 1000) {
+        console.warn('PDFExporter - Warning: PDF size is very small, might indicate rendering issues');
       }
       
       const fileName = this.generateFileName(profile, 'pdf');
