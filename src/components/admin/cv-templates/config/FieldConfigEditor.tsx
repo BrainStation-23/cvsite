@@ -35,18 +35,26 @@ const FieldConfigEditor: React.FC<FieldConfigEditorProps> = ({
   const { saveConfig, deleteConfig } = useFieldDisplayConfig();
   const { toast } = useToast();
   const [editedConfig, setEditedConfig] = useState(config);
-  const [hasChanges, setHasChanges] = useState(false);
+  const [originalConfig, setOriginalConfig] = useState(config);
   const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
+    console.log('Config changed, updating editor state');
     setEditedConfig(config);
-    setHasChanges(false);
+    setOriginalConfig(config);
   }, [config]);
 
+  // Check if there are changes by comparing with original config
+  const hasChanges = JSON.stringify(editedConfig) !== JSON.stringify(originalConfig);
+
+  console.log('Has changes:', hasChanges);
+  console.log('Edited config:', editedConfig);
+  console.log('Original config:', originalConfig);
+
   const handleFieldChange = (field: string, value: any) => {
+    console.log(`Field ${field} changed to:`, value);
     const newConfig = { ...editedConfig, [field]: value };
     setEditedConfig(newConfig);
-    setHasChanges(true);
     onConfigChange(newConfig);
   };
 
@@ -54,7 +62,7 @@ const FieldConfigEditor: React.FC<FieldConfigEditorProps> = ({
     setIsSaving(true);
     const success = await saveConfig(editedConfig);
     if (success) {
-      setHasChanges(false);
+      setOriginalConfig(editedConfig);
       toast({
         title: "Success",
         description: "Field configuration saved successfully"
@@ -64,9 +72,8 @@ const FieldConfigEditor: React.FC<FieldConfigEditorProps> = ({
   };
 
   const handleReset = () => {
-    setEditedConfig(config);
-    setHasChanges(false);
-    onConfigChange(config);
+    setEditedConfig(originalConfig);
+    onConfigChange(originalConfig);
   };
 
   const handleDelete = async () => {
