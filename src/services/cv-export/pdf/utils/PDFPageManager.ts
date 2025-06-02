@@ -1,4 +1,3 @@
-
 import jsPDF from 'jspdf';
 
 export interface PageMetrics {
@@ -15,12 +14,17 @@ export interface PageMetrics {
 }
 
 export interface ContentBlock {
-  type: 'section' | 'item' | 'text' | 'image';
+  type: 'section' | 'image' | 'text' | 'item' | 'page_break';
   content: any;
   estimatedHeight: number;
   minHeight?: number;
   canSplit?: boolean;
-  splitData?: any;
+  splitData?: {
+    sectionType: string;
+    sectionConfig: any;
+    items?: any[];
+    startIndex?: number;
+  };
 }
 
 export class PDFPageManager {
@@ -177,6 +181,8 @@ export class PDFPageManager {
     switch (block.type) {
       case 'section':
         return this.splitSection(block, availableHeight);
+      case 'image':
+        return this.splitImage(block, availableHeight);
       case 'item':
         return this.splitItem(block, availableHeight);
       default:
@@ -244,6 +250,14 @@ export class PDFPageManager {
       firstPart,
       remainingParts: [remainingPart]
     };
+  }
+
+  private splitImage(block: ContentBlock, availableHeight: number): {
+    firstPart?: ContentBlock;
+    remainingParts?: ContentBlock[];
+  } {
+    // For now, images are not splittable - they move to next page entirely
+    return { remainingParts: [block] };
   }
 
   private splitItem(block: ContentBlock, availableHeight: number): {
