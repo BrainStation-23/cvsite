@@ -1,14 +1,10 @@
 
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Switch } from '@/components/ui/switch';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Trash2, Save, RotateCcw } from 'lucide-react';
 import { useFieldDisplayConfig } from '@/hooks/use-field-display-config';
 import { useToast } from '@/hooks/use-toast';
+import FieldConfigForm from './FieldConfigForm';
+import FieldConfigActions from './FieldConfigActions';
 
 interface FieldDisplayConfig {
   id: string;
@@ -88,171 +84,24 @@ const FieldConfigEditor: React.FC<FieldConfigEditorProps> = ({
     }
   };
 
-  const sectionTypes = [
-    'general', 'technical_skills', 'specialized_skills', 
-    'experience', 'education', 'training', 'achievements', 'projects'
-  ];
-
-  const fieldTypes = ['text', 'number', 'date', 'boolean', 'array', 'image', 'richtext'];
-
   return (
     <Card className="h-full">
       <CardHeader>
-        <div className="flex items-center justify-between">
-          <CardTitle className="text-lg">Configure Field</CardTitle>
-          <div className="flex gap-2">
-            {hasChanges && (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleReset}
-              >
-                <RotateCcw className="h-4 w-4 mr-2" />
-                Reset
-              </Button>
-            )}
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleDelete}
-              className="text-red-600 hover:text-red-700"
-            >
-              <Trash2 className="h-4 w-4" />
-            </Button>
-          </div>
-        </div>
+        <CardTitle className="text-lg">Configure Field</CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <Label htmlFor="field_name">Field Name</Label>
-            <Input
-              id="field_name"
-              value={editedConfig.field_name}
-              onChange={(e) => handleFieldChange('field_name', e.target.value)}
-              placeholder="Enter field name"
-            />
-          </div>
-          <div>
-            <Label htmlFor="display_label">Display Label</Label>
-            <Input
-              id="display_label"
-              value={editedConfig.display_label}
-              onChange={(e) => handleFieldChange('display_label', e.target.value)}
-              placeholder="Enter display label"
-            />
-          </div>
-        </div>
-
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <Label htmlFor="section_type">Section Type</Label>
-            <Select 
-              value={editedConfig.section_type} 
-              onValueChange={(value) => handleFieldChange('section_type', value)}
-            >
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {sectionTypes.map(type => (
-                  <SelectItem key={type} value={type}>
-                    {type.replace('_', ' ')}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          <div>
-            <Label htmlFor="field_type">Field Type</Label>
-            <Select 
-              value={editedConfig.field_type} 
-              onValueChange={(value) => handleFieldChange('field_type', value)}
-            >
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {fieldTypes.map(type => (
-                  <SelectItem key={type} value={type}>
-                    {type}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <Label htmlFor="default_order">Display Order</Label>
-            <Input
-              id="default_order"
-              type="number"
-              value={editedConfig.default_order}
-              onChange={(e) => handleFieldChange('default_order', parseInt(e.target.value))}
-              min={1}
-            />
-          </div>
-          <div>
-            <Label htmlFor="default_mask_value">Default Mask Value</Label>
-            <Input
-              id="default_mask_value"
-              value={editedConfig.default_mask_value || ''}
-              onChange={(e) => handleFieldChange('default_mask_value', e.target.value)}
-              placeholder="e.g., ***-****"
-            />
-          </div>
-        </div>
-
-        <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <Label htmlFor="default_enabled">Default Enabled</Label>
-              <p className="text-sm text-gray-500">Show this field by default in new templates</p>
-            </div>
-            <Switch
-              id="default_enabled"
-              checked={editedConfig.default_enabled}
-              onCheckedChange={(checked) => handleFieldChange('default_enabled', checked)}
-            />
-          </div>
-
-          <div className="flex items-center justify-between">
-            <div>
-              <Label htmlFor="default_masked">Default Masked</Label>
-              <p className="text-sm text-gray-500">Mask this field by default in new templates</p>
-            </div>
-            <Switch
-              id="default_masked"
-              checked={editedConfig.default_masked}
-              onCheckedChange={(checked) => handleFieldChange('default_masked', checked)}
-            />
-          </div>
-
-          <div className="flex items-center justify-between">
-            <div>
-              <Label htmlFor="is_system_field">System Field</Label>
-              <p className="text-sm text-gray-500">Mark as a core system field</p>
-            </div>
-            <Switch
-              id="is_system_field"
-              checked={editedConfig.is_system_field}
-              onCheckedChange={(checked) => handleFieldChange('is_system_field', checked)}
-            />
-          </div>
-        </div>
-
-        <div className="pt-4 border-t">
-          <Button 
-            onClick={handleSave} 
-            disabled={!hasChanges || isSaving}
-            className="w-full"
-          >
-            <Save className="h-4 w-4 mr-2" />
-            {isSaving ? 'Saving...' : 'Save Changes'}
-          </Button>
-        </div>
+        <FieldConfigForm 
+          config={editedConfig}
+          onFieldChange={handleFieldChange}
+        />
+        
+        <FieldConfigActions
+          hasChanges={hasChanges}
+          isSaving={isSaving}
+          onSave={handleSave}
+          onReset={handleReset}
+          onDelete={handleDelete}
+        />
       </CardContent>
     </Card>
   );
