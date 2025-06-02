@@ -185,8 +185,8 @@ export class HTMLSectionsGenerator {
     const projects = profile?.projects || [];
     if (projects.length === 0) return '';
 
-    // Get the maximum number of projects from section configuration
-    const maxProjects = section?.styling_config?.items_per_column || projects.length;
+    // Get the maximum number of projects from section configuration - use new property name
+    const maxProjects = section?.styling_config?.projects_to_view || section?.styling_config?.items_per_column || projects.length;
     
     // Sort projects by display_order, then by start_date as fallback
     const sortedProjects = [...projects].sort((a, b) => {

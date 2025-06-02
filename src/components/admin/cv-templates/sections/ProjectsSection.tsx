@@ -29,7 +29,7 @@ interface ProjectsSectionProps {
   sectionConfig?: {
     styling_config?: {
       display_style?: string;
-      items_per_column?: number;
+      projects_to_view?: number;
       fields?: FieldConfig[];
     };
   };
@@ -75,7 +75,7 @@ export const ProjectsSection: React.FC<ProjectsSectionProps> = ({
   });
 
   // Get the maximum number of projects to show from section config
-  const maxProjects = sectionConfig?.styling_config?.items_per_column || sortedProjects.length;
+  const maxProjects = sectionConfig?.styling_config?.projects_to_view || sortedProjects.length;
   const projectsToShow = sortedProjects.slice(0, maxProjects);
 
   console.log(`=== PROJECTS SECTION CONFIG DEBUG ===`);

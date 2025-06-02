@@ -28,7 +28,7 @@ const SectionControls: React.FC<SectionControlsProps> = ({
 }) => {
   // Don't show items per column for general section as it doesn't make sense
   const showItemsPerColumn = sectionType !== 'general' && sectionType !== 'projects' && onItemsPerColumnChange;
-  const showProjectsCount = sectionType === 'projects' && onItemsPerColumnChange;
+  const showProjectsToView = sectionType === 'projects' && onItemsPerColumnChange;
 
   return (
     <div className="grid grid-cols-1 gap-2">
@@ -62,9 +62,9 @@ const SectionControls: React.FC<SectionControlsProps> = ({
         </div>
       )}
 
-      {showProjectsCount && (
+      {showProjectsToView && (
         <div>
-          <Label className="text-xs">Number of Projects</Label>
+          <Label className="text-xs">Projects to View</Label>
           <Input 
             type="number" 
             value={itemsPerColumn || 3}

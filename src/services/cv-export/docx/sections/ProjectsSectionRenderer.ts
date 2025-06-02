@@ -11,12 +11,28 @@ export class ProjectsSectionRenderer extends BaseSectionRenderer {
     this.richTextProcessor = new RichTextProcessor();
   }
 
-  render(projects: any[], styles: any): (Paragraph | Table)[] {
+  render(projects: any[], styles: any, sectionConfig?: any): (Paragraph | Table)[] {
     const elements: (Paragraph | Table)[] = [];
     const baseStyles = styles?.baseStyles || {};
     
     try {
-      projects.forEach((project) => {
+      // Apply projects limit from section configuration
+      const maxProjects = sectionConfig?.styling_config?.projects_to_view || sectionConfig?.styling_config?.items_per_column || projects.length;
+      
+      // Sort projects by display_order, then by start_date as fallback
+      const sortedProjects = [...projects].sort((a, b) => {
+        if (a.display_order !== undefined && b.display_order !== undefined) {
+          return a.display_order - b.display_order;
+        }
+        return new Date(b.start_date).getTime() - new Date(a.start_date).getTime();
+      });
+
+      // Limit the number of projects to show
+      const projectsToShow = sortedProjects.slice(0, maxProjects);
+      
+      console.log(`DOCX Projects section - Total: ${projects.length}, Max to show: ${maxProjects}, Showing: ${projectsToShow.length}`);
+
+      projectsToShow.forEach((project) => {
         // Check field visibility and apply masking
         const showName = this.isFieldVisible('name', 'projects');
         const showRole = this.isFieldVisible('role', 'projects');
