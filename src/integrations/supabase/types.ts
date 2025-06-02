@@ -931,7 +931,7 @@ export type Database = {
         Returns: boolean
       }
       has_role: {
-        Args: { _role: string }
+        Args: { _role: string } | { _user_id: string; _role: string }
         Returns: boolean
       }
       is_admin: {
