@@ -6,10 +6,12 @@ export class HTMLExporter extends BaseExporter {
     const { template, profile, sections, fieldMappings, styles } = options;
     
     try {
+      console.log('=== HTML EXPORT DEBUG START ===');
       console.log('HTML Export - Template:', template.name);
       console.log('HTML Export - Profile:', profile?.first_name, profile?.last_name);
       console.log('HTML Export - Sections:', sections?.length || 0);
       console.log('HTML Export - Field mappings:', fieldMappings?.length || 0);
+      console.log('HTML Export - Field mappings data:', fieldMappings);
       
       if (!profile) {
         throw new Error('Profile data is required for HTML export');
@@ -25,6 +27,8 @@ export class HTMLExporter extends BaseExporter {
       const fileName = this.generateFileName(profile, 'html');
       
       this.downloadFile(blob, fileName);
+      
+      console.log('=== HTML EXPORT DEBUG END ===');
       
       return {
         success: true,
@@ -322,33 +326,51 @@ export class HTMLExporter extends BaseExporter {
   }
 
   private generateHeaderHTML(profile: any, layoutConfig: any, fieldMappings: any[]): string {
-    const fullName = this.applyFieldMasking(`${profile?.first_name || ''} ${profile?.last_name || ''}`.trim(), 'full_name', fieldMappings);
-    const email = this.applyFieldMasking(profile?.email, 'email', fieldMappings);
-    const phone = this.applyFieldMasking(profile?.phone, 'phone', fieldMappings);
-    const location = this.applyFieldMasking(profile?.location, 'location', fieldMappings);
-    const currentPosition = this.applyFieldMasking(profile?.current_position, 'current_position', fieldMappings);
-    const biography = this.applyFieldMasking(profile?.biography, 'biography', fieldMappings);
+    console.log('=== HEADER GENERATION DEBUG ===');
+    
+    // Process header fields with debugging
+    const fullName = this.processFieldWithDebug(
+      `${profile?.first_name || ''} ${profile?.last_name || ''}`.trim(), 
+      'full_name', 
+      'general', 
+      fieldMappings
+    );
+    
+    const email = this.processFieldWithDebug(profile?.email, 'email', 'general', fieldMappings);
+    const phone = this.processFieldWithDebug(profile?.phone, 'phone', 'general', fieldMappings);
+    const location = this.processFieldWithDebug(profile?.location, 'location', 'general', fieldMappings);
+    const currentPosition = this.processFieldWithDebug(profile?.current_position, 'current_position', 'general', fieldMappings);
+    const biography = this.processFieldWithDebug(profile?.biography, 'biography', 'general', fieldMappings);
+    const profileImage = this.processFieldWithDebug(profile?.profile_image, 'profile_image', 'general', fieldMappings);
+    
+    console.log('Header processed fields:', {
+      fullName, email, phone, location, currentPosition, biography, profileImage
+    });
     
     const contactInfo = [];
-    if (email) contactInfo.push(`<span>📧 ${email}</span>`);
-    if (phone) contactInfo.push(`<span>📞 ${phone}</span>`);
-    if (location) contactInfo.push(`<span>📍 ${location}</span>`);
+    if (email !== null) contactInfo.push(`<span>📧 ${email}</span>`);
+    if (phone !== null) contactInfo.push(`<span>📞 ${phone}</span>`);
+    if (location !== null) contactInfo.push(`<span>📍 ${location}</span>`);
     
     return `
         <div class="header">
             <div class="header-content">
-                <div class="name">${fullName || 'Your Name'}</div>
-                ${currentPosition ? `<div class="title">${currentPosition}</div>` : ''}
+                ${fullName !== null ? `<div class="name">${fullName || 'Your Name'}</div>` : ''}
+                ${currentPosition !== null ? `<div class="title">${currentPosition}</div>` : ''}
                 ${contactInfo.length > 0 ? `<div class="contact-info">${contactInfo.join('')}</div>` : ''}
-                ${biography ? `<div class="biography">${this.processRichText(biography)}</div>` : ''}
+                ${biography !== null ? `<div class="biography">${this.processRichText(biography)}</div>` : ''}
             </div>
-            ${profile?.profile_image_url ? `<img src="${profile.profile_image_url}" alt="Profile" class="profile-image" />` : ''}
+            ${profileImage !== null && profileImage ? `<img src="${profileImage}" alt="Profile" class="profile-image" />` : ''}
         </div>
     `;
   }
 
   private generateSectionsHTML(sections: any[], profile: any, fieldMappings: any[]): string {
+    console.log('=== SECTIONS GENERATION DEBUG ===');
+    
     return sections.map(section => {
+      console.log(`Processing section: ${section.section_type}`);
+      
       switch (section.section_type) {
         case 'experience':
           return this.generateExperienceSection(profile, fieldMappings);
@@ -365,75 +387,99 @@ export class HTMLExporter extends BaseExporter {
         case 'trainings':
           return this.generateTrainingsSection(profile, fieldMappings);
         default:
+          console.log(`Unknown section type: ${section.section_type}`);
           return '';
       }
     }).join('');
   }
 
   private generateExperienceSection(profile: any, fieldMappings: any[]): string {
+    console.log('=== EXPERIENCE SECTION DEBUG ===');
+    
     const experiences = profile?.experiences || [];
     if (experiences.length === 0) return '';
 
     const experienceItems = experiences.map((exp: any) => {
-      // Use correct field names for experience data
-      const position = this.applyFieldMasking(exp.designation, 'designation', fieldMappings);
-      const company = this.applyFieldMasking(exp.company_name, 'company_name', fieldMappings);
-      const description = this.applyFieldMasking(exp.description, 'description', fieldMappings);
+      console.log('Processing experience:', exp);
+      
+      const designation = this.processFieldWithDebug(exp.designation, 'designation', 'experience', fieldMappings);
+      const companyName = this.processFieldWithDebug(exp.company_name, 'company_name', 'experience', fieldMappings);
+      const description = this.processFieldWithDebug(exp.description, 'description', 'experience', fieldMappings);
+      
       const dateRange = this.formatDateRange(exp.start_date, exp.end_date, exp.is_current);
+      
+      console.log('Experience processed fields:', {
+        designation, companyName, description, dateRange
+      });
+      
+      // Only render if both designation and company are visible
+      if (designation === null && companyName === null) {
+        console.log('Skipping experience item - both designation and company are hidden');
+        return '';
+      }
       
       return `
         <div class="item">
           <div class="item-header">
             <div>
-              <div class="item-title">${position || 'Position'}</div>
-              <div class="item-subtitle">${company || 'Company'}</div>
+              ${designation !== null ? `<div class="item-title">${designation || 'Position'}</div>` : ''}
+              ${companyName !== null ? `<div class="item-subtitle">${companyName || 'Company'}</div>` : ''}
             </div>
             <div class="item-date">${dateRange}</div>
           </div>
-          ${description ? `<div class="item-description">${this.processRichText(description)}</div>` : ''}
+          ${description !== null ? `<div class="item-description">${this.processRichText(description)}</div>` : ''}
         </div>
       `;
     }).join('');
 
-    return `
+    return experienceItems ? `
       <div class="section">
         <div class="section-title">Work Experience</div>
         <div class="section-content">
           ${experienceItems}
         </div>
       </div>
-    `;
+    ` : '';
   }
 
   private generateEducationSection(profile: any, fieldMappings: any[]): string {
+    console.log('=== EDUCATION SECTION DEBUG ===');
+    
     const education = profile?.education || [];
     if (education.length === 0) return '';
 
     const educationItems = education.map((edu: any) => {
-      const degree = this.applyFieldMasking(edu.degree, 'degree', fieldMappings);
-      const institution = this.applyFieldMasking(edu.institution, 'institution', fieldMappings);
-      const university = this.applyFieldMasking(edu.university, 'university', fieldMappings);
-      const department = this.applyFieldMasking(edu.department, 'department', fieldMappings);
-      const gpa = this.applyFieldMasking(edu.gpa, 'gpa', fieldMappings);
-      const description = this.applyFieldMasking(edu.description, 'description', fieldMappings);
+      console.log('Processing education:', edu);
+      
+      const degree = this.processFieldWithDebug(edu.degree, 'degree', 'education', fieldMappings);
+      const institution = this.processFieldWithDebug(edu.institution, 'institution', 'education', fieldMappings);
+      const university = this.processFieldWithDebug(edu.university, 'university', 'education', fieldMappings);
+      const department = this.processFieldWithDebug(edu.department, 'department', 'education', fieldMappings);
+      const gpa = this.processFieldWithDebug(edu.gpa, 'gpa', 'education', fieldMappings);
+      const description = this.processFieldWithDebug(edu.description, 'description', 'education', fieldMappings);
+      
       const dateRange = this.formatDateRange(edu.start_date, edu.end_date, edu.is_current);
       
       // Use institution name or university name
       const schoolName = institution || university || 'Institution';
       
+      console.log('Education processed fields:', {
+        degree, institution, university, department, gpa, description, schoolName, dateRange
+      });
+      
       return `
         <div class="item">
           <div class="item-header">
             <div>
-              <div class="item-title">${degree || 'Degree'}</div>
-              <div class="item-subtitle">${schoolName}</div>
-              ${department ? `<div class="item-subtitle" style="font-size: 0.9em; margin-top: 2pt;">${department}</div>` : ''}
+              ${degree !== null ? `<div class="item-title">${degree || 'Degree'}</div>` : ''}
+              ${(institution !== null || university !== null) ? `<div class="item-subtitle">${schoolName}</div>` : ''}
+              ${department !== null ? `<div class="item-subtitle" style="font-size: 0.9em; margin-top: 2pt;">${department}</div>` : ''}
             </div>
             <div class="item-date">${dateRange}</div>
           </div>
           <div class="education-details">
-            ${gpa ? `<div class="gpa-info">GPA: ${gpa}</div>` : ''}
-            ${description ? `<div class="item-description">${this.processRichText(description)}</div>` : ''}
+            ${gpa !== null ? `<div class="gpa-info">GPA: ${gpa}</div>` : ''}
+            ${description !== null ? `<div class="item-description">${this.processRichText(description)}</div>` : ''}
           </div>
         </div>
       `;
@@ -450,15 +496,17 @@ export class HTMLExporter extends BaseExporter {
   }
 
   private generateTechnicalSkillsSection(profile: any, fieldMappings: any[]): string {
+    console.log('=== TECHNICAL SKILLS SECTION DEBUG ===');
+    
     const skills = profile?.technical_skills || [];
     if (skills.length === 0) return '';
 
     const skillTags = skills.map((skill: any) => {
-      const skillName = this.applyFieldMasking(skill.name, 'name', fieldMappings);
-      return `<span class="skill-tag">${skillName}</span>`;
-    }).join('');
+      const skillName = this.processFieldWithDebug(skill.name, 'name', 'technical_skills', fieldMappings);
+      return skillName !== null ? `<span class="skill-tag">${skillName}</span>` : '';
+    }).filter(Boolean).join('');
 
-    return `
+    return skillTags ? `
       <div class="section">
         <div class="section-title">Technical Skills</div>
         <div class="section-content">
@@ -467,19 +515,21 @@ export class HTMLExporter extends BaseExporter {
           </div>
         </div>
       </div>
-    `;
+    ` : '';
   }
 
   private generateSpecializedSkillsSection(profile: any, fieldMappings: any[]): string {
+    console.log('=== SPECIALIZED SKILLS SECTION DEBUG ===');
+    
     const skills = profile?.specialized_skills || [];
     if (skills.length === 0) return '';
 
     const skillTags = skills.map((skill: any) => {
-      const skillName = this.applyFieldMasking(skill.name, 'name', fieldMappings);
-      return `<span class="skill-tag">${skillName}</span>`;
-    }).join('');
+      const skillName = this.processFieldWithDebug(skill.name, 'name', 'specialized_skills', fieldMappings);
+      return skillName !== null ? `<span class="skill-tag">${skillName}</span>` : '';
+    }).filter(Boolean).join('');
 
-    return `
+    return skillTags ? `
       <div class="section">
         <div class="section-title">Specialized Skills</div>
         <div class="section-content">
@@ -488,34 +538,43 @@ export class HTMLExporter extends BaseExporter {
           </div>
         </div>
       </div>
-    `;
+    ` : '';
   }
 
   private generateProjectsSection(profile: any, fieldMappings: any[]): string {
+    console.log('=== PROJECTS SECTION DEBUG ===');
+    
     const projects = profile?.projects || [];
     if (projects.length === 0) return '';
 
     const projectItems = projects.map((project: any) => {
-      const name = this.applyFieldMasking(project.name, 'name', fieldMappings);
-      const role = this.applyFieldMasking(project.role, 'role', fieldMappings);
-      const description = this.applyFieldMasking(project.description, 'description', fieldMappings);
-      const url = this.applyFieldMasking(project.url, 'url', fieldMappings);
+      console.log('Processing project:', project);
+      
+      const name = this.processFieldWithDebug(project.name, 'name', 'projects', fieldMappings);
+      const role = this.processFieldWithDebug(project.role, 'role', 'projects', fieldMappings);
+      const description = this.processFieldWithDebug(project.description, 'description', 'projects', fieldMappings);
+      const url = this.processFieldWithDebug(project.url, 'url', 'projects', fieldMappings);
+      
       const dateRange = this.formatDateRange(project.start_date, project.end_date, project.is_current);
       const techTags = project.technologies_used?.map((tech: string) => 
         `<span class="tech-tag">${tech}</span>`
       ).join('') || '';
 
+      console.log('Project processed fields:', {
+        name, role, description, url, dateRange, techTags
+      });
+
       return `
         <div class="item">
           <div class="item-header">
             <div>
-              <div class="item-title">${name || 'Project Name'}</div>
-              ${role ? `<div class="item-subtitle">${role}</div>` : ''}
+              ${name !== null ? `<div class="item-title">${name || 'Project Name'}</div>` : ''}
+              ${role !== null ? `<div class="item-subtitle">${role}</div>` : ''}
             </div>
             <div class="item-date">${dateRange}</div>
           </div>
-          ${description ? `<div class="item-description">${this.processRichText(description)}</div>` : ''}
-          ${url ? `<div class="project-url"><strong>Project URL:</strong> <a href="${url}" target="_blank" class="project-url">${url}</a></div>` : ''}
+          ${description !== null ? `<div class="item-description">${this.processRichText(description)}</div>` : ''}
+          ${url !== null ? `<div class="project-url"><strong>Project URL:</strong> <a href="${url}" target="_blank" class="project-url">${url}</a></div>` : ''}
           ${techTags ? `
             <div class="technologies">
               <div class="technologies-label">Technologies:</div>
@@ -537,12 +596,14 @@ export class HTMLExporter extends BaseExporter {
   }
 
   private generateAchievementsSection(profile: any, fieldMappings: any[]): string {
+    console.log('=== ACHIEVEMENTS SECTION DEBUG ===');
+    
     const achievements = profile?.achievements || [];
     if (achievements.length === 0) return '';
 
     const achievementItems = achievements.map((achievement: any) => {
-      const title = this.applyFieldMasking(achievement.title, 'title', fieldMappings);
-      const description = this.applyFieldMasking(achievement.description, 'description', fieldMappings);
+      const title = this.processFieldWithDebug(achievement.title, 'title', 'achievements', fieldMappings);
+      const description = this.processFieldWithDebug(achievement.description, 'description', 'achievements', fieldMappings);
       const date = achievement.date ? new Date(achievement.date).toLocaleDateString('en-US', { 
         month: 'short', 
         year: 'numeric' 
@@ -551,10 +612,10 @@ export class HTMLExporter extends BaseExporter {
       return `
         <div class="item">
           <div class="item-header">
-            <div class="item-title">${title || 'Achievement'}</div>
+            ${title !== null ? `<div class="item-title">${title || 'Achievement'}</div>` : ''}
             ${date ? `<div class="item-date">${date}</div>` : ''}
           </div>
-          ${description ? `<div class="item-description">${this.processRichText(description)}</div>` : ''}
+          ${description !== null ? `<div class="item-description">${this.processRichText(description)}</div>` : ''}
         </div>
       `;
     }).join('');
@@ -570,25 +631,27 @@ export class HTMLExporter extends BaseExporter {
   }
 
   private generateTrainingsSection(profile: any, fieldMappings: any[]): string {
+    console.log('=== TRAININGS SECTION DEBUG ===');
+    
     const trainings = profile?.trainings || [];
     if (trainings.length === 0) return '';
 
     const trainingItems = trainings.map((training: any) => {
-      const title = this.applyFieldMasking(training.title, 'title', fieldMappings);
-      const provider = this.applyFieldMasking(training.provider, 'provider', fieldMappings);
-      const description = this.applyFieldMasking(training.description, 'description', fieldMappings);
+      const title = this.processFieldWithDebug(training.title, 'title', 'trainings', fieldMappings);
+      const provider = this.processFieldWithDebug(training.provider, 'provider', 'trainings', fieldMappings);
+      const description = this.processFieldWithDebug(training.description, 'description', 'trainings', fieldMappings);
       const dateRange = this.formatDateRange(training.start_date, training.end_date, training.is_current);
 
       return `
         <div class="item">
           <div class="item-header">
             <div>
-              <div class="item-title">${title || 'Training'}</div>
-              ${provider ? `<div class="item-subtitle">${provider}</div>` : ''}
+              ${title !== null ? `<div class="item-title">${title || 'Training'}</div>` : ''}
+              ${provider !== null ? `<div class="item-subtitle">${provider}</div>` : ''}
             </div>
             <div class="item-date">${dateRange}</div>
           </div>
-          ${description ? `<div class="item-description">${this.processRichText(description)}</div>` : ''}
+          ${description !== null ? `<div class="item-description">${this.processRichText(description)}</div>` : ''}
         </div>
       `;
     }).join('');
@@ -603,43 +666,67 @@ export class HTMLExporter extends BaseExporter {
     `;
   }
 
-  private applyFieldMasking(value: any, fieldName: string, fieldMappings: any[]): any {
-    if (!value || !fieldMappings || fieldMappings.length === 0) return value;
+  private processFieldWithDebug(value: any, fieldName: string, sectionType: string, fieldMappings: any[]): any {
+    console.log(`\n--- Processing field: ${fieldName} in section: ${sectionType} ---`);
+    console.log(`Original value:`, value);
+    
+    if (!fieldMappings || fieldMappings.length === 0) {
+      console.log('No field mappings found - showing field by default');
+      return value;
+    }
     
     const mapping = fieldMappings.find(m => 
       m.original_field_name === fieldName && 
-      m.visibility_rules?.enabled !== false
+      m.section_type === sectionType
     );
     
+    console.log(`Found mapping:`, mapping);
+    
     if (!mapping) {
-      // If no mapping found, check if the field is disabled
-      const disabledMapping = fieldMappings.find(m => 
-        m.original_field_name === fieldName && 
-        m.visibility_rules?.enabled === false
-      );
+      console.log('No mapping found for this field - checking if field is globally disabled');
       
-      // If field is explicitly disabled, return null to hide it
-      if (disabledMapping) return null;
+      // Check if any field mapping exists for this section
+      const sectionHasMappings = fieldMappings.some(m => m.section_type === sectionType);
       
-      // Otherwise return the original value
-      return value;
+      if (sectionHasMappings) {
+        console.log('Section has mappings but this field is not included - field is DISABLED');
+        return null; // Field is disabled
+      } else {
+        console.log('Section has no mappings - showing field by default');
+        return value;
+      }
+    }
+    
+    // Check visibility rules first
+    const visibilityRules = mapping.visibility_rules || {};
+    console.log(`Visibility rules:`, visibilityRules);
+    
+    if (visibilityRules.enabled === false) {
+      console.log('Field is explicitly DISABLED by visibility rules');
+      return null;
     }
     
     // Apply masking if configured
     if (mapping.is_masked && value !== null && value !== undefined) {
+      console.log('Field is MASKED');
+      
       if (mapping.mask_value) {
+        console.log(`Using custom mask value: ${mapping.mask_value}`);
         return mapping.mask_value;
+      } else {
+        // Default masking behavior
+        if (typeof value === 'string') {
+          const maskedValue = value.length <= 3 ? '***' : value.substring(0, 3) + '***';
+          console.log(`Using default masking: ${maskedValue}`);
+          return maskedValue;
+        }
+        
+        console.log('Using default mask: ***');
+        return '***';
       }
-      
-      // Default masking behavior
-      if (typeof value === 'string') {
-        if (value.length <= 3) return '***';
-        return value.substring(0, 3) + '***';
-      }
-      
-      return '***';
     }
     
+    console.log('Field is VISIBLE and NOT MASKED');
     return value;
   }
 
