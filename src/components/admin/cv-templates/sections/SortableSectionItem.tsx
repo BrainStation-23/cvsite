@@ -38,6 +38,7 @@ interface SectionConfig {
   styling_config: {
     display_style?: string;
     items_per_column?: number;
+    projects_to_view?: number;
     fields?: FieldConfig[];
   };
 }
@@ -80,7 +81,8 @@ const SortableSectionItem: React.FC<SortableSectionItemProps> = ({
     opacity: isDragging ? 0.5 : 1,
   };
 
-  const showItemsPerColumn = section.section_type !== 'general';
+  const showItemsPerColumn = section.section_type !== 'general' && section.section_type !== 'projects';
+  const showProjectsToView = section.section_type === 'projects';
 
   return (
     <div ref={setNodeRef} style={style}>
@@ -147,6 +149,7 @@ const SortableSectionItem: React.FC<SortableSectionItemProps> = ({
                       </SelectContent>
                     </Select>
                   </div>
+                  
                   {showItemsPerColumn && (
                     <div>
                       <Label className="text-xs">Items per Column</Label>
@@ -157,6 +160,21 @@ const SortableSectionItem: React.FC<SortableSectionItemProps> = ({
                         min={1} 
                         max={3} 
                         className="h-7 text-xs" 
+                      />
+                    </div>
+                  )}
+
+                  {showProjectsToView && (
+                    <div>
+                      <Label className="text-xs">No of Projects</Label>
+                      <Input 
+                        type="number" 
+                        value={section.styling_config.projects_to_view || 3}
+                        onChange={(e) => onUpdateSectionStyling(section.id, { projects_to_view: parseInt(e.target.value) })}
+                        min={1} 
+                        max={10} 
+                        className="h-7 text-xs" 
+                        placeholder="Max projects to show"
                       />
                     </div>
                   )}

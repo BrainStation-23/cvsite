@@ -82,6 +82,7 @@ export const ProjectsSection: React.FC<ProjectsSectionProps> = ({
   console.log(`Total projects: ${sortedProjects.length}`);
   console.log(`Max projects to show: ${maxProjects}`);
   console.log(`Projects to display: ${projectsToShow.length}`);
+  console.log(`Section config:`, sectionConfig?.styling_config);
 
   return (
     <div style={styles.sectionStyles}>
