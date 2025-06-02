@@ -4,12 +4,24 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
 
+interface FieldConfig {
+  field: string;
+  label: string;
+  enabled: boolean;
+  masked: boolean;
+  mask_value?: string;
+  order: number;
+}
+
 interface SectionFieldConfigProps {
-  displayStyle: string;
+  displayStyle?: string;
   itemsPerColumn?: number;
-  onDisplayStyleChange: (value: string) => void;
+  onDisplayStyleChange?: (value: string) => void;
   onItemsPerColumnChange?: (value: number) => void;
   sectionType?: string;
+  fields?: FieldConfig[];
+  onUpdateField?: (fieldIndex: number, fieldUpdates: Partial<FieldConfig>) => void;
+  onReorderFields?: (reorderedFields: FieldConfig[]) => void;
 }
 
 const DISPLAY_STYLES = [
@@ -24,7 +36,10 @@ const SectionFieldConfig: React.FC<SectionFieldConfigProps> = ({
   itemsPerColumn,
   onDisplayStyleChange,
   onItemsPerColumnChange,
-  sectionType
+  sectionType,
+  fields,
+  onUpdateField,
+  onReorderFields
 }) => {
   // Don't show items per column for general section as it doesn't make sense
   const showItemsPerColumn = sectionType !== 'general' && sectionType !== 'projects' && onItemsPerColumnChange;
@@ -32,21 +47,23 @@ const SectionFieldConfig: React.FC<SectionFieldConfigProps> = ({
 
   return (
     <div className="grid grid-cols-1 gap-2">
-      <div>
-        <Label className="text-xs">Display Style</Label>
-        <Select value={displayStyle} onValueChange={onDisplayStyleChange}>
-          <SelectTrigger className="h-7 text-xs">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            {DISPLAY_STYLES.map(style => (
-              <SelectItem key={style.value} value={style.value}>
-                {style.label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
+      {displayStyle !== undefined && onDisplayStyleChange && (
+        <div>
+          <Label className="text-xs">Display Style</Label>
+          <Select value={displayStyle} onValueChange={onDisplayStyleChange}>
+            <SelectTrigger className="h-7 text-xs">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {DISPLAY_STYLES.map(style => (
+                <SelectItem key={style.value} value={style.value}>
+                  {style.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      )}
       
       {showItemsPerColumn && (
         <div>
@@ -74,6 +91,16 @@ const SectionFieldConfig: React.FC<SectionFieldConfigProps> = ({
             className="h-7 text-xs" 
             placeholder="Max projects to show"
           />
+        </div>
+      )}
+
+      {/* Field configuration section - placeholder for future field management */}
+      {fields && onUpdateField && onReorderFields && (
+        <div className="mt-2 pt-2 border-t">
+          <Label className="text-xs text-gray-500">Field Configuration</Label>
+          <div className="text-xs text-gray-400 mt-1">
+            {fields.length} fields configured
+          </div>
         </div>
       )}
     </div>
