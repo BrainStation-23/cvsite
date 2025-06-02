@@ -24,6 +24,7 @@ export interface ContentBlock {
     sectionConfig: any;
     items?: any[];
     startIndex?: number;
+    isContinuation?: boolean;
   };
 }
 
