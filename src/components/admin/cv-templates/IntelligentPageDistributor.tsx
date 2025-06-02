@@ -77,6 +77,22 @@ export const IntelligentPageDistributor: React.FC<IntelligentPageDistributorProp
     let currentPageHeight = 0;
 
     for (const section of sortedSections) {
+      // Handle page break sections - force a new page
+      if (section.section_type === 'page_break') {
+        // If current page has content, finish it and start a new page
+        if (currentPage.sections.length > 0 || Object.keys(currentPage.partialSections).length > 0) {
+          pages.push(currentPage);
+          currentPage = {
+            pageNumber: pages.length + 1,
+            sections: [],
+            partialSections: {}
+          };
+          currentPageHeight = 0;
+        }
+        // Page break sections don't add content, they just force a page break
+        continue;
+      }
+
       const sectionData = getSectionData(profile, section.section_type);
       const sectionTitle = getSectionTitle(section, fieldMappings);
       

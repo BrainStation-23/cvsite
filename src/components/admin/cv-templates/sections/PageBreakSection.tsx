@@ -6,32 +6,8 @@ interface PageBreakSectionProps {
 }
 
 export const PageBreakSection: React.FC<PageBreakSectionProps> = () => {
-  return (
-    <div 
-      style={{
-        pageBreakBefore: 'always',
-        height: '0',
-        width: '100%',
-        borderTop: '2px dashed #ccc',
-        margin: '20px 0',
-        position: 'relative',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center'
-      }}
-    >
-      <span 
-        style={{
-          backgroundColor: '#fff',
-          padding: '4px 8px',
-          fontSize: '10px',
-          color: '#666',
-          border: '1px solid #ccc',
-          borderRadius: '4px'
-        }}
-      >
-        Page Break
-      </span>
-    </div>
-  );
+  // Page breaks are now handled by the IntelligentPageDistributor
+  // This component should not render anything in the CV preview
+  // as the page break logic is handled at the distributor level
+  return null;
 };
