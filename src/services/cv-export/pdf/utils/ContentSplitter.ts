@@ -1,3 +1,4 @@
+
 import { ContentBlock } from './PDFPageManager';
 
 export class ContentSplitter {
@@ -5,13 +6,14 @@ export class ContentSplitter {
     const blocks: ContentBlock[] = [];
     
     for (const section of sections) {
-      // Handle page break sections
+      // Handle page break sections - they force a page break but have no content
       if (section.section_type === 'page_break') {
         blocks.push({
-          type: 'section',
+          type: 'page_break',
           content: null,
           estimatedHeight: 0,
           minHeight: 0,
+          canSplit: false,
           splitData: {
             sectionType: 'page_break',
             sectionConfig: section

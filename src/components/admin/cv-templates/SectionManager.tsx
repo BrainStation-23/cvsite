@@ -107,6 +107,11 @@ const SectionManager: React.FC<SectionManagerProps> = ({ templateId, onSectionsC
   };
 
   const getDefaultFields = async (sectionType: CVSectionType): Promise<FieldConfig[]> => {
+    // Page break sections don't have fields
+    if (sectionType === 'page_break') {
+      return [];
+    }
+
     try {
       const { data, error } = await supabase.rpc('get_section_fields', {
         section_type_param: sectionType
@@ -138,7 +143,7 @@ const SectionManager: React.FC<SectionManagerProps> = ({ templateId, onSectionsC
         display_order: sections.length + 1,
         is_required: false,
         field_mapping: {},
-        styling_config: {
+        styling_config: sectionType === 'page_break' ? {} : {
           display_style: 'default',
           projects_to_view: sectionType === 'projects' ? 3 : undefined,
           fields: defaultFields
@@ -160,7 +165,7 @@ const SectionManager: React.FC<SectionManagerProps> = ({ templateId, onSectionsC
         ...data,
         section_type: data.section_type as CVSectionType,
         field_mapping: data.field_mapping as Record<string, any> || {},
-        styling_config: { 
+        styling_config: sectionType === 'page_break' ? {} : { 
           display_style: 'default', 
           projects_to_view: sectionType === 'projects' ? 3 : undefined,
           fields: defaultFields 
@@ -232,8 +237,8 @@ const SectionManager: React.FC<SectionManagerProps> = ({ templateId, onSectionsC
           section.id === id ? newSection : section
         ));
 
-        // Sync field mappings when styling config is updated
-        if (updates.styling_config?.fields) {
+        // Sync field mappings when styling config is updated (but not for page breaks)
+        if (updates.styling_config?.fields && updatedSection.section_type !== 'page_break') {
           await syncFieldMappings(id, updatedSection.section_type, updates.styling_config.fields);
         }
       }

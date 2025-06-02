@@ -52,6 +52,11 @@ export const DynamicSectionRenderer: React.FC<DynamicSectionRendererProps> = ({
   partialSections = {}
 }) => {
   const renderSection = (section: TemplateSection) => {
+    // Handle page break sections - no styling or field mappings needed
+    if (section.section_type === 'page_break') {
+      return <PageBreakSection key={section.id} />;
+    }
+
     // Apply custom styling from section configuration
     const sectionStyles = {
       ...styles,
@@ -99,8 +104,6 @@ export const DynamicSectionRenderer: React.FC<DynamicSectionRendererProps> = ({
         return <TrainingsSection key={section.id} {...commonProps} />;
       case 'achievements':
         return <AchievementsSection key={section.id} {...commonProps} />;
-      case 'page_break':
-        return <PageBreakSection key={section.id} styles={sectionStyles} sectionConfig={section} />;
       default:
         console.warn(`Unknown section type: ${section.section_type}`);
         return (

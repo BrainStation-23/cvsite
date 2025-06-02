@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -79,6 +80,7 @@ const SortableSectionItem: React.FC<SortableSectionItemProps> = ({
     opacity: isDragging ? 0.5 : 1,
   };
 
+  const isPageBreak = section.section_type === 'page_break';
   const showProjectsToView = section.section_type === 'projects';
 
   return (
@@ -100,18 +102,20 @@ const SortableSectionItem: React.FC<SortableSectionItemProps> = ({
               </div>
             </div>
             <div className="flex items-center gap-2">
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                onClick={() => onToggleExpanded(section.id)}
-                className="h-6 w-6 p-0"
-              >
-                {expandedSections.has(section.id) ? (
-                  <ChevronDown className="h-3 w-3" />
-                ) : (
-                  <ChevronRight className="h-3 w-3" />
-                )}
-              </Button>
+              {!isPageBreak && (
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  onClick={() => onToggleExpanded(section.id)}
+                  className="h-6 w-6 p-0"
+                >
+                  {expandedSections.has(section.id) ? (
+                    <ChevronDown className="h-3 w-3" />
+                  ) : (
+                    <ChevronRight className="h-3 w-3" />
+                  )}
+                </Button>
+              )}
               <Button 
                 variant="ghost" 
                 size="sm" 
@@ -123,56 +127,66 @@ const SortableSectionItem: React.FC<SortableSectionItemProps> = ({
             </div>
           </div>
 
-          <Collapsible open={expandedSections.has(section.id)}>
-            <CollapsibleContent>
-              <div className="space-y-3 pt-2 border-t">
-                {/* Section Configuration */}
-                <div className="grid grid-cols-1 gap-2">
-                  <div>
-                    <Label className="text-xs">Display Style</Label>
-                    <Select 
-                      value={section.styling_config.display_style || 'default'} 
-                      onValueChange={(value) => onUpdateSectionStyling(section.id, { display_style: value })}
-                    >
-                      <SelectTrigger className="h-7 text-xs">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {DISPLAY_STYLES.map(style => (
-                          <SelectItem key={style.value} value={style.value}>
-                            {style.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+          {!isPageBreak && (
+            <Collapsible open={expandedSections.has(section.id)}>
+              <CollapsibleContent>
+                <div className="space-y-3 pt-2 border-t">
+                  {/* Section Configuration */}
+                  <div className="grid grid-cols-1 gap-2">
+                    <div>
+                      <Label className="text-xs">Display Style</Label>
+                      <Select 
+                        value={section.styling_config.display_style || 'default'} 
+                        onValueChange={(value) => onUpdateSectionStyling(section.id, { display_style: value })}
+                      >
+                        <SelectTrigger className="h-7 text-xs">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {DISPLAY_STYLES.map(style => (
+                            <SelectItem key={style.value} value={style.value}>
+                              {style.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    {showProjectsToView && (
+                      <div>
+                        <Label className="text-xs">No of Projects</Label>
+                        <Input 
+                          type="number" 
+                          value={section.styling_config.projects_to_view || 3}
+                          onChange={(e) => onUpdateSectionStyling(section.id, { projects_to_view: parseInt(e.target.value) })}
+                          min={1} 
+                          max={10} 
+                          className="h-7 text-xs" 
+                          placeholder="Max projects to show"
+                        />
+                      </div>
+                    )}
                   </div>
 
-                  {showProjectsToView && (
-                    <div>
-                      <Label className="text-xs">No of Projects</Label>
-                      <Input 
-                        type="number" 
-                        value={section.styling_config.projects_to_view || 3}
-                        onChange={(e) => onUpdateSectionStyling(section.id, { projects_to_view: parseInt(e.target.value) })}
-                        min={1} 
-                        max={10} 
-                        className="h-7 text-xs" 
-                        placeholder="Max projects to show"
-                      />
-                    </div>
-                  )}
+                  {/* Field Configuration */}
+                  <SectionFieldConfig
+                    fields={section.styling_config.fields || []}
+                    onUpdateField={(fieldIndex, fieldUpdates) => onUpdateFieldConfig(section.id, fieldIndex, fieldUpdates)}
+                    onReorderFields={(reorderedFields) => onReorderFields(section.id, reorderedFields)}
+                    sectionType={section.section_type}
+                  />
                 </div>
+              </CollapsibleContent>
+            </Collapsible>
+          )}
 
-                {/* Field Configuration */}
-                <SectionFieldConfig
-                  fields={section.styling_config.fields || []}
-                  onUpdateField={(fieldIndex, fieldUpdates) => onUpdateFieldConfig(section.id, fieldIndex, fieldUpdates)}
-                  onReorderFields={(reorderedFields) => onReorderFields(section.id, reorderedFields)}
-                  sectionType={section.section_type}
-                />
-              </div>
-            </CollapsibleContent>
-          </Collapsible>
+          {isPageBreak && (
+            <div className="pt-2 border-t">
+              <p className="text-xs text-gray-500">
+                Page break sections create a new page in exports. No configuration needed.
+              </p>
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>

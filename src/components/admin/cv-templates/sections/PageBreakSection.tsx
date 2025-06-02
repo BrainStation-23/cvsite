@@ -2,11 +2,10 @@
 import React from 'react';
 
 interface PageBreakSectionProps {
-  styles?: any;
-  sectionConfig?: any;
+  // No props needed - page break is purely functional
 }
 
-export const PageBreakSection: React.FC<PageBreakSectionProps> = ({ styles }) => {
+export const PageBreakSection: React.FC<PageBreakSectionProps> = () => {
   return (
     <div 
       style={{
