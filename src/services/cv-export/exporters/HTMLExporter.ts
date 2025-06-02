@@ -10,6 +10,7 @@ export class HTMLExporter extends BaseExporter {
       console.log('HTML Export - Template:', template.name);
       console.log('HTML Export - Profile:', profile?.first_name, profile?.last_name);
       console.log('HTML Export - Sections:', sections?.length || 0);
+      console.log('HTML Export - Field mappings:', fieldMappings?.length || 0);
       
       if (!profile) {
         throw new Error('Profile data is required for HTML export');
@@ -62,7 +63,7 @@ export class HTMLExporter extends BaseExporter {
 </head>
 <body>
     <div class="cv-container">
-        ${this.generateHeaderHTML(profile, layoutConfig)}
+        ${this.generateHeaderHTML(profile, layoutConfig, fieldMappings)}
         ${sectionsHTML}
     </div>
 </body>
@@ -115,6 +116,22 @@ export class HTMLExporter extends BaseExporter {
             margin-bottom: ${sectionSpacing}pt;
             border-bottom: 2px solid ${primaryColor};
             padding-bottom: 10pt;
+            display: flex;
+            align-items: flex-start;
+            gap: 20pt;
+        }
+        
+        .header-content {
+            flex: 1;
+        }
+        
+        .profile-image {
+            width: 120px;
+            height: 120px;
+            border-radius: 8px;
+            object-fit: cover;
+            border: 3px solid ${primaryColor};
+            flex-shrink: 0;
         }
         
         .name {
@@ -133,20 +150,18 @@ export class HTMLExporter extends BaseExporter {
         .contact-info {
             color: ${secondaryColor};
             font-size: ${baseFontSize - 1}pt;
+            margin-bottom: 10pt;
         }
         
         .contact-info span {
             margin-right: 15px;
         }
         
-        .profile-image {
-            width: 120px;
-            height: 120px;
-            border-radius: 50%;
-            object-fit: cover;
-            margin: 0 auto 15pt auto;
-            display: block;
-            border: 3px solid ${primaryColor};
+        .biography {
+            text-align: justify;
+            color: #333;
+            margin-top: 10pt;
+            line-height: 1.5;
         }
         
         .section {
@@ -203,6 +218,7 @@ export class HTMLExporter extends BaseExporter {
             color: #333;
             margin-top: 3pt;
             text-align: justify;
+            line-height: 1.5;
         }
         
         .skills-grid {
@@ -237,12 +253,6 @@ export class HTMLExporter extends BaseExporter {
             white-space: nowrap;
         }
         
-        .biography {
-            text-align: justify;
-            color: #333;
-            margin-bottom: 10pt;
-        }
-        
         .technologies {
             margin-top: 5pt;
         }
@@ -268,6 +278,27 @@ export class HTMLExporter extends BaseExporter {
             border: 1px solid #d1d5db;
         }
         
+        .project-url {
+            margin-top: 5pt;
+            color: ${accentColor};
+            text-decoration: none;
+            font-weight: 500;
+        }
+        
+        .project-url:hover {
+            text-decoration: underline;
+        }
+        
+        .education-details {
+            margin-top: 3pt;
+        }
+        
+        .gpa-info {
+            color: ${secondaryColor};
+            font-size: ${baseFontSize - 1}pt;
+            margin-top: 2pt;
+        }
+        
         @media print {
             body {
                 background-color: white;
@@ -291,21 +322,28 @@ export class HTMLExporter extends BaseExporter {
     `;
   }
 
-  private generateHeaderHTML(profile: any, layoutConfig: any): string {
-    const fullName = `${profile?.first_name || ''} ${profile?.last_name || ''}`.trim();
-    const contactInfo = [];
+  private generateHeaderHTML(profile: any, layoutConfig: any, fieldMappings: any[]): string {
+    const fullName = this.applyFieldMasking(`${profile?.first_name || ''} ${profile?.last_name || ''}`.trim(), 'full_name', fieldMappings);
+    const email = this.applyFieldMasking(profile?.email, 'email', fieldMappings);
+    const phone = this.applyFieldMasking(profile?.phone, 'phone', fieldMappings);
+    const location = this.applyFieldMasking(profile?.location, 'location', fieldMappings);
+    const currentPosition = this.applyFieldMasking(profile?.current_position, 'current_position', fieldMappings);
+    const biography = this.applyFieldMasking(profile?.biography, 'biography', fieldMappings);
     
-    if (profile?.email) contactInfo.push(`<span>📧 ${profile.email}</span>`);
-    if (profile?.phone) contactInfo.push(`<span>📞 ${profile.phone}</span>`);
-    if (profile?.location) contactInfo.push(`<span>📍 ${profile.location}</span>`);
+    const contactInfo = [];
+    if (email) contactInfo.push(`<span>📧 ${email}</span>`);
+    if (phone) contactInfo.push(`<span>📞 ${phone}</span>`);
+    if (location) contactInfo.push(`<span>📍 ${location}</span>`);
     
     return `
         <div class="header">
+            <div class="header-content">
+                <div class="name">${fullName || 'Your Name'}</div>
+                ${currentPosition ? `<div class="title">${currentPosition}</div>` : ''}
+                ${contactInfo.length > 0 ? `<div class="contact-info">${contactInfo.join('')}</div>` : ''}
+                ${biography ? `<div class="biography">${this.processRichText(biography)}</div>` : ''}
+            </div>
             ${profile?.profile_image_url ? `<img src="${profile.profile_image_url}" alt="Profile" class="profile-image" />` : ''}
-            <div class="name">${fullName || 'Your Name'}</div>
-            ${profile?.current_position ? `<div class="title">${profile.current_position}</div>` : ''}
-            ${contactInfo.length > 0 ? `<div class="contact-info">${contactInfo.join('')}</div>` : ''}
-            ${profile?.biography ? `<div class="biography">${this.processRichText(profile.biography)}</div>` : ''}
         </div>
     `;
   }
@@ -314,42 +352,45 @@ export class HTMLExporter extends BaseExporter {
     return sections.map(section => {
       switch (section.section_type) {
         case 'experience':
-          return this.generateExperienceSection(profile);
+          return this.generateExperienceSection(profile, fieldMappings);
         case 'education':
-          return this.generateEducationSection(profile);
+          return this.generateEducationSection(profile, fieldMappings);
         case 'technical_skills':
-          return this.generateTechnicalSkillsSection(profile);
+          return this.generateTechnicalSkillsSection(profile, fieldMappings);
         case 'specialized_skills':
-          return this.generateSpecializedSkillsSection(profile);
+          return this.generateSpecializedSkillsSection(profile, fieldMappings);
         case 'projects':
-          return this.generateProjectsSection(profile);
+          return this.generateProjectsSection(profile, fieldMappings);
         case 'achievements':
-          return this.generateAchievementsSection(profile);
+          return this.generateAchievementsSection(profile, fieldMappings);
         case 'trainings':
-          return this.generateTrainingsSection(profile);
+          return this.generateTrainingsSection(profile, fieldMappings);
         default:
           return '';
       }
     }).join('');
   }
 
-  private generateExperienceSection(profile: any): string {
+  private generateExperienceSection(profile: any, fieldMappings: any[]): string {
     const experiences = profile?.experiences || [];
     if (experiences.length === 0) return '';
 
     const experienceItems = experiences.map((exp: any) => {
+      const position = this.applyFieldMasking(exp.position, 'position', fieldMappings);
+      const company = this.applyFieldMasking(exp.company, 'company', fieldMappings);
+      const description = this.applyFieldMasking(exp.description, 'description', fieldMappings);
       const dateRange = this.formatDateRange(exp.start_date, exp.end_date, exp.is_current);
       
       return `
         <div class="item">
           <div class="item-header">
             <div>
-              <div class="item-title">${exp.position || 'Position'}</div>
-              <div class="item-subtitle">${exp.company || 'Company'}</div>
+              <div class="item-title">${position || 'Position'}</div>
+              <div class="item-subtitle">${company || 'Company'}</div>
             </div>
             <div class="item-date">${dateRange}</div>
           </div>
-          ${exp.description ? `<div class="item-description">${this.processRichText(exp.description)}</div>` : ''}
+          ${description ? `<div class="item-description">${this.processRichText(description)}</div>` : ''}
         </div>
       `;
     }).join('');
@@ -364,23 +405,36 @@ export class HTMLExporter extends BaseExporter {
     `;
   }
 
-  private generateEducationSection(profile: any): string {
+  private generateEducationSection(profile: any, fieldMappings: any[]): string {
     const education = profile?.education || [];
     if (education.length === 0) return '';
 
     const educationItems = education.map((edu: any) => {
+      const degree = this.applyFieldMasking(edu.degree, 'degree', fieldMappings);
+      const institution = this.applyFieldMasking(edu.institution, 'institution', fieldMappings);
+      const university = this.applyFieldMasking(edu.university, 'university', fieldMappings);
+      const department = this.applyFieldMasking(edu.department, 'department', fieldMappings);
+      const gpa = this.applyFieldMasking(edu.gpa, 'gpa', fieldMappings);
+      const description = this.applyFieldMasking(edu.description, 'description', fieldMappings);
       const dateRange = this.formatDateRange(edu.start_date, edu.end_date, edu.is_current);
+      
+      // Use institution name or university name
+      const schoolName = institution || university || 'Institution';
       
       return `
         <div class="item">
           <div class="item-header">
             <div>
-              <div class="item-title">${edu.degree || 'Degree'}</div>
-              <div class="item-subtitle">${edu.institution || 'Institution'}</div>
+              <div class="item-title">${degree || 'Degree'}</div>
+              <div class="item-subtitle">${schoolName}</div>
+              ${department ? `<div class="item-subtitle" style="font-size: 0.9em; margin-top: 2pt;">${department}</div>` : ''}
             </div>
             <div class="item-date">${dateRange}</div>
           </div>
-          ${edu.description ? `<div class="item-description">${this.processRichText(edu.description)}</div>` : ''}
+          <div class="education-details">
+            ${gpa ? `<div class="gpa-info">GPA: ${gpa}</div>` : ''}
+            ${description ? `<div class="item-description">${this.processRichText(description)}</div>` : ''}
+          </div>
         </div>
       `;
     }).join('');
@@ -395,13 +449,14 @@ export class HTMLExporter extends BaseExporter {
     `;
   }
 
-  private generateTechnicalSkillsSection(profile: any): string {
+  private generateTechnicalSkillsSection(profile: any, fieldMappings: any[]): string {
     const skills = profile?.technical_skills || [];
     if (skills.length === 0) return '';
 
-    const skillTags = skills.map((skill: any) => 
-      `<span class="skill-tag">${skill.name}</span>`
-    ).join('');
+    const skillTags = skills.map((skill: any) => {
+      const skillName = this.applyFieldMasking(skill.name, 'name', fieldMappings);
+      return `<span class="skill-tag">${skillName}</span>`;
+    }).join('');
 
     return `
       <div class="section">
@@ -415,13 +470,14 @@ export class HTMLExporter extends BaseExporter {
     `;
   }
 
-  private generateSpecializedSkillsSection(profile: any): string {
+  private generateSpecializedSkillsSection(profile: any, fieldMappings: any[]): string {
     const skills = profile?.specialized_skills || [];
     if (skills.length === 0) return '';
 
-    const skillTags = skills.map((skill: any) => 
-      `<span class="skill-tag">${skill.name}</span>`
-    ).join('');
+    const skillTags = skills.map((skill: any) => {
+      const skillName = this.applyFieldMasking(skill.name, 'name', fieldMappings);
+      return `<span class="skill-tag">${skillName}</span>`;
+    }).join('');
 
     return `
       <div class="section">
@@ -435,11 +491,15 @@ export class HTMLExporter extends BaseExporter {
     `;
   }
 
-  private generateProjectsSection(profile: any): string {
+  private generateProjectsSection(profile: any, fieldMappings: any[]): string {
     const projects = profile?.projects || [];
     if (projects.length === 0) return '';
 
     const projectItems = projects.map((project: any) => {
+      const name = this.applyFieldMasking(project.name, 'name', fieldMappings);
+      const role = this.applyFieldMasking(project.role, 'role', fieldMappings);
+      const description = this.applyFieldMasking(project.description, 'description', fieldMappings);
+      const url = this.applyFieldMasking(project.url, 'url', fieldMappings);
       const dateRange = this.formatDateRange(project.start_date, project.end_date, project.is_current);
       const techTags = project.technologies_used?.map((tech: string) => 
         `<span class="tech-tag">${tech}</span>`
@@ -449,12 +509,13 @@ export class HTMLExporter extends BaseExporter {
         <div class="item">
           <div class="item-header">
             <div>
-              <div class="item-title">${project.name || 'Project Name'}</div>
-              ${project.role ? `<div class="item-subtitle">${project.role}</div>` : ''}
+              <div class="item-title">${name || 'Project Name'}</div>
+              ${role ? `<div class="item-subtitle">${role}</div>` : ''}
             </div>
             <div class="item-date">${dateRange}</div>
           </div>
-          ${project.description ? `<div class="item-description">${this.processRichText(project.description)}</div>` : ''}
+          ${description ? `<div class="item-description">${this.processRichText(description)}</div>` : ''}
+          ${url ? `<div class="project-url"><strong>Project URL:</strong> <a href="${url}" target="_blank" class="project-url">${url}</a></div>` : ''}
           ${techTags ? `
             <div class="technologies">
               <div class="technologies-label">Technologies:</div>
@@ -475,11 +536,13 @@ export class HTMLExporter extends BaseExporter {
     `;
   }
 
-  private generateAchievementsSection(profile: any): string {
+  private generateAchievementsSection(profile: any, fieldMappings: any[]): string {
     const achievements = profile?.achievements || [];
     if (achievements.length === 0) return '';
 
     const achievementItems = achievements.map((achievement: any) => {
+      const title = this.applyFieldMasking(achievement.title, 'title', fieldMappings);
+      const description = this.applyFieldMasking(achievement.description, 'description', fieldMappings);
       const date = achievement.date ? new Date(achievement.date).toLocaleDateString('en-US', { 
         month: 'short', 
         year: 'numeric' 
@@ -488,10 +551,10 @@ export class HTMLExporter extends BaseExporter {
       return `
         <div class="item">
           <div class="item-header">
-            <div class="item-title">${achievement.title || 'Achievement'}</div>
+            <div class="item-title">${title || 'Achievement'}</div>
             ${date ? `<div class="item-date">${date}</div>` : ''}
           </div>
-          ${achievement.description ? `<div class="item-description">${this.processRichText(achievement.description)}</div>` : ''}
+          ${description ? `<div class="item-description">${this.processRichText(description)}</div>` : ''}
         </div>
       `;
     }).join('');
@@ -506,23 +569,26 @@ export class HTMLExporter extends BaseExporter {
     `;
   }
 
-  private generateTrainingsSection(profile: any): string {
+  private generateTrainingsSection(profile: any, fieldMappings: any[]): string {
     const trainings = profile?.trainings || [];
     if (trainings.length === 0) return '';
 
     const trainingItems = trainings.map((training: any) => {
+      const title = this.applyFieldMasking(training.title, 'title', fieldMappings);
+      const provider = this.applyFieldMasking(training.provider, 'provider', fieldMappings);
+      const description = this.applyFieldMasking(training.description, 'description', fieldMappings);
       const dateRange = this.formatDateRange(training.start_date, training.end_date, training.is_current);
 
       return `
         <div class="item">
           <div class="item-header">
             <div>
-              <div class="item-title">${training.title || 'Training'}</div>
-              ${training.provider ? `<div class="item-subtitle">${training.provider}</div>` : ''}
+              <div class="item-title">${title || 'Training'}</div>
+              ${provider ? `<div class="item-subtitle">${provider}</div>` : ''}
             </div>
             <div class="item-date">${dateRange}</div>
           </div>
-          ${training.description ? `<div class="item-description">${this.processRichText(training.description)}</div>` : ''}
+          ${description ? `<div class="item-description">${this.processRichText(description)}</div>` : ''}
         </div>
       `;
     }).join('');
@@ -535,6 +601,25 @@ export class HTMLExporter extends BaseExporter {
         </div>
       </div>
     `;
+  }
+
+  private applyFieldMasking(value: any, fieldName: string, fieldMappings: any[]): any {
+    if (!value || !fieldMappings) return value;
+    
+    const mapping = fieldMappings.find(m => m.original_field_name === fieldName);
+    if (!mapping || !mapping.is_masked) return value;
+    
+    if (mapping.mask_value) {
+      return mapping.mask_value;
+    }
+    
+    // Default masking behavior
+    if (typeof value === 'string') {
+      if (value.length <= 3) return '***';
+      return value.substring(0, 3) + '***';
+    }
+    
+    return '***';
   }
 
   private formatDateRange(startDate: string, endDate: string, isCurrent: boolean): string {
@@ -560,20 +645,20 @@ export class HTMLExporter extends BaseExporter {
   private processRichText(content: string): string {
     if (!content) return '';
     
-    // Handle common HTML tags and convert to proper HTML
+    // Handle common HTML tags and convert to proper HTML with justified text
     return content
       .replace(/\n/g, '<br>')
-      .replace(/<p>/g, '<p>')
+      .replace(/<p>/g, '<p style="text-align: justify; margin-bottom: 8pt;">')
       .replace(/<\/p>/g, '</p>')
       .replace(/<strong>/g, '<strong>')
       .replace(/<\/strong>/g, '</strong>')
       .replace(/<em>/g, '<em>')
       .replace(/<\/em>/g, '</em>')
-      .replace(/<ul>/g, '<ul>')
+      .replace(/<ul>/g, '<ul style="margin-left: 15pt; margin-bottom: 8pt;">')
       .replace(/<\/ul>/g, '</ul>')
-      .replace(/<ol>/g, '<ol>')
+      .replace(/<ol>/g, '<ol style="margin-left: 15pt; margin-bottom: 8pt;">')
       .replace(/<\/ol>/g, '</ol>')
-      .replace(/<li>/g, '<li>')
+      .replace(/<li>/g, '<li style="margin-bottom: 3pt;">')
       .replace(/<\/li>/g, '</li>');
   }
 }
