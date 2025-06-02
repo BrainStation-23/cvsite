@@ -1,3 +1,4 @@
+
 import jsPDF from 'jspdf';
 
 export interface PageMetrics {
@@ -109,6 +110,16 @@ export class PDFPageManager {
     let tempY = this.currentY;
 
     for (const block of blocks) {
+      // Handle page break blocks - force a new page
+      if (block.type === 'page_break') {
+        if (currentPageBlocks.length > 0) {
+          pages.push(currentPageBlocks);
+          currentPageBlocks = [];
+          tempY = this.metrics.margins.top;
+        }
+        continue;
+      }
+
       const availableHeight = this.metrics.height - this.metrics.margins.bottom - tempY;
 
       // If block fits entirely on current page

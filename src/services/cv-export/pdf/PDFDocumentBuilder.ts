@@ -200,7 +200,7 @@ export class PDFDocumentBuilder {
       return;
     }
     
-    // Handle page break sections
+    // Handle page break sections - force a new page
     if (sectionConfig.section_type === 'page_break') {
       this.pageManager.addNewPage();
       return;
