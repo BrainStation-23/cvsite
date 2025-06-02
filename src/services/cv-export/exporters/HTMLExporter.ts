@@ -29,7 +29,7 @@ export class HTMLExporter extends BaseExporter {
         throw new Error('At least one section must be configured for HTML export');
       }
 
-      // Generate comprehensive HTML CV
+      // Generate comprehensive HTML CV with page breaks
       const htmlContent = this.generateCompleteHTMLCV(profile, template, sections, fieldMappings, styles);
       const blob = new Blob([htmlContent], { type: 'text/html' });
       const fileName = this.generateFileName(profile, 'html');
@@ -59,8 +59,8 @@ export class HTMLExporter extends BaseExporter {
     // Generate CSS based on template configuration
     const css = this.cssGenerator.generateCSS(layoutConfig, template.orientation);
     
-    // Generate sections HTML with section configurations and page breaks
-    const sectionsHTML = this.sectionsGenerator.generateSectionsHTML(sections, profile, fieldMappings);
+    // Generate sections HTML with proper page break handling
+    const sectionsHTML = this.sectionsGenerator.generateSectionsHTMLWithPageBreaks(sections, profile, fieldMappings);
     
     return `<!DOCTYPE html>
 <html lang="en">
@@ -70,32 +70,6 @@ export class HTMLExporter extends BaseExporter {
     <title>CV - ${fullName}</title>
     <style>
         ${css}
-        .page-break {
-          page-break-before: always;
-          break-before: page;
-          height: 0;
-          margin: 0;
-        }
-        @media screen {
-          .page-break {
-            border-top: 2px dashed #ccc;
-            height: 20px;
-            margin: 20px 0;
-            position: relative;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-          }
-          .page-break::after {
-            content: "Page Break";
-            background: white;
-            padding: 4px 8px;
-            font-size: 10px;
-            color: #666;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-          }
-        }
     </style>
 </head>
 <body>
