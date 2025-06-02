@@ -11,7 +11,6 @@ export const PageBreakSection: React.FC<PageBreakSectionProps> = ({ styles }) =>
     <div 
       style={{
         pageBreakBefore: 'always',
-        break: 'page',
         height: '0',
         width: '100%',
         borderTop: '2px dashed #ccc',

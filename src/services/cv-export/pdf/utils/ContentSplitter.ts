@@ -8,11 +8,12 @@ export class ContentSplitter {
       // Handle page break sections
       if (section.section_type === 'page_break') {
         blocks.push({
-          type: 'page_break',
+          type: 'section',
           content: null,
           estimatedHeight: 0,
           minHeight: 0,
           splitData: {
+            sectionType: 'page_break',
             sectionConfig: section
           }
         });
