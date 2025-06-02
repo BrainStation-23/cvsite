@@ -1,4 +1,3 @@
-
 import { BaseExporter } from './BaseExporter';
 import { ExportOptions, ExportResult } from '../CVExportService';
 
@@ -376,8 +375,9 @@ export class HTMLExporter extends BaseExporter {
     if (experiences.length === 0) return '';
 
     const experienceItems = experiences.map((exp: any) => {
-      const position = this.applyFieldMasking(exp.position, 'position', fieldMappings);
-      const company = this.applyFieldMasking(exp.company, 'company', fieldMappings);
+      // Use correct field names for experience data
+      const position = this.applyFieldMasking(exp.designation, 'designation', fieldMappings);
+      const company = this.applyFieldMasking(exp.company_name, 'company_name', fieldMappings);
       const description = this.applyFieldMasking(exp.description, 'description', fieldMappings);
       const dateRange = this.formatDateRange(exp.start_date, exp.end_date, exp.is_current);
       
@@ -604,22 +604,43 @@ export class HTMLExporter extends BaseExporter {
   }
 
   private applyFieldMasking(value: any, fieldName: string, fieldMappings: any[]): any {
-    if (!value || !fieldMappings) return value;
+    if (!value || !fieldMappings || fieldMappings.length === 0) return value;
     
-    const mapping = fieldMappings.find(m => m.original_field_name === fieldName);
-    if (!mapping || !mapping.is_masked) return value;
+    const mapping = fieldMappings.find(m => 
+      m.original_field_name === fieldName && 
+      m.visibility_rules?.enabled !== false
+    );
     
-    if (mapping.mask_value) {
-      return mapping.mask_value;
+    if (!mapping) {
+      // If no mapping found, check if the field is disabled
+      const disabledMapping = fieldMappings.find(m => 
+        m.original_field_name === fieldName && 
+        m.visibility_rules?.enabled === false
+      );
+      
+      // If field is explicitly disabled, return null to hide it
+      if (disabledMapping) return null;
+      
+      // Otherwise return the original value
+      return value;
     }
     
-    // Default masking behavior
-    if (typeof value === 'string') {
-      if (value.length <= 3) return '***';
-      return value.substring(0, 3) + '***';
+    // Apply masking if configured
+    if (mapping.is_masked && value !== null && value !== undefined) {
+      if (mapping.mask_value) {
+        return mapping.mask_value;
+      }
+      
+      // Default masking behavior
+      if (typeof value === 'string') {
+        if (value.length <= 3) return '***';
+        return value.substring(0, 3) + '***';
+      }
+      
+      return '***';
     }
     
-    return '***';
+    return value;
   }
 
   private formatDateRange(startDate: string, endDate: string, isCurrent: boolean): string {

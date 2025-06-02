@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { CVSectionType } from '@/types/cv-templates';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { useSectionFieldMappings } from '@/hooks/use-section-field-mappings';
 import SortableSectionItem from './sections/SortableSectionItem';
 import AddSectionPanel from './sections/AddSectionPanel';
 import { SECTION_TYPES } from './sections/SectionConstants';
@@ -54,6 +55,7 @@ const SectionManager: React.FC<SectionManagerProps> = ({ templateId, onSectionsC
   const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set());
   const [isAddSectionOpen, setIsAddSectionOpen] = useState(false);
   const { toast } = useToast();
+  const { syncFieldMappings } = useSectionFieldMappings(templateId);
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -223,9 +225,19 @@ const SectionManager: React.FC<SectionManagerProps> = ({ templateId, onSectionsC
 
       if (error) throw error;
 
-      setSections(sections.map(section => 
-        section.id === id ? { ...section, ...updates } : section
-      ));
+      const updatedSection = sections.find(s => s.id === id);
+      if (updatedSection) {
+        const newSection = { ...updatedSection, ...updates };
+        setSections(sections.map(section => 
+          section.id === id ? newSection : section
+        ));
+
+        // Sync field mappings when styling config is updated
+        if (updates.styling_config?.fields) {
+          await syncFieldMappings(id, updatedSection.section_type, updates.styling_config.fields);
+        }
+      }
+
       onSectionsChange?.();
     } catch (error) {
       console.error('Error updating section:', error);
