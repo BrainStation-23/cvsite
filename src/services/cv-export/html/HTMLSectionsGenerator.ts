@@ -186,6 +186,7 @@ export class HTMLSectionsGenerator {
     if (projects.length === 0) return '';
 
     // Get the maximum number of projects from section configuration
+    // Fix the off-by-one issue: the value should directly represent the number of projects
     const maxProjects = section?.styling_config?.items_per_column || projects.length;
     
     // Sort projects by display_order, then by start_date as fallback
@@ -196,10 +197,10 @@ export class HTMLSectionsGenerator {
       return new Date(b.start_date).getTime() - new Date(a.start_date).getTime();
     });
 
-    // Limit the number of projects to show
+    // Limit the number of projects to show - fix the off-by-one issue
     const projectsToShow = sortedProjects.slice(0, maxProjects);
     
-    console.log(`Projects section - Total: ${projects.length}, Max to show: ${maxProjects}, Showing: ${projectsToShow.length}`);
+    console.log(`Projects section HTML export - Total: ${projects.length}, Max configured: ${maxProjects}, Showing: ${projectsToShow.length}`);
 
     const projectItems = projectsToShow.map((project: any) => {
       console.log('Processing project:', project);

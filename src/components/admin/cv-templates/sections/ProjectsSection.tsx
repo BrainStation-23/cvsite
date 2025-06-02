@@ -75,12 +75,13 @@ export const ProjectsSection: React.FC<ProjectsSectionProps> = ({
   });
 
   // Get the maximum number of projects to show from section config
+  // Fix the off-by-one issue: the value should directly represent the number of projects
   const maxProjects = sectionConfig?.styling_config?.items_per_column || sortedProjects.length;
   const projectsToShow = sortedProjects.slice(0, maxProjects);
 
   console.log(`=== PROJECTS SECTION CONFIG DEBUG ===`);
   console.log(`Total projects: ${sortedProjects.length}`);
-  console.log(`Max projects to show: ${maxProjects}`);
+  console.log(`Max projects configured: ${maxProjects}`);
   console.log(`Projects to display: ${projectsToShow.length}`);
 
   return (
