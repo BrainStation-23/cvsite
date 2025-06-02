@@ -1,4 +1,3 @@
-
 import { Document, Paragraph, TextRun, AlignmentType, BorderStyle, WidthType } from 'docx';
 
 export class DocumentStyler {
@@ -98,6 +97,13 @@ export class DocumentStyler {
       ],
       spacing: { after: 120 },
       alignment: AlignmentType.JUSTIFIED
+    });
+  }
+
+  createPageBreak(): Paragraph {
+    return new Paragraph({
+      children: [],
+      pageBreakBefore: true,
     });
   }
 

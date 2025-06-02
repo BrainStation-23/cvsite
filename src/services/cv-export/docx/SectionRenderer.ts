@@ -79,10 +79,10 @@ export class SectionRenderer {
     const elements: (Paragraph | Table)[] = [];
     
     try {
-      const sectionData = this.getSectionData(profile, section.section_type);
-      
-      if (!sectionData || (Array.isArray(sectionData) && sectionData.length === 0)) {
-        console.log(`Skipping empty section: ${section.section_type}`);
+      // Handle page break sections
+      if (section.section_type === 'page_break') {
+        console.log('Rendering page break section');
+        elements.push(this.styler.createPageBreak());
         return elements;
       }
 

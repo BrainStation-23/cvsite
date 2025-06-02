@@ -4,12 +4,19 @@ export class HTMLSectionsGenerator {
   private fieldProcessor = new HTMLFieldProcessor();
 
   generateSectionsHTML(sections: any[], profile: any, fieldMappings: any[]): string {
-    console.log('=== SECTIONS GENERATION DEBUG ===');
+    if (!sections || sections.length === 0) {
+      return '<div class="no-sections">No sections configured</div>';
+    }
+
+    // Sort sections by display order
+    const sortedSections = [...sections].sort((a, b) => a.display_order - b.display_order);
     
-    return sections.map(section => {
-      console.log(`Processing section: ${section.section_type}`);
+    return sortedSections.map(section => {
+      console.log('=== SECTIONS GENERATION DEBUG ===');
       
       switch (section.section_type) {
+        case 'page_break':
+          return '<div class="page-break"></div>';
         case 'experience':
           return this.generateExperienceSection(profile, fieldMappings);
         case 'education':

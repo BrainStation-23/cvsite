@@ -59,7 +59,7 @@ export class HTMLExporter extends BaseExporter {
     // Generate CSS based on template configuration
     const css = this.cssGenerator.generateCSS(layoutConfig, template.orientation);
     
-    // Generate sections HTML with section configurations
+    // Generate sections HTML with section configurations and page breaks
     const sectionsHTML = this.sectionsGenerator.generateSectionsHTML(sections, profile, fieldMappings);
     
     return `<!DOCTYPE html>
@@ -70,6 +70,32 @@ export class HTMLExporter extends BaseExporter {
     <title>CV - ${fullName}</title>
     <style>
         ${css}
+        .page-break {
+          page-break-before: always;
+          break-before: page;
+          height: 0;
+          margin: 0;
+        }
+        @media screen {
+          .page-break {
+            border-top: 2px dashed #ccc;
+            height: 20px;
+            margin: 20px 0;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+          }
+          .page-break::after {
+            content: "Page Break";
+            background: white;
+            padding: 4px 8px;
+            font-size: 10px;
+            color: #666;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+          }
+        }
     </style>
 </head>
 <body>

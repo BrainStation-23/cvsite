@@ -193,15 +193,21 @@ export class PDFDocumentBuilder {
     const width = customWidth !== undefined ? customWidth : this.pageManager.getContentWidth();
     const y = this.pageManager.getCurrentY();
     
-    // Ensure we have enough space
-    this.pageManager.ensureSpace(block.estimatedHeight, block.minHeight);
-    
     // Find the section configuration
     const sectionConfig = block.splitData?.sectionConfig;
     if (!sectionConfig) {
       console.warn('No section config found for block');
       return;
     }
+    
+    // Handle page break sections
+    if (sectionConfig.section_type === 'page_break') {
+      this.pageManager.addNewPage();
+      return;
+    }
+    
+    // Ensure we have enough space
+    this.pageManager.ensureSpace(block.estimatedHeight, block.minHeight);
     
     // Render the section
     const actualHeight = await this.sectionRenderer.render(

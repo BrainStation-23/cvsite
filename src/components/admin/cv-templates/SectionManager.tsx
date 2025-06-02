@@ -322,7 +322,10 @@ const SectionManager: React.FC<SectionManagerProps> = ({ templateId, onSectionsC
 
   const getAvailableSectionTypes = () => {
     const usedTypes = sections.map(s => s.section_type);
-    return SECTION_TYPES.filter(type => !usedTypes.includes(type.value));
+    // Allow page_break to be added multiple times, but exclude others that are already used
+    return SECTION_TYPES.filter(type => 
+      type.value === 'page_break' || !usedTypes.includes(type.value)
+    );
   };
 
   const toggleSectionExpanded = (sectionId: string) => {

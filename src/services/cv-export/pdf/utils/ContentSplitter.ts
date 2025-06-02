@@ -1,11 +1,24 @@
-
 import { ContentBlock } from './PDFPageManager';
 
 export class ContentSplitter {
   static createContentBlocks(sections: any[], profile: any): ContentBlock[] {
     const blocks: ContentBlock[] = [];
-
+    
     for (const section of sections) {
+      // Handle page break sections
+      if (section.section_type === 'page_break') {
+        blocks.push({
+          type: 'page_break',
+          content: null,
+          estimatedHeight: 0,
+          minHeight: 0,
+          splitData: {
+            sectionConfig: section
+          }
+        });
+        continue;
+      }
+
       const sectionData = this.getSectionData(profile, section.section_type);
       
       if (!sectionData || (Array.isArray(sectionData) && sectionData.length === 0)) {
