@@ -103,8 +103,16 @@ export const IntelligentPageDistributor: React.FC<IntelligentPageDistributorProp
 
       // For sections that can be split (experience, projects, education, achievements)
       if (canSectionBeSplit(section.section_type) && Array.isArray(sectionData)) {
-        // Filter out any undefined or null items before processing
-        let remainingItems = sectionData.filter(item => item != null);
+        // Apply section configuration limits BEFORE processing
+        let limitedSectionData = sectionData.filter(item => item != null);
+        
+        // Apply projects_to_view limit for projects section
+        if (section.section_type === 'projects' && section.styling_config?.projects_to_view) {
+          const maxProjects = section.styling_config.projects_to_view;
+          limitedSectionData = limitedSectionData.slice(0, maxProjects);
+        }
+        
+        let remainingItems = limitedSectionData;
         let isFirstPart = true;
 
         while (remainingItems.length > 0 && pages.length < MAX_PAGES) {
@@ -141,8 +149,8 @@ export const IntelligentPageDistributor: React.FC<IntelligentPageDistributorProp
             
             currentPage.partialSections[section.id] = {
               items: validItems,
-              startIndex: sectionData.length - remainingItems.length,
-              totalItems: sectionData.length,
+              startIndex: limitedSectionData.length - remainingItems.length,
+              totalItems: limitedSectionData.length, // Use limited data length
               isPartial: remainingItems.length > split.pageItems.length,
               title: isFirstPart ? sectionTitle : `${sectionTitle} (continued)`
             };
