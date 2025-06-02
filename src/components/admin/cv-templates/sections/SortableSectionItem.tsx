@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -37,7 +36,6 @@ interface SectionConfig {
   field_mapping: Record<string, any>;
   styling_config: {
     display_style?: string;
-    items_per_column?: number;
     projects_to_view?: number;
     fields?: FieldConfig[];
   };
@@ -81,7 +79,6 @@ const SortableSectionItem: React.FC<SortableSectionItemProps> = ({
     opacity: isDragging ? 0.5 : 1,
   };
 
-  const showItemsPerColumn = section.section_type !== 'general' && section.section_type !== 'projects';
   const showProjectsToView = section.section_type === 'projects';
 
   return (
@@ -149,20 +146,6 @@ const SortableSectionItem: React.FC<SortableSectionItemProps> = ({
                       </SelectContent>
                     </Select>
                   </div>
-                  
-                  {showItemsPerColumn && (
-                    <div>
-                      <Label className="text-xs">Items per Column</Label>
-                      <Input 
-                        type="number" 
-                        value={section.styling_config.items_per_column || 1}
-                        onChange={(e) => onUpdateSectionStyling(section.id, { items_per_column: parseInt(e.target.value) })}
-                        min={1} 
-                        max={3} 
-                        className="h-7 text-xs" 
-                      />
-                    </div>
-                  )}
 
                   {showProjectsToView && (
                     <div>

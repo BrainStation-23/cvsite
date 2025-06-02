@@ -44,7 +44,6 @@ interface SectionConfig {
   field_mapping: Record<string, any>;
   styling_config: {
     display_style?: string;
-    items_per_column?: number;
     projects_to_view?: number;
     fields?: FieldConfig[];
   };
@@ -88,8 +87,7 @@ const SectionManager: React.FC<SectionManagerProps> = ({ templateId, onSectionsC
           field_mapping: section.field_mapping as Record<string, any> || {},
           styling_config: {
             display_style: stylingConfig.display_style || 'default',
-            items_per_column: stylingConfig.items_per_column || 1,
-            projects_to_view: stylingConfig.projects_to_view || stylingConfig.items_per_column || 3,
+            projects_to_view: stylingConfig.projects_to_view || 3,
             fields: (stylingConfig.fields as FieldConfig[]) || []
           }
         } as SectionConfig;
@@ -142,7 +140,6 @@ const SectionManager: React.FC<SectionManagerProps> = ({ templateId, onSectionsC
         field_mapping: {},
         styling_config: {
           display_style: 'default',
-          items_per_column: sectionType === 'projects' ? undefined : 1,
           projects_to_view: sectionType === 'projects' ? 3 : undefined,
           fields: defaultFields
         }
@@ -165,7 +162,6 @@ const SectionManager: React.FC<SectionManagerProps> = ({ templateId, onSectionsC
         field_mapping: data.field_mapping as Record<string, any> || {},
         styling_config: { 
           display_style: 'default', 
-          items_per_column: sectionType === 'projects' ? undefined : 1,
           projects_to_view: sectionType === 'projects' ? 3 : undefined,
           fields: defaultFields 
         }
