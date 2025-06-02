@@ -41,18 +41,6 @@ export class HTMLCSSGenerator {
             min-height: ${pageHeight};
         }
         
-        .cv-page {
-            min-height: calc(${pageHeight} - ${margin * 2}mm);
-            page-break-after: always;
-            break-after: page;
-            padding-bottom: 20pt;
-        }
-        
-        .cv-page:last-child {
-            page-break-after: avoid;
-            break-after: avoid;
-        }
-        
         .header {
             text-align: ${layoutConfig.layoutType === 'single-column' ? 'center' : 'left'};
             margin-bottom: ${sectionSpacing}pt;
@@ -109,7 +97,6 @@ export class HTMLCSSGenerator {
         .section {
             margin-bottom: ${sectionSpacing}pt;
             page-break-inside: avoid;
-            break-inside: avoid;
         }
         
         .section-title {
@@ -130,7 +117,6 @@ export class HTMLCSSGenerator {
         .item {
             margin-bottom: ${itemSpacing}pt;
             page-break-inside: avoid;
-            break-inside: avoid;
         }
         
         .item-header {
@@ -243,57 +229,10 @@ export class HTMLCSSGenerator {
             margin-top: 2pt;
         }
         
-        /* Page break styles */
-        .page-break {
-            page-break-before: always;
-            break-before: page;
-            height: 0;
-            margin: 0;
-            padding: 0;
-            border: none;
-        }
-        
-        .page-break-explicit {
-            page-break-before: always;
-            break-before: page;
-            height: 0;
-            margin: 0;
-            padding: 0;
-            border: none;
-        }
-        
-        /* Screen preview styles for page breaks */
-        @media screen {
-            .cv-container {
-                padding: 0;
-                border-radius: 0;
-                box-shadow: none;
-                background: #e5e7eb;
-                max-width: none;
-            }
-            
-            .cv-page {
-                background: white;
-                margin-bottom: 20px;
-                padding: ${margin}mm;
-                border-radius: 8px;
-                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-                page-break-after: auto;
-                break-after: auto;
-            }
-            
-            .page-break,
-            .page-break-explicit {
-                display: none;
-            }
-        }
-        
-        /* Print styles */
         @media print {
             body {
                 background-color: white;
                 padding: 0;
-                margin: 0;
             }
             
             .cv-container {
@@ -302,26 +241,7 @@ export class HTMLCSSGenerator {
                 max-width: none;
                 width: 100%;
                 margin: 0;
-                padding: 0;
-                background: white;
-            }
-            
-            .cv-page {
                 padding: ${margin}mm;
-                margin: 0;
-                border-radius: 0;
-                box-shadow: none;
-                min-height: calc(${pageHeight} - ${margin * 2}mm);
-            }
-            
-            .page-break,
-            .page-break-explicit {
-                page-break-before: always;
-                break-before: page;
-                height: 0;
-                margin: 0;
-                padding: 0;
-                border: none;
             }
         }
         
