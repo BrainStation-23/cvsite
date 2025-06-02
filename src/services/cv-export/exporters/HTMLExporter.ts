@@ -59,7 +59,7 @@ export class HTMLExporter extends BaseExporter {
     // Generate CSS based on template configuration
     const css = this.cssGenerator.generateCSS(layoutConfig, template.orientation);
     
-    // Generate sections HTML
+    // Generate sections HTML with section configurations
     const sectionsHTML = this.sectionsGenerator.generateSectionsHTML(sections, profile, fieldMappings);
     
     return `<!DOCTYPE html>

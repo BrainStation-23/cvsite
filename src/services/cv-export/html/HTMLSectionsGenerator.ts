@@ -1,4 +1,3 @@
-
 import { HTMLFieldProcessor } from './HTMLFieldProcessor';
 
 export class HTMLSectionsGenerator {
@@ -20,7 +19,7 @@ export class HTMLSectionsGenerator {
         case 'specialized_skills':
           return this.generateSpecializedSkillsSection(profile, fieldMappings);
         case 'projects':
-          return this.generateProjectsSection(profile, fieldMappings);
+          return this.generateProjectsSection(profile, fieldMappings, section);
         case 'achievements':
           return this.generateAchievementsSection(profile, fieldMappings);
         case 'trainings':
@@ -180,13 +179,29 @@ export class HTMLSectionsGenerator {
     ` : '';
   }
 
-  private generateProjectsSection(profile: any, fieldMappings: any[]): string {
+  private generateProjectsSection(profile: any, fieldMappings: any[], section?: any): string {
     console.log('=== PROJECTS SECTION DEBUG ===');
     
     const projects = profile?.projects || [];
     if (projects.length === 0) return '';
 
-    const projectItems = projects.map((project: any) => {
+    // Get the maximum number of projects from section configuration
+    const maxProjects = section?.styling_config?.items_per_column || projects.length;
+    
+    // Sort projects by display_order, then by start_date as fallback
+    const sortedProjects = [...projects].sort((a, b) => {
+      if (a.display_order !== undefined && b.display_order !== undefined) {
+        return a.display_order - b.display_order;
+      }
+      return new Date(b.start_date).getTime() - new Date(a.start_date).getTime();
+    });
+
+    // Limit the number of projects to show
+    const projectsToShow = sortedProjects.slice(0, maxProjects);
+    
+    console.log(`Projects section - Total: ${projects.length}, Max to show: ${maxProjects}, Showing: ${projectsToShow.length}`);
+
+    const projectItems = projectsToShow.map((project: any) => {
       console.log('Processing project:', project);
       
       const name = this.fieldProcessor.processFieldWithDebug(project.name, 'name', 'projects', fieldMappings);

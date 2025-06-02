@@ -29,6 +29,7 @@ interface ProjectsSectionProps {
   sectionConfig?: {
     styling_config?: {
       display_style?: string;
+      items_per_column?: number;
       fields?: FieldConfig[];
     };
   };
@@ -73,10 +74,19 @@ export const ProjectsSection: React.FC<ProjectsSectionProps> = ({
     return new Date(b.start_date).getTime() - new Date(a.start_date).getTime();
   });
 
+  // Get the maximum number of projects to show from section config
+  const maxProjects = sectionConfig?.styling_config?.items_per_column || sortedProjects.length;
+  const projectsToShow = sortedProjects.slice(0, maxProjects);
+
+  console.log(`=== PROJECTS SECTION CONFIG DEBUG ===`);
+  console.log(`Total projects: ${sortedProjects.length}`);
+  console.log(`Max projects to show: ${maxProjects}`);
+  console.log(`Projects to display: ${projectsToShow.length}`);
+
   return (
     <div style={styles.sectionStyles}>
       <h2 style={styles.sectionTitleStyles}>{customTitle || sectionTitle || 'Projects'}</h2>
-      {sortedProjects.map((project: any, index: number) => (
+      {projectsToShow.map((project: any, index: number) => (
         <ProjectItem
           key={index}
           project={project}
