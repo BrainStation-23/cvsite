@@ -26,7 +26,7 @@ interface SectionConfig {
   field_mapping: Record<string, any>;
   styling_config: {
     display_style?: string;
-    items_per_column?: number;
+    projects_to_view?: number;
     fields?: FieldConfig[];
   };
 }
@@ -163,9 +163,9 @@ const SectionItem: React.FC<SectionItemProps> = ({
             <div className="space-y-3 pt-2 border-t">
               <SectionControls
                 displayStyle={section.styling_config.display_style || 'default'}
-                itemsPerColumn={section.styling_config.items_per_column || 1}
+                projectsToView={section.styling_config.projects_to_view}
                 onDisplayStyleChange={(value) => updateSectionStyling({ display_style: value })}
-                onItemsPerColumnChange={(value) => updateSectionStyling({ items_per_column: value })}
+                onProjectsToViewChange={(value) => updateSectionStyling({ projects_to_view: value })}
                 sectionType={section.section_type}
               />
 

@@ -6,9 +6,9 @@ import { Label } from '@/components/ui/label';
 
 interface SectionControlsProps {
   displayStyle: string;
-  itemsPerColumn?: number;
+  projectsToView?: number;
   onDisplayStyleChange: (value: string) => void;
-  onItemsPerColumnChange?: (value: number) => void;
+  onProjectsToViewChange?: (value: number) => void;
   sectionType?: string;
 }
 
@@ -21,13 +21,12 @@ const DISPLAY_STYLES = [
 
 const SectionControls: React.FC<SectionControlsProps> = ({
   displayStyle,
-  itemsPerColumn,
+  projectsToView,
   onDisplayStyleChange,
-  onItemsPerColumnChange,
+  onProjectsToViewChange,
   sectionType
 }) => {
-  // Don't show items per column for general section as it doesn't make sense
-  const showItemsPerColumn = sectionType !== 'general' && onItemsPerColumnChange;
+  const showProjectsToView = sectionType === 'projects' && onProjectsToViewChange;
 
   return (
     <div className="grid grid-cols-1 gap-2">
@@ -46,17 +45,18 @@ const SectionControls: React.FC<SectionControlsProps> = ({
           </SelectContent>
         </Select>
       </div>
-      
-      {showItemsPerColumn && (
+
+      {showProjectsToView && (
         <div>
-          <Label className="text-xs">Items per Column</Label>
+          <Label className="text-xs">No of Projects</Label>
           <Input 
             type="number" 
-            value={itemsPerColumn || 1}
-            onChange={(e) => onItemsPerColumnChange!(parseInt(e.target.value))}
+            value={projectsToView || 3}
+            onChange={(e) => onProjectsToViewChange!(parseInt(e.target.value))}
             min={1} 
-            max={3} 
+            max={10} 
             className="h-7 text-xs" 
+            placeholder="Max projects to show"
           />
         </div>
       )}

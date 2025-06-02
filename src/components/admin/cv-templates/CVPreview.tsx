@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { CVTemplate } from '@/types/cv-templates';
 import { createCVStyles } from './cv-preview-styles';
-import { PageDistributor } from './PageDistributor';
+import { IntelligentPageDistributor } from './IntelligentPageDistributor';
 import { useTemplateConfiguration } from '@/hooks/use-template-configuration';
 import { useToast } from '@/hooks/use-toast';
 
@@ -14,7 +14,6 @@ interface CVPreviewProps {
 const CVPreview: React.FC<CVPreviewProps> = ({ template, profile }) => {
   const { sections, fieldMappings, isLoading, refetch } = useTemplateConfiguration(template.id);
   const [currentPageCount, setCurrentPageCount] = useState(1);
-  const [previewKey, setPreviewKey] = useState(0);
   const { toast } = useToast();
   const styles = createCVStyles(template);
 
@@ -24,11 +23,6 @@ const CVPreview: React.FC<CVPreviewProps> = ({ template, profile }) => {
       refetch?.();
     }
   }, [template, refetch]);
-
-  // Force re-render when sections or field mappings change
-  useEffect(() => {
-    setPreviewKey(prev => prev + 1);
-  }, [sections, fieldMappings]);
 
   const handlePagesCalculated = (pageCount: number) => {
     setCurrentPageCount(pageCount);
@@ -86,8 +80,7 @@ const CVPreview: React.FC<CVPreviewProps> = ({ template, profile }) => {
         )}
       </div>
       
-      <PageDistributor
-        key={previewKey}
+      <IntelligentPageDistributor
         sections={sections || []}
         fieldMappings={fieldMappings || []}
         profile={profile}

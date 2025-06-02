@@ -571,6 +571,7 @@ export type Database = {
       profiles: {
         Row: {
           created_at: string
+          email: string | null
           employee_id: string | null
           first_name: string | null
           id: string
@@ -579,6 +580,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          email?: string | null
           employee_id?: string | null
           first_name?: string | null
           id: string
@@ -587,6 +589,7 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          email?: string | null
           employee_id?: string | null
           first_name?: string | null
           id?: string
@@ -887,6 +890,10 @@ export type Database = {
         Args: { start_date: string; end_date: string; is_current: boolean }
         Returns: number
       }
+      get_employee_data: {
+        Args: { profile_uuid: string }
+        Returns: Json
+      }
       get_employee_profiles: {
         Args: {
           search_query?: string
@@ -924,7 +931,7 @@ export type Database = {
         Returns: boolean
       }
       has_role: {
-        Args: { _role: string }
+        Args: { _role: string } | { _user_id: string; _role: string }
         Returns: boolean
       }
       is_admin: {

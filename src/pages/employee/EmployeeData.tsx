@@ -14,8 +14,9 @@ import {
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Loader2, Eye, User } from 'lucide-react';
+import { Loader2, Eye, User, Mail } from 'lucide-react';
 import { useEmployeeProfiles } from '@/hooks/use-employee-profiles';
+import { useSendProfileEmail } from '@/hooks/use-send-profile-email';
 import EmployeeSearchFilters from '@/components/employee/EmployeeSearchFilters';
 import UserPagination from '@/components/admin/UserPagination';
 import {
@@ -27,6 +28,8 @@ import {
 
 const EmployeeData: React.FC = () => {
   const navigate = useNavigate();
+  const { sendProfileEmail, isProfileSending } = useSendProfileEmail();
+  
   const {
     profiles,
     isLoading,
@@ -59,6 +62,18 @@ const EmployeeData: React.FC = () => {
 
   const handleViewProfile = (profileId: string) => {
     navigate(`/employee/profile/${profileId}`);
+  };
+
+  const handleSendEmail = async (profile: any) => {
+    try {
+      console.log('Sending email to profile:', profile);
+      
+      await sendProfileEmail({
+        profileId: profile.id
+      });
+    } catch (error) {
+      console.error('Error sending email:', error);
+    }
   };
 
   const handlePerPageChange = (perPage: number) => {
@@ -239,15 +254,38 @@ const EmployeeData: React.FC = () => {
                             </div>
                           </TableCell>
                           <TableCell className="text-right">
-                            <Button 
-                              variant="outline" 
-                              size="sm"
-                              onClick={() => handleViewProfile(profile.id)}
-                              className="h-8 px-3"
-                            >
-                              <Eye className="h-4 w-4 mr-1" />
-                              View Profile
-                            </Button>
+                            <div className="flex items-center justify-end gap-2">
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <Button 
+                                    variant="outline" 
+                                    size="sm"
+                                    onClick={() => handleSendEmail(profile)}
+                                    disabled={isProfileSending(profile.id)}
+                                    className="h-8 px-3"
+                                  >
+                                    {isProfileSending(profile.id) ? (
+                                      <Loader2 className="h-4 w-4 animate-spin" />
+                                    ) : (
+                                      <Mail className="h-4 w-4" />
+                                    )}
+                                  </Button>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                  <p>Send profile completion email</p>
+                                </TooltipContent>
+                              </Tooltip>
+                              
+                              <Button 
+                                variant="outline" 
+                                size="sm"
+                                onClick={() => handleViewProfile(profile.id)}
+                                className="h-8 px-3"
+                              >
+                                <Eye className="h-4 w-4 mr-1" />
+                                View Profile
+                              </Button>
+                            </div>
                           </TableCell>
                         </TableRow>
                       ))

@@ -111,16 +111,21 @@ export const GeneralInfoSection: React.FC<GeneralInfoSectionProps> = ({
     switch (fieldName) {
       case 'profile_image':
         if (isFieldEnabled('profile_image') && profile.profile_image) {
+          // Get orientation from styles to determine image size
+          const isLandscape = styles.baseStyles?.width === '297mm';
+          const imageSize = isLandscape ? '60px' : '80px'; // Smaller for landscape
+          
           return (
             <div key="profile_image" style={{ marginBottom: '10pt', textAlign: 'center' }}>
               <img 
                 src={profile.profile_image} 
                 alt="Profile" 
                 style={{ 
-                  width: '100px', 
-                  height: '100px', 
-                  borderRadius: '50%', 
-                  objectFit: 'cover' 
+                  width: imageSize, 
+                  height: imageSize, 
+                  borderRadius: '4px', // Square with slight rounding instead of circular
+                  objectFit: 'cover',
+                  border: '1px solid #e5e7eb'
                 }} 
               />
             </div>

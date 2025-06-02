@@ -45,6 +45,7 @@ export const createCVStyles = (template: CVTemplate) => {
       color: '#333',
       position: 'relative' as const,
       pageBreakAfter: 'always' as const,
+      orientation: template.orientation, // Add orientation to styles for reference
       ...getLayoutStyles()
     },
 

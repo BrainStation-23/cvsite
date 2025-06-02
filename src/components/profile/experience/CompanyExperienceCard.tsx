@@ -92,9 +92,10 @@ export const CompanyExperienceCard: React.FC<CompanyExperienceCardProps> = ({
                     {formatDateRange(position.start_date, position.end_date, position.is_current)} • {formatDuration(position.duration_months)}
                   </div>
                   {position.description && (
-                    <div className="mt-3 text-sm text-gray-700 dark:text-gray-300 whitespace-pre-line">
-                      {position.description}
-                    </div>
+                    <div 
+                      className="mt-3 text-sm text-gray-700 dark:text-gray-300 prose prose-sm max-w-none"
+                      dangerouslySetInnerHTML={{ __html: position.description }}
+                    />
                   )}
                 </div>
                 

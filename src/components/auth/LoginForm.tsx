@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { toast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import { Eye, EyeOff } from "lucide-react";
 import { AzureLoginButton } from './AzureLoginButton';
 
@@ -23,11 +23,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onSubmit, loading }) => {
     e.preventDefault();
     
     if (!email || !password) {
-      toast({
-        title: "Error",
-        description: "Please enter both email and password",
-        variant: "destructive"
-      });
+      toast.error("Please enter both email and password");
       return;
     }
     

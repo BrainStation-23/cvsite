@@ -67,6 +67,11 @@ export const useTemplateConfiguration = (templateId: string) => {
 
       setSections(processedSections);
       setFieldMappings(processedFieldMappings);
+
+      console.log('Template configuration loaded:', {
+        sectionsCount: processedSections.length,
+        fieldMappingsCount: processedFieldMappings.length
+      });
     } catch (error) {
       console.error('Error fetching template configuration:', error);
       toast({

@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { toast } from "@/hooks/use-toast";
+import { toast } from 'sonner';
 import { HeroSection } from '../components/auth/HeroSection';
 import { LoginForm } from '../components/auth/LoginForm';
 
@@ -42,11 +42,7 @@ const Login = () => {
       // Auth context will handle the redirect via the useEffect above
     } catch (err: any) {
       console.error('Login error:', err);
-      toast({
-        title: "Authentication failed",
-        description: err.message || "Invalid email or password",
-        variant: "destructive"
-      });
+      toast.error(err.message || "Invalid email or password");
     } finally {
       setLoading(false);
     }

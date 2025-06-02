@@ -29,6 +29,15 @@ interface CVPageRendererProps {
   sections?: TemplateSection[];
   fieldMappings?: FieldMapping[];
   layoutType?: string;
+  partialSections?: {
+    [sectionId: string]: {
+      items: any[];
+      startIndex: number;
+      totalItems: number;
+      isPartial: boolean;
+      title: string;
+    };
+  };
 }
 
 export const CVPageRenderer: React.FC<CVPageRendererProps> = ({ 
@@ -38,10 +47,11 @@ export const CVPageRenderer: React.FC<CVPageRendererProps> = ({
   styles,
   sections = [],
   fieldMappings = [],
-  layoutType = 'single-column'
+  layoutType = 'single-column',
+  partialSections = {}
 }) => {
   // If no sections are configured, show a message instead of default content
-  if (sections.length === 0) {
+  if (sections.length === 0 && Object.keys(partialSections).length === 0) {
     return (
       <div style={styles.baseStyles} key={pageNumber}>
         <div style={{ 
@@ -78,6 +88,7 @@ export const CVPageRenderer: React.FC<CVPageRendererProps> = ({
       sections={sections}
       fieldMappings={fieldMappings}
       layoutType={layoutType}
+      partialSections={partialSections}
     />
   );
 };

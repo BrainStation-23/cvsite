@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { CVSectionType } from '@/types/cv-templates';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { useSectionFieldMappings } from '@/hooks/use-section-field-mappings';
 import SortableSectionItem from './sections/SortableSectionItem';
 import AddSectionPanel from './sections/AddSectionPanel';
 import { SECTION_TYPES } from './sections/SectionConstants';
@@ -43,7 +44,7 @@ interface SectionConfig {
   field_mapping: Record<string, any>;
   styling_config: {
     display_style?: string;
-    items_per_column?: number;
+    projects_to_view?: number;
     fields?: FieldConfig[];
   };
 }
@@ -54,6 +55,7 @@ const SectionManager: React.FC<SectionManagerProps> = ({ templateId, onSectionsC
   const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set());
   const [isAddSectionOpen, setIsAddSectionOpen] = useState(false);
   const { toast } = useToast();
+  const { syncFieldMappings } = useSectionFieldMappings(templateId);
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -85,7 +87,7 @@ const SectionManager: React.FC<SectionManagerProps> = ({ templateId, onSectionsC
           field_mapping: section.field_mapping as Record<string, any> || {},
           styling_config: {
             display_style: stylingConfig.display_style || 'default',
-            items_per_column: stylingConfig.items_per_column || 1,
+            projects_to_view: stylingConfig.projects_to_view || 3,
             fields: (stylingConfig.fields as FieldConfig[]) || []
           }
         } as SectionConfig;
@@ -105,6 +107,11 @@ const SectionManager: React.FC<SectionManagerProps> = ({ templateId, onSectionsC
   };
 
   const getDefaultFields = async (sectionType: CVSectionType): Promise<FieldConfig[]> => {
+    // Page break sections don't have fields
+    if (sectionType === 'page_break') {
+      return [];
+    }
+
     try {
       const { data, error } = await supabase.rpc('get_section_fields', {
         section_type_param: sectionType
@@ -136,9 +143,9 @@ const SectionManager: React.FC<SectionManagerProps> = ({ templateId, onSectionsC
         display_order: sections.length + 1,
         is_required: false,
         field_mapping: {},
-        styling_config: {
+        styling_config: sectionType === 'page_break' ? {} : {
           display_style: 'default',
-          items_per_column: 1,
+          projects_to_view: sectionType === 'projects' ? 3 : undefined,
           fields: defaultFields
         }
       };
@@ -158,9 +165,9 @@ const SectionManager: React.FC<SectionManagerProps> = ({ templateId, onSectionsC
         ...data,
         section_type: data.section_type as CVSectionType,
         field_mapping: data.field_mapping as Record<string, any> || {},
-        styling_config: { 
+        styling_config: sectionType === 'page_break' ? {} : { 
           display_style: 'default', 
-          items_per_column: 1, 
+          projects_to_view: sectionType === 'projects' ? 3 : undefined,
           fields: defaultFields 
         }
       } as SectionConfig;
@@ -223,9 +230,19 @@ const SectionManager: React.FC<SectionManagerProps> = ({ templateId, onSectionsC
 
       if (error) throw error;
 
-      setSections(sections.map(section => 
-        section.id === id ? { ...section, ...updates } : section
-      ));
+      const updatedSection = sections.find(s => s.id === id);
+      if (updatedSection) {
+        const newSection = { ...updatedSection, ...updates };
+        setSections(sections.map(section => 
+          section.id === id ? newSection : section
+        ));
+
+        // Sync field mappings when styling config is updated (but not for page breaks)
+        if (updates.styling_config?.fields && updatedSection.section_type !== 'page_break') {
+          await syncFieldMappings(id, updatedSection.section_type, updates.styling_config.fields);
+        }
+      }
+
       onSectionsChange?.();
     } catch (error) {
       console.error('Error updating section:', error);
@@ -310,7 +327,10 @@ const SectionManager: React.FC<SectionManagerProps> = ({ templateId, onSectionsC
 
   const getAvailableSectionTypes = () => {
     const usedTypes = sections.map(s => s.section_type);
-    return SECTION_TYPES.filter(type => !usedTypes.includes(type.value));
+    // Allow page_break to be added multiple times, but exclude others that are already used
+    return SECTION_TYPES.filter(type => 
+      type.value === 'page_break' || !usedTypes.includes(type.value)
+    );
   };
 
   const toggleSectionExpanded = (sectionId: string) => {

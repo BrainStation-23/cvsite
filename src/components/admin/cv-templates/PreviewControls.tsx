@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -7,6 +6,8 @@ import { Download, Eye, RefreshCw } from 'lucide-react';
 import { CVTemplate } from '@/types/cv-templates';
 import { EmployeeProfile } from '@/hooks/types/employee-profiles';
 import { EmployeeCombobox } from './EmployeeCombobox';
+import ExportDropdown from './ExportDropdown';
+import { useTemplateConfiguration } from '@/hooks/use-template-configuration';
 
 interface PreviewControlsProps {
   template: CVTemplate;
@@ -14,6 +15,7 @@ interface PreviewControlsProps {
   onProfileChange: (profileId: string) => void;
   profiles: EmployeeProfile[];
   onExport?: () => void;
+  templateId?: string;
 }
 
 const PreviewControls: React.FC<PreviewControlsProps> = ({
@@ -21,7 +23,8 @@ const PreviewControls: React.FC<PreviewControlsProps> = ({
   selectedProfileId,
   onProfileChange,
   profiles,
-  onExport
+  onExport,
+  templateId
 }) => {
   const [selectedProfile, setSelectedProfile] = useState<EmployeeProfile | null>(null);
 
@@ -42,6 +45,9 @@ const PreviewControls: React.FC<PreviewControlsProps> = ({
   const handleExport = () => {
     onExport?.();
   };
+
+  // Get template configuration for export
+  const { sections: templateSections, fieldMappings: templateFieldMappings } = useTemplateConfiguration(templateId || '');
 
   return (
     <div className="space-y-4">
@@ -65,15 +71,14 @@ const PreviewControls: React.FC<PreviewControlsProps> = ({
           </div>
           
           <div className="flex gap-2">
-            <Button 
-              size="sm" 
-              onClick={handleExport} 
+            <ExportDropdown
+              template={template}
+              profile={selectedProfile}
+              sections={templateSections || []}
+              fieldMappings={templateFieldMappings || []}
+              styles={{}} // TODO: get actual styles
               disabled={!selectedProfile}
-              className="h-7 text-xs"
-            >
-              <Download className="h-3 w-3 mr-1" />
-              Export
-            </Button>
+            />
           </div>
         </CardContent>
       </Card>

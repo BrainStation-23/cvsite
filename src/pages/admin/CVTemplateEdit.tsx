@@ -6,8 +6,9 @@ import { CVTemplate } from '@/types/cv-templates';
 import LivePreviewLayout from '@/components/admin/cv-templates/LivePreviewLayout';
 import TemplateEditorLayout from '@/components/admin/cv-templates/TemplateEditorLayout';
 import { useEmployeeProfiles } from '@/hooks/use-employee-profiles';
-import { useEmployeeProfile } from '@/hooks/use-employee-profile';
+import { useEmployeeData } from '@/hooks/use-employee-data';
 import { useToast } from '@/hooks/use-toast';
+import { useTemplateConfiguration } from '@/hooks/use-template-configuration';
 
 const CVTemplateEdit: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -21,36 +22,14 @@ const CVTemplateEdit: React.FC = () => {
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const { toast } = useToast();
 
-  // Fetch detailed profile data for the selected profile
+  // Fetch employee data using the new RPC function
   const {
-    isLoading: profileLoading,
-    generalInfo,
-    technicalSkills,
-    specializedSkills,
-    experiences,
-    education,
-    trainings,
-    achievements,
-    projects
-  } = useEmployeeProfile(selectedProfileId);
+    data: selectedProfile,
+    isLoading: profileLoading
+  } = useEmployeeData(selectedProfileId);
 
-  // Construct the full profile object for the CV preview
-  const selectedProfile = selectedProfileId ? {
-    id: selectedProfileId,
-    // Get employee_id from the profiles data
-    employee_id: profiles?.find(p => p.id === selectedProfileId)?.employee_id || selectedProfileId,
-    first_name: generalInfo.firstName,
-    last_name: generalInfo.lastName,
-    biography: generalInfo.biography,
-    profile_image: generalInfo.profileImage,
-    technical_skills: technicalSkills,
-    specialized_skills: specializedSkills,
-    experiences: experiences,
-    education: education,
-    trainings: trainings,
-    achievements: achievements,
-    projects: projects
-  } : null;
+  // Get template configuration for export
+  const { sections: templateSections, fieldMappings: templateFieldMappings } = useTemplateConfiguration(id || '');
 
   const loadTemplate = async () => {
     if (id) {
@@ -112,6 +91,7 @@ const CVTemplateEdit: React.FC = () => {
 
   const handleSectionsChange = () => {
     setHasUnsavedChanges(true);
+    // Removed refetchProfile() call - data will update automatically when selectedProfileId changes
   };
 
   const handleBack = () => {
@@ -130,8 +110,8 @@ const CVTemplateEdit: React.FC = () => {
   };
 
   const handleExport = () => {
-    // TODO: Implement export functionality
-    console.log('Export functionality to be implemented');
+    // Export will now be handled by the ExportDropdown component
+    console.log('Export triggered from template editor');
   };
 
   if (isLoading) {
@@ -164,6 +144,11 @@ const CVTemplateEdit: React.FC = () => {
       onProfileChange={handleProfileChange}
       profiles={profiles || []}
       onExport={handleExport}
+      // Pass the template sections and field mappings for export
+      templateSections={templateSections}
+      templateFieldMappings={templateFieldMappings}
+      template={template}
+      selectedProfile={selectedProfile}
     >
       <LivePreviewLayout
         template={template}

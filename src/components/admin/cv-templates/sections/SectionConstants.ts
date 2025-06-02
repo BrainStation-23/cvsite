@@ -1,32 +1,72 @@
 
 import { 
-  User,
-  Code,
-  Wrench,
-  Briefcase,
-  GraduationCap,
-  Award,
-  Trophy,
-  FolderOpen,
-  Target
+  User, 
+  Briefcase, 
+  GraduationCap, 
+  Code, 
+  Star, 
+  FolderOpen, 
+  Award, 
+  BookOpen,
+  FileText
 } from 'lucide-react';
 import { CVSectionType } from '@/types/cv-templates';
 
-export const SECTION_TYPES: { 
-  value: CVSectionType; 
-  label: string; 
-  icon: React.ComponentType<{ className?: string }>;
-  description: string;
-}[] = [
-  { value: 'general', label: 'General Information', icon: User, description: 'Name, contact, bio' },
-  { value: 'skills', label: 'Skills', icon: Target, description: 'General skills overview' },
-  { value: 'technical_skills', label: 'Technical Skills', icon: Code, description: 'Programming, tools' },
-  { value: 'specialized_skills', label: 'Specialized Skills', icon: Wrench, description: 'Domain expertise' },
-  { value: 'experience', label: 'Work Experience', icon: Briefcase, description: 'Employment history' },
-  { value: 'education', label: 'Education', icon: GraduationCap, description: 'Academic background' },
-  { value: 'training', label: 'Training & Certifications', icon: Award, description: 'Courses, certificates' },
-  { value: 'achievements', label: 'Achievements', icon: Trophy, description: 'Awards, recognition' },
-  { value: 'projects', label: 'Projects', icon: FolderOpen, description: 'Portfolio work' },
+export const SECTION_TYPES = [
+  { 
+    value: 'general' as CVSectionType, 
+    label: 'General Information', 
+    icon: User,
+    description: 'Basic personal information and biography'
+  },
+  { 
+    value: 'experience' as CVSectionType, 
+    label: 'Work Experience', 
+    icon: Briefcase,
+    description: 'Professional work history and roles'
+  },
+  { 
+    value: 'education' as CVSectionType, 
+    label: 'Education', 
+    icon: GraduationCap,
+    description: 'Academic qualifications and degrees'
+  },
+  { 
+    value: 'technical_skills' as CVSectionType, 
+    label: 'Technical Skills', 
+    icon: Code,
+    description: 'Programming languages and technical expertise'
+  },
+  { 
+    value: 'specialized_skills' as CVSectionType, 
+    label: 'Specialized Skills', 
+    icon: Star,
+    description: 'Domain-specific skills and competencies'
+  },
+  { 
+    value: 'projects' as CVSectionType, 
+    label: 'Projects', 
+    icon: FolderOpen,
+    description: 'Notable projects and contributions'
+  },
+  { 
+    value: 'training' as CVSectionType, 
+    label: 'Training & Certifications', 
+    icon: BookOpen,
+    description: 'Professional training and certifications'
+  },
+  { 
+    value: 'achievements' as CVSectionType, 
+    label: 'Achievements', 
+    icon: Award,
+    description: 'Notable accomplishments and recognitions'
+  },
+  { 
+    value: 'page_break' as CVSectionType, 
+    label: 'Page Break', 
+    icon: FileText,
+    description: 'Insert a page break in the document'
+  }
 ];
 
 export const DISPLAY_STYLES = [
