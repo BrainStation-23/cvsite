@@ -41,8 +41,8 @@ const AdminDashboard: React.FC = () => {
           />
         </div>
 
-        {/* Charts */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Charts - Updated layout for better responsiveness */}
+        <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
           <SkillsChart data={analytics.skillMatrix} isLoading={isLoading} />
           <ExperienceChart data={analytics.experienceDistribution} isLoading={isLoading} />
         </div>
