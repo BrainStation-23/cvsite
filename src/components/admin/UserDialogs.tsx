@@ -583,7 +583,7 @@ export const BulkUploadDialog: React.FC<BulkUploadDialogProps> = ({
           {validationResult && !isValidating && (
             <div className="border rounded-lg p-4">
               {React.createElement(
-                (await import('@/components/admin/UserCSVValidation')).default,
+                React.lazy(() => import('@/components/admin/UserCSVValidation')),
                 { validationResult }
               )}
             </div>
