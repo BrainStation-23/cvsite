@@ -1,55 +1,91 @@
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.38.4";
-import * as csv from "https://deno.land/std@0.170.0/encoding/csv.ts";
-import * as xlsx from "https://esm.sh/xlsx@0.18.5";
+import Papa from "https://esm.sh/papaparse@5.4.1";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-const parseFileData = async (formData: FormData): Promise<any[]> => {
-  const file = formData.get('file') as File;
-  if (!file) throw new Error('No file uploaded');
+interface UserUpdateData {
+  userId: string;
+  email?: string;
+  firstName?: string;
+  lastName?: string;
+  role?: string;
+  employeeId?: string;
+  password?: string;
+  sbuName?: string;
+}
+
+const parseCSVData = async (file: File): Promise<UserUpdateData[]> => {
+  console.log('Parsing CSV file:', file.name, 'Size:', file.size);
   
-  const fileType = file.name.split('.').pop()?.toLowerCase();
-  const arrayBuffer = await file.arrayBuffer();
+  const text = await file.text();
+  console.log('CSV text length:', text.length);
+  console.log('First 200 chars:', text.substring(0, 200));
   
-  if (fileType === 'csv') {
-    const text = new TextDecoder().decode(arrayBuffer);
-    const rows = await csv.parse(text, { skipFirstRow: true });
-    return rows.map(row => ({
-      userId: row[0],
-      email: row[1],
-      firstName: row[2],
-      lastName: row[3],
-      role: row[4],
-      employeeId: row[5],
-      password: row[6], // Optional
-      sbuName: row[7] // Added SBU name field
-    }));
-  } else if (fileType === 'xlsx' || fileType === 'xls') {
-    const workbook = xlsx.read(arrayBuffer);
-    const worksheet = workbook.Sheets[workbook.SheetNames[0]];
-    const data = xlsx.utils.sheet_to_json(worksheet);
-    return data.map((row: any) => ({
-      userId: row.userId,
-      email: row.email,
-      firstName: row.firstName,
-      lastName: row.lastName,
-      role: row.role,
-      employeeId: row.employeeId,
-      password: row.password, // Optional
-      sbuName: row.sbuName // Added SBU name field
-    }));
-  } else {
-    throw new Error('Unsupported file format. Please upload CSV or Excel file.');
-  }
+  return new Promise((resolve, reject) => {
+    Papa.parse(text, {
+      header: true,
+      skipEmptyLines: true,
+      transformHeader: (header: string) => {
+        // Normalize headers to match expected field names
+        const normalized = header.trim().toLowerCase();
+        const headerMap: Record<string, string> = {
+          'userid': 'userId',
+          'user_id': 'userId',
+          'id': 'userId',
+          'firstname': 'firstName',
+          'first_name': 'firstName',
+          'lastname': 'lastName',
+          'last_name': 'lastName',
+          'employeeid': 'employeeId',
+          'employee_id': 'employeeId',
+          'sbuname': 'sbuName',
+          'sbu_name': 'sbuName'
+        };
+        return headerMap[normalized] || header;
+      },
+      complete: (results) => {
+        console.log('Parse complete. Rows:', results.data.length);
+        console.log('Parse errors:', results.errors);
+        
+        if (results.errors.length > 0) {
+          console.error('CSV parsing errors:', results.errors);
+        }
+        
+        const users = results.data
+          .filter((row: any) => row.userId && row.userId.trim() !== '')
+          .map((row: any) => ({
+            userId: row.userId?.trim(),
+            email: row.email?.trim(),
+            firstName: row.firstName?.trim(),
+            lastName: row.lastName?.trim(),
+            role: row.role?.trim(),
+            employeeId: row.employeeId?.trim(),
+            password: row.password?.trim(),
+            sbuName: row.sbuName?.trim()
+          }));
+        
+        console.log('Filtered users count:', users.length);
+        console.log('Sample user:', users[0]);
+        
+        resolve(users);
+      },
+      error: (error) => {
+        console.error('Papa parse error:', error);
+        reject(error);
+      }
+    });
+  });
 };
 
 const getSbuIdByName = async (supabase: any, sbuName: string): Promise<string | null> => {
   if (!sbuName || sbuName.trim() === '') return null;
+  
+  console.log('Looking up SBU:', sbuName);
   
   const { data: sbus, error } = await supabase
     .from('sbus')
@@ -62,10 +98,164 @@ const getSbuIdByName = async (supabase: any, sbuName: string): Promise<string | 
     return null;
   }
   
-  return sbus && sbus.length > 0 ? sbus[0].id : null;
+  const sbuId = sbus && sbus.length > 0 ? sbus[0].id : null;
+  console.log('SBU lookup result:', { sbuName, sbuId });
+  
+  return sbuId;
+};
+
+const updateUserInBatch = async (supabase: any, user: UserUpdateData) => {
+  console.log('Updating user:', user.userId);
+  
+  try {
+    // Get SBU ID from name if provided
+    let sbuId = null;
+    if (user.sbuName && user.sbuName.trim()) {
+      sbuId = await getSbuIdByName(supabase, user.sbuName);
+      if (!sbuId) {
+        console.log(`Warning: SBU "${user.sbuName}" not found for user ${user.userId}`);
+      }
+    }
+    
+    // Update user auth data if needed
+    if (user.email || user.firstName || user.lastName || user.employeeId || user.password) {
+      const updateData: Record<string, any> = {};
+      
+      if (user.email) updateData.email = user.email;
+      if (user.password) updateData.password = user.password;
+      
+      const userMetadata: Record<string, any> = {};
+      if (user.firstName) userMetadata.first_name = user.firstName;
+      if (user.lastName) userMetadata.last_name = user.lastName;
+      if (user.employeeId) userMetadata.employee_id = user.employeeId;
+      
+      if (Object.keys(userMetadata).length > 0) {
+        updateData.user_metadata = userMetadata;
+      }
+      
+      if (Object.keys(updateData).length > 0) {
+        console.log('Updating auth user:', user.userId, updateData);
+        const { error: updateError } = await supabase.auth.admin.updateUserById(
+          user.userId,
+          updateData
+        );
+        
+        if (updateError) {
+          throw new Error(`Auth update failed: ${updateError.message}`);
+        }
+      }
+    }
+    
+    // Update profile table
+    if (user.firstName || user.lastName || user.employeeId || user.sbuName !== undefined) {
+      const profileUpdates: Record<string, any> = {};
+      if (user.firstName) profileUpdates.first_name = user.firstName;
+      if (user.lastName) profileUpdates.last_name = user.lastName;
+      if (user.employeeId) profileUpdates.employee_id = user.employeeId;
+      
+      // Always update sbu_id if sbuName was provided (even if null to clear assignment)
+      if (user.sbuName !== undefined) {
+        profileUpdates.sbu_id = sbuId;
+      }
+      
+      console.log('Updating profile:', user.userId, profileUpdates);
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .update(profileUpdates)
+        .eq('id', user.userId);
+      
+      if (profileError) {
+        throw new Error(`Profile update failed: ${profileError.message}`);
+      }
+    }
+    
+    // Update role if provided
+    if (user.role) {
+      if (!['admin', 'manager', 'employee'].includes(user.role)) {
+        throw new Error('Invalid role. Must be admin, manager, or employee');
+      }
+      
+      console.log('Updating role for user:', user.userId, 'to:', user.role);
+      
+      // Check existing roles
+      const { data: existingRoles, error: fetchError } = await supabase
+        .from('user_roles')
+        .select('id, role')
+        .eq('user_id', user.userId);
+      
+      if (fetchError) {
+        throw new Error(`Role fetch failed: ${fetchError.message}`);
+      }
+      
+      if (existingRoles && existingRoles.length > 0) {
+        // Update existing role
+        const existingRole = existingRoles[0];
+        if (existingRole.role !== user.role) {
+          const { error: updateRoleError } = await supabase
+            .from('user_roles')
+            .update({ role: user.role })
+            .eq('id', existingRole.id);
+          
+          if (updateRoleError) {
+            throw new Error(`Role update failed: ${updateRoleError.message}`);
+          }
+        }
+      } else {
+        // Insert new role
+        const { error: insertRoleError } = await supabase
+          .from('user_roles')
+          .insert({ user_id: user.userId, role: user.role });
+        
+        if (insertRoleError) {
+          throw new Error(`Role insert failed: ${insertRoleError.message}`);
+        }
+      }
+    }
+    
+    console.log('Successfully updated user:', user.userId);
+    return {
+      userId: user.userId,
+      sbuAssigned: !!sbuId,
+      sbuName: sbuId ? user.sbuName : null
+    };
+  } catch (error) {
+    console.error('Error updating user:', user.userId, error);
+    throw error;
+  }
+};
+
+const processBatch = async (supabase: any, batch: UserUpdateData[], batchNumber: number) => {
+  console.log(`Processing batch ${batchNumber} with ${batch.length} users`);
+  
+  const results = {
+    successful: [] as any[],
+    failed: [] as any[]
+  };
+  
+  for (const user of batch) {
+    try {
+      const result = await updateUserInBatch(supabase, user);
+      results.successful.push(result);
+    } catch (error) {
+      console.error(`Failed to update user ${user.userId}:`, error);
+      results.failed.push({ 
+        userId: user.userId, 
+        error: error.message || 'Unknown error' 
+      });
+    }
+  }
+  
+  console.log(`Batch ${batchNumber} complete:`, {
+    successful: results.successful.length,
+    failed: results.failed.length
+  });
+  
+  return results;
 };
 
 serve(async (req) => {
+  console.log('Bulk update users function called');
+  
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -75,12 +265,25 @@ serve(async (req) => {
     const supabaseUrl = Deno.env.get('SUPABASE_URL') || '';
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || '';
     
+    if (!supabaseUrl || !supabaseServiceKey) {
+      throw new Error('Missing Supabase configuration');
+    }
+    
     // Create a Supabase client with the service role key
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
     
     // Parse the file from the request
     const formData = await req.formData();
-    const users = await parseFileData(formData);
+    const file = formData.get('file') as File;
+    
+    if (!file) {
+      throw new Error('No file uploaded');
+    }
+    
+    console.log('Processing file:', file.name, 'Type:', file.type);
+    
+    // Parse CSV using papaparse
+    const users = await parseCSVData(file);
     
     if (!users.length) {
       return new Response(
@@ -89,144 +292,51 @@ serve(async (req) => {
       );
     }
     
-    const results = {
-      successful: [],
-      failed: []
+    console.log(`Starting bulk update for ${users.length} users`);
+    
+    // Process users in batches of 10
+    const BATCH_SIZE = 10;
+    const batches = [];
+    for (let i = 0; i < users.length; i += BATCH_SIZE) {
+      batches.push(users.slice(i, i + BATCH_SIZE));
+    }
+    
+    console.log(`Processing ${batches.length} batches of ${BATCH_SIZE} users each`);
+    
+    const allResults = {
+      successful: [] as any[],
+      failed: [] as any[]
     };
     
-    // Process each user
-    for (const user of users) {
-      const { userId, email, firstName, lastName, role, employeeId, password, sbuName } = user;
+    // Process each batch
+    for (let i = 0; i < batches.length; i++) {
+      const batchResults = await processBatch(supabase, batches[i], i + 1);
+      allResults.successful.push(...batchResults.successful);
+      allResults.failed.push(...batchResults.failed);
       
-      if (!userId) {
-        results.failed.push({ ...user, error: 'User ID is required' });
-        continue;
-      }
-      
-      try {
-        // Get SBU ID from name if provided
-        let sbuId = null;
-        if (sbuName && sbuName.trim()) {
-          sbuId = await getSbuIdByName(supabase, sbuName);
-          if (!sbuId) {
-            console.log(`Warning: SBU "${sbuName}" not found for user ${userId}, will clear SBU assignment`);
-            // Set sbuId to null to clear the assignment if SBU name doesn't exist
-            sbuId = null;
-          }
-        }
-        
-        // Update user metadata if provided
-        if (email || firstName || lastName || employeeId || password) {
-          const updateData: Record<string, any> = {};
-          
-          if (email) updateData.email = email;
-          if (password) updateData.password = password;
-          
-          const userMetadata: Record<string, any> = {};
-          if (firstName) userMetadata.first_name = firstName;
-          if (lastName) userMetadata.last_name = lastName;
-          if (employeeId) userMetadata.employee_id = employeeId;
-          
-          if (Object.keys(userMetadata).length > 0) {
-            updateData.user_metadata = userMetadata;
-          }
-          
-          if (Object.keys(updateData).length > 0) {
-            const { error: updateError } = await supabase.auth.admin.updateUserById(
-              userId,
-              updateData
-            );
-            
-            if (updateError) {
-              results.failed.push({ userId, error: updateError.message });
-              continue;
-            }
-          }
-        }
-        
-        // Update profile table if profile-related fields are provided
-        if (firstName || lastName || employeeId || sbuName !== undefined) {
-          const profileUpdates: Record<string, any> = {};
-          if (firstName) profileUpdates.first_name = firstName;
-          if (lastName) profileUpdates.last_name = lastName;
-          if (employeeId) profileUpdates.employee_id = employeeId;
-          
-          // Always update sbu_id if sbuName was provided (even if null to clear assignment)
-          if (sbuName !== undefined) {
-            profileUpdates.sbu_id = sbuId;
-          }
-          
-          const { error: profileError } = await supabase
-            .from('profiles')
-            .update(profileUpdates)
-            .eq('id', userId);
-          
-          if (profileError) {
-            results.failed.push({ userId, error: profileError.message });
-            continue;
-          }
-        }
-        
-        // Update role if provided
-        if (role) {
-          // Validate role
-          if (!['admin', 'manager', 'employee'].includes(role)) {
-            results.failed.push({ userId, error: 'Invalid role. Must be admin, manager, or employee' });
-            continue;
-          }
-          
-          // First get the existing role to see if we need to update
-          const { data: existingRoles, error: fetchError } = await supabase
-            .from('user_roles')
-            .select('id, role')
-            .eq('user_id', userId);
-          
-          if (fetchError) {
-            results.failed.push({ userId, error: fetchError.message });
-            continue;
-          }
-          
-          if (existingRoles && existingRoles.length > 0) {
-            // User has roles, update if different
-            const existingRole = existingRoles[0];
-            if (existingRole.role !== role) {
-              const { error: updateRoleError } = await supabase
-                .from('user_roles')
-                .update({ role })
-                .eq('id', existingRole.id);
-              
-              if (updateRoleError) {
-                results.failed.push({ userId, error: updateRoleError.message });
-                continue;
-              }
-            }
-          } else {
-            // No roles found, insert new role
-            const { error: insertRoleError } = await supabase
-              .from('user_roles')
-              .insert({ user_id: userId, role });
-            
-            if (insertRoleError) {
-              results.failed.push({ userId, error: insertRoleError.message });
-              continue;
-            }
-          }
-        }
-        
-        results.successful.push({
-          userId,
-          sbuAssigned: !!sbuId,
-          sbuName: sbuId ? sbuName : null
-        });
-      } catch (error) {
-        results.failed.push({ userId, error: error.message || 'Unknown error' });
+      // Small delay between batches to avoid overwhelming the database
+      if (i < batches.length - 1) {
+        await new Promise(resolve => setTimeout(resolve, 100));
       }
     }
     
+    const batchInfo = {
+      totalUsers: users.length,
+      totalBatches: batches.length,
+      batchSize: BATCH_SIZE
+    };
+    
+    console.log('Bulk update completed:', {
+      successful: allResults.successful.length,
+      failed: allResults.failed.length,
+      batchInfo
+    });
+    
     return new Response(
       JSON.stringify({ 
-        message: `Processed ${users.length} users. ${results.successful.length} updated successfully, ${results.failed.length} failed.`,
-        results
+        message: `Processed ${users.length} users. ${allResults.successful.length} updated successfully, ${allResults.failed.length} failed.`,
+        results: allResults,
+        batchInfo
       }),
       { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
