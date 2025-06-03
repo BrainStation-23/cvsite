@@ -79,7 +79,6 @@ export function useProfile() {
     saveAchievement: achievementsHook.saveAchievement,
     updateAchievement: achievementsHook.updateAchievement, 
     deleteAchievement: achievementsHook.deleteAchievement,
-    reorderAchievements: achievementsHook.reorderAchievements,
     saveProject: projectsHook.saveProject,
     updateProject: projectsHook.updateProject,
     deleteProject: projectsHook.deleteProject,

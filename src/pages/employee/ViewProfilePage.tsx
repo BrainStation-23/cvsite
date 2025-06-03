@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import DashboardLayout from '../../components/Layout/DashboardLayout';
@@ -28,7 +29,7 @@ const ViewProfilePage: React.FC = () => {
   const { experiences, saveExperience, updateExperience, deleteExperience, isLoading: experienceLoading, isSaving: experienceSaving } = useExperience(profileId);
   const { education, saveEducation, updateEducation, deleteEducation, isLoading: educationLoading, isSaving: educationSaving } = useEducation(profileId);
   const { trainings, saveTraining, updateTraining, deleteTraining, isLoading: trainingLoading, isSaving: trainingSaving } = useTraining(profileId);
-  const { achievements, saveAchievement, updateAchievement, deleteAchievement, reorderAchievements, isLoading: achievementsLoading, isSaving: achievementsSaving } = useAchievements(profileId);
+  const { achievements, saveAchievement, updateAchievement, deleteAchievement, isLoading: achievementsLoading, isSaving: achievementsSaving } = useAchievements(profileId);
   const { projects, saveProject, updateProject, deleteProject, reorderProjects, isLoading: projectsLoading, isSaving: projectsSaving } = useProjects(profileId);
 
   // Check if current user can edit (admin or manager)
@@ -142,7 +143,6 @@ const ViewProfilePage: React.FC = () => {
             saveAchievement={saveAchievement}
             updateAchievement={updateAchievement}
             deleteAchievement={deleteAchievement}
-            reorderAchievements={reorderAchievements}
             saveProject={saveProject}
             updateProject={updateProject}
             deleteProject={deleteProject}
