@@ -1,8 +1,9 @@
+
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import DashboardLayout from '../../components/Layout/DashboardLayout';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Edit, Save, X } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
 import { ProfileTabs } from '@/components/profile/ProfileTabs';
 import { useForm } from 'react-hook-form';
 import { GeneralInfoFormData } from '@/components/profile/GeneralInfoTab';
@@ -19,7 +20,6 @@ const ViewProfilePage: React.FC = () => {
   const { profileId } = useParams<{ profileId: string }>();
   const navigate = useNavigate();
   const { user } = useAuth();
-  const [isEditing, setIsEditing] = useState(false);
   const [newTechnicalSkill, setNewTechnicalSkill] = useState({ name: '', proficiency: 1, priority: 0 });
   const [newSpecializedSkill, setNewSpecializedSkill] = useState({ name: '', proficiency: 1, priority: 0 });
   
@@ -59,35 +59,6 @@ const ViewProfilePage: React.FC = () => {
     }
   }, [isLoading, generalInfo, form]);
 
-  const handleEdit = () => {
-    setIsEditing(true);
-  };
-
-  const handleSave = async () => {
-    const formData = form.getValues();
-    const success = await saveGeneralInfo({
-      firstName: formData.firstName,
-      lastName: formData.lastName,
-      biography: formData.biography,
-      profileImage: formData.profileImage
-    });
-    
-    if (success) {
-      setIsEditing(false);
-    }
-  };
-
-  const handleCancel = () => {
-    setIsEditing(false);
-    // Reset form to original values
-    form.reset({
-      firstName: generalInfo.firstName || '',
-      lastName: generalInfo.lastName || '',
-      biography: generalInfo.biography || '',
-      profileImage: generalInfo.profileImage
-    });
-  };
-
   const handleImageUpdate = (imageUrl: string | null) => {
     form.setValue('profileImage', imageUrl);
   };
@@ -124,99 +95,66 @@ const ViewProfilePage: React.FC = () => {
 
   return (
     <DashboardLayout>
-      <div className="space-y-6">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <Button 
-              variant="outline" 
-              onClick={() => navigate('/admin/employee-data')}
-              className="flex items-center gap-2"
-            >
-              <ArrowLeft className="h-4 w-4" />
-              Back to Employee Data
-            </Button>
-            <div>
-              <h1 className="text-2xl font-semibold text-cvsite-navy dark:text-white">
-                {generalInfo.firstName} {generalInfo.lastName}'s Profile
-              </h1>
-              <p className="text-gray-600 dark:text-gray-400 mt-1">
-                Employee profile details
-              </p>
-            </div>
-          </div>
-          
-          {canEdit && (
-            <div className="flex items-center gap-2">
-              {!isEditing ? (
-                <Button onClick={handleEdit} className="flex items-center gap-2">
-                  <Edit className="h-4 w-4" />
-                  Edit Profile
-                </Button>
-              ) : (
-                <>
-                  <Button 
-                    onClick={handleSave} 
-                    disabled={isSaving}
-                    className="flex items-center gap-2"
-                  >
-                    <Save className="h-4 w-4" />
-                    {isSaving ? 'Saving...' : 'Save Changes'}
-                  </Button>
-                  <Button 
-                    variant="outline" 
-                    onClick={handleCancel}
-                    className="flex items-center gap-2"
-                  >
-                    <X className="h-4 w-4" />
-                    Cancel
-                  </Button>
-                </>
-              )}
-            </div>
-          )}
+      <div className="flex flex-col h-full">
+        {/* Compact header */}
+        <div className="flex-shrink-0 flex items-center py-4 px-1 border-b border-gray-200 dark:border-gray-700">
+          <Button 
+            variant="outline" 
+            onClick={() => navigate('/admin/employee-data')}
+            className="flex items-center gap-2 mr-4"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Back
+          </Button>
+          <h1 className="text-xl font-semibold text-cvsite-navy dark:text-white">
+            {generalInfo.firstName} {generalInfo.lastName}'s Profile
+          </h1>
         </div>
 
-        <ProfileTabs
-          form={form}
-          isEditing={isEditing}
-          onImageUpdate={handleImageUpdate}
-          technicalSkills={technicalSkills}
-          specializedSkills={specializedSkills}
-          experiences={experiences}
-          education={education}
-          trainings={trainings}
-          achievements={achievements}
-          projects={projects}
-          isSaving={isSaving}
-          newTechnicalSkill={newTechnicalSkill}
-          newSpecializedSkill={newSpecializedSkill}
-          setNewTechnicalSkill={setNewTechnicalSkill}
-          setNewSpecializedSkill={setNewSpecializedSkill}
-          handleAddTechnicalSkill={handleAddTechnicalSkillWrapper}
-          handleAddSpecializedSkill={handleAddSpecializedSkillWrapper}
-          saveExperience={saveExperience}
-          updateExperience={updateExperience}
-          deleteExperience={deleteExperience}
-          saveEducation={saveEducation}
-          updateEducation={updateEducation}
-          deleteEducation={deleteEducation}
-          saveTraining={saveTraining}
-          updateTraining={updateTraining}
-          deleteTraining={deleteTraining}
-          saveAchievement={saveAchievement}
-          updateAchievement={updateAchievement}
-          deleteAchievement={deleteAchievement}
-          saveProject={saveProject}
-          updateProject={updateProject}
-          deleteProject={deleteProject}
-          reorderProjects={reorderProjects}
-          deleteTechnicalSkill={deleteTechnicalSkill}
-          deleteSpecializedSkill={deleteSpecializedSkill}
-          saveTechnicalSkill={saveTechnicalSkill}
-          saveSpecializedSkill={saveSpecializedSkill}
-          reorderTechnicalSkills={reorderTechnicalSkills}
-          profileId={profileId}
-        />
+        {/* Content area - now takes full height */}
+        <div className="flex-1 min-h-0 py-4">
+          <ProfileTabs
+            form={form}
+            isEditing={canEdit}
+            onImageUpdate={handleImageUpdate}
+            technicalSkills={technicalSkills}
+            specializedSkills={specializedSkills}
+            experiences={experiences}
+            education={education}
+            trainings={trainings}
+            achievements={achievements}
+            projects={projects}
+            isSaving={isSaving}
+            newTechnicalSkill={newTechnicalSkill}
+            newSpecializedSkill={newSpecializedSkill}
+            setNewTechnicalSkill={setNewTechnicalSkill}
+            setNewSpecializedSkill={setNewSpecializedSkill}
+            handleAddTechnicalSkill={handleAddTechnicalSkillWrapper}
+            handleAddSpecializedSkill={handleAddSpecializedSkillWrapper}
+            saveExperience={saveExperience}
+            updateExperience={updateExperience}
+            deleteExperience={deleteExperience}
+            saveEducation={saveEducation}
+            updateEducation={updateEducation}
+            deleteEducation={deleteEducation}
+            saveTraining={saveTraining}
+            updateTraining={updateTraining}
+            deleteTraining={deleteTraining}
+            saveAchievement={saveAchievement}
+            updateAchievement={updateAchievement}
+            deleteAchievement={deleteAchievement}
+            saveProject={saveProject}
+            updateProject={updateProject}
+            deleteProject={deleteProject}
+            reorderProjects={reorderProjects}
+            deleteTechnicalSkill={deleteTechnicalSkill}
+            deleteSpecializedSkill={deleteSpecializedSkill}
+            saveTechnicalSkill={saveTechnicalSkill}
+            saveSpecializedSkill={saveSpecializedSkill}
+            reorderTechnicalSkills={reorderTechnicalSkills}
+            profileId={profileId}
+          />
+        </div>
       </div>
     </DashboardLayout>
   );
