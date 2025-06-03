@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import DashboardLayout from '../../components/Layout/DashboardLayout';
 import { Button } from '@/components/ui/button';
-import { Upload, RefreshCw, UserPlus } from 'lucide-react';
+import { Upload, RefreshCw, UserPlus, Download } from 'lucide-react';
 import { useUserManagement } from '@/hooks/use-user-management';
 import UserSearchFilters from '@/components/admin/UserSearchFilters';
 import UserList from '@/components/admin/UserList';
@@ -43,7 +43,8 @@ const UserManagement: React.FC = () => {
     updateUser,
     resetPassword,
     deleteUser,
-    bulkUpload
+    bulkUpload,
+    exportUsers
   } = useUserManagement();
   
   useEffect(() => {
@@ -130,6 +131,16 @@ const UserManagement: React.FC = () => {
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-semibold text-cvsite-navy dark:text-white">User Management</h1>
         <div className="flex space-x-2">
+          <Button 
+            variant="outline" 
+            className="flex items-center gap-2"
+            onClick={exportUsers}
+            disabled={isLoading}
+          >
+            <Download size={16} />
+            <span className="hidden md:inline">Export All</span>
+          </Button>
+          
           <Button 
             variant="outline" 
             className="flex items-center gap-2"
