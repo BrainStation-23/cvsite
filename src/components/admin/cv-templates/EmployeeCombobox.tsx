@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Check, ChevronsUpDown, User } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -17,25 +17,54 @@ import {
   PopoverTrigger,
 } from '@/components/ui/popover';
 import { EmployeeProfile } from '@/hooks/types/employee-profiles';
+import { useEmployeeProfiles } from '@/hooks/use-employee-profiles';
 
 interface EmployeeComboboxProps {
-  profiles: EmployeeProfile[];
   value?: string;
   onValueChange: (value: string) => void;
   placeholder?: string;
   disabled?: boolean;
-  isLoading?: boolean;
 }
 
 export const EmployeeCombobox: React.FC<EmployeeComboboxProps> = ({
-  profiles = [],
   value,
   onValueChange,
   placeholder = "Select employee...",
-  disabled = false,
-  isLoading = false
+  disabled = false
 }) => {
   const [open, setOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  
+  const { 
+    profiles, 
+    isLoading, 
+    fetchProfiles 
+  } = useEmployeeProfiles({ 
+    initialPage: 1, 
+    initialPerPage: 50 // Get more results for combobox
+  });
+
+  // Fetch initial profiles when component mounts
+  useEffect(() => {
+    fetchProfiles();
+  }, []);
+
+  // Search when query changes
+  useEffect(() => {
+    if (searchQuery.trim()) {
+      fetchProfiles({ 
+        page: 1, 
+        search: searchQuery,
+        perPage: 50 // Get up to 50 results for search
+      });
+    } else {
+      fetchProfiles({ 
+        page: 1, 
+        search: '',
+        perPage: 50 
+      });
+    }
+  }, [searchQuery]);
 
   const selectedProfile = profiles.find(profile => profile.id === value);
 
@@ -54,6 +83,10 @@ export const EmployeeCombobox: React.FC<EmployeeComboboxProps> = ({
     return displayText;
   };
 
+  const handleSearchChange = (search: string) => {
+    setSearchQuery(search);
+  };
+
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
@@ -62,7 +95,7 @@ export const EmployeeCombobox: React.FC<EmployeeComboboxProps> = ({
           role="combobox"
           aria-expanded={open}
           className="w-full justify-between min-w-0"
-          disabled={disabled || isLoading}
+          disabled={disabled}
         >
           <div className="flex items-center gap-2 min-w-0 flex-1">
             <User className="h-4 w-4 flex-shrink-0" />
@@ -74,21 +107,24 @@ export const EmployeeCombobox: React.FC<EmployeeComboboxProps> = ({
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-full min-w-[var(--radix-popover-trigger-width)] p-0" align="start">
-        <Command>
-          <CommandInput placeholder="Search employees..." />
+        <Command shouldFilter={false}>
+          <CommandInput 
+            placeholder="Search employees..." 
+            value={searchQuery}
+            onValueChange={handleSearchChange}
+          />
           <CommandList>
             <CommandEmpty>
               {isLoading ? "Loading employees..." : "No employee found."}
             </CommandEmpty>
             <CommandGroup>
               {profiles.map((profile) => {
-                const searchValue = `${profile.first_name || ''} ${profile.last_name || ''} ${profile.employee_id || ''}`;
                 const displayName = `${profile.first_name || ''} ${profile.last_name || ''}`.trim();
                 
                 return (
                   <CommandItem
                     key={profile.id}
-                    value={searchValue}
+                    value={profile.id}
                     onSelect={() => {
                       onValueChange(profile.id === value ? "" : profile.id);
                       setOpen(false);
