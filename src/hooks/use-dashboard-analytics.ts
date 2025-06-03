@@ -3,12 +3,21 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
+interface IncompleteProfile {
+  id: string;
+  employee_id: string;
+  first_name: string;
+  last_name: string;
+  missing_sections: string[];
+}
+
 interface DashboardAnalytics {
   totalEmployees: number;
   profilesCompleted: number;
   completionRate: number;
   skillMatrix: Array<{ skill: string; count: number }>;
   experienceDistribution: Array<{ range: string; count: number }>;
+  incompleteProfiles: IncompleteProfile[];
 }
 
 interface DashboardAnalyticsResponse {
@@ -17,6 +26,7 @@ interface DashboardAnalyticsResponse {
   completionRate: number;
   skillMatrix: Array<{ skill: string; count: number }>;
   experienceDistribution: Array<{ range: string; count: number }>;
+  incompleteProfiles: IncompleteProfile[];
 }
 
 export function useDashboardAnalytics() {
@@ -25,7 +35,8 @@ export function useDashboardAnalytics() {
     profilesCompleted: 0,
     completionRate: 0,
     skillMatrix: [],
-    experienceDistribution: []
+    experienceDistribution: [],
+    incompleteProfiles: []
   });
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
@@ -55,7 +66,8 @@ export function useDashboardAnalytics() {
           profilesCompleted: analyticsData.profilesCompleted || 0,
           completionRate: analyticsData.completionRate || 0,
           skillMatrix: analyticsData.skillMatrix || [],
-          experienceDistribution: analyticsData.experienceDistribution || []
+          experienceDistribution: analyticsData.experienceDistribution || [],
+          incompleteProfiles: analyticsData.incompleteProfiles || []
         });
       }
 

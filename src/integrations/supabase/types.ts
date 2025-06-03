@@ -883,14 +883,7 @@ export type Database = {
       }
     }
     Views: {
-      dashboard_analytics: {
-        Row: {
-          profiles_completed: number | null
-          total_employees: number | null
-          unique_skills: number | null
-        }
-        Relationships: []
-      }
+      [_ in never]: never
     }
     Functions: {
       calculate_experience_duration: {
