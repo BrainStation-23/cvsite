@@ -24,6 +24,7 @@ serve(async (req) => {
     console.log('Fetching all users for export...');
     
     // Fetch all users with their profile data, roles, and SBU information
+    // Join through auth.users since that's what both profiles and user_roles reference
     const { data: users, error: usersError } = await supabase
       .from('profiles')
       .select(`
@@ -32,7 +33,6 @@ serve(async (req) => {
         first_name,
         last_name,
         employee_id,
-        user_roles!inner(role),
         sbus(name)
       `);
     
@@ -48,7 +48,25 @@ serve(async (req) => {
       );
     }
     
-    console.log(`Found ${users.length} users to export`);
+    console.log(`Found ${users.length} users, now fetching roles...`);
+    
+    // Fetch user roles separately since we can't join them directly
+    const { data: userRoles, error: rolesError } = await supabase
+      .from('user_roles')
+      .select('user_id, role');
+    
+    if (rolesError) {
+      console.error('Error fetching user roles:', rolesError);
+      throw rolesError;
+    }
+    
+    // Create a map of user_id to role for quick lookup
+    const rolesMap = new Map();
+    if (userRoles) {
+      userRoles.forEach(ur => {
+        rolesMap.set(ur.user_id, ur.role);
+      });
+    }
     
     // Transform the data to match the bulk update CSV format
     const csvData = users.map(user => ({
@@ -56,7 +74,7 @@ serve(async (req) => {
       email: user.email || '',
       firstName: user.first_name || '',
       lastName: user.last_name || '',
-      role: user.user_roles?.[0]?.role || 'employee',
+      role: rolesMap.get(user.id) || 'employee',
       employeeId: user.employee_id || '',
       password: '', // Empty password field for security
       sbuName: user.sbus?.name || ''
