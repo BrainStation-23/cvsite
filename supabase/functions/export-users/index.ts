@@ -21,52 +21,33 @@ serve(async (req) => {
     // Create a Supabase client with the service role key
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
     
-    console.log('Fetching all users for export...');
+    console.log('Fetching all users for export using list_users function...');
     
-    // Fetch all users with their profile data, roles, and SBU information
-    // Join through auth.users since that's what both profiles and user_roles reference
-    const { data: users, error: usersError } = await supabase
-      .from('profiles')
-      .select(`
-        id,
-        email,
-        first_name,
-        last_name,
-        employee_id,
-        sbus(name)
-      `);
+    // Use the list_users function that we know works correctly
+    // Fetch all users by setting a high items_per_page value
+    const { data: usersResponse, error: usersError } = await supabase.rpc('list_users', {
+      search_query: null,
+      filter_role: null,
+      page_number: 1,
+      items_per_page: 10000, // Large number to get all users
+      sort_by: 'email',
+      sort_order: 'asc'
+    });
     
     if (usersError) {
       console.error('Error fetching users:', usersError);
       throw usersError;
     }
     
-    if (!users || users.length === 0) {
+    if (!usersResponse || !usersResponse.users) {
       return new Response(
         JSON.stringify({ error: 'No users found' }),
         { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
     
-    console.log(`Found ${users.length} users, now fetching roles...`);
-    
-    // Fetch user roles separately since we can't join them directly
-    const { data: userRoles, error: rolesError } = await supabase
-      .from('user_roles')
-      .select('user_id, role');
-    
-    if (rolesError) {
-      console.error('Error fetching user roles:', rolesError);
-      throw rolesError;
-    }
-    
-    // Create a map of user_id to role for quick lookup
-    const rolesMap = new Map();
-    if (userRoles) {
-      userRoles.forEach(ur => {
-        rolesMap.set(ur.user_id, ur.role);
-      });
-    }
+    const users = usersResponse.users;
+    console.log(`Found ${users.length} users to export`);
     
     // Transform the data to match the bulk update CSV format
     const csvData = users.map(user => ({
@@ -74,10 +55,10 @@ serve(async (req) => {
       email: user.email || '',
       firstName: user.first_name || '',
       lastName: user.last_name || '',
-      role: rolesMap.get(user.id) || 'employee',
+      role: user.role || 'employee',
       employeeId: user.employee_id || '',
       password: '', // Empty password field for security
-      sbuName: user.sbus?.name || ''
+      sbuName: user.sbu_name || ''
     }));
     
     // Convert to CSV format
