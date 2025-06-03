@@ -890,6 +890,10 @@ export type Database = {
         Args: { start_date: string; end_date: string; is_current: boolean }
         Returns: number
       }
+      get_dashboard_analytics: {
+        Args: Record<PropertyKey, never>
+        Returns: Json
+      }
       get_employee_data: {
         Args: { profile_uuid: string }
         Returns: Json
@@ -910,6 +914,13 @@ export type Database = {
         }
         Returns: Json
       }
+      get_experience_distribution: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          range: string
+          count: number
+        }[]
+      }
       get_experiences_by_company: {
         Args: { profile_uuid: string }
         Returns: Json
@@ -924,6 +935,13 @@ export type Database = {
           default_mask_value: string
           default_order: number
           field_type: string
+        }[]
+      }
+      get_skill_matrix: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          skill: string
+          count: number
         }[]
       }
       has_any_role: {

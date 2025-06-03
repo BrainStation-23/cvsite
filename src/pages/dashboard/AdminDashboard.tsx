@@ -1,65 +1,68 @@
 
 import React from 'react';
 import DashboardLayout from '../../components/Layout/DashboardLayout';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Users, Settings, Database, Shield, FileText } from 'lucide-react';
+import { StatCard } from '../../components/dashboard/StatCard';
+import { SkillsChart } from '../../components/dashboard/SkillsChart';
+import { ExperienceChart } from '../../components/dashboard/ExperienceChart';
+import { IncompleteProfilesTable } from '../../components/dashboard/IncompleteProfilesTable';
+import { useDashboardAnalytics } from '../../hooks/use-dashboard-analytics';
+import { Users, CheckCircle, BarChart, Activity, AlertTriangle } from 'lucide-react';
 
 const AdminDashboard: React.FC = () => {
-  const modules = [
-    {
-      title: 'User Management',
-      description: 'Create, update and manage user accounts',
-      icon: <Users className="h-10 w-10 text-cvsite-teal" />,
-      link: '/admin/user-management',
-    },
-    {
-      title: 'Employee Data',
-      description: 'View and edit employee profiles',
-      icon: <Database className="h-10 w-10 text-cvsite-teal" />,
-      link: '/admin/employee-data',
-    },
-    {
-      title: 'CV Templates',
-      description: 'Create and manage CV templates',
-      icon: <FileText className="h-10 w-10 text-cvsite-teal" />,
-      link: '/admin/cv-templates',
-    },
-    {
-      title: 'Platform Settings',
-      description: 'Configure system settings and references',
-      icon: <Settings className="h-10 w-10 text-cvsite-teal" />,
-      link: '/admin/platform-settings',
-    },
-    {
-      title: 'Security',
-      description: 'Update your password and security settings',
-      icon: <Shield className="h-10 w-10 text-cvsite-teal" />,
-      link: '/admin/security',
-    }
-  ];
+  const { analytics, isLoading } = useDashboardAnalytics();
+
+  const incompleteCount = analytics.incompleteProfiles.length;
 
   return (
     <DashboardLayout>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {modules.map((module, index) => (
-          <Card key={index} className="hover:shadow-lg transition-shadow">
-            <CardHeader className="pb-2">
-              <div className="flex justify-between items-start">
-                <CardTitle className="text-lg font-medium">{module.title}</CardTitle>
-                {module.icon}
-              </div>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-gray-500 dark:text-gray-400">{module.description}</p>
-              <a 
-                href={module.link}
-                className="mt-4 inline-block text-cvsite-teal hover:text-cvsite-navy dark:hover:text-cvsite-light-blue"
-              >
-                Access &rarr;
-              </a>
-            </CardContent>
-          </Card>
-        ))}
+      <div className="space-y-6">
+        {/* Statistics Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
+          <StatCard
+            title="Total Employees"
+            value={isLoading ? "..." : analytics.totalEmployees}
+            icon={<Users className="h-4 w-4 text-cvsite-teal" />}
+            description="Total registered employees"
+          />
+          <StatCard
+            title="Profiles Completed"
+            value={isLoading ? "..." : analytics.profilesCompleted}
+            icon={<CheckCircle className="h-4 w-4 text-cvsite-teal" />}
+            description="Employees with complete profiles"
+          />
+          <StatCard
+            title="Incomplete Profiles"
+            value={isLoading ? "..." : incompleteCount}
+            icon={<AlertTriangle className="h-4 w-4 text-orange-500" />}
+            description="Profiles missing sections"
+          />
+          <StatCard
+            title="Completion Rate"
+            value={isLoading ? "..." : `${analytics.completionRate}%`}
+            icon={<BarChart className="h-4 w-4 text-cvsite-teal" />}
+            description="Profile completion percentage"
+          />
+          <StatCard
+            title="Active Skills"
+            value={isLoading ? "..." : analytics.skillMatrix.length}
+            icon={<Activity className="h-4 w-4 text-cvsite-teal" />}
+            description="Unique skills in the platform"
+          />
+        </div>
+
+        {/* Charts Section */}
+        <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+          <SkillsChart data={analytics.skillMatrix} isLoading={isLoading} />
+          <ExperienceChart data={analytics.experienceDistribution} isLoading={isLoading} />
+        </div>
+
+        {/* Incomplete Profiles Section */}
+        <div className="grid grid-cols-1 gap-6">
+          <IncompleteProfilesTable 
+            data={analytics.incompleteProfiles} 
+            isLoading={isLoading} 
+          />
+        </div>
       </div>
     </DashboardLayout>
   );
