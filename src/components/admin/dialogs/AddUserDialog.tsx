@@ -13,6 +13,7 @@ import {
 } from '@/components/ui/select';
 import { Loader2 } from 'lucide-react';
 import { UserRole } from '@/types';
+import SbuCombobox from '@/components/admin/user/SbuCombobox';
 
 interface AddUserDialogProps {
   isOpen: boolean;
@@ -24,6 +25,7 @@ interface AddUserDialogProps {
     role: UserRole;
     password: string;
     employeeId: string;
+    sbuId?: string | null;
   }) => Promise<boolean>;
   isLoading: boolean;
 }
@@ -41,6 +43,7 @@ export const AddUserDialog: React.FC<AddUserDialogProps> = ({
     role: 'employee' as UserRole,
     password: '',
     employeeId: '',
+    sbuId: null as string | null,
   });
   
   const resetForm = () => {
@@ -51,6 +54,7 @@ export const AddUserDialog: React.FC<AddUserDialogProps> = ({
       role: 'employee',
       password: '',
       employeeId: '',
+      sbuId: null,
     });
   };
   
@@ -135,6 +139,16 @@ export const AddUserDialog: React.FC<AddUserDialogProps> = ({
                 <SelectItem value="employee">Employee</SelectItem>
               </SelectContent>
             </Select>
+          </div>
+          <div className="grid gap-2">
+            <Label htmlFor="sbu">
+              SBU (Optional)
+            </Label>
+            <SbuCombobox
+              value={newUser.sbuId}
+              onValueChange={(value) => setNewUser({ ...newUser, sbuId: value })}
+              placeholder="Select SBU..."
+            />
           </div>
           <div className="grid gap-2">
             <Label htmlFor="password">

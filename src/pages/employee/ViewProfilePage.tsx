@@ -83,6 +83,19 @@ const ViewProfilePage: React.FC = () => {
     return false;
   };
 
+  // Handle general info save for employee profile
+  const handleGeneralInfoSave = async (data: GeneralInfoFormData) => {
+    const saveData = {
+      firstName: data.firstName,
+      lastName: data.lastName,
+      biography: data.biography || null,
+      profileImage: data.profileImage
+    };
+    
+    const success = await saveGeneralInfo(saveData);
+    return success;
+  };
+
   if (isLoading) {
     return (
       <DashboardLayout>
@@ -153,6 +166,7 @@ const ViewProfilePage: React.FC = () => {
             saveSpecializedSkill={saveSpecializedSkill}
             reorderTechnicalSkills={reorderTechnicalSkills}
             profileId={profileId}
+            saveGeneralInfo={handleGeneralInfoSave}
           />
         </div>
       </div>

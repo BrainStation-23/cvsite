@@ -1,4 +1,3 @@
-
 import React, { useEffect } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { UseFormReturn } from 'react-hook-form';
@@ -51,6 +50,8 @@ interface ProfileTabsProps {
   saveSpecializedSkill: (skill: Skill) => Promise<boolean>;
   reorderTechnicalSkills: (skills: Skill[]) => Promise<boolean>;
   profileId?: string;
+  // New props for general info saving
+  saveGeneralInfo: (data: GeneralInfoFormData) => Promise<boolean>;
 }
 
 export const ProfileTabs: React.FC<ProfileTabsProps> = ({
@@ -92,8 +93,24 @@ export const ProfileTabs: React.FC<ProfileTabsProps> = ({
   saveTechnicalSkill,
   saveSpecializedSkill,
   reorderTechnicalSkills,
-  profileId
+  profileId,
+  saveGeneralInfo
 }) => {
+  // Handle general info save with proper conversion
+  const handleGeneralInfoSave = async (data: GeneralInfoFormData) => {
+    const saveData = {
+      firstName: data.firstName,
+      lastName: data.lastName,
+      biography: data.biography || null,
+      profileImage: data.profileImage
+    };
+    
+    const success = await saveGeneralInfo(saveData);
+    if (!success) {
+      throw new Error('Failed to save general information');
+    }
+  };
+
   return (
     <Tabs defaultValue="general" className="w-full h-full flex flex-col">
       {/* Compact tabs header */}
@@ -129,7 +146,10 @@ export const ProfileTabs: React.FC<ProfileTabsProps> = ({
           <GeneralInfoTab 
             form={form} 
             isEditing={isEditing} 
-            onImageUpdate={onImageUpdate} 
+            onImageUpdate={onImageUpdate}
+            profileId={profileId}
+            onSave={handleGeneralInfoSave}
+            isSaving={isSaving}
           />
         </TabsContent>
         

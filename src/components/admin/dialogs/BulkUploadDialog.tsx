@@ -4,26 +4,38 @@ import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Loader2, Upload, X } from 'lucide-react';
+import { Loader2, Upload, X, Download } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import UserCSVValidation from '@/components/admin/UserCSVValidation';
+import { parseUsersCSV, validateCSVData, downloadCSVTemplate, downloadUpdateCSVTemplate } from '@/utils/userCsvUtils';
 
 interface BulkUploadDialogProps {
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
   onBulkUpload: (file: File) => Promise<boolean>;
   isBulkUploading: boolean;
+  mode: 'create' | 'update';
+  title?: string;
+  description?: string;
 }
 
 export const BulkUploadDialog: React.FC<BulkUploadDialogProps> = ({
   isOpen,
   onOpenChange,
   onBulkUpload,
-  isBulkUploading
+  isBulkUploading,
+  mode,
+  title,
+  description
 }) => {
   const [uploadFile, setUploadFile] = useState<File | null>(null);
   const [validationResult, setValidationResult] = useState<any>(null);
   const [isValidating, setIsValidating] = useState(false);
+  
+  const dialogTitle = title || (mode === 'create' ? 'Bulk Create Users' : 'Bulk Update Users');
+  const dialogDescription = description || (mode === 'create' 
+    ? 'Upload a CSV file to create new users in bulk.' 
+    : 'Upload a CSV file to update existing users in bulk.');
   
   useEffect(() => {
     if (!isOpen) {
@@ -38,12 +50,11 @@ export const BulkUploadDialog: React.FC<BulkUploadDialogProps> = ({
       const file = files[0];
       setUploadFile(file);
       
-      // Validate the file
+      // Validate the file using papaparse
       setIsValidating(true);
       try {
-        const { parseUsersCSV, validateCSVData } = await import('@/utils/userCsvUtils');
         const parsedData = await parseUsersCSV(file);
-        const validation = validateCSVData(parsedData, []); // TODO: Pass existing users if needed
+        const validation = validateCSVData(parsedData, [], mode); // TODO: Pass existing users if needed for update mode
         setValidationResult(validation);
       } catch (error) {
         console.error('Error parsing CSV:', error);
@@ -57,9 +68,12 @@ export const BulkUploadDialog: React.FC<BulkUploadDialogProps> = ({
     }
   };
   
-  const handleDownloadTemplate = async () => {
-    const { downloadCSVTemplate } = await import('@/utils/userCsvUtils');
-    downloadCSVTemplate();
+  const handleDownloadTemplate = () => {
+    if (mode === 'create') {
+      downloadCSVTemplate();
+    } else {
+      downloadUpdateCSVTemplate();
+    }
   };
   
   const handleBulkUpload = async () => {
@@ -73,20 +87,25 @@ export const BulkUploadDialog: React.FC<BulkUploadDialogProps> = ({
   
   const canUpload = uploadFile && validationResult && validationResult.errors.length === 0 && validationResult.valid.length > 0;
   
+  const templateButtonText = mode === 'create' ? 'Download Create Template' : 'Download Update Template';
+  const uploadButtonText = mode === 'create' 
+    ? `Create ${validationResult?.valid?.length || 0} Users`
+    : `Update ${validationResult?.valid?.length || 0} Users`;
+  
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[600px] max-h-[80vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Bulk Upload Users</DialogTitle>
+          <DialogTitle>{dialogTitle}</DialogTitle>
         </DialogHeader>
         <div className="py-4 space-y-4">
           <div className="flex items-center justify-between">
             <p className="text-sm text-gray-500">
-              Upload a CSV file with user data. Download the template to see the required format.
+              {dialogDescription} Download the template to see the required format.
             </p>
             <Button variant="outline" onClick={handleDownloadTemplate} className="flex items-center gap-2">
-              <Upload size={16} />
-              Download Template
+              <Download size={16} />
+              {templateButtonText}
             </Button>
           </div>
           
@@ -127,7 +146,7 @@ export const BulkUploadDialog: React.FC<BulkUploadDialogProps> = ({
 
           {validationResult && !isValidating && (
             <div className="border rounded-lg p-4">
-              <UserCSVValidation validationResult={validationResult} />
+              <UserCSVValidation validationResult={validationResult} mode={mode} />
             </div>
           )}
         </div>
@@ -143,10 +162,10 @@ export const BulkUploadDialog: React.FC<BulkUploadDialogProps> = ({
             {isBulkUploading ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Uploading...
+                {mode === 'create' ? 'Creating...' : 'Updating...'}
               </>
             ) : (
-              `Upload ${validationResult?.valid?.length || 0} Users`
+              uploadButtonText
             )}
           </Button>
         </div>

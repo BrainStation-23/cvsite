@@ -10,7 +10,9 @@ export interface ListUsersResponse {
     first_name: string;
     last_name: string;
     role: UserRole;
-    employee_id?: string; // Added this field to fix the TypeScript error
+    employee_id?: string;
+    sbu_id?: string | null;
+    sbu_name?: string | null;
   }[];
   pagination: {
     total_count: number;

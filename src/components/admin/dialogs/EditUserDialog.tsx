@@ -14,6 +14,7 @@ import {
 import { Loader2 } from 'lucide-react';
 import { UserRole } from '@/types';
 import { UserData } from '@/hooks/use-user-management';
+import SbuCombobox from '@/components/admin/user/SbuCombobox';
 
 interface EditUserDialogProps {
   isOpen: boolean;
@@ -26,6 +27,7 @@ interface EditUserDialogProps {
     lastName: string;
     role: UserRole;
     employeeId: string;
+    sbuId?: string | null;
     password?: string;
   }) => Promise<boolean>;
   isLoading: boolean;
@@ -45,6 +47,7 @@ export const EditUserDialog: React.FC<EditUserDialogProps> = ({
     lastName: '',
     role: '' as UserRole,
     employeeId: '',
+    sbuId: null as string | null,
     password: '',
   });
   
@@ -57,6 +60,7 @@ export const EditUserDialog: React.FC<EditUserDialogProps> = ({
         lastName: user.lastName,
         role: user.role,
         employeeId: user.employeeId || '',
+        sbuId: user.sbuId || null,
         password: '',
       });
     }
@@ -139,6 +143,16 @@ export const EditUserDialog: React.FC<EditUserDialogProps> = ({
                 <SelectItem value="employee">Employee</SelectItem>
               </SelectContent>
             </Select>
+          </div>
+          <div className="grid gap-2">
+            <Label htmlFor="edit-sbu">
+              SBU (Optional)
+            </Label>
+            <SbuCombobox
+              value={editUser.sbuId}
+              onValueChange={(value) => setEditUser({ ...editUser, sbuId: value })}
+              placeholder="Select SBU..."
+            />
           </div>
           <div className="grid gap-2">
             <Label htmlFor="edit-password">

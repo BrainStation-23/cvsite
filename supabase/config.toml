@@ -19,6 +19,9 @@ verify_jwt = true
 [functions.bulk-update-users]
 verify_jwt = true
 
+[functions.export-users]
+verify_jwt = true
+
 [functions.list-users]
 verify_jwt = true
 

@@ -1,9 +1,9 @@
-
 import { useUserState } from './user-management/use-user-state';
 import { useUserListing } from './user-management/use-user-listing';
 import { useUserCreation } from './user-management/use-user-creation';
 import { useUserUpdate } from './user-management/use-user-update';
 import { useUserDeletion } from './user-management/use-user-deletion';
+import { useUserExport } from './user-management/use-user-export';
 
 export type { UserData, PaginationData, SortColumn, SortOrder } from './types/user-management';
 
@@ -24,6 +24,7 @@ export function useUserManagement({
   const creation = useUserCreation(state);
   const update = useUserUpdate(state);
   const deletion = useUserDeletion(state);
+  const exportHook = useUserExport(state);
   
   // Enhanced delete function that refreshes the list
   const deleteUserWithRefresh = async (userId: string) => {
@@ -75,6 +76,16 @@ export function useUserManagement({
     }
     return success;
   };
+
+  // Enhanced bulk update function that refreshes the list
+  const bulkUpdateWithRefresh = async (file: File) => {
+    const success = await creation.bulkUpdate(file);
+    if (success) {
+      // Refresh the user list after successful bulk update
+      listing.fetchUsers();
+    }
+    return success;
+  };
   
   // Return combined API with enhanced functions
   return {
@@ -101,6 +112,10 @@ export function useUserManagement({
     updateUser: updateUserWithRefresh,
     resetPassword: resetPasswordWithFeedback,
     deleteUser: deleteUserWithRefresh,
-    bulkUpload: bulkUploadWithRefresh
+    bulkUpload: bulkUploadWithRefresh,
+    bulkUpdate: bulkUpdateWithRefresh,
+    
+    // Export functionality
+    exportUsers: exportHook.exportUsers
   };
 }
