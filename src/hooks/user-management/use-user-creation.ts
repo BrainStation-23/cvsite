@@ -54,6 +54,7 @@ export function useUserCreation(state: ReturnType<typeof import('./use-user-stat
   // Bulk upload
   const bulkUpload = async (uploadFile: File) => {
     try {
+      console.log('Starting bulk upload for file:', uploadFile.name);
       state.setIsBulkUploading(true);
       
       if (!uploadFile) {
@@ -65,19 +66,47 @@ export function useUserCreation(state: ReturnType<typeof import('./use-user-stat
         return false;
       }
       
+      // Create FormData and append the file
       const formData = new FormData();
       formData.append('file', uploadFile);
       
+      console.log('FormData created, invoking function...');
+      
+      // Use the supabase client to invoke the function with FormData
       const { data, error } = await supabase.functions.invoke('bulk-create-users', {
         body: formData
       });
       
-      if (error) throw error;
+      console.log('Function response:', { data, error });
       
-      toast({
-        title: "Bulk upload completed",
-        description: data?.message || `Users have been added successfully.`,
-      });
+      if (error) {
+        console.error('Function error:', error);
+        throw error;
+      }
+      
+      // Show success message with details
+      if (data?.results) {
+        const { successful, failed, passwordsGenerated } = data.results;
+        let description = `${successful.length} users created successfully.`;
+        
+        if (failed.length > 0) {
+          description += ` ${failed.length} users failed to create.`;
+        }
+        
+        if (passwordsGenerated > 0) {
+          description += ` ${passwordsGenerated} passwords were auto-generated.`;
+        }
+        
+        toast({
+          title: "Bulk upload completed",
+          description,
+        });
+      } else {
+        toast({
+          title: "Bulk upload completed",
+          description: data?.message || `Users have been added successfully.`,
+        });
+      }
       
       return true;
     } catch (error) {
