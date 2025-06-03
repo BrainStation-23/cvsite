@@ -1,7 +1,7 @@
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.38.4";
-import * as csv from "https://deno.land/std@0.170.0/encoding/csv.ts";
+import Papa from "https://esm.sh/papaparse@5.4.1";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -37,7 +37,7 @@ const formatUserRole = (role: string): string => {
 };
 
 const parseFileData = async (formData: FormData): Promise<any[]> => {
-  console.log('Starting file parsing...');
+  console.log('Starting file parsing with PapaParse...');
   const file = formData.get('file') as File;
   if (!file) {
     console.error('No file found in FormData');
@@ -57,19 +57,37 @@ const parseFileData = async (formData: FormData): Promise<any[]> => {
   console.log('File content length:', text.length);
   console.log('First 200 chars:', text.substring(0, 200));
   
-  const rows = await csv.parse(text, { skipFirstRow: true });
-  console.log('Parsed rows count:', rows.length);
-  
-  return rows.map((row, index) => {
-    console.log(`Row ${index}:`, row);
-    return {
-      email: row[0],
-      firstName: row[1],
-      lastName: row[2],
-      role: row[3],
-      password: row[4],
-      employeeId: row[5]
-    };
+  return new Promise((resolve, reject) => {
+    Papa.parse(text, {
+      header: true,
+      skipEmptyLines: true,
+      complete: (results) => {
+        console.log('PapaParse results:', results);
+        console.log('Parsed rows count:', results.data.length);
+        
+        if (results.errors && results.errors.length > 0) {
+          console.error('PapaParse errors:', results.errors);
+        }
+        
+        const users = results.data.map((row: any, index: number) => {
+          console.log(`Row ${index}:`, row);
+          return {
+            email: row.email,
+            firstName: row.firstName,
+            lastName: row.lastName,
+            role: row.role,
+            password: row.password,
+            employeeId: row.employeeId
+          };
+        });
+        
+        resolve(users);
+      },
+      error: (error) => {
+        console.error('PapaParse error:', error);
+        reject(new Error(`CSV parsing failed: ${error.message}`));
+      }
+    });
   });
 };
 
