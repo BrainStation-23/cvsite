@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import DashboardLayout from '../../components/Layout/DashboardLayout';
 import { useToast } from '@/hooks/use-toast';
@@ -70,12 +69,13 @@ const ProfilePage: React.FC = () => {
   }, [isLoading, generalInfo, form.reset]);
 
   const handleUpdateProfile = async (data: GeneralInfoFormData) => {
-    await saveGeneralInfo({
+    const success = await saveGeneralInfo({
       firstName: data.firstName,
       lastName: data.lastName,
       biography: data.biography || null,
       profileImage: data.profileImage
     });
+    return success;
   };
 
   const handleImageUpdate = (imageUrl: string | null) => {
@@ -163,6 +163,7 @@ const ProfilePage: React.FC = () => {
               saveTechnicalSkill={saveTechnicalSkill}
               saveSpecializedSkill={saveSpecializedSkill}
               reorderTechnicalSkills={reorderTechnicalSkills}
+              saveGeneralInfo={handleUpdateProfile}
             />
           )}
         </div>

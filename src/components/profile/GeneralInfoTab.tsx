@@ -1,11 +1,13 @@
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
+import { Button } from '@/components/ui/button';
 import { UseFormReturn } from 'react-hook-form';
 import { ProfileImageUpload } from './ProfileImageUpload';
+import { Save } from 'lucide-react';
 
 // Define this type consistently across all files
 export interface GeneralInfoFormData {
@@ -20,31 +22,97 @@ interface GeneralInfoTabProps {
   isEditing: boolean;
   profileId?: string;
   onImageUpdate: (imageUrl: string | null) => void;
+  onSave?: (data: GeneralInfoFormData) => Promise<void>;
+  isSaving?: boolean;
 }
 
 export const GeneralInfoTab: React.FC<GeneralInfoTabProps> = ({ 
   form, 
   isEditing, 
   profileId,
-  onImageUpdate 
+  onImageUpdate,
+  onSave,
+  isSaving = false
 }) => {
+  const [hasChanges, setHasChanges] = useState(false);
+  const [initialValues, setInitialValues] = useState<GeneralInfoFormData | null>(null);
+
   const firstName = form.watch('firstName');
   const lastName = form.watch('lastName');
+  const biography = form.watch('biography');
   const profileImage = form.watch('profileImage');
   
   const userName = `${firstName} ${lastName}`.trim() || 'User';
+
+  // Track initial values and changes
+  useEffect(() => {
+    if (!initialValues) {
+      const currentValues = {
+        firstName,
+        lastName,
+        biography,
+        profileImage
+      };
+      setInitialValues(currentValues);
+    } else {
+      // Check if any values have changed
+      const currentValues = {
+        firstName,
+        lastName,
+        biography,
+        profileImage
+      };
+      
+      const hasChanged = JSON.stringify(currentValues) !== JSON.stringify(initialValues);
+      setHasChanges(hasChanged);
+    }
+  }, [firstName, lastName, biography, profileImage, initialValues]);
 
   const handleImageUpdate = (imageUrl: string | null) => {
     form.setValue('profileImage', imageUrl);
     onImageUpdate(imageUrl);
   };
 
+  const handleSave = async () => {
+    if (!onSave) return;
+    
+    const currentValues = form.getValues();
+    try {
+      await onSave(currentValues);
+      // Update initial values after successful save
+      setInitialValues(currentValues);
+      setHasChanges(false);
+    } catch (error) {
+      console.error('Error saving general info:', error);
+    }
+  };
+
   return (
     <Card>
-      <CardHeader>
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
         <CardTitle>General Information</CardTitle>
+        {isEditing && onSave && (
+          <Button 
+            onClick={handleSave}
+            disabled={!hasChanges || isSaving}
+            variant={hasChanges ? "default" : "outline"}
+            size="sm"
+            className={hasChanges ? "bg-orange-500 hover:bg-orange-600 text-white" : ""}
+          >
+            <Save className="h-4 w-4 mr-2" />
+            {isSaving ? 'Saving...' : 'Save'}
+          </Button>
+        )}
       </CardHeader>
       <CardContent>
+        {hasChanges && isEditing && (
+          <div className="mb-4 p-3 bg-orange-50 border border-orange-200 rounded-md">
+            <p className="text-sm text-orange-800">
+              You have unsaved changes. Please save your changes to avoid losing them.
+            </p>
+          </div>
+        )}
+        
         <Form {...form}>
           <form className="space-y-6">
             {/* Two Column Layout: Image Left, Form Fields Right */}
