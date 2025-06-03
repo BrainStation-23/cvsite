@@ -11,6 +11,8 @@ export interface UserData {
   lastName: string;
   role: UserRole;
   employeeId?: string;
+  sbuId?: string | null;
+  sbuName?: string | null;
   createdAt?: string;
   lastSignIn?: string;
 }

@@ -20,9 +20,9 @@ serve(async (req) => {
     // Create a Supabase client with the service role key
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
     
-    const { email, password, firstName, lastName, role, employeeId } = await req.json();
+    const { email, password, firstName, lastName, role, employeeId, sbuId } = await req.json();
     
-    console.log('Creating user with data:', { email, firstName, lastName, role, employeeId });
+    console.log('Creating user with data:', { email, firstName, lastName, role, employeeId, sbuId });
     
     if (!email || !password || !firstName || !lastName || !role || !employeeId) {
       return new Response(
@@ -48,7 +48,8 @@ serve(async (req) => {
         first_name: firstName,
         last_name: lastName,
         role: role,
-        employee_id: employeeId
+        employee_id: employeeId,
+        sbu_id: sbuId
       }
     });
     
@@ -77,6 +78,19 @@ serve(async (req) => {
       );
     }
     
+    // Update the profile with SBU assignment if provided
+    if (sbuId) {
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .update({ sbu_id: sbuId })
+        .eq('id', authData.user.id);
+      
+      if (profileError) {
+        console.error('Error updating profile with SBU:', profileError);
+        // Don't fail the entire operation if SBU assignment fails
+      }
+    }
+    
     console.log('User created successfully by trigger:', authData.user.id);
     
     return new Response(
@@ -88,7 +102,8 @@ serve(async (req) => {
           firstName,
           lastName,
           role,
-          employeeId
+          employeeId,
+          sbuId
         } 
       }),
       { status: 201, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }

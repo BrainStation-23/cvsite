@@ -71,6 +71,7 @@ const UserList: React.FC<UserListProps> = ({
               <TableHead>Name</TableHead>
               <TableHead>Email</TableHead>
               <TableHead>Employee ID</TableHead>
+              <TableHead>SBU</TableHead>
               <TableHead>Role</TableHead>
               <TableHead>
                 <div className="flex items-center gap-1">
@@ -90,7 +91,7 @@ const UserList: React.FC<UserListProps> = ({
           <TableBody>
             {users.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={7} className="text-center py-8 text-gray-500">
+                <TableCell colSpan={8} className="text-center py-8 text-gray-500">
                   No users found
                 </TableCell>
               </TableRow>
@@ -105,6 +106,15 @@ const UserList: React.FC<UserListProps> = ({
                     <Badge variant="outline" className="font-mono text-xs">
                       {user.employeeId || 'N/A'}
                     </Badge>
+                  </TableCell>
+                  <TableCell>
+                    {user.sbuName ? (
+                      <Badge variant="secondary" className="text-xs">
+                        {user.sbuName}
+                      </Badge>
+                    ) : (
+                      <span className="text-gray-400 text-xs">No SBU</span>
+                    )}
                   </TableCell>
                   <TableCell>
                     <Badge variant={user.role === 'admin' ? 'default' : user.role === 'manager' ? 'secondary' : 'outline'}>

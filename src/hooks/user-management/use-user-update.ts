@@ -15,6 +15,7 @@ export function useUserUpdate(state: ReturnType<typeof import('./use-user-state'
     lastName: string;
     role: UserRole;
     employeeId: string;
+    sbuId?: string | null;
     password?: string;
   }) => {
     try {
@@ -28,6 +29,7 @@ export function useUserUpdate(state: ReturnType<typeof import('./use-user-state'
           lastName: userData.lastName,
           role: userData.role,
           employeeId: userData.employeeId,
+          sbuId: userData.sbuId,
           password: userData.password || undefined
         }
       });

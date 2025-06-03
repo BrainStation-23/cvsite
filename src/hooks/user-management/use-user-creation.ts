@@ -15,6 +15,7 @@ export function useUserCreation(state: ReturnType<typeof import('./use-user-stat
     role: UserRole;
     password: string;
     employeeId: string;
+    sbuId?: string | null;
   }) => {
     try {
       setIsLoading(true);
@@ -26,7 +27,8 @@ export function useUserCreation(state: ReturnType<typeof import('./use-user-stat
           firstName: userData.firstName,
           lastName: userData.lastName,
           role: userData.role,
-          employeeId: userData.employeeId
+          employeeId: userData.employeeId,
+          sbuId: userData.sbuId
         }
       });
       

@@ -576,6 +576,7 @@ export type Database = {
           first_name: string | null
           id: string
           last_name: string | null
+          sbu_id: string | null
           updated_at: string
         }
         Insert: {
@@ -585,6 +586,7 @@ export type Database = {
           first_name?: string | null
           id: string
           last_name?: string | null
+          sbu_id?: string | null
           updated_at?: string
         }
         Update: {
@@ -594,9 +596,18 @@ export type Database = {
           first_name?: string | null
           id?: string
           last_name?: string | null
+          sbu_id?: string | null
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "profiles_sbu_id_fkey"
+            columns: ["sbu_id"]
+            isOneToOne: false
+            referencedRelation: "sbus"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       projects: {
         Row: {
