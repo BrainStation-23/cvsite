@@ -5,7 +5,6 @@ import { useCVTemplates } from '@/hooks/use-cv-templates';
 import { CVTemplate } from '@/types/cv-templates';
 import LivePreviewLayout from '@/components/admin/cv-templates/LivePreviewLayout';
 import TemplateEditorLayout from '@/components/admin/cv-templates/TemplateEditorLayout';
-import { useEmployeeProfiles } from '@/hooks/use-employee-profiles';
 import { useEmployeeData } from '@/hooks/use-employee-data';
 import { useToast } from '@/hooks/use-toast';
 import { useTemplateConfiguration } from '@/hooks/use-template-configuration';
@@ -14,7 +13,6 @@ const CVTemplateEdit: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { getTemplate, updateTemplate, isUpdating } = useCVTemplates();
-  const { profiles, fetchProfiles } = useEmployeeProfiles();
   const [template, setTemplate] = useState<CVTemplate | null>(null);
   const [originalTemplate, setOriginalTemplate] = useState<CVTemplate | null>(null);
   const [selectedProfileId, setSelectedProfileId] = useState('');
@@ -44,7 +42,6 @@ const CVTemplateEdit: React.FC = () => {
 
   useEffect(() => {
     loadTemplate();
-    fetchProfiles();
   }, [id]);
 
   const handleTemplateUpdate = (updates: Partial<CVTemplate>) => {
@@ -91,7 +88,6 @@ const CVTemplateEdit: React.FC = () => {
 
   const handleSectionsChange = () => {
     setHasUnsavedChanges(true);
-    // Removed refetchProfile() call - data will update automatically when selectedProfileId changes
   };
 
   const handleBack = () => {
@@ -142,7 +138,6 @@ const CVTemplateEdit: React.FC = () => {
       onTemplateNameChange={handleTemplateNameChange}
       selectedProfileId={selectedProfileId}
       onProfileChange={handleProfileChange}
-      profiles={profiles || []}
       onExport={handleExport}
       // Pass the template sections and field mappings for export
       templateSections={templateSections}
@@ -157,7 +152,6 @@ const CVTemplateEdit: React.FC = () => {
         onSectionsChange={handleSectionsChange}
         selectedProfileId={selectedProfileId}
         onProfileChange={handleProfileChange}
-        profiles={profiles || []}
       />
     </TemplateEditorLayout>
   );

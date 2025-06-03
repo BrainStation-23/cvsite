@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -8,12 +9,12 @@ import { EmployeeProfile } from '@/hooks/types/employee-profiles';
 import { EmployeeCombobox } from './EmployeeCombobox';
 import ExportDropdown from './ExportDropdown';
 import { useTemplateConfiguration } from '@/hooks/use-template-configuration';
+import { useEmployeeData } from '@/hooks/use-employee-data';
 
 interface PreviewControlsProps {
   template: CVTemplate;
   selectedProfileId: string;
   onProfileChange: (profileId: string) => void;
-  profiles: EmployeeProfile[];
   onExport?: () => void;
   templateId?: string;
 }
@@ -22,23 +23,17 @@ const PreviewControls: React.FC<PreviewControlsProps> = ({
   template,
   selectedProfileId,
   onProfileChange,
-  profiles,
   onExport,
   templateId
 }) => {
-  const [selectedProfile, setSelectedProfile] = useState<EmployeeProfile | null>(null);
-
-  useEffect(() => {
-    if (selectedProfileId && profiles) {
-      const profile = profiles.find(p => p.id === selectedProfileId);
-      setSelectedProfile(profile || null);
-    }
-  }, [selectedProfileId, profiles]);
+  // Fetch the selected profile data
+  const {
+    data: selectedProfile,
+    isLoading: profileLoading
+  } = useEmployeeData(selectedProfileId);
 
   const handleProfileChange = (profileId: string) => {
     console.log('Profile selected in PreviewControls:', profileId);
-    const profile = profiles?.find(p => p.id === profileId);
-    setSelectedProfile(profile || null);
     onProfileChange(profileId);
   };
 
@@ -61,11 +56,10 @@ const PreviewControls: React.FC<PreviewControlsProps> = ({
             <Label className="text-xs">Employee Profile</Label>
             <div className="mt-1">
               <EmployeeCombobox
-                profiles={profiles}
                 value={selectedProfileId}
                 onValueChange={handleProfileChange}
                 placeholder="Select employee..."
-                isLoading={false}
+                disabled={false}
               />
             </div>
           </div>

@@ -46,6 +46,8 @@ export const ProjectsTab: React.FC<ProjectsTabProps> = ({
   const [isAdding, setIsAdding] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
+  const [optimisticProjects, setOptimisticProjects] = useState<Project[]>([]);
+  const [isReordering, setIsReordering] = useState(false);
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -54,29 +56,51 @@ export const ProjectsTab: React.FC<ProjectsTabProps> = ({
     })
   );
 
+  // Use optimistic projects during reordering, otherwise use actual projects
+  const displayProjects = isReordering ? optimisticProjects : projects;
+
   // Filter projects based on search query
   const filteredProjects = useMemo(() => {
-    if (!searchQuery) return projects;
+    if (!searchQuery) return displayProjects;
     
     const query = searchQuery.toLowerCase();
-    return projects.filter(project => 
+    return displayProjects.filter(project => 
       project.name.toLowerCase().includes(query) ||
       project.description.toLowerCase().includes(query) ||
       (project.technologiesUsed && project.technologiesUsed.some(tech => 
         tech.toLowerCase().includes(query)
       ))
     );
-  }, [projects, searchQuery]);
+  }, [displayProjects, searchQuery]);
 
-  const handleDragEnd = (event: any) => {
+  const handleDragEnd = async (event: any) => {
     const { active, over } = event;
 
     if (active.id !== over.id) {
       const oldIndex = filteredProjects.findIndex(item => item.id === active.id);
       const newIndex = filteredProjects.findIndex(item => item.id === over.id);
       
+      // Optimistically update the UI immediately
       const reorderedProjects = arrayMove(filteredProjects, oldIndex, newIndex);
-      onReorder(reorderedProjects);
+      setOptimisticProjects(reorderedProjects);
+      setIsReordering(true);
+      
+      try {
+        // Attempt to sync with backend
+        const success = await onReorder(reorderedProjects);
+        
+        if (!success) {
+          // If failed, revert to original order
+          setOptimisticProjects(projects);
+        }
+      } catch (error) {
+        // If error, revert to original order
+        setOptimisticProjects(projects);
+      } finally {
+        // Reset optimistic state after backend sync
+        setIsReordering(false);
+        setOptimisticProjects([]);
+      }
     }
   };
 

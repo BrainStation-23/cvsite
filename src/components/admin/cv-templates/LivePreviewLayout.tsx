@@ -5,7 +5,6 @@ import { Card } from '@/components/ui/card';
 import CVPreview from './CVPreview';
 import TemplateInspector from './TemplateInspector';
 import { CVTemplate } from '@/types/cv-templates';
-import { EmployeeProfile } from '@/hooks/types/employee-profiles';
 
 interface LivePreviewLayoutProps {
   template: CVTemplate;
@@ -14,7 +13,6 @@ interface LivePreviewLayoutProps {
   onSectionsChange: () => void;
   selectedProfileId: string;
   onProfileChange: (profileId: string) => void;
-  profiles: EmployeeProfile[];
 }
 
 const LivePreviewLayout: React.FC<LivePreviewLayoutProps> = ({
