@@ -9,6 +9,7 @@ export interface UserCSVRow {
   role?: UserRole;
   password?: string;
   employeeId?: string;
+  sbuName?: string;
 }
 
 export interface CSVValidationResult {
@@ -59,7 +60,8 @@ export const downloadCSVTemplate = () => {
       lastName: 'Doe',
       role: 'employee',
       password: 'SecurePass123!',
-      employeeId: 'EMP001'
+      employeeId: 'EMP001',
+      sbuName: 'Technology Division'
     },
     {
       email: 'jane.smith@company.com',
@@ -67,7 +69,8 @@ export const downloadCSVTemplate = () => {
       lastName: 'Smith',
       role: 'manager',
       password: '',
-      employeeId: ''
+      employeeId: '',
+      sbuName: 'Marketing Department'
     },
     {
       email: 'admin@company.com',
@@ -75,7 +78,8 @@ export const downloadCSVTemplate = () => {
       lastName: 'User',
       role: 'admin',
       password: 'AdminPass456!',
-      employeeId: 'ADM001'
+      employeeId: 'ADM001',
+      sbuName: ''
     }
   ];
 
@@ -187,6 +191,12 @@ export const validateCSVData = (data: any[], existingUsers: any[] = []): CSVVali
       hasErrors = true;
     }
 
+    // Validate sbuName (optional)
+    let sbuName = '';
+    if (row.sbuName && typeof row.sbuName === 'string') {
+      sbuName = row.sbuName.trim();
+    }
+
     // If no errors, add to valid array with defaults
     if (!hasErrors && formattedRole) {
       valid.push({
@@ -195,7 +205,8 @@ export const validateCSVData = (data: any[], existingUsers: any[] = []): CSVVali
         lastName: row.lastName ? row.lastName.trim() : '',
         role: formattedRole,
         password: row.password && row.password.trim() ? row.password.trim() : generateRandomPassword(),
-        employeeId: row.employeeId ? row.employeeId.trim() : ''
+        employeeId: row.employeeId ? row.employeeId.trim() : '',
+        sbuName: sbuName
       });
     }
   });

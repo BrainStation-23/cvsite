@@ -97,6 +97,7 @@ const UserCSVValidation: React.FC<UserCSVValidationProps> = ({ validationResult 
           <li>• <strong>role</strong>: Optional (admin, manager, employee), defaults to employee</li>
           <li>• <strong>password</strong>: Optional, auto-generated if empty</li>
           <li>• <strong>employeeId</strong>: Optional</li>
+          <li>• <strong>sbuName</strong>: Optional, SBU name (human-readable)</li>
         </ul>
       </div>
     </div>

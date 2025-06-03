@@ -26,7 +26,8 @@ const parseFileData = async (formData: FormData): Promise<any[]> => {
       lastName: row[3],
       role: row[4],
       employeeId: row[5],
-      password: row[6] // Optional
+      password: row[6], // Optional
+      sbuName: row[7] // Added SBU name field
     }));
   } else if (fileType === 'xlsx' || fileType === 'xls') {
     const workbook = xlsx.read(arrayBuffer);
@@ -39,11 +40,29 @@ const parseFileData = async (formData: FormData): Promise<any[]> => {
       lastName: row.lastName,
       role: row.role,
       employeeId: row.employeeId,
-      password: row.password // Optional
+      password: row.password, // Optional
+      sbuName: row.sbuName // Added SBU name field
     }));
   } else {
     throw new Error('Unsupported file format. Please upload CSV or Excel file.');
   }
+};
+
+const getSbuIdByName = async (supabase: any, sbuName: string): Promise<string | null> => {
+  if (!sbuName || sbuName.trim() === '') return null;
+  
+  const { data: sbus, error } = await supabase
+    .from('sbus')
+    .select('id')
+    .ilike('name', sbuName.trim())
+    .limit(1);
+  
+  if (error) {
+    console.error('Error fetching SBU:', error);
+    return null;
+  }
+  
+  return sbus && sbus.length > 0 ? sbus[0].id : null;
 };
 
 serve(async (req) => {
@@ -77,7 +96,7 @@ serve(async (req) => {
     
     // Process each user
     for (const user of users) {
-      const { userId, email, firstName, lastName, role, employeeId, password } = user;
+      const { userId, email, firstName, lastName, role, employeeId, password, sbuName } = user;
       
       if (!userId) {
         results.failed.push({ ...user, error: 'User ID is required' });
@@ -85,6 +104,17 @@ serve(async (req) => {
       }
       
       try {
+        // Get SBU ID from name if provided
+        let sbuId = null;
+        if (sbuName && sbuName.trim()) {
+          sbuId = await getSbuIdByName(supabase, sbuName);
+          if (!sbuId) {
+            console.log(`Warning: SBU "${sbuName}" not found for user ${userId}, will clear SBU assignment`);
+            // Set sbuId to null to clear the assignment if SBU name doesn't exist
+            sbuId = null;
+          }
+        }
+        
         // Update user metadata if provided
         if (email || firstName || lastName || employeeId || password) {
           const updateData: Record<string, any> = {};
@@ -115,11 +145,16 @@ serve(async (req) => {
         }
         
         // Update profile table if profile-related fields are provided
-        if (firstName || lastName || employeeId) {
+        if (firstName || lastName || employeeId || sbuName !== undefined) {
           const profileUpdates: Record<string, any> = {};
           if (firstName) profileUpdates.first_name = firstName;
           if (lastName) profileUpdates.last_name = lastName;
           if (employeeId) profileUpdates.employee_id = employeeId;
+          
+          // Always update sbu_id if sbuName was provided (even if null to clear assignment)
+          if (sbuName !== undefined) {
+            profileUpdates.sbu_id = sbuId;
+          }
           
           const { error: profileError } = await supabase
             .from('profiles')
@@ -178,7 +213,11 @@ serve(async (req) => {
           }
         }
         
-        results.successful.push(userId);
+        results.successful.push({
+          userId,
+          sbuAssigned: !!sbuId,
+          sbuName: sbuId ? sbuName : null
+        });
       } catch (error) {
         results.failed.push({ userId, error: error.message || 'Unknown error' });
       }
