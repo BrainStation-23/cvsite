@@ -7,9 +7,13 @@ import { CSVValidationResult, CSVValidationError } from '@/utils/userCsvUtils';
 
 interface UserCSVValidationProps {
   validationResult: CSVValidationResult;
+  mode?: 'create' | 'update';
 }
 
-const UserCSVValidation: React.FC<UserCSVValidationProps> = ({ validationResult }) => {
+const UserCSVValidation: React.FC<UserCSVValidationProps> = ({ 
+  validationResult, 
+  mode = 'create' 
+}) => {
   const { valid, errors } = validationResult;
   const hasErrors = errors.length > 0;
   const hasValid = valid.length > 0;
@@ -23,6 +27,9 @@ const UserCSVValidation: React.FC<UserCSVValidationProps> = ({ validationResult 
     return acc;
   }, {} as Record<number, CSVValidationError[]>);
 
+  const actionText = mode === 'create' ? 'import' : 'update';
+  const entityText = mode === 'create' ? 'users ready to import' : 'users ready to update';
+
   return (
     <div className="space-y-4">
       {/* Summary */}
@@ -31,7 +38,7 @@ const UserCSVValidation: React.FC<UserCSVValidationProps> = ({ validationResult 
           <CheckCircle2 className="h-5 w-5 text-green-600 dark:text-green-400" />
           <div>
             <div className="font-medium text-green-900 dark:text-green-100">Valid Users</div>
-            <div className="text-sm text-green-700 dark:text-green-300">{valid.length} users ready to import</div>
+            <div className="text-sm text-green-700 dark:text-green-300">{valid.length} {entityText}</div>
           </div>
         </div>
         
@@ -49,7 +56,7 @@ const UserCSVValidation: React.FC<UserCSVValidationProps> = ({ validationResult 
         <Alert variant="destructive">
           <AlertTriangle className="h-4 w-4" />
           <AlertDescription>
-            Please fix the following errors before importing:
+            Please fix the following errors before {actionText}ing:
           </AlertDescription>
         </Alert>
       )}
@@ -89,13 +96,18 @@ const UserCSVValidation: React.FC<UserCSVValidationProps> = ({ validationResult 
 
       {/* Help Text */}
       <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
-        <h4 className="font-medium text-blue-900 dark:text-blue-100 mb-2">CSV Format Requirements:</h4>
+        <h4 className="font-medium text-blue-900 dark:text-blue-100 mb-2">
+          CSV Format Requirements for {mode === 'create' ? 'Create' : 'Update'}:
+        </h4>
         <ul className="text-sm text-blue-700 dark:text-blue-300 space-y-1">
+          {mode === 'update' && (
+            <li>• <strong>userId</strong>: Required for updates, must be existing user ID</li>
+          )}
           <li>• <strong>email</strong>: Required, must be valid email format</li>
           <li>• <strong>firstName</strong>: Required, cannot be empty</li>
           <li>• <strong>lastName</strong>: Optional</li>
           <li>• <strong>role</strong>: Optional (admin, manager, employee), defaults to employee</li>
-          <li>• <strong>password</strong>: Optional, auto-generated if empty</li>
+          <li>• <strong>password</strong>: Optional, {mode === 'create' ? 'auto-generated if empty' : 'leave empty to keep current password'}</li>
           <li>• <strong>employeeId</strong>: Optional</li>
           <li>• <strong>sbuName</strong>: Optional, SBU name (human-readable)</li>
         </ul>

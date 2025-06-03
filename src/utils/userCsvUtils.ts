@@ -3,6 +3,7 @@ import Papa from 'papaparse';
 import { UserRole } from '@/types';
 
 export interface UserCSVRow {
+  userId?: string; // For updates
   email: string;
   firstName: string;
   lastName: string;
@@ -90,7 +91,7 @@ export const downloadCSVTemplate = () => {
   if (link.download !== undefined) {
     const url = URL.createObjectURL(blob);
     link.setAttribute('href', url);
-    link.setAttribute('download', 'user_template.csv');
+    link.setAttribute('download', 'user_create_template.csv');
     link.style.visibility = 'hidden';
     document.body.appendChild(link);
     link.click();
@@ -98,17 +99,84 @@ export const downloadCSVTemplate = () => {
   }
 };
 
-export const validateCSVData = (data: any[], existingUsers: any[] = []): CSVValidationResult => {
+export const downloadUpdateCSVTemplate = () => {
+  const templateData = [
+    {
+      userId: 'user-id-1',
+      email: 'john.doe@company.com',
+      firstName: 'John Updated',
+      lastName: 'Doe',
+      role: 'manager',
+      password: '',
+      employeeId: 'EMP001',
+      sbuName: 'Technology Division'
+    },
+    {
+      userId: 'user-id-2',
+      email: 'jane.smith@company.com',
+      firstName: 'Jane',
+      lastName: 'Smith Updated',
+      role: 'admin',
+      password: 'NewPassword123!',
+      employeeId: 'EMP002',
+      sbuName: 'Marketing Department'
+    }
+  ];
+
+  const csv = Papa.unparse(templateData);
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const link = document.createElement('a');
+  
+  if (link.download !== undefined) {
+    const url = URL.createObjectURL(blob);
+    link.setAttribute('href', url);
+    link.setAttribute('download', 'user_update_template.csv');
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  }
+};
+
+export const validateCSVData = (data: any[], existingUsers: any[] = [], mode: 'create' | 'update' = 'create'): CSVValidationResult => {
   const valid: UserCSVRow[] = [];
   const errors: CSVValidationError[] = [];
   const seenEmails = new Set();
+  const seenUserIds = new Set();
   
   // Create a set of existing user emails for quick lookup
   const existingEmails = new Set(existingUsers.map(u => u.email.toLowerCase().trim()));
+  const existingUserIds = new Set(existingUsers.map(u => u.id));
 
   data.forEach((row: any, index: number) => {
     const rowNumber = index + 2; // +2 because index starts at 0 and CSV has header row
     let hasErrors = false;
+
+    // Validate userId for update mode
+    if (mode === 'update') {
+      if (!row.userId || typeof row.userId !== 'string' || row.userId.trim() === '') {
+        errors.push({
+          row: rowNumber,
+          field: 'userId',
+          value: row.userId || '',
+          message: 'User ID is required for updates'
+        });
+        hasErrors = true;
+      } else {
+        const trimmedUserId = row.userId.trim();
+        if (seenUserIds.has(trimmedUserId)) {
+          errors.push({
+            row: rowNumber,
+            field: 'userId',
+            value: trimmedUserId,
+            message: 'Duplicate user ID in CSV'
+          });
+          hasErrors = true;
+        } else {
+          seenUserIds.add(trimmedUserId);
+        }
+      }
+    }
 
     // Validate email (required)
     if (!row.email || typeof row.email !== 'string' || row.email.trim() === '') {
@@ -143,16 +211,19 @@ export const validateCSVData = (data: any[], existingUsers: any[] = []): CSVVali
             message: 'Duplicate email in CSV'
           });
           hasErrors = true;
-        } else if (existingEmails.has(lowerEmail)) {
-          errors.push({
-            row: rowNumber,
-            field: 'email',
-            value: trimmedEmail,
-            message: 'User with this email already exists'
-          });
-          hasErrors = true;
         } else {
           seenEmails.add(lowerEmail);
+          
+          // For create mode, check if user already exists
+          if (mode === 'create' && existingEmails.has(lowerEmail)) {
+            errors.push({
+              row: rowNumber,
+              field: 'email',
+              value: trimmedEmail,
+              message: 'User with this email already exists'
+            });
+            hasErrors = true;
+          }
         }
       }
     }
@@ -199,15 +270,31 @@ export const validateCSVData = (data: any[], existingUsers: any[] = []): CSVVali
 
     // If no errors, add to valid array with defaults
     if (!hasErrors && formattedRole) {
-      valid.push({
+      const validRow: UserCSVRow = {
         email: row.email.trim(),
         firstName: row.firstName.trim(),
         lastName: row.lastName ? row.lastName.trim() : '',
         role: formattedRole,
-        password: row.password && row.password.trim() ? row.password.trim() : generateRandomPassword(),
         employeeId: row.employeeId ? row.employeeId.trim() : '',
         sbuName: sbuName
-      });
+      };
+
+      // Add userId for update mode
+      if (mode === 'update') {
+        validRow.userId = row.userId.trim();
+      }
+
+      // Handle password
+      if (mode === 'create') {
+        validRow.password = row.password && row.password.trim() ? row.password.trim() : generateRandomPassword();
+      } else {
+        // For updates, only include password if provided
+        if (row.password && row.password.trim()) {
+          validRow.password = row.password.trim();
+        }
+      }
+
+      valid.push(validRow);
     }
   });
 
@@ -218,6 +305,7 @@ export const parseUsersCSV = (file: File): Promise<any[]> => {
   return new Promise((resolve, reject) => {
     Papa.parse(file, {
       header: true,
+      skipEmptyLines: true,
       complete: (results) => {
         try {
           // Filter out empty rows

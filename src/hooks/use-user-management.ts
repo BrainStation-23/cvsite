@@ -76,6 +76,16 @@ export function useUserManagement({
     }
     return success;
   };
+
+  // Enhanced bulk update function that refreshes the list
+  const bulkUpdateWithRefresh = async (file: File) => {
+    const success = await creation.bulkUpdate(file);
+    if (success) {
+      // Refresh the user list after successful bulk update
+      listing.fetchUsers();
+    }
+    return success;
+  };
   
   // Return combined API with enhanced functions
   return {
@@ -103,6 +113,7 @@ export function useUserManagement({
     resetPassword: resetPasswordWithFeedback,
     deleteUser: deleteUserWithRefresh,
     bulkUpload: bulkUploadWithRefresh,
+    bulkUpdate: bulkUpdateWithRefresh,
     
     // Export functionality
     exportUsers: exportHook.exportUsers

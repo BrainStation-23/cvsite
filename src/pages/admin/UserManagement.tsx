@@ -1,8 +1,7 @@
-
 import React, { useState, useEffect } from 'react';
 import DashboardLayout from '../../components/Layout/DashboardLayout';
 import { Button } from '@/components/ui/button';
-import { Upload, RefreshCw, UserPlus, Download } from 'lucide-react';
+import { Upload, RefreshCw, UserPlus, Download, Users } from 'lucide-react';
 import { useUserManagement } from '@/hooks/use-user-management';
 import UserSearchFilters from '@/components/admin/UserSearchFilters';
 import UserList from '@/components/admin/UserList';
@@ -22,7 +21,8 @@ const UserManagement: React.FC = () => {
   const [isEditUserDialogOpen, setIsEditUserDialogOpen] = useState(false);
   const [isResetPasswordDialogOpen, setIsResetPasswordDialogOpen] = useState(false);
   const [isDeleteUserDialogOpen, setIsDeleteUserDialogOpen] = useState(false);
-  const [isBulkUploadDialogOpen, setIsBulkUploadDialogOpen] = useState(false);
+  const [isBulkCreateDialogOpen, setIsBulkCreateDialogOpen] = useState(false);
+  const [isBulkUpdateDialogOpen, setIsBulkUpdateDialogOpen] = useState(false);
   
   const {
     users,
@@ -44,6 +44,7 @@ const UserManagement: React.FC = () => {
     resetPassword,
     deleteUser,
     bulkUpload,
+    bulkUpdate,
     exportUsers
   } = useUserManagement();
   
@@ -118,10 +119,18 @@ const UserManagement: React.FC = () => {
     return success;
   };
 
-  const handleBulkUploadSuccess = async (file: File) => {
+  const handleBulkCreateSuccess = async (file: File) => {
     const success = await bulkUpload(file);
     if (success) {
-      setIsBulkUploadDialogOpen(false);
+      setIsBulkCreateDialogOpen(false);
+    }
+    return success;
+  };
+
+  const handleBulkUpdateSuccess = async (file: File) => {
+    const success = await bulkUpdate(file);
+    if (success) {
+      setIsBulkUpdateDialogOpen(false);
     }
     return success;
   };
@@ -144,10 +153,19 @@ const UserManagement: React.FC = () => {
           <Button 
             variant="outline" 
             className="flex items-center gap-2"
-            onClick={() => setIsBulkUploadDialogOpen(true)}
+            onClick={() => setIsBulkUpdateDialogOpen(true)}
+          >
+            <Users size={16} />
+            <span className="hidden md:inline">Bulk Update</span>
+          </Button>
+          
+          <Button 
+            variant="outline" 
+            className="flex items-center gap-2"
+            onClick={() => setIsBulkCreateDialogOpen(true)}
           >
             <Upload size={16} />
-            <span className="hidden md:inline">Bulk Upload</span>
+            <span className="hidden md:inline">Bulk Create</span>
           </Button>
           
           <Button 
@@ -230,10 +248,23 @@ const UserManagement: React.FC = () => {
       />
       
       <BulkUploadDialog
-        isOpen={isBulkUploadDialogOpen}
-        onOpenChange={setIsBulkUploadDialogOpen}
-        onBulkUpload={handleBulkUploadSuccess}
+        isOpen={isBulkCreateDialogOpen}
+        onOpenChange={setIsBulkCreateDialogOpen}
+        onBulkUpload={handleBulkCreateSuccess}
         isBulkUploading={isBulkUploading}
+        mode="create"
+        title="Bulk Create Users"
+        description="Upload a CSV file to create new users in bulk."
+      />
+      
+      <BulkUploadDialog
+        isOpen={isBulkUpdateDialogOpen}
+        onOpenChange={setIsBulkUpdateDialogOpen}
+        onBulkUpload={handleBulkUpdateSuccess}
+        isBulkUploading={isBulkUploading}
+        mode="update"
+        title="Bulk Update Users"
+        description="Upload a CSV file to update existing users in bulk."
       />
     </DashboardLayout>
   );
