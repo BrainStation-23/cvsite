@@ -3,12 +3,12 @@ import React from 'react';
 import DashboardLayout from '../../components/Layout/DashboardLayout';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import SettingCategory from '@/components/admin/SettingCategory';
 import UniversitySettings from '@/components/admin/UniversitySettings';
 import DepartmentSettings from '@/components/admin/DepartmentSettings';
 import DegreeSettings from '@/components/admin/DegreeSettings';
 import DesignationSettings from '@/components/admin/DesignationSettings';
 import ReferenceSettings from '@/components/admin/reference/ReferenceSettings';
+import SbuSettings from '@/components/admin/SbuSettings';
 
 const PlatformSettings: React.FC = () => {
   return (
@@ -102,7 +102,7 @@ const PlatformSettings: React.FC = () => {
             <TabsContent value="sbus" className="mt-0 h-full">
               <ScrollArea className="h-full">
                 <div className="p-6">
-                  <SettingCategory title="SBUs" table="sbus" />
+                  <SbuSettings />
                 </div>
               </ScrollArea>
             </TabsContent>
