@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import DashboardLayout from '../../components/Layout/DashboardLayout';
 import { useToast } from '@/hooks/use-toast';
@@ -42,6 +41,7 @@ const ProfilePage: React.FC = () => {
     saveAchievement,
     updateAchievement,
     deleteAchievement,
+    reorderAchievements,
     saveProject,
     updateProject,
     deleteProject,
@@ -154,6 +154,7 @@ const ProfilePage: React.FC = () => {
               saveAchievement={saveAchievement}
               updateAchievement={updateAchievement}
               deleteAchievement={deleteAchievement}
+              reorderAchievements={reorderAchievements}
               saveProject={saveProject}
               updateProject={updateProject}
               deleteProject={deleteProject}

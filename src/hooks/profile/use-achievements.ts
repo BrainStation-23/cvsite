@@ -12,6 +12,7 @@ type AchievementDB = {
   title: string;
   description: string;
   date: string;
+  priority?: number;
   created_at: string;
   updated_at: string;
 };
@@ -52,6 +53,7 @@ export function useAchievements(profileId?: string) {
         .from('achievements')
         .select('*')
         .eq('profile_id', targetProfileId)
+        .order('priority', { ascending: true })
         .order('date', { ascending: false });
       
       if (error) throw error;
@@ -196,6 +198,56 @@ export function useAchievements(profileId?: string) {
     }
   };
 
+  // Reorder achievements
+  const reorderAchievements = async (reorderedAchievements: Achievement[]) => {
+    if (!targetProfileId) return false;
+    
+    try {
+      setIsSaving(true);
+      
+      // Update local state immediately for better UX
+      setAchievements(reorderedAchievements);
+      
+      // Prepare bulk update data with new priorities
+      const updates = reorderedAchievements.map((achievement, index) => ({
+        id: achievement.id,
+        priority: index,
+        updated_at: new Date().toISOString()
+      }));
+      
+      // Perform bulk update
+      for (const update of updates) {
+        const { error } = await supabase
+          .from('achievements')
+          .update({ priority: update.priority, updated_at: update.updated_at })
+          .eq('id', update.id)
+          .eq('profile_id', targetProfileId);
+        
+        if (error) throw error;
+      }
+      
+      toast({
+        title: 'Success',
+        description: 'Achievements have been reordered',
+      });
+      
+      return true;
+    } catch (error) {
+      console.error('Error reordering achievements:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to reorder achievements',
+        variant: 'destructive'
+      });
+      
+      // Revert local state on error
+      await fetchAchievements();
+      return false;
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
   // Load achievements data
   useEffect(() => {
     if (targetProfileId) {
@@ -209,6 +261,7 @@ export function useAchievements(profileId?: string) {
     isSaving,
     saveAchievement,
     updateAchievement,
-    deleteAchievement
+    deleteAchievement,
+    reorderAchievements
   };
 }

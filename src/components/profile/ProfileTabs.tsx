@@ -41,6 +41,7 @@ interface ProfileTabsProps {
   saveAchievement: (achievement: Omit<Achievement, 'id'>) => Promise<boolean>;
   updateAchievement: (id: string, achievement: Partial<Achievement>) => Promise<boolean>;
   deleteAchievement: (id: string) => Promise<boolean>;
+  reorderAchievements: (achievements: Achievement[]) => Promise<boolean>;
   saveProject: (project: Omit<Project, 'id'>) => Promise<boolean>;
   updateProject: (id: string, project: Partial<Project>) => Promise<boolean>;
   deleteProject: (id: string) => Promise<boolean>;

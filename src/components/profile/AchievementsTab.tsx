@@ -6,7 +6,21 @@ import { PlusCircle } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { Achievement } from '@/types';
 import { AchievementForm } from './achievements/AchievementForm';
-import { AchievementsList } from './achievements/AchievementsList';
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+} from '@dnd-kit/core';
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  verticalListSortingStrategy,
+} from '@dnd-kit/sortable';
+import { SortableAchievementItem } from './achievements/SortableAchievementItem';
 
 interface AchievementsTabProps {
   achievements: Achievement[];
@@ -15,6 +29,7 @@ interface AchievementsTabProps {
   onSave: (achievement: Omit<Achievement, 'id'>) => Promise<boolean>;
   onUpdate: (id: string, achievement: Partial<Achievement>) => Promise<boolean>;
   onDelete: (id: string) => Promise<boolean>;
+  onReorder?: (achievements: Achievement[]) => Promise<boolean>;
 }
 
 export const AchievementsTab: React.FC<AchievementsTabProps> = ({
@@ -23,11 +38,19 @@ export const AchievementsTab: React.FC<AchievementsTabProps> = ({
   isSaving,
   onSave,
   onUpdate,
-  onDelete
+  onDelete,
+  onReorder
 }) => {
   const [isAdding, setIsAdding] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [date, setDate] = useState<Date | undefined>(new Date());
+
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
 
   const addForm = useForm<Omit<Achievement, 'id'>>({
     defaultValues: {
@@ -44,6 +67,18 @@ export const AchievementsTab: React.FC<AchievementsTabProps> = ({
       date: new Date()
     }
   });
+
+  const handleDragEnd = (event: any) => {
+    const { active, over } = event;
+
+    if (active.id !== over.id && onReorder) {
+      const oldIndex = achievements.findIndex(item => item.id === active.id);
+      const newIndex = achievements.findIndex(item => item.id === over.id);
+      
+      const reorderedAchievements = arrayMove(achievements, oldIndex, newIndex);
+      onReorder(reorderedAchievements);
+    }
+  };
 
   const handleStartAddNew = () => {
     setIsAdding(true);
@@ -138,12 +173,36 @@ export const AchievementsTab: React.FC<AchievementsTabProps> = ({
           </div>
         )}
         
-        <AchievementsList
-          achievements={achievements}
-          isEditing={isEditing}
-          onEdit={handleStartEdit}
-          onDelete={onDelete}
-        />
+        {achievements.length > 0 ? (
+          <DndContext 
+            sensors={sensors}
+            collisionDetection={closestCenter}
+            onDragEnd={handleDragEnd}
+          >
+            <SortableContext 
+              items={achievements.map(a => a.id)} 
+              strategy={verticalListSortingStrategy}
+            >
+              <div className="space-y-4">
+                {achievements.map((achievement) => (
+                  <SortableAchievementItem
+                    key={achievement.id}
+                    achievement={achievement}
+                    isEditing={isEditing}
+                    onEdit={() => handleStartEdit(achievement)}
+                    onDelete={onDelete}
+                    editingId={editingId}
+                  />
+                ))}
+              </div>
+            </SortableContext>
+          </DndContext>
+        ) : (
+          <div className="text-center text-gray-500 dark:text-gray-400 py-8">
+            No achievements added yet. 
+            {isEditing && ' Click "Add Achievement" to add your professional accomplishments.'}
+          </div>
+        )}
       </CardContent>
     </Card>
   );
