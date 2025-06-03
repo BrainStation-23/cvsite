@@ -18,7 +18,6 @@ interface TemplateEditorLayoutProps {
   onTemplateNameChange: (name: string) => void;
   selectedProfileId: string;
   onProfileChange: (profileId: string) => void;
-  profiles: any[];
   onExport: () => void;
   // New props for export functionality
   templateSections?: any[];
@@ -38,7 +37,6 @@ const TemplateEditorLayout: React.FC<TemplateEditorLayoutProps> = ({
   onTemplateNameChange,
   selectedProfileId,
   onProfileChange,
-  profiles,
   onExport,
   templateSections = [],
   templateFieldMappings = [],
@@ -87,7 +85,6 @@ const TemplateEditorLayout: React.FC<TemplateEditorLayoutProps> = ({
             <EmployeeCombobox
               value={selectedProfileId}
               onValueChange={onProfileChange}
-              profiles={profiles}
               placeholder="Select employee for preview"
             />
             
