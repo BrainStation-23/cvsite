@@ -49,7 +49,7 @@ export function useDashboardAnalytics() {
 
       // Parse the JSON response and set the analytics state
       if (data) {
-        const analyticsData = data as DashboardAnalyticsResponse;
+        const analyticsData = data as unknown as DashboardAnalyticsResponse;
         setAnalytics({
           totalEmployees: analyticsData.totalEmployees || 0,
           profilesCompleted: analyticsData.profilesCompleted || 0,
