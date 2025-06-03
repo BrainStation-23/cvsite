@@ -11,6 +11,14 @@ interface DashboardAnalytics {
   experienceDistribution: Array<{ range: string; count: number }>;
 }
 
+interface DashboardAnalyticsResponse {
+  totalEmployees: number;
+  profilesCompleted: number;
+  completionRate: number;
+  skillMatrix: Array<{ skill: string; count: number }>;
+  experienceDistribution: Array<{ range: string; count: number }>;
+}
+
 export function useDashboardAnalytics() {
   const [analytics, setAnalytics] = useState<DashboardAnalytics>({
     totalEmployees: 0,
@@ -41,12 +49,13 @@ export function useDashboardAnalytics() {
 
       // Parse the JSON response and set the analytics state
       if (data) {
+        const analyticsData = data as DashboardAnalyticsResponse;
         setAnalytics({
-          totalEmployees: data.totalEmployees || 0,
-          profilesCompleted: data.profilesCompleted || 0,
-          completionRate: data.completionRate || 0,
-          skillMatrix: data.skillMatrix || [],
-          experienceDistribution: data.experienceDistribution || []
+          totalEmployees: analyticsData.totalEmployees || 0,
+          profilesCompleted: analyticsData.profilesCompleted || 0,
+          completionRate: analyticsData.completionRate || 0,
+          skillMatrix: analyticsData.skillMatrix || [],
+          experienceDistribution: analyticsData.experienceDistribution || []
         });
       }
 
