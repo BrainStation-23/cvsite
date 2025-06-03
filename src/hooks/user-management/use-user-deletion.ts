@@ -7,11 +7,18 @@ export function useUserDeletion(state: ReturnType<typeof import('./use-user-stat
   const { setIsDeleting } = state;
   
   // Delete user
-  const deleteUser = async (userId: string) => {
+  const deleteUser = async (userId: string, onSuccess?: () => void) => {
     try {
       setIsDeleting(true);
       
-      if (!userId) return false;
+      if (!userId) {
+        toast({
+          title: 'Error',
+          description: 'User ID is required',
+          variant: 'destructive',
+        });
+        return false;
+      }
       
       const { error } = await supabase.functions.invoke('delete-user', {
         body: { userId }
@@ -20,9 +27,14 @@ export function useUserDeletion(state: ReturnType<typeof import('./use-user-stat
       if (error) throw error;
       
       toast({
-        title: "User deleted",
+        title: "Success",
         description: `User has been deleted successfully.`,
       });
+      
+      // Call the success callback to refresh the list
+      if (onSuccess) {
+        onSuccess();
+      }
       
       return true;
     } catch (error) {

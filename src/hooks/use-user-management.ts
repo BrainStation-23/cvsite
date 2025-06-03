@@ -25,7 +25,55 @@ export function useUserManagement({
   const update = useUserUpdate(state);
   const deletion = useUserDeletion(state);
   
-  // Return combined API
+  // Enhanced delete function that refreshes the list
+  const deleteUserWithRefresh = async (userId: string) => {
+    const success = await deletion.deleteUser(userId, () => {
+      // Refresh the user list after successful deletion
+      listing.fetchUsers();
+    });
+    return success;
+  };
+
+  // Enhanced add user function that refreshes the list
+  const addUserWithRefresh = async (userData: any) => {
+    const success = await creation.addUser(userData);
+    if (success) {
+      // Refresh the user list after successful creation
+      listing.fetchUsers();
+    }
+    return success;
+  };
+
+  // Enhanced update user function that refreshes the list
+  const updateUserWithRefresh = async (userId: string, userData: any) => {
+    const success = await update.updateUser(userId, userData);
+    if (success) {
+      // Refresh the user list after successful update
+      listing.fetchUsers();
+    }
+    return success;
+  };
+
+  // Enhanced reset password function that shows feedback
+  const resetPasswordWithFeedback = async (userId: string) => {
+    const success = await update.resetPassword(userId);
+    if (success) {
+      // No need to refresh list for password reset, just show feedback
+    }
+    return success;
+  };
+
+  // Enhanced bulk upload function that refreshes the list
+  const bulkUploadWithRefresh = async (users: any[]) => {
+    const success = await creation.bulkUpload(users);
+    if (success) {
+      // Refresh the user list after successful bulk upload
+      listing.fetchUsers();
+    }
+    return success;
+  };
+  
+  // Return combined API with enhanced functions
   return {
     // State
     users: state.users,
@@ -40,10 +88,16 @@ export function useUserManagement({
     sortOrder: state.sortOrder,
     setSelectedUser: state.setSelectedUser,
     
-    // Methods from sub-hooks
-    ...listing,
-    ...creation,
-    ...update,
-    ...deletion
+    // Methods from sub-hooks (listing)
+    fetchUsers: listing.fetchUsers,
+    handlePageChange: listing.handlePageChange,
+    resetFilters: listing.resetFilters,
+    
+    // Enhanced methods that include auto-refresh and better feedback
+    addUser: addUserWithRefresh,
+    updateUser: updateUserWithRefresh,
+    resetPassword: resetPasswordWithFeedback,
+    deleteUser: deleteUserWithRefresh,
+    bulkUpload: bulkUploadWithRefresh
   };
 }

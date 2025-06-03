@@ -80,11 +80,55 @@ const UserManagement: React.FC = () => {
     setSelectedUser(user);
     setIsDeleteUserDialogOpen(true);
   };
+
+  // Enhanced handlers that automatically close dialogs and refresh
+  const handleAddUserSuccess = async (userData: any) => {
+    const success = await addUser(userData);
+    if (success) {
+      setIsAddUserDialogOpen(false);
+    }
+    return success;
+  };
+
+  const handleEditUserSuccess = async (userData: any) => {
+    if (!selectedUser) return false;
+    const success = await updateUser(selectedUser.id, userData);
+    if (success) {
+      setIsEditUserDialogOpen(false);
+    }
+    return success;
+  };
+
+  const handleResetPasswordSuccess = async () => {
+    if (!selectedUser) return false;
+    const success = await resetPassword(selectedUser.id);
+    if (success) {
+      setIsResetPasswordDialogOpen(false);
+    }
+    return success;
+  };
+
+  const handleDeleteUserSuccess = async () => {
+    if (!selectedUser) return false;
+    const success = await deleteUser(selectedUser.id);
+    if (success) {
+      setIsDeleteUserDialogOpen(false);
+    }
+    return success;
+  };
+
+  const handleBulkUploadSuccess = async (users: any[]) => {
+    const success = await bulkUpload(users);
+    if (success) {
+      setIsBulkUploadDialogOpen(false);
+    }
+    return success;
+  };
   
   return (
     <DashboardLayout>
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-semibold text-cvsite-navy dark:text-white"></h1>
+        <h1 className="text-2xl font-semibold text-cvsite-navy dark:text-white">User Management</h1>
         <div className="flex space-x-2">
           <Button 
             variant="outline" 
@@ -146,7 +190,7 @@ const UserManagement: React.FC = () => {
       <AddUserDialog
         isOpen={isAddUserDialogOpen}
         onOpenChange={setIsAddUserDialogOpen}
-        onAddUser={addUser}
+        onAddUser={handleAddUserSuccess}
         isLoading={isLoading}
       />
       
@@ -154,7 +198,7 @@ const UserManagement: React.FC = () => {
         isOpen={isEditUserDialogOpen}
         onOpenChange={setIsEditUserDialogOpen}
         user={selectedUser}
-        onUpdateUser={updateUser}
+        onUpdateUser={handleEditUserSuccess}
         isLoading={isLoading}
       />
       
@@ -162,7 +206,7 @@ const UserManagement: React.FC = () => {
         isOpen={isResetPasswordDialogOpen}
         onOpenChange={setIsResetPasswordDialogOpen}
         user={selectedUser}
-        onResetPassword={resetPassword}
+        onResetPassword={handleResetPasswordSuccess}
         isLoading={isLoading}
       />
       
@@ -170,14 +214,14 @@ const UserManagement: React.FC = () => {
         isOpen={isDeleteUserDialogOpen}
         onOpenChange={setIsDeleteUserDialogOpen}
         user={selectedUser}
-        onDeleteUser={deleteUser}
+        onDeleteUser={handleDeleteUserSuccess}
         isDeleting={isDeleting}
       />
       
       <BulkUploadDialog
         isOpen={isBulkUploadDialogOpen}
         onOpenChange={setIsBulkUploadDialogOpen}
-        onBulkUpload={bulkUpload}
+        onBulkUpload={handleBulkUploadSuccess}
         isBulkUploading={isBulkUploading}
       />
     </DashboardLayout>
