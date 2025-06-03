@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
@@ -339,7 +338,7 @@ interface ResetPasswordDialogProps {
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
   user: UserData | null;
-  onResetPassword: (userId: string, newPassword: string) => Promise<boolean>;
+  onResetPassword: (newPassword: string) => Promise<boolean>;
   isLoading: boolean;
 }
 
@@ -359,7 +358,7 @@ export const ResetPasswordDialog: React.FC<ResetPasswordDialogProps> = ({
   const handleResetPassword = async () => {
     if (!user) return;
     
-    const success = await onResetPassword(user.id, newPassword);
+    const success = await onResetPassword(newPassword);
     if (success) {
       onOpenChange(false);
     }

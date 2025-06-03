@@ -46,7 +46,10 @@ export function useUserManagement({
 
   // Enhanced update user function that refreshes the list
   const updateUserWithRefresh = async (userId: string, userData: any) => {
-    const success = await update.updateUser(userId, userData);
+    const success = await update.updateUser({
+      id: userId,
+      ...userData
+    });
     if (success) {
       // Refresh the user list after successful update
       listing.fetchUsers();
@@ -55,8 +58,8 @@ export function useUserManagement({
   };
 
   // Enhanced reset password function that shows feedback
-  const resetPasswordWithFeedback = async (userId: string) => {
-    const success = await update.resetPassword(userId);
+  const resetPasswordWithFeedback = async (userId: string, newPassword: string) => {
+    const success = await update.resetPassword(userId, newPassword);
     if (success) {
       // No need to refresh list for password reset, just show feedback
     }
@@ -64,8 +67,8 @@ export function useUserManagement({
   };
 
   // Enhanced bulk upload function that refreshes the list
-  const bulkUploadWithRefresh = async (users: any[]) => {
-    const success = await creation.bulkUpload(users);
+  const bulkUploadWithRefresh = async (file: File) => {
+    const success = await creation.bulkUpload(file);
     if (success) {
       // Refresh the user list after successful bulk upload
       listing.fetchUsers();

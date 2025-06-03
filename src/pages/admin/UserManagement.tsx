@@ -99,9 +99,9 @@ const UserManagement: React.FC = () => {
     return success;
   };
 
-  const handleResetPasswordSuccess = async () => {
+  const handleResetPasswordSuccess = async (newPassword: string) => {
     if (!selectedUser) return false;
-    const success = await resetPassword(selectedUser.id);
+    const success = await resetPassword(selectedUser.id, newPassword);
     if (success) {
       setIsResetPasswordDialogOpen(false);
     }
@@ -117,8 +117,8 @@ const UserManagement: React.FC = () => {
     return success;
   };
 
-  const handleBulkUploadSuccess = async (users: any[]) => {
-    const success = await bulkUpload(users);
+  const handleBulkUploadSuccess = async (file: File) => {
+    const success = await bulkUpload(file);
     if (success) {
       setIsBulkUploadDialogOpen(false);
     }
