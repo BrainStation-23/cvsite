@@ -36,6 +36,99 @@ const formatUserRole = (role: string): string => {
   }
 };
 
+// Helper function to process users in batches
+const processBatch = async (supabase: any, users: any[], batchIndex: number, batchSize: number) => {
+  console.log(`Processing batch ${batchIndex + 1}, users ${batchIndex * batchSize + 1}-${Math.min((batchIndex + 1) * batchSize, users.length)}`);
+  
+  const results = {
+    successful: [],
+    failed: [],
+    generatedPasswords: []
+  };
+  
+  for (let i = 0; i < users.length; i++) {
+    const user = users[i];
+    console.log(`Processing user ${batchIndex * batchSize + i + 1}: ${user.email}`);
+    
+    const { email, firstName, lastName, role, password, employeeId } = user;
+    
+    // Basic validation - email and firstName are required
+    if (!email || !firstName) {
+      console.log(`Validation failed for user: missing email or firstName`);
+      results.failed.push({ 
+        ...user, 
+        error: 'Email and first name are required fields' 
+      });
+      continue;
+    }
+    
+    // Email format validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email.trim())) {
+      console.log(`Invalid email format: ${email}`);
+      results.failed.push({ 
+        ...user, 
+        error: 'Invalid email format' 
+      });
+      continue;
+    }
+    
+    // Format role and generate password if needed
+    const formattedRole = formatUserRole(role);
+    const finalPassword = password && password.trim() ? password.trim() : generateRandomPassword();
+    const passwordWasGenerated = !password || !password.trim();
+    
+    try {
+      console.log(`Creating user in Supabase Auth: ${email}`);
+      
+      // Create user in Supabase Auth
+      const { data: authData, error: authError } = await supabase.auth.admin.createUser({
+        email: email.trim(),
+        password: finalPassword,
+        email_confirm: true,
+        user_metadata: {
+          first_name: firstName.trim(),
+          last_name: lastName ? lastName.trim() : '',
+          role: formattedRole,
+          employee_id: employeeId ? employeeId.trim() : ''
+        }
+      });
+      
+      if (authError) {
+        console.error(`Auth error for ${email}:`, authError);
+        results.failed.push({ ...user, error: authError.message });
+        continue;
+      }
+      
+      console.log(`Successfully created user: ${email}`);
+      
+      const successfulUser = { 
+        id: authData.user.id,
+        email: authData.user.email,
+        firstName: firstName.trim(),
+        lastName: lastName ? lastName.trim() : '',
+        role: formattedRole,
+        employeeId: employeeId ? employeeId.trim() : ''
+      };
+      
+      results.successful.push(successfulUser);
+      
+      // Track generated passwords for reporting
+      if (passwordWasGenerated) {
+        results.generatedPasswords.push({
+          email: email.trim(),
+          password: finalPassword
+        });
+      }
+    } catch (error) {
+      console.error(`Error processing user ${email}:`, error);
+      results.failed.push({ ...user, error: error.message || 'Unknown error' });
+    }
+  }
+  
+  return results;
+};
+
 const parseFileData = async (formData: FormData): Promise<any[]> => {
   console.log('Starting file parsing with PapaParse...');
   const file = formData.get('file') as File;
@@ -130,104 +223,56 @@ serve(async (req) => {
       );
     }
     
-    const results = {
+    // Process users in batches of 10
+    const batchSize = 10;
+    const totalBatches = Math.ceil(users.length / batchSize);
+    console.log(`Processing ${users.length} users in ${totalBatches} batches of ${batchSize}`);
+    
+    const allResults = {
       successful: [],
       failed: [],
       generatedPasswords: []
     };
     
-    // Process each user
-    for (let i = 0; i < users.length; i++) {
-      const user = users[i];
-      console.log(`Processing user ${i + 1}/${users.length}:`, user.email);
+    // Process each batch sequentially to avoid overwhelming the system
+    for (let batchIndex = 0; batchIndex < totalBatches; batchIndex++) {
+      const startIndex = batchIndex * batchSize;
+      const endIndex = Math.min(startIndex + batchSize, users.length);
+      const batchUsers = users.slice(startIndex, endIndex);
       
-      const { email, firstName, lastName, role, password, employeeId } = user;
+      console.log(`Starting batch ${batchIndex + 1}/${totalBatches}`);
       
-      // Basic validation - email and firstName are required
-      if (!email || !firstName) {
-        console.log(`Validation failed for user ${i + 1}: missing email or firstName`);
-        results.failed.push({ 
-          ...user, 
-          error: 'Email and first name are required fields' 
-        });
-        continue;
-      }
+      const batchResults = await processBatch(supabase, batchUsers, batchIndex, batchSize);
       
-      // Email format validation
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!emailRegex.test(email.trim())) {
-        console.log(`Invalid email format for user ${i + 1}:`, email);
-        results.failed.push({ 
-          ...user, 
-          error: 'Invalid email format' 
-        });
-        continue;
-      }
+      // Merge results
+      allResults.successful.push(...batchResults.successful);
+      allResults.failed.push(...batchResults.failed);
+      allResults.generatedPasswords.push(...batchResults.generatedPasswords);
       
-      // Format role and generate password if needed
-      const formattedRole = formatUserRole(role);
-      const finalPassword = password && password.trim() ? password.trim() : generateRandomPassword();
-      const passwordWasGenerated = !password || !password.trim();
+      console.log(`Completed batch ${batchIndex + 1}/${totalBatches}. Successful: ${batchResults.successful.length}, Failed: ${batchResults.failed.length}`);
       
-      try {
-        console.log(`Creating user in Supabase Auth: ${email}`);
-        
-        // Create user in Supabase Auth
-        const { data: authData, error: authError } = await supabase.auth.admin.createUser({
-          email: email.trim(),
-          password: finalPassword,
-          email_confirm: true,
-          user_metadata: {
-            first_name: firstName.trim(),
-            last_name: lastName ? lastName.trim() : '',
-            role: formattedRole,
-            employee_id: employeeId ? employeeId.trim() : ''
-          }
-        });
-        
-        if (authError) {
-          console.error(`Auth error for ${email}:`, authError);
-          results.failed.push({ ...user, error: authError.message });
-          continue;
-        }
-        
-        console.log(`Successfully created user: ${email}`);
-        
-        const successfulUser = { 
-          id: authData.user.id,
-          email: authData.user.email,
-          firstName: firstName.trim(),
-          lastName: lastName ? lastName.trim() : '',
-          role: formattedRole,
-          employeeId: employeeId ? employeeId.trim() : ''
-        };
-        
-        results.successful.push(successfulUser);
-        
-        // Track generated passwords for reporting
-        if (passwordWasGenerated) {
-          results.generatedPasswords.push({
-            email: email.trim(),
-            password: finalPassword
-          });
-        }
-      } catch (error) {
-        console.error(`Error processing user ${email}:`, error);
-        results.failed.push({ ...user, error: error.message || 'Unknown error' });
+      // Add a small delay between batches to prevent rate limiting
+      if (batchIndex < totalBatches - 1) {
+        await new Promise(resolve => setTimeout(resolve, 1000));
       }
     }
     
-    console.log('Processing complete. Results:', {
-      successful: results.successful.length,
-      failed: results.failed.length,
-      passwordsGenerated: results.generatedPasswords.length
+    console.log('All batches processed. Final results:', {
+      successful: allResults.successful.length,
+      failed: allResults.failed.length,
+      passwordsGenerated: allResults.generatedPasswords.length
     });
     
     return new Response(
       JSON.stringify({ 
-        message: `Processed ${users.length} users. ${results.successful.length} added successfully, ${results.failed.length} failed.`,
-        results,
-        passwordsGenerated: results.generatedPasswords.length
+        message: `Processed ${users.length} users in ${totalBatches} batches. ${allResults.successful.length} added successfully, ${allResults.failed.length} failed.`,
+        results: allResults,
+        passwordsGenerated: allResults.generatedPasswords.length,
+        batchInfo: {
+          totalBatches,
+          batchSize,
+          totalUsers: users.length
+        }
       }),
       { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );

@@ -51,7 +51,7 @@ export function useUserCreation(state: ReturnType<typeof import('./use-user-stat
     }
   };
   
-  // Bulk upload
+  // Bulk upload with improved progress handling
   const bulkUpload = async (uploadFile: File) => {
     try {
       console.log('Starting bulk upload for file:', uploadFile.name);
@@ -65,6 +65,12 @@ export function useUserCreation(state: ReturnType<typeof import('./use-user-stat
         });
         return false;
       }
+      
+      // Show initial progress toast
+      toast({
+        title: 'Processing bulk upload',
+        description: 'Analyzing file and preparing to create users in batches...',
+      });
       
       // Create FormData and append the file
       const formData = new FormData();
@@ -84,27 +90,44 @@ export function useUserCreation(state: ReturnType<typeof import('./use-user-stat
         throw error;
       }
       
-      // Show success message with details
+      // Show detailed success message with batch information
       if (data?.results) {
         const { successful, failed, passwordsGenerated } = data.results;
-        let description = `${successful.length} users created successfully.`;
+        const batchInfo = data.batchInfo;
+        
+        let description = `Successfully processed ${batchInfo?.totalUsers || 'unknown'} users in ${batchInfo?.totalBatches || 'multiple'} batches.\n`;
+        description += `✅ ${successful.length} users created successfully`;
         
         if (failed.length > 0) {
-          description += ` ${failed.length} users failed to create.`;
+          description += `\n❌ ${failed.length} users failed to create`;
         }
         
         if (passwordsGenerated > 0) {
-          description += ` ${passwordsGenerated} passwords were auto-generated.`;
+          description += `\n🔑 ${passwordsGenerated} passwords were auto-generated`;
         }
         
         toast({
           title: "Bulk upload completed",
           description,
         });
+        
+        // If there were failures, show them in a separate toast
+        if (failed.length > 0 && failed.length < 10) {
+          const failedEmails = failed.slice(0, 5).map(f => f.email || 'Unknown').join(', ');
+          const moreFailures = failed.length > 5 ? ` and ${failed.length - 5} more` : '';
+          
+          setTimeout(() => {
+            toast({
+              title: "Some users failed to create",
+              description: `Failed: ${failedEmails}${moreFailures}. Check logs for details.`,
+              variant: 'destructive',
+            });
+          }, 2000);
+        }
       } else {
         toast({
           title: "Bulk upload completed",
-          description: data?.message || `Users have been added successfully.`,
+          description: data?.message || `Users have been processed successfully.`,
         });
       }
       
