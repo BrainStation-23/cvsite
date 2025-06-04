@@ -1,4 +1,3 @@
-
 import { BaseExporter } from './BaseExporter';
 import { ExportOptions, ExportResult } from '../CVExportService';
 import * as XLSX from 'xlsx';
@@ -29,7 +28,7 @@ export class ExcelExporter extends BaseExporter {
       }
 
       // Generate Excel file
-      const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+      const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'buffer' });
       const blob = new Blob([excelBuffer], { 
         type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' 
       });
@@ -51,7 +50,7 @@ export class ExcelExporter extends BaseExporter {
     }
   }
 
-  private addProfileOverviewSheet(workbook: XLSX.WorkBook, profile: any, template: any): void {
+  private addProfileOverviewSheet(workbook: XLSX.IWorkBook, profile: any, template: any): void {
     const data = [
       ['CV Profile Overview'],
       [''],
@@ -73,7 +72,7 @@ export class ExcelExporter extends BaseExporter {
     XLSX.utils.book_append_sheet(workbook, worksheet, 'Profile Overview');
   }
 
-  private addSectionSheets(workbook: XLSX.WorkBook, sections: any[], profile: any): void {
+  private addSectionSheets(workbook: XLSX.IWorkBook, sections: any[], profile: any): void {
     sections
       .sort((a, b) => a.display_order - b.display_order)
       .forEach(section => {
@@ -107,7 +106,7 @@ export class ExcelExporter extends BaseExporter {
     }
   }
 
-  private createSectionWorksheet(section: any, data: any[]): XLSX.WorkSheet {
+  private createSectionWorksheet(section: any, data: any[]): XLSX.IWorkSheet {
     if (!data || data.length === 0) {
       return XLSX.utils.aoa_to_sheet([
         [section.section_type.toUpperCase()],
@@ -210,7 +209,7 @@ export class ExcelExporter extends BaseExporter {
     return XLSX.utils.aoa_to_sheet(worksheetData);
   }
 
-  private addFieldMappingsSheet(workbook: XLSX.WorkBook, fieldMappings: any[]): void {
+  private addFieldMappingsSheet(workbook: XLSX.IWorkBook, fieldMappings: any[]): void {
     const data = [
       ['Field Mappings Configuration'],
       [''],
