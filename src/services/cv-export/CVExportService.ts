@@ -107,7 +107,8 @@ export class CVExportService {
             format: 'pdf',
             name: 'PDF',
             description: 'Portable Document Format - ideal for printing and sharing',
-            available: true
+            available: false,
+            comingSoon: true
           },
           {
             format: 'docx',
@@ -132,7 +133,8 @@ export class CVExportService {
             format: 'ppt',
             name: 'PowerPoint',
             description: 'Microsoft PowerPoint presentation',
-            available: true
+            available: false,
+            comingSoon: true
           },
           {
             format: 'html',
