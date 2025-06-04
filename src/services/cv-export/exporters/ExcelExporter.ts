@@ -1,6 +1,7 @@
+
 import { BaseExporter } from './BaseExporter';
 import { ExportOptions, ExportResult } from '../CVExportService';
-import * as XLSX from 'xlsx';
+import * as ExcelJS from 'exceljs';
 
 export class ExcelExporter extends BaseExporter {
   async export(options: ExportOptions): Promise<ExportResult> {
@@ -14,7 +15,7 @@ export class ExcelExporter extends BaseExporter {
       }
 
       // Create a new workbook
-      const workbook = XLSX.utils.book_new();
+      const workbook = new ExcelJS.Workbook();
 
       // Add Profile Overview sheet
       this.addProfileOverviewSheet(workbook, profile, template);
@@ -28,8 +29,8 @@ export class ExcelExporter extends BaseExporter {
       }
 
       // Generate Excel file
-      const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'buffer' });
-      const blob = new Blob([excelBuffer], { 
+      const buffer = await workbook.xlsx.writeBuffer();
+      const blob = new Blob([buffer], { 
         type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' 
       });
       const fileName = this.generateFileName(profile, 'xlsx');
@@ -50,7 +51,9 @@ export class ExcelExporter extends BaseExporter {
     }
   }
 
-  private addProfileOverviewSheet(workbook: XLSX.IWorkBook, profile: any, template: any): void {
+  private addProfileOverviewSheet(workbook: ExcelJS.Workbook, profile: any, template: any): void {
+    const worksheet = workbook.addWorksheet('Profile Overview');
+    
     const data = [
       ['CV Profile Overview'],
       [''],
@@ -68,19 +71,21 @@ export class ExcelExporter extends BaseExporter {
       ['Generated On', new Date().toLocaleDateString()]
     ];
 
-    const worksheet = XLSX.utils.aoa_to_sheet(data);
-    XLSX.utils.book_append_sheet(workbook, worksheet, 'Profile Overview');
+    worksheet.addRows(data);
+    
+    // Style the header
+    worksheet.getCell('A1').font = { bold: true, size: 14 };
+    worksheet.getCell('A3').font = { bold: true };
+    worksheet.getCell('A11').font = { bold: true };
   }
 
-  private addSectionSheets(workbook: XLSX.IWorkBook, sections: any[], profile: any): void {
+  private addSectionSheets(workbook: ExcelJS.Workbook, sections: any[], profile: any): void {
     sections
       .sort((a, b) => a.display_order - b.display_order)
       .forEach(section => {
         const sectionData = this.getSectionData(section, profile);
         if (sectionData) {
-          const worksheet = this.createSectionWorksheet(section, sectionData);
-          const sheetName = this.formatSheetName(section.section_type);
-          XLSX.utils.book_append_sheet(workbook, worksheet, sheetName);
+          this.createSectionWorksheet(workbook, section, sectionData);
         }
       });
   }
@@ -106,12 +111,16 @@ export class ExcelExporter extends BaseExporter {
     }
   }
 
-  private createSectionWorksheet(section: any, data: any[]): XLSX.IWorkSheet {
+  private createSectionWorksheet(workbook: ExcelJS.Workbook, section: any, data: any[]): void {
+    const sheetName = this.formatSheetName(section.section_type);
+    const worksheet = workbook.addWorksheet(sheetName);
+
     if (!data || data.length === 0) {
-      return XLSX.utils.aoa_to_sheet([
+      worksheet.addRows([
         [section.section_type.toUpperCase()],
         ['No data available']
       ]);
+      return;
     }
 
     const sectionType = section.section_type;
@@ -206,10 +215,23 @@ export class ExcelExporter extends BaseExporter {
         });
     }
 
-    return XLSX.utils.aoa_to_sheet(worksheetData);
+    worksheet.addRows(worksheetData);
+    
+    // Style the header row
+    if (worksheetData.length > 2) {
+      const headerRow = worksheet.getRow(3);
+      headerRow.font = { bold: true };
+      headerRow.fill = {
+        type: 'pattern',
+        pattern: 'solid',
+        fgColor: { argb: 'FFE0E0E0' }
+      };
+    }
   }
 
-  private addFieldMappingsSheet(workbook: XLSX.IWorkBook, fieldMappings: any[]): void {
+  private addFieldMappingsSheet(workbook: ExcelJS.Workbook, fieldMappings: any[]): void {
+    const worksheet = workbook.addWorksheet('Field Mappings');
+    
     const data = [
       ['Field Mappings Configuration'],
       [''],
@@ -227,8 +249,17 @@ export class ExcelExporter extends BaseExporter {
       ]);
     });
 
-    const worksheet = XLSX.utils.aoa_to_sheet(data);
-    XLSX.utils.book_append_sheet(workbook, worksheet, 'Field Mappings');
+    worksheet.addRows(data);
+    
+    // Style the header
+    worksheet.getCell('A1').font = { bold: true, size: 14 };
+    const headerRow = worksheet.getRow(3);
+    headerRow.font = { bold: true };
+    headerRow.fill = {
+      type: 'pattern',
+      pattern: 'solid',
+      fgColor: { argb: 'FFE0E0E0' }
+    };
   }
 
   private formatSheetName(sectionType: string): string {
