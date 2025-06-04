@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { ArrowLeft, Save, RotateCcw } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { EmployeeCombobox } from './EmployeeCombobox';
-import ExportDropdown from './ExportDropdown';
+import ExportButton from './ExportButton';
 
 interface TemplateEditorLayoutProps {
   children: React.ReactNode;
@@ -88,7 +88,7 @@ const TemplateEditorLayout: React.FC<TemplateEditorLayoutProps> = ({
               placeholder="Select employee for preview"
             />
             
-            <ExportDropdown
+            <ExportButton
               template={template}
               profile={selectedProfile}
               sections={templateSections}
