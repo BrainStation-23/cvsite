@@ -177,8 +177,11 @@ export class MarkdownExporter extends BaseExporter {
     let content = '';
     
     skills.forEach(skill => {
-      const proficiencyStars = '★'.repeat(skill.proficiency || 1) + '☆'.repeat(5 - (skill.proficiency || 1));
-      content += `- **${skill.name}** - ${proficiencyStars} (${skill.proficiency || 1}/5)\n`;
+      // Ensure proficiency is a valid number between 1 and 5
+      const proficiency = Math.max(1, Math.min(5, parseInt(skill.proficiency) || 1));
+      const filledStars = '★'.repeat(proficiency);
+      const emptyStars = '☆'.repeat(5 - proficiency);
+      content += `- **${skill.name}** - ${filledStars}${emptyStars} (${proficiency}/5)\n`;
     });
     
     content += '\n';
