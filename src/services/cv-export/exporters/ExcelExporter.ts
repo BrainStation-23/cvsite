@@ -50,7 +50,7 @@ export class ExcelExporter extends BaseExporter {
     }
   }
 
-  private addProfileOverviewSheet(workbook: XLSX.WorkBook, profile: any, template: any): void {
+  private addProfileOverviewSheet(workbook: XLSX.IWorkBook, profile: any, template: any): void {
     const data = [
       ['CV Profile Overview'],
       [''],
@@ -72,7 +72,7 @@ export class ExcelExporter extends BaseExporter {
     XLSX.utils.book_append_sheet(workbook, worksheet, 'Profile Overview');
   }
 
-  private addSectionSheets(workbook: XLSX.WorkBook, sections: any[], profile: any): void {
+  private addSectionSheets(workbook: XLSX.IWorkBook, sections: any[], profile: any): void {
     sections
       .sort((a, b) => a.display_order - b.display_order)
       .forEach(section => {
@@ -209,7 +209,7 @@ export class ExcelExporter extends BaseExporter {
     return XLSX.utils.aoa_to_sheet(worksheetData);
   }
 
-  private addFieldMappingsSheet(workbook: XLSX.WorkBook, fieldMappings: any[]): void {
+  private addFieldMappingsSheet(workbook: XLSX.IWorkBook, fieldMappings: any[]): void {
     const data = [
       ['Field Mappings Configuration'],
       [''],
