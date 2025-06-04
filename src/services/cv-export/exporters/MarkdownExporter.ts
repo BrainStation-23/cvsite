@@ -40,9 +40,10 @@ export class MarkdownExporter extends BaseExporter {
     const fullName = `${profile.first_name || ''} ${profile.last_name || ''}`.trim();
     markdown += `# ${fullName}\n\n`;
     
-    // Profile image if available
-    if (profile.profile_image_url) {
-      markdown += `![${fullName} Profile Photo](${profile.profile_image_url})\n\n`;
+    // Profile image if available - check multiple possible fields
+    const profileImageUrl = profile.profile_image_url || profile.profile_image || profile.general_information?.profile_image;
+    if (profileImageUrl) {
+      markdown += `![${fullName} Profile Photo](${profileImageUrl})\n\n`;
     }
     
     // Contact information section
@@ -177,11 +178,13 @@ export class MarkdownExporter extends BaseExporter {
     let content = '';
     
     skills.forEach(skill => {
-      // Ensure proficiency is a valid number between 1 and 5
-      const proficiency = Math.max(1, Math.min(5, parseInt(skill.proficiency) || 1));
-      const filledStars = '★'.repeat(proficiency);
-      const emptyStars = '☆'.repeat(5 - proficiency);
-      content += `- **${skill.name}** - ${filledStars}${emptyStars} (${proficiency}/5)\n`;
+      // Ensure proficiency is a valid number between 1 and 10
+      const proficiency = Math.max(1, Math.min(10, parseInt(skill.proficiency) || 1));
+      // Create visual representation with stars (scale to 5 stars but show actual number out of 10)
+      const starCount = Math.round((proficiency / 10) * 5);
+      const filledStars = '★'.repeat(starCount);
+      const emptyStars = '☆'.repeat(5 - starCount);
+      content += `- **${skill.name}** - ${filledStars}${emptyStars} (${proficiency}/10)\n`;
     });
     
     content += '\n';
