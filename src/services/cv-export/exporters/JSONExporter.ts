@@ -13,35 +13,50 @@ export class JSONExporter extends BaseExporter {
         throw new Error('Profile data is required for JSON export');
       }
 
-      // Create structured JSON data
+      // Create comprehensive structured JSON data
       const jsonData = {
-        template: {
-          id: template.id,
-          name: template.name,
-          orientation: template.orientation
+        metadata: {
+          exportedAt: new Date().toISOString(),
+          exportFormat: 'json',
+          version: '1.0',
+          template: {
+            id: template.id,
+            name: template.name,
+            orientation: template.orientation
+          }
         },
         profile: {
           id: profile.id,
-          firstName: profile.first_name,
-          lastName: profile.last_name,
-          email: profile.email,
-          phone: profile.phone,
-          location: profile.location
+          personalInfo: {
+            firstName: profile.first_name,
+            lastName: profile.last_name,
+            fullName: `${profile.first_name || ''} ${profile.last_name || ''}`.trim(),
+            email: profile.email,
+            phone: profile.phone,
+            location: profile.location,
+            biography: profile.biography
+          }
         },
-        sections: sections.map(section => ({
-          id: section.id,
-          type: section.section_type,
-          displayOrder: section.display_order,
-          isRequired: section.is_required,
-          fieldMapping: section.field_mapping,
-          data: this.getSectionData(section, profile)
-        })),
-        fieldMappings: fieldMappings,
-        exportMetadata: {
-          exportedAt: new Date().toISOString(),
-          exportFormat: 'json',
-          version: '1.0'
-        }
+        sections: this.processSections(sections, profile),
+        fieldMappings: fieldMappings?.map(mapping => ({
+          id: mapping.id,
+          originalField: mapping.original_field_name,
+          displayName: mapping.display_name,
+          isMasked: mapping.is_masked,
+          maskValue: mapping.mask_value,
+          fieldOrder: mapping.field_order,
+          sectionType: mapping.section_type,
+          visibilityRules: mapping.visibility_rules
+        })) || [],
+        skills: {
+          technical: profile.technical_skills || [],
+          specialized: profile.specialized_skills || []
+        },
+        experience: profile.experiences || [],
+        education: profile.education || [],
+        projects: profile.projects || [],
+        trainings: profile.trainings || [],
+        achievements: profile.achievements || []
       };
 
       const jsonString = JSON.stringify(jsonData, null, 2);
@@ -64,29 +79,48 @@ export class JSONExporter extends BaseExporter {
     }
   }
 
+  private processSections(sections: any[], profile: any): any[] {
+    return sections
+      .sort((a, b) => a.display_order - b.display_order)
+      .map(section => ({
+        id: section.id,
+        type: section.section_type,
+        displayOrder: section.display_order,
+        isRequired: section.is_required,
+        fieldMapping: section.field_mapping,
+        stylingConfig: section.styling_config,
+        data: this.getSectionData(section, profile)
+      }));
+  }
+
   private getSectionData(section: any, profile: any): any {
-    // This would be expanded to fetch actual section data based on section type
-    // For now, return placeholder structure
     switch (section.section_type) {
       case 'general':
+      case 'general_info':
         return {
           firstName: profile.first_name,
           lastName: profile.last_name,
           email: profile.email,
-          phone: profile.phone
+          phone: profile.phone,
+          location: profile.location,
+          biography: profile.biography
         };
+      case 'technical_skills':
+        return profile.technical_skills || [];
+      case 'specialized_skills':
+        return profile.specialized_skills || [];
       case 'experience':
-        return {
-          placeholder: 'Experience data would be fetched here'
-        };
+        return profile.experiences || [];
       case 'education':
-        return {
-          placeholder: 'Education data would be fetched here'
-        };
+        return profile.education || [];
+      case 'projects':
+        return profile.projects || [];
+      case 'trainings':
+        return profile.trainings || [];
+      case 'achievements':
+        return profile.achievements || [];
       default:
-        return {
-          placeholder: `${section.section_type} data would be fetched here`
-        };
+        return null;
     }
   }
 }
