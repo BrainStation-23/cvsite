@@ -38,6 +38,7 @@ interface SectionConfig {
     display_style?: string;
     projects_to_view?: number;
     fields?: FieldConfig[];
+    layout_placement?: 'main' | 'sidebar';
   };
 }
 
@@ -50,9 +51,9 @@ interface SortableSectionItemProps {
   onUpdateFieldConfig: (sectionId: string, fieldIndex: number, fieldUpdates: Partial<FieldConfig>) => void;
   onReorderFields: (sectionId: string, reorderedFields: FieldConfig[]) => void;
   onRemoveSection: (id: string) => void;
-  onMoveSectionToPlacement?: (sectionId: string, placement: 'main' | 'sidebar') => void; // Add this prop
+  onMoveSectionToPlacement?: (sectionId: string, placement: 'main' | 'sidebar') => void;
   getSectionLabel: (type: CVSectionType) => string;
-  layoutType?: string; // Add layout type prop
+  layoutType?: string;
 }
 
 const SortableSectionItem: React.FC<SortableSectionItemProps> = ({
