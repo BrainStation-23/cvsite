@@ -25,6 +25,7 @@ import {
 interface SectionManagerProps {
   templateId: string;
   onSectionsChange?: () => void;
+  template?: any; // Add template prop to access layout config
 }
 
 interface FieldConfig {
@@ -46,10 +47,15 @@ interface SectionConfig {
     display_style?: string;
     projects_to_view?: number;
     fields?: FieldConfig[];
+    layout_placement?: 'main' | 'sidebar'; // Add layout placement
   };
 }
 
-const SectionManager: React.FC<SectionManagerProps> = ({ templateId, onSectionsChange }) => {
+const SectionManager: React.FC<SectionManagerProps> = ({ 
+  templateId, 
+  onSectionsChange,
+  template 
+}) => {
   const [sections, setSections] = useState<SectionConfig[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set());
@@ -63,6 +69,18 @@ const SectionManager: React.FC<SectionManagerProps> = ({ templateId, onSectionsC
       coordinateGetter: sortableKeyboardCoordinates,
     })
   );
+
+  // Get layout type from template
+  const layoutType = template?.layout_config?.layout || 'single-column';
+  const isMultiColumnLayout = ['two-column', 'sidebar-left', 'sidebar-right'].includes(layoutType);
+
+  // Get default sidebar sections for sidebar layouts
+  const getDefaultSidebarSections = (): CVSectionType[] => {
+    if (layoutType === 'sidebar-left' || layoutType === 'sidebar-right') {
+      return template?.layout_config?.sidebarSections || ['technical_skills', 'specialized_skills'];
+    }
+    return [];
+  };
 
   useEffect(() => {
     loadSections();
@@ -81,6 +99,15 @@ const SectionManager: React.FC<SectionManagerProps> = ({ templateId, onSectionsC
 
       const typedSections = (data || []).map(section => {
         const stylingConfig = section.styling_config as any || {};
+        
+        // Determine layout placement based on section type and layout config
+        let layoutPlacement: 'main' | 'sidebar' = 'main';
+        if (isMultiColumnLayout) {
+          const defaultSidebarSections = getDefaultSidebarSections();
+          layoutPlacement = stylingConfig.layout_placement || 
+            (defaultSidebarSections.includes(section.section_type as CVSectionType) ? 'sidebar' : 'main');
+        }
+
         return {
           ...section,
           section_type: section.section_type as CVSectionType,
@@ -88,7 +115,8 @@ const SectionManager: React.FC<SectionManagerProps> = ({ templateId, onSectionsC
           styling_config: {
             display_style: stylingConfig.display_style || 'default',
             projects_to_view: stylingConfig.projects_to_view || 3,
-            fields: (stylingConfig.fields as FieldConfig[]) || []
+            fields: (stylingConfig.fields as FieldConfig[]) || [],
+            layout_placement: layoutPlacement
           }
         } as SectionConfig;
       });
@@ -137,6 +165,13 @@ const SectionManager: React.FC<SectionManagerProps> = ({ templateId, onSectionsC
     try {
       const defaultFields = await getDefaultFields(sectionType);
       
+      // Determine default placement for new sections
+      let defaultPlacement: 'main' | 'sidebar' = 'main';
+      if (isMultiColumnLayout) {
+        const defaultSidebarSections = getDefaultSidebarSections();
+        defaultPlacement = defaultSidebarSections.includes(sectionType) ? 'sidebar' : 'main';
+      }
+      
       const newSection = {
         template_id: templateId,
         section_type: sectionType,
@@ -146,7 +181,8 @@ const SectionManager: React.FC<SectionManagerProps> = ({ templateId, onSectionsC
         styling_config: sectionType === 'page_break' ? {} : {
           display_style: 'default',
           projects_to_view: sectionType === 'projects' ? 3 : undefined,
-          fields: defaultFields
+          fields: defaultFields,
+          layout_placement: defaultPlacement
         }
       };
 
@@ -168,7 +204,8 @@ const SectionManager: React.FC<SectionManagerProps> = ({ templateId, onSectionsC
         styling_config: sectionType === 'page_break' ? {} : { 
           display_style: 'default', 
           projects_to_view: sectionType === 'projects' ? 3 : undefined,
-          fields: defaultFields 
+          fields: defaultFields,
+          layout_placement: defaultPlacement
         }
       } as SectionConfig;
 
@@ -280,6 +317,10 @@ const SectionManager: React.FC<SectionManagerProps> = ({ templateId, onSectionsC
     updateSectionStyling(sectionId, { fields: reorderedFields });
   };
 
+  const moveSectionToPlacement = (sectionId: string, newPlacement: 'main' | 'sidebar') => {
+    updateSectionStyling(sectionId, { layout_placement: newPlacement });
+  };
+
   const handleDragEnd = async (event: DragEndEvent) => {
     const { active, over } = event;
 
@@ -327,7 +368,6 @@ const SectionManager: React.FC<SectionManagerProps> = ({ templateId, onSectionsC
 
   const getAvailableSectionTypes = () => {
     const usedTypes = sections.map(s => s.section_type);
-    // Allow page_break to be added multiple times, but exclude others that are already used
     return SECTION_TYPES.filter(type => 
       type.value === 'page_break' || !usedTypes.includes(type.value)
     );
@@ -343,11 +383,52 @@ const SectionManager: React.FC<SectionManagerProps> = ({ templateId, onSectionsC
     setExpandedSections(newExpanded);
   };
 
+  // Group sections by placement for multi-column layouts
+  const groupedSections = React.useMemo(() => {
+    if (!isMultiColumnLayout) {
+      return { all: sections };
+    }
+
+    const mainSections = sections.filter(s => s.styling_config.layout_placement === 'main');
+    const sidebarSections = sections.filter(s => s.styling_config.layout_placement === 'sidebar');
+
+    return { main: mainSections, sidebar: sidebarSections };
+  }, [sections, isMultiColumnLayout]);
+
   if (isLoading) {
     return <div className="p-4 text-sm text-gray-500">Loading sections...</div>;
   }
 
   const availableSections = getAvailableSectionTypes();
+
+  const renderSectionGroup = (groupSections: SectionConfig[], groupName?: string) => (
+    <SortableContext items={groupSections.map(s => s.id)} strategy={verticalListSortingStrategy}>
+      <div className="space-y-3">
+        {groupName && (
+          <div className="flex items-center justify-between py-2 px-3 bg-gray-100 rounded-lg">
+            <h4 className="text-sm font-medium text-gray-700 capitalize">{groupName}</h4>
+            <span className="text-xs text-gray-500">{groupSections.length} sections</span>
+          </div>
+        )}
+        {groupSections.map((section) => (
+          <SortableSectionItem
+            key={section.id}
+            section={section}
+            expandedSections={expandedSections}
+            onToggleExpanded={toggleSectionExpanded}
+            onUpdateSection={updateSection}
+            onUpdateSectionStyling={updateSectionStyling}
+            onUpdateFieldConfig={updateFieldConfig}
+            onReorderFields={reorderFields}
+            onRemoveSection={removeSection}
+            onMoveSectionToPlacement={isMultiColumnLayout ? moveSectionToPlacement : undefined}
+            getSectionLabel={getSectionLabel}
+            layoutType={layoutType}
+          />
+        ))}
+      </div>
+    </SortableContext>
+  );
 
   return (
     <div className="space-y-4">
@@ -363,24 +444,14 @@ const SectionManager: React.FC<SectionManagerProps> = ({ templateId, onSectionsC
         collisionDetection={closestCenter}
         onDragEnd={handleDragEnd}
       >
-        <SortableContext items={sections.map(s => s.id)} strategy={verticalListSortingStrategy}>
-          <div className="space-y-3">
-            {sections.map((section) => (
-              <SortableSectionItem
-                key={section.id}
-                section={section}
-                expandedSections={expandedSections}
-                onToggleExpanded={toggleSectionExpanded}
-                onUpdateSection={updateSection}
-                onUpdateSectionStyling={updateSectionStyling}
-                onUpdateFieldConfig={updateFieldConfig}
-                onReorderFields={reorderFields}
-                onRemoveSection={removeSection}
-                getSectionLabel={getSectionLabel}
-              />
-            ))}
+        {isMultiColumnLayout ? (
+          <div className="space-y-6">
+            {renderSectionGroup(groupedSections.main, 'Main Column')}
+            {renderSectionGroup(groupedSections.sidebar, layoutType.includes('sidebar') ? 'Sidebar' : 'Second Column')}
           </div>
-        </SortableContext>
+        ) : (
+          renderSectionGroup(groupedSections.all)
+        )}
       </DndContext>
 
       {sections.length === 0 && availableSections.length === 0 && (

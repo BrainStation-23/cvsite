@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -51,7 +50,9 @@ interface SortableSectionItemProps {
   onUpdateFieldConfig: (sectionId: string, fieldIndex: number, fieldUpdates: Partial<FieldConfig>) => void;
   onReorderFields: (sectionId: string, reorderedFields: FieldConfig[]) => void;
   onRemoveSection: (id: string) => void;
+  onMoveSectionToPlacement?: (sectionId: string, placement: 'main' | 'sidebar') => void; // Add this prop
   getSectionLabel: (type: CVSectionType) => string;
+  layoutType?: string; // Add layout type prop
 }
 
 const SortableSectionItem: React.FC<SortableSectionItemProps> = ({
@@ -63,7 +64,9 @@ const SortableSectionItem: React.FC<SortableSectionItemProps> = ({
   onUpdateFieldConfig,
   onReorderFields,
   onRemoveSection,
-  getSectionLabel
+  onMoveSectionToPlacement,
+  getSectionLabel,
+  layoutType = 'single-column'
 }) => {
   const {
     attributes,
@@ -82,6 +85,7 @@ const SortableSectionItem: React.FC<SortableSectionItemProps> = ({
 
   const isPageBreak = section.section_type === 'page_break';
   const showProjectsToView = section.section_type === 'projects';
+  const isMultiColumnLayout = ['two-column', 'sidebar-left', 'sidebar-right'].includes(layoutType);
 
   // Get section type configuration for icon and color
   const sectionTypeConfig = SECTION_TYPES.find(type => type.value === section.section_type);
@@ -161,6 +165,14 @@ const SortableSectionItem: React.FC<SortableSectionItemProps> = ({
               <div>
                 <h4 className="font-medium text-sm">{getSectionLabel(section.section_type)}</h4>
                 <p className="text-xs text-gray-500">{sectionTypeConfig?.description}</p>
+                {isMultiColumnLayout && !isPageBreak && (
+                  <p className="text-xs text-blue-600 font-medium">
+                    {section.styling_config.layout_placement === 'sidebar' 
+                      ? (layoutType.includes('sidebar') ? 'Sidebar' : 'Second Column')
+                      : 'Main Column'
+                    }
+                  </p>
+                )}
               </div>
             </div>
             <div className="flex items-center gap-2">
@@ -193,6 +205,27 @@ const SortableSectionItem: React.FC<SortableSectionItemProps> = ({
             <Collapsible open={expandedSections.has(section.id)}>
               <CollapsibleContent>
                 <div className="space-y-3 pt-2 border-t">
+                  {/* Layout Placement Control for Multi-Column Layouts */}
+                  {isMultiColumnLayout && onMoveSectionToPlacement && (
+                    <div>
+                      <Label className="text-xs">Column Placement</Label>
+                      <Select 
+                        value={section.styling_config.layout_placement || 'main'} 
+                        onValueChange={(value: 'main' | 'sidebar') => onMoveSectionToPlacement(section.id, value)}
+                      >
+                        <SelectTrigger className="h-7 text-xs">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="main">Main Column</SelectItem>
+                          <SelectItem value="sidebar">
+                            {layoutType.includes('sidebar') ? 'Sidebar' : 'Second Column'}
+                          </SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  )}
+
                   {/* Section Configuration */}
                   <div className="grid grid-cols-1 gap-2">
                     <div>
