@@ -186,7 +186,15 @@ export class SingleColumnStrategy implements LayoutStrategy {
       case 'achievements':
         return SectionSplitter.splitAchievementsSection(items, availableHeight, sectionTitle);
       default:
-        return { pageItems: items.map(item => ({ content: item, estimatedHeight: 40 })), remainingItems: [], sectionTitle };
+        return { 
+          pageItems: items.map((item, index) => ({ 
+            id: `default-${index}`,
+            content: item, 
+            estimatedHeight: 40 
+          })), 
+          remainingItems: [], 
+          sectionTitle 
+        };
     }
   }
 }
