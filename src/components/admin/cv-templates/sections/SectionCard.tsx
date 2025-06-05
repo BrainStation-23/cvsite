@@ -63,6 +63,15 @@ const SectionCard: React.FC<SectionCardProps> = ({
   const isPageBreak = section.section_type === 'page_break';
   const isMultiColumnLayout = ['two-column', 'sidebar-left', 'sidebar-right'].includes(layoutType);
 
+  console.log('SectionCard render:', {
+    sectionId: section.id,
+    layoutType,
+    isMultiColumnLayout,
+    hasMoveSectionToPlacement: !!onMoveSectionToPlacement,
+    currentPlacement: section.styling_config.layout_placement,
+    isExpanded
+  });
+
   const getSectionColor = (sectionType: CVSectionType): string => {
     switch (sectionType) {
       case 'general':
@@ -106,15 +115,17 @@ const SectionCard: React.FC<SectionCardProps> = ({
         {!isPageBreak && (
           <Collapsible open={isExpanded}>
             <CollapsibleContent>
-              <div className="space-y-3 pt-2 border-t">
+              <div className="space-y-4 pt-3 border-t mt-3">
                 {/* Layout Placement Control for Multi-Column Layouts */}
                 {isMultiColumnLayout && onMoveSectionToPlacement && (
-                  <SectionLayoutControls
-                    sectionId={section.id}
-                    currentPlacement={section.styling_config.layout_placement || 'main'}
-                    layoutType={layoutType}
-                    onMoveSectionToPlacement={onMoveSectionToPlacement}
-                  />
+                  <div className="bg-gray-50 p-3 rounded-lg">
+                    <SectionLayoutControls
+                      sectionId={section.id}
+                      currentPlacement={section.styling_config.layout_placement || 'main'}
+                      layoutType={layoutType}
+                      onMoveSectionToPlacement={onMoveSectionToPlacement}
+                    />
+                  </div>
                 )}
 
                 {/* Section Configuration */}

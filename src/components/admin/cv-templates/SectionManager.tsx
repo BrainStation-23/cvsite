@@ -34,6 +34,12 @@ const SectionManager: React.FC<SectionManagerProps> = ({
   // Get layout type from template
   const layoutType = template?.layout_config?.layout || 'single-column';
   
+  console.log('SectionManager render:', {
+    templateId,
+    layoutType,
+    template: template?.layout_config
+  });
+  
   // Get default sidebar sections for sidebar layouts
   const getDefaultSidebarSections = (): CVSectionType[] => {
     if (layoutType === 'sidebar-left' || layoutType === 'sidebar-right') {
@@ -116,6 +122,13 @@ const SectionManager: React.FC<SectionManagerProps> = ({
   const availableSections = getAvailableSectionTypes();
   const { main: mainSections = [], sidebar: sidebarSections = [], all: allSections = [] } = groupedSections();
 
+  console.log('Rendering sections:', {
+    isMultiColumnLayout,
+    mainSectionsCount: mainSections.length,
+    sidebarSectionsCount: sidebarSections.length,
+    allSectionsCount: allSections.length
+  });
+
   return (
     <div className="space-y-4">
       <AddSectionPanel
@@ -172,7 +185,7 @@ const SectionManager: React.FC<SectionManagerProps> = ({
             onUpdateFieldConfig={updateFieldConfig}
             onReorderFields={reorderFields}
             onRemoveSection={removeSection}
-            onMoveSectionToPlacement={isMultiColumnLayout ? moveSectionToPlacement : undefined}
+            onMoveSectionToPlacement={undefined}
             getSectionLabel={getSectionLabel}
             layoutType={layoutType}
           />
