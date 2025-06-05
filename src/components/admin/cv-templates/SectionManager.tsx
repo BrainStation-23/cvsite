@@ -31,13 +31,15 @@ const SectionManager: React.FC<SectionManagerProps> = ({
   onSectionsChange,
   template 
 }) => {
-  // Get layout type from template
-  const layoutType = template?.layout_config?.layout || 'single-column';
+  // Get layout type from template - use layoutType from layout_config, not layout
+  const layoutType = template?.layout_config?.layoutType || template?.layout_config?.layout || 'single-column';
   
   console.log('SectionManager render:', {
     templateId,
     layoutType,
-    template: template?.layout_config
+    templateLayoutConfig: template?.layout_config,
+    rawLayoutType: template?.layout_config?.layoutType,
+    fallbackLayout: template?.layout_config?.layout
   });
   
   // Get default sidebar sections for sidebar layouts
@@ -73,6 +75,12 @@ const SectionManager: React.FC<SectionManagerProps> = ({
     moveSectionToPlacement,
     updateSectionsOrder
   } = useSectionOperations(templateId, sections, setSections, onSectionsChange);
+
+  console.log('SectionManager layout detection:', {
+    layoutType,
+    isMultiColumnLayout,
+    sectionsCount: sections.length
+  });
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -185,7 +193,7 @@ const SectionManager: React.FC<SectionManagerProps> = ({
             onUpdateFieldConfig={updateFieldConfig}
             onReorderFields={reorderFields}
             onRemoveSection={removeSection}
-            onMoveSectionToPlacement={undefined}
+            onMoveSectionToPlacement={isMultiColumnLayout ? moveSectionToPlacement : undefined}
             getSectionLabel={getSectionLabel}
             layoutType={layoutType}
           />

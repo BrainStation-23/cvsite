@@ -100,6 +100,15 @@ const LayoutPresets: React.FC<LayoutPresetsProps> = ({
   selectedLayout,
   onLayoutSelect
 }) => {
+  const handleLayoutSelect = (preset: LayoutPreset) => {
+    console.log('LayoutPresets handleLayoutSelect:', {
+      presetId: preset.id,
+      presetConfig: preset.config,
+      selectedLayout
+    });
+    onLayoutSelect(preset);
+  };
+
   return (
     <div className="space-y-4">
       <div>
@@ -116,7 +125,7 @@ const LayoutPresets: React.FC<LayoutPresetsProps> = ({
             className={`p-3 cursor-pointer transition-all hover:shadow-md ${
               selectedLayout === preset.id ? 'ring-2 ring-blue-500 bg-blue-50' : ''
             }`}
-            onClick={() => onLayoutSelect(preset)}
+            onClick={() => handleLayoutSelect(preset)}
           >
             <div className="flex items-center gap-3">
               <div className="flex-shrink-0">
