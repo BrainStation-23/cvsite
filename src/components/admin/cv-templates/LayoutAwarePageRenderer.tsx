@@ -8,7 +8,10 @@ interface TemplateSection {
   display_order: number;
   is_required: boolean;
   field_mapping: Record<string, any>;
-  styling_config: Record<string, any>;
+  styling_config: {
+    layout_placement?: 'main' | 'sidebar';
+    [key: string]: any;
+  };
 }
 
 interface FieldMapping {
@@ -73,7 +76,7 @@ export const LayoutAwarePageRenderer: React.FC<LayoutAwarePageRendererProps> = (
 
 // Helper function to render content based on layout type
 function renderLayoutContent(
-  sections: any[], 
+  sections: TemplateSection[], 
   fieldMappings: FieldMapping[], 
   profile: any, 
   styles: any, 
@@ -85,17 +88,36 @@ function renderLayoutContent(
     return null;
   }
 
+  console.log('LayoutAwarePageRenderer renderLayoutContent:', {
+    layoutType,
+    sectionsCount: sections.length,
+    sectionsWithPlacement: sections.map(s => ({
+      id: s.id,
+      type: s.section_type,
+      placement: s.styling_config?.layout_placement || 'main'
+    }))
+  });
+
   switch (layoutType) {
     case 'two-column':
-      const midPoint = Math.ceil(sections.length / 2);
-      const leftSections = sections.slice(0, midPoint);
-      const rightSections = sections.slice(midPoint);
+      // For two-column layout, use the section's layout_placement setting
+      const twoColMainSections = sections.filter(s => 
+        (s.styling_config?.layout_placement || 'main') === 'main'
+      );
+      const twoColSecondarySections = sections.filter(s => 
+        (s.styling_config?.layout_placement || 'main') === 'sidebar'
+      );
+      
+      console.log('Two-column layout distribution:', {
+        mainSections: twoColMainSections.map(s => s.section_type),
+        secondarySections: twoColSecondarySections.map(s => s.section_type)
+      });
       
       return (
         <>
           <div style={{ gridColumn: '1' }}>
             <DynamicSectionRenderer
-              sections={leftSections}
+              sections={twoColMainSections}
               fieldMappings={fieldMappings}
               profile={profile}
               styles={styles}
@@ -104,7 +126,7 @@ function renderLayoutContent(
           </div>
           <div style={{ gridColumn: '2' }}>
             <DynamicSectionRenderer
-              sections={rightSections}
+              sections={twoColSecondarySections}
               fieldMappings={fieldMappings}
               profile={profile}
               styles={styles}
@@ -115,12 +137,18 @@ function renderLayoutContent(
       );
 
     case 'sidebar':
+      // For sidebar layout, use the section's layout_placement setting
       const sidebarSections = sections.filter(s => 
-        ['technical_skills', 'specialized_skills'].includes(s.section_type)
+        (s.styling_config?.layout_placement || 'main') === 'sidebar'
       );
       const mainSections = sections.filter(s => 
-        !['technical_skills', 'specialized_skills'].includes(s.section_type)
+        (s.styling_config?.layout_placement || 'main') === 'main'
       );
+      
+      console.log('Sidebar layout distribution:', {
+        sidebarSections: sidebarSections.map(s => s.section_type),
+        mainSections: mainSections.map(s => s.section_type)
+      });
       
       return (
         <>

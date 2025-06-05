@@ -9,7 +9,11 @@ interface TemplateSection {
   display_order: number;
   is_required: boolean;
   field_mapping: Record<string, any>;
-  styling_config: Record<string, any>;
+  styling_config: {
+    layout_placement?: 'main' | 'sidebar';
+    projects_to_view?: number;
+    [key: string]: any;
+  };
 }
 
 interface FieldMapping {
@@ -66,6 +70,15 @@ export const IntelligentPageDistributor: React.FC<IntelligentPageDistributorProp
         partialSections: {}
       }];
     }
+
+    console.log('IntelligentPageDistributor processing sections:', {
+      layoutType: layoutConfig.layoutType,
+      sectionsWithPlacement: sections.map(s => ({
+        id: s.id,
+        type: s.section_type,
+        placement: s.styling_config?.layout_placement || 'main'
+      }))
+    });
 
     const sortedSections = [...sections].sort((a, b) => a.display_order - b.display_order);
     const pages: PageContent[] = [];
@@ -211,7 +224,7 @@ export const IntelligentPageDistributor: React.FC<IntelligentPageDistributorProp
     }
 
     return pages;
-  }, [sections, profile, fieldMappings, orientation]);
+  }, [sections, profile, fieldMappings, orientation, layoutConfig]);
 
   // Use useEffect to call onPagesCalculated to avoid setState during render
   useEffect(() => {
