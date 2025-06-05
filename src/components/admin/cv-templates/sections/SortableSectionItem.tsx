@@ -6,29 +6,7 @@ import {
   useSortable,
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-
-interface FieldConfig {
-  field: string;
-  label: string;
-  enabled: boolean;
-  masked: boolean;
-  mask_value?: string;
-  order: number;
-}
-
-interface SectionConfig {
-  id: string;
-  section_type: CVSectionType;
-  display_order: number;
-  is_required: boolean;
-  field_mapping: Record<string, any>;
-  styling_config: {
-    display_style?: string;
-    projects_to_view?: number;
-    fields?: FieldConfig[];
-    layout_placement?: 'main' | 'sidebar';
-  };
-}
+import { SectionConfig } from '@/hooks/use-template-sections';
 
 interface SortableSectionItemProps {
   section: SectionConfig;
@@ -36,8 +14,8 @@ interface SortableSectionItemProps {
   onToggleExpanded: (id: string) => void;
   onUpdateSection: (id: string, updates: Partial<SectionConfig>) => void;
   onUpdateSectionStyling: (id: string, styleUpdates: Partial<SectionConfig['styling_config']>) => void;
-  onUpdateFieldConfig: (sectionId: string, fieldIndex: number, fieldUpdates: Partial<FieldConfig>) => void;
-  onReorderFields: (sectionId: string, reorderedFields: FieldConfig[]) => void;
+  onUpdateFieldConfig: (sectionId: string, fieldIndex: number, fieldUpdates: Partial<any>) => void;
+  onReorderFields: (sectionId: string, reorderedFields: any[]) => void;
   onRemoveSection: (id: string) => void;
   onMoveSectionToPlacement?: (sectionId: string, placement: 'main' | 'sidebar') => void;
   getSectionLabel: (type: CVSectionType) => string;
