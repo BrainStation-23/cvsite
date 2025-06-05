@@ -61,7 +61,7 @@ const SectionCard: React.FC<SectionCardProps> = ({
   getSectionLabel
 }) => {
   const isPageBreak = section.section_type === 'page_break';
-  const isMultiColumnLayout = ['two-column', 'sidebar-left', 'sidebar-right'].includes(layoutType);
+  const isMultiColumnLayout = ['two-column', 'sidebar'].includes(layoutType);
 
   console.log('SectionCard render:', {
     sectionId: section.id,

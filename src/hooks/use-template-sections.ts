@@ -39,7 +39,7 @@ export const useTemplateSections = (
   const [isAddSectionOpen, setIsAddSectionOpen] = useState(false);
   const { toast } = useToast();
 
-  const isMultiColumnLayout = ['two-column', 'sidebar-left', 'sidebar-right'].includes(layoutType);
+  const isMultiColumnLayout = ['two-column', 'sidebar'].includes(layoutType);
 
   useEffect(() => {
     loadSections();

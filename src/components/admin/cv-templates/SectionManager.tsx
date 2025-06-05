@@ -42,7 +42,7 @@ const SectionManager: React.FC<SectionManagerProps> = ({
   
   // Get default sidebar sections for sidebar layouts
   const getDefaultSidebarSections = (): CVSectionType[] => {
-    if (layoutType === 'sidebar-left' || layoutType === 'sidebar-right') {
+    if (layoutType === 'sidebar') {
       return template?.layout_config?.sidebarSections || ['technical_skills', 'specialized_skills'];
     }
     return [];
