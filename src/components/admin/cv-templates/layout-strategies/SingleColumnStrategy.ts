@@ -45,15 +45,19 @@ export class SingleColumnStrategy implements LayoutStrategy {
       }
 
       if (PageUtils.canSectionBeSplit(section.section_type) && Array.isArray(sectionData)) {
-        this.handleSplittableSection(
+        const result = this.handleSplittableSection(
           section, sectionData, sectionTitle, currentPage, pages, 
           currentPageHeight, contentHeight, maxPages, fieldMappings
         );
+        currentPageHeight = result.newPageHeight;
+        currentPage = result.currentPage;
       } else {
-        this.handleNonSplittableSection(
+        const result = this.handleNonSplittableSection(
           section, sectionData, currentPage, pages, 
           currentPageHeight, contentHeight, orientation
         );
+        currentPageHeight = result.newPageHeight;
+        currentPage = result.currentPage;
       }
     }
 
@@ -82,7 +86,7 @@ export class SingleColumnStrategy implements LayoutStrategy {
     contentHeight: number,
     maxPages: number,
     fieldMappings: FieldMapping[]
-  ) {
+  ): { currentPage: PageContent; newPageHeight: number } {
     let limitedSectionData = sectionData.filter(item => item != null);
     
     if (section.section_type === 'projects' && section.styling_config?.projects_to_view) {
@@ -92,21 +96,23 @@ export class SingleColumnStrategy implements LayoutStrategy {
     
     let remainingItems = limitedSectionData;
     let isFirstPart = true;
+    let newPageHeight = currentPageHeight;
+    let updatedCurrentPage = currentPage;
 
     while (remainingItems.length > 0 && pages.length < maxPages) {
-      const availableHeight = contentHeight - currentPageHeight;
+      const availableHeight = contentHeight - newPageHeight;
       const split = this.splitSection(section, remainingItems, availableHeight, sectionTitle);
 
       if (split.pageItems.length > 0) {
-        if (!currentPage.sections.find(s => s.id === section.id)) {
-          currentPage.sections.push(section);
+        if (!updatedCurrentPage.sections.find(s => s.id === section.id)) {
+          updatedCurrentPage.sections.push(section);
         }
         
         const validItems = split.pageItems
           .map(item => item.content)
           .filter(item => item != null);
         
-        currentPage.partialSections[section.id] = {
+        updatedCurrentPage.partialSections[section.id] = {
           items: validItems,
           startIndex: limitedSectionData.length - remainingItems.length,
           totalItems: limitedSectionData.length,
@@ -115,21 +121,23 @@ export class SingleColumnStrategy implements LayoutStrategy {
         };
 
         const usedHeight = split.pageItems.reduce((sum, item) => sum + item.estimatedHeight, 0) + 30;
-        currentPageHeight += usedHeight;
+        newPageHeight += usedHeight;
         remainingItems = split.remainingItems.map(item => item.content).filter(item => item != null);
         isFirstPart = false;
       }
 
       if (remainingItems.length > 0) {
-        pages.push(currentPage);
-        currentPage = {
+        pages.push(updatedCurrentPage);
+        updatedCurrentPage = {
           pageNumber: pages.length + 1,
           sections: [],
           partialSections: {}
         };
-        currentPageHeight = 0;
+        newPageHeight = 0;
       }
     }
+
+    return { currentPage: updatedCurrentPage, newPageHeight };
   }
 
   private handleNonSplittableSection(
@@ -140,25 +148,30 @@ export class SingleColumnStrategy implements LayoutStrategy {
     currentPageHeight: number,
     contentHeight: number,
     orientation: string
-  ) {
+  ): { currentPage: PageContent; newPageHeight: number } {
     const estimatedHeight = SectionSplitter.estimateSectionHeight(
       section.section_type, 
       Array.isArray(sectionData) ? sectionData : [sectionData],
       orientation
     );
     
+    let updatedCurrentPage = currentPage;
+    let newPageHeight = currentPageHeight;
+
     if (currentPageHeight + estimatedHeight > contentHeight && currentPage.sections.length > 0) {
       pages.push(currentPage);
-      currentPage = {
+      updatedCurrentPage = {
         pageNumber: pages.length + 1,
         sections: [],
         partialSections: {}
       };
-      currentPageHeight = 0;
+      newPageHeight = 0;
     }
 
-    currentPage.sections.push(section);
-    currentPageHeight += estimatedHeight;
+    updatedCurrentPage.sections.push(section);
+    newPageHeight += estimatedHeight;
+
+    return { currentPage: updatedCurrentPage, newPageHeight };
   }
 
   private splitSection(section: TemplateSection, items: any[], availableHeight: number, sectionTitle: string) {
@@ -172,7 +185,7 @@ export class SingleColumnStrategy implements LayoutStrategy {
       case 'achievements':
         return SectionSplitter.splitAchievementsSection(items, availableHeight, sectionTitle);
       default:
-        return { pageItems: items, remainingItems: [], sectionTitle };
+        return { pageItems: items.map(item => ({ content: item, estimatedHeight: 40 })), remainingItems: [], sectionTitle };
     }
   }
 }
