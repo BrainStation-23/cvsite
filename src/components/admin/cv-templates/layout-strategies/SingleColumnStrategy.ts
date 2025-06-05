@@ -1,4 +1,3 @@
-
 import { SectionSplitter } from '@/utils/sectionSplitter';
 import { LayoutStrategy, PageContent, TemplateSection, FieldMapping } from './LayoutStrategyInterface';
 import { SectionDataUtils } from '../utils/SectionDataUtils';
@@ -120,8 +119,11 @@ export class SingleColumnStrategy implements LayoutStrategy {
           title: isFirstPart ? sectionTitle : `${sectionTitle} (continued)`
         };
 
-        // Fix: Properly access estimatedHeight from each SectionItem
-        const usedHeight = split.pageItems.reduce((sum, item) => sum + item.estimatedHeight, 0) + 30;
+        // Fix: Properly typed reduce function to calculate used height
+        const usedHeight = split.pageItems.reduce<number>(
+          (sum, item) => sum + item.estimatedHeight,
+          0
+        ) + 30;
         newPageHeight += usedHeight;
         remainingItems = split.remainingItems.map(item => item.content).filter(item => item != null);
         isFirstPart = false;
