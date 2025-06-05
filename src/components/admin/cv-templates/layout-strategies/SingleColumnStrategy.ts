@@ -120,6 +120,7 @@ export class SingleColumnStrategy implements LayoutStrategy {
           title: isFirstPart ? sectionTitle : `${sectionTitle} (continued)`
         };
 
+        // Fix: Properly access estimatedHeight from each SectionItem
         const usedHeight = split.pageItems.reduce((sum, item) => sum + item.estimatedHeight, 0) + 30;
         newPageHeight += usedHeight;
         remainingItems = split.remainingItems.map(item => item.content).filter(item => item != null);
