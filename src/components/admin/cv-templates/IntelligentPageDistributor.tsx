@@ -83,9 +83,9 @@ export const IntelligentPageDistributor: React.FC<IntelligentPageDistributorProp
     
     // Handle sidebar and two-column layouts differently
     if (layoutType === 'sidebar' || layoutType === 'two-column') {
-      return distributeMultiColumnPages(sections, fieldMappings, profile, A4_CONTENT_HEIGHT, MAX_PAGES, layoutType);
+      return distributeMultiColumnPages(sections, fieldMappings, profile, A4_CONTENT_HEIGHT, MAX_PAGES, layoutType, orientation);
     } else {
-      return distributeSingleColumnPages(sections, fieldMappings, profile, A4_CONTENT_HEIGHT, MAX_PAGES);
+      return distributeSingleColumnPages(sections, fieldMappings, profile, A4_CONTENT_HEIGHT, MAX_PAGES, orientation);
     }
   }, [sections, profile, fieldMappings, orientation, layoutConfig]);
 
@@ -124,7 +124,8 @@ function distributeMultiColumnPages(
   profile: any,
   contentHeight: number,
   maxPages: number,
-  layoutType: string
+  layoutType: string,
+  orientation: string
 ): PageContent[] {
   const sortedSections = [...sections].sort((a, b) => a.display_order - b.display_order);
   
@@ -143,160 +144,34 @@ function distributeMultiColumnPages(
   });
 
   const pages: PageContent[] = [];
-  let currentPage: PageContent = {
-    pageNumber: 1,
-    sections: [],
-    partialSections: {}
-  };
+  
+  // Process all sections together to ensure they appear on the same pages
+  const allPages = Math.max(
+    getRequiredPagesForSections(mainSections, fieldMappings, profile, contentHeight, orientation),
+    getRequiredPagesForSections(sidebarSections, fieldMappings, profile, contentHeight, orientation)
+  );
 
-  // Process main sections first to determine page breaks
-  let mainSectionIndex = 0;
-  let sidebarSectionIndex = 0;
-  let currentPageHeight = 0;
+  // Create pages and distribute sections
+  for (let pageIndex = 0; pageIndex < Math.min(allPages, maxPages); pageIndex++) {
+    const currentPage: PageContent = {
+      pageNumber: pageIndex + 1,
+      sections: [],
+      partialSections: {}
+    };
 
-  while ((mainSectionIndex < mainSections.length || sidebarSectionIndex < sidebarSections.length) && pages.length < maxPages) {
-    // Try to add a main section if available
-    if (mainSectionIndex < mainSections.length) {
-      const section = mainSections[mainSectionIndex];
-      
-      // Handle page break sections
-      if (section.section_type === 'page_break') {
-        if (currentPage.sections.length > 0 || Object.keys(currentPage.partialSections).length > 0) {
-          pages.push(currentPage);
-          currentPage = {
-            pageNumber: pages.length + 1,
-            sections: [],
-            partialSections: {}
-          };
-          currentPageHeight = 0;
-        }
-        mainSectionIndex++;
-        continue;
-      }
+    // Add main sections for this page
+    const mainSectionsForPage = getPageSections(mainSections, fieldMappings, profile, contentHeight, pageIndex, orientation);
+    currentPage.sections.push(...mainSectionsForPage.sections);
+    Object.assign(currentPage.partialSections, mainSectionsForPage.partialSections);
 
-      const sectionData = getSectionData(profile, section.section_type);
-      const sectionTitle = getSectionTitle(section, fieldMappings);
-      
-      if (sectionData && (Array.isArray(sectionData) ? sectionData.length > 0 : true)) {
-        if (canSectionBeSplit(section.section_type) && Array.isArray(sectionData)) {
-          // Handle splittable sections
-          let limitedSectionData = sectionData.filter(item => item != null);
-          
-          if (section.section_type === 'projects' && section.styling_config?.projects_to_view) {
-            const maxProjects = section.styling_config.projects_to_view;
-            limitedSectionData = limitedSectionData.slice(0, maxProjects);
-          }
-          
-          let remainingItems = limitedSectionData;
-          let isFirstPart = true;
+    // Add sidebar sections for this page
+    const sidebarSectionsForPage = getPageSections(sidebarSections, fieldMappings, profile, contentHeight, pageIndex, orientation);
+    currentPage.sections.push(...sidebarSectionsForPage.sections);
+    Object.assign(currentPage.partialSections, sidebarSectionsForPage.partialSections);
 
-          while (remainingItems.length > 0) {
-            const availableHeight = contentHeight - currentPageHeight;
-            let split;
-
-            switch (section.section_type) {
-              case 'experience':
-                split = SectionSplitter.splitExperienceSection(remainingItems, availableHeight, sectionTitle);
-                break;
-              case 'projects':
-                split = SectionSplitter.splitProjectsSection(remainingItems, availableHeight, sectionTitle);
-                break;
-              case 'education':
-                split = SectionSplitter.splitEducationSection(remainingItems, availableHeight, sectionTitle);
-                break;
-              case 'achievements':
-                split = SectionSplitter.splitAchievementsSection(remainingItems, availableHeight, sectionTitle);
-                break;
-              default:
-                split = { pageItems: remainingItems, remainingItems: [], sectionTitle };
-            }
-
-            if (split.pageItems.length > 0) {
-              if (!currentPage.sections.find(s => s.id === section.id)) {
-                currentPage.sections.push(section);
-              }
-              
-              const validItems = split.pageItems
-                .map(item => item.content)
-                .filter(item => item != null);
-              
-              currentPage.partialSections[section.id] = {
-                items: validItems,
-                startIndex: limitedSectionData.length - remainingItems.length,
-                totalItems: limitedSectionData.length,
-                isPartial: remainingItems.length > split.pageItems.length,
-                title: isFirstPart ? sectionTitle : `${sectionTitle} (continued)`
-              };
-
-              const usedHeight = split.pageItems.reduce((sum, item) => sum + item.estimatedHeight, 0) + 30;
-              currentPageHeight += usedHeight;
-              remainingItems = split.remainingItems.map(item => item.content).filter(item => item != null);
-              isFirstPart = false;
-            }
-
-            if (remainingItems.length > 0) {
-              // Move to next page
-              pages.push(currentPage);
-              currentPage = {
-                pageNumber: pages.length + 1,
-                sections: [],
-                partialSections: {}
-              };
-              currentPageHeight = 0;
-            }
-          }
-          mainSectionIndex++;
-        } else {
-          // Handle non-splittable sections
-          const estimatedHeight = SectionSplitter.estimateSectionHeight(
-            section.section_type, 
-            Array.isArray(sectionData) ? sectionData : [sectionData],
-            orientation
-          );
-          
-          if (currentPageHeight + estimatedHeight > contentHeight && currentPage.sections.length > 0) {
-            pages.push(currentPage);
-            currentPage = {
-              pageNumber: pages.length + 1,
-              sections: [],
-              partialSections: {}
-            };
-            currentPageHeight = 0;
-          }
-
-          currentPage.sections.push(section);
-          currentPageHeight += estimatedHeight;
-          mainSectionIndex++;
-        }
-      } else {
-        mainSectionIndex++;
-      }
+    if (currentPage.sections.length > 0 || Object.keys(currentPage.partialSections).length > 0) {
+      pages.push(currentPage);
     }
-
-    // Try to add a sidebar section if available and there's space
-    if (sidebarSectionIndex < sidebarSections.length) {
-      const section = sidebarSections[sidebarSectionIndex];
-      const sectionData = getSectionData(profile, section.section_type);
-      
-      if (sectionData && (Array.isArray(sectionData) ? sectionData.length > 0 : true)) {
-        // For sidebar sections, we add them to the current page regardless of height
-        // since they will be in a separate column
-        if (!currentPage.sections.find(s => s.id === section.id)) {
-          currentPage.sections.push(section);
-        }
-      }
-      sidebarSectionIndex++;
-    }
-
-    // If we've processed all sections for this page, move to next
-    if (mainSectionIndex >= mainSections.length && sidebarSectionIndex >= sidebarSections.length) {
-      break;
-    }
-  }
-
-  // Add the last page if it has content
-  if (currentPage.sections.length > 0 || Object.keys(currentPage.partialSections).length > 0) {
-    pages.push(currentPage);
   }
 
   // Ensure at least one page
@@ -311,13 +186,111 @@ function distributeMultiColumnPages(
   return pages;
 }
 
+// Helper function to calculate required pages for a set of sections
+function getRequiredPagesForSections(
+  sections: TemplateSection[],
+  fieldMappings: FieldMapping[],
+  profile: any,
+  contentHeight: number,
+  orientation: string
+): number {
+  let totalHeight = 0;
+  let pages = 1;
+
+  for (const section of sections) {
+    if (section.section_type === 'page_break') {
+      pages++;
+      totalHeight = 0;
+      continue;
+    }
+
+    const sectionData = getSectionData(profile, section.section_type);
+    if (!sectionData || (Array.isArray(sectionData) && sectionData.length === 0)) {
+      continue;
+    }
+
+    const estimatedHeight = SectionSplitter.estimateSectionHeight(
+      section.section_type, 
+      Array.isArray(sectionData) ? sectionData : [sectionData],
+      orientation
+    );
+
+    if (totalHeight + estimatedHeight > contentHeight) {
+      pages++;
+      totalHeight = estimatedHeight;
+    } else {
+      totalHeight += estimatedHeight;
+    }
+  }
+
+  return pages;
+}
+
+// Helper function to get sections for a specific page
+function getPageSections(
+  sections: TemplateSection[],
+  fieldMappings: FieldMapping[],
+  profile: any,
+  contentHeight: number,
+  pageIndex: number,
+  orientation: string
+): { sections: TemplateSection[], partialSections: any } {
+  const result = {
+    sections: [] as TemplateSection[],
+    partialSections: {} as any
+  };
+
+  let currentPageIndex = 0;
+  let currentPageHeight = 0;
+
+  for (const section of sections) {
+    // Handle page break sections
+    if (section.section_type === 'page_break') {
+      if (currentPageIndex === pageIndex) {
+        // We've reached the target page and hit a page break, so we're done
+        break;
+      }
+      currentPageIndex++;
+      currentPageHeight = 0;
+      continue;
+    }
+
+    const sectionData = getSectionData(profile, section.section_type);
+    if (!sectionData || (Array.isArray(sectionData) && sectionData.length === 0)) {
+      continue;
+    }
+
+    const estimatedHeight = SectionSplitter.estimateSectionHeight(
+      section.section_type, 
+      Array.isArray(sectionData) ? sectionData : [sectionData],
+      orientation
+    );
+
+    // Check if this section fits on the current page
+    if (currentPageHeight + estimatedHeight > contentHeight && currentPageHeight > 0) {
+      currentPageIndex++;
+      currentPageHeight = estimatedHeight;
+    } else {
+      currentPageHeight += estimatedHeight;
+    }
+
+    // If we're on the target page, add this section
+    if (currentPageIndex === pageIndex) {
+      result.sections.push(section);
+    }
+  }
+
+  return result;
+}
+
 // Keep the original single-column distribution logic
 function distributeSingleColumnPages(
   sections: TemplateSection[],
   fieldMappings: FieldMapping[],
   profile: any,
   contentHeight: number,
-  maxPages: number
+  maxPages: number,
+  orientation: string
 ): PageContent[] {
   const sortedSections = [...sections].sort((a, b) => a.display_order - b.display_order);
   const pages: PageContent[] = [];
