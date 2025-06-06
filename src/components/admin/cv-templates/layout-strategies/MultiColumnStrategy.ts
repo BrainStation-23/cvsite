@@ -1,8 +1,11 @@
-import { SectionSplitter } from '@/utils/sectionSplitter';
+
 import { LayoutStrategy, PageContent, TemplateSection, FieldMapping } from './LayoutStrategyInterface';
-import { SectionDataUtils } from '../utils/SectionDataUtils';
+import { PageProcessor } from './PageProcessor';
+import { LayoutTypeDetector } from './LayoutTypeDetector';
 
 export class MultiColumnStrategy implements LayoutStrategy {
+  private pageProcessor = new PageProcessor();
+
   distribute(
     sections: TemplateSection[],
     fieldMappings: FieldMapping[],
@@ -11,15 +14,7 @@ export class MultiColumnStrategy implements LayoutStrategy {
     maxPages: number,
     orientation: string
   ): PageContent[] {
-    const sortedSections = [...sections].sort((a, b) => a.display_order - b.display_order);
-    
-    // Separate sections by placement, handling page breaks for both columns
-    const mainSections = sortedSections.filter(s => 
-      (s.styling_config?.layout_placement || 'main') === 'main'
-    );
-    const sidebarSections = sortedSections.filter(s => 
-      (s.styling_config?.layout_placement || 'main') === 'sidebar'
-    );
+    const { mainSections, sidebarSections } = LayoutTypeDetector.separateSectionsByPlacement(sections);
 
     console.log('Multi-column layout distribution:', {
       mainSections: mainSections.map(s => s.section_type),
@@ -29,15 +24,15 @@ export class MultiColumnStrategy implements LayoutStrategy {
     const pages: PageContent[] = [];
     
     // Determine layout type for height calculations
-    const layoutType = this.getLayoutType(mainSections, sidebarSections);
+    const layoutType = LayoutTypeDetector.getLayoutType(mainSections, sidebarSections);
     
     // Process main sections with page break support and layout-aware calculations
-    const mainPages = this.processSectionsWithPageBreaks(
+    const mainPages = this.pageProcessor.processSectionsWithPageBreaks(
       mainSections, fieldMappings, profile, contentHeight, maxPages, orientation, layoutType, 'main'
     );
     
     // Process sidebar sections with page break support and layout-aware calculations
-    const sidebarPages = this.processSectionsWithPageBreaks(
+    const sidebarPages = this.pageProcessor.processSectionsWithPageBreaks(
       sidebarSections, fieldMappings, profile, contentHeight, maxPages, orientation, layoutType, 'sidebar'
     );
     
@@ -76,181 +71,5 @@ export class MultiColumnStrategy implements LayoutStrategy {
     }
 
     return pages;
-  }
-
-  private getLayoutType(mainSections: TemplateSection[], sidebarSections: TemplateSection[]): string {
-    // Determine if this is more of a sidebar layout (skills-heavy) or two-column layout
-    const skillsSections = ['technical_skills', 'specialized_skills'];
-    const sidebarSkillsCount = sidebarSections.filter(s => skillsSections.includes(s.section_type)).length;
-    
-    return sidebarSkillsCount > 0 ? 'sidebar' : 'two-column';
-  }
-
-  private processSectionsWithPageBreaks(
-    sections: TemplateSection[],
-    fieldMappings: FieldMapping[],
-    profile: any,
-    contentHeight: number,
-    maxPages: number,
-    orientation: string,
-    layoutType: string,
-    placement: 'main' | 'sidebar'
-  ): PageContent[] {
-    const pages: PageContent[] = [];
-    let currentPage: PageContent = {
-      pageNumber: 1,
-      sections: [],
-      partialSections: {}
-    };
-    let currentPageHeight = 0;
-
-    console.log(`Processing ${placement} sections with layout: ${layoutType}`);
-
-    for (const section of sections) {
-      // Handle page break sections - force a new page immediately
-      if (section.section_type === 'page_break') {
-        if (currentPage.sections.length > 0 || Object.keys(currentPage.partialSections).length > 0) {
-          pages.push(currentPage);
-          currentPage = {
-            pageNumber: pages.length + 1,
-            sections: [],
-            partialSections: {}
-          };
-          currentPageHeight = 0;
-        }
-        continue;
-      }
-
-      const sectionData = SectionDataUtils.getSectionData(profile, section.section_type);
-      if (!sectionData || (Array.isArray(sectionData) && sectionData.length === 0)) {
-        continue;
-      }
-
-      // Use layout-aware height estimation
-      const estimatedHeight = SectionSplitter.estimateSectionHeightWithLayout(
-        section.section_type, 
-        Array.isArray(sectionData) ? sectionData : [sectionData],
-        layoutType,
-        placement,
-        orientation
-      );
-
-      console.log(`Section ${section.section_type} (${layoutType}/${placement}): estimated height ${estimatedHeight}, current page height: ${currentPageHeight}`);
-
-      // Check if this section fits on the current page
-      if (currentPageHeight + estimatedHeight > contentHeight && currentPage.sections.length > 0) {
-        pages.push(currentPage);
-        currentPage = {
-          pageNumber: pages.length + 1,
-          sections: [],
-          partialSections: {}
-        };
-        currentPageHeight = 0;
-      }
-
-      currentPage.sections.push(section);
-      currentPageHeight += estimatedHeight;
-    }
-
-    // Add the last page if it has content
-    if (currentPage.sections.length > 0 || Object.keys(currentPage.partialSections).length > 0) {
-      pages.push(currentPage);
-    }
-
-    return pages;
-  }
-
-  private getRequiredPagesForSections(
-    sections: TemplateSection[],
-    fieldMappings: FieldMapping[],
-    profile: any,
-    contentHeight: number,
-    orientation: string
-  ): number {
-    let totalHeight = 0;
-    let pages = 1;
-
-    for (const section of sections) {
-      if (section.section_type === 'page_break') {
-        pages++;
-        totalHeight = 0;
-        continue;
-      }
-
-      const sectionData = SectionDataUtils.getSectionData(profile, section.section_type);
-      if (!sectionData || (Array.isArray(sectionData) && sectionData.length === 0)) {
-        continue;
-      }
-
-      const estimatedHeight = SectionSplitter.estimateSectionHeight(
-        section.section_type, 
-        Array.isArray(sectionData) ? sectionData : [sectionData],
-        orientation
-      );
-
-      if (totalHeight + estimatedHeight > contentHeight) {
-        pages++;
-        totalHeight = estimatedHeight;
-      } else {
-        totalHeight += estimatedHeight;
-      }
-    }
-
-    return pages;
-  }
-
-  private getPageSections(
-    sections: TemplateSection[],
-    fieldMappings: FieldMapping[],
-    profile: any,
-    contentHeight: number,
-    pageIndex: number,
-    orientation: string
-  ): { sections: TemplateSection[], partialSections: any } {
-    const result = {
-      sections: [] as TemplateSection[],
-      partialSections: {} as any
-    };
-
-    let currentPageIndex = 0;
-    let currentPageHeight = 0;
-
-    for (const section of sections) {
-      // Handle page break sections
-      if (section.section_type === 'page_break') {
-        if (currentPageIndex === pageIndex) {
-          break;
-        }
-        currentPageIndex++;
-        currentPageHeight = 0;
-        continue;
-      }
-
-      const sectionData = SectionDataUtils.getSectionData(profile, section.section_type);
-      if (!sectionData || (Array.isArray(sectionData) && sectionData.length === 0)) {
-        continue;
-      }
-
-      const estimatedHeight = SectionSplitter.estimateSectionHeight(
-        section.section_type, 
-        Array.isArray(sectionData) ? sectionData : [sectionData],
-        orientation
-      );
-
-      // Check if this section fits on the current page
-      if (currentPageHeight + estimatedHeight > contentHeight && currentPageHeight > 0) {
-        currentPageIndex++;
-        currentPageHeight = estimatedHeight;
-      } else {
-        currentPageHeight += estimatedHeight;
-      }
-
-      // If we're on the target page, add this section
-      if (currentPageIndex === pageIndex) {
-        result.sections.push(section);
-      }
-    }
-
-    return result;
   }
 }
