@@ -1,36 +1,38 @@
 
 import { SectionSplitterConstants } from './constants';
-import { LayoutAwareHeightEstimators } from './layoutAwareHeightEstimators';
+import { SectionEstimators } from './SectionEstimators';
+import { ItemEstimators } from './ItemEstimators';
+import { TextEstimators } from './TextEstimators';
 
 export class HeightEstimators {
   static estimateRichTextHeight(text: string, baseLineHeight: number = SectionSplitterConstants.BASE_LINE_HEIGHT): number {
     // Use layout-aware estimation with single-column defaults for backward compatibility
-    return LayoutAwareHeightEstimators.estimateRichTextHeight(text, 'single-column', 'main');
+    return TextEstimators.estimateRichTextHeight(text, 'single-column', 'main');
   }
 
   static estimateTechnologiesHeight(technologies: string[]): number {
     // Use layout-aware estimation with single-column defaults for backward compatibility
-    return LayoutAwareHeightEstimators.estimateTechnologiesHeight(technologies, 'single-column', 'main');
+    return TextEstimators.estimateTechnologiesHeight(technologies, 'single-column', 'main');
   }
 
   static estimateExperienceItemHeight(exp: any): number {
     // Use layout-aware estimation with single-column defaults for backward compatibility
-    return LayoutAwareHeightEstimators.estimateExperienceItemHeight(exp, 'single-column', 'main');
+    return ItemEstimators.estimateExperienceItemHeight(exp, 'single-column', 'main');
   }
 
   static estimateProjectItemHeight(project: any): number {
     // Use layout-aware estimation with single-column defaults for backward compatibility
-    return LayoutAwareHeightEstimators.estimateProjectItemHeight(project, 'single-column', 'main');
+    return ItemEstimators.estimateProjectItemHeight(project, 'single-column', 'main');
   }
 
   static estimateEducationItemHeight(edu: any): number {
     // Use layout-aware estimation with single-column defaults for backward compatibility
-    return LayoutAwareHeightEstimators.estimateEducationItemHeight(edu, 'single-column', 'main');
+    return ItemEstimators.estimateEducationItemHeight(edu, 'single-column', 'main');
   }
 
   static estimateSectionHeight(sectionType: string, data: any[], orientation: string = 'portrait'): number {
     // Use layout-aware estimation with single-column defaults for backward compatibility
-    return LayoutAwareHeightEstimators.estimateSectionHeight(sectionType, data, 'single-column', 'main', orientation);
+    return SectionEstimators.estimateSectionHeight(sectionType, data, 'single-column', 'main', orientation);
   }
 
   // New method for layout-aware estimation
@@ -41,7 +43,7 @@ export class HeightEstimators {
     placement: 'main' | 'sidebar' = 'main',
     orientation: string = 'portrait'
   ): number {
-    return LayoutAwareHeightEstimators.estimateSectionHeight(sectionType, data, layoutType, placement, orientation);
+    return SectionEstimators.estimateSectionHeight(sectionType, data, layoutType, placement, orientation);
   }
 
   static estimateProjectItemHeightWithLayout(
@@ -49,7 +51,7 @@ export class HeightEstimators {
     layoutType: string = 'single-column',
     placement: 'main' | 'sidebar' = 'main'
   ): number {
-    return LayoutAwareHeightEstimators.estimateProjectItemHeight(project, layoutType, placement);
+    return ItemEstimators.estimateProjectItemHeight(project, layoutType, placement);
   }
 
   static estimateExperienceItemHeightWithLayout(
@@ -57,7 +59,7 @@ export class HeightEstimators {
     layoutType: string = 'single-column',
     placement: 'main' | 'sidebar' = 'main'
   ): number {
-    return LayoutAwareHeightEstimators.estimateExperienceItemHeight(exp, layoutType, placement);
+    return ItemEstimators.estimateExperienceItemHeight(exp, layoutType, placement);
   }
 
   static estimateEducationItemHeightWithLayout(
@@ -65,6 +67,6 @@ export class HeightEstimators {
     layoutType: string = 'single-column',
     placement: 'main' | 'sidebar' = 'main'
   ): number {
-    return LayoutAwareHeightEstimators.estimateEducationItemHeight(edu, layoutType, placement);
+    return ItemEstimators.estimateEducationItemHeight(edu, layoutType, placement);
   }
 }
