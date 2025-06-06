@@ -1,4 +1,3 @@
-
 import { SectionSplitter } from '@/utils/sectionSplitter';
 import { LayoutStrategy, PageContent, TemplateSection, FieldMapping } from './LayoutStrategyInterface';
 import { SectionDataUtils } from '../utils/SectionDataUtils';
@@ -22,6 +21,9 @@ export class SingleColumnStrategy implements LayoutStrategy {
     };
     let currentPageHeight = 0;
 
+    console.log(`=== SINGLE COLUMN DISTRIBUTION ===`);
+    console.log(`Content height: ${contentHeight}, Max pages: ${maxPages}`);
+
     for (const section of sortedSections) {
       // Handle page break sections - force a new page immediately
       if (section.section_type === 'page_break') {
@@ -43,6 +45,8 @@ export class SingleColumnStrategy implements LayoutStrategy {
       if (!sectionData || (Array.isArray(sectionData) && sectionData.length === 0)) {
         continue;
       }
+
+      console.log(`Processing section: ${section.section_type}, current page height: ${currentPageHeight}`);
 
       if (PageUtils.canSectionBeSplit(section.section_type) && Array.isArray(sectionData)) {
         const result = this.handleSplittableSection(
@@ -73,6 +77,9 @@ export class SingleColumnStrategy implements LayoutStrategy {
       });
     }
 
+    console.log(`=== DISTRIBUTION COMPLETE ===`);
+    console.log(`Total pages created: ${pages.length}`);
+
     return pages;
   }
 
@@ -99,9 +106,15 @@ export class SingleColumnStrategy implements LayoutStrategy {
     let newPageHeight = currentPageHeight;
     let updatedCurrentPage = currentPage;
 
+    console.log(`Splitting ${section.section_type} section with ${limitedSectionData.length} items`);
+
     while (remainingItems.length > 0 && pages.length < maxPages) {
       const availableHeight = contentHeight - newPageHeight;
+      console.log(`Available height for splitting: ${availableHeight}`);
+      
       const split = this.splitSection(section, remainingItems, availableHeight, sectionTitle);
+
+      console.log(`Split result: ${split.pageItems.length} items fit, ${split.remainingItems.length} remaining`);
 
       if (split.pageItems.length > 0) {
         if (!updatedCurrentPage.sections.find(s => s.id === section.id)) {
@@ -120,18 +133,22 @@ export class SingleColumnStrategy implements LayoutStrategy {
           title: isFirstPart ? sectionTitle : `${sectionTitle} (continued)`
         };
 
-        // Fix: Calculate total height using explicit summation
+        // Calculate total height using explicit summation with better accuracy
         let totalItemHeight = 0;
         for (const item of split.pageItems) {
           totalItemHeight += item.estimatedHeight;
         }
-        const usedHeight = totalItemHeight + 30;
+        const usedHeight = totalItemHeight + 30; // 30 for section title
         newPageHeight += usedHeight;
+        
+        console.log(`Used height: ${usedHeight}, new page height: ${newPageHeight}`);
+        
         remainingItems = split.remainingItems.map(item => item.content).filter(item => item != null);
         isFirstPart = false;
       }
 
       if (remainingItems.length > 0) {
+        console.log(`Creating new page for remaining ${remainingItems.length} items`);
         pages.push(updatedCurrentPage);
         updatedCurrentPage = {
           pageNumber: pages.length + 1,

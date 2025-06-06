@@ -1,4 +1,5 @@
 
+
 import React from 'react';
 import { ProjectFieldRenderers } from './ProjectFieldRenderers';
 
@@ -41,7 +42,16 @@ export const ProjectItem: React.FC<ProjectItemProps> = ({
   applyMasking
 }) => {
   return (
-    <div style={styles.itemStyles}>
+    <div 
+      style={{
+        ...styles.itemStyles,
+        pageBreakInside: 'auto', // Allow page breaks within this item if necessary
+        breakInside: 'auto', // Modern CSS property
+        orphans: 2, // Prevent orphaned lines
+        widows: 2, // Prevent widow lines
+        position: 'relative' // Ensure proper positioning context
+      }}
+    >
       {orderedFields.map((fieldConfig) => {
         const fieldName = fieldConfig.field;
         const renderer = ProjectFieldRenderers[fieldName as keyof typeof ProjectFieldRenderers];
@@ -54,3 +64,4 @@ export const ProjectItem: React.FC<ProjectItemProps> = ({
     </div>
   );
 };
+

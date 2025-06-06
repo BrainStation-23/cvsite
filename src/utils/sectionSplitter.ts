@@ -1,4 +1,5 @@
 
+
 interface SectionItem {
   id: string;
   content: any;
@@ -18,13 +19,14 @@ export class SectionSplitter {
   private static readonly A4_LANDSCAPE_HEIGHT = 167 * 3.779528; // 167mm content height in pixels at 96 DPI (297-40-40-50 for margins and header)
   private static readonly SECTION_TITLE_HEIGHT = 30; // Estimated height for section titles
   private static readonly ITEM_MARGIN = 16; // Margin between items
+  private static readonly SAFETY_MARGIN = 40; // Additional safety margin to prevent overflow
 
   static getContentHeight(orientation: string = 'portrait'): number {
     return orientation === 'landscape' ? this.A4_LANDSCAPE_HEIGHT : this.A4_PORTRAIT_HEIGHT;
   }
 
   static canSectionFit(sectionHeight: number, availableHeight: number): boolean {
-    return sectionHeight <= availableHeight;
+    return sectionHeight <= availableHeight - this.SAFETY_MARGIN;
   }
 
   static splitExperienceSection(
@@ -41,7 +43,7 @@ export class SectionSplitter {
       const exp = experiences[i];
       const estimatedHeight = this.estimateExperienceItemHeight(exp);
       
-      if (usedHeight + estimatedHeight + this.ITEM_MARGIN <= availableHeight) {
+      if (usedHeight + estimatedHeight + this.ITEM_MARGIN <= availableHeight - this.SAFETY_MARGIN) {
         pageItems.push({
           id: `exp-${i}`,
           content: exp,
@@ -56,6 +58,20 @@ export class SectionSplitter {
         })));
         break;
       }
+    }
+
+    // Ensure at least one item per page if none fit
+    if (pageItems.length === 0 && experiences.length > 0) {
+      pageItems.push({
+        id: 'exp-0',
+        content: experiences[0],
+        estimatedHeight: this.estimateExperienceItemHeight(experiences[0])
+      });
+      remainingItems.push(...experiences.slice(1).map((item, idx) => ({
+        id: `exp-${idx + 1}`,
+        content: item,
+        estimatedHeight: this.estimateExperienceItemHeight(item)
+      })));
     }
 
     return {
@@ -76,11 +92,16 @@ export class SectionSplitter {
     const pageItems: SectionItem[] = [];
     const remainingItems: SectionItem[] = [];
 
+    console.log(`Splitting projects section - Available height: ${availableHeight}, Safety margin: ${this.SAFETY_MARGIN}`);
+
     for (let i = 0; i < projects.length; i++) {
       const project = projects[i];
       const estimatedHeight = this.estimateProjectItemHeight(project);
+      const totalNeededHeight = usedHeight + estimatedHeight + this.ITEM_MARGIN + this.SAFETY_MARGIN;
       
-      if (usedHeight + estimatedHeight + this.ITEM_MARGIN <= availableHeight) {
+      console.log(`Project ${i}: estimated height ${estimatedHeight}, total needed: ${totalNeededHeight}, available: ${availableHeight}`);
+      
+      if (totalNeededHeight <= availableHeight) {
         pageItems.push({
           id: `proj-${i}`,
           content: project,
@@ -96,6 +117,23 @@ export class SectionSplitter {
         break;
       }
     }
+
+    // Ensure at least one item per page if none fit
+    if (pageItems.length === 0 && projects.length > 0) {
+      console.log('No projects fit - forcing at least one project on page');
+      pageItems.push({
+        id: 'proj-0',
+        content: projects[0],
+        estimatedHeight: this.estimateProjectItemHeight(projects[0])
+      });
+      remainingItems.push(...projects.slice(1).map((item, idx) => ({
+        id: `proj-${idx + 1}`,
+        content: item,
+        estimatedHeight: this.estimateProjectItemHeight(item)
+      })));
+    }
+
+    console.log(`Split result - Page items: ${pageItems.length}, Remaining: ${remainingItems.length}`);
 
     return {
       pageItems,
@@ -119,7 +157,7 @@ export class SectionSplitter {
       const edu = education[i];
       const estimatedHeight = this.estimateEducationItemHeight(edu);
       
-      if (usedHeight + estimatedHeight + this.ITEM_MARGIN <= availableHeight) {
+      if (usedHeight + estimatedHeight + this.ITEM_MARGIN <= availableHeight - this.SAFETY_MARGIN) {
         pageItems.push({
           id: `edu-${i}`,
           content: edu,
@@ -134,6 +172,20 @@ export class SectionSplitter {
         })));
         break;
       }
+    }
+
+    // Ensure at least one item per page if none fit
+    if (pageItems.length === 0 && education.length > 0) {
+      pageItems.push({
+        id: 'edu-0',
+        content: education[0],
+        estimatedHeight: this.estimateEducationItemHeight(education[0])
+      });
+      remainingItems.push(...education.slice(1).map((item, idx) => ({
+        id: `edu-${idx + 1}`,
+        content: item,
+        estimatedHeight: this.estimateEducationItemHeight(item)
+      })));
     }
 
     return {
@@ -152,7 +204,7 @@ export class SectionSplitter {
     const pageItems = [];
     
     for (const achievement of achievements) {
-      if (usedHeight + ACHIEVEMENT_HEIGHT <= availableHeight) {
+      if (usedHeight + ACHIEVEMENT_HEIGHT <= availableHeight - this.SAFETY_MARGIN) {
         pageItems.push({
           content: achievement,
           estimatedHeight: ACHIEVEMENT_HEIGHT
@@ -183,24 +235,55 @@ export class SectionSplitter {
     };
   }
 
+  private static estimateRichTextHeight(text: string, baseLineHeight: number = 20): number {
+    if (!text) return 0;
+    
+    // Remove HTML tags for length calculation
+    const plainText = text.replace(/<[^>]*>/g, '');
+    
+    // Estimate lines based on character count (assuming ~80 chars per line)
+    const estimatedLines = Math.max(1, Math.ceil(plainText.length / 80));
+    
+    // Account for rich text formatting that might add height
+    const htmlTagCount = (text.match(/<[^>]*>/g) || []).length;
+    const formatBonus = htmlTagCount * 2; // Small bonus for formatting
+    
+    return (estimatedLines * baseLineHeight) + formatBonus;
+  }
+
+  private static estimateTechnologiesHeight(technologies: string[]): number {
+    if (!technologies || technologies.length === 0) return 0;
+    
+    // Estimate based on number of technologies and typical layout
+    // Assuming they wrap at ~6 items per line, each line ~25px height
+    const linesNeeded = Math.ceil(technologies.length / 6);
+    return linesNeeded * 25 + 10; // +10 for label
+  }
+
   private static estimateExperienceItemHeight(exp: any): number {
     const baseHeight = 60; // Title, company, dates
-    const descriptionHeight = exp.description ? Math.max(40, exp.description.length * 0.5) : 0;
-    return baseHeight + descriptionHeight;
+    const descriptionHeight = exp.description ? this.estimateRichTextHeight(exp.description, 18) : 0;
+    return baseHeight + descriptionHeight + this.ITEM_MARGIN;
   }
 
   private static estimateProjectItemHeight(project: any): number {
     const baseHeight = 50; // Title, role, dates
-    const descriptionHeight = project.description ? Math.max(30, project.description.length * 0.4) : 0;
-    const techHeight = project.technologies_used ? 20 : 0;
-    return baseHeight + descriptionHeight + techHeight;
+    const descriptionHeight = project.description ? this.estimateRichTextHeight(project.description, 16) : 0;
+    const techHeight = project.technologies_used ? this.estimateTechnologiesHeight(project.technologies_used) : 0;
+    const urlHeight = project.url ? 20 : 0;
+    
+    const totalHeight = baseHeight + descriptionHeight + techHeight + urlHeight + this.ITEM_MARGIN;
+    
+    console.log(`Project height estimation: base(${baseHeight}) + desc(${descriptionHeight}) + tech(${techHeight}) + url(${urlHeight}) = ${totalHeight}`);
+    
+    return totalHeight;
   }
 
   private static estimateEducationItemHeight(edu: any): number {
     const baseHeight = 40; // Degree, university, dates
     const departmentHeight = edu.department ? 15 : 0;
     const gpaHeight = edu.gpa ? 15 : 0;
-    return baseHeight + departmentHeight + gpaHeight;
+    return baseHeight + departmentHeight + gpaHeight + this.ITEM_MARGIN;
   }
 
   static estimateSectionHeight(sectionType: string, data: any[], orientation: string = 'portrait'): number {
@@ -209,13 +292,13 @@ export class SectionSplitter {
 
     switch (sectionType) {
       case 'experience':
-        contentHeight = data.reduce((sum, item) => sum + this.estimateExperienceItemHeight(item) + this.ITEM_MARGIN, 0);
+        contentHeight = data.reduce((sum, item) => sum + this.estimateExperienceItemHeight(item), 0);
         break;
       case 'projects':
-        contentHeight = data.reduce((sum, item) => sum + this.estimateProjectItemHeight(item) + this.ITEM_MARGIN, 0);
+        contentHeight = data.reduce((sum, item) => sum + this.estimateProjectItemHeight(item), 0);
         break;
       case 'education':
-        contentHeight = data.reduce((sum, item) => sum + this.estimateEducationItemHeight(item) + this.ITEM_MARGIN, 0);
+        contentHeight = data.reduce((sum, item) => sum + this.estimateEducationItemHeight(item), 0);
         break;
       case 'general':
         // Adjust general info height based on orientation
@@ -229,6 +312,7 @@ export class SectionSplitter {
         contentHeight = data.length * 30; // Default estimation
     }
 
-    return titleHeight + contentHeight;
+    return titleHeight + contentHeight + this.SAFETY_MARGIN;
   }
 }
+
