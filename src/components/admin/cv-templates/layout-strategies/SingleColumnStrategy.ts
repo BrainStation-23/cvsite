@@ -1,3 +1,4 @@
+
 import { SectionSplitter } from '@/utils/sectionSplitter';
 import { LayoutStrategy, PageContent, TemplateSection, FieldMapping } from './LayoutStrategyInterface';
 import { SectionDataUtils } from '../utils/SectionDataUtils';
@@ -112,7 +113,8 @@ export class SingleColumnStrategy implements LayoutStrategy {
       const availableHeight = contentHeight - newPageHeight;
       console.log(`Available height for splitting: ${availableHeight}`);
       
-      const split = this.splitSection(section, remainingItems, availableHeight, sectionTitle);
+      // Use layout-aware splitting - single column with main placement
+      const split = this.splitSection(section, remainingItems, availableHeight, sectionTitle, 'single-column', 'main');
 
       console.log(`Split result: ${split.pageItems.length} items fit, ${split.remainingItems.length} remaining`);
 
@@ -171,9 +173,12 @@ export class SingleColumnStrategy implements LayoutStrategy {
     contentHeight: number,
     orientation: string
   ): { currentPage: PageContent; newPageHeight: number } {
-    const estimatedHeight = SectionSplitter.estimateSectionHeight(
+    // Use layout-aware height estimation for single column
+    const estimatedHeight = SectionSplitter.estimateSectionHeightWithLayout(
       section.section_type, 
       Array.isArray(sectionData) ? sectionData : [sectionData],
+      'single-column',
+      'main',
       orientation
     );
     
@@ -196,16 +201,23 @@ export class SingleColumnStrategy implements LayoutStrategy {
     return { currentPage: updatedCurrentPage, newPageHeight };
   }
 
-  private splitSection(section: TemplateSection, items: any[], availableHeight: number, sectionTitle: string) {
+  private splitSection(
+    section: TemplateSection, 
+    items: any[], 
+    availableHeight: number, 
+    sectionTitle: string,
+    layoutType: string = 'single-column',
+    placement: 'main' | 'sidebar' = 'main'
+  ) {
     switch (section.section_type) {
       case 'experience':
-        return SectionSplitter.splitExperienceSection(items, availableHeight, sectionTitle);
+        return SectionSplitter.splitExperienceSection(items, availableHeight, sectionTitle, layoutType, placement);
       case 'projects':
-        return SectionSplitter.splitProjectsSection(items, availableHeight, sectionTitle);
+        return SectionSplitter.splitProjectsSection(items, availableHeight, sectionTitle, layoutType, placement);
       case 'education':
-        return SectionSplitter.splitEducationSection(items, availableHeight, sectionTitle);
+        return SectionSplitter.splitEducationSection(items, availableHeight, sectionTitle, layoutType, placement);
       case 'achievements':
-        return SectionSplitter.splitAchievementsSection(items, availableHeight, sectionTitle);
+        return SectionSplitter.splitAchievementsSection(items, availableHeight, sectionTitle, layoutType, placement);
       default:
         return { 
           pageItems: items.map((item, index) => ({ 

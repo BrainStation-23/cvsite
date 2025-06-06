@@ -28,11 +28,18 @@ export class MultiColumnStrategy implements LayoutStrategy {
 
     const pages: PageContent[] = [];
     
-    // Process main sections with page break support
-    const mainPages = this.processSectionsWithPageBreaks(mainSections, fieldMappings, profile, contentHeight, maxPages, orientation);
+    // Determine layout type for height calculations
+    const layoutType = this.getLayoutType(mainSections, sidebarSections);
     
-    // Process sidebar sections with page break support
-    const sidebarPages = this.processSectionsWithPageBreaks(sidebarSections, fieldMappings, profile, contentHeight, maxPages, orientation);
+    // Process main sections with page break support and layout-aware calculations
+    const mainPages = this.processSectionsWithPageBreaks(
+      mainSections, fieldMappings, profile, contentHeight, maxPages, orientation, layoutType, 'main'
+    );
+    
+    // Process sidebar sections with page break support and layout-aware calculations
+    const sidebarPages = this.processSectionsWithPageBreaks(
+      sidebarSections, fieldMappings, profile, contentHeight, maxPages, orientation, layoutType, 'sidebar'
+    );
     
     // Combine pages - ensure we have at least as many pages as either column needs
     const totalPages = Math.max(mainPages.length, sidebarPages.length, 1);
@@ -71,13 +78,23 @@ export class MultiColumnStrategy implements LayoutStrategy {
     return pages;
   }
 
+  private getLayoutType(mainSections: TemplateSection[], sidebarSections: TemplateSection[]): string {
+    // Determine if this is more of a sidebar layout (skills-heavy) or two-column layout
+    const skillsSections = ['technical_skills', 'specialized_skills'];
+    const sidebarSkillsCount = sidebarSections.filter(s => skillsSections.includes(s.section_type)).length;
+    
+    return sidebarSkillsCount > 0 ? 'sidebar' : 'two-column';
+  }
+
   private processSectionsWithPageBreaks(
     sections: TemplateSection[],
     fieldMappings: FieldMapping[],
     profile: any,
     contentHeight: number,
     maxPages: number,
-    orientation: string
+    orientation: string,
+    layoutType: string,
+    placement: 'main' | 'sidebar'
   ): PageContent[] {
     const pages: PageContent[] = [];
     let currentPage: PageContent = {
@@ -86,6 +103,8 @@ export class MultiColumnStrategy implements LayoutStrategy {
       partialSections: {}
     };
     let currentPageHeight = 0;
+
+    console.log(`Processing ${placement} sections with layout: ${layoutType}`);
 
     for (const section of sections) {
       // Handle page break sections - force a new page immediately
@@ -107,11 +126,16 @@ export class MultiColumnStrategy implements LayoutStrategy {
         continue;
       }
 
-      const estimatedHeight = SectionSplitter.estimateSectionHeight(
+      // Use layout-aware height estimation
+      const estimatedHeight = SectionSplitter.estimateSectionHeightWithLayout(
         section.section_type, 
         Array.isArray(sectionData) ? sectionData : [sectionData],
+        layoutType,
+        placement,
         orientation
       );
+
+      console.log(`Section ${section.section_type} (${layoutType}/${placement}): estimated height ${estimatedHeight}, current page height: ${currentPageHeight}`);
 
       // Check if this section fits on the current page
       if (currentPageHeight + estimatedHeight > contentHeight && currentPage.sections.length > 0) {
