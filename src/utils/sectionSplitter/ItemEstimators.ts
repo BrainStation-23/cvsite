@@ -21,8 +21,8 @@ export class ItemEstimators {
     
     const urlHeight = project.url ? this.getUrlHeight(layoutType, placement) : 0;
     
-    // Apply layout-specific safety multiplier with enhanced multipliers for narrow layouts
-    const safetyMultiplier = this.getEnhancedSafetyMultiplier(layoutType, placement, project.description);
+    // Apply layout-specific safety multiplier with reduced multipliers for narrow layouts
+    const safetyMultiplier = this.getReducedSafetyMultiplier(layoutType, placement, project.description);
     const totalHeight = (baseHeight + descriptionHeight + techHeight + urlHeight + SectionSplitterConstants.ITEM_MARGIN) * safetyMultiplier;
     
     console.log(`Project height estimation (${layoutType}/${placement}): 
@@ -46,7 +46,7 @@ export class ItemEstimators {
       ? TextEstimators.estimateRichTextHeight(exp.description, layoutType, placement)
       : 0;
     
-    const safetyMultiplier = this.getEnhancedSafetyMultiplier(layoutType, placement, exp.description);
+    const safetyMultiplier = this.getReducedSafetyMultiplier(layoutType, placement, exp.description);
     return (baseHeight + descriptionHeight + SectionSplitterConstants.ITEM_MARGIN) * safetyMultiplier;
   }
 
@@ -59,7 +59,7 @@ export class ItemEstimators {
     const departmentHeight = edu.department ? 15 : 0;
     const gpaHeight = edu.gpa ? 15 : 0;
     
-    const safetyMultiplier = LayoutDimensions.getSafetyMultiplier(layoutType, placement);
+    const safetyMultiplier = this.getReducedSafetyMultiplier(layoutType, placement);
     return (baseHeight + departmentHeight + gpaHeight + SectionSplitterConstants.ITEM_MARGIN) * safetyMultiplier;
   }
 
@@ -87,31 +87,30 @@ export class ItemEstimators {
     }
   }
 
-  private static getEnhancedSafetyMultiplier(layoutType: string, placement: 'main' | 'sidebar', description?: string): number {
-    let baseSafetyMultiplier = LayoutDimensions.getSafetyMultiplier(layoutType, placement);
+  private static getReducedSafetyMultiplier(layoutType: string, placement: 'main' | 'sidebar', description?: string): number {
+    // Significantly reduced safety multipliers to prevent oversized estimates
+    let baseSafetyMultiplier: number;
     
-    // Additional multiplier for long descriptions in narrow layouts
-    if (description && description.length > 200) {
-      switch (layoutType) {
-        case 'sidebar':
-          baseSafetyMultiplier *= placement === 'sidebar' ? 1.3 : 1.2;
-          break;
-        case 'two-column':
-          baseSafetyMultiplier *= 1.25;
-          break;
-      }
+    switch (layoutType) {
+      case 'sidebar':
+        baseSafetyMultiplier = placement === 'sidebar' ? 1.25 : 1.15; // Reduced from 1.8/1.4
+        break;
+      case 'two-column':
+        baseSafetyMultiplier = 1.2; // Reduced from 1.5
+        break;
+      case 'single-column':
+      default:
+        baseSafetyMultiplier = 1.1; // Reduced from 1.2
     }
     
-    // Additional multiplier for rich HTML content in narrow layouts
+    // Minimal additional multiplier for long descriptions
+    if (description && description.length > 500) {
+      baseSafetyMultiplier *= 1.1; // Very conservative increase
+    }
+    
+    // Minimal additional multiplier for rich HTML content
     if (description && this.hasComplexHTML(description)) {
-      switch (layoutType) {
-        case 'sidebar':
-          baseSafetyMultiplier *= placement === 'sidebar' ? 1.2 : 1.1;
-          break;
-        case 'two-column':
-          baseSafetyMultiplier *= 1.15;
-          break;
-      }
+      baseSafetyMultiplier *= 1.05; // Very conservative increase
     }
     
     return baseSafetyMultiplier;

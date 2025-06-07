@@ -20,11 +20,10 @@ export class TextEstimators {
     
     // Account for rich text formatting
     const htmlTagCount = (text.match(/<[^>]*>/g) || []).length;
-    const formatBonus = htmlTagCount * 2;
+    const formatBonus = htmlTagCount * 1; // Reduced from 2
     
     // Apply layout-specific multipliers for text wrapping and rich content
-    // Round the multiplier to avoid floating point precision issues
-    const layoutMultiplier = Math.round(LayoutDimensions.getRichTextMultiplier(layoutType, placement, hasRichContent) * 100) / 100;
+    const layoutMultiplier = LayoutDimensions.getConservativeRichTextMultiplier(layoutType, placement, hasRichContent);
     
     const estimatedHeight = Math.round((estimatedLines * dimensions.baseLineHeight * layoutMultiplier) + formatBonus);
     
@@ -52,18 +51,18 @@ export class TextEstimators {
     const linesNeeded = Math.ceil(technologies.length / dimensions.techItemsPerLine);
     const lineHeight = this.getTechLineHeight(layoutType, placement);
     
-    return Math.round(linesNeeded * lineHeight + 10); // +10 for label
+    return Math.round(linesNeeded * lineHeight + 8); // Reduced from +10
   }
 
   private static getTechLineHeight(layoutType: string, placement: 'main' | 'sidebar'): number {
     switch (layoutType) {
       case 'sidebar':
-        return placement === 'sidebar' ? 20 : 23;
+        return placement === 'sidebar' ? 18 : 20; // Reduced
       case 'two-column':
-        return 22;
+        return 20; // Reduced from 22
       case 'single-column':
       default:
-        return 25;
+        return 22; // Reduced from 25
     }
   }
 
