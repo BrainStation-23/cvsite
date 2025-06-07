@@ -11,21 +11,28 @@ export class NonSplittableSectionHandler extends BaseLayoutStrategy {
     pages: PageContent[],
     currentPageHeight: number,
     contentHeight: number,
-    orientation: string
+    orientation: string,
+    layoutType: string = 'single-column',
+    placement: 'main' | 'sidebar' = 'main'
   ): { currentPage: PageContent; newPageHeight: number } {
-    // Use layout-aware height estimation for single column
+    console.log(`Handling non-splittable section ${section.section_type} with layout context: ${layoutType}/${placement}`);
+    
+    // Use layout-aware height estimation
     const estimatedHeight = SectionSplitter.estimateSectionHeightWithLayout(
       section.section_type, 
       Array.isArray(sectionData) ? sectionData : [sectionData],
-      'single-column',
-      'main',
+      layoutType,
+      placement,
       orientation
     );
+    
+    console.log(`Estimated height for ${section.section_type} (${layoutType}/${placement}): ${estimatedHeight}`);
     
     let updatedCurrentPage = currentPage;
     let newPageHeight = currentPageHeight;
 
     if (currentPageHeight + estimatedHeight > contentHeight && currentPage.sections.length > 0) {
+      console.log(`Section ${section.section_type} doesn't fit, creating new page`);
       pages.push(currentPage);
       updatedCurrentPage = {
         pageNumber: pages.length + 1,

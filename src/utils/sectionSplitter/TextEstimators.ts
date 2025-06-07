@@ -12,6 +12,9 @@ export class TextEstimators {
     const dimensions = LayoutDimensions.getLayoutDimensions(layoutType, placement);
     const plainText = text.replace(/<[^>]*>/g, '');
     
+    // Detect if this is rich HTML content
+    const hasRichContent = this.hasRichHTMLContent(text);
+    
     // Calculate lines based on layout-specific chars per line
     const estimatedLines = Math.max(1, Math.ceil(plainText.length / dimensions.charsPerLine));
     
@@ -19,10 +22,20 @@ export class TextEstimators {
     const htmlTagCount = (text.match(/<[^>]*>/g) || []).length;
     const formatBonus = htmlTagCount * 2;
     
-    // Apply layout-specific multipliers for text wrapping
-    const layoutMultiplier = LayoutDimensions.getTextWrappingMultiplier(layoutType, placement);
+    // Apply layout-specific multipliers for text wrapping and rich content
+    const layoutMultiplier = LayoutDimensions.getRichTextMultiplier(layoutType, placement, hasRichContent);
     
-    return (estimatedLines * dimensions.baseLineHeight * layoutMultiplier) + formatBonus;
+    const estimatedHeight = (estimatedLines * dimensions.baseLineHeight * layoutMultiplier) + formatBonus;
+    
+    console.log(`Rich text height estimation (${layoutType}/${placement}): 
+      - Plain text length: ${plainText.length}
+      - Chars per line: ${dimensions.charsPerLine}
+      - Estimated lines: ${estimatedLines}
+      - Has rich content: ${hasRichContent}
+      - Layout multiplier: ${layoutMultiplier}
+      - Final height: ${estimatedHeight}`);
+    
+    return estimatedHeight;
   }
 
   static estimateTechnologiesHeight(
@@ -51,5 +64,19 @@ export class TextEstimators {
       default:
         return 25;
     }
+  }
+
+  private static hasRichHTMLContent(text: string): boolean {
+    if (!text) return false;
+    
+    // Check for common rich text elements
+    const richTextPatterns = [
+      /<(ul|ol|li)>/i,
+      /<(p|div)>/i,
+      /<(strong|b|em|i)>/i,
+      /<br\s*\/?>/i
+    ];
+    
+    return richTextPatterns.some(pattern => pattern.test(text));
   }
 }

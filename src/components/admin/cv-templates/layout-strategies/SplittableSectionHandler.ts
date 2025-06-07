@@ -14,7 +14,9 @@ export class SplittableSectionHandler extends BaseLayoutStrategy {
     currentPageHeight: number,
     contentHeight: number,
     maxPages: number,
-    fieldMappings: FieldMapping[]
+    fieldMappings: FieldMapping[],
+    layoutType: string = 'single-column',
+    placement: 'main' | 'sidebar' = 'main'
   ): { currentPage: PageContent; newPageHeight: number } {
     let limitedSectionData = sectionData.filter(item => item != null);
     
@@ -28,16 +30,16 @@ export class SplittableSectionHandler extends BaseLayoutStrategy {
     let newPageHeight = currentPageHeight;
     let updatedCurrentPage = currentPage;
 
-    console.log(`Splitting ${section.section_type} section with ${limitedSectionData.length} items`);
+    console.log(`Splitting ${section.section_type} section (${layoutType}/${placement}) with ${limitedSectionData.length} items`);
 
     while (remainingItems.length > 0 && pages.length < maxPages) {
       const availableHeight = contentHeight - newPageHeight;
-      console.log(`Available height for splitting: ${availableHeight}`);
+      console.log(`Available height for splitting (${layoutType}/${placement}): ${availableHeight}`);
       
-      // Use layout-aware splitting - single column with main placement
-      const split = this.splitSection(section, remainingItems, availableHeight, sectionTitle, 'single-column', 'main');
+      // Use layout-aware splitting with proper context
+      const split = this.splitSection(section, remainingItems, availableHeight, sectionTitle, layoutType, placement);
 
-      console.log(`Split result: ${split.pageItems.length} items fit, ${split.remainingItems.length} remaining`);
+      console.log(`Split result (${layoutType}/${placement}): ${split.pageItems.length} items fit, ${split.remainingItems.length} remaining`);
 
       if (split.pageItems.length > 0) {
         if (!updatedCurrentPage.sections.find(s => s.id === section.id)) {
@@ -56,7 +58,7 @@ export class SplittableSectionHandler extends BaseLayoutStrategy {
           title: isFirstPart ? sectionTitle : `${sectionTitle} (continued)`
         };
 
-        // Calculate total height using explicit summation with better accuracy
+        // Calculate total height using explicit summation with layout-aware accuracy
         let totalItemHeight = 0;
         for (const item of split.pageItems) {
           totalItemHeight += item.estimatedHeight;
@@ -64,14 +66,14 @@ export class SplittableSectionHandler extends BaseLayoutStrategy {
         const usedHeight = totalItemHeight + 30; // 30 for section title
         newPageHeight += usedHeight;
         
-        console.log(`Used height: ${usedHeight}, new page height: ${newPageHeight}`);
+        console.log(`Used height (${layoutType}/${placement}): ${usedHeight}, new page height: ${newPageHeight}`);
         
         remainingItems = split.remainingItems.map(item => item.content).filter(item => item != null);
         isFirstPart = false;
       }
 
       if (remainingItems.length > 0) {
-        console.log(`Creating new page for remaining ${remainingItems.length} items`);
+        console.log(`Creating new page for remaining ${remainingItems.length} items (${layoutType}/${placement})`);
         pages.push(updatedCurrentPage);
         updatedCurrentPage = {
           pageNumber: pages.length + 1,
@@ -93,6 +95,8 @@ export class SplittableSectionHandler extends BaseLayoutStrategy {
     layoutType: string = 'single-column',
     placement: 'main' | 'sidebar' = 'main'
   ) {
+    console.log(`Splitting section ${section.section_type} with layout context: ${layoutType}/${placement}`);
+    
     switch (section.section_type) {
       case 'experience':
         return SectionSplitter.splitExperienceSection(items, availableHeight, sectionTitle, layoutType, placement);

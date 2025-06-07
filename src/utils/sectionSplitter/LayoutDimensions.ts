@@ -7,7 +7,7 @@ export interface LayoutDimensions {
 }
 
 export class LayoutDimensions {
-  // Layout-specific dimensions
+  // Updated layout-specific dimensions with more accurate values
   private static readonly LAYOUT_DIMENSIONS = {
     'single-column': {
       contentWidth: 100, // Full width percentage
@@ -17,21 +17,21 @@ export class LayoutDimensions {
     },
     'two-column': {
       contentWidth: 45, // Roughly 45% width per column
-      charsPerLine: 45,
-      techItemsPerLine: 3,
+      charsPerLine: 35, // Reduced from 45 for more accurate wrapping
+      techItemsPerLine: 2, // Reduced from 3 for narrow columns
       baseLineHeight: 18
     },
     'sidebar': {
       main: {
         contentWidth: 65, // Main content area
-        charsPerLine: 55,
-        techItemsPerLine: 4,
+        charsPerLine: 50, // Reduced from 55 for better accuracy
+        techItemsPerLine: 3, // Reduced from 4
         baseLineHeight: 19
       },
       sidebar: {
         contentWidth: 30, // Sidebar area
-        charsPerLine: 25,
-        techItemsPerLine: 2,
+        charsPerLine: 20, // Reduced from 25 for very narrow sidebar
+        techItemsPerLine: 1, // Reduced from 2 for single column tech items
         baseLineHeight: 16
       }
     }
@@ -54,9 +54,9 @@ export class LayoutDimensions {
   static getTextWrappingMultiplier(layoutType: string, placement: 'main' | 'sidebar'): number {
     switch (layoutType) {
       case 'sidebar':
-        return placement === 'sidebar' ? 1.3 : 1.1;
+        return placement === 'sidebar' ? 1.6 : 1.2; // Increased for sidebar
       case 'two-column':
-        return 1.15;
+        return 1.4; // Increased for narrow columns
       case 'single-column':
       default:
         return 1.0;
@@ -66,12 +66,30 @@ export class LayoutDimensions {
   static getSafetyMultiplier(layoutType: string, placement: 'main' | 'sidebar'): number {
     switch (layoutType) {
       case 'sidebar':
-        return placement === 'sidebar' ? 1.4 : 1.25; // Sidebar content wraps more
+        return placement === 'sidebar' ? 1.6 : 1.3; // Increased safety margins
       case 'two-column':
-        return 1.3; // Two-column content wraps more than single
+        return 1.4; // Increased for two-column
       case 'single-column':
       default:
         return 1.2;
+    }
+  }
+
+  // New method to get rich text multiplier for HTML content
+  static getRichTextMultiplier(layoutType: string, placement: 'main' | 'sidebar', hasRichContent: boolean): number {
+    const baseMultiplier = this.getTextWrappingMultiplier(layoutType, placement);
+    
+    if (!hasRichContent) return baseMultiplier;
+    
+    // Additional multiplier for rich HTML content in narrow layouts
+    switch (layoutType) {
+      case 'sidebar':
+        return baseMultiplier * (placement === 'sidebar' ? 1.4 : 1.2);
+      case 'two-column':
+        return baseMultiplier * 1.3;
+      case 'single-column':
+      default:
+        return baseMultiplier * 1.1;
     }
   }
 }

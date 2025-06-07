@@ -56,14 +56,14 @@ export class SingleColumnStrategy implements LayoutStrategy {
       if (PageUtils.canSectionBeSplit(section.section_type) && Array.isArray(sectionData)) {
         const result = this.splittableSectionHandler.handleSplittableSection(
           section, sectionData, sectionTitle, currentPage, pages, 
-          currentPageHeight, contentHeight, maxPages, fieldMappings
+          currentPageHeight, contentHeight, maxPages, fieldMappings, 'single-column', 'main'
         );
         currentPageHeight = result.newPageHeight;
         currentPage = result.currentPage;
       } else {
         const result = this.nonSplittableSectionHandler.handleNonSplittableSection(
           section, sectionData, currentPage, pages, 
-          currentPageHeight, contentHeight, orientation
+          currentPageHeight, contentHeight, orientation, 'single-column', 'main'
         );
         currentPageHeight = result.newPageHeight;
         currentPage = result.currentPage;

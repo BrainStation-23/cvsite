@@ -21,11 +21,17 @@ export class ItemEstimators {
     
     const urlHeight = project.url ? this.getUrlHeight(layoutType, placement) : 0;
     
-    // Apply layout-specific safety multiplier
-    const safetyMultiplier = LayoutDimensions.getSafetyMultiplier(layoutType, placement);
+    // Apply layout-specific safety multiplier with enhanced multipliers for narrow layouts
+    const safetyMultiplier = this.getEnhancedSafetyMultiplier(layoutType, placement, project.description);
     const totalHeight = (baseHeight + descriptionHeight + techHeight + urlHeight + SectionSplitterConstants.ITEM_MARGIN) * safetyMultiplier;
     
-    console.log(`Project height estimation (${layoutType}/${placement}): base(${baseHeight}) + desc(${descriptionHeight}) + tech(${techHeight}) + url(${urlHeight}) = ${totalHeight}`);
+    console.log(`Project height estimation (${layoutType}/${placement}): 
+      - Base: ${baseHeight}
+      - Description: ${descriptionHeight}
+      - Tech: ${techHeight}
+      - URL: ${urlHeight}
+      - Safety multiplier: ${safetyMultiplier}
+      - Total: ${totalHeight}`);
     
     return totalHeight;
   }
@@ -40,7 +46,7 @@ export class ItemEstimators {
       ? TextEstimators.estimateRichTextHeight(exp.description, layoutType, placement)
       : 0;
     
-    const safetyMultiplier = LayoutDimensions.getSafetyMultiplier(layoutType, placement);
+    const safetyMultiplier = this.getEnhancedSafetyMultiplier(layoutType, placement, exp.description);
     return (baseHeight + descriptionHeight + SectionSplitterConstants.ITEM_MARGIN) * safetyMultiplier;
   }
 
@@ -79,5 +85,49 @@ export class ItemEstimators {
       default:
         return 20;
     }
+  }
+
+  private static getEnhancedSafetyMultiplier(layoutType: string, placement: 'main' | 'sidebar', description?: string): number {
+    let baseSafetyMultiplier = LayoutDimensions.getSafetyMultiplier(layoutType, placement);
+    
+    // Additional multiplier for long descriptions in narrow layouts
+    if (description && description.length > 200) {
+      switch (layoutType) {
+        case 'sidebar':
+          baseSafetyMultiplier *= placement === 'sidebar' ? 1.3 : 1.2;
+          break;
+        case 'two-column':
+          baseSafetyMultiplier *= 1.25;
+          break;
+      }
+    }
+    
+    // Additional multiplier for rich HTML content in narrow layouts
+    if (description && this.hasComplexHTML(description)) {
+      switch (layoutType) {
+        case 'sidebar':
+          baseSafetyMultiplier *= placement === 'sidebar' ? 1.2 : 1.1;
+          break;
+        case 'two-column':
+          baseSafetyMultiplier *= 1.15;
+          break;
+      }
+    }
+    
+    return baseSafetyMultiplier;
+  }
+
+  private static hasComplexHTML(text: string): boolean {
+    if (!text) return false;
+    
+    // Check for complex HTML structures that might affect layout
+    const complexPatterns = [
+      /<(ul|ol)>/i,
+      /<li>/i,
+      /<(p|div).*?>/i,
+      /<br\s*\/?>/i
+    ];
+    
+    return complexPatterns.some(pattern => pattern.test(text));
   }
 }

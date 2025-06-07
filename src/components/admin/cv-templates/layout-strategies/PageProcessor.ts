@@ -1,8 +1,14 @@
 
 import { TemplateSection, FieldMapping, PageContent } from './LayoutStrategyInterface';
-import { BaseLayoutStrategy } from './BaseLayoutStrategy';
+import { SectionDataUtils } from '../utils/SectionDataUtils';
+import { PageUtils } from '../utils/PageUtils';
+import { SplittableSectionHandler } from './SplittableSectionHandler';
+import { NonSplittableSectionHandler } from './NonSplittableSectionHandler';
 
-export class PageProcessor extends BaseLayoutStrategy {
+export class PageProcessor {
+  private splittableSectionHandler = new SplittableSectionHandler();
+  private nonSplittableSectionHandler = new NonSplittableSectionHandler();
+
   processSectionsWithPageBreaks(
     sections: TemplateSection[],
     fieldMappings: FieldMapping[],
@@ -13,54 +19,71 @@ export class PageProcessor extends BaseLayoutStrategy {
     layoutType: string,
     placement: 'main' | 'sidebar'
   ): PageContent[] {
+    const sortedSections = [...sections].sort((a, b) => a.display_order - b.display_order);
     const pages: PageContent[] = [];
-    let currentPage: PageContent = this.createEmptyPage(1);
+    let currentPage: PageContent = {
+      pageNumber: 1,
+      sections: [],
+      partialSections: {}
+    };
     let currentPageHeight = 0;
 
-    console.log(`Processing ${placement} sections with layout: ${layoutType}`);
+    console.log(`Processing ${placement} sections for ${layoutType} layout:`, sortedSections.map(s => s.section_type));
 
-    for (const section of sections) {
-      // Handle page break sections - force a new page immediately
+    for (const section of sortedSections) {
+      // Handle page break sections
       if (section.section_type === 'page_break') {
         if (currentPage.sections.length > 0 || Object.keys(currentPage.partialSections).length > 0) {
           pages.push(currentPage);
-          currentPage = this.createEmptyPage(pages.length + 1);
+          currentPage = {
+            pageNumber: pages.length + 1,
+            sections: [],
+            partialSections: {}
+          };
           currentPageHeight = 0;
         }
         continue;
       }
 
-      const sectionData = this.getSectionData(profile, section.section_type);
+      const sectionData = SectionDataUtils.getSectionData(profile, section.section_type);
+      const sectionTitle = PageUtils.getSectionTitle(section, fieldMappings);
+      
       if (!sectionData || (Array.isArray(sectionData) && sectionData.length === 0)) {
         continue;
       }
 
-      const estimatedHeight = this.estimateSectionHeight(
-        section.section_type,
-        sectionData,
-        layoutType,
-        placement,
-        orientation
-      );
+      console.log(`Processing ${placement} section: ${section.section_type} (${layoutType}), current page height: ${currentPageHeight}`);
 
-      console.log(`Section ${section.section_type} (${layoutType}/${placement}): estimated height ${estimatedHeight}, current page height: ${currentPageHeight}`);
-
-      // Check if this section fits on the current page
-      if (this.shouldStartNewPage(currentPageHeight, estimatedHeight, contentHeight, currentPage.sections.length > 0)) {
-        pages.push(currentPage);
-        currentPage = this.createEmptyPage(pages.length + 1);
-        currentPageHeight = 0;
+      if (PageUtils.canSectionBeSplit(section.section_type) && Array.isArray(sectionData)) {
+        const result = this.splittableSectionHandler.handleSplittableSection(
+          section, sectionData, sectionTitle, currentPage, pages, 
+          currentPageHeight, contentHeight, maxPages, fieldMappings, layoutType, placement
+        );
+        currentPageHeight = result.newPageHeight;
+        currentPage = result.currentPage;
+      } else {
+        const result = this.nonSplittableSectionHandler.handleNonSplittableSection(
+          section, sectionData, currentPage, pages, 
+          currentPageHeight, contentHeight, orientation, layoutType, placement
+        );
+        currentPageHeight = result.newPageHeight;
+        currentPage = result.currentPage;
       }
-
-      currentPage.sections.push(section);
-      currentPageHeight += estimatedHeight;
     }
 
-    // Add the last page if it has content
     if (currentPage.sections.length > 0 || Object.keys(currentPage.partialSections).length > 0) {
       pages.push(currentPage);
     }
 
+    if (pages.length === 0) {
+      pages.push({
+        pageNumber: 1,
+        sections: [],
+        partialSections: {}
+      });
+    }
+
+    console.log(`${placement} processing complete: ${pages.length} pages created`);
     return pages;
   }
 }
