@@ -23,9 +23,10 @@ export class TextEstimators {
     const formatBonus = htmlTagCount * 2;
     
     // Apply layout-specific multipliers for text wrapping and rich content
-    const layoutMultiplier = LayoutDimensions.getRichTextMultiplier(layoutType, placement, hasRichContent);
+    // Round the multiplier to avoid floating point precision issues
+    const layoutMultiplier = Math.round(LayoutDimensions.getRichTextMultiplier(layoutType, placement, hasRichContent) * 100) / 100;
     
-    const estimatedHeight = (estimatedLines * dimensions.baseLineHeight * layoutMultiplier) + formatBonus;
+    const estimatedHeight = Math.round((estimatedLines * dimensions.baseLineHeight * layoutMultiplier) + formatBonus);
     
     console.log(`Rich text height estimation (${layoutType}/${placement}): 
       - Plain text length: ${plainText.length}
@@ -51,7 +52,7 @@ export class TextEstimators {
     const linesNeeded = Math.ceil(technologies.length / dimensions.techItemsPerLine);
     const lineHeight = this.getTechLineHeight(layoutType, placement);
     
-    return linesNeeded * lineHeight + 10; // +10 for label
+    return Math.round(linesNeeded * lineHeight + 10); // +10 for label
   }
 
   private static getTechLineHeight(layoutType: string, placement: 'main' | 'sidebar'): number {

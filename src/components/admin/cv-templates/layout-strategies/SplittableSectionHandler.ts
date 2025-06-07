@@ -29,17 +29,52 @@ export class SplittableSectionHandler extends BaseLayoutStrategy {
     let isFirstPart = true;
     let newPageHeight = currentPageHeight;
     let updatedCurrentPage = currentPage;
+    let iterationCount = 0;
+    const maxIterations = Math.min(maxPages * 2, 20); // Prevent infinite loops
 
-    console.log(`Splitting ${section.section_type} section (${layoutType}/${placement}) with ${limitedSectionData.length} items`);
+    console.log(`=== SPLITTING ${section.section_type.toUpperCase()} SECTION (${layoutType}/${placement}) ===`);
+    console.log(`Starting with ${limitedSectionData.length} items, current page height: ${currentPageHeight}`);
 
-    while (remainingItems.length > 0 && pages.length < maxPages) {
+    while (remainingItems.length > 0 && pages.length < maxPages && iterationCount < maxIterations) {
+      iterationCount++;
+      
       const availableHeight = contentHeight - newPageHeight;
-      console.log(`Available height for splitting (${layoutType}/${placement}): ${availableHeight}`);
+      console.log(`Iteration ${iterationCount}: Available height for splitting: ${availableHeight}`);
+      
+      // Add minimum height requirement to prevent infinite loops
+      if (availableHeight < 100) {
+        console.log(`Available height too small (${availableHeight}), moving to new page`);
+        if (updatedCurrentPage.sections.length > 0 || Object.keys(updatedCurrentPage.partialSections).length > 0) {
+          pages.push(updatedCurrentPage);
+        }
+        updatedCurrentPage = {
+          pageNumber: pages.length + 1,
+          sections: [],
+          partialSections: {}
+        };
+        newPageHeight = 0;
+        continue;
+      }
       
       // Use layout-aware splitting with proper context
       const split = this.splitSection(section, remainingItems, availableHeight, sectionTitle, layoutType, placement);
 
-      console.log(`Split result (${layoutType}/${placement}): ${split.pageItems.length} items fit, ${split.remainingItems.length} remaining`);
+      console.log(`Split result: ${split.pageItems.length} items fit, ${split.remainingItems.length} remaining`);
+
+      // If no items fit and we have available height, there might be an estimation issue
+      if (split.pageItems.length === 0 && availableHeight > 100) {
+        console.log(`No items fit despite available height (${availableHeight}), forcing page break`);
+        if (updatedCurrentPage.sections.length > 0 || Object.keys(updatedCurrentPage.partialSections).length > 0) {
+          pages.push(updatedCurrentPage);
+        }
+        updatedCurrentPage = {
+          pageNumber: pages.length + 1,
+          sections: [],
+          partialSections: {}
+        };
+        newPageHeight = 0;
+        continue;
+      }
 
       if (split.pageItems.length > 0) {
         if (!updatedCurrentPage.sections.find(s => s.id === section.id)) {
@@ -54,7 +89,7 @@ export class SplittableSectionHandler extends BaseLayoutStrategy {
           items: validItems,
           startIndex: limitedSectionData.length - remainingItems.length,
           totalItems: limitedSectionData.length,
-          isPartial: remainingItems.length > split.pageItems.length,
+          isPartial: split.remainingItems.length > 0,
           title: isFirstPart ? sectionTitle : `${sectionTitle} (continued)`
         };
 
@@ -66,14 +101,14 @@ export class SplittableSectionHandler extends BaseLayoutStrategy {
         const usedHeight = totalItemHeight + 30; // 30 for section title
         newPageHeight += usedHeight;
         
-        console.log(`Used height (${layoutType}/${placement}): ${usedHeight}, new page height: ${newPageHeight}`);
+        console.log(`Used height: ${usedHeight}, new page height: ${newPageHeight}`);
         
         remainingItems = split.remainingItems.map(item => item.content).filter(item => item != null);
         isFirstPart = false;
       }
 
       if (remainingItems.length > 0) {
-        console.log(`Creating new page for remaining ${remainingItems.length} items (${layoutType}/${placement})`);
+        console.log(`Creating new page for remaining ${remainingItems.length} items`);
         pages.push(updatedCurrentPage);
         updatedCurrentPage = {
           pageNumber: pages.length + 1,
@@ -83,6 +118,13 @@ export class SplittableSectionHandler extends BaseLayoutStrategy {
         newPageHeight = 0;
       }
     }
+
+    if (iterationCount >= maxIterations) {
+      console.error(`Maximum iterations reached (${maxIterations}) for section ${section.section_type}, forcing termination`);
+    }
+
+    console.log(`=== SPLITTING COMPLETE ===`);
+    console.log(`Final result: ${pages.length} pages created, ${remainingItems.length} items remaining`);
 
     return { currentPage: updatedCurrentPage, newPageHeight };
   }

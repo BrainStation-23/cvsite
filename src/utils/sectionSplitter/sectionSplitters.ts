@@ -1,7 +1,7 @@
 
 import { SectionItem, SectionSplit } from './types';
 import { SectionSplitterConstants } from './constants';
-import { HeightEstimators } from './heightEstimators';
+import { ItemEstimators } from './ItemEstimators';
 
 export class SectionSplitters {
   static splitExperienceSection(
@@ -11,52 +11,15 @@ export class SectionSplitters {
     layoutType: string = 'single-column',
     placement: 'main' | 'sidebar' = 'main'
   ): SectionSplit {
-    const titleHeight = SectionSplitterConstants.SECTION_TITLE_HEIGHT;
-    let usedHeight = titleHeight;
-    const pageItems: SectionItem[] = [];
-    const remainingItems: SectionItem[] = [];
-
-    for (let i = 0; i < experiences.length; i++) {
-      const exp = experiences[i];
-      const estimatedHeight = HeightEstimators.estimateExperienceItemHeightWithLayout(exp, layoutType, placement);
-      
-      if (usedHeight + estimatedHeight + SectionSplitterConstants.ITEM_MARGIN <= availableHeight - SectionSplitterConstants.SAFETY_MARGIN) {
-        pageItems.push({
-          id: `exp-${i}`,
-          content: exp,
-          estimatedHeight
-        });
-        usedHeight += estimatedHeight + SectionSplitterConstants.ITEM_MARGIN;
-      } else {
-        remainingItems.push(...experiences.slice(i).map((item, idx) => ({
-          id: `exp-${i + idx}`,
-          content: item,
-          estimatedHeight: HeightEstimators.estimateExperienceItemHeightWithLayout(item, layoutType, placement)
-        })));
-        break;
-      }
-    }
-
-    // Ensure at least one item per page if none fit
-    if (pageItems.length === 0 && experiences.length > 0) {
-      pageItems.push({
-        id: 'exp-0',
-        content: experiences[0],
-        estimatedHeight: HeightEstimators.estimateExperienceItemHeightWithLayout(experiences[0], layoutType, placement)
-      });
-      remainingItems.push(...experiences.slice(1).map((item, idx) => ({
-        id: `exp-${idx + 1}`,
-        content: item,
-        estimatedHeight: HeightEstimators.estimateExperienceItemHeightWithLayout(item, layoutType, placement)
-      })));
-    }
-
-    return {
-      pageItems,
-      remainingItems,
-      sectionTitle: pageItems.length > 0 ? sectionTitle : undefined,
-      continuationTitle: remainingItems.length > 0 ? `${sectionTitle} (continued)` : undefined
-    };
+    return this.splitGenericSection(
+      experiences,
+      availableHeight,
+      sectionTitle,
+      (exp) => ItemEstimators.estimateExperienceItemHeight(exp, layoutType, placement),
+      'experience',
+      layoutType,
+      placement
+    );
   }
 
   static splitProjectsSection(
@@ -66,60 +29,15 @@ export class SectionSplitters {
     layoutType: string = 'single-column',
     placement: 'main' | 'sidebar' = 'main'
   ): SectionSplit {
-    const titleHeight = SectionSplitterConstants.SECTION_TITLE_HEIGHT;
-    let usedHeight = titleHeight;
-    const pageItems: SectionItem[] = [];
-    const remainingItems: SectionItem[] = [];
-
-    console.log(`Splitting projects section (${layoutType}/${placement}) - Available height: ${availableHeight}, Safety margin: ${SectionSplitterConstants.SAFETY_MARGIN}`);
-
-    for (let i = 0; i < projects.length; i++) {
-      const project = projects[i];
-      const estimatedHeight = HeightEstimators.estimateProjectItemHeightWithLayout(project, layoutType, placement);
-      const totalNeededHeight = usedHeight + estimatedHeight + SectionSplitterConstants.ITEM_MARGIN + SectionSplitterConstants.SAFETY_MARGIN;
-      
-      console.log(`Project ${i} (${layoutType}/${placement}): estimated height ${estimatedHeight}, total needed: ${totalNeededHeight}, available: ${availableHeight}`);
-      
-      if (totalNeededHeight <= availableHeight) {
-        pageItems.push({
-          id: `proj-${i}`,
-          content: project,
-          estimatedHeight
-        });
-        usedHeight += estimatedHeight + SectionSplitterConstants.ITEM_MARGIN;
-      } else {
-        remainingItems.push(...projects.slice(i).map((item, idx) => ({
-          id: `proj-${i + idx}`,
-          content: item,
-          estimatedHeight: HeightEstimators.estimateProjectItemHeightWithLayout(item, layoutType, placement)
-        })));
-        break;
-      }
-    }
-
-    // Ensure at least one item per page if none fit
-    if (pageItems.length === 0 && projects.length > 0) {
-      console.log(`No projects fit (${layoutType}/${placement}) - forcing at least one project on page`);
-      pageItems.push({
-        id: 'proj-0',
-        content: projects[0],
-        estimatedHeight: HeightEstimators.estimateProjectItemHeightWithLayout(projects[0], layoutType, placement)
-      });
-      remainingItems.push(...projects.slice(1).map((item, idx) => ({
-        id: `proj-${idx + 1}`,
-        content: item,
-        estimatedHeight: HeightEstimators.estimateProjectItemHeightWithLayout(item, layoutType, placement)
-      })));
-    }
-
-    console.log(`Split result (${layoutType}/${placement}) - Page items: ${pageItems.length}, Remaining: ${remainingItems.length}`);
-
-    return {
-      pageItems,
-      remainingItems,
-      sectionTitle: pageItems.length > 0 ? sectionTitle : undefined,
-      continuationTitle: remainingItems.length > 0 ? `${sectionTitle} (continued)` : undefined
-    };
+    return this.splitGenericSection(
+      projects,
+      availableHeight,
+      sectionTitle,
+      (project) => ItemEstimators.estimateProjectItemHeight(project, layoutType, placement),
+      'projects',
+      layoutType,
+      placement
+    );
   }
 
   static splitEducationSection(
@@ -129,97 +47,127 @@ export class SectionSplitters {
     layoutType: string = 'single-column',
     placement: 'main' | 'sidebar' = 'main'
   ): SectionSplit {
-    const titleHeight = SectionSplitterConstants.SECTION_TITLE_HEIGHT;
-    let usedHeight = titleHeight;
-    const pageItems: SectionItem[] = [];
-    const remainingItems: SectionItem[] = [];
-
-    for (let i = 0; i < education.length; i++) {
-      const edu = education[i];
-      const estimatedHeight = HeightEstimators.estimateEducationItemHeightWithLayout(edu, layoutType, placement);
-      
-      if (usedHeight + estimatedHeight + SectionSplitterConstants.ITEM_MARGIN <= availableHeight - SectionSplitterConstants.SAFETY_MARGIN) {
-        pageItems.push({
-          id: `edu-${i}`,
-          content: edu,
-          estimatedHeight
-        });
-        usedHeight += estimatedHeight + SectionSplitterConstants.ITEM_MARGIN;
-      } else {
-        remainingItems.push(...education.slice(i).map((item, idx) => ({
-          id: `edu-${i + idx}`,
-          content: item,
-          estimatedHeight: HeightEstimators.estimateEducationItemHeightWithLayout(item, layoutType, placement)
-        })));
-        break;
-      }
-    }
-
-    // Ensure at least one item per page if none fit
-    if (pageItems.length === 0 && education.length > 0) {
-      pageItems.push({
-        id: 'edu-0',
-        content: education[0],
-        estimatedHeight: HeightEstimators.estimateEducationItemHeightWithLayout(education[0], layoutType, placement)
-      });
-      remainingItems.push(...education.slice(1).map((item, idx) => ({
-        id: `edu-${idx + 1}`,
-        content: item,
-        estimatedHeight: HeightEstimators.estimateEducationItemHeightWithLayout(item, layoutType, placement)
-      })));
-    }
-
-    return {
-      pageItems,
-      remainingItems,
-      sectionTitle: pageItems.length > 0 ? sectionTitle : undefined,
-      continuationTitle: remainingItems.length > 0 ? `${sectionTitle} (continued)` : undefined
-    };
+    return this.splitGenericSection(
+      education,
+      availableHeight,
+      sectionTitle,
+      (edu) => ItemEstimators.estimateEducationItemHeight(edu, layoutType, placement),
+      'education',
+      layoutType,
+      placement
+    );
   }
 
   static splitAchievementsSection(
-    achievements: any[], 
-    availableHeight: number, 
+    achievements: any[],
+    availableHeight: number,
     sectionTitle: string,
     layoutType: string = 'single-column',
     placement: 'main' | 'sidebar' = 'main'
-  ) {
-    // Use layout-aware height calculation
-    const achievementHeight = layoutType === 'sidebar' && placement === 'sidebar' ? 50 : 60;
-    const TITLE_HEIGHT = 30;
+  ): SectionSplit {
+    return this.splitGenericSection(
+      achievements,
+      availableHeight,
+      sectionTitle,
+      () => 40, // Simple height for achievements
+      'achievements',
+      layoutType,
+      placement
+    );
+  }
+
+  private static splitGenericSection(
+    items: any[],
+    availableHeight: number,
+    sectionTitle: string,
+    heightEstimator: (item: any) => number,
+    sectionType: string,
+    layoutType: string,
+    placement: 'main' | 'sidebar'
+  ): SectionSplit {
+    const pageItems: SectionItem[] = [];
+    const remainingItems: SectionItem[] = [];
     
-    let usedHeight = TITLE_HEIGHT;
-    const pageItems = [];
+    // Round floating point numbers to avoid precision issues
+    const roundedAvailableHeight = Math.round(availableHeight);
+    const titleHeight = SectionSplitterConstants.SECTION_TITLE_HEIGHT;
+    const safetyMargin = this.getSafetyMargin(layoutType, placement);
     
-    for (const achievement of achievements) {
-      if (usedHeight + achievementHeight <= availableHeight - SectionSplitterConstants.SAFETY_MARGIN) {
+    // Calculate usable height with safety margin
+    const usableHeight = Math.max(0, roundedAvailableHeight - titleHeight - safetyMargin);
+    
+    console.log(`=== SPLITTING ${sectionType.toUpperCase()} SECTION (${layoutType}/${placement}) ===`);
+    console.log(`Available height: ${roundedAvailableHeight}, Usable height: ${usableHeight}`);
+    console.log(`Items to process: ${items.length}`);
+    
+    // If no usable height, return everything as remaining
+    if (usableHeight <= 0) {
+      console.log(`No usable height available, returning all items as remaining`);
+      return {
+        pageItems: [],
+        remainingItems: items.map((item, index) => ({
+          id: `${sectionType}-${index}`,
+          content: item,
+          estimatedHeight: Math.round(heightEstimator(item))
+        })),
+        sectionTitle
+      };
+    }
+
+    let currentHeight = 0;
+    let processedCount = 0;
+    const maxIterations = items.length; // Prevent infinite loops
+    
+    for (let i = 0; i < items.length && processedCount < maxIterations; i++) {
+      const item = items[i];
+      const estimatedHeight = Math.round(heightEstimator(item));
+      
+      console.log(`Item ${i + 1}: estimated height ${estimatedHeight}, current height: ${currentHeight}`);
+      
+      // Check if this item can fit
+      if (currentHeight + estimatedHeight <= usableHeight) {
         pageItems.push({
-          content: achievement,
-          estimatedHeight: achievementHeight
+          id: `${sectionType}-${i}`,
+          content: item,
+          estimatedHeight
         });
-        usedHeight += achievementHeight;
+        currentHeight += estimatedHeight;
+        console.log(`✓ Item ${i + 1} fits, new total height: ${currentHeight}`);
       } else {
+        // Item doesn't fit, add all remaining items to remainingItems
+        console.log(`✗ Item ${i + 1} doesn't fit (would be ${currentHeight + estimatedHeight}), stopping here`);
+        
+        for (let j = i; j < items.length; j++) {
+          remainingItems.push({
+            id: `${sectionType}-${j}`,
+            content: items[j],
+            estimatedHeight: Math.round(heightEstimator(items[j]))
+          });
+        }
         break;
       }
+      
+      processedCount++;
     }
     
-    // If we couldn't fit any items but this is the first section on the page, take at least one
-    if (pageItems.length === 0 && usedHeight === TITLE_HEIGHT && achievements.length > 0) {
-      pageItems.push({
-        content: achievements[0],
-        estimatedHeight: achievementHeight
-      });
-    }
-    
-    const remainingItems = achievements.slice(pageItems.length).map(achievement => ({
-      content: achievement,
-      estimatedHeight: achievementHeight
-    }));
+    console.log(`Split result: ${pageItems.length} items fit (${currentHeight}/${usableHeight}), ${remainingItems.length} remaining`);
     
     return {
       pageItems,
       remainingItems,
       sectionTitle
     };
+  }
+
+  private static getSafetyMargin(layoutType: string, placement: 'main' | 'sidebar'): number {
+    switch (layoutType) {
+      case 'sidebar':
+        return placement === 'sidebar' ? 40 : 30;
+      case 'two-column':
+        return 35;
+      case 'single-column':
+      default:
+        return 25;
+    }
   }
 }
