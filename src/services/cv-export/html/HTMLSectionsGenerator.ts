@@ -1,329 +1,287 @@
+
 import { HTMLFieldProcessor } from './HTMLFieldProcessor';
+
+interface TemplateSection {
+  id: string;
+  section_type: string;
+  display_order: number;
+  is_required: boolean;
+  field_mapping: Record<string, any>;
+  styling_config: Record<string, any>;
+}
+
+interface FieldMapping {
+  original_field_name: string;
+  display_name: string;
+  is_masked: boolean;
+  mask_value?: string;
+  field_order: number;
+  visibility_rules: Record<string, any>;
+  section_type: string;
+}
 
 export class HTMLSectionsGenerator {
   private fieldProcessor = new HTMLFieldProcessor();
 
-  generateSectionsHTML(sections: any[], profile: any, fieldMappings: any[]): string {
+  generateSectionsHTML(
+    sections: TemplateSection[], 
+    profile: any, 
+    fieldMappings: FieldMapping[],
+    partialSections: any = {}
+  ): string {
     if (!sections || sections.length === 0) {
-      return '<div class="no-sections">No sections configured</div>';
+      return '';
     }
 
     // Sort sections by display order
     const sortedSections = [...sections].sort((a, b) => a.display_order - b.display_order);
     
-    return sortedSections.map(section => {
-      console.log('=== SECTIONS GENERATION DEBUG ===');
-      
-      switch (section.section_type) {
-        case 'page_break':
-          return '<div class="page-break"></div>';
-        case 'experience':
-          return this.generateExperienceSection(profile, fieldMappings);
-        case 'education':
-          return this.generateEducationSection(profile, fieldMappings);
-        case 'technical_skills':
-          return this.generateTechnicalSkillsSection(profile, fieldMappings);
-        case 'specialized_skills':
-          return this.generateSpecializedSkillsSection(profile, fieldMappings);
-        case 'projects':
-          return this.generateProjectsSection(profile, fieldMappings, section);
-        case 'achievements':
-          return this.generateAchievementsSection(profile, fieldMappings);
-        case 'trainings':
-          return this.generateTrainingsSection(profile, fieldMappings);
-        default:
-          console.log(`Unknown section type: ${section.section_type}`);
-          return '';
-      }
-    }).join('');
+    return sortedSections.map(section => this.renderSection(section, profile, fieldMappings, partialSections)).join('\n');
   }
 
-  private generateExperienceSection(profile: any, fieldMappings: any[]): string {
-    console.log('=== EXPERIENCE SECTION DEBUG ===');
+  private renderSection(
+    section: TemplateSection, 
+    profile: any, 
+    fieldMappings: FieldMapping[],
+    partialSections: any
+  ): string {
+    // Handle page break sections
+    if (section.section_type === 'page_break') {
+      return '<div class="page-break"></div>';
+    }
+
+    // Get field mappings for this section
+    const sectionFieldMappings = fieldMappings.filter(
+      mapping => mapping.section_type === section.section_type
+    );
+
+    // Check if this section has partial data for this page
+    const partialData = partialSections[section.id];
     
-    const experiences = profile?.experiences || [];
-    if (experiences.length === 0) return '';
+    // Create modified profile with partial data if applicable
+    const profileForSection = partialData ? {
+      ...profile,
+      [this.getSectionDataKey(section.section_type)]: partialData.items
+    } : profile;
 
-    const experienceItems = experiences.map((exp: any) => {
-      console.log('Processing experience:', exp);
-      
-      const designation = this.fieldProcessor.processFieldWithDebug(exp.designation, 'designation', 'experience', fieldMappings);
-      const companyName = this.fieldProcessor.processFieldWithDebug(exp.company_name, 'company_name', 'experience', fieldMappings);
-      const description = this.fieldProcessor.processFieldWithDebug(exp.description, 'description', 'experience', fieldMappings);
-      
-      const dateRange = this.fieldProcessor.formatDateRange(exp.start_date, exp.end_date, exp.is_current);
-      
-      console.log('Experience processed fields:', {
-        designation, companyName, description, dateRange
-      });
-      
-      // Only render if both designation and company are visible
-      if (designation === null && companyName === null) {
-        console.log('Skipping experience item - both designation and company are hidden');
-        return '';
-      }
-      
-      return `
-        <div class="item">
-          <div class="item-header">
-            <div>
-              ${designation !== null ? `<div class="item-title">${designation || 'Position'}</div>` : ''}
-              ${companyName !== null ? `<div class="item-subtitle">${companyName || 'Company'}</div>` : ''}
-            </div>
-            <div class="item-date">${dateRange}</div>
-          </div>
-          ${description !== null ? `<div class="item-description">${this.fieldProcessor.processRichText(description)}</div>` : ''}
-        </div>
-      `;
-    }).join('');
+    // Generate section HTML based on type
+    switch (section.section_type) {
+      case 'general':
+        return this.renderGeneralSection(profileForSection, sectionFieldMappings, section, partialData?.title);
+      case 'experience':
+        return this.renderExperienceSection(profileForSection, sectionFieldMappings, section, partialData?.title);
+      case 'education':
+        return this.renderEducationSection(profileForSection, sectionFieldMappings, section, partialData?.title);
+      case 'technical_skills':
+        return this.renderTechnicalSkillsSection(profileForSection, sectionFieldMappings, section, partialData?.title);
+      case 'specialized_skills':
+        return this.renderSpecializedSkillsSection(profileForSection, sectionFieldMappings, section, partialData?.title);
+      case 'projects':
+        return this.renderProjectsSection(profileForSection, sectionFieldMappings, section, partialData?.title);
+      case 'training':
+        return this.renderTrainingSection(profileForSection, sectionFieldMappings, section, partialData?.title);
+      case 'achievements':
+        return this.renderAchievementsSection(profileForSection, sectionFieldMappings, section, partialData?.title);
+      default:
+        console.warn(`Unknown section type: ${section.section_type}`);
+        return `<div class="unknown-section">Unknown section type: ${section.section_type}</div>`;
+    }
+  }
 
-    return experienceItems ? `
-      <div class="section">
-        <div class="section-title">Work Experience</div>
-        <div class="section-content">
-          ${experienceItems}
-        </div>
+  private renderGeneralSection(profile: any, fieldMappings: FieldMapping[], section: TemplateSection, customTitle?: string): string {
+    const title = customTitle || 'Personal Information';
+    
+    return `<div class="section general-section">
+      <h2 class="section-title">${title}</h2>
+      <div class="section-content">
+        ${this.fieldProcessor.processField('first_name', profile.first_name, fieldMappings, 'general')}
+        ${this.fieldProcessor.processField('last_name', profile.last_name, fieldMappings, 'general')}
+        ${this.fieldProcessor.processField('email', profile.email, fieldMappings, 'general')}
+        ${this.fieldProcessor.processField('phone', profile.phone, fieldMappings, 'general')}
+        ${this.fieldProcessor.processField('location', profile.location, fieldMappings, 'general')}
+        ${this.fieldProcessor.processField('designation', profile.designation, fieldMappings, 'general')}
       </div>
-    ` : '';
+    </div>`;
   }
 
-  private generateEducationSection(profile: any, fieldMappings: any[]): string {
-    console.log('=== EDUCATION SECTION DEBUG ===');
+  private renderExperienceSection(profile: any, fieldMappings: FieldMapping[], section: TemplateSection, customTitle?: string): string {
+    const title = customTitle || 'Professional Experience';
+    const experiences = profile.experiences || [];
     
-    const education = profile?.education || [];
-    if (education.length === 0) return '';
-
-    const educationItems = education.map((edu: any) => {
-      console.log('Processing education:', edu);
-      
-      const degree = this.fieldProcessor.processFieldWithDebug(edu.degree, 'degree', 'education', fieldMappings);
-      const institution = this.fieldProcessor.processFieldWithDebug(edu.institution, 'institution', 'education', fieldMappings);
-      const university = this.fieldProcessor.processFieldWithDebug(edu.university, 'university', 'education', fieldMappings);
-      const department = this.fieldProcessor.processFieldWithDebug(edu.department, 'department', 'education', fieldMappings);
-      const gpa = this.fieldProcessor.processFieldWithDebug(edu.gpa, 'gpa', 'education', fieldMappings);
-      const description = this.fieldProcessor.processFieldWithDebug(edu.description, 'description', 'education', fieldMappings);
-      
-      const dateRange = this.fieldProcessor.formatDateRange(edu.start_date, edu.end_date, edu.is_current);
-      
-      // Use institution name or university name
-      const schoolName = institution || university || 'Institution';
-      
-      console.log('Education processed fields:', {
-        degree, institution, university, department, gpa, description, schoolName, dateRange
-      });
-      
-      return `
-        <div class="item">
-          <div class="item-header">
-            <div>
-              ${degree !== null ? `<div class="item-title">${degree || 'Degree'}</div>` : ''}
-              ${(institution !== null || university !== null) ? `<div class="item-subtitle">${schoolName}</div>` : ''}
-              ${department !== null ? `<div class="item-subtitle" style="font-size: 0.9em; margin-top: 2pt;">${department}</div>` : ''}
-            </div>
-            <div class="item-date">${dateRange}</div>
-          </div>
-          <div class="education-details">
-            ${gpa !== null ? `<div class="gpa-info">GPA: ${gpa}</div>` : ''}
-            ${description !== null ? `<div class="item-description">${this.fieldProcessor.processRichText(description)}</div>` : ''}
-          </div>
+    const experienceItems = experiences.map((exp: any) => `
+      <div class="item experience-item">
+        <div class="item-header">
+          <h4 class="item-title">${exp.job_title || ''}</h4>
+          <div class="item-subtitle">${exp.company_name || ''} | ${exp.start_date || ''} - ${exp.end_date || 'Present'}</div>
         </div>
-      `;
-    }).join('');
-
-    return `
-      <div class="section">
-        <div class="section-title">Education</div>
-        <div class="section-content">
-          ${educationItems}
-        </div>
+        ${exp.description ? `<div class="item-description">${exp.description}</div>` : ''}
       </div>
-    `;
-  }
+    `).join('');
 
-  private generateTechnicalSkillsSection(profile: any, fieldMappings: any[]): string {
-    console.log('=== TECHNICAL SKILLS SECTION DEBUG ===');
-    
-    const skills = profile?.technical_skills || [];
-    if (skills.length === 0) return '';
-
-    const skillTags = skills.map((skill: any) => {
-      const skillName = this.fieldProcessor.processFieldWithDebug(skill.name, 'name', 'technical_skills', fieldMappings);
-      return skillName !== null ? `<span class="skill-tag">${skillName}</span>` : '';
-    }).filter(Boolean).join('');
-
-    return skillTags ? `
-      <div class="section">
-        <div class="section-title">Technical Skills</div>
-        <div class="section-content">
-          <div class="skills-list">
-            ${skillTags}
-          </div>
-        </div>
+    return `<div class="section experience-section">
+      <h2 class="section-title">${title}</h2>
+      <div class="section-content">
+        ${experienceItems}
       </div>
-    ` : '';
+    </div>`;
   }
 
-  private generateSpecializedSkillsSection(profile: any, fieldMappings: any[]): string {
-    console.log('=== SPECIALIZED SKILLS SECTION DEBUG ===');
+  private renderEducationSection(profile: any, fieldMappings: FieldMapping[], section: TemplateSection, customTitle?: string): string {
+    const title = customTitle || 'Education';
+    const education = profile.education || [];
     
-    const skills = profile?.specialized_skills || [];
-    if (skills.length === 0) return '';
-
-    const skillTags = skills.map((skill: any) => {
-      const skillName = this.fieldProcessor.processFieldWithDebug(skill.name, 'name', 'specialized_skills', fieldMappings);
-      return skillName !== null ? `<span class="skill-tag">${skillName}</span>` : '';
-    }).filter(Boolean).join('');
-
-    return skillTags ? `
-      <div class="section">
-        <div class="section-title">Specialized Skills</div>
-        <div class="section-content">
-          <div class="skills-list">
-            ${skillTags}
-          </div>
+    const educationItems = education.map((edu: any) => `
+      <div class="item education-item">
+        <div class="item-header">
+          <h4 class="item-title">${edu.degree || ''}</h4>
+          <div class="item-subtitle">${edu.university || ''} | ${edu.graduation_year || ''}</div>
         </div>
+        ${edu.department ? `<div class="item-detail">Department: ${edu.department}</div>` : ''}
+        ${edu.gpa ? `<div class="item-detail">GPA: ${edu.gpa}</div>` : ''}
       </div>
-    ` : '';
+    `).join('');
+
+    return `<div class="section education-section">
+      <h2 class="section-title">${title}</h2>
+      <div class="section-content">
+        ${educationItems}
+      </div>
+    </div>`;
   }
 
-  private generateProjectsSection(profile: any, fieldMappings: any[], section?: any): string {
-    console.log('=== PROJECTS SECTION DEBUG ===');
+  private renderTechnicalSkillsSection(profile: any, fieldMappings: FieldMapping[], section: TemplateSection, customTitle?: string): string {
+    const title = customTitle || 'Technical Skills';
+    const skills = profile.technical_skills || [];
     
-    const projects = profile?.projects || [];
-    if (projects.length === 0) return '';
-
-    // Get the maximum number of projects from section configuration - use new property name
-    const maxProjects = section?.styling_config?.projects_to_view || section?.styling_config?.items_per_column || projects.length;
-    
-    // Sort projects by display_order, then by start_date as fallback
-    const sortedProjects = [...projects].sort((a, b) => {
-      if (a.display_order !== undefined && b.display_order !== undefined) {
-        return a.display_order - b.display_order;
-      }
-      return new Date(b.start_date).getTime() - new Date(a.start_date).getTime();
-    });
-
-    // Limit the number of projects to show
-    const projectsToShow = sortedProjects.slice(0, maxProjects);
-    
-    console.log(`Projects section - Total: ${projects.length}, Max to show: ${maxProjects}, Showing: ${projectsToShow.length}`);
-
-    const projectItems = projectsToShow.map((project: any) => {
-      console.log('Processing project:', project);
+    const skillsHTML = skills.map((skill: any) => {
+      const technologies = Array.isArray(skill.technologies) ? skill.technologies : [];
+      const techItems = technologies.map((tech: string) => `<span class="skill-tag">${tech}</span>`).join('');
       
-      const name = this.fieldProcessor.processFieldWithDebug(project.name, 'name', 'projects', fieldMappings);
-      const role = this.fieldProcessor.processFieldWithDebug(project.role, 'role', 'projects', fieldMappings);
-      const description = this.fieldProcessor.processFieldWithDebug(project.description, 'description', 'projects', fieldMappings);
-      const url = this.fieldProcessor.processFieldWithDebug(project.url, 'url', 'projects', fieldMappings);
-      
-      const dateRange = this.fieldProcessor.formatDateRange(project.start_date, project.end_date, project.is_current);
-      const techTags = project.technologies_used?.map((tech: string) => 
-        `<span class="tech-tag">${tech}</span>`
-      ).join('') || '';
-
-      console.log('Project processed fields:', {
-        name, role, description, url, dateRange, techTags
-      });
-
-      return `
-        <div class="item">
-          <div class="item-header">
-            <div>
-              ${name !== null ? `<div class="item-title">${name || 'Project Name'}</div>` : ''}
-              ${role !== null ? `<div class="item-subtitle">${role}</div>` : ''}
-            </div>
-            <div class="item-date">${dateRange}</div>
-          </div>
-          ${description !== null ? `<div class="item-description">${this.fieldProcessor.processRichText(description)}</div>` : ''}
-          ${url !== null && url ? `<div class="project-url"><strong>Project URL:</strong> <a href="${url}" target="_blank" class="project-url">${url}</a></div>` : ''}
-          ${techTags ? `
-            <div class="technologies">
-              <div class="technologies-label">Technologies:</div>
-              <div class="tech-list">${techTags}</div>
-            </div>
-          ` : ''}
-        </div>
-      `;
+      return `<div class="skill-category">
+        <h4 class="skill-category-title">${skill.category || ''}</h4>
+        <div class="skills-container">${techItems}</div>
+      </div>`;
     }).join('');
 
-    return `
-      <div class="section">
-        <div class="section-title">Projects</div>
-        <div class="section-content">
-          ${projectItems}
-        </div>
+    return `<div class="section technical-skills-section">
+      <h2 class="section-title">${title}</h2>
+      <div class="section-content">
+        ${skillsHTML}
       </div>
-    `;
+    </div>`;
   }
 
-  private generateAchievementsSection(profile: any, fieldMappings: any[]): string {
-    console.log('=== ACHIEVEMENTS SECTION DEBUG ===');
+  private renderSpecializedSkillsSection(profile: any, fieldMappings: FieldMapping[], section: TemplateSection, customTitle?: string): string {
+    const title = customTitle || 'Specialized Skills';
+    const skills = profile.specialized_skills || [];
     
-    const achievements = profile?.achievements || [];
-    if (achievements.length === 0) return '';
-
-    const achievementItems = achievements.map((achievement: any) => {
-      const title = this.fieldProcessor.processFieldWithDebug(achievement.title, 'title', 'achievements', fieldMappings);
-      const description = this.fieldProcessor.processFieldWithDebug(achievement.description, 'description', 'achievements', fieldMappings);
-      const date = achievement.date ? new Date(achievement.date).toLocaleDateString('en-US', { 
-        month: 'short', 
-        year: 'numeric' 
-      }) : '';
-
-      return `
-        <div class="item">
-          <div class="item-header">
-            ${title !== null ? `<div class="item-title">${title || 'Achievement'}</div>` : ''}
-            ${date ? `<div class="item-date">${date}</div>` : ''}
-          </div>
-          ${description !== null ? `<div class="item-description">${this.fieldProcessor.processRichText(description)}</div>` : ''}
-        </div>
-      `;
+    const skillsHTML = skills.map((skill: any) => {
+      const technologies = Array.isArray(skill.technologies) ? skill.technologies : [];
+      const techItems = technologies.map((tech: string) => `<span class="skill-tag">${tech}</span>`).join('');
+      
+      return `<div class="skill-category">
+        <h4 class="skill-category-title">${skill.category || ''}</h4>
+        <div class="skills-container">${techItems}</div>
+      </div>`;
     }).join('');
 
-    return `
-      <div class="section">
-        <div class="section-title">Achievements</div>
-        <div class="section-content">
-          ${achievementItems}
-        </div>
+    return `<div class="section specialized-skills-section">
+      <h2 class="section-title">${title}</h2>
+      <div class="section-content">
+        ${skillsHTML}
       </div>
-    `;
+    </div>`;
   }
 
-  private generateTrainingsSection(profile: any, fieldMappings: any[]): string {
-    console.log('=== TRAININGS SECTION DEBUG ===');
+  private renderProjectsSection(profile: any, fieldMappings: FieldMapping[], section: TemplateSection, customTitle?: string): string {
+    const title = customTitle || 'Projects';
+    const projects = profile.projects || [];
     
-    const trainings = profile?.trainings || [];
-    if (trainings.length === 0) return '';
-
-    const trainingItems = trainings.map((training: any) => {
-      const title = this.fieldProcessor.processFieldWithDebug(training.title, 'title', 'trainings', fieldMappings);
-      const provider = this.fieldProcessor.processFieldWithDebug(training.provider, 'provider', 'trainings', fieldMappings);
-      const description = this.fieldProcessor.processFieldWithDebug(training.description, 'description', 'trainings', fieldMappings);
-      const dateRange = this.fieldProcessor.formatDateRange(training.start_date, training.end_date, training.is_current);
-
-      return `
-        <div class="item">
-          <div class="item-header">
-            <div>
-              ${title !== null ? `<div class="item-title">${title || 'Training'}</div>` : ''}
-              ${provider !== null ? `<div class="item-subtitle">${provider}</div>` : ''}
-            </div>
-            <div class="item-date">${dateRange}</div>
-          </div>
-          ${description !== null ? `<div class="item-description">${this.fieldProcessor.processRichText(description)}</div>` : ''}
+    const projectItems = projects.map((project: any) => {
+      const technologies = Array.isArray(project.technologies_used) ? project.technologies_used : [];
+      const techTags = technologies.map((tech: string) => `<span class="skill-tag">${tech}</span>`).join('');
+      
+      return `<div class="item project-item">
+        <div class="item-header">
+          <h4 class="item-title">${project.name || ''}</h4>
+          <div class="item-subtitle">${project.role || ''} | ${project.start_date || ''} - ${project.end_date || 'Present'}</div>
         </div>
-      `;
+        ${project.description ? `<div class="item-description">${project.description}</div>` : ''}
+        ${technologies.length > 0 ? `<div class="technologies">${techTags}</div>` : ''}
+        ${project.url ? `<div class="project-url"><a href="${project.url}" target="_blank">${project.url}</a></div>` : ''}
+      </div>`;
     }).join('');
 
-    return `
-      <div class="section">
-        <div class="section-title">Training & Certifications</div>
-        <div class="section-content">
-          ${trainingItems}
-        </div>
+    return `<div class="section projects-section">
+      <h2 class="section-title">${title}</h2>
+      <div class="section-content">
+        ${projectItems}
       </div>
-    `;
+    </div>`;
+  }
+
+  private renderTrainingSection(profile: any, fieldMappings: FieldMapping[], section: TemplateSection, customTitle?: string): string {
+    const title = customTitle || 'Training & Certifications';
+    const trainings = profile.trainings || [];
+    
+    const trainingItems = trainings.map((training: any) => `
+      <div class="item training-item">
+        <div class="item-header">
+          <h4 class="item-title">${training.name || ''}</h4>
+          <div class="item-subtitle">${training.provider || ''} | ${training.completion_date || ''}</div>
+        </div>
+        ${training.description ? `<div class="item-description">${training.description}</div>` : ''}
+      </div>
+    `).join('');
+
+    return `<div class="section training-section">
+      <h2 class="section-title">${title}</h2>
+      <div class="section-content">
+        ${trainingItems}
+      </div>
+    </div>`;
+  }
+
+  private renderAchievementsSection(profile: any, fieldMappings: FieldMapping[], section: TemplateSection, customTitle?: string): string {
+    const title = customTitle || 'Achievements';
+    const achievements = profile.achievements || [];
+    
+    const achievementItems = achievements.map((achievement: any) => `
+      <div class="item achievement-item">
+        <div class="item-header">
+          <h4 class="item-title">${achievement.title || ''}</h4>
+          <div class="item-subtitle">${achievement.date || ''}</div>
+        </div>
+        ${achievement.description ? `<div class="item-description">${achievement.description}</div>` : ''}
+      </div>
+    `).join('');
+
+    return `<div class="section achievements-section">
+      <h2 class="section-title">${title}</h2>
+      <div class="section-content">
+        ${achievementItems}
+      </div>
+    </div>`;
+  }
+
+  private getSectionDataKey(sectionType: string): string {
+    switch (sectionType) {
+      case 'experience':
+        return 'experiences';
+      case 'education':
+        return 'education';
+      case 'projects':
+        return 'projects';
+      case 'technical_skills':
+        return 'technical_skills';
+      case 'specialized_skills':
+        return 'specialized_skills';
+      case 'training':
+        return 'trainings';
+      case 'achievements':
+        return 'achievements';
+      default:
+        return sectionType;
+    }
   }
 }
