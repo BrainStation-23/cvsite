@@ -13,9 +13,17 @@ export class HTMLExporter extends BaseExporter {
     try {
       console.log('=== HTML EXPORT DEBUG START ===');
       console.log('HTML Export - Template:', template.name);
-      console.log('HTML Export - Profile structure:', {
+      console.log('HTML Export - Profile structure check:', {
         hasProfile: !!profile,
         profileKeys: profile ? Object.keys(profile) : [],
+        profileType: typeof profile,
+        isArray: Array.isArray(profile),
+        profileData: profile
+      });
+      
+      // Check if profile has the expected structure from get_employee_data
+      console.log('HTML Export - Profile field analysis:', {
+        // Direct fields that should exist on root
         firstName: profile?.first_name,
         lastName: profile?.last_name,
         email: profile?.email,
@@ -24,13 +32,23 @@ export class HTMLExporter extends BaseExporter {
         designation: profile?.designation,
         biography: profile?.biography,
         profileImage: profile?.profile_image,
+        
+        // Nested arrays that should exist
         technicalSkills: profile?.technical_skills,
         specializedSkills: profile?.specialized_skills,
+        experiences: profile?.experiences,
+        education: profile?.education,
+        projects: profile?.projects,
+        trainings: profile?.trainings,
+        achievements: profile?.achievements,
+        
+        // Type checks
         technicalSkillsType: typeof profile?.technical_skills,
         specializedSkillsType: typeof profile?.specialized_skills,
         technicalSkillsLength: Array.isArray(profile?.technical_skills) ? profile.technical_skills.length : 'not array',
         specializedSkillsLength: Array.isArray(profile?.specialized_skills) ? profile.specialized_skills.length : 'not array'
       });
+      
       console.log('HTML Export - Sections:', sections?.length || 0);
       console.log('HTML Export - Field mappings:', fieldMappings?.length || 0);
       console.log('HTML Export - Field mappings by section:', 

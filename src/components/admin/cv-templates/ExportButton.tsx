@@ -23,6 +23,25 @@ const ExportButton: React.FC<ExportButtonProps> = ({
 }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
+  // Debug the profile data being passed to export
+  console.log('=== EXPORT BUTTON DEBUG ===');
+  console.log('Export Button - Profile structure:', {
+    hasProfile: !!profile,
+    profileKeys: profile ? Object.keys(profile) : [],
+    profileData: profile,
+    // Check if it's the employee data structure or raw profile
+    isEmployeeDataStructure: profile?.first_name !== undefined,
+    // General info fields
+    firstName: profile?.first_name,
+    lastName: profile?.last_name,
+    email: profile?.email,
+    phone: profile?.phone,
+    location: profile?.location,
+    designation: profile?.designation,
+    biography: profile?.biography,
+    profileImage: profile?.profile_image
+  });
+
   return (
     <>
       <Button 
