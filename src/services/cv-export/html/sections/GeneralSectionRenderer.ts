@@ -24,8 +24,6 @@ export class GeneralSectionRenderer {
   constructor(private fieldProcessor: HTMLFieldProcessor) {}
 
   render(profile: any, fieldMappings: FieldMapping[], section: TemplateSection, customTitle?: string): string {
-    const title = customTitle || 'Personal Information';
-    
     // Check if profile image should be shown
     const hasProfileImage = profile.profile_image;
     
@@ -34,7 +32,29 @@ export class GeneralSectionRenderer {
     const isLandscape = orientation === 'landscape';
     const imageSize = isLandscape ? '60px' : '80px';
     
-    // Create a proper fixed-size container that matches the preview approach
+    // Helper function to check if a field is enabled based on field mappings
+    const isFieldEnabled = (fieldName: string) => {
+      const mapping = fieldMappings.find(m => m.original_field_name === fieldName);
+      return mapping ? mapping.visibility_rules?.enabled !== false : true;
+    };
+
+    // Helper function to apply masking
+    const applyMasking = (value: any, fieldName: string) => {
+      const mapping = fieldMappings.find(m => m.original_field_name === fieldName);
+      if (!mapping?.is_masked || !value) return value;
+
+      if (mapping.mask_value) {
+        return mapping.mask_value;
+      } else {
+        // Default masking
+        if (typeof value === 'string' && value.length > 3) {
+          return value.substring(0, 3) + '***';
+        }
+        return '***';
+      }
+    };
+    
+    // Create profile image HTML
     const profileImageHTML = hasProfileImage ? `
       <div class="profile-image-container" style="
         margin-bottom: 10pt; 
@@ -67,19 +87,69 @@ export class GeneralSectionRenderer {
         </div>
       </div>
     ` : '';
+
+    // Create name HTML (without labels, as header style)
+    let nameHTML = '';
+    const hasFirstName = isFieldEnabled('first_name') && profile.first_name;
+    const hasLastName = isFieldEnabled('last_name') && profile.last_name;
     
-    return `<div class="section general-section">
-      <h2 class="section-title">${title}</h2>
-      <div class="section-content">
-        ${profileImageHTML}
-        ${this.fieldProcessor.processField('first_name', profile.first_name, fieldMappings, 'general')}
-        ${this.fieldProcessor.processField('last_name', profile.last_name, fieldMappings, 'general')}
-        ${this.fieldProcessor.processField('email', profile.email, fieldMappings, 'general')}
-        ${this.fieldProcessor.processField('phone', profile.phone, fieldMappings, 'general')}
-        ${this.fieldProcessor.processField('location', profile.location, fieldMappings, 'general')}
-        ${this.fieldProcessor.processField('designation', profile.designation, fieldMappings, 'general')}
-        ${profile.biography ? `<p style="margin-top: 10pt; font-size: 0.9em; font-style: italic;">${profile.biography}</p>` : ''}
-      </div>
+    if (hasFirstName || hasLastName) {
+      const firstName = hasFirstName ? applyMasking(profile.first_name, 'first_name') : '';
+      const lastName = hasLastName ? applyMasking(profile.last_name, 'last_name') : '';
+      const fullName = `${firstName} ${lastName}`.trim();
+      
+      nameHTML = `<h1 style="
+        font-size: 1.5em; 
+        font-weight: bold; 
+        margin: 0 0 8pt 0; 
+        text-align: center;
+        color: inherit;
+      ">${fullName}</h1>`;
+    }
+
+    // Create other fields HTML (without labels)
+    let fieldsHTML = '';
+    
+    // Email
+    if (isFieldEnabled('email') && profile.email) {
+      fieldsHTML += `<p style="margin: 4pt 0; text-align: center; color: inherit;">
+        ${applyMasking(profile.email, 'email')}
+      </p>`;
+    }
+    
+    // Phone
+    if (isFieldEnabled('phone') && profile.phone) {
+      fieldsHTML += `<p style="margin: 4pt 0; text-align: center; color: inherit;">
+        ${applyMasking(profile.phone, 'phone')}
+      </p>`;
+    }
+    
+    // Location
+    if (isFieldEnabled('location') && profile.location) {
+      fieldsHTML += `<p style="margin: 4pt 0; text-align: center; color: inherit;">
+        ${applyMasking(profile.location, 'location')}
+      </p>`;
+    }
+    
+    // Designation
+    if (isFieldEnabled('designation') && profile.designation) {
+      fieldsHTML += `<p style="margin: 4pt 0; text-align: center; font-style: italic; color: inherit;">
+        ${applyMasking(profile.designation, 'designation')}
+      </p>`;
+    }
+    
+    // Biography
+    if (isFieldEnabled('biography') && profile.biography) {
+      fieldsHTML += `<p style="margin-top: 10pt; font-size: 0.9em; font-style: italic; text-align: center; color: inherit;">
+        ${applyMasking(profile.biography, 'biography')}
+      </p>`;
+    }
+    
+    // Render as header-style section (no section title, centered content)
+    return `<div class="section general-section" style="text-align: center; margin-bottom: 20pt;">
+      ${profileImageHTML}
+      ${nameHTML}
+      ${fieldsHTML}
     </div>`;
   }
 }

@@ -23,20 +23,36 @@ export class SkillsSectionRenderer {
     const title = customTitle || 'Technical Skills';
     const skills = profile.technical_skills || [];
     
+    if (skills.length === 0) {
+      return '';
+    }
+    
     const skillsHTML = skills.map((skill: any) => {
-      const technologies = Array.isArray(skill.technologies) ? skill.technologies : [];
-      const techItems = technologies.map((tech: string) => `<span class="skill-tag">${tech}</span>`).join('');
+      // Match the CV preview structure: skill.name and skill.proficiency
+      const skillName = skill.name || '';
+      const proficiency = skill.proficiency || 0;
+      const displayText = `${skillName} (${proficiency}/10)`;
       
-      return `<div class="skill-category">
-        <h4 class="skill-category-title">${skill.category || ''}</h4>
-        <div class="skills-container">${techItems}</div>
-      </div>`;
+      return `<span class="skill-tag" style="
+        background-color: #3b82f6;
+        color: white;
+        padding: 2pt 6pt;
+        border-radius: 3pt;
+        font-size: 0.8em;
+        display: inline-block;
+        margin: 2pt;
+      ">${displayText}</span>`;
     }).join('');
 
     return `<div class="section technical-skills-section">
       <h2 class="section-title">${title}</h2>
       <div class="section-content">
-        ${skillsHTML}
+        <div class="skills-container" style="
+          display: flex;
+          flex-wrap: wrap;
+          gap: 5pt;
+          margin: 6pt 0;
+        ">${skillsHTML}</div>
       </div>
     </div>`;
   }
@@ -45,20 +61,36 @@ export class SkillsSectionRenderer {
     const title = customTitle || 'Specialized Skills';
     const skills = profile.specialized_skills || [];
     
+    if (skills.length === 0) {
+      return '';
+    }
+    
     const skillsHTML = skills.map((skill: any) => {
-      const technologies = Array.isArray(skill.technologies) ? skill.technologies : [];
-      const techItems = technologies.map((tech: string) => `<span class="skill-tag">${tech}</span>`).join('');
+      // Match the CV preview structure: skill.name and skill.proficiency
+      const skillName = skill.name || '';
+      const proficiency = skill.proficiency || 0;
+      const displayText = `${skillName} (${proficiency}/10)`;
       
-      return `<div class="skill-category">
-        <h4 class="skill-category-title">${skill.category || ''}</h4>
-        <div class="skills-container">${techItems}</div>
-      </div>`;
+      return `<span class="skill-tag" style="
+        background-color: #3b82f6;
+        color: white;
+        padding: 2pt 6pt;
+        border-radius: 3pt;
+        font-size: 0.8em;
+        display: inline-block;
+        margin: 2pt;
+      ">${displayText}</span>`;
     }).join('');
 
     return `<div class="section specialized-skills-section">
       <h2 class="section-title">${title}</h2>
       <div class="section-content">
-        ${skillsHTML}
+        <div class="skills-container" style="
+          display: flex;
+          flex-wrap: wrap;
+          gap: 5pt;
+          margin: 6pt 0;
+        ">${skillsHTML}</div>
       </div>
     </div>`;
   }
