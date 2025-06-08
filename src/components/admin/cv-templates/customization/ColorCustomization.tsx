@@ -14,6 +14,8 @@ const ColorCustomization: React.FC<ColorCustomizationProps> = ({
   layoutConfig,
   onConfigUpdate
 }) => {
+  const isMultiColumn = ['two-column', 'sidebar'].includes(layoutConfig.layoutType);
+
   return (
     <Card>
       <CardHeader className="pb-4">
@@ -76,6 +78,75 @@ const ColorCustomization: React.FC<ColorCustomizationProps> = ({
             />
           </div>
         </div>
+
+        {/* Multi-column specific background colors */}
+        {isMultiColumn && (
+          <>
+            <div className="border-t pt-4">
+              <Label className="text-xs font-medium text-gray-700 mb-3 block">
+                Layout Background Colors
+              </Label>
+              
+              {layoutConfig.layoutType === 'sidebar' && (
+                <div className="mb-4">
+                  <Label className="text-xs font-medium text-gray-600 mb-2 block">Sidebar Background</Label>
+                  <div className="flex gap-2">
+                    <Input
+                      type="color"
+                      value={layoutConfig.sidebarBg || layoutConfig.primaryColor || '#1f2937'}
+                      onChange={(e) => onConfigUpdate('sidebarBg', e.target.value)}
+                      className="w-12 h-10 p-1 rounded border cursor-pointer"
+                    />
+                    <Input
+                      value={layoutConfig.sidebarBg || layoutConfig.primaryColor || '#1f2937'}
+                      onChange={(e) => onConfigUpdate('sidebarBg', e.target.value)}
+                      className="text-xs h-10 flex-1"
+                      placeholder="Sidebar background"
+                    />
+                  </div>
+                </div>
+              )}
+
+              {layoutConfig.layoutType === 'two-column' && (
+                <div className="mb-4">
+                  <Label className="text-xs font-medium text-gray-600 mb-2 block">Second Column Background</Label>
+                  <div className="flex gap-2">
+                    <Input
+                      type="color"
+                      value={layoutConfig.secondaryColumnBg || '#f8fafc'}
+                      onChange={(e) => onConfigUpdate('secondaryColumnBg', e.target.value)}
+                      className="w-12 h-10 p-1 rounded border cursor-pointer"
+                    />
+                    <Input
+                      value={layoutConfig.secondaryColumnBg || '#f8fafc'}
+                      onChange={(e) => onConfigUpdate('secondaryColumnBg', e.target.value)}
+                      className="text-xs h-10 flex-1"
+                      placeholder="Second column background"
+                    />
+                  </div>
+                </div>
+              )}
+
+              <div>
+                <Label className="text-xs font-medium text-gray-600 mb-2 block">Main Content Background</Label>
+                <div className="flex gap-2">
+                  <Input
+                    type="color"
+                    value={layoutConfig.mainColumnBg || 'transparent'}
+                    onChange={(e) => onConfigUpdate('mainColumnBg', e.target.value)}
+                    className="w-12 h-10 p-1 rounded border cursor-pointer"
+                  />
+                  <Input
+                    value={layoutConfig.mainColumnBg || 'transparent'}
+                    onChange={(e) => onConfigUpdate('mainColumnBg', e.target.value)}
+                    className="text-xs h-10 flex-1"
+                    placeholder="Main content background"
+                  />
+                </div>
+              </div>
+            </div>
+          </>
+        )}
       </CardContent>
     </Card>
   );

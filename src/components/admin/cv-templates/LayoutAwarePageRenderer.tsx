@@ -124,7 +124,10 @@ function renderLayoutContent(
               partialSections={partialSections}
             />
           </div>
-          <div style={{ gridColumn: '2' }}>
+          <div style={{ 
+            gridColumn: '2',
+            ...styles.secondaryColumnStyles
+          }}>
             <DynamicSectionRenderer
               sections={twoColSecondarySections}
               fieldMappings={fieldMappings}
@@ -152,7 +155,10 @@ function renderLayoutContent(
       
       return (
         <>
-          <div style={{ gridColumn: '1' }}>
+          <div style={{ 
+            gridColumn: '1',
+            ...styles.sidebarSectionStyles
+          }}>
             <DynamicSectionRenderer
               sections={sidebarSections}
               fieldMappings={fieldMappings}
