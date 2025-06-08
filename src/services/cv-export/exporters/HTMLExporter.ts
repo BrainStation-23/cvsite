@@ -1,13 +1,10 @@
-
 import { BaseExporter } from './BaseExporter';
 import { ExportOptions, ExportResult } from '../CVExportService';
 import { HTMLLayoutRenderer } from '../html/HTMLLayoutRenderer';
-import { HTMLHeaderGenerator } from '../html/HTMLHeaderGenerator';
 import { HTMLPageDistributor } from '../html/HTMLPageDistributor';
 
 export class HTMLExporter extends BaseExporter {
   private layoutRenderer = new HTMLLayoutRenderer();
-  private headerGenerator = new HTMLHeaderGenerator();
   private pageDistributor = new HTMLPageDistributor();
 
   async export(options: ExportOptions): Promise<ExportResult> {
@@ -58,7 +55,7 @@ export class HTMLExporter extends BaseExporter {
     const layoutType = layoutConfig.layoutType || 'single-column';
     const orientation = template.orientation || 'portrait';
     
-    // Generate pages using the same logic as the preview
+    // Generate pages using the same logic as the preview - this should include the general section in the layout
     const pages = this.pageDistributor.distributePages(
       sections,
       fieldMappings,
@@ -71,10 +68,7 @@ export class HTMLExporter extends BaseExporter {
     const layoutCSS = this.layoutRenderer.generateLayoutCSS(layoutType, layoutConfig);
     const baseCSS = this.generateBaseCSS(layoutConfig, template.orientation);
     
-    // Generate header HTML
-    const headerHTML = this.headerGenerator.generateHeaderHTML(profile, layoutConfig, fieldMappings);
-    
-    // Combine all pages
+    // Combine all pages (no separate header needed - general section is included in layout)
     const pagesHTML = pages.join('\n');
 
     return `<!DOCTYPE html>
@@ -118,7 +112,6 @@ export class HTMLExporter extends BaseExporter {
 </head>
 <body>
     <div class="cv-container">
-        ${headerHTML}
         ${pagesHTML}
     </div>
 </body>
