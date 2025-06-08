@@ -74,6 +74,18 @@ export const LayoutAwarePageRenderer: React.FC<LayoutAwarePageRendererProps> = (
   );
 };
 
+// Helper function to get contrast color for text visibility
+function getContrastColor(backgroundColor: string) {
+  if (!backgroundColor || backgroundColor === 'transparent') return 'inherit';
+  
+  const hex = backgroundColor.replace('#', '');
+  const r = parseInt(hex.substr(0, 2), 16);
+  const g = parseInt(hex.substr(2, 2), 16);
+  const b = parseInt(hex.substr(4, 2), 16);
+  const brightness = (r * 299 + g * 587 + b * 114) / 1000;
+  return brightness > 128 ? '#000000' : '#ffffff';
+}
+
 // Helper function to render content based on layout type
 function renderLayoutContent(
   sections: TemplateSection[], 
@@ -152,22 +164,52 @@ function renderLayoutContent(
         sidebarSections: sidebarSections.map(s => s.section_type),
         mainSections: mainSections.map(s => s.section_type)
       });
+
+      // Get layout config for sidebar styling
+      const layoutConfig = styles.layoutConfig || {};
+      const sidebarBg = layoutConfig.sidebarBg || layoutConfig.primaryColor || '#1f2937';
+      const mainColumnBg = layoutConfig.mainColumnBg || 'transparent';
       
       return (
         <>
           <div style={{ 
             gridColumn: '1',
-            ...styles.sidebarSectionStyles
+            backgroundColor: sidebarBg,
+            padding: '20px 15px',
+            borderRadius: '0 12px 12px 0',
+            color: getContrastColor(sidebarBg),
+            minHeight: '100%'
           }}>
             <DynamicSectionRenderer
               sections={sidebarSections}
               fieldMappings={fieldMappings}
               profile={profile}
-              styles={styles}
+              styles={{
+                ...styles,
+                sectionTitleStyles: {
+                  ...styles.sectionTitleStyles,
+                  color: getContrastColor(sidebarBg),
+                  borderBottomColor: `${getContrastColor(sidebarBg)}30`
+                },
+                itemTitleStyles: {
+                  ...styles.itemTitleStyles,
+                  color: getContrastColor(sidebarBg)
+                },
+                itemSubtitleStyles: {
+                  ...styles.itemSubtitleStyles,
+                  color: sidebarBg !== 'transparent' ? `${getContrastColor(sidebarBg)}CC` : styles.itemSubtitleStyles.color
+                }
+              }}
               partialSections={partialSections}
             />
           </div>
-          <div style={{ gridColumn: '2' }}>
+          <div style={{ 
+            gridColumn: '2',
+            backgroundColor: mainColumnBg,
+            padding: mainColumnBg !== 'transparent' ? '15px' : '0',
+            borderRadius: mainColumnBg !== 'transparent' ? '8px' : '0',
+            color: getContrastColor(mainColumnBg)
+          }}>
             <DynamicSectionRenderer
               sections={mainSections}
               fieldMappings={fieldMappings}

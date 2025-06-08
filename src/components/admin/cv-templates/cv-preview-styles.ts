@@ -30,41 +30,14 @@ export const createCVStyles = (template: CVTemplate) => {
           display: 'grid',
           gridTemplateColumns: '1fr 1fr',
           gap: `${layoutConfig.columnGap || 10}mm`,
-          alignItems: 'start',
-          // Apply background colors to columns
-          '& > div:first-child': {
-            backgroundColor: layoutConfig.mainColumnBg || 'transparent',
-            padding: layoutConfig.mainColumnBg ? '15px' : '0',
-            borderRadius: layoutConfig.mainColumnBg ? '8px' : '0',
-            color: layoutConfig.mainColumnBg ? getContrastColor(layoutConfig.mainColumnBg) : 'inherit'
-          },
-          '& > div:last-child': {
-            backgroundColor: layoutConfig.secondaryColumnBg || `${accentColor}15`, // 15 for light opacity
-            padding: '15px',
-            borderRadius: '8px',
-            color: layoutConfig.secondaryColumnBg ? getContrastColor(layoutConfig.secondaryColumnBg) : 'inherit'
-          }
+          alignItems: 'start'
         };
       case 'sidebar':
         return {
           display: 'grid',
           gridTemplateColumns: '1fr 2fr',
           gap: `${layoutConfig.columnGap || 10}mm`,
-          alignItems: 'start',
-          // Apply background colors with sidebar styling
-          '& > div:first-child': {
-            backgroundColor: layoutConfig.sidebarBg || primaryColor,
-            padding: '20px 15px',
-            borderRadius: '0 12px 12px 0',
-            color: layoutConfig.sidebarBg ? getContrastColor(layoutConfig.sidebarBg) : getContrastColor(primaryColor),
-            minHeight: '100%'
-          },
-          '& > div:last-child': {
-            backgroundColor: layoutConfig.mainColumnBg || 'transparent',
-            padding: layoutConfig.mainColumnBg ? '15px' : '0',
-            borderRadius: layoutConfig.mainColumnBg ? '8px' : '0',
-            color: layoutConfig.mainColumnBg ? getContrastColor(layoutConfig.mainColumnBg) : 'inherit'
-          }
+          alignItems: 'start'
         };
       default: // single-column
         return {
@@ -91,6 +64,9 @@ export const createCVStyles = (template: CVTemplate) => {
       ...getLayoutStyles()
     },
 
+    // Pass layout config to renderer
+    layoutConfig,
+
     headerStyles: {
       textAlign: layoutConfig.layoutType === 'single-column' ? 'center' as const : 'left' as const,
       marginBottom: `${layoutConfig.sectionSpacing || 16}pt`,
@@ -104,7 +80,7 @@ export const createCVStyles = (template: CVTemplate) => {
     nameStyles: {
       fontSize: `${layoutConfig.headingSize || 16}pt`,
       fontWeight: 'bold',
-      color: 'inherit', // Use inherited color for proper contrast
+      color: 'inherit',
       margin: '0 0 5pt 0'
     },
 
@@ -123,7 +99,7 @@ export const createCVStyles = (template: CVTemplate) => {
     sectionTitleStyles: {
       fontSize: `${layoutConfig.subheadingSize || 14}pt`,
       fontWeight: 'bold',
-      color: 'inherit', // Use inherited color for proper contrast
+      color: 'inherit',
       borderBottom: layoutConfig.layoutType === 'sidebar' ? '1px solid rgba(255,255,255,0.3)' : `1px solid ${layoutConfig.accentColor || '#3b82f6'}`,
       paddingBottom: '2pt',
       marginBottom: `${layoutConfig.itemSpacing || 8}pt`
@@ -136,7 +112,7 @@ export const createCVStyles = (template: CVTemplate) => {
 
     itemTitleStyles: {
       fontWeight: 'bold',
-      color: 'inherit' // Use inherited color for proper contrast
+      color: 'inherit'
     },
 
     itemSubtitleStyles: {
