@@ -57,6 +57,12 @@ export class HTMLSectionsGenerator {
       profileKeys: profile ? Object.keys(profile) : [],
       firstName: profile?.first_name,
       lastName: profile?.last_name,
+      email: profile?.email,
+      phone: profile?.phone,
+      location: profile?.location,
+      designation: profile?.designation,
+      biography: profile?.biography,
+      profileImage: profile?.profile_image,
       technicalSkills: profile?.technical_skills,
       specializedSkills: profile?.specialized_skills,
       technicalSkillsArray: Array.isArray(profile?.technical_skills),
@@ -119,9 +125,9 @@ export class HTMLSectionsGenerator {
       [this.getSectionDataKey(section.section_type)]: partialData.items
     } : profile;
 
-    // Special handling for general section - data is directly on profile
+    // Special handling for general section - data is directly on profile from general_information table
     if (section.section_type === 'general') {
-      console.log('HTML Sections Generator - General section - using profile data directly');
+      console.log('HTML Sections Generator - General section - using profile data from general_information table');
       console.log('HTML Sections Generator - General section profile data:', {
         firstName: profile?.first_name,
         lastName: profile?.last_name,
@@ -192,8 +198,8 @@ export class HTMLSectionsGenerator {
   private getSectionDataKey(sectionType: string): string {
     switch (sectionType) {
       case 'general':
-        // General section data is directly on the profile object, not nested
-        return 'general'; // This will be handled specially in the renderer
+        // General section data is directly on the profile object from general_information table
+        return 'general_info'; // Not actually used since we access data directly
       case 'experience':
         return 'experiences';
       case 'education':

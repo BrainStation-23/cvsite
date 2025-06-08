@@ -37,6 +37,13 @@ export class GeneralSectionRenderer {
     });
     console.log('General Section Renderer - Field mappings:', fieldMappings);
 
+    // The profile object should already contain the general_information data
+    // with first_name, last_name, biography, and profile_image from the general_information table
+    if (!profile) {
+      console.log('General Section Renderer - No profile data available');
+      return '';
+    }
+
     // Check if profile image should be shown
     const hasProfileImage = profile?.profile_image;
     
