@@ -1,4 +1,3 @@
-
 import { HTMLFieldProcessor } from './HTMLFieldProcessor';
 import { GeneralSectionRenderer } from './sections/GeneralSectionRenderer';
 import { ExperienceSectionRenderer } from './sections/ExperienceSectionRenderer';
@@ -55,6 +54,7 @@ export class HTMLSectionsGenerator {
     console.log('HTML Sections Generator - Profile data structure check:', {
       hasProfile: !!profile,
       profileKeys: profile ? Object.keys(profile) : [],
+      // General section fields (direct on profile)
       firstName: profile?.first_name,
       lastName: profile?.last_name,
       email: profile?.email,
@@ -63,12 +63,17 @@ export class HTMLSectionsGenerator {
       designation: profile?.designation,
       biography: profile?.biography,
       profileImage: profile?.profile_image,
+      // Skills sections (nested arrays)
       technicalSkills: profile?.technical_skills,
       specializedSkills: profile?.specialized_skills,
       technicalSkillsArray: Array.isArray(profile?.technical_skills),
       specializedSkillsArray: Array.isArray(profile?.specialized_skills),
+      // Other sections (nested arrays)
       experiences: profile?.experiences,
-      experiencesArray: Array.isArray(profile?.experiences)
+      education: profile?.education,
+      projects: profile?.projects,
+      trainings: profile?.trainings,
+      achievements: profile?.achievements
     });
 
     if (!sections || sections.length === 0) {
@@ -119,14 +124,17 @@ export class HTMLSectionsGenerator {
       console.log(`HTML Sections Generator - Using partial data for ${section.section_type}:`, partialData);
     }
     
-    // Create modified profile with partial data if applicable
-    const profileForSection = partialData ? {
-      ...profile,
-      [this.getSectionDataKey(section.section_type)]: partialData.items
-    } : profile;
+    // Create modified profile with partial data if applicable - only for non-general sections
+    let profileForSection = profile;
+    if (partialData && section.section_type !== 'general') {
+      const sectionDataKey = this.getSectionDataKey(section.section_type);
+      profileForSection = {
+        ...profile,
+        [sectionDataKey]: partialData.items
+      };
+    }
 
-    // Check if section has data
-    const sectionDataKey = this.getSectionDataKey(section.section_type);
+    // Check section data availability and log appropriately
     if (section.section_type === 'general') {
       // For general section, check if required general info fields exist directly on profile
       console.log('HTML Sections Generator - General section - checking direct profile fields');
@@ -142,6 +150,7 @@ export class HTMLSectionsGenerator {
       });
     } else {
       // For other sections, check the nested data
+      const sectionDataKey = this.getSectionDataKey(section.section_type);
       const sectionData = profileForSection[sectionDataKey];
       console.log(`HTML Sections Generator - Section ${section.section_type} data check:`, {
         dataKey: sectionDataKey,
@@ -200,7 +209,7 @@ export class HTMLSectionsGenerator {
     switch (sectionType) {
       case 'general':
         // General section data is directly on the profile object (first_name, last_name, etc.)
-        // We don't use a nested key for general section
+        // We return empty string to indicate no nested key is needed
         return '';
       case 'experience':
         return 'experiences';

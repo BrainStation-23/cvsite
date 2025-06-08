@@ -1,3 +1,4 @@
+
 import { HTMLFieldProcessor } from '../HTMLFieldProcessor';
 
 interface TemplateSection {
@@ -36,7 +37,8 @@ export class GeneralSectionRenderer {
     });
     console.log('General Section Renderer - Field mappings:', fieldMappings);
 
-    // For general section, the data is directly on the profile object from general_information table
+    // For general section, the data comes directly from the profile object
+    // These fields (first_name, last_name, etc.) are returned directly by get_employee_data
     if (!profile) {
       console.log('General Section Renderer - No profile data available');
       return '';
@@ -137,35 +139,35 @@ export class GeneralSectionRenderer {
     // Create other fields HTML (without labels)
     let fieldsHTML = '';
     
-    // Email
+    // Email - access directly from profile object
     if (isFieldEnabled('email') && profile?.email) {
       fieldsHTML += `<p style="margin: 4pt 0; text-align: center; color: inherit;">
         ${applyMasking(profile.email, 'email')}
       </p>`;
     }
     
-    // Phone
+    // Phone - access directly from profile object
     if (isFieldEnabled('phone') && profile?.phone) {
       fieldsHTML += `<p style="margin: 4pt 0; text-align: center; color: inherit;">
         ${applyMasking(profile.phone, 'phone')}
       </p>`;
     }
     
-    // Location
+    // Location - access directly from profile object
     if (isFieldEnabled('location') && profile?.location) {
       fieldsHTML += `<p style="margin: 4pt 0; text-align: center; color: inherit;">
         ${applyMasking(profile.location, 'location')}
       </p>`;
     }
     
-    // Designation
+    // Designation - access directly from profile object
     if (isFieldEnabled('designation') && profile?.designation) {
       fieldsHTML += `<p style="margin: 4pt 0; text-align: center; font-style: italic; color: inherit;">
         ${applyMasking(profile.designation, 'designation')}
       </p>`;
     }
     
-    // Biography
+    // Biography - access directly from profile object
     if (isFieldEnabled('biography') && profile?.biography) {
       fieldsHTML += `<p style="margin-top: 10pt; font-size: 0.9em; font-style: italic; text-align: center; color: inherit;">
         ${applyMasking(profile.biography, 'biography')}
