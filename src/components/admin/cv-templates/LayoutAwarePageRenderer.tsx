@@ -1,6 +1,7 @@
-
 import React from 'react';
 import { DynamicSectionRenderer } from './DynamicSectionRenderer';
+import { LayoutStyleFactory } from './layout/LayoutStyleFactory';
+import { getLayoutConfiguration } from './layout/LayoutConfigurations';
 
 interface TemplateSection {
   id: string;
@@ -59,7 +60,7 @@ export const LayoutAwarePageRenderer: React.FC<LayoutAwarePageRendererProps> = (
     profile_image: profile.profile_image || profile.profileImage,
   };
 
-  // If no sections configured, don't render anything (parent should handle this case)
+  // If no sections configured, don't render anything
   if (!sections || sections.length === 0) {
     return null;
   }
@@ -74,19 +75,7 @@ export const LayoutAwarePageRenderer: React.FC<LayoutAwarePageRendererProps> = (
   );
 };
 
-// Helper function to get contrast color for text visibility
-function getContrastColor(backgroundColor: string) {
-  if (!backgroundColor || backgroundColor === 'transparent') return 'inherit';
-  
-  const hex = backgroundColor.replace('#', '');
-  const r = parseInt(hex.substr(0, 2), 16);
-  const g = parseInt(hex.substr(2, 2), 16);
-  const b = parseInt(hex.substr(4, 2), 16);
-  const brightness = (r * 299 + g * 587 + b * 114) / 1000;
-  return brightness > 128 ? '#000000' : '#ffffff';
-}
-
-// Helper function to render content based on layout type
+// Helper function to render content using unified layout system
 function renderLayoutContent(
   sections: TemplateSection[], 
   fieldMappings: FieldMapping[], 
@@ -110,126 +99,67 @@ function renderLayoutContent(
     }))
   });
 
-  switch (layoutType) {
-    case 'two-column':
-      // For two-column layout, use the section's layout_placement setting
-      const twoColMainSections = sections.filter(s => 
-        (s.styling_config?.layout_placement || 'main') === 'main'
-      );
-      const twoColSecondarySections = sections.filter(s => 
-        (s.styling_config?.layout_placement || 'main') === 'sidebar'
-      );
-      
-      console.log('Two-column layout distribution:', {
-        mainSections: twoColMainSections.map(s => s.section_type),
-        secondarySections: twoColSecondarySections.map(s => s.section_type)
-      });
-      
-      return (
-        <>
-          <div style={{ gridColumn: '1' }}>
-            <DynamicSectionRenderer
-              sections={twoColMainSections}
-              fieldMappings={fieldMappings}
-              profile={profile}
-              styles={styles}
-              partialSections={partialSections}
-            />
-          </div>
-          <div style={{ 
-            gridColumn: '2',
-            ...styles.secondaryColumnStyles
-          }}>
-            <DynamicSectionRenderer
-              sections={twoColSecondarySections}
-              fieldMappings={fieldMappings}
-              profile={profile}
-              styles={styles}
-              partialSections={partialSections}
-            />
-          </div>
-        </>
-      );
+  // Get layout configuration and styles
+  const layoutConfig = getLayoutConfiguration(layoutType);
+  const layoutStyles = styles.layoutStyles || LayoutStyleFactory.generateStyles(layoutType, styles.layoutConfig || {});
 
-    case 'sidebar':
-      // For sidebar layout, use the section's layout_placement setting
-      const sidebarSections = sections.filter(s => 
-        (s.styling_config?.layout_placement || 'main') === 'sidebar'
-      );
-      const mainSections = sections.filter(s => 
-        (s.styling_config?.layout_placement || 'main') === 'main'
-      );
-      
-      console.log('Sidebar layout distribution:', {
-        sidebarSections: sidebarSections.map(s => s.section_type),
-        mainSections: mainSections.map(s => s.section_type)
-      });
+  // Group sections by their target zones
+  const sectionsByZone: Record<string, TemplateSection[]> = {};
+  
+  layoutConfig.zones.forEach(zone => {
+    sectionsByZone[zone.id] = [];
+  });
 
-      // Get layout config for sidebar styling
-      const layoutConfig = styles.layoutConfig || {};
-      const sidebarBg = layoutConfig.sidebarBg || layoutConfig.primaryColor || '#1f2937';
-      const mainColumnBg = layoutConfig.mainColumnBg || 'transparent';
-      
-      return (
-        <>
-          <div style={{ 
-            gridColumn: '1',
-            backgroundColor: sidebarBg,
-            padding: '20px 15px',
-            borderRadius: '0 12px 12px 0',
-            color: getContrastColor(sidebarBg),
-            minHeight: '100%'
-          }}>
-            <DynamicSectionRenderer
-              sections={sidebarSections}
-              fieldMappings={fieldMappings}
-              profile={profile}
-              styles={{
-                ...styles,
-                sectionTitleStyles: {
-                  ...styles.sectionTitleStyles,
-                  color: getContrastColor(sidebarBg),
-                  borderBottomColor: `${getContrastColor(sidebarBg)}30`
-                },
-                itemTitleStyles: {
-                  ...styles.itemTitleStyles,
-                  color: getContrastColor(sidebarBg)
-                },
-                itemSubtitleStyles: {
-                  ...styles.itemSubtitleStyles,
-                  color: sidebarBg !== 'transparent' ? `${getContrastColor(sidebarBg)}CC` : styles.itemSubtitleStyles.color
-                }
-              }}
-              partialSections={partialSections}
-            />
-          </div>
-          <div style={{ 
-            gridColumn: '2',
-            backgroundColor: mainColumnBg,
-            padding: mainColumnBg !== 'transparent' ? '15px' : '0',
-            borderRadius: mainColumnBg !== 'transparent' ? '8px' : '0',
-            color: getContrastColor(mainColumnBg)
-          }}>
-            <DynamicSectionRenderer
-              sections={mainSections}
-              fieldMappings={fieldMappings}
-              profile={profile}
-              styles={styles}
-              partialSections={partialSections}
-            />
-          </div>
-        </>
-      );
+  // Distribute sections to zones
+  sections.forEach(section => {
+    const placement = section.styling_config?.layout_placement || 'main';
+    const targetZone = placement === 'sidebar' ? 'sidebar' : 
+                     placement === 'secondary' ? 'secondary' : 'main';
+    
+    if (sectionsByZone[targetZone]) {
+      sectionsByZone[targetZone].push(section);
+    } else {
+      // Fallback to main if zone doesn't exist
+      sectionsByZone['main'] = sectionsByZone['main'] || [];
+      sectionsByZone['main'].push(section);
+    }
+  });
 
-    default: // single-column
-      return (
-        <DynamicSectionRenderer
-          sections={sections}
-          fieldMappings={fieldMappings}
-          profile={profile}
-          styles={styles}
-          partialSections={partialSections}
-        />
-      );
-  }
+  console.log('Section distribution by zone:', sectionsByZone);
+
+  // Render columns based on layout configuration
+  return (
+    <>
+      {layoutConfig.columns.map((column) => (
+        <div 
+          key={column.id}
+          style={layoutStyles.columnStyles[column.id]}
+        >
+          <DynamicSectionRenderer
+            sections={sectionsByZone[column.zone] || []}
+            fieldMappings={fieldMappings}
+            profile={profile}
+            styles={LayoutStyleFactory.getSectionStyles(
+              column.zone,
+              layoutStyles.zoneStyles,
+              styles
+            )}
+            partialSections={partialSections}
+          />
+        </div>
+      ))}
+    </>
+  );
+}
+
+// Helper function to get contrast color for text visibility
+function getContrastColor(backgroundColor: string) {
+  if (!backgroundColor || backgroundColor === 'transparent') return 'inherit';
+  
+  const hex = backgroundColor.replace('#', '');
+  const r = parseInt(hex.substr(0, 2), 16);
+  const g = parseInt(hex.substr(2, 2), 16);
+  const b = parseInt(hex.substr(4, 2), 16);
+  const brightness = (r * 299 + g * 587 + b * 114) / 1000;
+  return brightness > 128 ? '#000000' : '#ffffff';
 }

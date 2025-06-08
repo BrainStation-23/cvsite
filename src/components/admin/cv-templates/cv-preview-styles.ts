@@ -1,5 +1,6 @@
 
 import { CVTemplate } from '@/types/cv-templates';
+import { LayoutStyleFactory } from './layout/LayoutStyleFactory';
 
 export const createCVStyles = (template: CVTemplate) => {
   const layoutConfig = template.layout_config || {};
@@ -7,45 +8,12 @@ export const createCVStyles = (template: CVTemplate) => {
   const pageWidth = template.orientation === 'portrait' ? '210mm' : '297mm';
   const pageHeight = template.orientation === 'portrait' ? '297mm' : '210mm';
   
-  // Helper function to ensure text visibility on colored backgrounds
-  const getContrastColor = (backgroundColor: string) => {
-    // Simple contrast check - if background is dark, use light text
-    const hex = backgroundColor.replace('#', '');
-    const r = parseInt(hex.substr(0, 2), 16);
-    const g = parseInt(hex.substr(2, 2), 16);
-    const b = parseInt(hex.substr(4, 2), 16);
-    const brightness = (r * 299 + g * 587 + b * 114) / 1000;
-    return brightness > 128 ? '#000000' : '#ffffff';
-  };
+  // Generate unified layout styles
+  const layoutStyles = LayoutStyleFactory.generateStyles(
+    layoutConfig.layoutType || 'single-column',
+    layoutConfig
+  );
 
-  // Layout type specific styles
-  const getLayoutStyles = () => {
-    const primaryColor = layoutConfig.primaryColor || '#1f2937';
-    const secondaryColor = layoutConfig.secondaryColor || '#6b7280';
-    const accentColor = layoutConfig.accentColor || '#3b82f6';
-
-    switch (layoutConfig.layoutType) {
-      case 'two-column':
-        return {
-          display: 'grid',
-          gridTemplateColumns: '1fr 1fr',
-          gap: `${layoutConfig.columnGap || 10}mm`,
-          alignItems: 'start'
-        };
-      case 'sidebar':
-        return {
-          display: 'grid',
-          gridTemplateColumns: '1fr 2fr',
-          gap: `${layoutConfig.columnGap || 10}mm`,
-          alignItems: 'start'
-        };
-      default: // single-column
-        return {
-          display: 'block'
-        };
-    }
-  };
-  
   return {
     baseStyles: {
       width: pageWidth,
@@ -61,11 +29,12 @@ export const createCVStyles = (template: CVTemplate) => {
       position: 'relative' as const,
       pageBreakAfter: 'always' as const,
       orientation: template.orientation,
-      ...getLayoutStyles()
+      ...layoutStyles.containerStyles
     },
 
-    // Pass layout config to renderer
+    // Pass layout config and unified styles to renderer
     layoutConfig,
+    layoutStyles,
 
     headerStyles: {
       textAlign: layoutConfig.layoutType === 'single-column' ? 'center' as const : 'left' as const,
@@ -86,7 +55,7 @@ export const createCVStyles = (template: CVTemplate) => {
 
     titleStyles: {
       fontSize: `${layoutConfig.subheadingSize || 14}pt`,
-      color: layoutConfig.layoutType === 'sidebar' ? 'rgba(255,255,255,0.8)' : (layoutConfig.secondaryColor || '#6b7280'),
+      color: layoutConfig.secondaryColor || '#6b7280',
       margin: '0'
     },
 
@@ -100,7 +69,7 @@ export const createCVStyles = (template: CVTemplate) => {
       fontSize: `${layoutConfig.subheadingSize || 14}pt`,
       fontWeight: 'bold',
       color: 'inherit',
-      borderBottom: layoutConfig.layoutType === 'sidebar' ? '1px solid rgba(255,255,255,0.3)' : `1px solid ${layoutConfig.accentColor || '#3b82f6'}`,
+      borderBottom: `1px solid ${layoutConfig.accentColor || '#3b82f6'}`,
       paddingBottom: '2pt',
       marginBottom: `${layoutConfig.itemSpacing || 8}pt`
     },
@@ -116,7 +85,7 @@ export const createCVStyles = (template: CVTemplate) => {
     },
 
     itemSubtitleStyles: {
-      color: layoutConfig.layoutType === 'sidebar' ? 'rgba(255,255,255,0.7)' : (layoutConfig.secondaryColor || '#6b7280'),
+      color: layoutConfig.secondaryColor || '#6b7280',
       fontSize: '0.9em'
     },
 
@@ -127,35 +96,12 @@ export const createCVStyles = (template: CVTemplate) => {
     },
 
     skillStyles: {
-      backgroundColor: layoutConfig.layoutType === 'sidebar' ? 'rgba(255,255,255,0.2)' : (layoutConfig.accentColor || '#3b82f6'),
-      color: layoutConfig.layoutType === 'sidebar' ? 'white' : 'white',
+      backgroundColor: layoutConfig.accentColor || '#3b82f6',
+      color: 'white',
       padding: '2pt 6pt',
       borderRadius: '3pt',
       fontSize: '0.8em',
-      border: layoutConfig.layoutType === 'sidebar' ? '1px solid rgba(255,255,255,0.3)' : 'none'
-    },
-
-    // Add layout-specific container styles
-    layoutContainerStyles: {
-      ...getLayoutStyles()
-    },
-
-    // Add specific styles for sidebar and two-column sections
-    sidebarSectionStyles: {
-      color: 'white',
-      '& h3': {
-        color: 'white',
-        borderBottomColor: 'rgba(255,255,255,0.3)'
-      },
-      '& .item-subtitle': {
-        color: 'rgba(255,255,255,0.7)'
-      }
-    },
-
-    secondaryColumnStyles: {
-      backgroundColor: `${layoutConfig.accentColor || '#3b82f6'}15`,
-      padding: '15px',
-      borderRadius: '8px'
+      border: 'none'
     }
   };
 };
