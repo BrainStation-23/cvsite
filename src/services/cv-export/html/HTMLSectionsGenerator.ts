@@ -1,4 +1,3 @@
-
 import { HTMLFieldProcessor } from './HTMLFieldProcessor';
 
 interface TemplateSection {
@@ -91,15 +90,41 @@ export class HTMLSectionsGenerator {
   private renderGeneralSection(profile: any, fieldMappings: FieldMapping[], section: TemplateSection, customTitle?: string): string {
     const title = customTitle || 'Personal Information';
     
+    // Check if profile image should be shown
+    const hasProfileImage = profile.profile_image;
+    
+    // Get orientation from styling config or default to portrait
+    const orientation = section.styling_config?.orientation || 'portrait';
+    const isLandscape = orientation === 'landscape';
+    const imageSize = isLandscape ? '60px' : '80px';
+    
+    const profileImageHTML = hasProfileImage ? `
+      <div style="margin-bottom: 10pt; text-align: center;">
+        <img 
+          src="${profile.profile_image}" 
+          alt="Profile" 
+          style="
+            width: ${imageSize}; 
+            height: ${imageSize}; 
+            border-radius: 4px; 
+            object-fit: cover;
+            border: 1px solid #e5e7eb;
+          " 
+        />
+      </div>
+    ` : '';
+    
     return `<div class="section general-section">
       <h2 class="section-title">${title}</h2>
       <div class="section-content">
+        ${profileImageHTML}
         ${this.fieldProcessor.processField('first_name', profile.first_name, fieldMappings, 'general')}
         ${this.fieldProcessor.processField('last_name', profile.last_name, fieldMappings, 'general')}
         ${this.fieldProcessor.processField('email', profile.email, fieldMappings, 'general')}
         ${this.fieldProcessor.processField('phone', profile.phone, fieldMappings, 'general')}
         ${this.fieldProcessor.processField('location', profile.location, fieldMappings, 'general')}
         ${this.fieldProcessor.processField('designation', profile.designation, fieldMappings, 'general')}
+        ${profile.biography ? `<p style="margin-top: 10pt; font-size: 0.9em; font-style: italic;">${profile.biography}</p>` : ''}
       </div>
     </div>`;
   }
