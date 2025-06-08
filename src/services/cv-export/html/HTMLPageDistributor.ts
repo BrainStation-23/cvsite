@@ -14,7 +14,24 @@ export class HTMLPageDistributor {
     layoutConfig: Record<string, any> = {},
     orientation: string = 'portrait'
   ): string[] {
+    console.log('=== HTML PAGE DISTRIBUTOR DEBUG START ===');
+    console.log('HTML Page Distributor - Input sections:', sections.length);
+    console.log('HTML Page Distributor - Sections details:', sections.map(s => ({
+      id: s.id,
+      type: s.section_type,
+      placement: s.styling_config?.layout_placement || 'main',
+      order: s.display_order
+    })));
+    console.log('HTML Page Distributor - Field mappings:', fieldMappings.length);
+    console.log('HTML Page Distributor - Field mappings by section:', 
+      fieldMappings.reduce((acc, fm) => {
+        acc[fm.section_type] = (acc[fm.section_type] || 0) + 1;
+        return acc;
+      }, {} as Record<string, number>)
+    );
+
     if (!profile || sections.length === 0) {
+      console.log('HTML Page Distributor - No profile or sections, returning empty page');
       return ['<div class="empty-page">No content to display</div>'];
     }
 
@@ -22,17 +39,16 @@ export class HTMLPageDistributor {
     const MAX_PAGES = 20;
     const layoutType = layoutConfig.layoutType || 'single-column';
 
-    console.log('HTML Page Distributor processing sections:', {
+    console.log('HTML Page Distributor - Layout config:', {
       layoutType,
-      sectionsWithPlacement: sections.map(s => ({
-        id: s.id,
-        type: s.section_type,
-        placement: s.styling_config?.layout_placement || 'main'
-      }))
+      orientation,
+      contentHeight: A4_CONTENT_HEIGHT
     });
 
     // Use the same strategy as the preview
     const strategy = LayoutStrategyFactory.createStrategy(layoutType);
+    console.log('HTML Page Distributor - Using strategy:', strategy.constructor.name);
+    
     const distributedPages = strategy.distribute(
       sections,
       fieldMappings,
@@ -42,8 +58,17 @@ export class HTMLPageDistributor {
       orientation
     );
 
+    console.log('HTML Page Distributor - Distributed pages:', distributedPages.length);
+    distributedPages.forEach((page, index) => {
+      console.log(`HTML Page Distributor - Page ${index + 1}:`, {
+        sectionsCount: page.sections.length,
+        sections: page.sections.map(s => s.section_type),
+        partialSections: Object.keys(page.partialSections)
+      });
+    });
+
     // Convert each page to HTML
-    return distributedPages.map((pageContent, index) => {
+    const htmlPages = distributedPages.map((pageContent, index) => {
       return this.generatePageHTML(
         pageContent,
         layoutType,
@@ -51,6 +76,9 @@ export class HTMLPageDistributor {
         distributedPages.length
       );
     });
+
+    console.log('=== HTML PAGE DISTRIBUTOR DEBUG END ===');
+    return htmlPages;
   }
 
   private generatePageHTML(
@@ -59,6 +87,12 @@ export class HTMLPageDistributor {
     pageNumber: number,
     totalPages: number
   ): string {
+    console.log(`HTML Page Distributor - Generating HTML for page ${pageNumber}:`, {
+      sectionsCount: pageContent.sections.length,
+      sectionTypes: pageContent.sections.map(s => s.section_type),
+      partialSections: Object.keys(pageContent.partialSections)
+    });
+
     const sectionsHTML = this.layoutRenderer.generateLayoutHTML(
       pageContent.sections,
       [], // Field mappings are handled within sections

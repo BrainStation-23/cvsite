@@ -32,19 +32,18 @@ export class HTMLLayoutRenderer {
     layoutType: string,
     partialSections: any = {}
   ): string {
+    console.log('=== HTML LAYOUT RENDERER DEBUG START ===');
+    console.log('HTML Layout Renderer - Input sections:', sections.length);
+    console.log('HTML Layout Renderer - Sections details:', sections.map(s => ({
+      id: s.id,
+      type: s.section_type,
+      placement: s.styling_config?.layout_placement || 'main'
+    })));
+
     if (!sections || sections.length === 0) {
+      console.log('HTML Layout Renderer - No sections to render');
       return '';
     }
-
-    console.log('HTML Layout Renderer - Processing sections:', {
-      layoutType,
-      sectionsCount: sections.length,
-      sectionsWithPlacement: sections.map(s => ({
-        id: s.id,
-        type: s.section_type,
-        placement: s.styling_config?.layout_placement || 'main'
-      }))
-    });
 
     // Get layout configuration
     const layoutConfig = getLayoutConfiguration(layoutType);
@@ -81,11 +80,14 @@ export class HTMLLayoutRenderer {
       }
     });
 
-    console.log('HTML Section distribution by zone:', sectionsByZone);
+    console.log('HTML Layout Renderer - Section distribution by zone:', sectionsByZone);
 
     // Generate HTML columns based on layout configuration
     const columnsHTML = layoutConfig.columns.map((column) => {
       const columnSections = sectionsByZone[column.zone] || [];
+      console.log(`HTML Layout Renderer - Generating column ${column.id} (zone: ${column.zone}) with ${columnSections.length} sections:`, 
+        columnSections.map(s => s.section_type));
+      
       const sectionsHTML = this.sectionsGenerator.generateSectionsHTML(
         columnSections, 
         profile, 
@@ -98,6 +100,7 @@ export class HTMLLayoutRenderer {
       </div>`;
     }).join('\n');
 
+    console.log('=== HTML LAYOUT RENDERER DEBUG END ===');
     return `<div class="layout-container layout-${layoutType}">
       ${columnsHTML}
     </div>`;
