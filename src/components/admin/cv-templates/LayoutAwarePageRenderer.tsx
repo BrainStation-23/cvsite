@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { DynamicSectionRenderer } from './DynamicSectionRenderer';
 import { LayoutStyleFactory } from './layout/LayoutStyleFactory';
@@ -113,8 +114,18 @@ function renderLayoutContent(
   // Distribute sections to zones
   sections.forEach(section => {
     const placement = section.styling_config?.layout_placement || 'main';
-    const targetZone = placement === 'sidebar' ? 'sidebar' : 
-                     placement === 'secondary' ? 'secondary' : 'main';
+    
+    // Map placement to actual zone based on layout configuration
+    let targetZone = 'main'; // default fallback
+    
+    if (placement === 'sidebar' && sectionsByZone['sidebar']) {
+      targetZone = 'sidebar';
+    } else if (placement === 'sidebar' && sectionsByZone['secondary']) {
+      // For two-column layout, sidebar placement maps to secondary zone
+      targetZone = 'secondary';
+    } else {
+      targetZone = 'main';
+    }
     
     if (sectionsByZone[targetZone]) {
       sectionsByZone[targetZone].push(section);
@@ -150,16 +161,4 @@ function renderLayoutContent(
       ))}
     </>
   );
-}
-
-// Helper function to get contrast color for text visibility
-function getContrastColor(backgroundColor: string) {
-  if (!backgroundColor || backgroundColor === 'transparent') return 'inherit';
-  
-  const hex = backgroundColor.replace('#', '');
-  const r = parseInt(hex.substr(0, 2), 16);
-  const g = parseInt(hex.substr(2, 2), 16);
-  const b = parseInt(hex.substr(4, 2), 16);
-  const brightness = (r * 299 + g * 587 + b * 114) / 1000;
-  return brightness > 128 ? '#000000' : '#ffffff';
 }
