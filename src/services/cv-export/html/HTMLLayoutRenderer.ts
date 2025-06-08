@@ -147,6 +147,43 @@ export class HTMLLayoutRenderer {
       }
     });
 
+    // Add specific CSS rules for profile image container to ensure proper containment
+    css += `
+      .profile-image-container {
+        box-sizing: border-box !important;
+        overflow: hidden !important;
+      }
+      
+      .profile-image-wrapper {
+        box-sizing: border-box !important;
+        overflow: hidden !important;
+        border-radius: 4px !important;
+      }
+      
+      .profile-image {
+        max-width: 100% !important;
+        max-height: 100% !important;
+        width: 100% !important;
+        height: 100% !important;
+        object-fit: cover !important;
+        object-position: center !important;
+      }
+      
+      /* Ensure profile image container respects layout constraints */
+      .layout-column .profile-image-container,
+      [data-zone] .profile-image-container {
+        width: 100% !important;
+        max-width: 100% !important;
+        overflow: visible !important;
+      }
+      
+      .layout-column .profile-image-wrapper,
+      [data-zone] .profile-image-wrapper {
+        flex-shrink: 0 !important;
+        margin: 0 auto !important;
+      }
+    `;
+
     return css;
   }
 

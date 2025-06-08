@@ -34,19 +34,37 @@ export class GeneralSectionRenderer {
     const isLandscape = orientation === 'landscape';
     const imageSize = isLandscape ? '60px' : '80px';
     
+    // Create a proper fixed-size container that matches the preview approach
     const profileImageHTML = hasProfileImage ? `
-      <div style="margin-bottom: 10pt; text-align: center;">
-        <img 
-          src="${profile.profile_image}" 
-          alt="Profile" 
-          style="
-            width: ${imageSize}; 
-            height: ${imageSize}; 
-            border-radius: 4px; 
-            object-fit: cover;
-            border: 1px solid #e5e7eb;
-          " 
-        />
+      <div class="profile-image-container" style="
+        margin-bottom: 10pt; 
+        text-align: center;
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      ">
+        <div class="profile-image-wrapper" style="
+          width: ${imageSize};
+          height: ${imageSize};
+          position: relative;
+          display: inline-block;
+          flex-shrink: 0;
+        ">
+          <img 
+            src="${profile.profile_image}" 
+            alt="Profile" 
+            class="profile-image"
+            style="
+              width: 100%;
+              height: 100%;
+              border-radius: 4px; 
+              object-fit: cover;
+              border: 1px solid #e5e7eb;
+              display: block;
+            " 
+          />
+        </div>
       </div>
     ` : '';
     
