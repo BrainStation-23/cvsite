@@ -24,8 +24,21 @@ export class GeneralSectionRenderer {
   constructor(private fieldProcessor: HTMLFieldProcessor) {}
 
   render(profile: any, fieldMappings: FieldMapping[], section: TemplateSection, customTitle?: string): string {
+    console.log('General Section Renderer - Profile data received:', {
+      hasProfile: !!profile,
+      firstName: profile?.first_name,
+      lastName: profile?.last_name,
+      email: profile?.email,
+      phone: profile?.phone,
+      location: profile?.location,
+      designation: profile?.designation,
+      biography: profile?.biography,
+      profileImage: profile?.profile_image
+    });
+    console.log('General Section Renderer - Field mappings:', fieldMappings);
+
     // Check if profile image should be shown
-    const hasProfileImage = profile.profile_image;
+    const hasProfileImage = profile?.profile_image;
     
     // Get orientation from styling config or default to portrait
     const orientation = section.styling_config?.orientation || 'portrait';
@@ -35,7 +48,9 @@ export class GeneralSectionRenderer {
     // Helper function to check if a field is enabled based on field mappings
     const isFieldEnabled = (fieldName: string) => {
       const mapping = fieldMappings.find(m => m.original_field_name === fieldName);
-      return mapping ? mapping.visibility_rules?.enabled !== false : true;
+      const enabled = mapping ? mapping.visibility_rules?.enabled !== false : true;
+      console.log(`General Section Renderer - Field ${fieldName} enabled:`, enabled, 'mapping:', mapping);
+      return enabled;
     };
 
     // Helper function to apply masking
@@ -90,8 +105,15 @@ export class GeneralSectionRenderer {
 
     // Create name HTML (without labels, as header style)
     let nameHTML = '';
-    const hasFirstName = isFieldEnabled('first_name') && profile.first_name;
-    const hasLastName = isFieldEnabled('last_name') && profile.last_name;
+    const hasFirstName = isFieldEnabled('first_name') && profile?.first_name;
+    const hasLastName = isFieldEnabled('last_name') && profile?.last_name;
+    
+    console.log('General Section Renderer - Name check:', {
+      hasFirstName,
+      hasLastName,
+      firstName: profile?.first_name,
+      lastName: profile?.last_name
+    });
     
     if (hasFirstName || hasLastName) {
       const firstName = hasFirstName ? applyMasking(profile.first_name, 'first_name') : '';
@@ -111,45 +133,50 @@ export class GeneralSectionRenderer {
     let fieldsHTML = '';
     
     // Email
-    if (isFieldEnabled('email') && profile.email) {
+    if (isFieldEnabled('email') && profile?.email) {
       fieldsHTML += `<p style="margin: 4pt 0; text-align: center; color: inherit;">
         ${applyMasking(profile.email, 'email')}
       </p>`;
     }
     
     // Phone
-    if (isFieldEnabled('phone') && profile.phone) {
+    if (isFieldEnabled('phone') && profile?.phone) {
       fieldsHTML += `<p style="margin: 4pt 0; text-align: center; color: inherit;">
         ${applyMasking(profile.phone, 'phone')}
       </p>`;
     }
     
     // Location
-    if (isFieldEnabled('location') && profile.location) {
+    if (isFieldEnabled('location') && profile?.location) {
       fieldsHTML += `<p style="margin: 4pt 0; text-align: center; color: inherit;">
         ${applyMasking(profile.location, 'location')}
       </p>`;
     }
     
     // Designation
-    if (isFieldEnabled('designation') && profile.designation) {
+    if (isFieldEnabled('designation') && profile?.designation) {
       fieldsHTML += `<p style="margin: 4pt 0; text-align: center; font-style: italic; color: inherit;">
         ${applyMasking(profile.designation, 'designation')}
       </p>`;
     }
     
     // Biography
-    if (isFieldEnabled('biography') && profile.biography) {
+    if (isFieldEnabled('biography') && profile?.biography) {
       fieldsHTML += `<p style="margin-top: 10pt; font-size: 0.9em; font-style: italic; text-align: center; color: inherit;">
         ${applyMasking(profile.biography, 'biography')}
       </p>`;
     }
     
-    // Render as header-style section (no section title, centered content)
-    return `<div class="section general-section" style="text-align: center; margin-bottom: 20pt;">
+    const finalHTML = `<div class="section general-section" style="text-align: center; margin-bottom: 20pt;">
       ${profileImageHTML}
       ${nameHTML}
       ${fieldsHTML}
     </div>`;
+
+    console.log('General Section Renderer - Generated HTML length:', finalHTML.length);
+    console.log('General Section Renderer - Generated HTML preview:', finalHTML.substring(0, 200) + '...');
+    
+    // Render as header-style section (no section title, centered content)
+    return finalHTML;
   }
 }

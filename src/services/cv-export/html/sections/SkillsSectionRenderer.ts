@@ -20,17 +20,31 @@ interface TemplateSection {
 
 export class SkillsSectionRenderer {
   renderTechnicalSkills(profile: any, fieldMappings: FieldMapping[], section: TemplateSection, customTitle?: string): string {
+    console.log('Skills Section Renderer - Technical Skills - Profile data:', {
+      technicalSkills: profile?.technical_skills,
+      technicalSkillsType: typeof profile?.technical_skills,
+      technicalSkillsArray: Array.isArray(profile?.technical_skills),
+      technicalSkillsLength: Array.isArray(profile?.technical_skills) ? profile.technical_skills.length : 'not array'
+    });
+
     const title = customTitle || 'Technical Skills';
-    const skills = profile.technical_skills || [];
+    const skills = profile?.technical_skills || [];
     
-    if (skills.length === 0) {
+    console.log('Skills Section Renderer - Technical Skills processed:', {
+      skillsCount: skills.length,
+      skills: skills
+    });
+    
+    if (!Array.isArray(skills) || skills.length === 0) {
+      console.log('Skills Section Renderer - Technical Skills - No valid skills data, returning empty');
       return '';
     }
     
     const skillsHTML = skills.map((skill: any) => {
+      console.log('Skills Section Renderer - Processing technical skill:', skill);
       // Match the CV preview structure: skill.name and skill.proficiency
-      const skillName = skill.name || '';
-      const proficiency = skill.proficiency || 0;
+      const skillName = skill?.name || '';
+      const proficiency = skill?.proficiency || 0;
       const displayText = `${skillName} (${proficiency}/10)`;
       
       return `<span class="skill-tag" style="
@@ -58,17 +72,31 @@ export class SkillsSectionRenderer {
   }
 
   renderSpecializedSkills(profile: any, fieldMappings: FieldMapping[], section: TemplateSection, customTitle?: string): string {
+    console.log('Skills Section Renderer - Specialized Skills - Profile data:', {
+      specializedSkills: profile?.specialized_skills,
+      specializedSkillsType: typeof profile?.specialized_skills,
+      specializedSkillsArray: Array.isArray(profile?.specialized_skills),
+      specializedSkillsLength: Array.isArray(profile?.specialized_skills) ? profile.specialized_skills.length : 'not array'
+    });
+
     const title = customTitle || 'Specialized Skills';
-    const skills = profile.specialized_skills || [];
+    const skills = profile?.specialized_skills || [];
     
-    if (skills.length === 0) {
+    console.log('Skills Section Renderer - Specialized Skills processed:', {
+      skillsCount: skills.length,
+      skills: skills
+    });
+    
+    if (!Array.isArray(skills) || skills.length === 0) {
+      console.log('Skills Section Renderer - Specialized Skills - No valid skills data, returning empty');
       return '';
     }
     
     const skillsHTML = skills.map((skill: any) => {
+      console.log('Skills Section Renderer - Processing specialized skill:', skill);
       // Match the CV preview structure: skill.name and skill.proficiency
-      const skillName = skill.name || '';
-      const proficiency = skill.proficiency || 0;
+      const skillName = skill?.name || '';
+      const proficiency = skill?.proficiency || 0;
       const displayText = `${skillName} (${proficiency}/10)`;
       
       return `<span class="skill-tag" style="

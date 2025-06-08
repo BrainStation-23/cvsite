@@ -13,9 +13,26 @@ export class HTMLExporter extends BaseExporter {
     try {
       console.log('=== HTML EXPORT DEBUG START ===');
       console.log('HTML Export - Template:', template.name);
-      console.log('HTML Export - Profile:', profile?.first_name, profile?.last_name);
+      console.log('HTML Export - Profile structure:', {
+        hasProfile: !!profile,
+        profileKeys: profile ? Object.keys(profile) : [],
+        firstName: profile?.first_name,
+        lastName: profile?.last_name,
+        technicalSkills: profile?.technical_skills,
+        specializedSkills: profile?.specialized_skills,
+        technicalSkillsType: typeof profile?.technical_skills,
+        specializedSkillsType: typeof profile?.specialized_skills,
+        technicalSkillsLength: Array.isArray(profile?.technical_skills) ? profile.technical_skills.length : 'not array',
+        specializedSkillsLength: Array.isArray(profile?.specialized_skills) ? profile.specialized_skills.length : 'not array'
+      });
       console.log('HTML Export - Sections:', sections?.length || 0);
       console.log('HTML Export - Field mappings:', fieldMappings?.length || 0);
+      console.log('HTML Export - Field mappings by section:', 
+        fieldMappings?.reduce((acc, fm) => {
+          acc[fm.section_type] = (acc[fm.section_type] || 0) + 1;
+          return acc;
+        }, {} as Record<string, number>) || {}
+      );
       console.log('HTML Export - Layout config:', template.layout_config);
       
       if (!profile) {
