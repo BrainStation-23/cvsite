@@ -34,7 +34,8 @@ export class DocumentBuilder {
       profileName: `${profile.first_name} ${profile.last_name}`,
       sectionsCount: sections.length,
       orientation: template?.orientation,
-      layoutConfig: template?.layout_config
+      layoutConfig: template?.layout_config,
+      layoutType: template?.layout_config?.layoutType
     });
 
     // Configure services
@@ -50,9 +51,12 @@ export class DocumentBuilder {
     
     // Sort sections by display order
     const sortedSections = [...sections].sort((a, b) => a.display_order - b.display_order);
-    console.log('Processing sections:', sortedSections.map(s => s.section_type));
+    console.log('Processing sections:', sortedSections.map(s => ({
+      type: s.section_type,
+      placement: s.styling_config?.layout_placement || 'main'
+    })));
     
-    // Separate sections based on layout
+    // Separate sections based on layout using the improved layout processor
     const mainSections: (Paragraph | Table)[] = [];
     const sidebarSections: (Paragraph | Table)[] = [];
     
@@ -67,7 +71,8 @@ export class DocumentBuilder {
         );
         
         if (sectionElements.length > 0) {
-          const placement = this.layoutProcessor.getSectionPlacement(section.section_type);
+          // Use the updated getSectionPlacement method that reads from section configuration
+          const placement = this.layoutProcessor.getSectionPlacement(section);
           if (placement === 'sidebar') {
             sidebarSections.push(...sectionElements);
           } else {
@@ -81,7 +86,13 @@ export class DocumentBuilder {
       }
     }
     
-    // Apply layout structure
+    console.log('DOCX Export - Section distribution:', {
+      mainSections: mainSections.length,
+      sidebarSections: sidebarSections.length,
+      layoutType: template?.layout_config?.layoutType
+    });
+    
+    // Apply layout structure using the improved layout processor
     const documentChildren = this.layoutProcessor.createLayoutStructure(mainSections, sidebarSections);
     
     console.log('Total document elements:', documentChildren.length);
