@@ -66,7 +66,7 @@ export class GeneralSectionRenderer extends BaseSectionRenderer {
               new TextRun({
                 text: `${firstName || ''} ${lastName || ''}`.trim(),
                 bold: true,
-                size: this.styler.getFontSize(baseStyles, 'heading'),
+                size: this.styler.getFontSize('heading'),
                 color: this.styler.parseColor(baseStyles.primaryColor || '#1f2937')
               })
             ],
@@ -84,7 +84,7 @@ export class GeneralSectionRenderer extends BaseSectionRenderer {
             children: [
               new TextRun({
                 text: designation,
-                size: this.styler.getFontSize(baseStyles, 'subheading'),
+                size: this.styler.getFontSize('subheading'),
                 color: this.styler.parseColor(baseStyles.secondaryColor || '#6b7280')
               })
             ],
@@ -117,7 +117,7 @@ export class GeneralSectionRenderer extends BaseSectionRenderer {
           children: [
             new TextRun({
               text: contactInfo.join(' | '),
-              size: this.styler.getFontSize(baseStyles, 'base')
+              size: this.styler.getFontSize('base')
             })
           ],
           alignment: AlignmentType.CENTER,

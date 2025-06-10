@@ -100,35 +100,35 @@ export class SectionRenderer {
       // Render section content based on type with zone information
       switch (section.section_type) {
         case 'general':
-          const generalElements = await this.generalRenderer.render(profile, styles, zone);
+          const generalElements = await this.generalRenderer.render(profile, styles);
           elements.push(...generalElements);
           break;
         case 'experience':
-          const experienceElements = this.experienceRenderer.render(profile.experiences || [], styles, zone);
+          const experienceElements = this.experienceRenderer.render(profile.experiences || [], styles);
           elements.push(...experienceElements);
           break;
         case 'education':
-          const educationElements = this.educationRenderer.render(profile.education || [], styles, zone);
+          const educationElements = this.educationRenderer.render(profile.education || [], styles);
           elements.push(...educationElements);
           break;
         case 'projects':
-          const projectElements = this.projectsRenderer.render(profile.projects || [], styles, zone);
+          const projectElements = this.projectsRenderer.render(profile.projects || [], styles);
           elements.push(...projectElements);
           break;
         case 'technical_skills':
-          const techSkillsElements = this.skillsRenderer.render(profile.technical_skills || [], styles, zone);
+          const techSkillsElements = this.skillsRenderer.render(profile.technical_skills || [], styles);
           elements.push(...techSkillsElements);
           break;
         case 'specialized_skills':
-          const specSkillsElements = this.skillsRenderer.render(profile.specialized_skills || [], styles, zone);
+          const specSkillsElements = this.skillsRenderer.render(profile.specialized_skills || [], styles);
           elements.push(...specSkillsElements);
           break;
         case 'training':
-          const trainingElements = this.trainingRenderer.render(profile.trainings || [], styles, zone);
+          const trainingElements = this.trainingRenderer.render(profile.trainings || [], styles);
           elements.push(...trainingElements);
           break;
         case 'achievements':
-          const achievementElements = this.achievementsRenderer.render(profile.achievements || [], styles, zone);
+          const achievementElements = this.achievementsRenderer.render(profile.achievements || [], styles);
           elements.push(...achievementElements);
           break;
         default:

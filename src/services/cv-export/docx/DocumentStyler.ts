@@ -282,7 +282,8 @@ export class DocumentStyler {
     return Math.round(value * multiplier * 56.7); // Convert mm to twips
   }
 
-  private parseColor(color: string): string {
+  // Make this public and fix the signature
+  public parseColor(color: string): string {
     if (!color) return '000000';
     
     // Handle CSS custom properties by using fallback colors
@@ -307,7 +308,8 @@ export class DocumentStyler {
     return color;
   }
 
-  private getFontSize(type: 'heading' | 'subheading' | 'base' = 'base'): number {
+  // Make this public and fix the signature
+  public getFontSize(type: 'heading' | 'subheading' | 'base' = 'base'): number {
     const sizeMap = {
       heading: this.layoutConfig.headingSize || 16,
       subheading: this.layoutConfig.subheadingSize || 14,
