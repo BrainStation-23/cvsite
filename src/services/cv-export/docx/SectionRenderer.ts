@@ -86,53 +86,56 @@ export class SectionRenderer {
         return elements;
       }
 
+      // Get the zone for this section to apply proper styling
+      const zone = this.styler.getZoneForSection(section);
+      
       const sectionTitle = this.maskingService.getSectionTitle(section);
-      console.log(`Rendering section: ${section.section_type} with title: ${sectionTitle}`);
+      console.log(`Rendering section: ${section.section_type} with title: ${sectionTitle} in zone: ${zone}`);
 
       // Skip section title for general section (personal info goes at top without header)
       if (section.section_type !== 'general') {
-        elements.push(this.styler.createSectionTitle(sectionTitle, styles?.baseStyles));
+        elements.push(this.styler.createSectionTitle(sectionTitle, styles?.baseStyles, zone));
       }
 
-      // Render section content based on type
+      // Render section content based on type with zone information
       switch (section.section_type) {
         case 'general':
-          const generalElements = await this.generalRenderer.render(profile, styles);
+          const generalElements = await this.generalRenderer.render(profile, styles, zone);
           elements.push(...generalElements);
           break;
         case 'experience':
-          const experienceElements = this.experienceRenderer.render(profile.experiences || [], styles);
+          const experienceElements = this.experienceRenderer.render(profile.experiences || [], styles, zone);
           elements.push(...experienceElements);
           break;
         case 'education':
-          const educationElements = this.educationRenderer.render(profile.education || [], styles);
+          const educationElements = this.educationRenderer.render(profile.education || [], styles, zone);
           elements.push(...educationElements);
           break;
         case 'projects':
-          const projectElements = this.projectsRenderer.render(profile.projects || [], styles);
+          const projectElements = this.projectsRenderer.render(profile.projects || [], styles, zone);
           elements.push(...projectElements);
           break;
         case 'technical_skills':
-          const techSkillsElements = this.skillsRenderer.render(profile.technical_skills || [], styles);
+          const techSkillsElements = this.skillsRenderer.render(profile.technical_skills || [], styles, zone);
           elements.push(...techSkillsElements);
           break;
         case 'specialized_skills':
-          const specSkillsElements = this.skillsRenderer.render(profile.specialized_skills || [], styles);
+          const specSkillsElements = this.skillsRenderer.render(profile.specialized_skills || [], styles, zone);
           elements.push(...specSkillsElements);
           break;
         case 'training':
-          const trainingElements = this.trainingRenderer.render(profile.trainings || [], styles);
+          const trainingElements = this.trainingRenderer.render(profile.trainings || [], styles, zone);
           elements.push(...trainingElements);
           break;
         case 'achievements':
-          const achievementElements = this.achievementsRenderer.render(profile.achievements || [], styles);
+          const achievementElements = this.achievementsRenderer.render(profile.achievements || [], styles, zone);
           elements.push(...achievementElements);
           break;
         default:
           console.log(`Unknown section type: ${section.section_type}`);
       }
 
-      console.log(`Section ${section.section_type} rendered with ${elements.length} elements`);
+      console.log(`Section ${section.section_type} rendered with ${elements.length} elements in zone ${zone}`);
       return elements;
     } catch (error) {
       console.error(`Error rendering section ${section.section_type}:`, error);

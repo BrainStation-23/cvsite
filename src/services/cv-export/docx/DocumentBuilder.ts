@@ -38,13 +38,18 @@ export class DocumentBuilder {
       layoutType: template?.layout_config?.layoutType
     });
 
-    // Configure services
+    // Configure layout for all services
+    const layoutConfig = template?.layout_config || {};
+    this.styler.setLayoutConfig(layoutConfig);
+    this.layoutProcessor.setLayoutConfig(layoutConfig);
+    this.layoutProcessor.setStyler(this.styler);
+
+    // Configure other services
     this.maskingService.setFieldMappings(fieldMappings || []);
     this.visibilityService.setFieldMappings(fieldMappings || []);
     this.visibilityService.setSectionConfigs(sections);
-    this.layoutProcessor.setLayoutConfig(template?.layout_config || {});
     
-    // Configure section renderer
+    // Configure section renderer with all services
     this.sectionRenderer.setMaskingService(this.maskingService);
     this.sectionRenderer.setVisibilityService(this.visibilityService);
     this.sectionRenderer.setStyler(this.styler);
