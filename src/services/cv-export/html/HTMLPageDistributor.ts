@@ -29,6 +29,13 @@ export class HTMLPageDistributor {
         return acc;
       }, {} as Record<string, number>)
     );
+    console.log('HTML Page Distributor - Profile data check:', {
+      hasProfile: !!profile,
+      firstName: profile?.first_name,
+      lastName: profile?.last_name,
+      technicalSkills: profile?.technical_skills,
+      specializedSkills: profile?.specialized_skills
+    });
 
     if (!profile || sections.length === 0) {
       console.log('HTML Page Distributor - No profile or sections, returning empty page');
@@ -67,13 +74,15 @@ export class HTMLPageDistributor {
       });
     });
 
-    // Convert each page to HTML
+    // Convert each page to HTML - PASS ACTUAL PROFILE AND FIELD MAPPINGS
     const htmlPages = distributedPages.map((pageContent, index) => {
       return this.generatePageHTML(
         pageContent,
         layoutType,
         index + 1,
-        distributedPages.length
+        distributedPages.length,
+        profile,          // Pass the actual profile
+        fieldMappings     // Pass the actual field mappings
       );
     });
 
@@ -85,18 +94,22 @@ export class HTMLPageDistributor {
     pageContent: PageContent,
     layoutType: string,
     pageNumber: number,
-    totalPages: number
+    totalPages: number,
+    profile: any,          // Add profile parameter
+    fieldMappings: FieldMapping[]  // Add field mappings parameter
   ): string {
     console.log(`HTML Page Distributor - Generating HTML for page ${pageNumber}:`, {
       sectionsCount: pageContent.sections.length,
       sectionTypes: pageContent.sections.map(s => s.section_type),
-      partialSections: Object.keys(pageContent.partialSections)
+      partialSections: Object.keys(pageContent.partialSections),
+      hasProfile: !!profile,
+      hasFieldMappings: !!fieldMappings && fieldMappings.length > 0
     });
 
     const sectionsHTML = this.layoutRenderer.generateLayoutHTML(
       pageContent.sections,
-      [], // Field mappings are handled within sections
-      {}, // Profile data is embedded in sections
+      fieldMappings,     // Pass actual field mappings instead of empty array
+      profile,           // Pass actual profile instead of empty object
       layoutType,
       pageContent.partialSections
     );

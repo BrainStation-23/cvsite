@@ -1,4 +1,3 @@
-
 import { LayoutStyleFactory } from '@/components/admin/cv-templates/layout/LayoutStyleFactory';
 import { getLayoutConfiguration } from '@/components/admin/cv-templates/layout/LayoutConfigurations';
 import { HTMLSectionsGenerator } from './HTMLSectionsGenerator';
@@ -39,6 +38,14 @@ export class HTMLLayoutRenderer {
       type: s.section_type,
       placement: s.styling_config?.layout_placement || 'main'
     })));
+    console.log('HTML Layout Renderer - Profile data check:', {
+      hasProfile: !!profile,
+      firstName: profile?.first_name,
+      lastName: profile?.last_name,
+      technicalSkills: profile?.technical_skills,
+      specializedSkills: profile?.specialized_skills
+    });
+    console.log('HTML Layout Renderer - Field mappings:', fieldMappings?.length || 0);
 
     if (!sections || sections.length === 0) {
       console.log('HTML Layout Renderer - No sections to render');
@@ -88,10 +95,11 @@ export class HTMLLayoutRenderer {
       console.log(`HTML Layout Renderer - Generating column ${column.id} (zone: ${column.zone}) with ${columnSections.length} sections:`, 
         columnSections.map(s => s.section_type));
       
+      // PASS ACTUAL PROFILE AND FIELD MAPPINGS TO SECTIONS GENERATOR
       const sectionsHTML = this.sectionsGenerator.generateSectionsHTML(
         columnSections, 
-        profile, 
-        fieldMappings,
+        profile,           // Pass actual profile instead of empty object
+        fieldMappings,     // Pass actual field mappings instead of empty array
         partialSections
       );
 
