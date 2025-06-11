@@ -8,6 +8,8 @@ import { EducationTab } from './EducationTab';
 import { TrainingTab } from './training/TrainingTab';
 import { AchievementsTab } from './AchievementsTab';
 import { ProjectsTab } from './ProjectsTab';
+import { JSONImportExport } from './JSONImportExport';
+import { useProfileImport } from '@/hooks/profile/use-profile-import';
 import { Skill, Experience, Education, Training, Achievement, Project } from '@/types';
 
 interface ProfileTabsProps {
@@ -49,8 +51,8 @@ interface ProfileTabsProps {
   saveTechnicalSkill: (skill: Skill) => Promise<boolean>;
   saveSpecializedSkill: (skill: Skill) => Promise<boolean>;
   reorderTechnicalSkills: (skills: Skill[]) => Promise<boolean>;
+  reorderSpecializedSkills: (skills: Skill[]) => Promise<boolean>;
   profileId?: string;
-  // New props for general info saving
   saveGeneralInfo: (data: GeneralInfoFormData) => Promise<boolean>;
 }
 
@@ -93,11 +95,12 @@ export const ProfileTabs: React.FC<ProfileTabsProps> = ({
   saveTechnicalSkill,
   saveSpecializedSkill,
   reorderTechnicalSkills,
+  reorderSpecializedSkills,
   profileId,
   saveGeneralInfo
 }) => {
-  // Handle general info save with proper conversion
-  const handleGeneralInfoSave = async (data: GeneralInfoFormData) => {
+  // Handle general info save with proper conversion and return boolean
+  const handleGeneralInfoSave = async (data: GeneralInfoFormData): Promise<boolean> => {
     const saveData = {
       firstName: data.firstName,
       lastName: data.lastName,
@@ -105,17 +108,49 @@ export const ProfileTabs: React.FC<ProfileTabsProps> = ({
       profileImage: data.profileImage
     };
     
-    const success = await saveGeneralInfo(saveData);
-    if (!success) {
-      throw new Error('Failed to save general information');
+    try {
+      const success = await saveGeneralInfo(saveData);
+      return success;
+    } catch (error) {
+      console.error('Failed to save general information:', error);
+      return false;
     }
+  };
+
+  // Set up import handlers for JSON import
+  const { importProfile } = useProfileImport({
+    saveGeneralInfo: handleGeneralInfoSave,
+    saveTechnicalSkill,
+    saveSpecializedSkill,
+    saveExperience,
+    saveEducation,
+    saveTraining,
+    saveAchievement,
+    saveProject
+  });
+
+  // Prepare profile data for export
+  const profileData = {
+    generalInfo: {
+      firstName: form.getValues('firstName'),
+      lastName: form.getValues('lastName'),
+      biography: form.getValues('biography'),
+      profileImage: form.getValues('profileImage')
+    },
+    technicalSkills,
+    specializedSkills,
+    experiences,
+    education,
+    trainings,
+    achievements,
+    projects
   };
 
   return (
     <Tabs defaultValue="general" className="w-full h-full flex flex-col">
-      {/* Compact tabs header */}
+      {/* Updated tabs header to include JSON tab */}
       <div className="flex-shrink-0">
-        <TabsList className="grid w-full grid-cols-7 h-10 bg-gray-100 dark:bg-gray-800 rounded-md p-1">
+        <TabsList className="grid w-full grid-cols-8 h-10 bg-gray-100 dark:bg-gray-800 rounded-md p-1">
           <TabsTrigger value="general" className="text-xs py-2 px-3 data-[state=active]:bg-white dark:data-[state=active]:bg-gray-700">
             General
           </TabsTrigger>
@@ -136,6 +171,9 @@ export const ProfileTabs: React.FC<ProfileTabsProps> = ({
           </TabsTrigger>
           <TabsTrigger value="projects" className="text-xs py-2 px-3 data-[state=active]:bg-white dark:data-[state=active]:bg-gray-700">
             Projects
+          </TabsTrigger>
+          <TabsTrigger value="json" className="text-xs py-2 px-3 data-[state=active]:bg-white dark:data-[state=active]:bg-gray-700">
+            JSON
           </TabsTrigger>
         </TabsList>
       </div>
@@ -169,6 +207,7 @@ export const ProfileTabs: React.FC<ProfileTabsProps> = ({
             saveTechnicalSkill={saveTechnicalSkill}
             saveSpecializedSkill={saveSpecializedSkill}
             onReorderTechnicalSkills={reorderTechnicalSkills}
+            onReorderSpecializedSkills={reorderSpecializedSkills}
           />
         </TabsContent>
         
@@ -226,6 +265,13 @@ export const ProfileTabs: React.FC<ProfileTabsProps> = ({
             onUpdate={updateProject}
             onDelete={deleteProject}
             onReorder={reorderProjects}
+          />
+        </TabsContent>
+        
+        <TabsContent value="json" className="mt-0 h-full overflow-auto">
+          <JSONImportExport
+            profileData={profileData}
+            onImport={importProfile}
           />
         </TabsContent>
       </div>

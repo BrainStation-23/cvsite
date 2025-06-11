@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
@@ -81,12 +80,23 @@ export function useEmployeeProfileEditor(profileId: string) {
     if (!canEdit || !profileId) return false;
     
     try {
+      // Get the highest priority to add the new skill at the end
+      const { data: existingSkills } = await supabase
+        .from('technical_skills')
+        .select('priority')
+        .eq('profile_id', profileId)
+        .order('priority', { ascending: false })
+        .limit(1);
+      
+      const maxPriority = existingSkills && existingSkills.length > 0 ? existingSkills[0].priority : 0;
+      
       const { error } = await supabase
         .from('technical_skills')
         .insert({
           profile_id: profileId,
           name: skill.name,
-          proficiency: skill.proficiency
+          proficiency: skill.proficiency,
+          priority: maxPriority + 1
         });
       
       if (error) throw error;
@@ -142,12 +152,23 @@ export function useEmployeeProfileEditor(profileId: string) {
     if (!canEdit || !profileId) return false;
     
     try {
+      // Get the highest priority to add the new skill at the end
+      const { data: existingSkills } = await supabase
+        .from('specialized_skills')
+        .select('priority')
+        .eq('profile_id', profileId)
+        .order('priority', { ascending: false })
+        .limit(1);
+      
+      const maxPriority = existingSkills && existingSkills.length > 0 ? existingSkills[0].priority : 0;
+      
       const { error } = await supabase
         .from('specialized_skills')
         .insert({
           profile_id: profileId,
           name: skill.name,
-          proficiency: skill.proficiency
+          proficiency: skill.proficiency,
+          priority: maxPriority + 1
         });
       
       if (error) throw error;

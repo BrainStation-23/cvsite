@@ -18,6 +18,7 @@ interface SkillsTabProps {
   saveTechnicalSkill: (skill: Skill) => void;
   saveSpecializedSkill: (skill: Skill) => void;
   onReorderTechnicalSkills?: (reorderedSkills: Skill[]) => void;
+  onReorderSpecializedSkills?: (reorderedSkills: Skill[]) => void;
 }
 
 export const SkillsTab: React.FC<SkillsTabProps> = ({
@@ -34,7 +35,8 @@ export const SkillsTab: React.FC<SkillsTabProps> = ({
   deleteSpecializedSkill,
   saveTechnicalSkill,
   saveSpecializedSkill,
-  onReorderTechnicalSkills
+  onReorderTechnicalSkills,
+  onReorderSpecializedSkills
 }) => {
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -56,12 +58,13 @@ export const SkillsTab: React.FC<SkillsTabProps> = ({
         title="Specialized Skills"
         skills={specializedSkills}
         isEditing={isEditing}
-        isDraggable={false}
+        isDraggable={true}
         newSkill={newSpecializedSkill}
         setNewSkill={setNewSpecializedSkill}
         onAddSkill={handleAddSpecializedSkill}
         onUpdateSkill={saveSpecializedSkill}
         onDeleteSkill={deleteSpecializedSkill}
+        onReorderSkills={onReorderSpecializedSkills}
         skillType="specialized"
       />
     </div>

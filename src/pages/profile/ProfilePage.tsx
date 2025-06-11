@@ -29,6 +29,7 @@ const ProfilePage: React.FC = () => {
     deleteTechnicalSkill,
     deleteSpecializedSkill,
     reorderTechnicalSkills,
+    reorderSpecializedSkills,
     saveExperience,
     updateExperience,
     deleteExperience,
@@ -163,6 +164,7 @@ const ProfilePage: React.FC = () => {
               saveTechnicalSkill={saveTechnicalSkill}
               saveSpecializedSkill={saveSpecializedSkill}
               reorderTechnicalSkills={reorderTechnicalSkills}
+              reorderSpecializedSkills={reorderSpecializedSkills}
               saveGeneralInfo={handleUpdateProfile}
             />
           )}

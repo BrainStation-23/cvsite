@@ -32,11 +32,12 @@ export function useSkillsFetch(profileId: string) {
         })));
       }
 
-      // Fetch specialized skills
+      // Fetch specialized skills with priority ordering
       const { data: specSkillsData, error: specSkillsError } = await supabase
         .from('specialized_skills')
         .select('*')
-        .eq('profile_id', profileId);
+        .eq('profile_id', profileId)
+        .order('priority', { ascending: true });
 
       if (specSkillsError) throw specSkillsError;
 
@@ -45,7 +46,7 @@ export function useSkillsFetch(profileId: string) {
           id: skill.id,
           name: skill.name,
           proficiency: skill.proficiency,
-          priority: 0 // Specialized skills don't use priority ordering
+          priority: skill.priority || 0
         })));
       }
     } catch (error) {

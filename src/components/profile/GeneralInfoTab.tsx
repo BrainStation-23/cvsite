@@ -22,7 +22,7 @@ interface GeneralInfoTabProps {
   isEditing: boolean;
   profileId?: string;
   onImageUpdate: (imageUrl: string | null) => void;
-  onSave?: (data: GeneralInfoFormData) => Promise<void>;
+  onSave?: (data: GeneralInfoFormData) => Promise<boolean>;
   isSaving?: boolean;
 }
 
@@ -78,10 +78,12 @@ export const GeneralInfoTab: React.FC<GeneralInfoTabProps> = ({
     
     const currentValues = form.getValues();
     try {
-      await onSave(currentValues);
-      // Update initial values after successful save
-      setInitialValues(currentValues);
-      setHasChanges(false);
+      const success = await onSave(currentValues);
+      if (success) {
+        // Update initial values after successful save
+        setInitialValues(currentValues);
+        setHasChanges(false);
+      }
     } catch (error) {
       console.error('Error saving general info:', error);
     }
