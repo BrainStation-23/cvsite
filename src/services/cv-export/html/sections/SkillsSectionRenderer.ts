@@ -31,10 +31,25 @@ export class SkillsSectionRenderer {
     const skills = profile?.technical_skills || [];
     const maxSkillsCount = section?.styling_config?.max_skills_count || 10;
     
+    // Access colors from layout config
+    const accentColor = styles?.layoutConfig?.accentColor;
+    
+    // Log errors if style data is missing
+    if (!styles) {
+      console.error('SkillsSectionRenderer - Technical Skills: No styles object provided');
+      return '';
+    }
+    
+    if (!accentColor) {
+      console.error('SkillsSectionRenderer - Technical Skills: No accentColor found in styles.layoutConfig', styles);
+      return '';
+    }
+    
     console.log('Skills Section Renderer - Technical Skills processed:', {
       skillsCount: skills.length,
       maxSkillsCount: maxSkillsCount,
-      skills: skills
+      skills: skills,
+      accentColor: accentColor
     });
     
     if (!Array.isArray(skills) || skills.length === 0) {
@@ -54,7 +69,7 @@ export class SkillsSectionRenderer {
       const displayText = `${skillName} (${proficiency}/10)`;
       
       return `<span class="skill-tag" style="
-        background-color: ${styles?.accentColor || '#3b82f6'};
+        background-color: ${accentColor};
         color: white;
         padding: 2pt 6pt;
         border-radius: 3pt;
@@ -89,10 +104,25 @@ export class SkillsSectionRenderer {
     const skills = profile?.specialized_skills || [];
     const maxSkillsCount = section?.styling_config?.max_skills_count || 10;
     
+    // Access colors from layout config
+    const accentColor = styles?.layoutConfig?.accentColor;
+    
+    // Log errors if style data is missing
+    if (!styles) {
+      console.error('SkillsSectionRenderer - Specialized Skills: No styles object provided');
+      return '';
+    }
+    
+    if (!accentColor) {
+      console.error('SkillsSectionRenderer - Specialized Skills: No accentColor found in styles.layoutConfig', styles);
+      return '';
+    }
+    
     console.log('Skills Section Renderer - Specialized Skills processed:', {
       skillsCount: skills.length,
       maxSkillsCount: maxSkillsCount,
-      skills: skills
+      skills: skills,
+      accentColor: accentColor
     });
     
     if (!Array.isArray(skills) || skills.length === 0) {
@@ -112,7 +142,7 @@ export class SkillsSectionRenderer {
       const displayText = `${skillName} (${proficiency}/10)`;
       
       return `<span class="skill-tag" style="
-        background-color: ${styles?.accentColor || '#3b82f6'};
+        background-color: ${accentColor};
         color: white;
         padding: 2pt 6pt;
         border-radius: 3pt;

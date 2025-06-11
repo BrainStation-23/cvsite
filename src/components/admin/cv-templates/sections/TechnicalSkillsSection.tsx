@@ -38,6 +38,22 @@ export const TechnicalSkillsSection: React.FC<TechnicalSkillsSectionProps> = ({
   const skills = profile?.technical_skills || [];
   const maxSkillsCount = sectionConfig?.styling_config?.max_skills_count || 10;
   
+  // Access colors from layout config
+  const accentColor = styles?.layoutConfig?.accentColor;
+  const primaryColor = styles?.layoutConfig?.primaryColor;
+  const subheadingSize = styles?.layoutConfig?.subheadingSize;
+  
+  // Log errors if style data is missing
+  if (!styles) {
+    console.error('TechnicalSkillsSection: No styles object provided');
+    return null;
+  }
+  
+  if (!accentColor) {
+    console.error('TechnicalSkillsSection: No accentColor found in styles.layoutConfig', styles);
+    return null;
+  }
+  
   if (!Array.isArray(skills) || skills.length === 0) {
     return null;
   }
@@ -52,10 +68,10 @@ export const TechnicalSkillsSection: React.FC<TechnicalSkillsSectionProps> = ({
       <h2 
         className="section-title" 
         style={{ 
-          fontSize: `${styles?.subheadingSize || 14}pt`,
-          color: styles?.primaryColor || '#1f2937',
+          fontSize: `${subheadingSize || 14}pt`,
+          color: primaryColor,
           fontWeight: 'bold',
-          borderBottom: `1px solid ${styles?.accentColor || '#3b82f6'}`,
+          borderBottom: `1px solid ${accentColor}`,
           paddingBottom: '2pt',
           marginBottom: '8pt',
           marginTop: '0'
@@ -78,7 +94,7 @@ export const TechnicalSkillsSection: React.FC<TechnicalSkillsSectionProps> = ({
               key={skill.id || index}
               className="skill-tag"
               style={{
-                backgroundColor: styles?.accentColor || '#3b82f6',
+                backgroundColor: accentColor,
                 color: 'white',
                 padding: '2pt 6pt',
                 borderRadius: '3pt',
