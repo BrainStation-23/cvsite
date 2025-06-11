@@ -1,4 +1,3 @@
-
 import React, { useEffect } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { UseFormReturn } from 'react-hook-form';
@@ -52,6 +51,7 @@ interface ProfileTabsProps {
   saveTechnicalSkill: (skill: Skill) => Promise<boolean>;
   saveSpecializedSkill: (skill: Skill) => Promise<boolean>;
   reorderTechnicalSkills: (skills: Skill[]) => Promise<boolean>;
+  reorderSpecializedSkills: (skills: Skill[]) => Promise<boolean>;
   profileId?: string;
   saveGeneralInfo: (data: GeneralInfoFormData) => Promise<boolean>;
 }
@@ -95,6 +95,7 @@ export const ProfileTabs: React.FC<ProfileTabsProps> = ({
   saveTechnicalSkill,
   saveSpecializedSkill,
   reorderTechnicalSkills,
+  reorderSpecializedSkills,
   profileId,
   saveGeneralInfo
 }) => {
@@ -206,6 +207,7 @@ export const ProfileTabs: React.FC<ProfileTabsProps> = ({
             saveTechnicalSkill={saveTechnicalSkill}
             saveSpecializedSkill={saveSpecializedSkill}
             onReorderTechnicalSkills={reorderTechnicalSkills}
+            onReorderSpecializedSkills={reorderSpecializedSkills}
           />
         </TabsContent>
         

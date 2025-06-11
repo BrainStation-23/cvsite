@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
@@ -42,7 +41,7 @@ export function useSkills(profileId?: string) {
     }
   };
 
-  // Fetch specialized skills
+  // Fetch specialized skills with priority ordering
   const fetchSpecializedSkills = async () => {
     if (!targetProfileId) return;
     
@@ -50,7 +49,8 @@ export function useSkills(profileId?: string) {
       const { data, error } = await supabase
         .from('specialized_skills')
         .select('*')
-        .eq('profile_id', targetProfileId);
+        .eq('profile_id', targetProfileId)
+        .order('priority', { ascending: true });
       
       if (error) throw error;
       
@@ -59,7 +59,7 @@ export function useSkills(profileId?: string) {
           id: skill.id,
           name: skill.name,
           proficiency: skill.proficiency,
-          priority: 0 // Specialized skills don't use priority yet
+          priority: skill.priority || 0
         })));
       }
     } catch (error) {
@@ -108,6 +108,53 @@ export function useSkills(profileId?: string) {
       toast({
         title: 'Error',
         description: 'Failed to reorder technical skills',
+        variant: 'destructive'
+      });
+      return false;
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  // Reorder specialized skills
+  const reorderSpecializedSkills = async (reorderedSkills: Skill[]) => {
+    if (!targetProfileId) return false;
+    
+    try {
+      setIsSaving(true);
+      
+      // Update priorities in the database
+      const updates = reorderedSkills.map((skill, index) => ({
+        id: skill.id,
+        priority: index + 1
+      }));
+
+      for (const update of updates) {
+        const { error } = await supabase
+          .from('specialized_skills')
+          .update({ priority: update.priority })
+          .eq('id', update.id);
+        
+        if (error) throw error;
+      }
+      
+      // Update local state
+      setSpecializedSkills(reorderedSkills.map((skill, index) => ({
+        ...skill,
+        priority: index + 1
+      })));
+      
+      toast({
+        title: 'Success',
+        description: 'Specialized skills have been reordered',
+      });
+      
+      return true;
+    } catch (error) {
+      console.error('Error reordering specialized skills:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to reorder specialized skills',
         variant: 'destructive'
       });
       return false;
@@ -186,7 +233,7 @@ export function useSkills(profileId?: string) {
     }
   };
 
-  // Save specialized skill
+  // Save specialized skill with priority
   const saveSpecializedSkill = async (skill: Skill) => {
     if (!targetProfileId) return false;
     
@@ -200,25 +247,29 @@ export function useSkills(profileId?: string) {
           .update({
             name: skill.name,
             proficiency: skill.proficiency,
+            priority: skill.priority,
             updated_at: new Date().toISOString()
           })
           .eq('id', skill.id);
         
         if (error) throw error;
       } else {
-        // Create new skill
+        // Create new skill with highest priority
+        const maxPriority = Math.max(...specializedSkills.map(s => s.priority), 0);
+        
         const { data, error } = await supabase
           .from('specialized_skills')
           .insert({
             profile_id: targetProfileId,
             name: skill.name,
-            proficiency: skill.proficiency
+            proficiency: skill.proficiency,
+            priority: maxPriority + 1
           })
           .select();
         
         if (error) throw error;
         
-        skill = { ...skill, id: data[0].id };
+        skill = { ...skill, id: data[0].id, priority: maxPriority + 1 };
       }
       
       // Update local state
@@ -340,6 +391,7 @@ export function useSkills(profileId?: string) {
     saveSpecializedSkill,
     deleteTechnicalSkill,
     deleteSpecializedSkill,
-    reorderTechnicalSkills
+    reorderTechnicalSkills,
+    reorderSpecializedSkills
   };
 }
