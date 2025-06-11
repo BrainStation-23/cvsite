@@ -19,7 +19,7 @@ interface TemplateSection {
 }
 
 export class SkillsSectionRenderer {
-  renderTechnicalSkills(profile: any, fieldMappings: FieldMapping[], section: TemplateSection, customTitle?: string): string {
+  renderTechnicalSkills(profile: any, fieldMappings: FieldMapping[], section: TemplateSection, customTitle?: string, styles?: any): string {
     console.log('Skills Section Renderer - Technical Skills - Profile data:', {
       technicalSkills: profile?.technical_skills,
       technicalSkillsType: typeof profile?.technical_skills,
@@ -29,10 +29,27 @@ export class SkillsSectionRenderer {
 
     const title = customTitle || 'Technical Skills';
     const skills = profile?.technical_skills || [];
+    const maxSkillsCount = section?.styling_config?.max_skills_count || 10;
+    
+    // Access colors from layout config
+    const accentColor = styles?.layoutConfig?.accentColor;
+    
+    // Log errors if style data is missing
+    if (!styles) {
+      console.error('SkillsSectionRenderer - Technical Skills: No styles object provided');
+      return '';
+    }
+    
+    if (!accentColor) {
+      console.error('SkillsSectionRenderer - Technical Skills: No accentColor found in styles.layoutConfig', styles);
+      return '';
+    }
     
     console.log('Skills Section Renderer - Technical Skills processed:', {
       skillsCount: skills.length,
-      skills: skills
+      maxSkillsCount: maxSkillsCount,
+      skills: skills,
+      accentColor: accentColor
     });
     
     if (!Array.isArray(skills) || skills.length === 0) {
@@ -40,15 +57,19 @@ export class SkillsSectionRenderer {
       return '';
     }
     
-    const skillsHTML = skills.map((skill: any) => {
+    // Sort by priority and limit to max count
+    const limitedSkills = skills
+      .sort((a: any, b: any) => (a.priority || 0) - (b.priority || 0))
+      .slice(0, maxSkillsCount);
+
+    const skillsHTML = limitedSkills.map((skill: any) => {
       console.log('Skills Section Renderer - Processing technical skill:', skill);
-      // Match the CV preview structure: skill.name and skill.proficiency
       const skillName = skill?.name || '';
       const proficiency = skill?.proficiency || 0;
       const displayText = `${skillName} (${proficiency}/10)`;
       
       return `<span class="skill-tag" style="
-        background-color: #3b82f6;
+        background-color: ${accentColor};
         color: white;
         padding: 2pt 6pt;
         border-radius: 3pt;
@@ -71,7 +92,7 @@ export class SkillsSectionRenderer {
     </div>`;
   }
 
-  renderSpecializedSkills(profile: any, fieldMappings: FieldMapping[], section: TemplateSection, customTitle?: string): string {
+  renderSpecializedSkills(profile: any, fieldMappings: FieldMapping[], section: TemplateSection, customTitle?: string, styles?: any): string {
     console.log('Skills Section Renderer - Specialized Skills - Profile data:', {
       specializedSkills: profile?.specialized_skills,
       specializedSkillsType: typeof profile?.specialized_skills,
@@ -81,10 +102,27 @@ export class SkillsSectionRenderer {
 
     const title = customTitle || 'Specialized Skills';
     const skills = profile?.specialized_skills || [];
+    const maxSkillsCount = section?.styling_config?.max_skills_count || 10;
+    
+    // Access colors from layout config
+    const accentColor = styles?.layoutConfig?.accentColor;
+    
+    // Log errors if style data is missing
+    if (!styles) {
+      console.error('SkillsSectionRenderer - Specialized Skills: No styles object provided');
+      return '';
+    }
+    
+    if (!accentColor) {
+      console.error('SkillsSectionRenderer - Specialized Skills: No accentColor found in styles.layoutConfig', styles);
+      return '';
+    }
     
     console.log('Skills Section Renderer - Specialized Skills processed:', {
       skillsCount: skills.length,
-      skills: skills
+      maxSkillsCount: maxSkillsCount,
+      skills: skills,
+      accentColor: accentColor
     });
     
     if (!Array.isArray(skills) || skills.length === 0) {
@@ -92,15 +130,19 @@ export class SkillsSectionRenderer {
       return '';
     }
     
-    const skillsHTML = skills.map((skill: any) => {
+    // Sort by priority and limit to max count
+    const limitedSkills = skills
+      .sort((a: any, b: any) => (a.priority || 0) - (b.priority || 0))
+      .slice(0, maxSkillsCount);
+
+    const skillsHTML = limitedSkills.map((skill: any) => {
       console.log('Skills Section Renderer - Processing specialized skill:', skill);
-      // Match the CV preview structure: skill.name and skill.proficiency
       const skillName = skill?.name || '';
       const proficiency = skill?.proficiency || 0;
       const displayText = `${skillName} (${proficiency}/10)`;
       
       return `<span class="skill-tag" style="
-        background-color: #3b82f6;
+        background-color: ${accentColor};
         color: white;
         padding: 2pt 6pt;
         border-radius: 3pt;

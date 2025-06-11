@@ -27,6 +27,7 @@ interface SectionConfig {
   styling_config: {
     display_style?: string;
     projects_to_view?: number;
+    max_skills_count?: number;
     fields?: FieldConfig[];
   };
 }
@@ -162,9 +163,9 @@ const SectionItem: React.FC<SectionItemProps> = ({
           <CollapsibleContent>
             <div className="space-y-3 pt-2 border-t">
               <SectionControls
-                displayStyle={section.styling_config.display_style || 'default'}
+                maxSkillsCount={section.styling_config.max_skills_count}
                 projectsToView={section.styling_config.projects_to_view}
-                onDisplayStyleChange={(value) => updateSectionStyling({ display_style: value })}
+                onMaxSkillsCountChange={(value) => updateSectionStyling({ max_skills_count: value })}
                 onProjectsToViewChange={(value) => updateSectionStyling({ projects_to_view: value })}
                 sectionType={section.section_type}
               />
