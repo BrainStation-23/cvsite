@@ -6,7 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useToast } from '@/hooks/use-toast';
-import { Download, Upload, FileJson, Bot, FileText } from 'lucide-react';
+import { Download, Upload, FileJson, Bot, FileText, Copy, ExternalLink, Info } from 'lucide-react';
 import { ProfileJSONService, ProfileJSONData } from '@/services/profile/ProfileJSONService';
 
 interface JSONImportExportProps {
@@ -123,6 +123,31 @@ export const JSONImportExport: React.FC<JSONImportExportProps> = ({
     });
   };
 
+  const handleCopyPrompt = async () => {
+    try {
+      const prompt = ProfileJSONService.generateGeminiPrompt();
+      await navigator.clipboard.writeText(prompt);
+      toast({
+        title: 'Success',
+        description: 'Prompt copied to clipboard',
+      });
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: 'Failed to copy prompt to clipboard',
+        variant: 'destructive'
+      });
+    }
+  };
+
+  const handleOpenGemini = () => {
+    window.open('https://gemini.google.com/', '_blank');
+  };
+
+  const handleOpenLinkedIn = () => {
+    window.open('https://www.linkedin.com/in/me/', '_blank');
+  };
+
   return (
     <div className="space-y-6">
       {/* Export Section */}
@@ -201,23 +226,75 @@ export const JSONImportExport: React.FC<JSONImportExportProps> = ({
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <Alert>
-            <FileText className="h-4 w-4" />
-            <AlertDescription>
-              <strong>How to use:</strong>
-              <ol className="list-decimal list-inside mt-2 space-y-1">
-                <li>Download the Gemini prompt below</li>
-                <li>Export your LinkedIn profile as PDF</li>
-                <li>Use Gemini AI with the prompt and your LinkedIn PDF</li>
-                <li>Copy the generated JSON and import it above</li>
-              </ol>
+          {/* Detailed Instructions */}
+          <Alert className="border-blue-200 bg-blue-50 dark:bg-blue-950 dark:border-blue-800">
+            <Info className="h-4 w-4 text-blue-600" />
+            <AlertDescription className="text-blue-800 dark:text-blue-200">
+              <div className="space-y-3">
+                <div className="font-semibold text-lg">📋 Step-by-Step Instructions:</div>
+                
+                <div className="space-y-2">
+                  <div className="font-medium">1. Export your LinkedIn profile as PDF:</div>
+                  <div className="ml-4 space-y-1 text-sm">
+                    <div>• Click the "Go to LinkedIn Profile" button below</div>
+                    <div>• On your LinkedIn profile page, look for the "More" button (three dots)</div>
+                    <div>• Click "More" → "Save to PDF"</div>
+                    <div>• Wait for the PDF to download to your computer</div>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <div className="font-medium">2. Get the Gemini AI prompt:</div>
+                  <div className="ml-4 space-y-1 text-sm">
+                    <div>• Copy the prompt using the "Copy Prompt" button below</div>
+                    <div>• Or download it as a text file for reference</div>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <div className="font-medium">3. Use Gemini AI:</div>
+                  <div className="ml-4 space-y-1 text-sm">
+                    <div>• Click "Open Gemini AI" button below</div>
+                    <div>• Paste the prompt into Gemini</div>
+                    <div>• Upload your LinkedIn PDF file</div>
+                    <div>• Wait for Gemini to generate the JSON response</div>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <div className="font-medium">4. Import the generated data:</div>
+                  <div className="ml-4 space-y-1 text-sm">
+                    <div>• Copy the JSON response from Gemini</div>
+                    <div>• Paste it in the "Import Profile" section above</div>
+                    <div>• Click "Import Profile Data" to update your profile</div>
+                  </div>
+                </div>
+              </div>
             </AlertDescription>
           </Alert>
+
+          {/* Action Buttons */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+            <Button onClick={handleOpenLinkedIn} variant="outline" className="flex items-center gap-2">
+              <ExternalLink className="h-4 w-4" />
+              Go to LinkedIn Profile
+            </Button>
+            
+            <Button onClick={handleCopyPrompt} variant="outline" className="flex items-center gap-2">
+              <Copy className="h-4 w-4" />
+              Copy Prompt
+            </Button>
+            
+            <Button onClick={handleOpenGemini} variant="outline" className="flex items-center gap-2">
+              <Bot className="h-4 w-4" />
+              Open Gemini AI
+            </Button>
+          </div>
 
           <div className="flex gap-2">
             <Button onClick={handleDownloadPrompt} variant="outline" className="flex-1">
               <FileText className="h-4 w-4 mr-2" />
-              Download Gemini Prompt
+              Download Prompt File
             </Button>
             <Button 
               onClick={() => setShowPrompt(!showPrompt)} 
