@@ -1,329 +1,232 @@
 import { HTMLFieldProcessor } from './HTMLFieldProcessor';
+import { GeneralSectionRenderer } from './sections/GeneralSectionRenderer';
+import { ExperienceSectionRenderer } from './sections/ExperienceSectionRenderer';
+import { EducationSectionRenderer } from './sections/EducationSectionRenderer';
+import { SkillsSectionRenderer } from './sections/SkillsSectionRenderer';
+import { ProjectsSectionRenderer } from './sections/ProjectsSectionRenderer';
+import { TrainingSectionRenderer } from './sections/TrainingSectionRenderer';
+import { AchievementsSectionRenderer } from './sections/AchievementsSectionRenderer';
+
+interface TemplateSection {
+  id: string;
+  section_type: string;
+  display_order: number;
+  is_required: boolean;
+  field_mapping: Record<string, any>;
+  styling_config: Record<string, any>;
+}
+
+interface FieldMapping {
+  original_field_name: string;
+  display_name: string;
+  is_masked: boolean;
+  mask_value?: string;
+  field_order: number;
+  visibility_rules: Record<string, any>;
+  section_type: string;
+}
 
 export class HTMLSectionsGenerator {
   private fieldProcessor = new HTMLFieldProcessor();
+  private generalRenderer = new GeneralSectionRenderer(this.fieldProcessor);
+  private experienceRenderer = new ExperienceSectionRenderer();
+  private educationRenderer = new EducationSectionRenderer();
+  private skillsRenderer = new SkillsSectionRenderer();
+  private projectsRenderer = new ProjectsSectionRenderer();
+  private trainingRenderer = new TrainingSectionRenderer();
+  private achievementsRenderer = new AchievementsSectionRenderer();
 
-  generateSectionsHTML(sections: any[], profile: any, fieldMappings: any[]): string {
+  generateSectionsHTML(
+    sections: TemplateSection[], 
+    profile: any, 
+    fieldMappings: FieldMapping[],
+    partialSections: any = {}
+  ): string {
+    console.log('=== HTML SECTIONS GENERATOR DEBUG START ===');
+    console.log('HTML Sections Generator - Input sections:', sections.length);
+    console.log('HTML Sections Generator - Sections details:', sections.map(s => ({
+      id: s.id,
+      type: s.section_type,
+      order: s.display_order
+    })));
+    console.log('HTML Sections Generator - Field mappings:', fieldMappings.length);
+    console.log('HTML Sections Generator - Partial sections:', Object.keys(partialSections));
+    console.log('HTML Sections Generator - Profile data structure check:', {
+      hasProfile: !!profile,
+      profileKeys: profile ? Object.keys(profile) : [],
+      // General section fields (direct on profile)
+      firstName: profile?.first_name,
+      lastName: profile?.last_name,
+      email: profile?.email,
+      phone: profile?.phone,
+      location: profile?.location,
+      designation: profile?.designation,
+      biography: profile?.biography,
+      profileImage: profile?.profile_image,
+      // Skills sections (nested arrays)
+      technicalSkills: profile?.technical_skills,
+      specializedSkills: profile?.specialized_skills,
+      technicalSkillsArray: Array.isArray(profile?.technical_skills),
+      specializedSkillsArray: Array.isArray(profile?.specialized_skills),
+      // Other sections (nested arrays)
+      experiences: profile?.experiences,
+      education: profile?.education,
+      projects: profile?.projects,
+      trainings: profile?.trainings,
+      achievements: profile?.achievements
+    });
+
     if (!sections || sections.length === 0) {
-      return '<div class="no-sections">No sections configured</div>';
+      console.log('HTML Sections Generator - No sections to generate');
+      return '';
     }
 
     // Sort sections by display order
     const sortedSections = [...sections].sort((a, b) => a.display_order - b.display_order);
+    console.log('HTML Sections Generator - Sorted sections:', sortedSections.map(s => s.section_type));
     
-    return sortedSections.map(section => {
-      console.log('=== SECTIONS GENERATION DEBUG ===');
-      
-      switch (section.section_type) {
-        case 'page_break':
-          return '<div class="page-break"></div>';
-        case 'experience':
-          return this.generateExperienceSection(profile, fieldMappings);
-        case 'education':
-          return this.generateEducationSection(profile, fieldMappings);
-        case 'technical_skills':
-          return this.generateTechnicalSkillsSection(profile, fieldMappings);
-        case 'specialized_skills':
-          return this.generateSpecializedSkillsSection(profile, fieldMappings);
-        case 'projects':
-          return this.generateProjectsSection(profile, fieldMappings, section);
-        case 'achievements':
-          return this.generateAchievementsSection(profile, fieldMappings);
-        case 'trainings':
-          return this.generateTrainingsSection(profile, fieldMappings);
-        default:
-          console.log(`Unknown section type: ${section.section_type}`);
-          return '';
-      }
-    }).join('');
+    const renderedSections = sortedSections.map(section => {
+      console.log(`HTML Sections Generator - Rendering section: ${section.section_type} (id: ${section.id})`);
+      const html = this.renderSection(section, profile, fieldMappings, partialSections);
+      console.log(`HTML Sections Generator - Section ${section.section_type} rendered, length:`, html.length);
+      return html;
+    }).filter(html => html.trim().length > 0);
+
+    console.log('HTML Sections Generator - Final rendered sections count:', renderedSections.length);
+    console.log('=== HTML SECTIONS GENERATOR DEBUG END ===');
+    
+    return renderedSections.join('\n');
   }
 
-  private generateExperienceSection(profile: any, fieldMappings: any[]): string {
-    console.log('=== EXPERIENCE SECTION DEBUG ===');
+  private renderSection(
+    section: TemplateSection, 
+    profile: any, 
+    fieldMappings: FieldMapping[],
+    partialSections: any
+  ): string {
+    console.log(`HTML Sections Generator - Processing section: ${section.section_type}`);
     
-    const experiences = profile?.experiences || [];
-    if (experiences.length === 0) return '';
+    // Handle page break sections
+    if (section.section_type === 'page_break') {
+      console.log('HTML Sections Generator - Rendering page break');
+      return '<div class="page-break"></div>';
+    }
 
-    const experienceItems = experiences.map((exp: any) => {
-      console.log('Processing experience:', exp);
-      
-      const designation = this.fieldProcessor.processFieldWithDebug(exp.designation, 'designation', 'experience', fieldMappings);
-      const companyName = this.fieldProcessor.processFieldWithDebug(exp.company_name, 'company_name', 'experience', fieldMappings);
-      const description = this.fieldProcessor.processFieldWithDebug(exp.description, 'description', 'experience', fieldMappings);
-      
-      const dateRange = this.fieldProcessor.formatDateRange(exp.start_date, exp.end_date, exp.is_current);
-      
-      console.log('Experience processed fields:', {
-        designation, companyName, description, dateRange
+    // Get field mappings for this section
+    const sectionFieldMappings = fieldMappings.filter(
+      mapping => mapping.section_type === section.section_type
+    );
+    console.log(`HTML Sections Generator - Found ${sectionFieldMappings.length} field mappings for ${section.section_type}`);
+
+    // Check if this section has partial data for this page
+    const partialData = partialSections[section.id];
+    if (partialData) {
+      console.log(`HTML Sections Generator - Using partial data for ${section.section_type}:`, partialData);
+    }
+    
+    // Create modified profile with partial data if applicable - only for non-general sections
+    let profileForSection = profile;
+    if (partialData && section.section_type !== 'general') {
+      const sectionDataKey = this.getSectionDataKey(section.section_type);
+      profileForSection = {
+        ...profile,
+        [sectionDataKey]: partialData.items
+      };
+    }
+
+    // Check section data availability and log appropriately
+    if (section.section_type === 'general') {
+      // For general section, check if required general info fields exist directly on profile
+      console.log('HTML Sections Generator - General section - checking direct profile fields');
+      console.log('HTML Sections Generator - General section profile data:', {
+        firstName: profile?.first_name,
+        lastName: profile?.last_name,
+        email: profile?.email,
+        phone: profile?.phone,
+        location: profile?.location,
+        designation: profile?.designation,
+        biography: profile?.biography,
+        profileImage: profile?.profile_image
       });
-      
-      // Only render if both designation and company are visible
-      if (designation === null && companyName === null) {
-        console.log('Skipping experience item - both designation and company are hidden');
+    } else {
+      // For other sections, check the nested data
+      const sectionDataKey = this.getSectionDataKey(section.section_type);
+      const sectionData = profileForSection[sectionDataKey];
+      console.log(`HTML Sections Generator - Section ${section.section_type} data check:`, {
+        dataKey: sectionDataKey,
+        hasData: !!sectionData,
+        dataLength: Array.isArray(sectionData) ? sectionData.length : 'not array',
+        dataType: typeof sectionData,
+        actualData: sectionData
+      });
+    }
+
+    // Generate section HTML based on type
+    let html = '';
+    switch (section.section_type) {
+      case 'general':
+        console.log('HTML Sections Generator - Rendering general section');
+        html = this.generalRenderer.render(profileForSection, sectionFieldMappings, section, partialData?.title);
+        break;
+      case 'experience':
+        console.log('HTML Sections Generator - Rendering experience section');
+        html = this.experienceRenderer.render(profileForSection, sectionFieldMappings, section, partialData?.title);
+        break;
+      case 'education':
+        console.log('HTML Sections Generator - Rendering education section');
+        html = this.educationRenderer.render(profileForSection, sectionFieldMappings, section, partialData?.title);
+        break;
+      case 'technical_skills':
+        console.log('HTML Sections Generator - Rendering technical skills section');
+        html = this.skillsRenderer.renderTechnicalSkills(profileForSection, sectionFieldMappings, section, partialData?.title);
+        break;
+      case 'specialized_skills':
+        console.log('HTML Sections Generator - Rendering specialized skills section');
+        html = this.skillsRenderer.renderSpecializedSkills(profileForSection, sectionFieldMappings, section, partialData?.title);
+        break;
+      case 'projects':
+        console.log('HTML Sections Generator - Rendering projects section');
+        html = this.projectsRenderer.render(profileForSection, sectionFieldMappings, section, partialData?.title);
+        break;
+      case 'training':
+        console.log('HTML Sections Generator - Rendering training section');
+        html = this.trainingRenderer.render(profileForSection, sectionFieldMappings, section, partialData?.title);
+        break;
+      case 'achievements':
+        console.log('HTML Sections Generator - Rendering achievements section');
+        html = this.achievementsRenderer.render(profileForSection, sectionFieldMappings, section, partialData?.title);
+        break;
+      default:
+        console.warn(`HTML Sections Generator - Unknown section type: ${section.section_type}`);
+        html = `<div class="unknown-section">Unknown section type: ${section.section_type}</div>`;
+    }
+
+    console.log(`HTML Sections Generator - Rendered ${section.section_type}, HTML length:`, html.length);
+    return html;
+  }
+
+  private getSectionDataKey(sectionType: string): string {
+    switch (sectionType) {
+      case 'general':
+        // General section data is directly on the profile object (first_name, last_name, etc.)
+        // We return empty string to indicate no nested key is needed
         return '';
-      }
-      
-      return `
-        <div class="item">
-          <div class="item-header">
-            <div>
-              ${designation !== null ? `<div class="item-title">${designation || 'Position'}</div>` : ''}
-              ${companyName !== null ? `<div class="item-subtitle">${companyName || 'Company'}</div>` : ''}
-            </div>
-            <div class="item-date">${dateRange}</div>
-          </div>
-          ${description !== null ? `<div class="item-description">${this.fieldProcessor.processRichText(description)}</div>` : ''}
-        </div>
-      `;
-    }).join('');
-
-    return experienceItems ? `
-      <div class="section">
-        <div class="section-title">Work Experience</div>
-        <div class="section-content">
-          ${experienceItems}
-        </div>
-      </div>
-    ` : '';
-  }
-
-  private generateEducationSection(profile: any, fieldMappings: any[]): string {
-    console.log('=== EDUCATION SECTION DEBUG ===');
-    
-    const education = profile?.education || [];
-    if (education.length === 0) return '';
-
-    const educationItems = education.map((edu: any) => {
-      console.log('Processing education:', edu);
-      
-      const degree = this.fieldProcessor.processFieldWithDebug(edu.degree, 'degree', 'education', fieldMappings);
-      const institution = this.fieldProcessor.processFieldWithDebug(edu.institution, 'institution', 'education', fieldMappings);
-      const university = this.fieldProcessor.processFieldWithDebug(edu.university, 'university', 'education', fieldMappings);
-      const department = this.fieldProcessor.processFieldWithDebug(edu.department, 'department', 'education', fieldMappings);
-      const gpa = this.fieldProcessor.processFieldWithDebug(edu.gpa, 'gpa', 'education', fieldMappings);
-      const description = this.fieldProcessor.processFieldWithDebug(edu.description, 'description', 'education', fieldMappings);
-      
-      const dateRange = this.fieldProcessor.formatDateRange(edu.start_date, edu.end_date, edu.is_current);
-      
-      // Use institution name or university name
-      const schoolName = institution || university || 'Institution';
-      
-      console.log('Education processed fields:', {
-        degree, institution, university, department, gpa, description, schoolName, dateRange
-      });
-      
-      return `
-        <div class="item">
-          <div class="item-header">
-            <div>
-              ${degree !== null ? `<div class="item-title">${degree || 'Degree'}</div>` : ''}
-              ${(institution !== null || university !== null) ? `<div class="item-subtitle">${schoolName}</div>` : ''}
-              ${department !== null ? `<div class="item-subtitle" style="font-size: 0.9em; margin-top: 2pt;">${department}</div>` : ''}
-            </div>
-            <div class="item-date">${dateRange}</div>
-          </div>
-          <div class="education-details">
-            ${gpa !== null ? `<div class="gpa-info">GPA: ${gpa}</div>` : ''}
-            ${description !== null ? `<div class="item-description">${this.fieldProcessor.processRichText(description)}</div>` : ''}
-          </div>
-        </div>
-      `;
-    }).join('');
-
-    return `
-      <div class="section">
-        <div class="section-title">Education</div>
-        <div class="section-content">
-          ${educationItems}
-        </div>
-      </div>
-    `;
-  }
-
-  private generateTechnicalSkillsSection(profile: any, fieldMappings: any[]): string {
-    console.log('=== TECHNICAL SKILLS SECTION DEBUG ===');
-    
-    const skills = profile?.technical_skills || [];
-    if (skills.length === 0) return '';
-
-    const skillTags = skills.map((skill: any) => {
-      const skillName = this.fieldProcessor.processFieldWithDebug(skill.name, 'name', 'technical_skills', fieldMappings);
-      return skillName !== null ? `<span class="skill-tag">${skillName}</span>` : '';
-    }).filter(Boolean).join('');
-
-    return skillTags ? `
-      <div class="section">
-        <div class="section-title">Technical Skills</div>
-        <div class="section-content">
-          <div class="skills-list">
-            ${skillTags}
-          </div>
-        </div>
-      </div>
-    ` : '';
-  }
-
-  private generateSpecializedSkillsSection(profile: any, fieldMappings: any[]): string {
-    console.log('=== SPECIALIZED SKILLS SECTION DEBUG ===');
-    
-    const skills = profile?.specialized_skills || [];
-    if (skills.length === 0) return '';
-
-    const skillTags = skills.map((skill: any) => {
-      const skillName = this.fieldProcessor.processFieldWithDebug(skill.name, 'name', 'specialized_skills', fieldMappings);
-      return skillName !== null ? `<span class="skill-tag">${skillName}</span>` : '';
-    }).filter(Boolean).join('');
-
-    return skillTags ? `
-      <div class="section">
-        <div class="section-title">Specialized Skills</div>
-        <div class="section-content">
-          <div class="skills-list">
-            ${skillTags}
-          </div>
-        </div>
-      </div>
-    ` : '';
-  }
-
-  private generateProjectsSection(profile: any, fieldMappings: any[], section?: any): string {
-    console.log('=== PROJECTS SECTION DEBUG ===');
-    
-    const projects = profile?.projects || [];
-    if (projects.length === 0) return '';
-
-    // Get the maximum number of projects from section configuration - use new property name
-    const maxProjects = section?.styling_config?.projects_to_view || section?.styling_config?.items_per_column || projects.length;
-    
-    // Sort projects by display_order, then by start_date as fallback
-    const sortedProjects = [...projects].sort((a, b) => {
-      if (a.display_order !== undefined && b.display_order !== undefined) {
-        return a.display_order - b.display_order;
-      }
-      return new Date(b.start_date).getTime() - new Date(a.start_date).getTime();
-    });
-
-    // Limit the number of projects to show
-    const projectsToShow = sortedProjects.slice(0, maxProjects);
-    
-    console.log(`Projects section - Total: ${projects.length}, Max to show: ${maxProjects}, Showing: ${projectsToShow.length}`);
-
-    const projectItems = projectsToShow.map((project: any) => {
-      console.log('Processing project:', project);
-      
-      const name = this.fieldProcessor.processFieldWithDebug(project.name, 'name', 'projects', fieldMappings);
-      const role = this.fieldProcessor.processFieldWithDebug(project.role, 'role', 'projects', fieldMappings);
-      const description = this.fieldProcessor.processFieldWithDebug(project.description, 'description', 'projects', fieldMappings);
-      const url = this.fieldProcessor.processFieldWithDebug(project.url, 'url', 'projects', fieldMappings);
-      
-      const dateRange = this.fieldProcessor.formatDateRange(project.start_date, project.end_date, project.is_current);
-      const techTags = project.technologies_used?.map((tech: string) => 
-        `<span class="tech-tag">${tech}</span>`
-      ).join('') || '';
-
-      console.log('Project processed fields:', {
-        name, role, description, url, dateRange, techTags
-      });
-
-      return `
-        <div class="item">
-          <div class="item-header">
-            <div>
-              ${name !== null ? `<div class="item-title">${name || 'Project Name'}</div>` : ''}
-              ${role !== null ? `<div class="item-subtitle">${role}</div>` : ''}
-            </div>
-            <div class="item-date">${dateRange}</div>
-          </div>
-          ${description !== null ? `<div class="item-description">${this.fieldProcessor.processRichText(description)}</div>` : ''}
-          ${url !== null && url ? `<div class="project-url"><strong>Project URL:</strong> <a href="${url}" target="_blank" class="project-url">${url}</a></div>` : ''}
-          ${techTags ? `
-            <div class="technologies">
-              <div class="technologies-label">Technologies:</div>
-              <div class="tech-list">${techTags}</div>
-            </div>
-          ` : ''}
-        </div>
-      `;
-    }).join('');
-
-    return `
-      <div class="section">
-        <div class="section-title">Projects</div>
-        <div class="section-content">
-          ${projectItems}
-        </div>
-      </div>
-    `;
-  }
-
-  private generateAchievementsSection(profile: any, fieldMappings: any[]): string {
-    console.log('=== ACHIEVEMENTS SECTION DEBUG ===');
-    
-    const achievements = profile?.achievements || [];
-    if (achievements.length === 0) return '';
-
-    const achievementItems = achievements.map((achievement: any) => {
-      const title = this.fieldProcessor.processFieldWithDebug(achievement.title, 'title', 'achievements', fieldMappings);
-      const description = this.fieldProcessor.processFieldWithDebug(achievement.description, 'description', 'achievements', fieldMappings);
-      const date = achievement.date ? new Date(achievement.date).toLocaleDateString('en-US', { 
-        month: 'short', 
-        year: 'numeric' 
-      }) : '';
-
-      return `
-        <div class="item">
-          <div class="item-header">
-            ${title !== null ? `<div class="item-title">${title || 'Achievement'}</div>` : ''}
-            ${date ? `<div class="item-date">${date}</div>` : ''}
-          </div>
-          ${description !== null ? `<div class="item-description">${this.fieldProcessor.processRichText(description)}</div>` : ''}
-        </div>
-      `;
-    }).join('');
-
-    return `
-      <div class="section">
-        <div class="section-title">Achievements</div>
-        <div class="section-content">
-          ${achievementItems}
-        </div>
-      </div>
-    `;
-  }
-
-  private generateTrainingsSection(profile: any, fieldMappings: any[]): string {
-    console.log('=== TRAININGS SECTION DEBUG ===');
-    
-    const trainings = profile?.trainings || [];
-    if (trainings.length === 0) return '';
-
-    const trainingItems = trainings.map((training: any) => {
-      const title = this.fieldProcessor.processFieldWithDebug(training.title, 'title', 'trainings', fieldMappings);
-      const provider = this.fieldProcessor.processFieldWithDebug(training.provider, 'provider', 'trainings', fieldMappings);
-      const description = this.fieldProcessor.processFieldWithDebug(training.description, 'description', 'trainings', fieldMappings);
-      const dateRange = this.fieldProcessor.formatDateRange(training.start_date, training.end_date, training.is_current);
-
-      return `
-        <div class="item">
-          <div class="item-header">
-            <div>
-              ${title !== null ? `<div class="item-title">${title || 'Training'}</div>` : ''}
-              ${provider !== null ? `<div class="item-subtitle">${provider}</div>` : ''}
-            </div>
-            <div class="item-date">${dateRange}</div>
-          </div>
-          ${description !== null ? `<div class="item-description">${this.fieldProcessor.processRichText(description)}</div>` : ''}
-        </div>
-      `;
-    }).join('');
-
-    return `
-      <div class="section">
-        <div class="section-title">Training & Certifications</div>
-        <div class="section-content">
-          ${trainingItems}
-        </div>
-      </div>
-    `;
+      case 'experience':
+        return 'experiences';
+      case 'education':
+        return 'education';
+      case 'projects':
+        return 'projects';
+      case 'technical_skills':
+        return 'technical_skills';
+      case 'specialized_skills':
+        return 'specialized_skills';
+      case 'training':
+        return 'trainings';
+      case 'achievements':
+        return 'achievements';
+      default:
+        return sectionType;
+    }
   }
 }

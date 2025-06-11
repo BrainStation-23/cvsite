@@ -1,4 +1,5 @@
 
+
 import React from 'react';
 import { ProjectItem } from './projects/ProjectItem';
 import { useSectionFieldConfig } from '@/hooks/use-section-field-config';
@@ -88,17 +89,26 @@ export const ProjectsSection: React.FC<ProjectsSectionProps> = ({
     <div style={styles.sectionStyles}>
       <h2 style={styles.sectionTitleStyles}>{customTitle || sectionTitle || 'Projects'}</h2>
       {projectsToShow.map((project: any, index: number) => (
-        <ProjectItem
+        <div 
           key={index}
-          project={project}
-          index={index}
-          orderedFields={orderedFields}
-          fieldMappings={fieldMappings}
-          styles={styles}
-          isFieldEnabled={isFieldEnabled}
-          applyMasking={applyMasking}
-        />
+          style={{
+            pageBreakInside: 'auto', // Allow breaking inside items if needed
+            breakInside: 'auto', // CSS Grid/Flexbox version
+            marginBottom: '16px'
+          }}
+        >
+          <ProjectItem
+            project={project}
+            index={index}
+            orderedFields={orderedFields}
+            fieldMappings={fieldMappings}
+            styles={styles}
+            isFieldEnabled={isFieldEnabled}
+            applyMasking={applyMasking}
+          />
+        </div>
       ))}
     </div>
   );
 };
+

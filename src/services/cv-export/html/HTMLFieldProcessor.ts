@@ -1,5 +1,44 @@
-
 export class HTMLFieldProcessor {
+  processField(fieldName: string, value: any, fieldMappings: any[], sectionType: string): string {
+    const processedValue = this.processFieldWithDebug(value, fieldName, sectionType, fieldMappings);
+    
+    if (processedValue === null || processedValue === undefined) {
+      return ''; // Field is disabled or has no value
+    }
+    
+    // Format the field as HTML
+    const displayName = this.getDisplayName(fieldName, fieldMappings, sectionType);
+    if (!displayName) {
+      return ''; // Field has no display name, likely disabled
+    }
+    
+    return `<div class="field-item">
+      <span class="field-label">${displayName}:</span>
+      <span class="field-value">${this.escapeHtml(String(processedValue))}</span>
+    </div>`;
+  }
+
+  private getDisplayName(fieldName: string, fieldMappings: any[], sectionType: string): string {
+    const mapping = fieldMappings.find(m => 
+      m.original_field_name === fieldName && 
+      m.section_type === sectionType
+    );
+    
+    return mapping?.display_name || this.formatFieldName(fieldName);
+  }
+
+  private formatFieldName(fieldName: string): string {
+    return fieldName
+      .replace(/_/g, ' ')
+      .replace(/\b\w/g, l => l.toUpperCase());
+  }
+
+  private escapeHtml(text: string): string {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+  }
+
   processFieldWithDebug(value: any, fieldName: string, sectionType: string, fieldMappings: any[]): any {
     console.log(`\n--- Processing field: ${fieldName} in section: ${sectionType} ---`);
     console.log(`Original value:`, value);

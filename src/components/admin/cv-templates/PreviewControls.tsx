@@ -7,7 +7,7 @@ import { Download, Eye, RefreshCw } from 'lucide-react';
 import { CVTemplate } from '@/types/cv-templates';
 import { EmployeeProfile } from '@/hooks/types/employee-profiles';
 import { EmployeeCombobox } from './EmployeeCombobox';
-import ExportDropdown from './ExportDropdown';
+import ExportButton from './ExportButton';
 import { useTemplateConfiguration } from '@/hooks/use-template-configuration';
 import { useEmployeeData } from '@/hooks/use-employee-data';
 
@@ -65,7 +65,7 @@ const PreviewControls: React.FC<PreviewControlsProps> = ({
           </div>
           
           <div className="flex gap-2">
-            <ExportDropdown
+            <ExportButton
               template={template}
               profile={selectedProfile}
               sections={templateSections || []}

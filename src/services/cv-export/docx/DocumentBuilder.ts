@@ -34,25 +34,34 @@ export class DocumentBuilder {
       profileName: `${profile.first_name} ${profile.last_name}`,
       sectionsCount: sections.length,
       orientation: template?.orientation,
-      layoutConfig: template?.layout_config
+      layoutConfig: template?.layout_config,
+      layoutType: template?.layout_config?.layoutType
     });
 
-    // Configure services
+    // Configure layout for all services
+    const layoutConfig = template?.layout_config || {};
+    this.styler.setLayoutConfig(layoutConfig);
+    this.layoutProcessor.setLayoutConfig(layoutConfig);
+    this.layoutProcessor.setStyler(this.styler);
+
+    // Configure other services
     this.maskingService.setFieldMappings(fieldMappings || []);
     this.visibilityService.setFieldMappings(fieldMappings || []);
     this.visibilityService.setSectionConfigs(sections);
-    this.layoutProcessor.setLayoutConfig(template?.layout_config || {});
     
-    // Configure section renderer
+    // Configure section renderer with all services
     this.sectionRenderer.setMaskingService(this.maskingService);
     this.sectionRenderer.setVisibilityService(this.visibilityService);
     this.sectionRenderer.setStyler(this.styler);
     
     // Sort sections by display order
     const sortedSections = [...sections].sort((a, b) => a.display_order - b.display_order);
-    console.log('Processing sections:', sortedSections.map(s => s.section_type));
+    console.log('Processing sections:', sortedSections.map(s => ({
+      type: s.section_type,
+      placement: s.styling_config?.layout_placement || 'main'
+    })));
     
-    // Separate sections based on layout
+    // Separate sections based on layout using the improved layout processor
     const mainSections: (Paragraph | Table)[] = [];
     const sidebarSections: (Paragraph | Table)[] = [];
     
@@ -67,7 +76,8 @@ export class DocumentBuilder {
         );
         
         if (sectionElements.length > 0) {
-          const placement = this.layoutProcessor.getSectionPlacement(section.section_type);
+          // Use the updated getSectionPlacement method that reads from section configuration
+          const placement = this.layoutProcessor.getSectionPlacement(section);
           if (placement === 'sidebar') {
             sidebarSections.push(...sectionElements);
           } else {
@@ -81,7 +91,13 @@ export class DocumentBuilder {
       }
     }
     
-    // Apply layout structure
+    console.log('DOCX Export - Section distribution:', {
+      mainSections: mainSections.length,
+      sidebarSections: sidebarSections.length,
+      layoutType: template?.layout_config?.layoutType
+    });
+    
+    // Apply layout structure using the improved layout processor
     const documentChildren = this.layoutProcessor.createLayoutStructure(mainSections, sidebarSections);
     
     console.log('Total document elements:', documentChildren.length);

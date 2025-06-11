@@ -1,6 +1,8 @@
 
 import React from 'react';
 import { DynamicSectionRenderer } from './DynamicSectionRenderer';
+import { LayoutStyleFactory } from './layout/LayoutStyleFactory';
+import { getLayoutConfiguration } from './layout/LayoutConfigurations';
 
 interface TemplateSection {
   id: string;
@@ -8,7 +10,10 @@ interface TemplateSection {
   display_order: number;
   is_required: boolean;
   field_mapping: Record<string, any>;
-  styling_config: Record<string, any>;
+  styling_config: {
+    layout_placement?: 'main' | 'sidebar';
+    [key: string]: any;
+  };
 }
 
 interface FieldMapping {
@@ -56,7 +61,7 @@ export const LayoutAwarePageRenderer: React.FC<LayoutAwarePageRendererProps> = (
     profile_image: profile.profile_image || profile.profileImage,
   };
 
-  // If no sections configured, don't render anything (parent should handle this case)
+  // If no sections configured, don't render anything
   if (!sections || sections.length === 0) {
     return null;
   }
@@ -71,9 +76,9 @@ export const LayoutAwarePageRenderer: React.FC<LayoutAwarePageRendererProps> = (
   );
 };
 
-// Helper function to render content based on layout type
+// Helper function to render content using unified layout system
 function renderLayoutContent(
-  sections: any[], 
+  sections: TemplateSection[], 
   fieldMappings: FieldMapping[], 
   profile: any, 
   styles: any, 
@@ -85,75 +90,75 @@ function renderLayoutContent(
     return null;
   }
 
-  switch (layoutType) {
-    case 'two-column':
-      const midPoint = Math.ceil(sections.length / 2);
-      const leftSections = sections.slice(0, midPoint);
-      const rightSections = sections.slice(midPoint);
-      
-      return (
-        <>
-          <div style={{ gridColumn: '1' }}>
-            <DynamicSectionRenderer
-              sections={leftSections}
-              fieldMappings={fieldMappings}
-              profile={profile}
-              styles={styles}
-              partialSections={partialSections}
-            />
-          </div>
-          <div style={{ gridColumn: '2' }}>
-            <DynamicSectionRenderer
-              sections={rightSections}
-              fieldMappings={fieldMappings}
-              profile={profile}
-              styles={styles}
-              partialSections={partialSections}
-            />
-          </div>
-        </>
-      );
+  console.log('LayoutAwarePageRenderer renderLayoutContent:', {
+    layoutType,
+    sectionsCount: sections.length,
+    sectionsWithPlacement: sections.map(s => ({
+      id: s.id,
+      type: s.section_type,
+      placement: s.styling_config?.layout_placement || 'main'
+    }))
+  });
 
-    case 'sidebar':
-      const sidebarSections = sections.filter(s => 
-        ['technical_skills', 'specialized_skills'].includes(s.section_type)
-      );
-      const mainSections = sections.filter(s => 
-        !['technical_skills', 'specialized_skills'].includes(s.section_type)
-      );
-      
-      return (
-        <>
-          <div style={{ gridColumn: '1' }}>
-            <DynamicSectionRenderer
-              sections={sidebarSections}
-              fieldMappings={fieldMappings}
-              profile={profile}
-              styles={styles}
-              partialSections={partialSections}
-            />
-          </div>
-          <div style={{ gridColumn: '2' }}>
-            <DynamicSectionRenderer
-              sections={mainSections}
-              fieldMappings={fieldMappings}
-              profile={profile}
-              styles={styles}
-              partialSections={partialSections}
-            />
-          </div>
-        </>
-      );
+  // Get layout configuration and styles
+  const layoutConfig = getLayoutConfiguration(layoutType);
+  const layoutStyles = styles.layoutStyles || LayoutStyleFactory.generateStyles(layoutType, styles.layoutConfig || {});
 
-    default: // single-column
-      return (
-        <DynamicSectionRenderer
-          sections={sections}
-          fieldMappings={fieldMappings}
-          profile={profile}
-          styles={styles}
-          partialSections={partialSections}
-        />
-      );
-  }
+  // Group sections by their target zones
+  const sectionsByZone: Record<string, TemplateSection[]> = {};
+  
+  layoutConfig.zones.forEach(zone => {
+    sectionsByZone[zone.id] = [];
+  });
+
+  // Distribute sections to zones
+  sections.forEach(section => {
+    const placement = section.styling_config?.layout_placement || 'main';
+    
+    // Map placement to actual zone based on layout configuration
+    let targetZone = 'main'; // default fallback
+    
+    if (placement === 'sidebar' && sectionsByZone['sidebar']) {
+      targetZone = 'sidebar';
+    } else if (placement === 'sidebar' && sectionsByZone['secondary']) {
+      // For two-column layout, sidebar placement maps to secondary zone
+      targetZone = 'secondary';
+    } else {
+      targetZone = 'main';
+    }
+    
+    if (sectionsByZone[targetZone]) {
+      sectionsByZone[targetZone].push(section);
+    } else {
+      // Fallback to main if zone doesn't exist
+      sectionsByZone['main'] = sectionsByZone['main'] || [];
+      sectionsByZone['main'].push(section);
+    }
+  });
+
+  console.log('Section distribution by zone:', sectionsByZone);
+
+  // Render columns based on layout configuration
+  return (
+    <>
+      {layoutConfig.columns.map((column) => (
+        <div 
+          key={column.id}
+          style={layoutStyles.columnStyles[column.id]}
+        >
+          <DynamicSectionRenderer
+            sections={sectionsByZone[column.zone] || []}
+            fieldMappings={fieldMappings}
+            profile={profile}
+            styles={LayoutStyleFactory.getSectionStyles(
+              column.zone,
+              layoutStyles.zoneStyles,
+              styles
+            )}
+            partialSections={partialSections}
+          />
+        </div>
+      ))}
+    </>
+  );
 }

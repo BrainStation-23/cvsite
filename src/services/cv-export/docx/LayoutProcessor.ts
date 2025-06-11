@@ -1,15 +1,22 @@
 
 import { Document, Table, TableRow, TableCell, Paragraph, WidthType } from 'docx';
+import { getLayoutConfiguration } from '@/components/admin/cv-templates/layout/LayoutConfigurations';
+import { DocumentStyler } from './DocumentStyler';
 
 export class LayoutProcessor {
   private layoutConfig: Record<string, any> = {};
+  private styler?: DocumentStyler;
 
   setLayoutConfig(layoutConfig: Record<string, any>): void {
     this.layoutConfig = layoutConfig;
   }
 
+  setStyler(styler: DocumentStyler): void {
+    this.styler = styler;
+  }
+
   getLayoutType(): string {
-    return this.layoutConfig.layout || 'single-column';
+    return this.layoutConfig.layoutType || 'single-column';
   }
 
   createLayoutStructure(
@@ -18,13 +25,15 @@ export class LayoutProcessor {
   ): (Paragraph | Table)[] {
     const layoutType = this.getLayoutType();
 
+    console.log('DOCX Layout Processor - Layout type:', layoutType);
+    console.log('DOCX Layout Processor - Left column elements:', leftColumnElements.length);
+    console.log('DOCX Layout Processor - Right column elements:', rightColumnElements.length);
+
     switch (layoutType) {
       case 'two-column':
         return this.createTwoColumnLayout(leftColumnElements, rightColumnElements);
-      case 'sidebar-left':
-        return this.createSidebarLayout(leftColumnElements, rightColumnElements, 'left');
-      case 'sidebar-right':
-        return this.createSidebarLayout(leftColumnElements, rightColumnElements, 'right');
+      case 'sidebar':
+        return this.createSidebarLayout(leftColumnElements, rightColumnElements);
       case 'single-column':
       default:
         return [...leftColumnElements, ...rightColumnElements];
@@ -39,72 +48,61 @@ export class LayoutProcessor {
       return [];
     }
 
-    // Create a table-based two-column layout
-    const maxLength = Math.max(leftElements.length, rightElements.length);
-    const rows: TableRow[] = [];
-
-    for (let i = 0; i < maxLength; i++) {
-      const leftCell = new TableCell({
-        children: leftElements[i] ? [leftElements[i] as Paragraph] : [new Paragraph({ children: [] })],
-        width: { size: 50, type: WidthType.PERCENTAGE },
-        margins: { top: 100, bottom: 100, left: 100, right: 50 }
-      });
-
-      const rightCell = new TableCell({
-        children: rightElements[i] ? [rightElements[i] as Paragraph] : [new Paragraph({ children: [] })],
-        width: { size: 50, type: WidthType.PERCENTAGE },
-        margins: { top: 100, bottom: 100, left: 50, right: 100 }
-      });
-
-      rows.push(new TableRow({ children: [leftCell, rightCell] }));
+    if (!this.styler) {
+      console.error('DOCX Layout Processor - No styler available');
+      return [...leftElements, ...rightElements];
     }
 
-    return [new Table({
-      rows,
-      width: { size: 100, type: WidthType.PERCENTAGE }
-    })];
+    // Use the enhanced styler to create a properly styled table
+    return [this.styler.createLayoutTable(
+      leftElements,
+      rightElements,
+      'two-column',
+      'main',
+      'secondary'
+    )];
   }
 
   private createSidebarLayout(
     mainElements: (Paragraph | Table)[],
-    sidebarElements: (Paragraph | Table)[],
-    sidebarPosition: 'left' | 'right'
+    sidebarElements: (Paragraph | Table)[]
   ): (Paragraph | Table)[] {
-    const mainWidth = 70;
-    const sidebarWidth = 30;
-
-    const leftElements = sidebarPosition === 'left' ? sidebarElements : mainElements;
-    const rightElements = sidebarPosition === 'left' ? mainElements : sidebarElements;
-    const leftWidth = sidebarPosition === 'left' ? sidebarWidth : mainWidth;
-    const rightWidth = sidebarPosition === 'left' ? mainWidth : sidebarWidth;
-
-    const maxLength = Math.max(leftElements.length, rightElements.length);
-    const rows: TableRow[] = [];
-
-    for (let i = 0; i < maxLength; i++) {
-      const leftCell = new TableCell({
-        children: leftElements[i] ? [leftElements[i] as Paragraph] : [new Paragraph({ children: [] })],
-        width: { size: leftWidth, type: WidthType.PERCENTAGE },
-        margins: { top: 100, bottom: 100, left: 100, right: 50 }
-      });
-
-      const rightCell = new TableCell({
-        children: rightElements[i] ? [rightElements[i] as Paragraph] : [new Paragraph({ children: [] })],
-        width: { size: rightWidth, type: WidthType.PERCENTAGE },
-        margins: { top: 100, bottom: 100, left: 50, right: 100 }
-      });
-
-      rows.push(new TableRow({ children: [leftCell, rightCell] }));
+    if (mainElements.length === 0 && sidebarElements.length === 0) {
+      return [];
     }
 
-    return [new Table({
-      rows,
-      width: { size: 100, type: WidthType.PERCENTAGE }
-    })];
+    if (!this.styler) {
+      console.error('DOCX Layout Processor - No styler available');
+      return [...sidebarElements, ...mainElements];
+    }
+
+    // Use the enhanced styler to create a properly styled sidebar layout
+    // Note: For sidebar layout, left is sidebar, right is main content
+    return [this.styler.createLayoutTable(
+      sidebarElements,
+      mainElements,
+      'sidebar',
+      'sidebar',
+      'main'
+    )];
   }
 
-  getSectionPlacement(sectionType: string): 'main' | 'sidebar' {
-    const sidebarSections = this.layoutConfig.sidebarSections || [];
-    return sidebarSections.includes(sectionType) ? 'sidebar' : 'main';
+  getSectionPlacement(section: any): 'main' | 'sidebar' {
+    const placement = section.styling_config?.layout_placement || 'main';
+    
+    console.log(`DOCX Layout Processor - Section ${section.section_type} placement:`, placement);
+    
+    const layoutType = this.getLayoutType();
+    const layoutConfig = getLayoutConfiguration(layoutType);
+    
+    if (placement === 'sidebar') {
+      if (layoutType === 'sidebar') {
+        return 'sidebar';
+      } else if (layoutType === 'two-column') {
+        return 'sidebar'; // We'll treat this as the secondary column
+      }
+    }
+    
+    return 'main';
   }
 }

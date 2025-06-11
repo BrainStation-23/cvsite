@@ -29,7 +29,7 @@ export class SkillsSectionRenderer extends BaseSectionRenderer {
                 children: [
                   new TextRun({
                     text: skillText,
-                    size: this.styler.getFontSize(baseStyles, 'base')
+                    size: this.styler.getFontSize('base')
                   })
                 ],
                 spacing: { before: 60, after: 60 }

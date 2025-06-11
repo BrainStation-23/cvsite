@@ -25,6 +25,12 @@ const TemplateBuilder: React.FC<TemplateBuilderProps> = ({ template, onLayoutUpd
     const currentLayoutType = layoutConfig.layoutType || 'single-column';
     setSelectedLayoutPreset(currentLayoutType);
     
+    console.log('TemplateBuilder useEffect - layout config:', {
+      layoutConfig,
+      currentLayoutType,
+      templateLayoutConfig: template.layout_config
+    });
+    
     // Try to match current colors to a preset
     const matchingPreset = STYLE_PRESETS.find(preset => 
       preset.config.primaryColor === layoutConfig.primaryColor &&
@@ -41,6 +47,14 @@ const TemplateBuilder: React.FC<TemplateBuilderProps> = ({ template, onLayoutUpd
       ...layoutConfig,
       [key]: value
     };
+    
+    console.log('TemplateBuilder updateLayoutConfig:', {
+      key,
+      value,
+      oldConfig: layoutConfig,
+      newConfig
+    });
+    
     setLayoutConfig(newConfig);
     
     if (onLayoutUpdate) {
@@ -50,6 +64,11 @@ const TemplateBuilder: React.FC<TemplateBuilderProps> = ({ template, onLayoutUpd
 
   const handleStylePresetSelect = (preset: StylePreset) => {
     setSelectedStylePreset(preset.id);
+    
+    console.log('TemplateBuilder handleStylePresetSelect:', {
+      presetId: preset.id,
+      presetConfig: preset.config
+    });
     
     // Apply all preset values
     const updatedConfig = {
@@ -65,6 +84,12 @@ const TemplateBuilder: React.FC<TemplateBuilderProps> = ({ template, onLayoutUpd
 
   const handleLayoutPresetSelect = (preset: LayoutPreset) => {
     setSelectedLayoutPreset(preset.id);
+    
+    console.log('TemplateBuilder handleLayoutPresetSelect:', {
+      presetId: preset.id,
+      presetConfig: preset.config,
+      oldLayoutType: layoutConfig.layoutType
+    });
     
     // Apply layout preset values
     const updatedConfig = {
@@ -94,6 +119,11 @@ const TemplateBuilder: React.FC<TemplateBuilderProps> = ({ template, onLayoutUpd
       sectionSpacing: 16,
       itemSpacing: 8
     };
+    
+    console.log('TemplateBuilder resetToDefaults:', {
+      oldConfig: layoutConfig,
+      defaultConfig
+    });
     
     setLayoutConfig(defaultConfig);
     setSelectedStylePreset('professional');

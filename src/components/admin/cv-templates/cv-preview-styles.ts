@@ -1,5 +1,6 @@
 
 import { CVTemplate } from '@/types/cv-templates';
+import { LayoutStyleFactory } from './layout/LayoutStyleFactory';
 
 export const createCVStyles = (template: CVTemplate) => {
   const layoutConfig = template.layout_config || {};
@@ -7,30 +8,12 @@ export const createCVStyles = (template: CVTemplate) => {
   const pageWidth = template.orientation === 'portrait' ? '210mm' : '297mm';
   const pageHeight = template.orientation === 'portrait' ? '297mm' : '210mm';
   
-  // Layout type specific styles
-  const getLayoutStyles = () => {
-    switch (layoutConfig.layoutType) {
-      case 'two-column':
-        return {
-          display: 'grid',
-          gridTemplateColumns: '1fr 1fr',
-          gap: `${layoutConfig.columnGap || 10}mm`,
-          alignItems: 'start'
-        };
-      case 'sidebar':
-        return {
-          display: 'grid',
-          gridTemplateColumns: '1fr 2fr',
-          gap: `${layoutConfig.columnGap || 10}mm`,
-          alignItems: 'start'
-        };
-      default: // single-column
-        return {
-          display: 'block'
-        };
-    }
-  };
-  
+  // Generate unified layout styles
+  const layoutStyles = LayoutStyleFactory.generateStyles(
+    layoutConfig.layoutType || 'single-column',
+    layoutConfig
+  );
+
   return {
     baseStyles: {
       width: pageWidth,
@@ -45,22 +28,28 @@ export const createCVStyles = (template: CVTemplate) => {
       color: '#333',
       position: 'relative' as const,
       pageBreakAfter: 'always' as const,
-      orientation: template.orientation, // Add orientation to styles for reference
-      ...getLayoutStyles()
+      orientation: template.orientation,
+      ...layoutStyles.containerStyles
     },
+
+    // Pass layout config and unified styles to renderer
+    layoutConfig,
+    layoutStyles,
 
     headerStyles: {
       textAlign: layoutConfig.layoutType === 'single-column' ? 'center' as const : 'left' as const,
       marginBottom: `${layoutConfig.sectionSpacing || 16}pt`,
       borderBottom: `2px solid ${layoutConfig.primaryColor || '#1f2937'}`,
       paddingBottom: '10pt',
-      gridColumn: layoutConfig.layoutType === 'two-column' ? '1 / -1' : 'auto'
+      gridColumn: layoutConfig.layoutType === 'two-column' ? '1 / -1' : 'auto',
+      backgroundColor: 'transparent',
+      color: 'inherit'
     },
 
     nameStyles: {
       fontSize: `${layoutConfig.headingSize || 16}pt`,
       fontWeight: 'bold',
-      color: layoutConfig.primaryColor || '#1f2937',
+      color: 'inherit',
       margin: '0 0 5pt 0'
     },
 
@@ -72,25 +61,27 @@ export const createCVStyles = (template: CVTemplate) => {
 
     sectionStyles: {
       marginBottom: `${layoutConfig.sectionSpacing || 16}pt`,
-      breakInside: 'avoid' as const
+      breakInside: 'avoid' as const,
+      backgroundColor: 'transparent'
     },
 
     sectionTitleStyles: {
       fontSize: `${layoutConfig.subheadingSize || 14}pt`,
       fontWeight: 'bold',
-      color: layoutConfig.primaryColor || '#1f2937',
+      color: 'inherit',
       borderBottom: `1px solid ${layoutConfig.accentColor || '#3b82f6'}`,
       paddingBottom: '2pt',
       marginBottom: `${layoutConfig.itemSpacing || 8}pt`
     },
 
     itemStyles: {
-      marginBottom: `${layoutConfig.itemSpacing || 8}pt`
+      marginBottom: `${layoutConfig.itemSpacing || 8}pt`,
+      backgroundColor: 'transparent'
     },
 
     itemTitleStyles: {
       fontWeight: 'bold',
-      color: layoutConfig.primaryColor || '#1f2937'
+      color: 'inherit'
     },
 
     itemSubtitleStyles: {
@@ -109,12 +100,8 @@ export const createCVStyles = (template: CVTemplate) => {
       color: 'white',
       padding: '2pt 6pt',
       borderRadius: '3pt',
-      fontSize: '0.8em'
-    },
-
-    // Add layout-specific container styles
-    layoutContainerStyles: {
-      ...getLayoutStyles()
+      fontSize: '0.8em',
+      border: 'none'
     }
   };
 };

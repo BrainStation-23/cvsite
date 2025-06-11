@@ -1,7 +1,8 @@
 
 import React from 'react';
 import { Card } from '@/components/ui/card';
-import { Grid, Columns, SidebarOpen, Check } from 'lucide-react';
+import { Check } from 'lucide-react';
+import { getLayoutConfiguration, getSupportedLayouts } from './layout/LayoutConfigurations';
 
 interface LayoutPreset {
   id: string;
@@ -18,33 +19,25 @@ interface LayoutPreset {
   };
 }
 
-const LAYOUT_PRESETS: LayoutPreset[] = [
-  {
-    id: 'single-column',
-    name: 'Single Column',
-    description: 'Traditional resume layout',
-    icon: <Grid className="h-4 w-4" />,
-    preview: (
+// Generate layout presets from configuration
+const generateLayoutPresets = (): LayoutPreset[] => {
+  const supportedLayouts = getSupportedLayouts();
+  
+  const iconMap: Record<string, React.ReactNode> = {
+    'single-column': <div className="w-4 h-4 bg-gray-400 rounded"></div>,
+    'two-column': <div className="w-4 h-4 bg-gray-400 rounded flex gap-0.5"><div className="flex-1 bg-gray-500"></div><div className="flex-1 bg-gray-500"></div></div>,
+    'sidebar': <div className="w-4 h-4 bg-gray-400 rounded flex gap-0.5"><div className="w-1/3 bg-blue-500"></div><div className="flex-1 bg-gray-500"></div></div>
+  };
+
+  const previewMap: Record<string, React.ReactNode> = {
+    'single-column': (
       <div className="w-full h-12 bg-gray-100 rounded border flex flex-col gap-1 p-2">
         <div className="h-2 bg-gray-300 rounded w-full"></div>
         <div className="h-2 bg-gray-300 rounded w-3/4"></div>
         <div className="h-2 bg-gray-300 rounded w-1/2"></div>
       </div>
     ),
-    config: {
-      layoutType: 'single-column',
-      columnGap: 0,
-      margin: 20,
-      sectionSpacing: 16,
-      itemSpacing: 8
-    }
-  },
-  {
-    id: 'two-column',
-    name: 'Two Column',
-    description: 'Balanced dual-column layout',
-    icon: <Columns className="h-4 w-4" />,
-    preview: (
+    'two-column': (
       <div className="w-full h-12 bg-gray-100 rounded border flex gap-1 p-2">
         <div className="flex-1 flex flex-col gap-1">
           <div className="h-2 bg-gray-300 rounded w-full"></div>
@@ -56,20 +49,7 @@ const LAYOUT_PRESETS: LayoutPreset[] = [
         </div>
       </div>
     ),
-    config: {
-      layoutType: 'two-column',
-      columnGap: 10,
-      margin: 20,
-      sectionSpacing: 14,
-      itemSpacing: 6
-    }
-  },
-  {
-    id: 'sidebar',
-    name: 'Sidebar',
-    description: 'Skills sidebar with main content',
-    icon: <SidebarOpen className="h-4 w-4" />,
-    preview: (
+    'sidebar': (
       <div className="w-full h-12 bg-gray-100 rounded border flex gap-1 p-2">
         <div className="w-1/3 flex flex-col gap-1">
           <div className="h-2 bg-blue-200 rounded w-full"></div>
@@ -80,16 +60,29 @@ const LAYOUT_PRESETS: LayoutPreset[] = [
           <div className="h-2 bg-gray-300 rounded w-4/5"></div>
         </div>
       </div>
-    ),
-    config: {
-      layoutType: 'sidebar',
-      columnGap: 12,
-      margin: 18,
-      sectionSpacing: 16,
-      itemSpacing: 8
-    }
-  }
-];
+    )
+  };
+
+  return supportedLayouts.map(layoutId => {
+    const config = getLayoutConfiguration(layoutId);
+    return {
+      id: layoutId,
+      name: config.name,
+      description: config.description,
+      icon: iconMap[layoutId] || iconMap['single-column'],
+      preview: previewMap[layoutId] || previewMap['single-column'],
+      config: {
+        layoutType: layoutId,
+        columnGap: config.gap,
+        margin: 20,
+        sectionSpacing: layoutId === 'two-column' ? 14 : 16,
+        itemSpacing: layoutId === 'two-column' ? 6 : 8
+      }
+    };
+  });
+};
+
+const LAYOUT_PRESETS = generateLayoutPresets();
 
 interface LayoutPresetsProps {
   selectedLayout?: string;
@@ -100,6 +93,15 @@ const LayoutPresets: React.FC<LayoutPresetsProps> = ({
   selectedLayout,
   onLayoutSelect
 }) => {
+  const handleLayoutSelect = (preset: LayoutPreset) => {
+    console.log('LayoutPresets handleLayoutSelect:', {
+      presetId: preset.id,
+      presetConfig: preset.config,
+      selectedLayout
+    });
+    onLayoutSelect(preset);
+  };
+
   return (
     <div className="space-y-4">
       <div>
@@ -116,7 +118,7 @@ const LayoutPresets: React.FC<LayoutPresetsProps> = ({
             className={`p-3 cursor-pointer transition-all hover:shadow-md ${
               selectedLayout === preset.id ? 'ring-2 ring-blue-500 bg-blue-50' : ''
             }`}
-            onClick={() => onLayoutSelect(preset)}
+            onClick={() => handleLayoutSelect(preset)}
           >
             <div className="flex items-center gap-3">
               <div className="flex-shrink-0">

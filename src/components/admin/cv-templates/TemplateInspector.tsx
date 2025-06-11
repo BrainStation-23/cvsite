@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -123,6 +122,7 @@ const TemplateInspector: React.FC<TemplateInspectorProps> = ({
               <SectionManager 
                 templateId={template.id} 
                 onSectionsChange={onConfigurationChange}
+                template={template}
               />
             </TabsContent>
           </div>

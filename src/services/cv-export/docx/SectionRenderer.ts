@@ -86,15 +86,18 @@ export class SectionRenderer {
         return elements;
       }
 
+      // Get the zone for this section to apply proper styling
+      const zone = this.styler.getZoneForSection(section);
+      
       const sectionTitle = this.maskingService.getSectionTitle(section);
-      console.log(`Rendering section: ${section.section_type} with title: ${sectionTitle}`);
+      console.log(`Rendering section: ${section.section_type} with title: ${sectionTitle} in zone: ${zone}`);
 
       // Skip section title for general section (personal info goes at top without header)
       if (section.section_type !== 'general') {
-        elements.push(this.styler.createSectionTitle(sectionTitle, styles?.baseStyles));
+        elements.push(this.styler.createSectionTitle(sectionTitle, styles?.baseStyles, zone));
       }
 
-      // Render section content based on type
+      // Render section content based on type with zone information
       switch (section.section_type) {
         case 'general':
           const generalElements = await this.generalRenderer.render(profile, styles);
@@ -132,7 +135,7 @@ export class SectionRenderer {
           console.log(`Unknown section type: ${section.section_type}`);
       }
 
-      console.log(`Section ${section.section_type} rendered with ${elements.length} elements`);
+      console.log(`Section ${section.section_type} rendered with ${elements.length} elements in zone ${zone}`);
       return elements;
     } catch (error) {
       console.error(`Error rendering section ${section.section_type}:`, error);
