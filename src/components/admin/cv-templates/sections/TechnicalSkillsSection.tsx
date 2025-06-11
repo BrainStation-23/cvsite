@@ -40,8 +40,10 @@ export const TechnicalSkillsSection: React.FC<TechnicalSkillsSectionProps> = ({
   
   // Access colors from layout config
   const accentColor = styles?.layoutConfig?.accentColor;
-  const primaryColor = styles?.layoutConfig?.primaryColor;
   const subheadingSize = styles?.layoutConfig?.subheadingSize;
+  
+  // Use zone-aware section title styles (automatically adjusts color based on background)
+  const sectionTitleStyles = styles?.sectionTitleStyles || {};
   
   // Log errors if style data is missing
   if (!styles) {
@@ -69,9 +71,9 @@ export const TechnicalSkillsSection: React.FC<TechnicalSkillsSectionProps> = ({
         className="section-title" 
         style={{ 
           fontSize: `${subheadingSize || 14}pt`,
-          color: primaryColor,
+          color: sectionTitleStyles.color || 'inherit',
           fontWeight: 'bold',
-          borderBottom: `1px solid ${accentColor}`,
+          borderBottom: `1px solid ${sectionTitleStyles.borderBottomColor || accentColor}`,
           paddingBottom: '2pt',
           marginBottom: '8pt',
           marginTop: '0'
