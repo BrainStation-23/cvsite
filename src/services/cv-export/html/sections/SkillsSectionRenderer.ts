@@ -19,7 +19,7 @@ interface TemplateSection {
 }
 
 export class SkillsSectionRenderer {
-  renderTechnicalSkills(profile: any, fieldMappings: FieldMapping[], section: TemplateSection, customTitle?: string): string {
+  renderTechnicalSkills(profile: any, fieldMappings: FieldMapping[], section: TemplateSection, customTitle?: string, styles?: any): string {
     console.log('Skills Section Renderer - Technical Skills - Profile data:', {
       technicalSkills: profile?.technical_skills,
       technicalSkillsType: typeof profile?.technical_skills,
@@ -54,7 +54,7 @@ export class SkillsSectionRenderer {
       const displayText = `${skillName} (${proficiency}/10)`;
       
       return `<span class="skill-tag" style="
-        background-color: #3b82f6;
+        background-color: ${styles?.accentColor || '#3b82f6'};
         color: white;
         padding: 2pt 6pt;
         border-radius: 3pt;
@@ -77,7 +77,7 @@ export class SkillsSectionRenderer {
     </div>`;
   }
 
-  renderSpecializedSkills(profile: any, fieldMappings: FieldMapping[], section: TemplateSection, customTitle?: string): string {
+  renderSpecializedSkills(profile: any, fieldMappings: FieldMapping[], section: TemplateSection, customTitle?: string, styles?: any): string {
     console.log('Skills Section Renderer - Specialized Skills - Profile data:', {
       specializedSkills: profile?.specialized_skills,
       specializedSkillsType: typeof profile?.specialized_skills,
@@ -112,7 +112,7 @@ export class SkillsSectionRenderer {
       const displayText = `${skillName} (${proficiency}/10)`;
       
       return `<span class="skill-tag" style="
-        background-color: #3b82f6;
+        background-color: ${styles?.accentColor || '#3b82f6'};
         color: white;
         padding: 2pt 6pt;
         border-radius: 3pt;
