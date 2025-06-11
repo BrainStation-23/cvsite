@@ -69,10 +69,11 @@ export function useSkills(profileId?: string) {
     }
   };
 
-  // Reorder technical skills - now async with proper error handling
-  const reorderTechnicalSkills = async (reorderedSkills: Skill[]): Promise<void> => {
+  // Reorder technical skills - now returns boolean for success/failure
+  const reorderTechnicalSkills = async (reorderedSkills: Skill[]): Promise<boolean> => {
     if (!targetProfileId) {
-      throw new Error('No profile ID available');
+      console.error('No profile ID available');
+      return false;
     }
     
     setIsSaving(true);
@@ -103,6 +104,8 @@ export function useSkills(profileId?: string) {
         title: 'Success',
         description: 'Technical skills have been reordered',
       });
+      
+      return true;
     } catch (error) {
       console.error('Error reordering technical skills:', error);
       toast({
@@ -110,16 +113,17 @@ export function useSkills(profileId?: string) {
         description: 'Failed to reorder technical skills',
         variant: 'destructive'
       });
-      throw error; // Re-throw to allow UI to handle the error
+      return false;
     } finally {
       setIsSaving(false);
     }
   };
 
-  // Reorder specialized skills - now async with proper error handling
-  const reorderSpecializedSkills = async (reorderedSkills: Skill[]): Promise<void> => {
+  // Reorder specialized skills - now returns boolean for success/failure
+  const reorderSpecializedSkills = async (reorderedSkills: Skill[]): Promise<boolean> => {
     if (!targetProfileId) {
-      throw new Error('No profile ID available');
+      console.error('No profile ID available');
+      return false;
     }
     
     setIsSaving(true);
@@ -150,6 +154,8 @@ export function useSkills(profileId?: string) {
         title: 'Success',
         description: 'Specialized skills have been reordered',
       });
+      
+      return true;
     } catch (error) {
       console.error('Error reordering specialized skills:', error);
       toast({
@@ -157,7 +163,7 @@ export function useSkills(profileId?: string) {
         description: 'Failed to reorder specialized skills',
         variant: 'destructive'
       });
-      throw error; // Re-throw to allow UI to handle the error
+      return false;
     } finally {
       setIsSaving(false);
     }
