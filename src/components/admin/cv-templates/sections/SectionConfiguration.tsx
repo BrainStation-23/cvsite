@@ -77,7 +77,11 @@ const SectionConfiguration: React.FC<SectionConfigurationProps> = ({
           <Input 
             type="number" 
             value={maxSkillsCount || 10}
-            onChange={(e) => onUpdateSectionStyling(sectionId, { max_skills_count: parseInt(e.target.value) })}
+            onChange={(e) => {
+              const newValue = parseInt(e.target.value);
+              console.log('Max skills count changing to:', newValue);
+              onUpdateSectionStyling(sectionId, { max_skills_count: newValue });
+            }}
             min={1} 
             max={20} 
             className="h-7 text-xs" 

@@ -26,6 +26,7 @@ interface SectionConfig {
   styling_config: {
     display_style?: string;
     projects_to_view?: number;
+    max_skills_count?: number;
     fields?: FieldConfig[];
     layout_placement?: 'main' | 'sidebar';
   };
@@ -69,7 +70,8 @@ const SectionCard: React.FC<SectionCardProps> = ({
     isMultiColumnLayout,
     hasMoveSectionToPlacement: !!onMoveSectionToPlacement,
     currentPlacement: section.styling_config.layout_placement,
-    isExpanded
+    isExpanded,
+    maxSkillsCount: section.styling_config.max_skills_count
   });
 
   const getSectionColor = (sectionType: CVSectionType): string => {
@@ -134,6 +136,7 @@ const SectionCard: React.FC<SectionCardProps> = ({
                   sectionType={section.section_type}
                   displayStyle={section.styling_config.display_style || 'default'}
                   projectsToView={section.styling_config.projects_to_view}
+                  maxSkillsCount={section.styling_config.max_skills_count}
                   onUpdateSectionStyling={onUpdateSectionStyling}
                 />
 
