@@ -1,3 +1,4 @@
+
 import React, { useEffect } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { UseFormReturn } from 'react-hook-form';
@@ -97,8 +98,8 @@ export const ProfileTabs: React.FC<ProfileTabsProps> = ({
   profileId,
   saveGeneralInfo
 }) => {
-  // Handle general info save with proper conversion
-  const handleGeneralInfoSave = async (data: GeneralInfoFormData) => {
+  // Handle general info save with proper conversion and return boolean
+  const handleGeneralInfoSave = async (data: GeneralInfoFormData): Promise<boolean> => {
     const saveData = {
       firstName: data.firstName,
       lastName: data.lastName,
@@ -106,9 +107,12 @@ export const ProfileTabs: React.FC<ProfileTabsProps> = ({
       profileImage: data.profileImage
     };
     
-    const success = await saveGeneralInfo(saveData);
-    if (!success) {
-      throw new Error('Failed to save general information');
+    try {
+      const success = await saveGeneralInfo(saveData);
+      return success;
+    } catch (error) {
+      console.error('Failed to save general information:', error);
+      return false;
     }
   };
 
