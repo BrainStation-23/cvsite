@@ -47,10 +47,15 @@ export const SkillList: React.FC<SkillListProps> = ({
 }) => {
   const [activeId, setActiveId] = useState<string | null>(null);
   const [localSkills, setLocalSkills] = useState<Skill[]>(skills);
+  const [optimisticSkills, setOptimisticSkills] = useState<Skill[]>(skills);
 
-  // Update local skills when props change, but only if we're not currently dragging
+  // Update local skills when props change, but preserve optimistic state during drag
   useEffect(() => {
     if (!activeId) {
+      setLocalSkills(skills);
+      setOptimisticSkills(skills);
+    } else {
+      // Only update local skills during drag, not optimistic
       setLocalSkills(skills);
     }
   }, [skills, activeId]);
@@ -70,28 +75,39 @@ export const SkillList: React.FC<SkillListProps> = ({
     setActiveId(event.active.id as string);
   };
 
-  const handleDragEnd = (event: DragEndEvent) => {
+  const handleDragEnd = async (event: DragEndEvent) => {
     const { active, over } = event;
     
     if (over && active.id !== over.id && onReorderSkills) {
-      const oldIndex = localSkills.findIndex((skill) => skill.id === active.id);
-      const newIndex = localSkills.findIndex((skill) => skill.id === over.id);
+      const oldIndex = optimisticSkills.findIndex((skill) => skill.id === active.id);
+      const newIndex = optimisticSkills.findIndex((skill) => skill.id === over.id);
 
-      const reorderedSkills = arrayMove(localSkills, oldIndex, newIndex);
+      // Create the optimistically reordered array
+      const reorderedSkills = arrayMove(optimisticSkills, oldIndex, newIndex);
       
-      // Update local state immediately for smooth animation
-      setLocalSkills(reorderedSkills);
+      // Update optimistic state immediately for smooth UX
+      setOptimisticSkills(reorderedSkills);
 
-      // Then update the database
-      onReorderSkills(reorderedSkills);
+      // Attempt database update
+      try {
+        await onReorderSkills(reorderedSkills);
+        // If successful, the parent will update and useEffect will sync localSkills
+      } catch (error) {
+        // If failed, revert optimistic state to original
+        console.error('Failed to reorder skills:', error);
+        setOptimisticSkills(localSkills);
+      }
     }
     
     setActiveId(null);
   };
 
-  const activeSkill = activeId ? localSkills.find(skill => skill.id === activeId) : null;
+  const activeSkill = activeId ? optimisticSkills.find(skill => skill.id === activeId) : null;
 
-  if (localSkills.length === 0) {
+  // Use optimistic skills for rendering during drag operations
+  const displaySkills = activeId ? optimisticSkills : localSkills;
+
+  if (displaySkills.length === 0) {
     return (
       <div className="text-center py-8 text-gray-500 dark:text-gray-400">
         <p>No {title.toLowerCase()} added yet.</p>
@@ -113,10 +129,10 @@ export const SkillList: React.FC<SkillListProps> = ({
           modifiers={[restrictToVerticalAxis, restrictToParentElement]}
         >
           <SortableContext 
-            items={localSkills.map(skill => skill.id)} 
+            items={displaySkills.map(skill => skill.id)} 
             strategy={verticalListSortingStrategy}
           >
-            {localSkills.map((skill) => (
+            {displaySkills.map((skill) => (
               <SkillCard
                 key={skill.id}
                 skill={skill}
@@ -142,7 +158,7 @@ export const SkillList: React.FC<SkillListProps> = ({
           </DragOverlay>
         </DndContext>
       ) : (
-        localSkills.map((skill) => (
+        displaySkills.map((skill) => (
           <SkillCard
             key={skill.id}
             skill={skill}

@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
@@ -70,13 +69,15 @@ export function useSkills(profileId?: string) {
     }
   };
 
-  // Reorder technical skills
-  const reorderTechnicalSkills = async (reorderedSkills: Skill[]) => {
-    if (!targetProfileId) return false;
+  // Reorder technical skills - now async with proper error handling
+  const reorderTechnicalSkills = async (reorderedSkills: Skill[]): Promise<void> => {
+    if (!targetProfileId) {
+      throw new Error('No profile ID available');
+    }
+    
+    setIsSaving(true);
     
     try {
-      setIsSaving(true);
-      
       // Update priorities in the database
       const updates = reorderedSkills.map((skill, index) => ({
         id: skill.id,
@@ -92,7 +93,7 @@ export function useSkills(profileId?: string) {
         if (error) throw error;
       }
       
-      // Update local state
+      // Update local state only after successful database update
       setTechnicalSkills(reorderedSkills.map((skill, index) => ({
         ...skill,
         priority: index + 1
@@ -102,8 +103,6 @@ export function useSkills(profileId?: string) {
         title: 'Success',
         description: 'Technical skills have been reordered',
       });
-      
-      return true;
     } catch (error) {
       console.error('Error reordering technical skills:', error);
       toast({
@@ -111,19 +110,21 @@ export function useSkills(profileId?: string) {
         description: 'Failed to reorder technical skills',
         variant: 'destructive'
       });
-      return false;
+      throw error; // Re-throw to allow UI to handle the error
     } finally {
       setIsSaving(false);
     }
   };
 
-  // Reorder specialized skills using priority column
-  const reorderSpecializedSkills = async (reorderedSkills: Skill[]) => {
-    if (!targetProfileId) return false;
+  // Reorder specialized skills - now async with proper error handling
+  const reorderSpecializedSkills = async (reorderedSkills: Skill[]): Promise<void> => {
+    if (!targetProfileId) {
+      throw new Error('No profile ID available');
+    }
+    
+    setIsSaving(true);
     
     try {
-      setIsSaving(true);
-      
       // Update priorities in the database
       const updates = reorderedSkills.map((skill, index) => ({
         id: skill.id,
@@ -139,7 +140,7 @@ export function useSkills(profileId?: string) {
         if (error) throw error;
       }
       
-      // Update local state
+      // Update local state only after successful database update
       setSpecializedSkills(reorderedSkills.map((skill, index) => ({
         ...skill,
         priority: index + 1
@@ -149,8 +150,6 @@ export function useSkills(profileId?: string) {
         title: 'Success',
         description: 'Specialized skills have been reordered',
       });
-      
-      return true;
     } catch (error) {
       console.error('Error reordering specialized skills:', error);
       toast({
@@ -158,7 +157,7 @@ export function useSkills(profileId?: string) {
         description: 'Failed to reorder specialized skills',
         variant: 'destructive'
       });
-      return false;
+      throw error; // Re-throw to allow UI to handle the error
     } finally {
       setIsSaving(false);
     }
