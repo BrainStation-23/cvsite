@@ -69,24 +69,24 @@ export const SkillCard: React.FC<SkillCardProps> = ({
     setHasChanges(false);
   };
 
+  // Determine if the entire card should show drag cursor
+  const shouldShowDragCursor = isDraggable && isEditing && !isDragging;
+
   return (
     <Card 
       ref={setNodeRef}
       style={style}
       className={`transition-all duration-200 hover:shadow-md ${
-        isDragging ? 'ring-2 ring-cvsite-teal shadow-lg opacity-90' : ''
-      } ${isDraggable && isEditing ? 'cursor-grab active:cursor-grabbing' : ''}`}
+        isDragging ? 'ring-2 ring-cvsite-teal shadow-lg opacity-50' : ''
+      } ${shouldShowDragCursor ? 'cursor-grab active:cursor-grabbing' : ''}`}
+      {...(shouldShowDragCursor ? { ...attributes, ...listeners } : {})}
     >
       <CardContent className="p-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-3 flex-1">
             {isDraggable && isEditing && (
-              <div
-                {...attributes}
-                {...listeners}
-                className="cursor-grab active:cursor-grabbing touch-none flex-shrink-0"
-              >
-                <GripVertical className="h-4 w-4 text-gray-400 hover:text-gray-600" />
+              <div className="flex-shrink-0 text-gray-400 hover:text-gray-600">
+                <GripVertical className="h-4 w-4" />
               </div>
             )}
             
@@ -116,7 +116,10 @@ export const SkillCard: React.FC<SkillCardProps> = ({
                         <button
                           key={i}
                           type="button"
-                          onClick={() => handleProficiencyChange(i + 1)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleProficiencyChange(i + 1);
+                          }}
                           className={`w-5 h-5 rounded transition-colors ${
                             i < editedSkill.proficiency 
                               ? 'bg-cvsite-teal hover:bg-cvsite-teal/80' 
@@ -133,7 +136,10 @@ export const SkillCard: React.FC<SkillCardProps> = ({
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={handleSave}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleSave();
+                        }}
                         className="h-7 px-3 text-xs bg-green-50 border-green-200 text-green-700 hover:bg-green-100"
                       >
                         <Check className="h-3 w-3 mr-1" />
@@ -142,7 +148,10 @@ export const SkillCard: React.FC<SkillCardProps> = ({
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={handleCancel}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleCancel();
+                        }}
                         className="h-7 px-3 text-xs"
                       >
                         <X className="h-3 w-3 mr-1" />
@@ -192,7 +201,10 @@ export const SkillCard: React.FC<SkillCardProps> = ({
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={() => onDelete(skill.id)}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onDelete(skill.id);
+                }}
                 className="h-8 w-8 p-0 text-red-600 hover:text-red-700 hover:bg-red-50"
               >
                 <Trash2 className="h-4 w-4" />

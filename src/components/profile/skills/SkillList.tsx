@@ -48,10 +48,12 @@ export const SkillList: React.FC<SkillListProps> = ({
   const [activeId, setActiveId] = useState<string | null>(null);
   const [localSkills, setLocalSkills] = useState<Skill[]>(skills);
 
-  // Update local skills when props change
+  // Update local skills when props change, but only if we're not currently dragging
   useEffect(() => {
-    setLocalSkills(skills);
-  }, [skills]);
+    if (!activeId) {
+      setLocalSkills(skills);
+    }
+  }, [skills, activeId]);
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -70,19 +72,21 @@ export const SkillList: React.FC<SkillListProps> = ({
 
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
-    setActiveId(null);
-
+    
     if (over && active.id !== over.id && onReorderSkills) {
       const oldIndex = localSkills.findIndex((skill) => skill.id === active.id);
       const newIndex = localSkills.findIndex((skill) => skill.id === over.id);
 
-      // Optimistic update - update UI immediately
       const reorderedSkills = arrayMove(localSkills, oldIndex, newIndex);
+      
+      // Update local state immediately for smooth animation
       setLocalSkills(reorderedSkills);
 
       // Then update the database
       onReorderSkills(reorderedSkills);
     }
+    
+    setActiveId(null);
   };
 
   const activeSkill = activeId ? localSkills.find(skill => skill.id === activeId) : null;
