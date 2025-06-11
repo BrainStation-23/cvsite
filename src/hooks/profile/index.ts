@@ -1,5 +1,4 @@
 
-import { useState } from 'react';
 import { useGeneralInfo } from './use-general-info';
 import { useSkills } from './use-skills';
 import { useExperience } from './use-experience';
@@ -8,19 +7,12 @@ import { useTraining } from './use-training';
 import { useAchievements } from './use-achievements';
 import { useProjects } from './use-projects';
 
-export { useGeneralInfo } from './use-general-info';
-export { useSkills } from './use-skills';
-export { useExperience } from './use-experience';
-export { useEducation } from './use-education';
-export { useTraining } from './use-training';
-export { useAchievements } from './use-achievements';
-export { useProjects } from './use-projects';
-
-export type ProfileFormData = {
+export interface ProfileFormData {
   firstName: string;
   lastName: string;
-  biography: string;
-};
+  biography?: string;
+  profileImage?: string;
+}
 
 export function useProfile() {
   const generalInfoHook = useGeneralInfo();
@@ -38,7 +30,7 @@ export function useProfile() {
                    trainingHook.isLoading ||
                    achievementsHook.isLoading ||
                    projectsHook.isLoading;
-  
+
   const isSaving = generalInfoHook.isSaving || 
                    skillsHook.isSaving || 
                    experienceHook.isSaving || 
@@ -48,7 +40,6 @@ export function useProfile() {
                    projectsHook.isSaving;
 
   return {
-    // State
     isLoading,
     isSaving,
     generalInfo: generalInfoHook.generalInfo,
@@ -59,14 +50,13 @@ export function useProfile() {
     trainings: trainingHook.trainings,
     achievements: achievementsHook.achievements,
     projects: projectsHook.projects,
-    
-    // Methods
     saveGeneralInfo: generalInfoHook.saveGeneralInfo,
     saveTechnicalSkill: skillsHook.saveTechnicalSkill,
     saveSpecializedSkill: skillsHook.saveSpecializedSkill,
     deleteTechnicalSkill: skillsHook.deleteTechnicalSkill,
     deleteSpecializedSkill: skillsHook.deleteSpecializedSkill,
     reorderTechnicalSkills: skillsHook.reorderTechnicalSkills,
+    reorderSpecializedSkills: skillsHook.reorderSpecializedSkills,
     saveExperience: experienceHook.saveExperience,
     updateExperience: experienceHook.updateExperience,
     deleteExperience: experienceHook.deleteExperience,
@@ -77,7 +67,7 @@ export function useProfile() {
     updateTraining: trainingHook.updateTraining,
     deleteTraining: trainingHook.deleteTraining,
     saveAchievement: achievementsHook.saveAchievement,
-    updateAchievement: achievementsHook.updateAchievement, 
+    updateAchievement: achievementsHook.updateAchievement,
     deleteAchievement: achievementsHook.deleteAchievement,
     saveProject: projectsHook.saveProject,
     updateProject: projectsHook.updateProject,

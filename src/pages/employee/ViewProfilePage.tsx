@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import DashboardLayout from '../../components/Layout/DashboardLayout';
@@ -25,7 +24,7 @@ const ViewProfilePage: React.FC = () => {
   
   // Use the updated hooks with profileId
   const { isLoading: generalInfoLoading, generalInfo, saveGeneralInfo, isSaving: generalInfoSaving } = useGeneralInfo(profileId);
-  const { isLoading: skillsLoading, technicalSkills, specializedSkills, saveTechnicalSkill, saveSpecializedSkill, deleteTechnicalSkill, deleteSpecializedSkill, reorderTechnicalSkills, isSaving: skillsSaving } = useSkills(profileId);
+  const { isLoading: skillsLoading, technicalSkills, specializedSkills, saveTechnicalSkill, saveSpecializedSkill, deleteTechnicalSkill, deleteSpecializedSkill, reorderTechnicalSkills, reorderSpecializedSkills, isSaving: skillsSaving } = useSkills(profileId);
   const { experiences, saveExperience, updateExperience, deleteExperience, isLoading: experienceLoading, isSaving: experienceSaving } = useExperience(profileId);
   const { education, saveEducation, updateEducation, deleteEducation, isLoading: educationLoading, isSaving: educationSaving } = useEducation(profileId);
   const { trainings, saveTraining, updateTraining, deleteTraining, isLoading: trainingLoading, isSaving: trainingSaving } = useTraining(profileId);
@@ -165,6 +164,7 @@ const ViewProfilePage: React.FC = () => {
             saveTechnicalSkill={saveTechnicalSkill}
             saveSpecializedSkill={saveSpecializedSkill}
             reorderTechnicalSkills={reorderTechnicalSkills}
+            reorderSpecializedSkills={reorderSpecializedSkills}
             profileId={profileId}
             saveGeneralInfo={handleGeneralInfoSave}
           />

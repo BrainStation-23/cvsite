@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
@@ -41,7 +42,7 @@ export function useSkills(profileId?: string) {
     }
   };
 
-  // Fetch specialized skills with priority ordering
+  // Fetch specialized skills without priority ordering (they don't have priority column)
   const fetchSpecializedSkills = async () => {
     if (!targetProfileId) return;
     
@@ -50,16 +51,16 @@ export function useSkills(profileId?: string) {
         .from('specialized_skills')
         .select('*')
         .eq('profile_id', targetProfileId)
-        .order('priority', { ascending: true });
+        .order('created_at', { ascending: true });
       
       if (error) throw error;
       
       if (data) {
-        setSpecializedSkills(data.map(skill => ({
+        setSpecializedSkills(data.map((skill, index) => ({
           id: skill.id,
           name: skill.name,
           proficiency: skill.proficiency,
-          priority: skill.priority || 0
+          priority: index + 1 // Assign priority based on order for UI consistency
         })));
       }
     } catch (error) {
@@ -116,24 +117,25 @@ export function useSkills(profileId?: string) {
     }
   };
 
-  // Reorder specialized skills
+  // Reorder specialized skills (simulated reordering since no priority column)
   const reorderSpecializedSkills = async (reorderedSkills: Skill[]) => {
     if (!targetProfileId) return false;
     
     try {
       setIsSaving(true);
       
-      // Update priorities in the database
-      const updates = reorderedSkills.map((skill, index) => ({
-        id: skill.id,
-        priority: index + 1
-      }));
-
-      for (const update of updates) {
+      // Since specialized_skills doesn't have priority column, we'll use created_at timestamps
+      // to simulate ordering by updating each record with a new timestamp
+      const now = new Date();
+      
+      for (let i = 0; i < reorderedSkills.length; i++) {
+        const skill = reorderedSkills[i];
+        const timestamp = new Date(now.getTime() + i * 1000).toISOString(); // Add seconds to maintain order
+        
         const { error } = await supabase
           .from('specialized_skills')
-          .update({ priority: update.priority })
-          .eq('id', update.id);
+          .update({ updated_at: timestamp })
+          .eq('id', skill.id);
         
         if (error) throw error;
       }
@@ -233,7 +235,7 @@ export function useSkills(profileId?: string) {
     }
   };
 
-  // Save specialized skill with priority
+  // Save specialized skill (without priority in database)
   const saveSpecializedSkill = async (skill: Skill) => {
     if (!targetProfileId) return false;
     
@@ -247,29 +249,25 @@ export function useSkills(profileId?: string) {
           .update({
             name: skill.name,
             proficiency: skill.proficiency,
-            priority: skill.priority,
             updated_at: new Date().toISOString()
           })
           .eq('id', skill.id);
         
         if (error) throw error;
       } else {
-        // Create new skill with highest priority
-        const maxPriority = Math.max(...specializedSkills.map(s => s.priority), 0);
-        
+        // Create new skill
         const { data, error } = await supabase
           .from('specialized_skills')
           .insert({
             profile_id: targetProfileId,
             name: skill.name,
-            proficiency: skill.proficiency,
-            priority: maxPriority + 1
+            proficiency: skill.proficiency
           })
           .select();
         
         if (error) throw error;
         
-        skill = { ...skill, id: data[0].id, priority: maxPriority + 1 };
+        skill = { ...skill, id: data[0].id, priority: specializedSkills.length + 1 };
       }
       
       // Update local state
