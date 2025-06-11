@@ -22,12 +22,15 @@ export class EducationSectionRenderer {
   render(profile: any, fieldMappings: FieldMapping[], section: TemplateSection, customTitle?: string): string {
     const title = customTitle || 'Education';
     const education = profile.education || [];
-    
+
     const educationItems = education.map((edu: any) => `
       <div class="item education-item">
         <div class="item-header">
           <h4 class="item-title">${edu.degree || ''}</h4>
-          <div class="item-subtitle">${edu.university || ''} | ${edu.graduation_year || ''}</div>
+          <div class="item-subtitle">
+            <div class="field-heading">${edu.university || ''}</div>
+            <div class="field-subheading">${edu.graduation_year || ''}</div>
+          </div>
         </div>
         ${edu.department ? `<div class="item-detail">Department: ${edu.department}</div>` : ''}
         ${edu.gpa ? `<div class="item-detail">GPA: ${edu.gpa}</div>` : ''}

@@ -268,6 +268,21 @@ export class HTMLExporter extends BaseExporter {
         text-decoration: underline;
       }
 
+      .field-heading {
+        font-weight: bold;
+        color: inherit;
+        font-size: 1.1em;
+        margin: 6pt 0 4pt 0;
+        display: block;
+      }
+
+      .field-subheading {
+        color: ${layoutConfig.secondaryColor || '#6b7280'};
+        font-size: 0.9em;
+        margin: 4pt 0;
+        display: block;
+      }
+
       @media print {
         body {
           background: white;

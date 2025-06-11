@@ -80,10 +80,10 @@ export class GeneralSectionRenderer {
     const profileImageHTML = hasProfileImage ? `
       <div class="profile-image-container" style="
         margin-bottom: 10pt; 
-        text-align: center;
+        text-align: left;
         width: 100%;
-        display: flex;
-        justify-content: center;
+        display: flow;
+        justify-content: left;
         align-items: center;
       ">
         <div class="profile-image-wrapper" style="
@@ -131,7 +131,7 @@ export class GeneralSectionRenderer {
         font-size: 1.5em; 
         font-weight: bold; 
         margin: 0 0 8pt 0; 
-        text-align: center;
+        text-align: left;
         color: inherit;
       ">${fullName}</h1>`;
     }
@@ -141,40 +141,40 @@ export class GeneralSectionRenderer {
     
     // Email - access directly from profile object
     if (isFieldEnabled('email') && profile?.email) {
-      fieldsHTML += `<p style="margin: 4pt 0; text-align: center; color: inherit;">
+      fieldsHTML += `<p style="margin: 4pt 0; text-align: left; color: inherit;">
         ${applyMasking(profile.email, 'email')}
       </p>`;
     }
     
     // Phone - access directly from profile object
     if (isFieldEnabled('phone') && profile?.phone) {
-      fieldsHTML += `<p style="margin: 4pt 0; text-align: center; color: inherit;">
+      fieldsHTML += `<p style="margin: 4pt 0; text-align: left; color: inherit;">
         ${applyMasking(profile.phone, 'phone')}
       </p>`;
     }
     
     // Location - access directly from profile object
     if (isFieldEnabled('location') && profile?.location) {
-      fieldsHTML += `<p style="margin: 4pt 0; text-align: center; color: inherit;">
+      fieldsHTML += `<p style="margin: 4pt 0; text-align: left; color: inherit;">
         ${applyMasking(profile.location, 'location')}
       </p>`;
     }
     
     // Designation - access directly from profile object
     if (isFieldEnabled('designation') && profile?.designation) {
-      fieldsHTML += `<p style="margin: 4pt 0; text-align: center; font-style: italic; color: inherit;">
+      fieldsHTML += `<p style="margin: 4pt 0; text-align: left; font-style: italic; color: inherit;">
         ${applyMasking(profile.designation, 'designation')}
       </p>`;
     }
     
     // Biography - access directly from profile object
     if (isFieldEnabled('biography') && profile?.biography) {
-      fieldsHTML += `<p style="margin-top: 10pt; font-size: 0.9em; font-style: italic; text-align: center; color: inherit;">
+      fieldsHTML += `<p style="margin-top: 10pt; font-size: 0.9em; font-style: italic; text-align: left; color: inherit;">
         ${applyMasking(profile.biography, 'biography')}
       </p>`;
     }
     
-    const finalHTML = `<div class="section general-section" style="text-align: center; margin-bottom: 20pt;">
+    const finalHTML = `<div class="section general-section" style="text-align: left; margin-bottom: 20pt;">
       ${profileImageHTML}
       ${nameHTML}
       ${fieldsHTML}
