@@ -12,7 +12,8 @@ export class HTMLPageDistributor {
     fieldMappings: FieldMapping[],
     profile: any,
     layoutConfig: Record<string, any> = {},
-    orientation: string = 'portrait'
+    orientation: string = 'portrait',
+    styles: any = {}
   ): string[] {
     console.log('=== HTML PAGE DISTRIBUTOR DEBUG START ===');
     console.log('HTML Page Distributor - Input sections:', sections.length);
@@ -55,7 +56,7 @@ export class HTMLPageDistributor {
     // Use the same strategy as the preview
     const strategy = LayoutStrategyFactory.createStrategy(layoutType);
     console.log('HTML Page Distributor - Using strategy:', strategy.constructor.name);
-    
+
     const distributedPages = strategy.distribute(
       sections,
       fieldMappings,
@@ -74,7 +75,7 @@ export class HTMLPageDistributor {
       });
     });
 
-    // Convert each page to HTML - PASS ACTUAL PROFILE AND FIELD MAPPINGS
+    // Convert each page to HTML - PASS ACTUAL PROFILE, FIELD MAPPINGS AND STYLES
     const htmlPages = distributedPages.map((pageContent, index) => {
       return this.generatePageHTML(
         pageContent,
@@ -82,7 +83,8 @@ export class HTMLPageDistributor {
         index + 1,
         distributedPages.length,
         profile,          // Pass the actual profile
-        fieldMappings     // Pass the actual field mappings
+        fieldMappings,    // Pass the actual field mappings
+        styles            // Pass the styles
       );
     });
 
@@ -96,7 +98,8 @@ export class HTMLPageDistributor {
     pageNumber: number,
     totalPages: number,
     profile: any,          // Add profile parameter
-    fieldMappings: FieldMapping[]  // Add field mappings parameter
+    fieldMappings: FieldMapping[],  // Add field mappings parameter
+    styles: any = {}       // Add styles parameter
   ): string {
     console.log(`HTML Page Distributor - Generating HTML for page ${pageNumber}:`, {
       sectionsCount: pageContent.sections.length,
@@ -111,7 +114,8 @@ export class HTMLPageDistributor {
       fieldMappings,     // Pass actual field mappings instead of empty array
       profile,           // Pass actual profile instead of empty object
       layoutType,
-      pageContent.partialSections
+      pageContent.partialSections,
+      styles             // Pass styles
     );
 
     return `<div class="cv-page" data-page="${pageNumber}">

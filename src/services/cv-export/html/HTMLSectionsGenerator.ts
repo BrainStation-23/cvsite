@@ -40,7 +40,8 @@ export class HTMLSectionsGenerator {
     sections: TemplateSection[], 
     profile: any, 
     fieldMappings: FieldMapping[],
-    partialSections: any = {}
+    partialSections: any = {},
+    styles: any = {}
   ): string {
     console.log('=== HTML SECTIONS GENERATOR DEBUG START ===');
     console.log('HTML Sections Generator - Input sections:', sections.length);
@@ -84,17 +85,17 @@ export class HTMLSectionsGenerator {
     // Sort sections by display order
     const sortedSections = [...sections].sort((a, b) => a.display_order - b.display_order);
     console.log('HTML Sections Generator - Sorted sections:', sortedSections.map(s => s.section_type));
-    
+
     const renderedSections = sortedSections.map(section => {
       console.log(`HTML Sections Generator - Rendering section: ${section.section_type} (id: ${section.id})`);
-      const html = this.renderSection(section, profile, fieldMappings, partialSections);
+      const html = this.renderSection(section, profile, fieldMappings, partialSections, styles);
       console.log(`HTML Sections Generator - Section ${section.section_type} rendered, length:`, html.length);
       return html;
     }).filter(html => html.trim().length > 0);
 
     console.log('HTML Sections Generator - Final rendered sections count:', renderedSections.length);
     console.log('=== HTML SECTIONS GENERATOR DEBUG END ===');
-    
+
     return renderedSections.join('\n');
   }
 
@@ -102,10 +103,11 @@ export class HTMLSectionsGenerator {
     section: TemplateSection, 
     profile: any, 
     fieldMappings: FieldMapping[],
-    partialSections: any
+    partialSections: any,
+    styles: any = {}
   ): string {
     console.log(`HTML Sections Generator - Processing section: ${section.section_type}`);
-    
+
     // Handle page break sections
     if (section.section_type === 'page_break') {
       console.log('HTML Sections Generator - Rendering page break');
@@ -123,7 +125,7 @@ export class HTMLSectionsGenerator {
     if (partialData) {
       console.log(`HTML Sections Generator - Using partial data for ${section.section_type}:`, partialData);
     }
-    
+
     // Create modified profile with partial data if applicable - only for non-general sections
     let profileForSection = profile;
     if (partialData && section.section_type !== 'general') {
@@ -178,11 +180,11 @@ export class HTMLSectionsGenerator {
         break;
       case 'technical_skills':
         console.log('HTML Sections Generator - Rendering technical skills section');
-        html = this.skillsRenderer.renderTechnicalSkills(profileForSection, sectionFieldMappings, section, partialData?.title);
+        html = this.skillsRenderer.renderTechnicalSkills(profileForSection, sectionFieldMappings, section, partialData?.title, styles);
         break;
       case 'specialized_skills':
         console.log('HTML Sections Generator - Rendering specialized skills section');
-        html = this.skillsRenderer.renderSpecializedSkills(profileForSection, sectionFieldMappings, section, partialData?.title);
+        html = this.skillsRenderer.renderSpecializedSkills(profileForSection, sectionFieldMappings, section, partialData?.title, styles);
         break;
       case 'projects':
         console.log('HTML Sections Generator - Rendering projects section');
