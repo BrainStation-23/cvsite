@@ -64,18 +64,27 @@ export const useSectionOperations = (
         defaultPlacement = defaultSidebarSections.includes(sectionType) ? 'sidebar' : 'main';
       }
       
+      // Set default styling config based on section type
+      let defaultStylingConfig: any = {
+        layout_placement: defaultPlacement,
+        fields: defaultFields
+      };
+
+      if (sectionType === 'projects') {
+        defaultStylingConfig.projects_to_view = 3;
+      } else if (sectionType === 'technical_skills' || sectionType === 'specialized_skills') {
+        defaultStylingConfig.max_skills_count = 10;
+      } else if (sectionType !== 'page_break') {
+        defaultStylingConfig.display_style = 'default';
+      }
+      
       const newSection = {
         template_id: templateId,
         section_type: sectionType,
         display_order: sections.length + 1,
         is_required: false,
         field_mapping: {},
-        styling_config: sectionType === 'page_break' ? {} : {
-          display_style: 'default',
-          projects_to_view: sectionType === 'projects' ? 3 : undefined,
-          fields: defaultFields,
-          layout_placement: defaultPlacement
-        }
+        styling_config: sectionType === 'page_break' ? {} : defaultStylingConfig
       };
 
       const { data, error } = await supabase
@@ -93,12 +102,7 @@ export const useSectionOperations = (
         ...data,
         section_type: data.section_type as CVSectionType,
         field_mapping: data.field_mapping as Record<string, any> || {},
-        styling_config: sectionType === 'page_break' ? {} : { 
-          display_style: 'default', 
-          projects_to_view: sectionType === 'projects' ? 3 : undefined,
-          fields: defaultFields,
-          layout_placement: defaultPlacement
-        }
+        styling_config: defaultStylingConfig
       } as SectionConfig;
 
       setSections([...sections, typedSection]);
