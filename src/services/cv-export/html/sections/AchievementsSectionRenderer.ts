@@ -19,19 +19,36 @@ interface TemplateSection {
 }
 
 export class AchievementsSectionRenderer {
+  // Helper function to format date in MMM'YYYY format (e.g., Jan'2021)
+  private formatDate(dateString: string | null | undefined): string {
+    if (!dateString) return '';
+    try {
+      const date = new Date(dateString);
+      const month = date.toLocaleDateString('en-US', { month: 'short' });
+      const year = date.getFullYear();
+      return `${month}'${year}`;
+    } catch {
+      return dateString.toString();
+    }
+  }
+
   render(profile: any, fieldMappings: FieldMapping[], section: TemplateSection, customTitle?: string): string {
     const title = customTitle || 'Achievements';
     const achievements = profile.achievements || [];
-    
-    const achievementItems = achievements.map((achievement: any) => `
+
+    const achievementItems = achievements.map((achievement: any) => {
+      const achievementDate = this.formatDate(achievement.date);
+
+      return `
       <div class="item achievement-item">
         <div class="item-header">
           <h4 class="item-title">${achievement.title || ''}</h4>
-          <div class="item-subtitle">${achievement.date || ''}</div>
+          <div class="item-subtitle">${achievementDate}</div>
         </div>
         ${achievement.description ? `<div class="item-description">${achievement.description}</div>` : ''}
       </div>
-    `).join('');
+    `;
+    }).join('');
 
     return `<div class="section achievements-section">
       <h2 class="section-title">${title}</h2>

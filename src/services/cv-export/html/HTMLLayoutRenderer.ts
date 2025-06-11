@@ -29,7 +29,8 @@ export class HTMLLayoutRenderer {
     fieldMappings: FieldMapping[], 
     profile: any, 
     layoutType: string,
-    partialSections: any = {}
+    partialSections: any = {},
+    styles: any = {}
   ): string {
     console.log('=== HTML LAYOUT RENDERER DEBUG START ===');
     console.log('HTML Layout Renderer - Input sections:', sections.length);
@@ -57,7 +58,7 @@ export class HTMLLayoutRenderer {
 
     // Group sections by their target zones
     const sectionsByZone: Record<string, TemplateSection[]> = {};
-    
+
     layoutConfig.zones.forEach(zone => {
       sectionsByZone[zone.id] = [];
     });
@@ -65,10 +66,10 @@ export class HTMLLayoutRenderer {
     // Distribute sections to zones
     sections.forEach(section => {
       const placement = section.styling_config?.layout_placement || 'main';
-      
+
       // Map placement to actual zone based on layout configuration
       let targetZone = 'main'; // default fallback
-      
+
       if (placement === 'sidebar' && sectionsByZone['sidebar']) {
         targetZone = 'sidebar';
       } else if (placement === 'sidebar' && sectionsByZone['secondary']) {
@@ -77,7 +78,7 @@ export class HTMLLayoutRenderer {
       } else {
         targetZone = 'main';
       }
-      
+
       if (sectionsByZone[targetZone]) {
         sectionsByZone[targetZone].push(section);
       } else {
@@ -94,13 +95,14 @@ export class HTMLLayoutRenderer {
       const columnSections = sectionsByZone[column.zone] || [];
       console.log(`HTML Layout Renderer - Generating column ${column.id} (zone: ${column.zone}) with ${columnSections.length} sections:`, 
         columnSections.map(s => s.section_type));
-      
-      // PASS ACTUAL PROFILE AND FIELD MAPPINGS TO SECTIONS GENERATOR
+
+      // PASS ACTUAL PROFILE, FIELD MAPPINGS AND STYLES TO SECTIONS GENERATOR
       const sectionsHTML = this.sectionsGenerator.generateSectionsHTML(
         columnSections, 
         profile,           // Pass actual profile instead of empty object
         fieldMappings,     // Pass actual field mappings instead of empty array
-        partialSections
+        partialSections,
+        styles             // Pass styles
       );
 
       return `<div class="layout-column layout-column-${column.id}" data-zone="${column.zone}">
@@ -116,10 +118,10 @@ export class HTMLLayoutRenderer {
 
   generateLayoutCSS(layoutType: string, layoutConfig: Record<string, any>): string {
     const layoutStyles = LayoutStyleFactory.generateStyles(layoutType, layoutConfig);
-    
+
     // Convert React style objects to CSS
     let css = '';
-    
+
     // Container styles
     css += `.layout-container {
       ${this.styleObjectToCSS(layoutStyles.containerStyles)}
@@ -147,11 +149,11 @@ export class HTMLLayoutRenderer {
           color: ${zoneStyle.textColor};
           border-bottom-color: ${zoneStyle.textColor}30;
         }\n`;
-        
+
         css += `[data-zone="${zoneId}"] .item-title {
           color: ${zoneStyle.textColor};
         }\n`;
-        
+
         css += `[data-zone="${zoneId}"] .item-subtitle {
           color: ${zoneStyle.textColor}CC;
         }\n`;
@@ -164,13 +166,13 @@ export class HTMLLayoutRenderer {
         box-sizing: border-box !important;
         overflow: hidden !important;
       }
-      
+
       .profile-image-wrapper {
         box-sizing: border-box !important;
         overflow: hidden !important;
         border-radius: 4px !important;
       }
-      
+
       .profile-image {
         max-width: 100% !important;
         max-height: 100% !important;
@@ -179,7 +181,7 @@ export class HTMLLayoutRenderer {
         object-fit: cover !important;
         object-position: center !important;
       }
-      
+
       /* Ensure profile image container respects layout constraints */
       .layout-column .profile-image-container,
       [data-zone] .profile-image-container {
@@ -187,7 +189,7 @@ export class HTMLLayoutRenderer {
         max-width: 100% !important;
         overflow: visible !important;
       }
-      
+
       .layout-column .profile-image-wrapper,
       [data-zone] .profile-image-wrapper {
         flex-shrink: 0 !important;
