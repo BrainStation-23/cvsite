@@ -10,6 +10,7 @@ export interface GeneralInfo {
   lastName: string;
   biography: string | null;
   profileImage: string | null;
+  currentDesignation: string | null;
 }
 
 export function useGeneralInfo(profileId?: string) {
@@ -62,7 +63,8 @@ export function useGeneralInfo(profileId?: string) {
           firstName: data.first_name,
           lastName: data.last_name,
           biography: data.biography,
-          profileImage: data.profile_image
+          profileImage: data.profile_image,
+          currentDesignation: data.current_designation
         };
       } else {
         // Use user data as fallback only if this is current user
@@ -71,14 +73,16 @@ export function useGeneralInfo(profileId?: string) {
             firstName: user.firstName || '',
             lastName: user.lastName || '',
             biography: null,
-            profileImage: user.profileImageUrl || null
+            profileImage: user.profileImageUrl || null,
+            currentDesignation: null
           };
         }
         return {
           firstName: '',
           lastName: '',
           biography: null,
-          profileImage: null
+          profileImage: null,
+          currentDesignation: null
         };
       }
     },
@@ -103,6 +107,7 @@ export function useGeneralInfo(profileId?: string) {
     lastName: string;
     biography: string | null;
     profileImage?: string | null;
+    currentDesignation?: string | null;
   }) => {
     if (!targetProfileId) return false;
     
@@ -127,6 +132,7 @@ export function useGeneralInfo(profileId?: string) {
             last_name: data.lastName,
             biography: data.biography,
             profile_image: data.profileImage,
+            current_designation: data.currentDesignation,
             updated_at: new Date().toISOString()
           })
           .eq('profile_id', targetProfileId);
@@ -141,7 +147,8 @@ export function useGeneralInfo(profileId?: string) {
             first_name: data.firstName,
             last_name: data.lastName,
             biography: data.biography,
-            profile_image: data.profileImage
+            profile_image: data.profileImage,
+            current_designation: data.currentDesignation
           });
         
         if (error) throw error;
@@ -176,7 +183,8 @@ export function useGeneralInfo(profileId?: string) {
       firstName: '',
       lastName: '',
       biography: null,
-      profileImage: null
+      profileImage: null,
+      currentDesignation: null
     },
     saveGeneralInfo,
   };
