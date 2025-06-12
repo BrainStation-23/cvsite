@@ -343,18 +343,32 @@ export function useProfile() {
     try {
       setIsSaving(true);
 
-      const { error } = await supabase
-        .from('technical_skills')
-        .upsert({
-          id: skill.id,
-          profile_id: user.id,
-          name: skill.name,
-          proficiency: skill.proficiency,
-          priority: skill.priority,
-          updated_at: new Date().toISOString()
-        }, { onConflict: 'id', returning: 'minimal' });
-
-      if (error) throw error;
+      if (skill.id) {
+        // Update existing skill
+        const { error } = await supabase
+          .from('technical_skills')
+          .update({
+            name: skill.name,
+            proficiency: skill.proficiency,
+            priority: skill.priority,
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', skill.id);
+        
+        if (error) throw error;
+      } else {
+        // Create new skill
+        const { error } = await supabase
+          .from('technical_skills')
+          .insert({
+            profile_id: user.id,
+            name: skill.name,
+            proficiency: skill.proficiency,
+            priority: skill.priority
+          });
+        
+        if (error) throw error;
+      }
 
       await fetchTechnicalSkills();
 
@@ -383,18 +397,32 @@ export function useProfile() {
     try {
       setIsSaving(true);
 
-      const { error } = await supabase
-        .from('specialized_skills')
-        .upsert({
-          id: skill.id,
-          profile_id: user.id,
-          name: skill.name,
-          proficiency: skill.proficiency,
-          priority: skill.priority,
-          updated_at: new Date().toISOString()
-        }, { onConflict: 'id', returning: 'minimal' });
-
-      if (error) throw error;
+      if (skill.id) {
+        // Update existing skill
+        const { error } = await supabase
+          .from('specialized_skills')
+          .update({
+            name: skill.name,
+            proficiency: skill.proficiency,
+            priority: skill.priority,
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', skill.id);
+        
+        if (error) throw error;
+      } else {
+        // Create new skill
+        const { error } = await supabase
+          .from('specialized_skills')
+          .insert({
+            profile_id: user.id,
+            name: skill.name,
+            proficiency: skill.proficiency,
+            priority: skill.priority
+          });
+        
+        if (error) throw error;
+      }
 
       await fetchSpecializedSkills();
 
@@ -1045,7 +1073,7 @@ export function useProfile() {
           end_date: project.endDate?.toISOString() || null,
           is_current: project.isCurrent || false,
           description: project.description,
-          technologies_used: project.technologiesUsed,
+          technologiesUsed: project.technologiesUsed,
           url: project.url
         });
 
@@ -1087,7 +1115,7 @@ export function useProfile() {
           end_date: project.endDate?.toISOString() || null,
           is_current: project.isCurrent,
           description: project.description,
-          technologies_used: project.technologiesUsed,
+          technologiesUsed: project.technologiesUsed,
           url: project.url
         })
         .eq('id', id)
