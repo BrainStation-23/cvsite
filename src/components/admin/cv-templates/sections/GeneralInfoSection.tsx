@@ -1,6 +1,5 @@
 
 import React from 'react';
-import { FieldProcessor } from '../FieldProcessor';
 
 interface FieldMapping {
   original_field_name: string;
@@ -218,10 +217,9 @@ export const GeneralInfoSection: React.FC<GeneralInfoSectionProps> = ({
         break;
 
       case 'current_designation':
-      case 'currentDesignation':
         if (isFieldEnabled('current_designation') && profile.current_designation) {
           return (
-            <p key="current_designation" style={{ marginTop: '8pt', fontSize: '0.9em', fontStyle: 'italic' }}>
+            <p key="current_designation" style={{ fontSize: '1.1em', fontStyle: 'bold' }}>
               {applyMasking(profile.current_designation, 'current_designation')}
             </p>
           );
