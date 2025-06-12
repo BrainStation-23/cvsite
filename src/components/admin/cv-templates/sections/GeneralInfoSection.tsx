@@ -1,6 +1,5 @@
 
 import React from 'react';
-import { FieldProcessor } from '../FieldProcessor';
 
 interface FieldMapping {
   original_field_name: string;
@@ -79,15 +78,30 @@ export const GeneralInfoSection: React.FC<GeneralInfoSectionProps> = ({
 
   const displayStyleClasses = getDisplayStyleClasses();
 
+  // Get all available fields from profile and field mappings
+  const getAllAvailableFields = () => {
+    const profileFields = Object.keys(profile || {});
+    const mappingFields = fieldMappings.map(mapping => mapping.original_field_name);
+    const configFields = fieldConfigs.map(config => config.field);
+    
+    // Combine all fields and remove duplicates
+    const allFields = [...new Set([...profileFields, ...mappingFields, ...configFields])];
+    
+    return allFields.filter(field => field && field !== 'id' && field !== 'created_at' && field !== 'updated_at');
+  };
+
   // Sort fields by their configured order, or use default order if no configuration
   const getOrderedFields = () => {
+    const allFields = getAllAvailableFields();
+    
     if (fieldConfigs.length === 0) {
-      // Default order if no configuration
+      // Default order if no configuration - prioritize known fields first
+      const knownFields = ['profile_image', 'first_name', 'last_name', 'employee_id', 'designation', 'biography'];
+      const unknownFields = allFields.filter(field => !knownFields.includes(field));
+      
       return [
-        { name: 'profile_image', order: 1 },
-        { name: 'name', order: 2 },
-        { name: 'employee_id', order: 3 },
-        { name: 'biography', order: 4 },
+        ...knownFields.filter(field => allFields.includes(field)).map((field, index) => ({ name: field, order: index + 1 })),
+        ...unknownFields.map((field, index) => ({ name: field, order: knownFields.length + index + 1 }))
       ];
     }
 
@@ -104,6 +118,35 @@ export const GeneralInfoSection: React.FC<GeneralInfoSectionProps> = ({
     }).filter((field, index, self) => 
       // Remove duplicates (like multiple name entries)
       self.findIndex(f => f.name === field.name) === index
+    );
+  };
+
+  // Helper function to format field name for display
+  const formatFieldName = (fieldName: string) => {
+    return fieldName
+      .replace(/_/g, ' ')
+      .replace(/\b\w/g, l => l.toUpperCase());
+  };
+
+  // Helper function to get display name for a field
+  const getDisplayName = (fieldName: string) => {
+    const mapping = fieldMappings.find(m => m.original_field_name === fieldName);
+    const config = fieldConfigs.find(f => f.field === fieldName);
+    
+    return mapping?.display_name || config?.label || formatFieldName(fieldName);
+  };
+
+  // Generic field renderer for any field
+  const renderGenericField = (fieldName: string, value: any) => {
+    if (!value) return null;
+
+    const displayName = getDisplayName(fieldName);
+    const maskedValue = applyMasking(value, fieldName);
+
+    return (
+      <p key={fieldName} style={{ marginTop: '8pt', fontSize: '0.9em', color: 'inherit' }}>
+        <strong>{displayName}:</strong> {maskedValue}
+      </p>
     );
   };
 
@@ -170,6 +213,23 @@ export const GeneralInfoSection: React.FC<GeneralInfoSectionProps> = ({
               {applyMasking(profile.biography, 'biography')}
             </p>
           );
+        }
+        break;
+
+      case 'current_designation':
+        if (isFieldEnabled('current_designation') && profile.current_designation) {
+          return (
+            <p key="current_designation" style={{ fontSize: '1.1em', fontStyle: 'bold' }}>
+              {applyMasking(profile.current_designation, 'current_designation')}
+            </p>
+          );
+        }
+        break;
+
+      default:
+        // Handle any other field generically
+        if (isFieldEnabled(fieldName) && profile[fieldName]) {
+          return renderGenericField(fieldName, profile[fieldName]);
         }
         break;
     }

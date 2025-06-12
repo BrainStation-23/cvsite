@@ -9,6 +9,7 @@ import DegreeSettings from '@/components/admin/DegreeSettings';
 import DesignationSettings from '@/components/admin/DesignationSettings';
 import ReferenceSettings from '@/components/admin/reference/ReferenceSettings';
 import SbuSettings from '@/components/admin/SbuSettings';
+import HrContactSettings from '@/components/admin/HrContactSettings';
 
 const PlatformSettings: React.FC = () => {
   return (
@@ -53,6 +54,12 @@ const PlatformSettings: React.FC = () => {
                 className="h-12 rounded-none border-b-2 border-transparent data-[state=active]:border-cvsite-teal data-[state=active]:bg-transparent data-[state=active]:shadow-none px-6 font-medium"
               >
                 SBUs
+              </TabsTrigger>
+              <TabsTrigger 
+                value="hr-contacts" 
+                className="h-12 rounded-none border-b-2 border-transparent data-[state=active]:border-cvsite-teal data-[state=active]:bg-transparent data-[state=active]:shadow-none px-6 font-medium"
+              >
+                HR Contacts
               </TabsTrigger>
             </TabsList>
           </div>
@@ -103,6 +110,14 @@ const PlatformSettings: React.FC = () => {
               <ScrollArea className="h-full">
                 <div className="p-6">
                   <SbuSettings />
+                </div>
+              </ScrollArea>
+            </TabsContent>
+            
+            <TabsContent value="hr-contacts" className="mt-0 h-full">
+              <ScrollArea className="h-full">
+                <div className="p-6">
+                  <HrContactSettings />
                 </div>
               </ScrollArea>
             </TabsContent>

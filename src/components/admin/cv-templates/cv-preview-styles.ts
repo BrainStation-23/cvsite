@@ -39,7 +39,6 @@ export const createCVStyles = (template: CVTemplate) => {
     headerStyles: {
       textAlign: layoutConfig.layoutType === 'single-column' ? 'center' as const : 'left' as const,
       marginBottom: `${layoutConfig.sectionSpacing || 16}pt`,
-      borderBottom: `2px solid ${layoutConfig.primaryColor || '#1f2937'}`,
       paddingBottom: '10pt',
       gridColumn: layoutConfig.layoutType === 'two-column' ? '1 / -1' : 'auto',
       backgroundColor: 'transparent',

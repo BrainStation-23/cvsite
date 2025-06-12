@@ -531,6 +531,7 @@ export type Database = {
         Row: {
           biography: string | null
           created_at: string
+          current_designation: string | null
           first_name: string
           id: string
           last_name: string
@@ -541,6 +542,7 @@ export type Database = {
         Insert: {
           biography?: string | null
           created_at?: string
+          current_designation?: string | null
           first_name: string
           id?: string
           last_name: string
@@ -551,6 +553,7 @@ export type Database = {
         Update: {
           biography?: string | null
           created_at?: string
+          current_designation?: string | null
           first_name?: string
           id?: string
           last_name?: string
@@ -560,6 +563,13 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "general_information_current_designation_fkey"
+            columns: ["current_designation"]
+            isOneToOne: false
+            referencedRelation: "designations"
+            referencedColumns: ["name"]
+          },
+          {
             foreignKeyName: "general_information_profile_id_fkey"
             columns: ["profile_id"]
             isOneToOne: true
@@ -567,6 +577,30 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      hr_contacts: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          name?: string
+          updated_at?: string
+        }
+        Relationships: []
       }
       profiles: {
         Row: {

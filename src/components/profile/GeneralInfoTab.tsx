@@ -7,6 +7,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { UseFormReturn } from 'react-hook-form';
 import { ProfileImageUpload } from './ProfileImageUpload';
+import { DesignationCombobox } from '@/components/admin/designation/DesignationCombobox';
 import { Save } from 'lucide-react';
 
 // Define this type consistently across all files
@@ -15,6 +16,7 @@ export interface GeneralInfoFormData {
   lastName: string;
   biography: string;
   profileImage?: string | null;
+  currentDesignation?: string | null;
 }
 
 interface GeneralInfoTabProps {
@@ -41,6 +43,7 @@ export const GeneralInfoTab: React.FC<GeneralInfoTabProps> = ({
   const lastName = form.watch('lastName');
   const biography = form.watch('biography');
   const profileImage = form.watch('profileImage');
+  const currentDesignation = form.watch('currentDesignation');
   
   const userName = `${firstName} ${lastName}`.trim() || 'User';
 
@@ -51,7 +54,8 @@ export const GeneralInfoTab: React.FC<GeneralInfoTabProps> = ({
         firstName,
         lastName,
         biography,
-        profileImage
+        profileImage,
+        currentDesignation
       };
       setInitialValues(currentValues);
     } else {
@@ -60,13 +64,14 @@ export const GeneralInfoTab: React.FC<GeneralInfoTabProps> = ({
         firstName,
         lastName,
         biography,
-        profileImage
+        profileImage,
+        currentDesignation
       };
       
       const hasChanged = JSON.stringify(currentValues) !== JSON.stringify(initialValues);
       setHasChanges(hasChanged);
     }
-  }, [firstName, lastName, biography, profileImage, initialValues]);
+  }, [firstName, lastName, biography, profileImage, currentDesignation, initialValues]);
 
   const handleImageUpdate = (imageUrl: string | null) => {
     form.setValue('profileImage', imageUrl);
@@ -175,6 +180,28 @@ export const GeneralInfoTab: React.FC<GeneralInfoTabProps> = ({
                     )}
                   />
                 </div>
+
+                <FormField
+                  control={form.control}
+                  name="currentDesignation"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="block text-sm font-medium text-gray-700 dark:text-gray-300">Current Designation</FormLabel>
+                      <FormControl>
+                        {isEditing ? (
+                          <DesignationCombobox
+                            value={field.value || ''}
+                            onValueChange={field.onChange}
+                            placeholder="Select or add designation..."
+                          />
+                        ) : (
+                          <div className="mt-1 text-gray-900 dark:text-gray-100">{field.value || "No designation provided"}</div>
+                        )}
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
                 <FormField
                   control={form.control}

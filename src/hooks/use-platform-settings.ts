@@ -1,4 +1,3 @@
-
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -12,7 +11,7 @@ export interface SettingItem {
 }
 
 // Define valid table names for type safety
-export type SettingTableName = 'universities' | 'departments' | 'degrees' | 'designations' | 'references' | 'sbus';
+export type SettingTableName = 'universities' | 'departments' | 'degrees' | 'designations' | 'references' | 'sbus' | 'hr_contacts';
 
 export const usePlatformSettings = (table: SettingTableName) => {
   const { toast } = useToast();
