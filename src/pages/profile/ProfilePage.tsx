@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import DashboardLayout from '../../components/Layout/DashboardLayout';
 import { useToast } from '@/hooks/use-toast';
@@ -54,7 +55,8 @@ const ProfilePage: React.FC = () => {
       firstName: generalInfo.firstName,
       lastName: generalInfo.lastName,
       biography: generalInfo.biography || '',
-      profileImage: generalInfo.profileImage
+      profileImage: generalInfo.profileImage,
+      currentDesignation: generalInfo.currentDesignation || null
     }
   });
 
@@ -64,7 +66,8 @@ const ProfilePage: React.FC = () => {
         firstName: generalInfo.firstName,
         lastName: generalInfo.lastName,
         biography: generalInfo.biography || '',
-        profileImage: generalInfo.profileImage
+        profileImage: generalInfo.profileImage,
+        currentDesignation: generalInfo.currentDesignation || null
       });
     }
   }, [isLoading, generalInfo, form.reset]);
@@ -74,7 +77,8 @@ const ProfilePage: React.FC = () => {
       firstName: data.firstName,
       lastName: data.lastName,
       biography: data.biography || null,
-      profileImage: data.profileImage
+      profileImage: data.profileImage,
+      currentDesignation: data.currentDesignation || null
     });
     return success;
   };
