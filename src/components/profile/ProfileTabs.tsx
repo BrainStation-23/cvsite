@@ -1,3 +1,4 @@
+
 import React, { useEffect } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { UseFormReturn } from 'react-hook-form';
@@ -105,7 +106,8 @@ export const ProfileTabs: React.FC<ProfileTabsProps> = ({
       firstName: data.firstName,
       lastName: data.lastName,
       biography: data.biography || null,
-      profileImage: data.profileImage
+      profileImage: data.profileImage,
+      currentDesignation: data.currentDesignation || null
     };
     
     try {
