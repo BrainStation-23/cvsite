@@ -37,7 +37,7 @@ export const ProjectTechnologiesRenderer = (
           <div style={{ marginTop: '5pt' }}>
             <div style={styles.skillsContainerStyles}>
               {processedValue.map((tech: string, techIndex: number) => (
-                <span key={techIndex} style={{ ...styles.skillStyles, backgroundColor: '#10b981' }}>
+                <span key={techIndex} style={styles.skillStyles}>
                   {tech}
                 </span>
               ))}
