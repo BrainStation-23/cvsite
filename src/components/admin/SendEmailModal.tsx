@@ -51,7 +51,7 @@ const SendEmailModal: React.FC<SendEmailModalProps> = ({
       await sendProfileEmail({
         profileId: profile.id,
         ccOptions,
-        senderEmail: user?.email || undefined
+        userEmail: user?.email || undefined // Pass the authenticated user's email
       });
       onClose();
       // Reset options for next time

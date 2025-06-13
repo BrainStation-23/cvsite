@@ -12,7 +12,7 @@ interface CcOptions {
 interface SendEmailData {
   profileId: string;
   ccOptions?: CcOptions;
-  senderEmail?: string;
+  userEmail?: string; // The authenticated user's email for CC
 }
 
 export function useSendProfileEmail() {
@@ -24,6 +24,7 @@ export function useSendProfileEmail() {
     try {
       console.log('Sending profile email for profile ID:', data.profileId);
       console.log('CC Options:', data.ccOptions);
+      console.log('User Email for CC:', data.userEmail);
       
       const { data: result, error } = await supabase.functions.invoke('send-profile-email', {
         body: data

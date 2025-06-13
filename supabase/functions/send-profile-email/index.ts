@@ -15,7 +15,7 @@ interface SendEmailRequest {
     includeHrContacts?: boolean;
     includeMe?: boolean;
   };
-  senderEmail?: string; // For "CC Me" option
+  userEmail?: string; // The authenticated user's email for CC
 }
 
 const handler = async (req: Request): Promise<Response> => {
@@ -36,10 +36,11 @@ const handler = async (req: Request): Promise<Response> => {
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
     const resend = new Resend(resendApiKey);
 
-    const { profileId, ccOptions = {}, senderEmail: userEmail }: SendEmailRequest = await req.json();
+    const { profileId, ccOptions = {}, userEmail }: SendEmailRequest = await req.json();
 
     console.log('Fetching user data for profile ID:', profileId);
     console.log('CC Options:', ccOptions);
+    console.log('User Email for CC:', userEmail);
 
     // Fetch profile data including email and SBU information
     const { data: profile, error: profileError } = await supabase
@@ -108,10 +109,10 @@ const handler = async (req: Request): Promise<Response> => {
       }
     }
 
-    // Add sender's email if requested
+    // Add authenticated user's email if requested
     if (ccOptions.includeMe && userEmail) {
       ccEmails.push(userEmail);
-      console.log('Added sender to CC:', userEmail);
+      console.log('Added authenticated user to CC:', userEmail);
     }
 
     // Remove duplicates and filter out the main recipient to avoid duplication
@@ -242,7 +243,6 @@ const handler = async (req: Request): Promise<Response> => {
       );
     }
 
-    // Check if we have successful data
     if (!emailResponse.data || !emailResponse.data.id) {
       console.error('No email ID returned from Resend');
       return new Response(
