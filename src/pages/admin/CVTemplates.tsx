@@ -79,7 +79,7 @@ const CVTemplates: React.FC = () => {
           <div className="flex gap-2">
             <Button 
               variant="outline" 
-              onClick={() => setIsConfigOpen(true)}
+              onClick={() => navigate('/cv-templates/configuration')}
               className="flex items-center gap-2"
             >
               <Settings className="h-4 w-4" />

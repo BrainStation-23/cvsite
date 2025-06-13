@@ -18,6 +18,7 @@ import UserManagement from '@/pages/admin/UserManagement';
 import PlatformSettings from '@/pages/admin/PlatformSettings';
 import CVTemplates from '@/pages/admin/CVTemplates';
 import CVTemplateEdit from '@/pages/admin/CVTemplateEdit';
+import CVTemplatesConfigurationPage from '@/pages/cv-templates/configuration';
 import SecurityPage from '@/pages/security/SecurityPage';
 import NotFound from '@/pages/NotFound';
 import './App.css';
@@ -224,6 +225,14 @@ function App() {
               element={
                 <ProtectedRoute>
                   <SecurityPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/cv-templates/configuration"
+              element={
+                <ProtectedRoute allowedRoles={['admin']}>
+                  <CVTemplatesConfigurationPage />
                 </ProtectedRoute>
               }
             />
