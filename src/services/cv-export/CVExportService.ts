@@ -107,8 +107,8 @@ export class CVExportService {
             format: 'pdf',
             name: 'PDF',
             description: 'Portable Document Format - ideal for printing and sharing',
-            available: false,
-            comingSoon: true
+            available: true, // Changed from false to true
+            comingSoon: false // Changed from true to false
           },
           {
             format: 'docx',
