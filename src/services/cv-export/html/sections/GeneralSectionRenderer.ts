@@ -160,10 +160,10 @@ export class GeneralSectionRenderer {
       </p>`;
     }
     
-    // Designation - access directly from profile object
-    if (isFieldEnabled('designation') && profile?.designation) {
+    // Designation - use only current_designation
+    if (isFieldEnabled('designation') && profile?.current_designation) {
       fieldsHTML += `<p style="margin: 4pt 0; text-align: left; font-style: italic; color: inherit;">
-        ${applyMasking(profile.designation, 'designation')}
+        ${applyMasking(profile.current_designation, 'designation')}
       </p>`;
     }
     
