@@ -51,6 +51,8 @@ export const useTemplateConfiguration = (templateId: string) => {
         .eq('template_id', templateId)
         .order('field_order');
 
+      console.log('[DEBUG] Raw fieldMappingsData from Supabase:', fieldMappingsData);
+
       if (fieldMappingsError) throw fieldMappingsError;
 
       // Cast Json types to Record<string, any> to match our interfaces
@@ -64,6 +66,8 @@ export const useTemplateConfiguration = (templateId: string) => {
         ...mapping,
         visibility_rules: mapping.visibility_rules as Record<string, any>
       }));
+
+      console.log('[DEBUG] Processed fieldMappings (after mapping):', processedFieldMappings);
 
       setSections(processedSections);
       setFieldMappings(processedFieldMappings);
