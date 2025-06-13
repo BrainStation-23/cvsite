@@ -1,5 +1,5 @@
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import DashboardLayout from '../../components/Layout/DashboardLayout';
 import { Card, CardContent } from '@/components/ui/card';
@@ -16,9 +16,9 @@ import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Loader2, Eye, User, Mail } from 'lucide-react';
 import { useEmployeeProfiles } from '@/hooks/use-employee-profiles';
-import { useSendProfileEmail } from '@/hooks/use-send-profile-email';
 import EmployeeSearchFilters from '@/components/employee/EmployeeSearchFilters';
 import UserPagination from '@/components/admin/UserPagination';
+import SendEmailModal from '@/components/admin/SendEmailModal';
 import {
   Tooltip,
   TooltipContent,
@@ -28,7 +28,8 @@ import {
 
 const EmployeeData: React.FC = () => {
   const navigate = useNavigate();
-  const { sendProfileEmail, isProfileSending } = useSendProfileEmail();
+  const [selectedProfile, setSelectedProfile] = useState<any>(null);
+  const [isEmailModalOpen, setIsEmailModalOpen] = useState(false);
   
   const {
     profiles,
@@ -65,15 +66,8 @@ const EmployeeData: React.FC = () => {
   };
 
   const handleSendEmail = async (profile: any) => {
-    try {
-      console.log('Sending email to profile:', profile);
-      
-      await sendProfileEmail({
-        profileId: profile.id
-      });
-    } catch (error) {
-      console.error('Error sending email:', error);
-    }
+    setSelectedProfile(profile);
+    setIsEmailModalOpen(true);
   };
 
   const handlePerPageChange = (perPage: number) => {
@@ -261,14 +255,9 @@ const EmployeeData: React.FC = () => {
                                     variant="outline" 
                                     size="sm"
                                     onClick={() => handleSendEmail(profile)}
-                                    disabled={isProfileSending(profile.id)}
                                     className="h-8 px-3"
                                   >
-                                    {isProfileSending(profile.id) ? (
-                                      <Loader2 className="h-4 w-4 animate-spin" />
-                                    ) : (
-                                      <Mail className="h-4 w-4" />
-                                    )}
+                                    <Mail className="h-4 w-4" />
                                   </Button>
                                 </TooltipTrigger>
                                 <TooltipContent>
@@ -316,6 +305,17 @@ const EmployeeData: React.FC = () => {
             onPageChange={handlePageChange}
             onPerPageChange={handlePerPageChange}
             isLoading={isLoading}
+          />
+        )}
+
+        {selectedProfile && (
+          <SendEmailModal
+            isOpen={isEmailModalOpen}
+            onClose={() => {
+              setIsEmailModalOpen(false);
+              setSelectedProfile(null);
+            }}
+            profile={selectedProfile}
           />
         )}
       </div>

@@ -10,6 +10,12 @@ const corsHeaders = {
 
 interface SendEmailRequest {
   profileId: string;
+  ccOptions?: {
+    includeSbuHead?: boolean;
+    includeHrContacts?: boolean;
+    includeMe?: boolean;
+  };
+  senderEmail?: string; // For "CC Me" option
 }
 
 const handler = async (req: Request): Promise<Response> => {
@@ -30,14 +36,22 @@ const handler = async (req: Request): Promise<Response> => {
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
     const resend = new Resend(resendApiKey);
 
-    const { profileId }: SendEmailRequest = await req.json();
+    const { profileId, ccOptions = {}, senderEmail: userEmail }: SendEmailRequest = await req.json();
 
     console.log('Fetching user data for profile ID:', profileId);
+    console.log('CC Options:', ccOptions);
 
-    // Fetch profile data including email
+    // Fetch profile data including email and SBU information
     const { data: profile, error: profileError } = await supabase
       .from('profiles')
-      .select('first_name, last_name, employee_id, email')
+      .select(`
+        first_name, 
+        last_name, 
+        employee_id, 
+        email,
+        sbu_id,
+        sbus!inner(name, sbu_head_email)
+      `)
       .eq('id', profileId)
       .single();
 
@@ -69,9 +83,44 @@ const handler = async (req: Request): Promise<Response> => {
       );
     }
 
-    console.log('Sending profile completion email to:', profile.email);
+    // Build CC list based on options
+    const ccEmails: string[] = [];
 
-    // Create the email content
+    // Add SBU head email if requested
+    if (ccOptions.includeSbuHead && profile.sbus?.sbu_head_email) {
+      ccEmails.push(profile.sbus.sbu_head_email);
+      console.log('Added SBU head to CC:', profile.sbus.sbu_head_email);
+    }
+
+    // Add HR contacts if requested
+    if (ccOptions.includeHrContacts) {
+      const { data: hrContacts, error: hrError } = await supabase
+        .from('hr_contacts')
+        .select('email')
+        .not('email', 'is', null);
+
+      if (!hrError && hrContacts) {
+        const hrEmails = hrContacts.map(hr => hr.email).filter(Boolean);
+        ccEmails.push(...hrEmails);
+        console.log('Added HR contacts to CC:', hrEmails);
+      } else {
+        console.warn('Could not fetch HR contacts:', hrError);
+      }
+    }
+
+    // Add sender's email if requested
+    if (ccOptions.includeMe && userEmail) {
+      ccEmails.push(userEmail);
+      console.log('Added sender to CC:', userEmail);
+    }
+
+    // Remove duplicates and filter out the main recipient to avoid duplication
+    const uniqueCcEmails = [...new Set(ccEmails)].filter(email => email !== profile.email);
+
+    console.log('Sending profile completion email to:', profile.email);
+    console.log('CC recipients:', uniqueCcEmails);
+
+    // Create the email content (same as before)
     const emailHtml = `
       <!DOCTYPE html>
       <html>
@@ -160,12 +209,20 @@ const handler = async (req: Request): Promise<Response> => {
       </html>
     `;
 
-    const emailResponse = await resend.emails.send({
+    // Send email with CC if any
+    const emailOptions: any = {
       from: senderEmail,
       to: [profile.email],
       subject: `Action Required: Complete Your Employee Profile - ${profile.first_name || 'Employee'} ${profile.last_name || ''}`,
       html: emailHtml,
-    });
+    };
+
+    // Add CC if there are any recipients
+    if (uniqueCcEmails.length > 0) {
+      emailOptions.cc = uniqueCcEmails;
+    }
+
+    const emailResponse = await resend.emails.send(emailOptions);
 
     console.log('Resend response:', emailResponse);
 
@@ -206,7 +263,8 @@ const handler = async (req: Request): Promise<Response> => {
       success: true, 
       message: 'Profile completion email sent successfully',
       emailId: emailResponse.data.id,
-      sentTo: profile.email
+      sentTo: profile.email,
+      ccSent: uniqueCcEmails
     }), {
       status: 200,
       headers: {
