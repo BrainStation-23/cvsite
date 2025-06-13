@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useCVTemplates } from '@/hooks/use-cv-templates';
@@ -8,6 +7,8 @@ import TemplateEditorLayout from '@/components/admin/cv-templates/TemplateEditor
 import { useEmployeeData } from '@/hooks/use-employee-data';
 import { useToast } from '@/hooks/use-toast';
 import { useTemplateConfiguration } from '@/hooks/use-template-configuration';
+import { ConfirmationDialog } from '@/components/ui/confirmation-dialog';
+import { useConfirmationDialog } from '@/hooks/use-confirmation-dialog';
 
 const CVTemplateEdit: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -19,6 +20,9 @@ const CVTemplateEdit: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const { toast } = useToast();
+  
+  // Add confirmation dialog hook
+  const { isOpen, config, showConfirmation, hideConfirmation, handleConfirm } = useConfirmationDialog();
 
   // Fetch employee data using the new RPC function
   const {
@@ -92,10 +96,17 @@ const CVTemplateEdit: React.FC = () => {
 
   const handleBack = () => {
     if (hasUnsavedChanges) {
-      const confirmLeave = window.confirm('You have unsaved changes. Are you sure you want to leave?');
-      if (!confirmLeave) return;
+      showConfirmation({
+        title: 'Unsaved Changes',
+        description: 'You have unsaved changes. Are you sure you want to leave? All unsaved changes will be lost.',
+        confirmText: 'Leave',
+        cancelText: 'Stay',
+        variant: 'destructive',
+        onConfirm: () => navigate('/admin/cv-templates')
+      });
+    } else {
+      navigate('/admin/cv-templates');
     }
-    navigate('/admin/cv-templates');
   };
 
   const handleTemplateNameChange = (name: string) => {
@@ -128,32 +139,45 @@ const CVTemplateEdit: React.FC = () => {
   }
 
   return (
-    <TemplateEditorLayout
-      templateName={template.name}
-      hasUnsavedChanges={hasUnsavedChanges}
-      isSaving={isUpdating}
-      onBack={handleBack}
-      onSave={handleSaveAll}
-      onDiscard={handleDiscardChanges}
-      onTemplateNameChange={handleTemplateNameChange}
-      selectedProfileId={selectedProfileId}
-      onProfileChange={handleProfileChange}
-      onExport={handleExport}
-      // Pass the template sections and field mappings for export
-      templateSections={templateSections}
-      templateFieldMappings={templateFieldMappings}
-      template={template}
-      selectedProfile={selectedProfile}
-    >
-      <LivePreviewLayout
-        template={template}
-        selectedProfile={selectedProfile}
-        onTemplateUpdate={handleTemplateUpdate}
-        onSectionsChange={handleSectionsChange}
+    <>
+      <TemplateEditorLayout
+        templateName={template.name}
+        hasUnsavedChanges={hasUnsavedChanges}
+        isSaving={isUpdating}
+        onBack={handleBack}
+        onSave={handleSaveAll}
+        onDiscard={handleDiscardChanges}
+        onTemplateNameChange={handleTemplateNameChange}
         selectedProfileId={selectedProfileId}
         onProfileChange={handleProfileChange}
+        onExport={handleExport}
+        // Pass the template sections and field mappings for export
+        templateSections={templateSections}
+        templateFieldMappings={templateFieldMappings}
+        template={template}
+        selectedProfile={selectedProfile}
+      >
+        <LivePreviewLayout
+          template={template}
+          selectedProfile={selectedProfile}
+          onTemplateUpdate={handleTemplateUpdate}
+          onSectionsChange={handleSectionsChange}
+          selectedProfileId={selectedProfileId}
+          onProfileChange={handleProfileChange}
+        />
+      </TemplateEditorLayout>
+
+      <ConfirmationDialog
+        isOpen={isOpen}
+        onClose={hideConfirmation}
+        onConfirm={handleConfirm}
+        title={config?.title || ''}
+        description={config?.description || ''}
+        confirmText={config?.confirmText}
+        cancelText={config?.cancelText}
+        variant={config?.variant}
       />
-    </TemplateEditorLayout>
+    </>
   );
 };
 
