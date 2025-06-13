@@ -36,8 +36,8 @@ export const GeneralInfoTab: React.FC<GeneralInfoTabProps> = ({
   onSave,
   isSaving = false
 }) => {
-  const [hasChanges, setHasChanges] = useState(false);
-  const [initialValues, setInitialValues] = useState<GeneralInfoFormData | null>(null);
+  // Use react-hook-form's built-in dirty/submitting state
+  const { isDirty, isSubmitting } = form.formState;
 
   const firstName = form.watch('firstName');
   const lastName = form.watch('lastName');
@@ -47,31 +47,6 @@ export const GeneralInfoTab: React.FC<GeneralInfoTabProps> = ({
   
   const userName = `${firstName} ${lastName}`.trim() || 'User';
 
-  // Track initial values and changes
-  useEffect(() => {
-    if (!initialValues) {
-      const currentValues = {
-        firstName,
-        lastName,
-        biography,
-        profileImage,
-        currentDesignation
-      };
-      setInitialValues(currentValues);
-    } else {
-      // Check if any values have changed
-      const currentValues = {
-        firstName,
-        lastName,
-        biography,
-        profileImage,
-        currentDesignation
-      };
-      
-      const hasChanged = JSON.stringify(currentValues) !== JSON.stringify(initialValues);
-      setHasChanges(hasChanged);
-    }
-  }, [firstName, lastName, biography, profileImage, currentDesignation, initialValues]);
 
   const handleImageUpdate = (imageUrl: string | null) => {
     form.setValue('profileImage', imageUrl);
@@ -80,19 +55,14 @@ export const GeneralInfoTab: React.FC<GeneralInfoTabProps> = ({
 
   const handleSave = async () => {
     if (!onSave) return;
-    
     const currentValues = form.getValues();
     try {
-      const success = await onSave(currentValues);
-      if (success) {
-        // Update initial values after successful save
-        setInitialValues(currentValues);
-        setHasChanges(false);
-      }
+      await onSave(currentValues);
+      // react-hook-form will reset isDirty after a successful submission if you use reset()
     } catch (error) {
       console.error('Error saving general info:', error);
     }
-  };
+  }; 
 
   return (
     <Card>
@@ -101,18 +71,18 @@ export const GeneralInfoTab: React.FC<GeneralInfoTabProps> = ({
         {isEditing && onSave && (
           <Button 
             onClick={handleSave}
-            disabled={!hasChanges || isSaving}
-            variant={hasChanges ? "default" : "outline"}
+            disabled={!isDirty || isSaving || isSubmitting}
+            variant={isDirty ? "default" : "outline"}
             size="sm"
-            className={hasChanges ? "bg-orange-500 hover:bg-orange-600 text-white" : ""}
+            className={isDirty ? "bg-orange-500 hover:bg-orange-600 text-white" : ""}
           >
             <Save className="h-4 w-4 mr-2" />
-            {isSaving ? 'Saving...' : 'Save'}
+            {isSaving || isSubmitting ? 'Saving...' : 'Save'}
           </Button>
         )}
       </CardHeader>
       <CardContent>
-        {hasChanges && isEditing && (
+        {isDirty && isEditing && (
           <div className="mb-4 p-3 bg-orange-50 border border-orange-200 rounded-md">
             <p className="text-sm text-orange-800">
               You have unsaved changes. Please save your changes to avoid losing them.
