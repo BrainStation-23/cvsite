@@ -184,6 +184,7 @@ export const GeneralInfoTab: React.FC<GeneralInfoTabProps> = ({
                           <Textarea
                             {...field}
                             rows={4}
+                            data-tour="biography"
                             className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-cvsite-teal focus:ring focus:ring-cvsite-teal focus:ring-opacity-50"
                           />
                         ) : (
