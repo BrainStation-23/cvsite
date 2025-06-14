@@ -51,6 +51,12 @@ const AdvancedFiltersPanel: React.FC<AdvancedFiltersPanelProps> = ({
   onClearAllFilters,
   isLoading
 }) => {
+  const handleUniversityChange = (value: string) => {
+    setUniversityInput(value);
+    // Trigger immediate search when university is selected
+    onApplyFilters();
+  };
+
   return (
     <div className="mt-6 p-6 bg-gray-50 dark:bg-gray-900/50 rounded-lg border space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -75,7 +81,7 @@ const AdvancedFiltersPanel: React.FC<AdvancedFiltersPanelProps> = ({
           </Label>
           <UniversityCombobox
             value={universityInput}
-            onValueChange={setUniversityInput}
+            onValueChange={handleUniversityChange}
             placeholder="Search by university..."
           />
         </div>

@@ -161,7 +161,9 @@ const EnhancedEmployeeSearchFilters: React.FC<EnhancedEmployeeSearchFiltersProps
       });
     }
 
-    if (universityInput) {
+    // Only show university input filter if it's different from the education filter
+    // This prevents duplicate chips when university search is applied
+    if (universityInput && universityInput !== educationFilter) {
       filters.push({ 
         id: 'university-input', 
         label: `Education: ${universityInput}`, 
