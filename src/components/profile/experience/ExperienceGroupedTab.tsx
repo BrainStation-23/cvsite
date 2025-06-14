@@ -70,7 +70,7 @@ export const ExperienceGroupedTab: React.FC<ExperienceGroupedTabProps> = ({
         <div className="flex justify-between items-center">
           <CardTitle>Work Experience</CardTitle>
           {isEditing && (
-            <Button variant="outline" onClick={onAddNew}>
+            <Button variant="outline" onClick={onAddNew} data-tour="add-experience-button">
               <PlusCircle className="mr-2 h-4 w-4" />
               Add Experience
             </Button>
@@ -92,7 +92,7 @@ export const ExperienceGroupedTab: React.FC<ExperienceGroupedTabProps> = ({
             ))}
           </div>
         ) : (
-          <div className="text-center text-gray-500 dark:text-gray-400 py-8">
+          <div className="text-center text-gray-500 dark:text-gray-400 py-8" data-tour="experience-empty-state">
             No work experience added yet. 
             {isEditing && ' Click "Add Experience" to add your work history.'}
           </div>

@@ -18,11 +18,19 @@ const stepTabMapping: Record<number, string> = {
   4: 'skills',  // technical-skills
   5: 'skills',  // specialized-skills
   6: 'experience', // experience-tab
-  7: 'education', // education-tab
-  8: 'training', // training-tab
-  9: 'achievements', // achievements-tab
-  10: 'projects', // projects-tab
-  11: 'json', // json-tab
+  7: 'experience', // add-experience-button
+  8: 'experience', // experience-company
+  9: 'experience', // experience-designation
+  10: 'experience', // experience-start-date
+  11: 'experience', // experience-end-date
+  12: 'experience', // experience-current-checkbox
+  13: 'experience', // experience-description
+  14: 'experience', // experience-save-button
+  15: 'education', // education-tab
+  16: 'training', // training-tab
+  17: 'achievements', // achievements-tab
+  18: 'projects', // projects-tab
+  19: 'json', // json-tab
 };
 
 export const useProfileTour = () => {
@@ -62,8 +70,48 @@ export const useProfileTour = () => {
       },
       {
         target: '[data-tour="experience-tab"]',
-        content: 'Document your work experience to showcase your professional journey.',
+        content: 'Now let\'s add your work experience. This section showcases your professional journey and career progression.',
         placement: 'bottom',
+      },
+      {
+        target: '[data-tour="add-experience-button"]',
+        content: 'Click "Add Experience" to start adding your work history. Let\'s add your first experience entry!',
+        placement: 'left',
+      },
+      {
+        target: '[data-tour="experience-company"]',
+        content: 'Enter the company name where you worked. Be sure to use the full, official company name.',
+        placement: 'top',
+      },
+      {
+        target: '[data-tour="experience-designation"]',
+        content: 'Select or enter your job title/designation. You can choose from existing designations or add a new one.',
+        placement: 'top',
+      },
+      {
+        target: '[data-tour="experience-start-date"]',
+        content: 'Set the start date of your employment. Click to open the date picker.',
+        placement: 'top',
+      },
+      {
+        target: '[data-tour="experience-end-date"]',
+        content: 'Set the end date of your employment. If this is your current job, you can check "Current Position" instead.',
+        placement: 'top',
+      },
+      {
+        target: '[data-tour="experience-current-checkbox"]',
+        content: 'Check this box if this is your current position. This will automatically clear the end date.',
+        placement: 'top',
+      },
+      {
+        target: '[data-tour="experience-description"]',
+        content: 'Describe your role, responsibilities, and key achievements. Use bullet points for better readability.',
+        placement: 'top',
+      },
+      {
+        target: '[data-tour="experience-save-button"]',
+        content: 'Click "Save Experience" to add this entry to your profile. You can add more experiences or edit existing ones later.',
+        placement: 'top',
       },
       {
         target: '[data-tour="education-tab"]',
@@ -135,6 +183,34 @@ export const useProfileTour = () => {
     if (status === STATUS.FINISHED || status === STATUS.SKIPPED) {
       setTourState(prev => ({ ...prev, run: false, stepIndex: 0 }));
       return;
+    }
+
+    // Special handling for the "Add Experience" button click
+    if (type === 'step:after' && action === 'next' && index === 7) {
+      // Click the add experience button
+      const addButton = document.querySelector('[data-tour="add-experience-button"]') as HTMLButtonElement;
+      if (addButton) {
+        addButton.click();
+        
+        // Wait for the form to appear
+        const formAppeared = await waitForElement('[data-tour="experience-form"]', 3000);
+        
+        if (formAppeared) {
+          setTourState(prev => ({ 
+            ...prev, 
+            stepIndex: index + 1,
+            currentTab: 'experience'
+          }));
+        } else {
+          console.warn('Experience form did not appear, skipping form steps');
+          // Skip to education tab
+          setTourState(prev => ({ 
+            ...prev, 
+            stepIndex: 15
+          }));
+        }
+        return;
+      }
     }
 
     if (type === 'step:after' && action === 'next') {

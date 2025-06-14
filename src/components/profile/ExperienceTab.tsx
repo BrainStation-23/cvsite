@@ -143,14 +143,14 @@ export const ExperienceTab: React.FC<ExperienceTabProps> = ({
         <CardHeader>
           <div className="flex justify-between items-center">
             <CardTitle>{title}</CardTitle>
-            <Button variant="ghost" size="sm" onClick={onCancel}>
+            <Button variant="ghost" size="sm" onClick={onCancel} data-tour="experience-form-cancel">
               <X className="h-4 w-4" />
             </Button>
           </div>
         </CardHeader>
         <CardContent>
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4" data-tour="experience-form">
               <FormField
                 control={form.control}
                 name="companyName"
@@ -159,7 +159,7 @@ export const ExperienceTab: React.FC<ExperienceTabProps> = ({
                   <FormItem>
                     <FormLabel>Company</FormLabel>
                     <FormControl>
-                      <Input {...field} placeholder="Company name" />
+                      <Input {...field} placeholder="Company name" data-tour="experience-company" />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -178,6 +178,7 @@ export const ExperienceTab: React.FC<ExperienceTabProps> = ({
                         value={field.value}
                         onValueChange={field.onChange}
                         placeholder="Select designation"
+                        data-tour="experience-designation"
                       />
                     </FormControl>
                     <FormMessage />
@@ -193,6 +194,7 @@ export const ExperienceTab: React.FC<ExperienceTabProps> = ({
                       <Button
                         variant="outline"
                         className="w-full justify-start text-left font-normal"
+                        data-tour="experience-start-date"
                       >
                         <CalendarIcon className="mr-2 h-4 w-4" />
                         {startDate ? format(startDate, 'PPP') : <span>Pick a date</span>}
@@ -218,6 +220,7 @@ export const ExperienceTab: React.FC<ExperienceTabProps> = ({
                           variant="outline"
                           className="w-full justify-start text-left font-normal"
                           disabled={isCurrent}
+                          data-tour="experience-end-date"
                         >
                           <CalendarIcon className="mr-2 h-4 w-4" />
                           {endDate && !isCurrent ? format(endDate, 'PPP') : <span>Pick a date</span>}
@@ -242,6 +245,7 @@ export const ExperienceTab: React.FC<ExperienceTabProps> = ({
                         id="current-position" 
                         checked={isCurrent}
                         onCheckedChange={handleCurrentCheckboxChange}
+                        data-tour="experience-current-checkbox"
                       />
                       <label
                         htmlFor="current-position"
@@ -266,6 +270,7 @@ export const ExperienceTab: React.FC<ExperienceTabProps> = ({
                         onChange={field.onChange}
                         placeholder="Describe your role and achievements"
                         className="min-h-[120px]"
+                        data-tour="experience-description"
                       />
                     </FormControl>
                     <FormMessage />
@@ -277,7 +282,7 @@ export const ExperienceTab: React.FC<ExperienceTabProps> = ({
                 <Button type="button" variant="outline" onClick={onCancel}>
                   Cancel
                 </Button>
-                <Button type="submit" disabled={isSaving}>
+                <Button type="submit" disabled={isSaving} data-tour="experience-save-button">
                   {isSaving ? "Saving..." : isAdding ? "Save Experience" : "Save Changes"}
                 </Button>
               </div>
