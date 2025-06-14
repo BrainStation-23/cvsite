@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { UseFormReturn } from 'react-hook-form';
 import { ProfileImageUpload } from './ProfileImageUpload';
 import { DesignationCombobox } from '@/components/admin/designation/DesignationCombobox';
+import { GeneralInfoTourButton } from './GeneralInfoTourButton';
 import { Save } from 'lucide-react';
 
 // Define this type consistently across all files
@@ -67,7 +68,10 @@ export const GeneralInfoTab: React.FC<GeneralInfoTabProps> = ({
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle>General Information</CardTitle>
+        <div className="flex items-center gap-2">
+          <CardTitle>General Information</CardTitle>
+          <GeneralInfoTourButton />
+        </div>
         {isEditing && onSave && (
           <Button 
             onClick={handleSave}
@@ -118,6 +122,7 @@ export const GeneralInfoTab: React.FC<GeneralInfoTabProps> = ({
                           {isEditing ? (
                             <Input
                               {...field}
+                              data-tour="first-name-input"
                               className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-cvsite-teal focus:ring focus:ring-cvsite-teal focus:ring-opacity-50"
                             />
                           ) : (
@@ -139,6 +144,7 @@ export const GeneralInfoTab: React.FC<GeneralInfoTabProps> = ({
                           {isEditing ? (
                             <Input
                               {...field}
+                              data-tour="last-name-input"
                               className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-cvsite-teal focus:ring focus:ring-cvsite-teal focus:ring-opacity-50"
                             />
                           ) : (
@@ -159,11 +165,13 @@ export const GeneralInfoTab: React.FC<GeneralInfoTabProps> = ({
                       <FormLabel className="block text-sm font-medium text-gray-700 dark:text-gray-300">Current Designation</FormLabel>
                       <FormControl>
                         {isEditing ? (
-                          <DesignationCombobox
-                            value={field.value || ''}
-                            onValueChange={field.onChange}
-                            placeholder="Select or add designation..."
-                          />
+                          <div data-tour="designation-select">
+                            <DesignationCombobox
+                              value={field.value || ''}
+                              onValueChange={field.onChange}
+                              placeholder="Select or add designation..."
+                            />
+                          </div>
                         ) : (
                           <div className="mt-1 text-gray-900 dark:text-gray-100">{field.value || "No designation provided"}</div>
                         )}

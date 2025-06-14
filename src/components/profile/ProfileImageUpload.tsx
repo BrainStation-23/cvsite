@@ -236,6 +236,7 @@ export const ProfileImageUpload: React.FC<ProfileImageUploadProps> = ({
               onClick={handleRemoveImage}
               disabled={deleting || uploading}
               className="flex-1"
+              data-tour="remove-image-button"
             >
               <Trash2 className="h-4 w-4 mr-2" />
               {deleting ? 'Removing...' : 'Remove'}
