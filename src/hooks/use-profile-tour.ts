@@ -9,9 +9,21 @@ export interface ProfileTourState {
   currentTab?: string;
 }
 
-export interface TourStep extends Step {
-  tab?: string;
-}
+// Separate mapping for step tabs to avoid TypeScript conflicts
+const stepTabMapping: Record<number, string> = {
+  0: 'general', // general-tab
+  1: 'general', // profile-image  
+  2: 'general', // biography
+  3: 'skills',  // skills-tab
+  4: 'skills',  // technical-skills
+  5: 'skills',  // specialized-skills
+  6: 'experience', // experience-tab
+  7: 'education', // education-tab
+  8: 'training', // training-tab
+  9: 'achievements', // achievements-tab
+  10: 'projects', // projects-tab
+  11: 'json', // json-tab
+};
 
 export const useProfileTour = () => {
   const [tourState, setTourState] = useState<ProfileTourState>({
@@ -22,73 +34,61 @@ export const useProfileTour = () => {
         content: 'Start by filling out your general information. This includes your name, profile picture, and professional biography.',
         placement: 'bottom',
         disableBeacon: true,
-        tab: 'general',
       },
       {
         target: '[data-tour="profile-image"]',
         content: 'Upload a professional profile picture. This helps colleagues and clients recognize you.',
         placement: 'right',
-        tab: 'general',
       },
       {
         target: '[data-tour="biography"]',
         content: 'Write a compelling biography that highlights your professional background and key achievements.',
         placement: 'top',
-        tab: 'general',
       },
       {
         target: '[data-tour="skills-tab"]',
         content: 'Next, add your technical and specialized skills. This helps others understand your expertise.',
         placement: 'bottom',
-        tab: 'skills',
       },
       {
         target: '[data-tour="technical-skills"]',
         content: 'Add your technical skills like programming languages, frameworks, and tools you work with.',
         placement: 'right',
-        tab: 'skills',
       },
       {
         target: '[data-tour="specialized-skills"]',
         content: 'Include specialized skills that make you unique in your field.',
         placement: 'left',
-        tab: 'skills',
       },
       {
         target: '[data-tour="experience-tab"]',
         content: 'Document your work experience to showcase your professional journey.',
         placement: 'bottom',
-        tab: 'experience',
       },
       {
         target: '[data-tour="education-tab"]',
         content: 'Add your educational background including degrees, certifications, and relevant coursework.',
         placement: 'bottom',
-        tab: 'education',
       },
       {
         target: '[data-tour="training-tab"]',
         content: 'Include any additional training, workshops, or professional development courses.',
         placement: 'bottom',
-        tab: 'training',
       },
       {
         target: '[data-tour="achievements-tab"]',
         content: 'Highlight your key achievements, awards, and recognitions.',
         placement: 'bottom',
-        tab: 'achievements',
       },
       {
         target: '[data-tour="projects-tab"]',
         content: 'Showcase your notable projects to demonstrate your practical experience.',
         placement: 'bottom',
-        tab: 'projects',
       },
       {
         target: '[data-tour="json-tab"]',
         content: 'Finally, you can export your complete profile or import data from existing sources.',
         placement: 'bottom',
-        tab: 'json',
       },
     ],
     stepIndex: 0,
@@ -139,20 +139,21 @@ export const useProfileTour = () => {
 
     if (type === 'step:after' && action === 'next') {
       const nextStepIndex = index + 1;
-      const nextStep = tourState.steps[nextStepIndex] as TourStep;
+      const nextStepTab = stepTabMapping[nextStepIndex];
       
-      if (nextStep && nextStep.tab) {
+      if (nextStepTab && nextStepIndex < tourState.steps.length) {
         // Switch to the required tab
-        switchToTab(nextStep.tab);
+        switchToTab(nextStepTab);
         
         // Wait for the element to be available
+        const nextStep = tourState.steps[nextStepIndex];
         const elementFound = await waitForElement(nextStep.target as string, 2000);
         
         if (elementFound) {
           setTourState(prev => ({ 
             ...prev, 
             stepIndex: nextStepIndex,
-            currentTab: nextStep.tab 
+            currentTab: nextStepTab 
           }));
         } else {
           console.warn(`Tour target ${nextStep.target} not found, skipping to next step`);
@@ -168,18 +169,18 @@ export const useProfileTour = () => {
     }
 
     if (type === 'step:before') {
-      const currentStep = tourState.steps[index] as TourStep;
+      const currentStepTab = stepTabMapping[index];
       
-      if (currentStep && currentStep.tab && currentStep.tab !== tourState.currentTab) {
+      if (currentStepTab && currentStepTab !== tourState.currentTab) {
         // Switch to the required tab before showing the step
-        switchToTab(currentStep.tab);
+        switchToTab(currentStepTab);
         
         // Wait a bit for the tab content to render
         await new Promise(resolve => setTimeout(resolve, 300));
         
         setTourState(prev => ({ 
           ...prev, 
-          currentTab: currentStep.tab 
+          currentTab: currentStepTab 
         }));
       }
     }
