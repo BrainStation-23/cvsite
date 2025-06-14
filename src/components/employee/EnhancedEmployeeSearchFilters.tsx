@@ -126,7 +126,8 @@ const EnhancedEmployeeSearchFilters: React.FC<EnhancedEmployeeSearchFiltersProps
     setSkillInput,
     setUniversityInput,
     setCompanyInput,
-    setTechnologyInput
+    setTechnologyInput,
+    technologyInput
   });
 
   const { handleApplyAdvancedFilters, clearAllFilters } = useAdvancedFiltersManager({
