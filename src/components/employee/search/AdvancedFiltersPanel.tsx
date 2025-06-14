@@ -134,26 +134,26 @@ const AdvancedFiltersPanel: React.FC<AdvancedFiltersPanelProps> = ({
   };
 
   return (
-    <div className="mt-4 p-4 bg-gray-50 dark:bg-gray-900/50 rounded-lg border space-y-4">
-      {/* Skills & Education Row */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="space-y-3">
-          <div className="flex items-center gap-2 mb-2">
+    <div className="w-full p-3 bg-gray-50 dark:bg-gray-900/50 rounded-lg border space-y-3">
+      {/* Skills & Education */}
+      <div className="space-y-3">
+        <div className="space-y-2">
+          <div className="flex items-center gap-2">
             <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-            <Label className="text-sm font-medium text-blue-700 dark:text-blue-300">Skills</Label>
+            <Label className="text-xs font-medium text-blue-700 dark:text-blue-300">Skills</Label>
           </div>
           <Input
-            placeholder="Search by skill name..."
+            placeholder="Search by skill..."
             value={skillInput}
             onChange={(e) => handleSkillChange(e.target.value)}
-            className="text-sm h-8"
+            className="text-xs h-7 w-full"
           />
         </div>
         
-        <div className="space-y-3">
-          <div className="flex items-center gap-2 mb-2">
+        <div className="space-y-2">
+          <div className="flex items-center gap-2">
             <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-            <Label className="text-sm font-medium text-green-700 dark:text-green-300">Education</Label>
+            <Label className="text-xs font-medium text-green-700 dark:text-green-300">Education</Label>
           </div>
           <UniversityCombobox
             value={universityInput}
@@ -163,24 +163,24 @@ const AdvancedFiltersPanel: React.FC<AdvancedFiltersPanelProps> = ({
         </div>
       </div>
 
-      {/* Experience & Company Row */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="space-y-3">
-          <div className="flex items-center gap-2 mb-2">
+      {/* Experience & Company */}
+      <div className="space-y-3">
+        <div className="space-y-2">
+          <div className="flex items-center gap-2">
             <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
-            <Label className="text-sm font-medium text-purple-700 dark:text-purple-300">Experience</Label>
+            <Label className="text-xs font-medium text-purple-700 dark:text-purple-300">Company</Label>
           </div>
           <Input
-            placeholder="Search by company name..."
+            placeholder="Search company..."
             value={companyInput}
             onChange={(e) => handleCompanyChange(e.target.value)}
-            className="text-sm h-8"
+            className="text-xs h-7 w-full"
           />
         </div>
 
-        <div className="space-y-3">
+        <div className="space-y-2">
           <Label className="text-xs font-medium text-gray-600 dark:text-gray-400">
-            Experience Range: {experienceYears[0]}-{experienceYears[1]} years
+            Experience: {experienceYears[0]}-{experienceYears[1]} years
           </Label>
           <Slider
             value={experienceYears}
@@ -193,38 +193,40 @@ const AdvancedFiltersPanel: React.FC<AdvancedFiltersPanelProps> = ({
         </div>
       </div>
 
-      {/* Projects Row */}
+      {/* Projects */}
       <div className="space-y-3">
-        <div className="flex items-center gap-2 mb-2">
+        <div className="flex items-center gap-2">
           <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
-          <Label className="text-sm font-medium text-orange-700 dark:text-orange-300">Projects</Label>
+          <Label className="text-xs font-medium text-orange-700 dark:text-orange-300">Projects</Label>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        
+        <div className="space-y-2">
           <Input
             placeholder="Project name..."
             value={projectNameInput}
             onChange={(e) => handleProjectNameChange(e.target.value)}
-            className="text-sm h-8"
+            className="text-xs h-7 w-full"
           />
           <Input
             placeholder="Project description..."
             value={projectDescriptionInput}
             onChange={(e) => handleProjectDescriptionChange(e.target.value)}
-            className="text-sm h-8"
+            className="text-xs h-7 w-full"
           />
         </div>
+        
         <TechnologyTagsInput
           value={technologyInput}
           onChange={handleTechnologyChange}
-          placeholder="Add project technologies..."
+          placeholder="Add technologies..."
           disabled={isLoading}
         />
       </div>
 
-      {/* Graduation Years & Status Row */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="space-y-3">
-          <Label className="text-sm font-medium text-gray-700 dark:text-gray-300">Graduation Years</Label>
+      {/* Graduation Years & Status */}
+      <div className="space-y-3">
+        <div className="space-y-2">
+          <Label className="text-xs font-medium text-gray-700 dark:text-gray-300">Graduation Years</Label>
           <GraduationYearRangeControl
             minYear={minGraduationYear}
             maxYear={maxGraduationYear}
@@ -233,10 +235,10 @@ const AdvancedFiltersPanel: React.FC<AdvancedFiltersPanelProps> = ({
           />
         </div>
 
-        <div className="space-y-3">
-          <Label className="text-sm font-medium text-gray-700 dark:text-gray-300">Profile Status</Label>
+        <div className="space-y-2">
+          <Label className="text-xs font-medium text-gray-700 dark:text-gray-300">Profile Status</Label>
           <Select value={completionStatus} onValueChange={handleCompletionStatusChange}>
-            <SelectTrigger className="text-sm h-8">
+            <SelectTrigger className="text-xs h-7 w-full">
               <SelectValue placeholder="Select status" />
             </SelectTrigger>
             <SelectContent>
@@ -252,12 +254,12 @@ const AdvancedFiltersPanel: React.FC<AdvancedFiltersPanelProps> = ({
       </div>
 
       {/* Clear All Button */}
-      <div className="flex items-center justify-start pt-3 border-t">
+      <div className="pt-2 border-t">
         <Button 
           variant="outline" 
           onClick={onClearAllFilters}
           disabled={isLoading}
-          className="text-sm h-8"
+          className="text-xs h-7 w-full"
           size="sm"
         >
           Clear All Filters
