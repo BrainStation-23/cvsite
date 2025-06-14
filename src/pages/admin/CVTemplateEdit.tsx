@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useCVTemplates } from '@/hooks/use-cv-templates';
@@ -9,6 +10,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useTemplateConfiguration } from '@/hooks/use-template-configuration';
 import { ConfirmationDialog } from '@/components/ui/confirmation-dialog';
 import { useConfirmationDialog } from '@/hooks/use-confirmation-dialog';
+import { EnsureReferencesFieldMappings } from '@/components/admin/cv-templates/sections/EnsureReferencesFieldMappings';
 
 const CVTemplateEdit: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -140,6 +142,9 @@ const CVTemplateEdit: React.FC = () => {
 
   return (
     <>
+      {/* Ensure references field mappings exist */}
+      {id && <EnsureReferencesFieldMappings templateId={id} />}
+      
       <TemplateEditorLayout
         templateName={template.name}
         hasUnsavedChanges={hasUnsavedChanges}
