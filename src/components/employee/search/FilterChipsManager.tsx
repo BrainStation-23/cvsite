@@ -1,5 +1,5 @@
 
-import React from 'react';
+import { useCallback } from 'react';
 import { FilterChip } from './FilterState';
 
 interface FilterChipsManagerProps {
@@ -30,11 +30,15 @@ interface FilterChipsManagerProps {
   setUniversityInput: (university: string) => void;
   setCompanyInput: (company: string) => void;
   setTechnologyInput: (tech: string[]) => void;
+  setProjectNameInput: (name: string) => void;
+  setProjectDescriptionInput: (description: string) => void;
   technologyInput: string[];
 }
 
 export const useFilterChipsManager = (props: FilterChipsManagerProps) => {
-  const removeFilter = (filterId: string) => {
+  const removeFilter = useCallback((filterId: string) => {
+    console.log('Removing filter:', filterId);
+    
     const filter = props.activeFilters.find(f => f.id === filterId);
     if (!filter) return;
 
@@ -42,24 +46,51 @@ export const useFilterChipsManager = (props: FilterChipsManagerProps) => {
       case 'search':
         props.onSearch('');
         break;
+      
       case 'skill':
+      case 'skill-input':
+        props.setSkillInput('');
         props.onSkillFilter('');
         break;
+      
       case 'experience':
+      case 'company-input':
+        props.setCompanyInput('');
         props.onExperienceFilter('');
         break;
+      
       case 'education':
+      case 'university-input':
+        props.setUniversityInput('');
         props.onEducationFilter('');
         break;
+      
       case 'training':
         props.onTrainingFilter('');
         break;
+      
       case 'achievement':
         props.onAchievementFilter('');
         break;
+      
       case 'project':
+      case 'project-name-input':
+        props.setProjectNameInput('');
         props.onProjectFilter('');
         break;
+      
+      case 'project-description-input':
+        props.setProjectDescriptionInput('');
+        props.onProjectFilter('');
+        break;
+      
+      case 'technology':
+        const techIndex = parseInt(filterId.split('-')[1]);
+        const newTechnologies = [...props.technologyInput];
+        newTechnologies.splice(techIndex, 1);
+        props.setTechnologyInput(newTechnologies);
+        break;
+      
       case 'experience-years':
         props.setExperienceYears([0, 20]);
         props.onAdvancedFilters({
@@ -70,6 +101,7 @@ export const useFilterChipsManager = (props: FilterChipsManagerProps) => {
           completionStatus: props.completionStatus !== 'all' ? props.completionStatus : null
         });
         break;
+      
       case 'graduation-years':
         props.setMinGraduationYear(null);
         props.setMaxGraduationYear(null);
@@ -81,6 +113,7 @@ export const useFilterChipsManager = (props: FilterChipsManagerProps) => {
           completionStatus: props.completionStatus !== 'all' ? props.completionStatus : null
         });
         break;
+      
       case 'completion':
         props.setCompletionStatus('all');
         props.onAdvancedFilters({
@@ -91,22 +124,8 @@ export const useFilterChipsManager = (props: FilterChipsManagerProps) => {
           completionStatus: null
         });
         break;
-      case 'skill-input':
-        props.setSkillInput('');
-        break;
-      case 'university-input':
-        props.setUniversityInput('');
-        break;
-      case 'company-input':
-        props.setCompanyInput('');
-        break;
-      case 'technology':
-        const techToRemove = filter.value;
-        const updatedTechnologies = props.technologyInput.filter(tech => tech !== techToRemove);
-        props.setTechnologyInput(updatedTechnologies);
-        break;
     }
-  };
+  }, [props]);
 
   return { removeFilter };
 };

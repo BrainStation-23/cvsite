@@ -19,6 +19,10 @@ interface AdvancedFiltersPanelProps {
   setCompanyInput: (value: string) => void;
   technologyInput: string[];
   setTechnologyInput: (value: string[]) => void;
+  projectNameInput: string;
+  setProjectNameInput: (value: string) => void;
+  projectDescriptionInput: string;
+  setProjectDescriptionInput: (value: string) => void;
   experienceYears: number[];
   setExperienceYears: (value: number[]) => void;
   completionStatus: string;
@@ -30,6 +34,7 @@ interface AdvancedFiltersPanelProps {
   onApplyFilters: () => void;
   onClearAllFilters: () => void;
   onEducationFilter: (education: string) => void;
+  onProjectFilter: (project: string) => void;
   isLoading: boolean;
 }
 
@@ -42,6 +47,10 @@ const AdvancedFiltersPanel: React.FC<AdvancedFiltersPanelProps> = ({
   setCompanyInput,
   technologyInput,
   setTechnologyInput,
+  projectNameInput,
+  setProjectNameInput,
+  projectDescriptionInput,
+  setProjectDescriptionInput,
   experienceYears,
   setExperienceYears,
   completionStatus,
@@ -53,12 +62,29 @@ const AdvancedFiltersPanel: React.FC<AdvancedFiltersPanelProps> = ({
   onApplyFilters,
   onClearAllFilters,
   onEducationFilter,
+  onProjectFilter,
   isLoading
 }) => {
   const handleUniversityChange = (value: string) => {
     setUniversityInput(value);
     // Trigger immediate search when university is selected
     onEducationFilter(value);
+  };
+
+  const handleProjectNameChange = (value: string) => {
+    setProjectNameInput(value);
+    // Trigger immediate search when project name is entered
+    if (value.trim()) {
+      onProjectFilter(value);
+    }
+  };
+
+  const handleProjectDescriptionChange = (value: string) => {
+    setProjectDescriptionInput(value);
+    // Trigger immediate search when project description is entered
+    if (value.trim()) {
+      onProjectFilter(value);
+    }
   };
 
   return (
@@ -166,10 +192,34 @@ const AdvancedFiltersPanel: React.FC<AdvancedFiltersPanelProps> = ({
               Projects Filters
             </CardTitle>
             <p className="text-sm text-gray-600 dark:text-gray-400">
-              Search in projects table (technologies_used column)
+              Search in projects table (name, description, technologies_used)
             </p>
           </CardHeader>
           <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="project-name-input" className="text-sm font-medium">
+                Project Name
+              </Label>
+              <Input
+                id="project-name-input"
+                placeholder="Search by project name..."
+                value={projectNameInput}
+                onChange={(e) => handleProjectNameChange(e.target.value)}
+                className="text-sm"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="project-description-input" className="text-sm font-medium">
+                Project Description
+              </Label>
+              <Input
+                id="project-description-input"
+                placeholder="Search by project description..."
+                value={projectDescriptionInput}
+                onChange={(e) => handleProjectDescriptionChange(e.target.value)}
+                className="text-sm"
+              />
+            </div>
             <div className="space-y-2">
               <Label className="text-sm font-medium">
                 Technologies Used

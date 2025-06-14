@@ -88,6 +88,8 @@ const EnhancedEmployeeSearchFilters: React.FC<EnhancedEmployeeSearchFiltersProps
   const [universityInput, setUniversityInput] = useState('');
   const [companyInput, setCompanyInput] = useState('');
   const [technologyInput, setTechnologyInput] = useState<string[]>([]);
+  const [projectNameInput, setProjectNameInput] = useState('');
+  const [projectDescriptionInput, setProjectDescriptionInput] = useState('');
 
   // Use custom hooks for state management
   const { activeFilters } = useFilterState({
@@ -105,7 +107,9 @@ const EnhancedEmployeeSearchFilters: React.FC<EnhancedEmployeeSearchFiltersProps
     skillInput,
     universityInput,
     companyInput,
-    technologyInput
+    technologyInput,
+    projectNameInput,
+    projectDescriptionInput
   });
 
   const { removeFilter } = useFilterChipsManager({
@@ -130,6 +134,8 @@ const EnhancedEmployeeSearchFilters: React.FC<EnhancedEmployeeSearchFiltersProps
     setUniversityInput,
     setCompanyInput,
     setTechnologyInput,
+    setProjectNameInput,
+    setProjectDescriptionInput,
     technologyInput
   });
 
@@ -138,6 +144,8 @@ const EnhancedEmployeeSearchFilters: React.FC<EnhancedEmployeeSearchFiltersProps
     universityInput,
     companyInput,
     technologyInput,
+    projectNameInput,
+    projectDescriptionInput,
     experienceYears,
     minGraduationYear,
     maxGraduationYear,
@@ -150,6 +158,8 @@ const EnhancedEmployeeSearchFilters: React.FC<EnhancedEmployeeSearchFiltersProps
     setUniversityInput,
     setCompanyInput,
     setTechnologyInput,
+    setProjectNameInput,
+    setProjectDescriptionInput,
     setExperienceYears,
     setMinGraduationYear,
     setMaxGraduationYear,
@@ -288,6 +298,10 @@ const EnhancedEmployeeSearchFilters: React.FC<EnhancedEmployeeSearchFiltersProps
               setCompanyInput={setCompanyInput}
               technologyInput={technologyInput}
               setTechnologyInput={setTechnologyInput}
+              projectNameInput={projectNameInput}
+              setProjectNameInput={setProjectNameInput}
+              projectDescriptionInput={projectDescriptionInput}
+              setProjectDescriptionInput={setProjectDescriptionInput}
               experienceYears={experienceYears}
               setExperienceYears={setExperienceYears}
               completionStatus={completionStatus}
@@ -299,6 +313,7 @@ const EnhancedEmployeeSearchFilters: React.FC<EnhancedEmployeeSearchFiltersProps
               onApplyFilters={handleApplyAdvancedFilters}
               onClearAllFilters={clearAllFilters}
               onEducationFilter={onEducationFilter}
+              onProjectFilter={onProjectFilter}
               isLoading={isLoading}
             />
           </CollapsibleContent>

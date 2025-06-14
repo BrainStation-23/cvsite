@@ -7,7 +7,8 @@ export interface FilterChip {
   value: string;
   type: 'search' | 'skill' | 'experience' | 'education' | 'training' | 'achievement' | 'project' | 
         'experience-years' | 'graduation-years' | 'completion' | 
-        'skill-input' | 'university-input' | 'company-input' | 'technology';
+        'skill-input' | 'university-input' | 'company-input' | 'technology' | 
+        'project-name-input' | 'project-description-input';
   tableSource?: string; // Add table source information
 }
 
@@ -27,6 +28,8 @@ interface FilterStateProps {
   universityInput: string;
   companyInput: string;
   technologyInput: string[];
+  projectNameInput: string;
+  projectDescriptionInput: string;
 }
 
 export const useFilterState = (props: FilterStateProps) => {
@@ -98,10 +101,10 @@ export const useFilterState = (props: FilterStateProps) => {
     if (props.projectFilter) {
       filters.push({
         id: 'project-applied',
-        label: 'Project Tech Applied',
+        label: 'Project Applied',
         value: props.projectFilter,
         type: 'project',
-        tableSource: 'projects.technologies_used'
+        tableSource: 'projects'
       });
     }
 
@@ -133,6 +136,26 @@ export const useFilterState = (props: FilterStateProps) => {
         value: props.companyInput,
         type: 'company-input',
         tableSource: 'experiences'
+      });
+    }
+
+    if (props.projectNameInput) {
+      filters.push({
+        id: 'project-name-input',
+        label: 'Project Name (pending)',
+        value: props.projectNameInput,
+        type: 'project-name-input',
+        tableSource: 'projects'
+      });
+    }
+
+    if (props.projectDescriptionInput) {
+      filters.push({
+        id: 'project-description-input',
+        label: 'Project Description (pending)',
+        value: props.projectDescriptionInput,
+        type: 'project-description-input',
+        tableSource: 'projects'
       });
     }
 
@@ -206,7 +229,9 @@ export const useFilterState = (props: FilterStateProps) => {
     props.skillInput,
     props.universityInput,
     props.companyInput,
-    props.technologyInput
+    props.technologyInput,
+    props.projectNameInput,
+    props.projectDescriptionInput
   ]);
 
   return { activeFilters };

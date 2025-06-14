@@ -6,6 +6,8 @@ interface AdvancedFiltersManagerProps {
   universityInput: string;
   companyInput: string;
   technologyInput: string[];
+  projectNameInput: string;
+  projectDescriptionInput: string;
   experienceYears: number[];
   minGraduationYear: number | null;
   maxGraduationYear: number | null;
@@ -24,6 +26,8 @@ interface AdvancedFiltersManagerProps {
   setUniversityInput: (university: string) => void;
   setCompanyInput: (company: string) => void;
   setTechnologyInput: (tech: string[]) => void;
+  setProjectNameInput: (name: string) => void;
+  setProjectDescriptionInput: (description: string) => void;
   setExperienceYears: (years: number[]) => void;
   setMinGraduationYear: (year: number | null) => void;
   setMaxGraduationYear: (year: number | null) => void;
@@ -51,6 +55,8 @@ export const useAdvancedFiltersManager = (props: AdvancedFiltersManagerProps) =>
       },
       // Projects table filters
       projectsTable: {
+        projectNameInput: props.projectNameInput,
+        projectDescriptionInput: props.projectDescriptionInput,
         technologyInput: props.technologyInput
       },
       // Profile status
@@ -71,11 +77,22 @@ export const useAdvancedFiltersManager = (props: AdvancedFiltersManagerProps) =>
       props.onExperienceFilter(props.companyInput);
     }
 
-    // Apply Projects table filter (projects.technologies_used)
-    if (props.technologyInput.length > 0) {
+    // Apply Projects table filters (projects.name, projects.description, projects.technologies_used)
+    let projectSearchTerm = '';
+    
+    if (props.projectNameInput) {
+      projectSearchTerm = props.projectNameInput;
+      console.log('Applying projects table filter for name:', props.projectNameInput);
+    } else if (props.projectDescriptionInput) {
+      projectSearchTerm = props.projectDescriptionInput;
+      console.log('Applying projects table filter for description:', props.projectDescriptionInput);
+    } else if (props.technologyInput.length > 0) {
+      projectSearchTerm = props.technologyInput[0];
       console.log('Applying projects table filter for technologies:', props.technologyInput);
-      // Apply first technology as project filter (searches in technologies_used array)
-      props.onProjectFilter(props.technologyInput[0]);
+    }
+    
+    if (projectSearchTerm) {
+      props.onProjectFilter(projectSearchTerm);
     }
 
     // Apply advanced filters for experience years, graduation years, and completion status
@@ -104,6 +121,8 @@ export const useAdvancedFiltersManager = (props: AdvancedFiltersManagerProps) =>
     props.setExperienceYears([0, 20]);
     
     // Reset Projects table filters
+    props.setProjectNameInput('');
+    props.setProjectDescriptionInput('');
     props.setTechnologyInput([]);
     
     // Reset Profile status
