@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -29,6 +28,7 @@ import {
 import { Calendar as CalendarComponent } from '@/components/ui/calendar';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
+import { DateRange } from 'react-day-picker';
 
 interface FilterChip {
   id: string;
@@ -87,7 +87,7 @@ const EnhancedEmployeeSearchFilters: React.FC<EnhancedEmployeeSearchFiltersProps
   // Advanced filter states
   const [experienceYears, setExperienceYears] = useState<number[]>([0, 20]);
   const [selectedSkills, setSelectedSkills] = useState<string[]>([]);
-  const [graduationDateRange, setGraduationDateRange] = useState<{from?: Date, to?: Date}>({});
+  const [graduationDateRange, setGraduationDateRange] = useState<DateRange | undefined>();
   const [completionStatus, setCompletionStatus] = useState<string>('all');
   
   const [skillInput, setSkillInput] = useState('');
@@ -228,7 +228,7 @@ const EnhancedEmployeeSearchFilters: React.FC<EnhancedEmployeeSearchFiltersProps
     setTechnologyInput('');
     setExperienceYears([0, 20]);
     setCompletionStatus('all');
-    setGraduationDateRange({});
+    setGraduationDateRange(undefined);
     onReset();
   };
 
@@ -412,11 +412,11 @@ const EnhancedEmployeeSearchFilters: React.FC<EnhancedEmployeeSearchFiltersProps
                       variant="outline"
                       className={cn(
                         "w-full justify-start text-left font-normal",
-                        !graduationDateRange.from && "text-muted-foreground"
+                        !graduationDateRange?.from && "text-muted-foreground"
                       )}
                     >
                       <Calendar className="mr-2 h-4 w-4" />
-                      {graduationDateRange.from ? (
+                      {graduationDateRange?.from ? (
                         graduationDateRange.to ? (
                           <>
                             {format(graduationDateRange.from, "MMM yyyy")} -{" "}
@@ -434,7 +434,7 @@ const EnhancedEmployeeSearchFilters: React.FC<EnhancedEmployeeSearchFiltersProps
                     <CalendarComponent
                       initialFocus
                       mode="range"
-                      defaultMonth={graduationDateRange.from}
+                      defaultMonth={graduationDateRange?.from}
                       selected={graduationDateRange}
                       onSelect={setGraduationDateRange}
                       numberOfMonths={2}
