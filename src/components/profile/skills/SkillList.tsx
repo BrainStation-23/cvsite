@@ -1,28 +1,10 @@
 
-import React, { useState, useEffect } from 'react';
+import React from 'react';
+import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
+import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy } from '@dnd-kit/sortable';
+import { restrictToVerticalAxis } from '@dnd-kit/modifiers';
 import { Skill } from '@/types';
 import { SkillCard } from './SkillCard';
-import {
-  DndContext,
-  closestCenter,
-  KeyboardSensor,
-  PointerSensor,
-  useSensor,
-  useSensors,
-  DragEndEvent,
-  DragStartEvent,
-  DragOverlay,
-} from '@dnd-kit/core';
-import {
-  arrayMove,
-  SortableContext,
-  sortableKeyboardCoordinates,
-  verticalListSortingStrategy,
-} from '@dnd-kit/sortable';
-import {
-  restrictToVerticalAxis,
-  restrictToParentElement,
-} from '@dnd-kit/modifiers';
 
 interface SkillListProps {
   skills: Skill[];
@@ -45,131 +27,70 @@ export const SkillList: React.FC<SkillListProps> = ({
   title,
   skillType = 'specialized'
 }) => {
-  const [activeId, setActiveId] = useState<string | null>(null);
-  const [localSkills, setLocalSkills] = useState<Skill[]>(skills);
-  const [optimisticSkills, setOptimisticSkills] = useState<Skill[]>(skills);
-
-  // Update local skills when props change, but preserve optimistic state during drag
-  useEffect(() => {
-    if (!activeId) {
-      setLocalSkills(skills);
-      setOptimisticSkills(skills);
-    } else {
-      // Only update local skills during drag, not optimistic
-      setLocalSkills(skills);
-    }
-  }, [skills, activeId]);
-
   const sensors = useSensors(
-    useSensor(PointerSensor, {
-      activationConstraint: {
-        distance: 8,
-      },
-    }),
+    useSensor(PointerSensor),
     useSensor(KeyboardSensor, {
       coordinateGetter: sortableKeyboardCoordinates,
     })
   );
 
-  const handleDragStart = (event: DragStartEvent) => {
-    setActiveId(event.active.id as string);
-  };
-
-  const handleDragEnd = async (event: DragEndEvent) => {
+  const handleDragEnd = (event: any) => {
     const { active, over } = event;
-    
-    if (over && active.id !== over.id && onReorderSkills) {
-      const oldIndex = optimisticSkills.findIndex((skill) => skill.id === active.id);
-      const newIndex = optimisticSkills.findIndex((skill) => skill.id === over.id);
 
-      // Create the optimistically reordered array
-      const reorderedSkills = arrayMove(optimisticSkills, oldIndex, newIndex);
+    if (active.id !== over?.id && onReorderSkills) {
+      const oldIndex = skills.findIndex(skill => skill.id === active.id);
+      const newIndex = skills.findIndex(skill => skill.id === over.id);
       
-      // Update optimistic state immediately for smooth UX
-      setOptimisticSkills(reorderedSkills);
-
-      // Attempt database update
-      try {
-        await onReorderSkills(reorderedSkills);
-        // If successful, the parent will update and useEffect will sync localSkills
-      } catch (error) {
-        // If failed, revert optimistic state to original
-        console.error('Failed to reorder skills:', error);
-        setOptimisticSkills(localSkills);
-      }
+      const reorderedSkills = arrayMove(skills, oldIndex, newIndex);
+      onReorderSkills(reorderedSkills);
     }
-    
-    setActiveId(null);
   };
 
-  const activeSkill = activeId ? optimisticSkills.find(skill => skill.id === activeId) : null;
-
-  // Use optimistic skills for rendering during drag operations
-  const displaySkills = activeId ? optimisticSkills : localSkills;
-
-  if (displaySkills.length === 0) {
+  if (skills.length === 0) {
     return (
-      <div className="text-center py-8 text-gray-500 dark:text-gray-400">
-        <p>No {title.toLowerCase()} added yet.</p>
+      <div className="text-center py-6 text-gray-500 dark:text-gray-400">
+        <p className="text-sm">No {title.toLowerCase()} added yet.</p>
         {isEditing && (
-          <p className="text-sm mt-1">Click "Add Skill" to get started.</p>
+          <p className="text-xs mt-1">Use the button above to add your first skill.</p>
         )}
       </div>
     );
   }
 
-  return (
+  const skillList = (
     <div className="space-y-2">
-      {isDraggable && isEditing ? (
-        <DndContext
-          sensors={sensors}
-          collisionDetection={closestCenter}
-          onDragStart={handleDragStart}
-          onDragEnd={handleDragEnd}
-          modifiers={[restrictToVerticalAxis, restrictToParentElement]}
+      {skills.map((skill, index) => (
+        <div 
+          key={skill.id} 
+          data-tour={index === 0 ? "skill-item" : undefined}
         >
-          <SortableContext 
-            items={displaySkills.map(skill => skill.id)} 
-            strategy={verticalListSortingStrategy}
-          >
-            {displaySkills.map((skill) => (
-              <SkillCard
-                key={skill.id}
-                skill={skill}
-                isEditing={isEditing}
-                isDraggable={isDraggable}
-                onUpdate={onUpdateSkill}
-                onDelete={onDeleteSkill}
-                skillType={skillType}
-              />
-            ))}
-          </SortableContext>
-          <DragOverlay>
-            {activeSkill ? (
-              <SkillCard
-                skill={activeSkill}
-                isEditing={isEditing}
-                isDraggable={false}
-                onUpdate={onUpdateSkill}
-                onDelete={onDeleteSkill}
-                skillType={skillType}
-              />
-            ) : null}
-          </DragOverlay>
-        </DndContext>
-      ) : (
-        displaySkills.map((skill) => (
           <SkillCard
-            key={skill.id}
             skill={skill}
             isEditing={isEditing}
-            isDraggable={false}
+            isDraggable={isDraggable}
             onUpdate={onUpdateSkill}
             onDelete={onDeleteSkill}
             skillType={skillType}
           />
-        ))
-      )}
+        </div>
+      ))}
     </div>
+  );
+
+  if (!isDraggable || !isEditing) {
+    return skillList;
+  }
+
+  return (
+    <DndContext
+      sensors={sensors}
+      collisionDetection={closestCenter}
+      onDragEnd={handleDragEnd}
+      modifiers={[restrictToVerticalAxis]}
+    >
+      <SortableContext items={skills.map(skill => skill.id)} strategy={verticalListSortingStrategy}>
+        {skillList}
+      </SortableContext>
+    </DndContext>
   );
 };
