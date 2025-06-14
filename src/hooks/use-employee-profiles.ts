@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -52,6 +53,8 @@ export function useEmployeeProfiles({
     projectFilter?: string;
     minExperienceYears?: number | null;
     maxExperienceYears?: number | null;
+    minGraduationYear?: number | null;
+    maxGraduationYear?: number | null;
     completionStatus?: string | null;
     sortColumn?: EmployeeProfileSortColumn;
     sortDirection?: EmployeeProfileSortOrder;
@@ -68,6 +71,8 @@ export function useEmployeeProfiles({
       projectFilter: project = projectFilter,
       minExperienceYears = null,
       maxExperienceYears = null,
+      minGraduationYear = null,
+      maxGraduationYear = null,
       completionStatus = null,
       sortColumn = sortBy,
       sortDirection = sortOrder
@@ -86,6 +91,8 @@ export function useEmployeeProfiles({
         project,
         minExperienceYears,
         maxExperienceYears,
+        minGraduationYear,
+        maxGraduationYear,
         completionStatus,
         page,
         perPage,
@@ -103,6 +110,8 @@ export function useEmployeeProfiles({
         project_filter: project || null,
         min_experience_years: minExperienceYears,
         max_experience_years: maxExperienceYears,
+        min_graduation_year: minGraduationYear,
+        max_graduation_year: maxGraduationYear,
         completion_status: completionStatus,
         page_number: page,
         items_per_page: perPage,
@@ -223,6 +232,8 @@ export function useEmployeeProfiles({
   const handleAdvancedFilters = (filters: {
     minExperienceYears?: number | null;
     maxExperienceYears?: number | null;
+    minGraduationYear?: number | null;
+    maxGraduationYear?: number | null;
     completionStatus?: string | null;
   }) => {
     fetchProfiles({ 
@@ -243,6 +254,8 @@ export function useEmployeeProfiles({
       projectFilter: '',
       minExperienceYears: null,
       maxExperienceYears: null,
+      minGraduationYear: null,
+      maxGraduationYear: null,
       completionStatus: null,
       sortColumn: 'last_name',
       sortDirection: 'asc'

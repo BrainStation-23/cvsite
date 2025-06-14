@@ -1,25 +1,11 @@
 
-import React, { useState } from 'react';
-import { Input } from '@/components/ui/input';
+import React from 'react';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
-import { 
-  Select, 
-  SelectContent, 
-  SelectItem, 
-  SelectTrigger, 
-  SelectValue 
-} from '@/components/ui/select';
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/components/ui/popover';
-import { Calendar as CalendarComponent } from '@/components/ui/calendar';
-import { format } from 'date-fns';
-import { cn } from '@/lib/utils';
-import { DateRange } from 'react-day-picker';
-import { Calendar } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import GraduationYearRangeControl from './GraduationYearRangeControl';
 
 interface AdvancedFiltersPanelProps {
   skillInput: string;
@@ -34,8 +20,10 @@ interface AdvancedFiltersPanelProps {
   setExperienceYears: (value: number[]) => void;
   completionStatus: string;
   setCompletionStatus: (value: string) => void;
-  graduationDateRange: DateRange | undefined;
-  setGraduationDateRange: (value: DateRange | undefined) => void;
+  minGraduationYear: number | null;
+  maxGraduationYear: number | null;
+  setMinGraduationYear: (year: number | null) => void;
+  setMaxGraduationYear: (year: number | null) => void;
   onApplyFilters: () => void;
   onClearAllFilters: () => void;
   isLoading: boolean;
@@ -54,154 +42,135 @@ const AdvancedFiltersPanel: React.FC<AdvancedFiltersPanelProps> = ({
   setExperienceYears,
   completionStatus,
   setCompletionStatus,
-  graduationDateRange,
-  setGraduationDateRange,
+  minGraduationYear,
+  maxGraduationYear,
+  setMinGraduationYear,
+  setMaxGraduationYear,
   onApplyFilters,
   onClearAllFilters,
   isLoading
 }) => {
   return (
-    <div className="mt-6">
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+    <div className="mt-6 p-6 bg-gray-50 dark:bg-gray-900/50 rounded-lg border space-y-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {/* Skills Filter */}
         <div className="space-y-2">
-          <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+          <Label htmlFor="skill-input" className="text-sm font-medium">
             Skills
-          </label>
+          </Label>
           <Input
-            placeholder="e.g., React, Python, AWS"
+            id="skill-input"
+            placeholder="Search by skills..."
             value={skillInput}
             onChange={(e) => setSkillInput(e.target.value)}
+            className="text-sm"
           />
         </div>
 
         {/* University Filter */}
         <div className="space-y-2">
-          <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+          <Label htmlFor="university-input" className="text-sm font-medium">
             University
-          </label>
+          </Label>
           <Input
-            placeholder="e.g., MIT, Stanford"
+            id="university-input"
+            placeholder="Search by university..."
             value={universityInput}
             onChange={(e) => setUniversityInput(e.target.value)}
+            className="text-sm"
           />
         </div>
 
         {/* Company Filter */}
         <div className="space-y-2">
-          <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+          <Label htmlFor="company-input" className="text-sm font-medium">
             Company
-          </label>
+          </Label>
           <Input
-            placeholder="e.g., Google, Microsoft"
+            id="company-input"
+            placeholder="Search by company..."
             value={companyInput}
             onChange={(e) => setCompanyInput(e.target.value)}
+            className="text-sm"
           />
         </div>
 
         {/* Technology Filter */}
         <div className="space-y-2">
-          <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-            Technologies
-          </label>
+          <Label htmlFor="technology-input" className="text-sm font-medium">
+            Technology
+          </Label>
           <Input
-            placeholder="e.g., Docker, Kubernetes"
+            id="technology-input"
+            placeholder="Search by technology..."
             value={technologyInput}
             onChange={(e) => setTechnologyInput(e.target.value)}
+            className="text-sm"
+          />
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {/* Experience Years Range */}
+        <div className="space-y-4">
+          <Label className="text-sm font-medium">
+            Experience Range: {experienceYears[0]}-{experienceYears[1]} years
+          </Label>
+          <Slider
+            value={experienceYears}
+            onValueChange={setExperienceYears}
+            max={20}
+            min={0}
+            step={1}
+            className="w-full"
           />
         </div>
 
-        {/* Experience Years Range with proper dual knobs */}
-        <div className="space-y-2">
-          <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-            Experience (Years)
-          </label>
-          <div className="px-3 py-2">
-            <Slider
-              value={experienceYears}
-              onValueChange={setExperienceYears}
-              max={20}
-              min={0}
-              step={1}
-              className="w-full"
-            />
-            <div className="flex justify-between text-xs text-gray-500 mt-2">
-              <span>{experienceYears[0]} {experienceYears[0] === 1 ? 'year' : 'years'}</span>
-              <span>{experienceYears[1] === 20 ? '20+ years' : `${experienceYears[1]} ${experienceYears[1] === 1 ? 'year' : 'years'}`}</span>
-            </div>
-          </div>
-        </div>
+        {/* Graduation Year Range */}
+        <GraduationYearRangeControl
+          minYear={minGraduationYear}
+          maxYear={maxGraduationYear}
+          onMinYearChange={setMinGraduationYear}
+          onMaxYearChange={setMaxGraduationYear}
+        />
 
         {/* Profile Completion Status */}
         <div className="space-y-2">
-          <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+          <Label className="text-sm font-medium">
             Profile Status
-          </label>
+          </Label>
           <Select value={completionStatus} onValueChange={setCompletionStatus}>
-            <SelectTrigger>
-              <SelectValue />
+            <SelectTrigger className="text-sm">
+              <SelectValue placeholder="Select status" />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All Profiles</SelectItem>
-              <SelectItem value="complete">Complete</SelectItem>
-              <SelectItem value="incomplete">Incomplete</SelectItem>
+              <SelectItem value="complete">Complete Profiles</SelectItem>
+              <SelectItem value="incomplete">Incomplete Profiles</SelectItem>
               <SelectItem value="no-skills">Missing Skills</SelectItem>
               <SelectItem value="no-experience">Missing Experience</SelectItem>
               <SelectItem value="no-education">Missing Education</SelectItem>
             </SelectContent>
           </Select>
         </div>
-
-        {/* Graduation Date Range */}
-        <div className="space-y-2">
-          <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-            Graduation Period
-          </label>
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button
-                variant="outline"
-                className={cn(
-                  "w-full justify-start text-left font-normal",
-                  !graduationDateRange?.from && "text-muted-foreground"
-                )}
-              >
-                <Calendar className="mr-2 h-4 w-4" />
-                {graduationDateRange?.from ? (
-                  graduationDateRange.to ? (
-                    <>
-                      {format(graduationDateRange.from, "MMM yyyy")} -{" "}
-                      {format(graduationDateRange.to, "MMM yyyy")}
-                    </>
-                  ) : (
-                    format(graduationDateRange.from, "MMM yyyy")
-                  )
-                ) : (
-                  "Pick date range"
-                )}
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-auto p-0" align="start">
-              <CalendarComponent
-                initialFocus
-                mode="range"
-                defaultMonth={graduationDateRange?.from}
-                selected={graduationDateRange}
-                onSelect={setGraduationDateRange}
-                numberOfMonths={2}
-                className="pointer-events-auto"
-              />
-            </PopoverContent>
-          </Popover>
-        </div>
       </div>
-      
-      <div className="flex gap-3 mt-6">
-        <Button onClick={onApplyFilters} disabled={isLoading}>
-          Apply Filters
-        </Button>
-        <Button variant="outline" onClick={onClearAllFilters}>
+
+      {/* Action Buttons */}
+      <div className="flex items-center justify-between pt-4 border-t">
+        <Button 
+          variant="outline" 
+          onClick={onClearAllFilters}
+          disabled={isLoading}
+          className="text-sm"
+        >
           Clear All Filters
+        </Button>
+        <Button 
+          onClick={onApplyFilters}
+          disabled={isLoading}
+          className="text-sm"
+        >
+          Apply Filters
         </Button>
       </div>
     </div>

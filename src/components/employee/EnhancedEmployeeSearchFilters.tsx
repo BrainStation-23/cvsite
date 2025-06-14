@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -11,7 +12,6 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from '@/components/ui/collapsible';
-import { DateRange } from 'react-day-picker';
 
 // Import our new components
 import BasicSearchBar from './search/BasicSearchBar';
@@ -37,6 +37,8 @@ interface EnhancedEmployeeSearchFiltersProps {
   onAdvancedFilters: (filters: {
     minExperienceYears?: number | null;
     maxExperienceYears?: number | null;
+    minGraduationYear?: number | null;
+    maxGraduationYear?: number | null;
     completionStatus?: string | null;
   }) => void;
   onSortChange: (column: EmployeeProfileSortColumn, order: EmployeeProfileSortOrder) => void;
@@ -81,7 +83,8 @@ const EnhancedEmployeeSearchFilters: React.FC<EnhancedEmployeeSearchFiltersProps
   // Advanced filter states
   const [experienceYears, setExperienceYears] = useState<number[]>([0, 20]);
   const [selectedSkills, setSelectedSkills] = useState<string[]>([]);
-  const [graduationDateRange, setGraduationDateRange] = useState<DateRange | undefined>();
+  const [minGraduationYear, setMinGraduationYear] = useState<number | null>(null);
+  const [maxGraduationYear, setMaxGraduationYear] = useState<number | null>(null);
   const [completionStatus, setCompletionStatus] = useState<string>('all');
   
   const [skillInput, setSkillInput] = useState('');
@@ -127,6 +130,16 @@ const EnhancedEmployeeSearchFilters: React.FC<EnhancedEmployeeSearchFiltersProps
         label: `Experience: ${experienceYears[0]}-${experienceYears[1]} years`, 
         value: experienceYears.join('-'), 
         type: 'experience-years' 
+      });
+    }
+
+    if (minGraduationYear || maxGraduationYear) {
+      const yearRange = `${minGraduationYear || 'Any'}-${maxGraduationYear || 'Any'}`;
+      filters.push({ 
+        id: 'graduation-years', 
+        label: `Graduation: ${yearRange}`, 
+        value: yearRange, 
+        type: 'graduation-years' 
       });
     }
 
@@ -176,7 +189,7 @@ const EnhancedEmployeeSearchFilters: React.FC<EnhancedEmployeeSearchFiltersProps
     }
     
     setActiveFilters(filters);
-  }, [searchQuery, skillFilter, experienceFilter, educationFilter, trainingFilter, achievementFilter, projectFilter, experienceYears, completionStatus, skillInput, universityInput, companyInput, technologyInput]);
+  }, [searchQuery, skillFilter, experienceFilter, educationFilter, trainingFilter, achievementFilter, projectFilter, experienceYears, minGraduationYear, maxGraduationYear, completionStatus, skillInput, universityInput, companyInput, technologyInput]);
 
   const removeFilter = (filterId: string) => {
     const filter = activeFilters.find(f => f.id === filterId);
@@ -210,6 +223,20 @@ const EnhancedEmployeeSearchFilters: React.FC<EnhancedEmployeeSearchFiltersProps
         onAdvancedFilters({
           minExperienceYears: null,
           maxExperienceYears: null,
+          minGraduationYear: minGraduationYear,
+          maxGraduationYear: maxGraduationYear,
+          completionStatus: completionStatus !== 'all' ? completionStatus : null
+        });
+        break;
+      case 'graduation-years':
+        setMinGraduationYear(null);
+        setMaxGraduationYear(null);
+        // Apply the reset to backend
+        onAdvancedFilters({
+          minExperienceYears: experienceYears[0] > 0 || experienceYears[1] < 20 ? experienceYears[0] : null,
+          maxExperienceYears: experienceYears[0] > 0 || experienceYears[1] < 20 ? experienceYears[1] : null,
+          minGraduationYear: null,
+          maxGraduationYear: null,
           completionStatus: completionStatus !== 'all' ? completionStatus : null
         });
         break;
@@ -219,6 +246,8 @@ const EnhancedEmployeeSearchFilters: React.FC<EnhancedEmployeeSearchFiltersProps
         onAdvancedFilters({
           minExperienceYears: experienceYears[0] > 0 || experienceYears[1] < 20 ? experienceYears[0] : null,
           maxExperienceYears: experienceYears[0] > 0 || experienceYears[1] < 20 ? experienceYears[1] : null,
+          minGraduationYear: minGraduationYear,
+          maxGraduationYear: maxGraduationYear,
           completionStatus: null
         });
         break;
@@ -244,6 +273,8 @@ const EnhancedEmployeeSearchFilters: React.FC<EnhancedEmployeeSearchFiltersProps
       companyInput,
       technologyInput,
       experienceYears,
+      minGraduationYear,
+      maxGraduationYear,
       completionStatus
     });
 
@@ -265,10 +296,12 @@ const EnhancedEmployeeSearchFilters: React.FC<EnhancedEmployeeSearchFiltersProps
       onProjectFilter(technologyInput);
     }
 
-    // Apply experience years and completion status filters via the new backend support
+    // Apply experience years, graduation years and completion status filters via the new backend support
     onAdvancedFilters({
       minExperienceYears: experienceYears[0] > 0 || experienceYears[1] < 20 ? experienceYears[0] : null,
       maxExperienceYears: experienceYears[0] > 0 || experienceYears[1] < 20 ? experienceYears[1] : null,
+      minGraduationYear: minGraduationYear,
+      maxGraduationYear: maxGraduationYear,
       completionStatus: completionStatus !== 'all' ? completionStatus : null
     });
   };
@@ -279,8 +312,9 @@ const EnhancedEmployeeSearchFilters: React.FC<EnhancedEmployeeSearchFiltersProps
     setCompanyInput('');
     setTechnologyInput('');
     setExperienceYears([0, 20]);
+    setMinGraduationYear(null);
+    setMaxGraduationYear(null);
     setCompletionStatus('all');
-    setGraduationDateRange(undefined);
     onReset();
   };
 
@@ -332,8 +366,10 @@ const EnhancedEmployeeSearchFilters: React.FC<EnhancedEmployeeSearchFiltersProps
               setExperienceYears={setExperienceYears}
               completionStatus={completionStatus}
               setCompletionStatus={setCompletionStatus}
-              graduationDateRange={graduationDateRange}
-              setGraduationDateRange={setGraduationDateRange}
+              minGraduationYear={minGraduationYear}
+              maxGraduationYear={maxGraduationYear}
+              setMinGraduationYear={setMinGraduationYear}
+              setMaxGraduationYear={setMaxGraduationYear}
               onApplyFilters={handleApplyAdvancedFilters}
               onClearAllFilters={clearAllFilters}
               isLoading={isLoading}

@@ -975,6 +975,24 @@ export type Database = {
               training_filter?: string
               achievement_filter?: string
               project_filter?: string
+              min_experience_years?: number
+              max_experience_years?: number
+              min_graduation_year?: number
+              max_graduation_year?: number
+              completion_status?: string
+              page_number?: number
+              items_per_page?: number
+              sort_by?: string
+              sort_order?: string
+            }
+          | {
+              search_query?: string
+              skill_filter?: string
+              experience_filter?: string
+              education_filter?: string
+              training_filter?: string
+              achievement_filter?: string
+              project_filter?: string
               page_number?: number
               items_per_page?: number
               sort_by?: string
