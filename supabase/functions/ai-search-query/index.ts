@@ -14,6 +14,9 @@ interface SearchFilters {
   training_filter?: string;
   achievement_filter?: string;
   project_filter?: string;
+  project_name_filter?: string;
+  project_description_filter?: string;
+  technology_filter?: string[];
   min_experience_years?: number;
   max_experience_years?: number;
   min_graduation_year?: number;
@@ -51,49 +54,106 @@ serve(async (req) => {
     console.log(`Processing AI search query: "${query}"`);
 
     const prompt = `
-You are an expert at parsing employee search queries and converting them into structured database filters.
+You are an expert at parsing employee search queries and converting them into structured database filters for an employee profile management system.
 
 Given this natural language query: "${query}"
 
-Extract relevant search parameters and map them to these available filters:
+Extract relevant search parameters and map them to these available filters based on our database structure:
 
-- search_query: general text search across names, IDs, biography
-- skill_filter: technical/specialized skills (programming languages, frameworks, tools)
-- experience_filter: company names, job titles, role descriptions
-- education_filter: university names, degrees, departments
-- training_filter: certifications, courses, training programs
-- achievement_filter: awards, recognition, accomplishments
-- project_filter: project names, descriptions, technologies used
-- min_experience_years: minimum years of experience (numeric)
-- max_experience_years: maximum years of experience (numeric)
-- min_graduation_year: earliest graduation year (4-digit year)
-- max_graduation_year: latest graduation year (4-digit year)
-- completion_status: "complete", "incomplete", "no-skills", "no-experience", "no-education", or null
+## FILTER DEFINITIONS & DATABASE CONTEXT:
+
+**search_query**: General text search across employee names, employee IDs, and biography text
+- Use for: names, employee IDs, general profile information
+
+**skill_filter**: Search in technical_skills and specialized_skills tables
+- Use for: Programming languages, frameworks, software tools, technical abilities
+- Examples: "React", "Python", "Machine Learning", "Data Analysis"
+- NOT for: technologies used in specific projects (use technology_filter instead)
+
+**experience_filter**: Search in experiences table (company_name, designation, description)
+- Use for: Company names where someone worked, job titles, work experience descriptions
+- Examples: "Google", "Senior Developer", "Microsoft", "Team Lead"
+- NOT for: companies mentioned as project clients (use project filters instead)
+
+**education_filter**: Search in education and universities tables
+- Use for: University names, degree names, academic departments
+- Examples: "MIT", "Computer Science", "Stanford University", "Bachelor's"
+
+**training_filter**: Search in trainings table (title, provider, description)
+- Use for: Certifications, courses, training programs, professional development
+- Examples: "AWS Certified", "Scrum Master", "Google Analytics", "PMP"
+
+**achievement_filter**: Search in achievements table (title, description)
+- Use for: Awards, recognitions, accomplishments, honors
+- Examples: "Employee of the Year", "Best Innovation Award", "Dean's List"
+
+**project_filter**: General project search (legacy - avoid using, prefer specific project filters below)
+
+**project_name_filter**: Search specifically in projects.name field
+- Use for: Specific project names or when user mentions "project called X"
+- Examples: "E-commerce Platform", "Mobile Banking App", "CRM System"
+
+**project_description_filter**: Search in projects.description field
+- Use for: Project details, what the project does, project domain
+- Examples: "payment processing", "inventory management", "social media"
+
+**technology_filter**: Search in projects.technologies_used array field
+- Use for: Technologies, frameworks, tools used IN PROJECTS
+- Examples: ["React", "Node.js"], ["Python", "TensorFlow"], ["Unity", "C#"]
+- This is DIFFERENT from skill_filter - this is about what was used in projects
+
+**Numeric Filters:**
+- min_experience_years/max_experience_years: Years of work experience (0-20+ range)
+- min_graduation_year/max_graduation_year: University graduation years (1980-2030 range)
+
+**completion_status**: Profile completeness analysis
+- Values: "complete", "incomplete", "no-skills", "no-experience", "no-education"
+
+## DISAMBIGUATION EXAMPLES:
+
+"React developers" → skill_filter: "React" (they have React as a skill)
+"Projects using React" → technology_filter: ["React"] (React was used in their projects)
+
+"worked at Google" → experience_filter: "Google" (employment history)
+"Google project" → project_name_filter: "Google" OR project_description_filter: "Google" (project client/name)
+
+"Unity developer" → skill_filter: "Unity" (has Unity as a skill)
+"Unity game project" → technology_filter: ["Unity"] (used Unity in a project)
+
+"5 years experience" → min_experience_years: 5
+"5+ years experience" → min_experience_years: 5
+"3-7 years experience" → min_experience_years: 3, max_experience_years: 7
+
+"MIT graduates" → education_filter: "MIT"
+"Computer Science degree" → education_filter: "Computer Science"
+
+"AWS certified" → training_filter: "AWS"
+"Machine Learning skills" → skill_filter: "Machine Learning"
 
 Return a JSON response with this exact structure:
 {
   "filters": {
-    // Only include filters that are relevant to the query
+    // Only include filters that are clearly indicated by the query
   },
   "confidence": 0.95, // 0-1 confidence score
   "explanation": "Brief explanation of how the query was interpreted"
 }
 
-Rules:
-- Only include filters that are clearly indicated by the query
-- Use skill_filter for specific technologies, programming languages, frameworks
-- Use experience_filter for company names, job titles, seniority levels
-- Use education_filter for universities, degrees, academic departments
-- Extract numeric ranges carefully for experience and graduation years
-- If query mentions "senior" or similar, include it in experience_filter rather than as separate terms
-- Be conservative - better to miss a filter than to include incorrect ones
-- Confidence should reflect how certain you are about the interpretation
+## IMPORTANT RULES:
+1. Only include filters that are CLEARLY indicated by the query
+2. Be conservative - better to miss a filter than include incorrect ones
+3. For technologies, distinguish between personal skills vs project usage
+4. For companies, distinguish between employment vs project clients
+5. Use arrays for technology_filter: ["React", "Node.js"] not just "React"
+6. Confidence should reflect certainty about the interpretation
+7. If unclear whether something is a skill or project technology, prefer skill_filter
+8. Always explain your reasoning in the explanation field
 
-Examples:
-"React developers from Google" → skill_filter: "React", experience_filter: "Google"
-"MIT computer science graduates" → education_filter: "MIT computer science"
-"Senior engineers with 5+ years experience" → experience_filter: "senior engineer", min_experience_years: 5
-"AWS certified developers" → skill_filter: "AWS", training_filter: "AWS"
+Examples of good confidence scores:
+- 0.9+: Very clear queries like "React developers with 5+ years"
+- 0.7-0.9: Clear intent but some ambiguity "frontend developers"
+- 0.5-0.7: Multiple possible interpretations "Google engineers"
+- <0.5: Very ambiguous or unclear queries
 `;
 
     const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${geminiModel}:generateContent?key=${geminiApiKey}`, {
@@ -171,6 +231,19 @@ Examples:
     }
     if (parsedResponse.filters.project_filter) {
       validatedFilters.project_filter = String(parsedResponse.filters.project_filter).trim();
+    }
+    if (parsedResponse.filters.project_name_filter) {
+      validatedFilters.project_name_filter = String(parsedResponse.filters.project_name_filter).trim();
+    }
+    if (parsedResponse.filters.project_description_filter) {
+      validatedFilters.project_description_filter = String(parsedResponse.filters.project_description_filter).trim();
+    }
+    
+    // Handle technology filter (array of strings)
+    if (parsedResponse.filters.technology_filter && Array.isArray(parsedResponse.filters.technology_filter)) {
+      validatedFilters.technology_filter = parsedResponse.filters.technology_filter
+        .map(tech => String(tech).trim())
+        .filter(tech => tech.length > 0);
     }
     
     // Handle numeric filters
