@@ -36,100 +36,97 @@ interface AdvancedFiltersManagerProps {
 }
 
 export const useAdvancedFiltersManager = (props: AdvancedFiltersManagerProps) => {
-  const handleApplyAdvancedFilters = () => {
-    console.log('Applying advanced filters with table-grouped data:', {
-      // Skills table filters
-      skillsTable: {
-        skillInput: props.skillInput
-      },
-      // Education table filters
-      educationTable: {
-        universityInput: props.universityInput,
-        minGraduationYear: props.minGraduationYear,
-        maxGraduationYear: props.maxGraduationYear
-      },
-      // Experience table filters
-      experienceTable: {
-        companyInput: props.companyInput,
-        experienceYears: props.experienceYears
-      },
-      // Projects table filters
-      projectsTable: {
-        projectNameInput: props.projectNameInput,
-        projectDescriptionInput: props.projectDescriptionInput,
-        technologyInput: props.technologyInput
-      },
-      // Profile status
-      profileStatus: {
-        completionStatus: props.completionStatus
-      }
-    });
+  // Apply filters immediately when values change
+  const applySkillFilter = (skill: string) => {
+    props.setSkillInput(skill);
+    props.onSkillFilter(skill);
+  };
 
-    // Apply Skills table filter (technical_skills, specialized_skills)
-    if (props.skillInput) {
-      console.log('Applying skills table filter:', props.skillInput);
-      props.onSkillFilter(props.skillInput);
-    }
+  const applyCompanyFilter = (company: string) => {
+    props.setCompanyInput(company);
+    props.onExperienceFilter(company);
+  };
 
-    // Apply Experience table filter (experiences.company_name)
-    if (props.companyInput) {
-      console.log('Applying experience table filter for company:', props.companyInput);
-      props.onExperienceFilter(props.companyInput);
+  const applyProjectNameFilter = (name: string) => {
+    props.setProjectNameInput(name);
+    if (name.trim()) {
+      props.onProjectFilter(name);
+    } else {
+      props.onProjectFilter('');
     }
+  };
 
-    // Apply Projects table filters (projects.name, projects.description, projects.technologies_used)
-    let projectSearchTerm = '';
-    
-    if (props.projectNameInput) {
-      projectSearchTerm = props.projectNameInput;
-      console.log('Applying projects table filter for name:', props.projectNameInput);
-    } else if (props.projectDescriptionInput) {
-      projectSearchTerm = props.projectDescriptionInput;
-      console.log('Applying projects table filter for description:', props.projectDescriptionInput);
-    } else if (props.technologyInput.length > 0) {
-      projectSearchTerm = props.technologyInput[0];
-      console.log('Applying projects table filter for technologies:', props.technologyInput);
+  const applyProjectDescriptionFilter = (description: string) => {
+    props.setProjectDescriptionInput(description);
+    if (description.trim()) {
+      props.onProjectFilter(description);
+    } else {
+      props.onProjectFilter('');
     }
-    
-    if (projectSearchTerm) {
-      props.onProjectFilter(projectSearchTerm);
-    }
+  };
 
-    // Apply advanced filters for experience years, graduation years, and completion status
+  const applyTechnologyFilter = (technologies: string[]) => {
+    props.setTechnologyInput(technologies);
+    if (technologies.length > 0) {
+      props.onProjectFilter(technologies[0]); // Use first technology for search
+    } else {
+      props.onProjectFilter('');
+    }
+  };
+
+  const applyAdvancedFilters = (updates: Partial<{
+    experienceYears: number[];
+    minGraduationYear: number | null;
+    maxGraduationYear: number | null;
+    completionStatus: string;
+  }>) => {
+    // Update local state
+    if (updates.experienceYears) props.setExperienceYears(updates.experienceYears);
+    if (updates.minGraduationYear !== undefined) props.setMinGraduationYear(updates.minGraduationYear);
+    if (updates.maxGraduationYear !== undefined) props.setMaxGraduationYear(updates.maxGraduationYear);
+    if (updates.completionStatus) props.setCompletionStatus(updates.completionStatus);
+
+    // Apply filters immediately
+    const currentExperienceYears = updates.experienceYears || props.experienceYears;
+    const currentMinGradYear = updates.minGraduationYear !== undefined ? updates.minGraduationYear : props.minGraduationYear;
+    const currentMaxGradYear = updates.maxGraduationYear !== undefined ? updates.maxGraduationYear : props.maxGraduationYear;
+    const currentCompletionStatus = updates.completionStatus || props.completionStatus;
+
     props.onAdvancedFilters({
-      minExperienceYears: props.experienceYears[0] > 0 || props.experienceYears[1] < 20 ? props.experienceYears[0] : null,
-      maxExperienceYears: props.experienceYears[0] > 0 || props.experienceYears[1] < 20 ? props.experienceYears[1] : null,
-      minGraduationYear: props.minGraduationYear,
-      maxGraduationYear: props.maxGraduationYear,
-      completionStatus: props.completionStatus !== 'all' ? props.completionStatus : null
+      minExperienceYears: currentExperienceYears[0] > 0 || currentExperienceYears[1] < 20 ? currentExperienceYears[0] : null,
+      maxExperienceYears: currentExperienceYears[0] > 0 || currentExperienceYears[1] < 20 ? currentExperienceYears[1] : null,
+      minGraduationYear: currentMinGradYear,
+      maxGraduationYear: currentMaxGradYear,
+      completionStatus: currentCompletionStatus !== 'all' ? currentCompletionStatus : null
     });
   };
 
   const clearAllFilters = () => {
-    console.log('Clearing all table-grouped filters');
+    console.log('Clearing all filters');
     
-    // Reset Skills table filters
+    // Reset all local state
     props.setSkillInput('');
-    
-    // Reset Education table filters
     props.setUniversityInput('');
-    props.setMinGraduationYear(null);
-    props.setMaxGraduationYear(null);
-    
-    // Reset Experience table filters
     props.setCompanyInput('');
-    props.setExperienceYears([0, 20]);
-    
-    // Reset Projects table filters
     props.setProjectNameInput('');
     props.setProjectDescriptionInput('');
     props.setTechnologyInput([]);
-    
-    // Reset Profile status
+    props.setExperienceYears([0, 20]);
+    props.setMinGraduationYear(null);
+    props.setMaxGraduationYear(null);
     props.setCompletionStatus('all');
     
+    // Reset backend filters
     props.onReset();
   };
 
-  return { handleApplyAdvancedFilters, clearAllFilters };
+  return { 
+    applySkillFilter,
+    applyCompanyFilter,
+    applyProjectNameFilter,
+    applyProjectDescriptionFilter,
+    applyTechnologyFilter,
+    applyAdvancedFilters,
+    clearAllFilters 
+  };
 };

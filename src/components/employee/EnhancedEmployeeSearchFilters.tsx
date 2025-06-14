@@ -79,7 +79,6 @@ const EnhancedEmployeeSearchFilters: React.FC<EnhancedEmployeeSearchFiltersProps
   
   // Advanced filter states
   const [experienceYears, setExperienceYears] = useState<number[]>([0, 20]);
-  const [selectedSkills, setSelectedSkills] = useState<string[]>([]);
   const [minGraduationYear, setMinGraduationYear] = useState<number | null>(null);
   const [maxGraduationYear, setMaxGraduationYear] = useState<number | null>(null);
   const [completionStatus, setCompletionStatus] = useState<string>('all');
@@ -139,7 +138,15 @@ const EnhancedEmployeeSearchFilters: React.FC<EnhancedEmployeeSearchFiltersProps
     technologyInput
   });
 
-  const { handleApplyAdvancedFilters, clearAllFilters } = useAdvancedFiltersManager({
+  const { 
+    applySkillFilter,
+    applyCompanyFilter,
+    applyProjectNameFilter,
+    applyProjectDescriptionFilter,
+    applyTechnologyFilter,
+    applyAdvancedFilters,
+    clearAllFilters 
+  } = useAdvancedFiltersManager({
     skillInput,
     universityInput,
     companyInput,
@@ -310,10 +317,14 @@ const EnhancedEmployeeSearchFilters: React.FC<EnhancedEmployeeSearchFiltersProps
               maxGraduationYear={maxGraduationYear}
               setMinGraduationYear={setMinGraduationYear}
               setMaxGraduationYear={setMaxGraduationYear}
-              onApplyFilters={handleApplyAdvancedFilters}
-              onClearAllFilters={clearAllFilters}
+              onSkillFilter={applySkillFilter}
+              onCompanyFilter={applyCompanyFilter}
+              onProjectNameFilter={applyProjectNameFilter}
+              onProjectDescriptionFilter={applyProjectDescriptionFilter}
+              onTechnologyFilter={applyTechnologyFilter}
+              onAdvancedFilters={applyAdvancedFilters}
               onEducationFilter={onEducationFilter}
-              onProjectFilter={onProjectFilter}
+              onClearAllFilters={clearAllFilters}
               isLoading={isLoading}
             />
           </CollapsibleContent>

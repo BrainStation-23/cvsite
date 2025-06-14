@@ -1,4 +1,3 @@
-
 import { useMemo } from 'react';
 
 export interface FilterChip {
@@ -9,7 +8,7 @@ export interface FilterChip {
         'experience-years' | 'graduation-years' | 'completion' | 
         'skill-input' | 'university-input' | 'company-input' | 'technology' | 
         'project-name-input' | 'project-description-input';
-  tableSource?: string; // Add table source information
+  tableSource?: string;
 }
 
 interface FilterStateProps {
@@ -47,41 +46,61 @@ export const useFilterState = (props: FilterStateProps) => {
       });
     }
 
-    // Applied filters (from previous searches)
-    if (props.skillFilter) {
+    // Skills table filters
+    if (props.skillFilter || props.skillInput) {
+      const value = props.skillFilter || props.skillInput;
       filters.push({
-        id: 'skill-applied',
-        label: 'Skills Applied',
-        value: props.skillFilter,
+        id: 'skill',
+        label: 'Skills',
+        value: value,
         type: 'skill',
         tableSource: 'technical_skills, specialized_skills'
       });
     }
 
-    if (props.experienceFilter) {
+    // Education table filters
+    if (props.educationFilter || props.universityInput) {
+      const value = props.educationFilter || props.universityInput;
       filters.push({
-        id: 'experience-applied',
-        label: 'Company Applied',
-        value: props.experienceFilter,
-        type: 'experience',
-        tableSource: 'experiences'
-      });
-    }
-
-    if (props.educationFilter) {
-      filters.push({
-        id: 'education-applied',
-        label: 'Education Applied',
-        value: props.educationFilter,
+        id: 'education',
+        label: 'University',
+        value: value,
         type: 'education',
         tableSource: 'education, universities'
       });
     }
 
+    // Experience table filters
+    if (props.experienceFilter || props.companyInput) {
+      const value = props.experienceFilter || props.companyInput;
+      filters.push({
+        id: 'experience',
+        label: 'Company',
+        value: value,
+        type: 'experience',
+        tableSource: 'experiences'
+      });
+    }
+
+    // Projects table filters
+    if (props.projectFilter || props.projectNameInput || props.projectDescriptionInput) {
+      const value = props.projectFilter || props.projectNameInput || props.projectDescriptionInput;
+      const label = props.projectNameInput ? 'Project Name' : 
+                   props.projectDescriptionInput ? 'Project Description' : 'Project';
+      filters.push({
+        id: 'project',
+        label: label,
+        value: value,
+        type: 'project',
+        tableSource: 'projects'
+      });
+    }
+
+    // Other applied filters
     if (props.trainingFilter) {
       filters.push({
-        id: 'training-applied',
-        label: 'Training Applied',
+        id: 'training',
+        label: 'Training',
         value: props.trainingFilter,
         type: 'training',
         tableSource: 'trainings'
@@ -90,72 +109,11 @@ export const useFilterState = (props: FilterStateProps) => {
 
     if (props.achievementFilter) {
       filters.push({
-        id: 'achievement-applied',
-        label: 'Achievement Applied',
+        id: 'achievement',
+        label: 'Achievement',
         value: props.achievementFilter,
         type: 'achievement',
         tableSource: 'achievements'
-      });
-    }
-
-    if (props.projectFilter) {
-      filters.push({
-        id: 'project-applied',
-        label: 'Project Applied',
-        value: props.projectFilter,
-        type: 'project',
-        tableSource: 'projects'
-      });
-    }
-
-    // Advanced filter inputs (pending application)
-    if (props.skillInput) {
-      filters.push({
-        id: 'skill-input',
-        label: 'Skills (pending)',
-        value: props.skillInput,
-        type: 'skill-input',
-        tableSource: 'technical_skills, specialized_skills'
-      });
-    }
-
-    if (props.universityInput) {
-      filters.push({
-        id: 'university-input',
-        label: 'University (pending)',
-        value: props.universityInput,
-        type: 'university-input',
-        tableSource: 'education, universities'
-      });
-    }
-
-    if (props.companyInput) {
-      filters.push({
-        id: 'company-input',
-        label: 'Company (pending)',
-        value: props.companyInput,
-        type: 'company-input',
-        tableSource: 'experiences'
-      });
-    }
-
-    if (props.projectNameInput) {
-      filters.push({
-        id: 'project-name-input',
-        label: 'Project Name (pending)',
-        value: props.projectNameInput,
-        type: 'project-name-input',
-        tableSource: 'projects'
-      });
-    }
-
-    if (props.projectDescriptionInput) {
-      filters.push({
-        id: 'project-description-input',
-        label: 'Project Description (pending)',
-        value: props.projectDescriptionInput,
-        type: 'project-description-input',
-        tableSource: 'projects'
       });
     }
 
@@ -163,7 +121,7 @@ export const useFilterState = (props: FilterStateProps) => {
     props.technologyInput.forEach((tech, index) => {
       filters.push({
         id: `technology-${index}`,
-        label: 'Project Tech (pending)',
+        label: 'Project Technology',
         value: tech,
         type: 'technology',
         tableSource: 'projects.technologies_used'

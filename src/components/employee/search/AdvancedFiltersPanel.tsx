@@ -31,10 +31,14 @@ interface AdvancedFiltersPanelProps {
   maxGraduationYear: number | null;
   setMinGraduationYear: (year: number | null) => void;
   setMaxGraduationYear: (year: number | null) => void;
-  onApplyFilters: () => void;
-  onClearAllFilters: () => void;
+  onSkillFilter: (skill: string) => void;
+  onCompanyFilter: (company: string) => void;
+  onProjectNameFilter: (name: string) => void;
+  onProjectDescriptionFilter: (description: string) => void;
+  onTechnologyFilter: (technologies: string[]) => void;
+  onAdvancedFilters: (filters: any) => void;
   onEducationFilter: (education: string) => void;
-  onProjectFilter: (project: string) => void;
+  onClearAllFilters: () => void;
   isLoading: boolean;
 }
 
@@ -59,32 +63,75 @@ const AdvancedFiltersPanel: React.FC<AdvancedFiltersPanelProps> = ({
   maxGraduationYear,
   setMinGraduationYear,
   setMaxGraduationYear,
-  onApplyFilters,
-  onClearAllFilters,
+  onSkillFilter,
+  onCompanyFilter,
+  onProjectNameFilter,
+  onProjectDescriptionFilter,
+  onTechnologyFilter,
+  onAdvancedFilters,
   onEducationFilter,
-  onProjectFilter,
+  onClearAllFilters,
   isLoading
 }) => {
+  const handleSkillChange = (value: string) => {
+    setSkillInput(value);
+    onSkillFilter(value);
+  };
+
   const handleUniversityChange = (value: string) => {
     setUniversityInput(value);
-    // Trigger immediate search when university is selected
     onEducationFilter(value);
+  };
+
+  const handleCompanyChange = (value: string) => {
+    setCompanyInput(value);
+    onCompanyFilter(value);
   };
 
   const handleProjectNameChange = (value: string) => {
     setProjectNameInput(value);
-    // Trigger immediate search when project name is entered
-    if (value.trim()) {
-      onProjectFilter(value);
-    }
+    onProjectNameFilter(value);
   };
 
   const handleProjectDescriptionChange = (value: string) => {
     setProjectDescriptionInput(value);
-    // Trigger immediate search when project description is entered
-    if (value.trim()) {
-      onProjectFilter(value);
-    }
+    onProjectDescriptionFilter(value);
+  };
+
+  const handleTechnologyChange = (technologies: string[]) => {
+    setTechnologyInput(technologies);
+    onTechnologyFilter(technologies);
+  };
+
+  const handleExperienceYearsChange = (years: number[]) => {
+    setExperienceYears(years);
+    onAdvancedFilters({
+      experienceYears: years,
+      minGraduationYear,
+      maxGraduationYear,
+      completionStatus
+    });
+  };
+
+  const handleGraduationYearChange = (minYear: number | null, maxYear: number | null) => {
+    setMinGraduationYear(minYear);
+    setMaxGraduationYear(maxYear);
+    onAdvancedFilters({
+      experienceYears,
+      minGraduationYear: minYear,
+      maxGraduationYear: maxYear,
+      completionStatus
+    });
+  };
+
+  const handleCompletionStatusChange = (status: string) => {
+    setCompletionStatus(status);
+    onAdvancedFilters({
+      experienceYears,
+      minGraduationYear,
+      maxGraduationYear,
+      completionStatus: status
+    });
   };
 
   return (
@@ -109,7 +156,7 @@ const AdvancedFiltersPanel: React.FC<AdvancedFiltersPanelProps> = ({
                 id="skill-input"
                 placeholder="Search by skill name..."
                 value={skillInput}
-                onChange={(e) => setSkillInput(e.target.value)}
+                onChange={(e) => handleSkillChange(e.target.value)}
                 className="text-sm"
               />
             </div>
@@ -140,8 +187,8 @@ const AdvancedFiltersPanel: React.FC<AdvancedFiltersPanelProps> = ({
             <GraduationYearRangeControl
               minYear={minGraduationYear}
               maxYear={maxGraduationYear}
-              onMinYearChange={setMinGraduationYear}
-              onMaxYearChange={setMaxGraduationYear}
+              onMinYearChange={(year) => handleGraduationYearChange(year, maxGraduationYear)}
+              onMaxYearChange={(year) => handleGraduationYearChange(minGraduationYear, year)}
             />
           </CardContent>
         </Card>
@@ -165,7 +212,7 @@ const AdvancedFiltersPanel: React.FC<AdvancedFiltersPanelProps> = ({
                 id="company-input"
                 placeholder="Search by company name..."
                 value={companyInput}
-                onChange={(e) => setCompanyInput(e.target.value)}
+                onChange={(e) => handleCompanyChange(e.target.value)}
                 className="text-sm"
               />
             </div>
@@ -175,7 +222,7 @@ const AdvancedFiltersPanel: React.FC<AdvancedFiltersPanelProps> = ({
               </Label>
               <Slider
                 value={experienceYears}
-                onValueChange={setExperienceYears}
+                onValueChange={handleExperienceYearsChange}
                 max={20}
                 min={0}
                 step={1}
@@ -226,7 +273,7 @@ const AdvancedFiltersPanel: React.FC<AdvancedFiltersPanelProps> = ({
               </Label>
               <TechnologyTagsInput
                 value={technologyInput}
-                onChange={setTechnologyInput}
+                onChange={handleTechnologyChange}
                 placeholder="Add project technologies..."
                 disabled={isLoading}
               />
@@ -250,7 +297,7 @@ const AdvancedFiltersPanel: React.FC<AdvancedFiltersPanelProps> = ({
             <Label className="text-sm font-medium">
               Completion Status
             </Label>
-            <Select value={completionStatus} onValueChange={setCompletionStatus}>
+            <Select value={completionStatus} onValueChange={handleCompletionStatusChange}>
               <SelectTrigger className="text-sm">
                 <SelectValue placeholder="Select status" />
               </SelectTrigger>
@@ -267,8 +314,8 @@ const AdvancedFiltersPanel: React.FC<AdvancedFiltersPanelProps> = ({
         </CardContent>
       </Card>
 
-      {/* Action Buttons */}
-      <div className="flex items-center justify-between pt-4 border-t">
+      {/* Clear All Button */}
+      <div className="flex items-center justify-start pt-4 border-t">
         <Button 
           variant="outline" 
           onClick={onClearAllFilters}
@@ -276,13 +323,6 @@ const AdvancedFiltersPanel: React.FC<AdvancedFiltersPanelProps> = ({
           className="text-sm"
         >
           Clear All Filters
-        </Button>
-        <Button 
-          onClick={onApplyFilters}
-          disabled={isLoading}
-          className="text-sm"
-        >
-          Apply Filters
         </Button>
       </div>
     </div>
