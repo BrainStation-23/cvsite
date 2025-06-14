@@ -33,32 +33,52 @@ interface AdvancedFiltersManagerProps {
 
 export const useAdvancedFiltersManager = (props: AdvancedFiltersManagerProps) => {
   const handleApplyAdvancedFilters = () => {
-    console.log('Applying advanced filters:', {
-      skillInput: props.skillInput,
-      universityInput: props.universityInput, 
-      companyInput: props.companyInput,
-      technologyInput: props.technologyInput,
-      experienceYears: props.experienceYears,
-      minGraduationYear: props.minGraduationYear,
-      maxGraduationYear: props.maxGraduationYear,
-      completionStatus: props.completionStatus
+    console.log('Applying advanced filters with table-grouped data:', {
+      // Skills table filters
+      skillsTable: {
+        skillInput: props.skillInput
+      },
+      // Education table filters
+      educationTable: {
+        universityInput: props.universityInput,
+        minGraduationYear: props.minGraduationYear,
+        maxGraduationYear: props.maxGraduationYear
+      },
+      // Experience table filters
+      experienceTable: {
+        companyInput: props.companyInput,
+        experienceYears: props.experienceYears
+      },
+      // Projects table filters
+      projectsTable: {
+        technologyInput: props.technologyInput
+      },
+      // Profile status
+      profileStatus: {
+        completionStatus: props.completionStatus
+      }
     });
 
+    // Apply Skills table filter (technical_skills, specialized_skills)
     if (props.skillInput) {
+      console.log('Applying skills table filter:', props.skillInput);
       props.onSkillFilter(props.skillInput);
     }
 
+    // Apply Experience table filter (experiences.company_name)
     if (props.companyInput) {
+      console.log('Applying experience table filter for company:', props.companyInput);
       props.onExperienceFilter(props.companyInput);
     }
 
-    // Apply each technology as a separate project filter search
+    // Apply Projects table filter (projects.technologies_used)
     if (props.technologyInput.length > 0) {
-      // For now, we'll search for the first technology as the primary filter
-      // In a more advanced implementation, we could modify the backend to handle multiple technologies
+      console.log('Applying projects table filter for technologies:', props.technologyInput);
+      // Apply first technology as project filter (searches in technologies_used array)
       props.onProjectFilter(props.technologyInput[0]);
     }
 
+    // Apply advanced filters for experience years, graduation years, and completion status
     props.onAdvancedFilters({
       minExperienceYears: props.experienceYears[0] > 0 || props.experienceYears[1] < 20 ? props.experienceYears[0] : null,
       maxExperienceYears: props.experienceYears[0] > 0 || props.experienceYears[1] < 20 ? props.experienceYears[1] : null,
@@ -69,17 +89,28 @@ export const useAdvancedFiltersManager = (props: AdvancedFiltersManagerProps) =>
   };
 
   const clearAllFilters = () => {
+    console.log('Clearing all table-grouped filters');
+    
+    // Reset Skills table filters
     props.setSkillInput('');
+    
+    // Reset Education table filters
     props.setUniversityInput('');
-    props.setCompanyInput('');
-    props.setTechnologyInput([]);
-    props.setExperienceYears([0, 20]);
     props.setMinGraduationYear(null);
     props.setMaxGraduationYear(null);
+    
+    // Reset Experience table filters
+    props.setCompanyInput('');
+    props.setExperienceYears([0, 20]);
+    
+    // Reset Projects table filters
+    props.setTechnologyInput([]);
+    
+    // Reset Profile status
     props.setCompletionStatus('all');
+    
     props.onReset();
   };
 
   return { handleApplyAdvancedFilters, clearAllFilters };
 };
-

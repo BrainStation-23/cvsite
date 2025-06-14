@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { UniversityCombobox } from '@/components/admin/university/UniversityCombobox';
 import GraduationYearRangeControl from './GraduationYearRangeControl';
 import TechnologyTagsInput from './TechnologyTagsInput';
@@ -62,105 +63,159 @@ const AdvancedFiltersPanel: React.FC<AdvancedFiltersPanelProps> = ({
 
   return (
     <div className="mt-6 p-6 bg-gray-50 dark:bg-gray-900/50 rounded-lg border space-y-6">
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {/* Skills Filter */}
-        <div className="space-y-2">
-          <Label htmlFor="skill-input" className="text-sm font-medium">
-            Skills
-          </Label>
-          <Input
-            id="skill-input"
-            placeholder="Search by skills..."
-            value={skillInput}
-            onChange={(e) => setSkillInput(e.target.value)}
-            className="text-sm"
-          />
-        </div>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Skills Table Filters */}
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base font-medium text-blue-700 dark:text-blue-300">
+              Skills Filters
+            </CardTitle>
+            <p className="text-sm text-gray-600 dark:text-gray-400">
+              Search in technical_skills and specialized_skills tables
+            </p>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="skill-input" className="text-sm font-medium">
+                Skill Name
+              </Label>
+              <Input
+                id="skill-input"
+                placeholder="Search by skill name..."
+                value={skillInput}
+                onChange={(e) => setSkillInput(e.target.value)}
+                className="text-sm"
+              />
+            </div>
+          </CardContent>
+        </Card>
 
-        {/* University Filter */}
-        <div className="space-y-2">
-          <Label className="text-sm font-medium">
-            University
-          </Label>
-          <UniversityCombobox
-            value={universityInput}
-            onValueChange={handleUniversityChange}
-            placeholder="Search by university..."
-          />
-        </div>
+        {/* Education Table Filters */}
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base font-medium text-green-700 dark:text-green-300">
+              Education Filters
+            </CardTitle>
+            <p className="text-sm text-gray-600 dark:text-gray-400">
+              Search in education and universities tables
+            </p>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <Label className="text-sm font-medium">
+                University
+              </Label>
+              <UniversityCombobox
+                value={universityInput}
+                onValueChange={handleUniversityChange}
+                placeholder="Search by university..."
+              />
+            </div>
+            <GraduationYearRangeControl
+              minYear={minGraduationYear}
+              maxYear={maxGraduationYear}
+              onMinYearChange={setMinGraduationYear}
+              onMaxYearChange={setMaxGraduationYear}
+            />
+          </CardContent>
+        </Card>
 
-        {/* Company Filter */}
-        <div className="space-y-2">
-          <Label htmlFor="company-input" className="text-sm font-medium">
-            Company
-          </Label>
-          <Input
-            id="company-input"
-            placeholder="Search by company..."
-            value={companyInput}
-            onChange={(e) => setCompanyInput(e.target.value)}
-            className="text-sm"
-          />
-        </div>
+        {/* Experience Table Filters */}
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base font-medium text-purple-700 dark:text-purple-300">
+              Experience Filters
+            </CardTitle>
+            <p className="text-sm text-gray-600 dark:text-gray-400">
+              Search in experiences table
+            </p>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="company-input" className="text-sm font-medium">
+                Company Name
+              </Label>
+              <Input
+                id="company-input"
+                placeholder="Search by company name..."
+                value={companyInput}
+                onChange={(e) => setCompanyInput(e.target.value)}
+                className="text-sm"
+              />
+            </div>
+            <div className="space-y-4">
+              <Label className="text-sm font-medium">
+                Total Experience: {experienceYears[0]}-{experienceYears[1]} years
+              </Label>
+              <Slider
+                value={experienceYears}
+                onValueChange={setExperienceYears}
+                max={20}
+                min={0}
+                step={1}
+                className="w-full"
+              />
+            </div>
+          </CardContent>
+        </Card>
 
-        {/* Technology Filter - Updated to use TechnologyTagsInput */}
-        <div className="space-y-2">
-          <Label className="text-sm font-medium">
-            Technologies
-          </Label>
-          <TechnologyTagsInput
-            value={technologyInput}
-            onChange={setTechnologyInput}
-            placeholder="Add technologies..."
-            disabled={isLoading}
-          />
-        </div>
+        {/* Projects Table Filters */}
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base font-medium text-orange-700 dark:text-orange-300">
+              Projects Filters
+            </CardTitle>
+            <p className="text-sm text-gray-600 dark:text-gray-400">
+              Search in projects table (technologies_used column)
+            </p>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <Label className="text-sm font-medium">
+                Technologies Used
+              </Label>
+              <TechnologyTagsInput
+                value={technologyInput}
+                onChange={setTechnologyInput}
+                placeholder="Add project technologies..."
+                disabled={isLoading}
+              />
+            </div>
+          </CardContent>
+        </Card>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {/* Experience Years Range */}
-        <div className="space-y-4">
-          <Label className="text-sm font-medium">
-            Experience Range: {experienceYears[0]}-{experienceYears[1]} years
-          </Label>
-          <Slider
-            value={experienceYears}
-            onValueChange={setExperienceYears}
-            max={20}
-            min={0}
-            step={1}
-            className="w-full"
-          />
-        </div>
-
-        {/* Graduation Year Range */}
-        <GraduationYearRangeControl
-          minYear={minGraduationYear}
-          maxYear={maxGraduationYear}
-          onMinYearChange={setMinGraduationYear}
-          onMaxYearChange={setMaxGraduationYear}
-        />
-
-        {/* Profile Completion Status */}
-        <div className="space-y-2">
-          <Label className="text-sm font-medium">
+      {/* Profile Status Filter */}
+      <Card>
+        <CardHeader className="pb-3">
+          <CardTitle className="text-base font-medium text-gray-700 dark:text-gray-300">
             Profile Status
-          </Label>
-          <Select value={completionStatus} onValueChange={setCompletionStatus}>
-            <SelectTrigger className="text-sm">
-              <SelectValue placeholder="Select status" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Profiles</SelectItem>
-              <SelectItem value="complete">Complete Profiles</SelectItem>
-              <SelectItem value="incomplete">Incomplete Profiles</SelectItem>
-              <SelectItem value="no-skills">Missing Skills</SelectItem>
-              <SelectItem value="no-experience">Missing Experience</SelectItem>
-              <SelectItem value="no-education">Missing Education</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-      </div>
+          </CardTitle>
+          <p className="text-sm text-gray-600 dark:text-gray-400">
+            Filter by profile completion status
+          </p>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-2 max-w-sm">
+            <Label className="text-sm font-medium">
+              Completion Status
+            </Label>
+            <Select value={completionStatus} onValueChange={setCompletionStatus}>
+              <SelectTrigger className="text-sm">
+                <SelectValue placeholder="Select status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Profiles</SelectItem>
+                <SelectItem value="complete">Complete Profiles</SelectItem>
+                <SelectItem value="incomplete">Incomplete Profiles</SelectItem>
+                <SelectItem value="no-skills">Missing Skills</SelectItem>
+                <SelectItem value="no-experience">Missing Experience</SelectItem>
+                <SelectItem value="no-education">Missing Education</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Action Buttons */}
       <div className="flex items-center justify-between pt-4 border-t">

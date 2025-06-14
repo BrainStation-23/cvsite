@@ -1,11 +1,14 @@
 
-import { useState, useEffect } from 'react';
+import { useMemo } from 'react';
 
-interface FilterChip {
+export interface FilterChip {
   id: string;
   label: string;
   value: string;
-  type: string;
+  type: 'search' | 'skill' | 'experience' | 'education' | 'training' | 'achievement' | 'project' | 
+        'experience-years' | 'graduation-years' | 'completion' | 
+        'skill-input' | 'university-input' | 'company-input' | 'technology';
+  tableSource?: string; // Add table source information
 }
 
 interface FilterStateProps {
@@ -27,125 +30,184 @@ interface FilterStateProps {
 }
 
 export const useFilterState = (props: FilterStateProps) => {
-  const [activeFilters, setActiveFilters] = useState<FilterChip[]>([]);
-
-  useEffect(() => {
+  const activeFilters = useMemo(() => {
     const filters: FilterChip[] = [];
-    
+
+    // Global search
     if (props.searchQuery) {
-      filters.push({ id: 'search', label: `Search: "${props.searchQuery}"`, value: props.searchQuery, type: 'search' });
+      filters.push({
+        id: 'search',
+        label: 'Search',
+        value: props.searchQuery,
+        type: 'search',
+        tableSource: 'All tables'
+      });
     }
-    
+
+    // Applied filters (from previous searches)
     if (props.skillFilter) {
-      filters.push({ id: 'skill', label: `Skills: ${props.skillFilter}`, value: props.skillFilter, type: 'skill' });
+      filters.push({
+        id: 'skill-applied',
+        label: 'Skills Applied',
+        value: props.skillFilter,
+        type: 'skill',
+        tableSource: 'technical_skills, specialized_skills'
+      });
     }
-    
+
     if (props.experienceFilter) {
-      filters.push({ id: 'experience', label: `Experience: ${props.experienceFilter}`, value: props.experienceFilter, type: 'experience' });
+      filters.push({
+        id: 'experience-applied',
+        label: 'Company Applied',
+        value: props.experienceFilter,
+        type: 'experience',
+        tableSource: 'experiences'
+      });
     }
-    
+
     if (props.educationFilter) {
-      filters.push({ id: 'education', label: `Education: ${props.educationFilter}`, value: props.educationFilter, type: 'education' });
+      filters.push({
+        id: 'education-applied',
+        label: 'Education Applied',
+        value: props.educationFilter,
+        type: 'education',
+        tableSource: 'education, universities'
+      });
     }
-    
+
     if (props.trainingFilter) {
-      filters.push({ id: 'training', label: `Training: ${props.trainingFilter}`, value: props.trainingFilter, type: 'training' });
+      filters.push({
+        id: 'training-applied',
+        label: 'Training Applied',
+        value: props.trainingFilter,
+        type: 'training',
+        tableSource: 'trainings'
+      });
     }
-    
+
     if (props.achievementFilter) {
-      filters.push({ id: 'achievement', label: `Achievements: ${props.achievementFilter}`, value: props.achievementFilter, type: 'achievement' });
+      filters.push({
+        id: 'achievement-applied',
+        label: 'Achievement Applied',
+        value: props.achievementFilter,
+        type: 'achievement',
+        tableSource: 'achievements'
+      });
     }
-    
+
     if (props.projectFilter) {
-      filters.push({ id: 'project', label: `Projects: ${props.projectFilter}`, value: props.projectFilter, type: 'project' });
-    }
-
-    if (props.experienceYears[0] > 0 || props.experienceYears[1] < 20) {
-      filters.push({ 
-        id: 'experience-years', 
-        label: `Experience: ${props.experienceYears[0]}-${props.experienceYears[1]} years`, 
-        value: props.experienceYears.join('-'), 
-        type: 'experience-years' 
+      filters.push({
+        id: 'project-applied',
+        label: 'Project Tech Applied',
+        value: props.projectFilter,
+        type: 'project',
+        tableSource: 'projects.technologies_used'
       });
     }
 
-    if (props.minGraduationYear || props.maxGraduationYear) {
-      const yearRange = `${props.minGraduationYear || 'Any'}-${props.maxGraduationYear || 'Any'}`;
-      filters.push({ 
-        id: 'graduation-years', 
-        label: `Graduation: ${yearRange}`, 
-        value: yearRange, 
-        type: 'graduation-years' 
-      });
-    }
-
-    if (props.completionStatus !== 'all') {
-      filters.push({ 
-        id: 'completion', 
-        label: `Status: ${props.completionStatus}`, 
-        value: props.completionStatus, 
-        type: 'completion' 
-      });
-    }
-
+    // Advanced filter inputs (pending application)
     if (props.skillInput) {
-      filters.push({ 
-        id: 'skill-input', 
-        label: `Skills: ${props.skillInput}`, 
-        value: props.skillInput, 
-        type: 'skill-input' 
+      filters.push({
+        id: 'skill-input',
+        label: 'Skills (pending)',
+        value: props.skillInput,
+        type: 'skill-input',
+        tableSource: 'technical_skills, specialized_skills'
       });
     }
 
-    if (props.universityInput && props.universityInput !== props.educationFilter) {
-      filters.push({ 
-        id: 'university-input', 
-        label: `Education: ${props.universityInput}`, 
-        value: props.universityInput, 
-        type: 'university-input' 
+    if (props.universityInput) {
+      filters.push({
+        id: 'university-input',
+        label: 'University (pending)',
+        value: props.universityInput,
+        type: 'university-input',
+        tableSource: 'education, universities'
       });
     }
 
     if (props.companyInput) {
-      filters.push({ 
-        id: 'company-input', 
-        label: `Company: ${props.companyInput}`, 
-        value: props.companyInput, 
-        type: 'company-input' 
+      filters.push({
+        id: 'company-input',
+        label: 'Company (pending)',
+        value: props.companyInput,
+        type: 'company-input',
+        tableSource: 'experiences'
       });
     }
 
-    if (props.technologyInput.length > 0) {
-      props.technologyInput.forEach((tech, index) => {
-        filters.push({ 
-          id: `technology-${index}`, 
-          label: `Technology: ${tech}`, 
-          value: tech, 
-          type: 'technology' 
-        });
+    // Technology filters (each technology as separate chip)
+    props.technologyInput.forEach((tech, index) => {
+      filters.push({
+        id: `technology-${index}`,
+        label: 'Project Tech (pending)',
+        value: tech,
+        type: 'technology',
+        tableSource: 'projects.technologies_used'
+      });
+    });
+
+    // Experience years range
+    if (props.experienceYears[0] > 0 || props.experienceYears[1] < 20) {
+      filters.push({
+        id: 'experience-years',
+        label: 'Experience Range',
+        value: `${props.experienceYears[0]}-${props.experienceYears[1]} years`,
+        type: 'experience-years',
+        tableSource: 'experiences (calculated)'
       });
     }
-    
-    setActiveFilters(filters);
+
+    // Graduation years range
+    if (props.minGraduationYear || props.maxGraduationYear) {
+      const minYear = props.minGraduationYear || 'any';
+      const maxYear = props.maxGraduationYear || 'any';
+      filters.push({
+        id: 'graduation-years',
+        label: 'Graduation Range',
+        value: `${minYear} - ${maxYear}`,
+        type: 'graduation-years',
+        tableSource: 'education'
+      });
+    }
+
+    // Completion status
+    if (props.completionStatus !== 'all') {
+      const statusLabels = {
+        'complete': 'Complete Profiles',
+        'incomplete': 'Incomplete Profiles',
+        'no-skills': 'Missing Skills',
+        'no-experience': 'Missing Experience',
+        'no-education': 'Missing Education'
+      };
+      
+      filters.push({
+        id: 'completion',
+        label: 'Profile Status',
+        value: statusLabels[props.completionStatus as keyof typeof statusLabels] || props.completionStatus,
+        type: 'completion',
+        tableSource: 'Profile analysis'
+      });
+    }
+
+    return filters;
   }, [
-    props.searchQuery, 
-    props.skillFilter, 
-    props.experienceFilter, 
-    props.educationFilter, 
-    props.trainingFilter, 
-    props.achievementFilter, 
-    props.projectFilter, 
-    props.experienceYears, 
-    props.minGraduationYear, 
-    props.maxGraduationYear, 
-    props.completionStatus, 
-    props.skillInput, 
-    props.universityInput, 
-    props.companyInput, 
+    props.searchQuery,
+    props.skillFilter,
+    props.experienceFilter,
+    props.educationFilter,
+    props.trainingFilter,
+    props.achievementFilter,
+    props.projectFilter,
+    props.experienceYears,
+    props.minGraduationYear,
+    props.maxGraduationYear,
+    props.completionStatus,
+    props.skillInput,
+    props.universityInput,
+    props.companyInput,
     props.technologyInput
   ]);
 
   return { activeFilters };
 };
-
-export type { FilterChip };
