@@ -7,6 +7,7 @@ import { Slider } from '@/components/ui/slider';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { UniversityCombobox } from '@/components/admin/university/UniversityCombobox';
 import GraduationYearRangeControl from './GraduationYearRangeControl';
+import TechnologyTagsInput from './TechnologyTagsInput';
 
 interface AdvancedFiltersPanelProps {
   skillInput: string;
@@ -15,8 +16,8 @@ interface AdvancedFiltersPanelProps {
   setUniversityInput: (value: string) => void;
   companyInput: string;
   setCompanyInput: (value: string) => void;
-  technologyInput: string;
-  setTechnologyInput: (value: string) => void;
+  technologyInput: string[];
+  setTechnologyInput: (value: string[]) => void;
   experienceYears: number[];
   setExperienceYears: (value: number[]) => void;
   completionStatus: string;
@@ -102,17 +103,16 @@ const AdvancedFiltersPanel: React.FC<AdvancedFiltersPanelProps> = ({
           />
         </div>
 
-        {/* Technology Filter */}
+        {/* Technology Filter - Updated to use TechnologyTagsInput */}
         <div className="space-y-2">
-          <Label htmlFor="technology-input" className="text-sm font-medium">
-            Technology
+          <Label className="text-sm font-medium">
+            Technologies
           </Label>
-          <Input
-            id="technology-input"
-            placeholder="Search by technology..."
+          <TechnologyTagsInput
             value={technologyInput}
-            onChange={(e) => setTechnologyInput(e.target.value)}
-            className="text-sm"
+            onChange={setTechnologyInput}
+            placeholder="Add technologies..."
+            disabled={isLoading}
           />
         </div>
       </div>

@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -89,7 +90,7 @@ const EnhancedEmployeeSearchFilters: React.FC<EnhancedEmployeeSearchFiltersProps
   const [skillInput, setSkillInput] = useState('');
   const [universityInput, setUniversityInput] = useState('');
   const [companyInput, setCompanyInput] = useState('');
-  const [technologyInput, setTechnologyInput] = useState('');
+  const [technologyInput, setTechnologyInput] = useState<string[]>([]);
 
   // Update active filters when inputs change
   useEffect(() => {
@@ -161,7 +162,6 @@ const EnhancedEmployeeSearchFilters: React.FC<EnhancedEmployeeSearchFiltersProps
     }
 
     // Only show university input filter if it's different from the education filter
-    // This prevents duplicate chips when university search is applied
     if (universityInput && universityInput !== educationFilter) {
       filters.push({ 
         id: 'university-input', 
@@ -180,12 +180,15 @@ const EnhancedEmployeeSearchFilters: React.FC<EnhancedEmployeeSearchFiltersProps
       });
     }
 
-    if (technologyInput) {
-      filters.push({ 
-        id: 'technology-input', 
-        label: `Technology: ${technologyInput}`, 
-        value: technologyInput, 
-        type: 'technology-input' 
+    // Handle technology array - create individual chips for each technology
+    if (technologyInput.length > 0) {
+      technologyInput.forEach((tech, index) => {
+        filters.push({ 
+          id: `technology-${index}`, 
+          label: `Technology: ${tech}`, 
+          value: tech, 
+          type: 'technology' 
+        });
       });
     }
     
@@ -261,8 +264,10 @@ const EnhancedEmployeeSearchFilters: React.FC<EnhancedEmployeeSearchFiltersProps
       case 'company-input':
         setCompanyInput('');
         break;
-      case 'technology-input':
-        setTechnologyInput('');
+      case 'technology':
+        // Remove specific technology from array
+        const techToRemove = filter.value;
+        setTechnologyInput(prev => prev.filter(tech => tech !== techToRemove));
         break;
     }
   };
@@ -288,8 +293,9 @@ const EnhancedEmployeeSearchFilters: React.FC<EnhancedEmployeeSearchFiltersProps
       onExperienceFilter(companyInput);
     }
 
-    if (technologyInput) {
-      onProjectFilter(technologyInput);
+    // Convert technology array to comma-separated string for project filter
+    if (technologyInput.length > 0) {
+      onProjectFilter(technologyInput.join(','));
     }
 
     // Apply experience years, graduation years and completion status filters via the new backend support
@@ -306,7 +312,7 @@ const EnhancedEmployeeSearchFilters: React.FC<EnhancedEmployeeSearchFiltersProps
     setSkillInput('');
     setUniversityInput('');
     setCompanyInput('');
-    setTechnologyInput('');
+    setTechnologyInput([]);
     setExperienceYears([0, 20]);
     setMinGraduationYear(null);
     setMaxGraduationYear(null);
