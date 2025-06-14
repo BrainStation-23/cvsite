@@ -1,5 +1,5 @@
 
--- Update the get_employee_profiles function to support experience years range and completion status filtering
+-- Update the get_employee_profiles function to support experience years range, graduation year range and completion status filtering
 CREATE OR REPLACE FUNCTION public.get_employee_profiles(
   search_query text DEFAULT NULL::text, 
   skill_filter text DEFAULT NULL::text, 
@@ -10,6 +10,8 @@ CREATE OR REPLACE FUNCTION public.get_employee_profiles(
   project_filter text DEFAULT NULL::text, 
   min_experience_years integer DEFAULT NULL::integer,
   max_experience_years integer DEFAULT NULL::integer,
+  min_graduation_year integer DEFAULT NULL::integer,
+  max_graduation_year integer DEFAULT NULL::integer,
   completion_status text DEFAULT NULL::text,
   page_number integer DEFAULT 1, 
   items_per_page integer DEFAULT 10, 
@@ -152,21 +154,37 @@ BEGIN
            OR description ILIKE '%' || project_filter || '%')
     )
   )
-  -- Experience years range filter
+  -- Total experience years range filter with precise fractional years calculation
   AND (
     (min_experience_years IS NULL AND max_experience_years IS NULL)
-    OR EXISTS (
-      SELECT 1 
-      FROM experiences ex_years 
-      WHERE ex_years.profile_id = p.id
-      AND (
-        CASE 
-          WHEN ex_years.is_current THEN 
-            EXTRACT(YEAR FROM age(CURRENT_DATE, ex_years.start_date))
-          ELSE 
-            EXTRACT(YEAR FROM age(COALESCE(ex_years.end_date, CURRENT_DATE), ex_years.start_date))
-        END
-      ) BETWEEN COALESCE(min_experience_years, 0) AND COALESCE(max_experience_years, 100)
+    OR p.id IN (
+      SELECT ex_total.profile_id
+      FROM (
+        SELECT 
+          ex_years.profile_id,
+          SUM(
+            CASE 
+              WHEN ex_years.is_current THEN 
+                EXTRACT(EPOCH FROM age(CURRENT_DATE, ex_years.start_date)) / 31536000.0
+              ELSE 
+                EXTRACT(EPOCH FROM age(COALESCE(ex_years.end_date, CURRENT_DATE), ex_years.start_date)) / 31536000.0
+            END
+          ) as total_experience_years
+        FROM experiences ex_years 
+        WHERE ex_years.start_date IS NOT NULL
+        GROUP BY ex_years.profile_id
+      ) ex_total
+      WHERE ex_total.total_experience_years BETWEEN COALESCE(min_experience_years, 0) AND COALESCE(max_experience_years, 100)
+    )
+  )
+  -- Graduation year range filter
+  AND (
+    (min_graduation_year IS NULL AND max_graduation_year IS NULL)
+    OR p.id IN (
+      SELECT ed_grad.profile_id
+      FROM education ed_grad
+      WHERE ed_grad.end_date IS NOT NULL
+      AND EXTRACT(YEAR FROM ed_grad.end_date) BETWEEN COALESCE(min_graduation_year, 1900) AND COALESCE(max_graduation_year, 2100)
     )
   )
   -- Profile completion status filter
@@ -247,7 +265,7 @@ BEGIN
         SELECT 1 FROM trainings 
         WHERE profile_id = p.id 
         AND (title ILIKE '%' || search_query || '%' 
-             OR provider ILIKE '%' || search_query || '%'
+             OR provider ILIKE '%' || training_filter || '%'
              OR description ILIKE '%' || search_query || '%')
       )
       OR EXISTS (
@@ -324,21 +342,37 @@ BEGIN
              OR description ILIKE '%' || project_filter || '%')
       )
     )
-    -- Experience years range filter
+    -- Total experience years range filter with precise fractional years calculation
     AND (
       (min_experience_years IS NULL AND max_experience_years IS NULL)
-      OR EXISTS (
-        SELECT 1 
-        FROM experiences ex_years 
-        WHERE ex_years.profile_id = p.id
-        AND (
-          CASE 
-            WHEN ex_years.is_current THEN 
-              EXTRACT(YEAR FROM age(CURRENT_DATE, ex_years.start_date))
-            ELSE 
-              EXTRACT(YEAR FROM age(COALESCE(ex_years.end_date, CURRENT_DATE), ex_years.start_date))
-          END
-        ) BETWEEN COALESCE(min_experience_years, 0) AND COALESCE(max_experience_years, 100)
+      OR p.id IN (
+        SELECT ex_total.profile_id
+        FROM (
+          SELECT 
+            ex_years.profile_id,
+            SUM(
+              CASE 
+                WHEN ex_years.is_current THEN 
+                  EXTRACT(EPOCH FROM age(CURRENT_DATE, ex_years.start_date)) / 31536000.0
+                ELSE 
+                  EXTRACT(EPOCH FROM age(COALESCE(ex_years.end_date, CURRENT_DATE), ex_years.start_date)) / 31536000.0
+              END
+            ) as total_experience_years
+          FROM experiences ex_years 
+          WHERE ex_years.start_date IS NOT NULL
+          GROUP BY ex_years.profile_id
+        ) ex_total
+        WHERE ex_total.total_experience_years BETWEEN COALESCE(min_experience_years, 0) AND COALESCE(max_experience_years, 100)
+      )
+    )
+    -- Graduation year range filter
+    AND (
+      (min_graduation_year IS NULL AND max_graduation_year IS NULL)
+      OR p.id IN (
+        SELECT ed_grad.profile_id
+        FROM education ed_grad
+        WHERE ed_grad.end_date IS NOT NULL
+        AND EXTRACT(YEAR FROM ed_grad.end_date) BETWEEN COALESCE(min_graduation_year, 1900) AND COALESCE(max_graduation_year, 2100)
       )
     )
     -- Profile completion status filter
