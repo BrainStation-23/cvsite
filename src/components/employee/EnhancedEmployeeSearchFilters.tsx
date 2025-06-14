@@ -161,15 +161,6 @@ const EnhancedEmployeeSearchFilters: React.FC<EnhancedEmployeeSearchFiltersProps
       });
     }
 
-    if (universityInput) {
-      filters.push({ 
-        id: 'university-input', 
-        label: `University: ${universityInput}`, 
-        value: universityInput, 
-        type: 'university-input' 
-      });
-    }
-
     if (companyInput) {
       filters.push({ 
         id: 'company-input', 
@@ -189,7 +180,7 @@ const EnhancedEmployeeSearchFilters: React.FC<EnhancedEmployeeSearchFiltersProps
     }
     
     setActiveFilters(filters);
-  }, [searchQuery, skillFilter, experienceFilter, educationFilter, trainingFilter, achievementFilter, projectFilter, experienceYears, minGraduationYear, maxGraduationYear, completionStatus, skillInput, universityInput, companyInput, technologyInput]);
+  }, [searchQuery, skillFilter, experienceFilter, educationFilter, trainingFilter, achievementFilter, projectFilter, experienceYears, minGraduationYear, maxGraduationYear, completionStatus, skillInput, companyInput, technologyInput]);
 
   const removeFilter = (filterId: string) => {
     const filter = activeFilters.find(f => f.id === filterId);
@@ -254,9 +245,6 @@ const EnhancedEmployeeSearchFilters: React.FC<EnhancedEmployeeSearchFiltersProps
       case 'skill-input':
         setSkillInput('');
         break;
-      case 'university-input':
-        setUniversityInput('');
-        break;
       case 'company-input':
         setCompanyInput('');
         break;
@@ -269,7 +257,6 @@ const EnhancedEmployeeSearchFilters: React.FC<EnhancedEmployeeSearchFiltersProps
   const handleApplyAdvancedFilters = () => {
     console.log('Applying advanced filters:', {
       skillInput,
-      universityInput, 
       companyInput,
       technologyInput,
       experienceYears,
@@ -284,10 +271,6 @@ const EnhancedEmployeeSearchFilters: React.FC<EnhancedEmployeeSearchFiltersProps
     }
 
     // Apply other advanced filters
-    if (universityInput) {
-      onEducationFilter(universityInput);
-    }
-
     if (companyInput) {
       onExperienceFilter(companyInput);
     }
