@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Filter } from 'lucide-react';
+import { Filter, Sparkles } from 'lucide-react';
 import { 
   EmployeeProfileSortColumn, 
   EmployeeProfileSortOrder 
@@ -12,8 +12,10 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from '@/components/ui/collapsible';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 import BasicSearchBar from './search/BasicSearchBar';
+import AISearchBar from './search/AISearchBar';
 import FilterChipsList from './search/FilterChipsList';
 import AdvancedFiltersPanel from './search/AdvancedFiltersPanel';
 import SortControls from './search/SortControls';
@@ -73,6 +75,7 @@ const EnhancedEmployeeSearchFilters: React.FC<EnhancedEmployeeSearchFiltersProps
   isLoading
 }) => {
   const [isFiltersOpen, setIsFiltersOpen] = useState(false);
+  const [searchMode, setSearchMode] = useState<'manual' | 'ai'>('manual');
   
   // Advanced filter states
   const [experienceYears, setExperienceYears] = useState<number[]>([0, 20]);
@@ -154,18 +157,93 @@ const EnhancedEmployeeSearchFilters: React.FC<EnhancedEmployeeSearchFiltersProps
     onReset
   });
 
+  const handleAISearch = (filters: any) => {
+    console.log('Applying AI search filters:', filters);
+    
+    // Clear any existing filters first
+    onReset();
+    
+    // Apply each filter if present
+    if (filters.search_query) {
+      onSearch(filters.search_query);
+    }
+    if (filters.skill_filter) {
+      onSkillFilter(filters.skill_filter);
+    }
+    if (filters.experience_filter) {
+      onExperienceFilter(filters.experience_filter);
+    }
+    if (filters.education_filter) {
+      onEducationFilter(filters.education_filter);
+    }
+    if (filters.training_filter) {
+      onTrainingFilter(filters.training_filter);
+    }
+    if (filters.achievement_filter) {
+      onAchievementFilter(filters.achievement_filter);
+    }
+    if (filters.project_filter) {
+      onProjectFilter(filters.project_filter);
+    }
+    
+    // Apply advanced filters
+    const advancedFilters: any = {};
+    if (filters.min_experience_years !== undefined) {
+      advancedFilters.minExperienceYears = filters.min_experience_years;
+    }
+    if (filters.max_experience_years !== undefined) {
+      advancedFilters.maxExperienceYears = filters.max_experience_years;
+    }
+    if (filters.min_graduation_year !== undefined) {
+      advancedFilters.minGraduationYear = filters.min_graduation_year;
+    }
+    if (filters.max_graduation_year !== undefined) {
+      advancedFilters.maxGraduationYear = filters.max_graduation_year;
+    }
+    if (filters.completion_status) {
+      advancedFilters.completionStatus = filters.completion_status;
+    }
+    
+    if (Object.keys(advancedFilters).length > 0) {
+      onAdvancedFilters(advancedFilters);
+    }
+  };
+
   const hasActiveFilters = activeFilters.length > 0;
 
   return (
     <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border space-y-6">
-      {/* Header with Search Bar and Sort Controls */}
+      {/* Header with Search Controls and Sort */}
       <div className="flex flex-col lg:flex-row gap-4 items-start lg:items-center justify-between">
         <div className="flex-1 w-full lg:w-auto">
-          <BasicSearchBar
-            searchQuery={searchQuery}
-            onSearch={onSearch}
-            isLoading={isLoading}
-          />
+          {/* Search Mode Tabs */}
+          <Tabs value={searchMode} onValueChange={(value) => setSearchMode(value as 'manual' | 'ai')} className="w-full">
+            <TabsList className="grid w-full grid-cols-2 mb-4">
+              <TabsTrigger value="manual" className="flex items-center gap-2">
+                <Filter className="h-4 w-4" />
+                Manual Search
+              </TabsTrigger>
+              <TabsTrigger value="ai" className="flex items-center gap-2">
+                <Sparkles className="h-4 w-4" />
+                AI Search
+              </TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="manual">
+              <BasicSearchBar
+                searchQuery={searchQuery}
+                onSearch={onSearch}
+                isLoading={isLoading}
+              />
+            </TabsContent>
+            
+            <TabsContent value="ai">
+              <AISearchBar
+                onAISearch={handleAISearch}
+                isLoading={isLoading}
+              />
+            </TabsContent>
+          </Tabs>
         </div>
         
         <div className="flex-shrink-0">
