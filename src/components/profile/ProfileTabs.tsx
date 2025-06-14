@@ -1,4 +1,3 @@
-
 import React, { useEffect } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { UseFormReturn } from 'react-hook-form';
@@ -150,31 +149,31 @@ export const ProfileTabs: React.FC<ProfileTabsProps> = ({
 
   return (
     <Tabs defaultValue="general" className="w-full h-full flex flex-col">
-      {/* Updated tabs header to include JSON tab */}
+      {/* Updated tabs header to include tour data attributes */}
       <div className="flex-shrink-0">
         <TabsList className="grid w-full grid-cols-8 h-10 bg-gray-100 dark:bg-gray-800 rounded-md p-1">
-          <TabsTrigger value="general" className="text-xs py-2 px-3 data-[state=active]:bg-white dark:data-[state=active]:bg-gray-700">
+          <TabsTrigger value="general" data-tour="general-tab" className="text-xs py-2 px-3 data-[state=active]:bg-white dark:data-[state=active]:bg-gray-700">
             General
           </TabsTrigger>
-          <TabsTrigger value="skills" className="text-xs py-2 px-3 data-[state=active]:bg-white dark:data-[state=active]:bg-gray-700">
+          <TabsTrigger value="skills" data-tour="skills-tab" className="text-xs py-2 px-3 data-[state=active]:bg-white dark:data-[state=active]:bg-gray-700">
             Skills
           </TabsTrigger>
-          <TabsTrigger value="experience" className="text-xs py-2 px-3 data-[state=active]:bg-white dark:data-[state=active]:bg-gray-700">
+          <TabsTrigger value="experience" data-tour="experience-tab" className="text-xs py-2 px-3 data-[state=active]:bg-white dark:data-[state=active]:bg-gray-700">
             Experience
           </TabsTrigger>
-          <TabsTrigger value="education" className="text-xs py-2 px-3 data-[state=active]:bg-white dark:data-[state=active]:bg-gray-700">
+          <TabsTrigger value="education" data-tour="education-tab" className="text-xs py-2 px-3 data-[state=active]:bg-white dark:data-[state=active]:bg-gray-700">
             Education
           </TabsTrigger>
-          <TabsTrigger value="training" className="text-xs py-2 px-3 data-[state=active]:bg-white dark:data-[state=active]:bg-gray-700">
+          <TabsTrigger value="training" data-tour="training-tab" className="text-xs py-2 px-3 data-[state=active]:bg-white dark:data-[state=active]:bg-gray-700">
             Training
           </TabsTrigger>
-          <TabsTrigger value="achievements" className="text-xs py-2 px-3 data-[state=active]:bg-white dark:data-[state=active]:bg-gray-700">
+          <TabsTrigger value="achievements" data-tour="achievements-tab" className="text-xs py-2 px-3 data-[state=active]:bg-white dark:data-[state=active]:bg-gray-700">
             Achievements
           </TabsTrigger>
-          <TabsTrigger value="projects" className="text-xs py-2 px-3 data-[state=active]:bg-white dark:data-[state=active]:bg-gray-700">
+          <TabsTrigger value="projects" data-tour="projects-tab" className="text-xs py-2 px-3 data-[state=active]:bg-white dark:data-[state=active]:bg-gray-700">
             Projects
           </TabsTrigger>
-          <TabsTrigger value="json" className="text-xs py-2 px-3 data-[state=active]:bg-white dark:data-[state=active]:bg-gray-700">
+          <TabsTrigger value="json" data-tour="json-tab" className="text-xs py-2 px-3 data-[state=active]:bg-white dark:data-[state=active]:bg-gray-700">
             JSON
           </TabsTrigger>
         </TabsList>
