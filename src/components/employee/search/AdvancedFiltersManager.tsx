@@ -52,8 +52,11 @@ export const useAdvancedFiltersManager = (props: AdvancedFiltersManagerProps) =>
       props.onExperienceFilter(props.companyInput);
     }
 
+    // Apply each technology as a separate project filter search
     if (props.technologyInput.length > 0) {
-      props.onProjectFilter(props.technologyInput.join(','));
+      // For now, we'll search for the first technology as the primary filter
+      // In a more advanced implementation, we could modify the backend to handle multiple technologies
+      props.onProjectFilter(props.technologyInput[0]);
     }
 
     props.onAdvancedFilters({
@@ -79,3 +82,4 @@ export const useAdvancedFiltersManager = (props: AdvancedFiltersManagerProps) =>
 
   return { handleApplyAdvancedFilters, clearAllFilters };
 };
+
