@@ -29,6 +29,16 @@ export const useSectionOperations = (
       return [];
     }
 
+    // References section has its own default fields
+    if (sectionType === 'references') {
+      return [
+        { field: 'name', label: 'Name', enabled: true, masked: false, order: 1 },
+        { field: 'designation', label: 'Designation', enabled: true, masked: false, order: 2 },
+        { field: 'company', label: 'Company', enabled: true, masked: false, order: 3 },
+        { field: 'email', label: 'Email', enabled: true, masked: false, order: 4 }
+      ];
+    }
+
     try {
       const { data, error } = await supabase.rpc('get_section_fields', {
         section_type_param: sectionType
