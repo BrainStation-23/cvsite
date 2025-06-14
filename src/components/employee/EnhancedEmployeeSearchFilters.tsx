@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Filter } from 'lucide-react';
@@ -13,18 +13,13 @@ import {
   CollapsibleTrigger,
 } from '@/components/ui/collapsible';
 
-// Import our new components
 import BasicSearchBar from './search/BasicSearchBar';
 import FilterChipsList from './search/FilterChipsList';
 import AdvancedFiltersPanel from './search/AdvancedFiltersPanel';
 import SortControls from './search/SortControls';
-
-interface FilterChip {
-  id: string;
-  label: string;
-  value: string;
-  type: string;
-}
+import { useFilterState } from './search/FilterState';
+import { useFilterChipsManager } from './search/FilterChipsManager';
+import { useAdvancedFiltersManager } from './search/AdvancedFiltersManager';
 
 interface EnhancedEmployeeSearchFiltersProps {
   onSearch: (query: string) => void;
@@ -78,7 +73,6 @@ const EnhancedEmployeeSearchFilters: React.FC<EnhancedEmployeeSearchFiltersProps
   isLoading
 }) => {
   const [isFiltersOpen, setIsFiltersOpen] = useState(false);
-  const [activeFilters, setActiveFilters] = useState<FilterChip[]>([]);
   
   // Advanced filter states
   const [experienceYears, setExperienceYears] = useState<number[]>([0, 20]);
@@ -92,233 +86,72 @@ const EnhancedEmployeeSearchFilters: React.FC<EnhancedEmployeeSearchFiltersProps
   const [companyInput, setCompanyInput] = useState('');
   const [technologyInput, setTechnologyInput] = useState<string[]>([]);
 
-  // Update active filters when inputs change
-  useEffect(() => {
-    const filters: FilterChip[] = [];
-    
-    if (searchQuery) {
-      filters.push({ id: 'search', label: `Search: "${searchQuery}"`, value: searchQuery, type: 'search' });
-    }
-    
-    if (skillFilter) {
-      filters.push({ id: 'skill', label: `Skills: ${skillFilter}`, value: skillFilter, type: 'skill' });
-    }
-    
-    if (experienceFilter) {
-      filters.push({ id: 'experience', label: `Experience: ${experienceFilter}`, value: experienceFilter, type: 'experience' });
-    }
-    
-    if (educationFilter) {
-      filters.push({ id: 'education', label: `Education: ${educationFilter}`, value: educationFilter, type: 'education' });
-    }
-    
-    if (trainingFilter) {
-      filters.push({ id: 'training', label: `Training: ${trainingFilter}`, value: trainingFilter, type: 'training' });
-    }
-    
-    if (achievementFilter) {
-      filters.push({ id: 'achievement', label: `Achievements: ${achievementFilter}`, value: achievementFilter, type: 'achievement' });
-    }
-    
-    if (projectFilter) {
-      filters.push({ id: 'project', label: `Projects: ${projectFilter}`, value: projectFilter, type: 'project' });
-    }
+  // Use custom hooks for state management
+  const { activeFilters } = useFilterState({
+    searchQuery,
+    skillFilter,
+    experienceFilter,
+    educationFilter,
+    trainingFilter,
+    achievementFilter,
+    projectFilter,
+    experienceYears,
+    minGraduationYear,
+    maxGraduationYear,
+    completionStatus,
+    skillInput,
+    universityInput,
+    companyInput,
+    technologyInput
+  });
 
-    if (experienceYears[0] > 0 || experienceYears[1] < 20) {
-      filters.push({ 
-        id: 'experience-years', 
-        label: `Experience: ${experienceYears[0]}-${experienceYears[1]} years`, 
-        value: experienceYears.join('-'), 
-        type: 'experience-years' 
-      });
-    }
+  const { removeFilter } = useFilterChipsManager({
+    activeFilters,
+    experienceYears,
+    minGraduationYear,
+    maxGraduationYear,
+    completionStatus,
+    onSearch,
+    onSkillFilter,
+    onExperienceFilter,
+    onEducationFilter,
+    onTrainingFilter,
+    onAchievementFilter,
+    onProjectFilter,
+    onAdvancedFilters,
+    setExperienceYears,
+    setMinGraduationYear,
+    setMaxGraduationYear,
+    setCompletionStatus,
+    setSkillInput,
+    setUniversityInput,
+    setCompanyInput,
+    setTechnologyInput
+  });
 
-    if (minGraduationYear || maxGraduationYear) {
-      const yearRange = `${minGraduationYear || 'Any'}-${maxGraduationYear || 'Any'}`;
-      filters.push({ 
-        id: 'graduation-years', 
-        label: `Graduation: ${yearRange}`, 
-        value: yearRange, 
-        type: 'graduation-years' 
-      });
-    }
-
-    if (completionStatus !== 'all') {
-      filters.push({ 
-        id: 'completion', 
-        label: `Status: ${completionStatus}`, 
-        value: completionStatus, 
-        type: 'completion' 
-      });
-    }
-
-    if (skillInput) {
-      filters.push({ 
-        id: 'skill-input', 
-        label: `Skills: ${skillInput}`, 
-        value: skillInput, 
-        type: 'skill-input' 
-      });
-    }
-
-    // Only show university input filter if it's different from the education filter
-    if (universityInput && universityInput !== educationFilter) {
-      filters.push({ 
-        id: 'university-input', 
-        label: `Education: ${universityInput}`, 
-        value: universityInput, 
-        type: 'university-input' 
-      });
-    }
-
-    if (companyInput) {
-      filters.push({ 
-        id: 'company-input', 
-        label: `Company: ${companyInput}`, 
-        value: companyInput, 
-        type: 'company-input' 
-      });
-    }
-
-    // Handle technology array - create individual chips for each technology
-    if (technologyInput.length > 0) {
-      technologyInput.forEach((tech, index) => {
-        filters.push({ 
-          id: `technology-${index}`, 
-          label: `Technology: ${tech}`, 
-          value: tech, 
-          type: 'technology' 
-        });
-      });
-    }
-    
-    setActiveFilters(filters);
-  }, [searchQuery, skillFilter, experienceFilter, educationFilter, trainingFilter, achievementFilter, projectFilter, experienceYears, minGraduationYear, maxGraduationYear, completionStatus, skillInput, universityInput, companyInput, technologyInput]);
-
-  const removeFilter = (filterId: string) => {
-    const filter = activeFilters.find(f => f.id === filterId);
-    if (!filter) return;
-
-    switch (filter.type) {
-      case 'search':
-        onSearch('');
-        break;
-      case 'skill':
-        onSkillFilter('');
-        break;
-      case 'experience':
-        onExperienceFilter('');
-        break;
-      case 'education':
-        onEducationFilter('');
-        break;
-      case 'training':
-        onTrainingFilter('');
-        break;
-      case 'achievement':
-        onAchievementFilter('');
-        break;
-      case 'project':
-        onProjectFilter('');
-        break;
-      case 'experience-years':
-        setExperienceYears([0, 20]);
-        // Apply the reset to backend
-        onAdvancedFilters({
-          minExperienceYears: null,
-          maxExperienceYears: null,
-          minGraduationYear: minGraduationYear,
-          maxGraduationYear: maxGraduationYear,
-          completionStatus: completionStatus !== 'all' ? completionStatus : null
-        });
-        break;
-      case 'graduation-years':
-        setMinGraduationYear(null);
-        setMaxGraduationYear(null);
-        // Apply the reset to backend
-        onAdvancedFilters({
-          minExperienceYears: experienceYears[0] > 0 || experienceYears[1] < 20 ? experienceYears[0] : null,
-          maxExperienceYears: experienceYears[0] > 0 || experienceYears[1] < 20 ? experienceYears[1] : null,
-          minGraduationYear: null,
-          maxGraduationYear: null,
-          completionStatus: completionStatus !== 'all' ? completionStatus : null
-        });
-        break;
-      case 'completion':
-        setCompletionStatus('all');
-        // Apply the reset to backend
-        onAdvancedFilters({
-          minExperienceYears: experienceYears[0] > 0 || experienceYears[1] < 20 ? experienceYears[0] : null,
-          maxExperienceYears: experienceYears[0] > 0 || experienceYears[1] < 20 ? experienceYears[1] : null,
-          minGraduationYear: minGraduationYear,
-          maxGraduationYear: maxGraduationYear,
-          completionStatus: null
-        });
-        break;
-      case 'skill-input':
-        setSkillInput('');
-        break;
-      case 'university-input':
-        setUniversityInput('');
-        break;
-      case 'company-input':
-        setCompanyInput('');
-        break;
-      case 'technology':
-        // Remove specific technology from array
-        const techToRemove = filter.value;
-        setTechnologyInput(prev => prev.filter(tech => tech !== techToRemove));
-        break;
-    }
-  };
-
-  const handleApplyAdvancedFilters = () => {
-    console.log('Applying advanced filters:', {
-      skillInput,
-      universityInput, 
-      companyInput,
-      technologyInput,
-      experienceYears,
-      minGraduationYear,
-      maxGraduationYear,
-      completionStatus
-    });
-
-    // Apply skill selections
-    if (skillInput) {
-      onSkillFilter(skillInput);
-    }
-
-    if (companyInput) {
-      onExperienceFilter(companyInput);
-    }
-
-    // Convert technology array to comma-separated string for project filter
-    if (technologyInput.length > 0) {
-      onProjectFilter(technologyInput.join(','));
-    }
-
-    // Apply experience years, graduation years and completion status filters via the new backend support
-    onAdvancedFilters({
-      minExperienceYears: experienceYears[0] > 0 || experienceYears[1] < 20 ? experienceYears[0] : null,
-      maxExperienceYears: experienceYears[0] > 0 || experienceYears[1] < 20 ? experienceYears[1] : null,
-      minGraduationYear: minGraduationYear,
-      maxGraduationYear: maxGraduationYear,
-      completionStatus: completionStatus !== 'all' ? completionStatus : null
-    });
-  };
-
-  const clearAllFilters = () => {
-    setSkillInput('');
-    setUniversityInput('');
-    setCompanyInput('');
-    setTechnologyInput([]);
-    setExperienceYears([0, 20]);
-    setMinGraduationYear(null);
-    setMaxGraduationYear(null);
-    setCompletionStatus('all');
-    onReset();
-  };
+  const { handleApplyAdvancedFilters, clearAllFilters } = useAdvancedFiltersManager({
+    skillInput,
+    universityInput,
+    companyInput,
+    technologyInput,
+    experienceYears,
+    minGraduationYear,
+    maxGraduationYear,
+    completionStatus,
+    onSkillFilter,
+    onExperienceFilter,
+    onProjectFilter,
+    onAdvancedFilters,
+    setSkillInput,
+    setUniversityInput,
+    setCompanyInput,
+    setTechnologyInput,
+    setExperienceYears,
+    setMinGraduationYear,
+    setMaxGraduationYear,
+    setCompletionStatus,
+    onReset
+  });
 
   const hasActiveFilters = activeFilters.length > 0;
 
@@ -334,7 +167,6 @@ const EnhancedEmployeeSearchFilters: React.FC<EnhancedEmployeeSearchFiltersProps
           />
         </div>
         
-        {/* Sort Controls */}
         <div className="flex-shrink-0">
           <SortControls
             sortBy={sortBy}
