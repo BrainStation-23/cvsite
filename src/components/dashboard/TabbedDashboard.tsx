@@ -73,14 +73,16 @@ export const TabbedDashboard: React.FC<TabbedDashboardProps> = ({ analytics, isL
         </TabsList>
 
         <TabsContent value="overview" className="space-y-6 mt-6">
-          <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-            <SkillsChart data={analytics.skillMatrix} isLoading={isLoading} />
-            <ExperienceChart data={analytics.experienceDistribution} isLoading={isLoading} />
+          <div className="grid grid-cols-1 gap-6">
+            <IncompleteProfilesTable 
+              data={analytics.incompleteProfiles} 
+              isLoading={isLoading} 
+            />
           </div>
         </TabsContent>
 
         <TabsContent value="skills" className="space-y-6 mt-6">
-          <div className="grid grid-cols-1 gap-6">
+          <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
             <SkillsChart data={analytics.skillMatrix} isLoading={isLoading} />
             <ExperienceChart data={analytics.experienceDistribution} isLoading={isLoading} />
           </div>
