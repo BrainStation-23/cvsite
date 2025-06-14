@@ -18,7 +18,7 @@ import {
   Code, 
   Briefcase, 
   GraduationCap, 
-  Certificate, 
+  Award, 
   Trophy, 
   FolderOpen, 
   FileJson,
@@ -236,7 +236,7 @@ export const ProfileTabs: React.FC<ProfileTabsProps> = ({
           />
           <TabTriggerWithIcon
             value="training"
-            icon={Certificate}
+            icon={Award}
             label="Training"
             isEmpty={trainings.length === 0}
             dataTour="training-tab"
