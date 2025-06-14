@@ -27,6 +27,7 @@ interface AdvancedFiltersPanelProps {
   setMaxGraduationYear: (year: number | null) => void;
   onApplyFilters: () => void;
   onClearAllFilters: () => void;
+  onEducationFilter: (education: string) => void;
   isLoading: boolean;
 }
 
@@ -49,12 +50,13 @@ const AdvancedFiltersPanel: React.FC<AdvancedFiltersPanelProps> = ({
   setMaxGraduationYear,
   onApplyFilters,
   onClearAllFilters,
+  onEducationFilter,
   isLoading
 }) => {
   const handleUniversityChange = (value: string) => {
     setUniversityInput(value);
     // Trigger immediate search when university is selected
-    onApplyFilters();
+    onEducationFilter(value);
   };
 
   return (

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -285,11 +284,6 @@ const EnhancedEmployeeSearchFilters: React.FC<EnhancedEmployeeSearchFiltersProps
       onSkillFilter(skillInput);
     }
 
-    // Apply university input to education filter (not separate university filter)
-    if (universityInput) {
-      onEducationFilter(universityInput);
-    }
-
     if (companyInput) {
       onExperienceFilter(companyInput);
     }
@@ -374,6 +368,7 @@ const EnhancedEmployeeSearchFilters: React.FC<EnhancedEmployeeSearchFiltersProps
               setMaxGraduationYear={setMaxGraduationYear}
               onApplyFilters={handleApplyAdvancedFilters}
               onClearAllFilters={clearAllFilters}
+              onEducationFilter={onEducationFilter}
               isLoading={isLoading}
             />
           </CollapsibleContent>
