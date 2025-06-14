@@ -16,8 +16,8 @@ const AdminDashboard: React.FC = () => {
   return (
     <DashboardLayout>
       <div className="space-y-6">
-        {/* Statistics Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
+        {/* Key Metrics Row */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
           <StatCard
             title="Total Employees"
             value={isLoading ? "..." : analytics.totalEmployees}
@@ -50,18 +50,36 @@ const AdminDashboard: React.FC = () => {
           />
         </div>
 
-        {/* Charts Section */}
+        {/* Primary Analytics Grid */}
         <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+          {/* Skills Analytics */}
           <SkillsChart data={analytics.skillMatrix} isLoading={isLoading} />
+          
+          {/* Experience Distribution */}
           <ExperienceChart data={analytics.experienceDistribution} isLoading={isLoading} />
         </div>
 
-        {/* Incomplete Profiles Section */}
-        <div className="grid grid-cols-1 gap-6">
+        {/* Secondary Analytics Grid - Ready for expansion */}
+        <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+          {/* Placeholder for future analytics widgets */}
+          <div className="space-y-6">
+            {/* Department/SBU Analytics will go here */}
+          </div>
+          
+          <div className="space-y-6">
+            {/* Technology Trends or other analytics will go here */}
+          </div>
+        </div>
+
+        {/* Full-width Section for Tables and Detailed Views */}
+        <div className="space-y-6">
+          {/* Incomplete Profiles Table */}
           <IncompleteProfilesTable 
             data={analytics.incompleteProfiles} 
             isLoading={isLoading} 
           />
+          
+          {/* Additional tables can be added here */}
         </div>
       </div>
     </DashboardLayout>
