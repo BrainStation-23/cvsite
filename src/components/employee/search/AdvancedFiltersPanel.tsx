@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -135,192 +134,131 @@ const AdvancedFiltersPanel: React.FC<AdvancedFiltersPanelProps> = ({
   };
 
   return (
-    <div className="mt-6 p-6 bg-gray-50 dark:bg-gray-900/50 rounded-lg border space-y-6">
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Skills Table Filters */}
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-base font-medium text-blue-700 dark:text-blue-300">
-              Skills Filters
-            </CardTitle>
-            <p className="text-sm text-gray-600 dark:text-gray-400">
-              Search in technical_skills and specialized_skills tables
-            </p>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="skill-input" className="text-sm font-medium">
-                Skill Name
-              </Label>
-              <Input
-                id="skill-input"
-                placeholder="Search by skill name..."
-                value={skillInput}
-                onChange={(e) => handleSkillChange(e.target.value)}
-                className="text-sm"
-              />
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Education Table Filters */}
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-base font-medium text-green-700 dark:text-green-300">
-              Education Filters
-            </CardTitle>
-            <p className="text-sm text-gray-600 dark:text-gray-400">
-              Search in education and universities tables
-            </p>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="space-y-2">
-              <Label className="text-sm font-medium">
-                University
-              </Label>
-              <UniversityCombobox
-                value={universityInput}
-                onValueChange={handleUniversityChange}
-                placeholder="Search by university..."
-              />
-            </div>
-            <GraduationYearRangeControl
-              minYear={minGraduationYear}
-              maxYear={maxGraduationYear}
-              onMinYearChange={(year) => handleGraduationYearChange(year, maxGraduationYear)}
-              onMaxYearChange={(year) => handleGraduationYearChange(minGraduationYear, year)}
-            />
-          </CardContent>
-        </Card>
-
-        {/* Experience Table Filters */}
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-base font-medium text-purple-700 dark:text-purple-300">
-              Experience Filters
-            </CardTitle>
-            <p className="text-sm text-gray-600 dark:text-gray-400">
-              Search in experiences table
-            </p>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="company-input" className="text-sm font-medium">
-                Company Name
-              </Label>
-              <Input
-                id="company-input"
-                placeholder="Search by company name..."
-                value={companyInput}
-                onChange={(e) => handleCompanyChange(e.target.value)}
-                className="text-sm"
-              />
-            </div>
-            <div className="space-y-4">
-              <Label className="text-sm font-medium">
-                Total Experience: {experienceYears[0]}-{experienceYears[1]} years
-              </Label>
-              <Slider
-                value={experienceYears}
-                onValueChange={handleExperienceYearsChange}
-                max={20}
-                min={0}
-                step={1}
-                className="w-full"
-              />
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Projects Table Filters */}
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-base font-medium text-orange-700 dark:text-orange-300">
-              Projects Filters
-            </CardTitle>
-            <p className="text-sm text-gray-600 dark:text-gray-400">
-              Search in projects table (name, description, technologies_used)
-            </p>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="project-name-input" className="text-sm font-medium">
-                Project Name
-              </Label>
-              <Input
-                id="project-name-input"
-                placeholder="Search by project name..."
-                value={projectNameInput}
-                onChange={(e) => handleProjectNameChange(e.target.value)}
-                className="text-sm"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="project-description-input" className="text-sm font-medium">
-                Project Description
-              </Label>
-              <Input
-                id="project-description-input"
-                placeholder="Search by project description..."
-                value={projectDescriptionInput}
-                onChange={(e) => handleProjectDescriptionChange(e.target.value)}
-                className="text-sm"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label className="text-sm font-medium">
-                Technologies Used
-              </Label>
-              <TechnologyTagsInput
-                value={technologyInput}
-                onChange={handleTechnologyChange}
-                placeholder="Add project technologies..."
-                disabled={isLoading}
-              />
-            </div>
-          </CardContent>
-        </Card>
+    <div className="mt-4 p-4 bg-gray-50 dark:bg-gray-900/50 rounded-lg border space-y-4">
+      {/* Skills & Education Row */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="space-y-3">
+          <div className="flex items-center gap-2 mb-2">
+            <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+            <Label className="text-sm font-medium text-blue-700 dark:text-blue-300">Skills</Label>
+          </div>
+          <Input
+            placeholder="Search by skill name..."
+            value={skillInput}
+            onChange={(e) => handleSkillChange(e.target.value)}
+            className="text-sm h-8"
+          />
+        </div>
+        
+        <div className="space-y-3">
+          <div className="flex items-center gap-2 mb-2">
+            <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+            <Label className="text-sm font-medium text-green-700 dark:text-green-300">Education</Label>
+          </div>
+          <UniversityCombobox
+            value={universityInput}
+            onValueChange={handleUniversityChange}
+            placeholder="Search university..."
+          />
+        </div>
       </div>
 
-      {/* Profile Status Filter */}
-      <Card>
-        <CardHeader className="pb-3">
-          <CardTitle className="text-base font-medium text-gray-700 dark:text-gray-300">
-            Profile Status
-          </CardTitle>
-          <p className="text-sm text-gray-600 dark:text-gray-400">
-            Filter by profile completion status
-          </p>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-2 max-w-sm">
-            <Label className="text-sm font-medium">
-              Completion Status
-            </Label>
-            <Select value={completionStatus} onValueChange={handleCompletionStatusChange}>
-              <SelectTrigger className="text-sm">
-                <SelectValue placeholder="Select status" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Profiles</SelectItem>
-                <SelectItem value="complete">Complete Profiles</SelectItem>
-                <SelectItem value="incomplete">Incomplete Profiles</SelectItem>
-                <SelectItem value="no-skills">Missing Skills</SelectItem>
-                <SelectItem value="no-experience">Missing Experience</SelectItem>
-                <SelectItem value="no-education">Missing Education</SelectItem>
-              </SelectContent>
-            </Select>
+      {/* Experience & Company Row */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="space-y-3">
+          <div className="flex items-center gap-2 mb-2">
+            <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
+            <Label className="text-sm font-medium text-purple-700 dark:text-purple-300">Experience</Label>
           </div>
-        </CardContent>
-      </Card>
+          <Input
+            placeholder="Search by company name..."
+            value={companyInput}
+            onChange={(e) => handleCompanyChange(e.target.value)}
+            className="text-sm h-8"
+          />
+        </div>
+
+        <div className="space-y-3">
+          <Label className="text-xs font-medium text-gray-600 dark:text-gray-400">
+            Experience Range: {experienceYears[0]}-{experienceYears[1]} years
+          </Label>
+          <Slider
+            value={experienceYears}
+            onValueChange={handleExperienceYearsChange}
+            max={20}
+            min={0}
+            step={1}
+            className="w-full"
+          />
+        </div>
+      </div>
+
+      {/* Projects Row */}
+      <div className="space-y-3">
+        <div className="flex items-center gap-2 mb-2">
+          <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
+          <Label className="text-sm font-medium text-orange-700 dark:text-orange-300">Projects</Label>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <Input
+            placeholder="Project name..."
+            value={projectNameInput}
+            onChange={(e) => handleProjectNameChange(e.target.value)}
+            className="text-sm h-8"
+          />
+          <Input
+            placeholder="Project description..."
+            value={projectDescriptionInput}
+            onChange={(e) => handleProjectDescriptionChange(e.target.value)}
+            className="text-sm h-8"
+          />
+        </div>
+        <TechnologyTagsInput
+          value={technologyInput}
+          onChange={handleTechnologyChange}
+          placeholder="Add project technologies..."
+          disabled={isLoading}
+        />
+      </div>
+
+      {/* Graduation Years & Status Row */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="space-y-3">
+          <Label className="text-sm font-medium text-gray-700 dark:text-gray-300">Graduation Years</Label>
+          <GraduationYearRangeControl
+            minYear={minGraduationYear}
+            maxYear={maxGraduationYear}
+            onMinYearChange={(year) => handleGraduationYearChange(year, maxGraduationYear)}
+            onMaxYearChange={(year) => handleGraduationYearChange(minGraduationYear, year)}
+          />
+        </div>
+
+        <div className="space-y-3">
+          <Label className="text-sm font-medium text-gray-700 dark:text-gray-300">Profile Status</Label>
+          <Select value={completionStatus} onValueChange={handleCompletionStatusChange}>
+            <SelectTrigger className="text-sm h-8">
+              <SelectValue placeholder="Select status" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Profiles</SelectItem>
+              <SelectItem value="complete">Complete Profiles</SelectItem>
+              <SelectItem value="incomplete">Incomplete Profiles</SelectItem>
+              <SelectItem value="no-skills">Missing Skills</SelectItem>
+              <SelectItem value="no-experience">Missing Experience</SelectItem>
+              <SelectItem value="no-education">Missing Education</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
 
       {/* Clear All Button */}
-      <div className="flex items-center justify-start pt-4 border-t">
+      <div className="flex items-center justify-start pt-3 border-t">
         <Button 
           variant="outline" 
           onClick={onClearAllFilters}
           disabled={isLoading}
-          className="text-sm"
+          className="text-sm h-8"
+          size="sm"
         >
           Clear All Filters
         </Button>
