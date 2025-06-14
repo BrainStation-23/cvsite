@@ -84,6 +84,7 @@ const EnhancedEmployeeSearchFilters: React.FC<EnhancedEmployeeSearchFiltersProps
   const [skillInput, setSkillInput] = useState('');
   const [universityInput, setUniversityInput] = useState('');
   const [companyInput, setCompanyInput] = useState('');
+  const [projectInput, setProjectInput] = useState('');
   const [technologyInput, setTechnologyInput] = useState<string[]>([]);
 
   // Use custom hooks for state management
@@ -102,6 +103,7 @@ const EnhancedEmployeeSearchFilters: React.FC<EnhancedEmployeeSearchFiltersProps
     skillInput,
     universityInput,
     companyInput,
+    projectInput,
     technologyInput
   });
 
@@ -126,6 +128,7 @@ const EnhancedEmployeeSearchFilters: React.FC<EnhancedEmployeeSearchFiltersProps
     setSkillInput,
     setUniversityInput,
     setCompanyInput,
+    setProjectInput,
     setTechnologyInput,
     technologyInput
   });
@@ -134,6 +137,7 @@ const EnhancedEmployeeSearchFilters: React.FC<EnhancedEmployeeSearchFiltersProps
     skillInput,
     universityInput,
     companyInput,
+    projectInput,
     technologyInput,
     experienceYears,
     minGraduationYear,
@@ -146,6 +150,7 @@ const EnhancedEmployeeSearchFilters: React.FC<EnhancedEmployeeSearchFiltersProps
     setSkillInput,
     setUniversityInput,
     setCompanyInput,
+    setProjectInput,
     setTechnologyInput,
     setExperienceYears,
     setMinGraduationYear,
@@ -208,6 +213,8 @@ const EnhancedEmployeeSearchFilters: React.FC<EnhancedEmployeeSearchFiltersProps
               setUniversityInput={setUniversityInput}
               companyInput={companyInput}
               setCompanyInput={setCompanyInput}
+              projectInput={projectInput}
+              setProjectInput={setProjectInput}
               technologyInput={technologyInput}
               setTechnologyInput={setTechnologyInput}
               experienceYears={experienceYears}

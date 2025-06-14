@@ -5,6 +5,7 @@ interface AdvancedFiltersManagerProps {
   skillInput: string;
   universityInput: string;
   companyInput: string;
+  projectInput: string;
   technologyInput: string[];
   experienceYears: number[];
   minGraduationYear: number | null;
@@ -23,6 +24,7 @@ interface AdvancedFiltersManagerProps {
   setSkillInput: (skill: string) => void;
   setUniversityInput: (university: string) => void;
   setCompanyInput: (company: string) => void;
+  setProjectInput: (project: string) => void;
   setTechnologyInput: (tech: string[]) => void;
   setExperienceYears: (years: number[]) => void;
   setMinGraduationYear: (year: number | null) => void;
@@ -37,6 +39,7 @@ export const useAdvancedFiltersManager = (props: AdvancedFiltersManagerProps) =>
       skillInput: props.skillInput,
       universityInput: props.universityInput, 
       companyInput: props.companyInput,
+      projectInput: props.projectInput,
       technologyInput: props.technologyInput,
       experienceYears: props.experienceYears,
       minGraduationYear: props.minGraduationYear,
@@ -52,8 +55,8 @@ export const useAdvancedFiltersManager = (props: AdvancedFiltersManagerProps) =>
       props.onExperienceFilter(props.companyInput);
     }
 
-    if (props.technologyInput.length > 0) {
-      props.onProjectFilter(props.technologyInput.join(','));
+    if (props.projectInput) {
+      props.onProjectFilter(props.projectInput);
     }
 
     props.onAdvancedFilters({
@@ -69,6 +72,7 @@ export const useAdvancedFiltersManager = (props: AdvancedFiltersManagerProps) =>
     props.setSkillInput('');
     props.setUniversityInput('');
     props.setCompanyInput('');
+    props.setProjectInput('');
     props.setTechnologyInput([]);
     props.setExperienceYears([0, 20]);
     props.setMinGraduationYear(null);

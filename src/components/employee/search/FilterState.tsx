@@ -23,6 +23,7 @@ interface FilterStateProps {
   skillInput: string;
   universityInput: string;
   companyInput: string;
+  projectInput: string;
   technologyInput: string[];
 }
 
@@ -115,6 +116,15 @@ export const useFilterState = (props: FilterStateProps) => {
       });
     }
 
+    if (props.projectInput) {
+      filters.push({ 
+        id: 'project-input', 
+        label: `Project: ${props.projectInput}`, 
+        value: props.projectInput, 
+        type: 'project-input' 
+      });
+    }
+
     if (props.technologyInput.length > 0) {
       props.technologyInput.forEach((tech, index) => {
         filters.push({ 
@@ -142,6 +152,7 @@ export const useFilterState = (props: FilterStateProps) => {
     props.skillInput, 
     props.universityInput, 
     props.companyInput, 
+    props.projectInput, 
     props.technologyInput
   ]);
 
