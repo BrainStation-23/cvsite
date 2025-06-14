@@ -1,4 +1,5 @@
 
+
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -136,10 +137,11 @@ const AdvancedFiltersPanel: React.FC<AdvancedFiltersPanelProps> = ({
 
   return (
     <div className="w-full p-3 bg-gray-50 dark:bg-gray-900/50 rounded-lg border space-y-2">
-      {/* Row 1: Skills & Education */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-        <div className="space-y-1">
-          <div className="flex items-center gap-2">
+      {/* Main Flex Container - All filters in one row */}
+      <div className="flex flex-wrap gap-3 items-end">
+        {/* Skills */}
+        <div className="flex-1 min-w-[140px] space-y-1">
+          <div className="flex items-center gap-1">
             <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
             <Label className="text-xs font-medium text-blue-700 dark:text-blue-300">Skills</Label>
           </div>
@@ -151,8 +153,9 @@ const AdvancedFiltersPanel: React.FC<AdvancedFiltersPanelProps> = ({
           />
         </div>
         
-        <div className="space-y-1">
-          <div className="flex items-center gap-2">
+        {/* Education */}
+        <div className="flex-1 min-w-[140px] space-y-1">
+          <div className="flex items-center gap-1">
             <div className="w-2 h-2 bg-green-500 rounded-full"></div>
             <Label className="text-xs font-medium text-green-700 dark:text-green-300">Education</Label>
           </div>
@@ -162,12 +165,10 @@ const AdvancedFiltersPanel: React.FC<AdvancedFiltersPanelProps> = ({
             placeholder="Search university..."
           />
         </div>
-      </div>
 
-      {/* Row 2: Company & Experience */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-        <div className="space-y-1">
-          <div className="flex items-center gap-2">
+        {/* Company */}
+        <div className="flex-1 min-w-[140px] space-y-1">
+          <div className="flex items-center gap-1">
             <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
             <Label className="text-xs font-medium text-purple-700 dark:text-purple-300">Company</Label>
           </div>
@@ -179,7 +180,8 @@ const AdvancedFiltersPanel: React.FC<AdvancedFiltersPanelProps> = ({
           />
         </div>
 
-        <div className="space-y-1">
+        {/* Experience Slider */}
+        <div className="flex-1 min-w-[160px] space-y-1">
           <Label className="text-xs font-medium text-gray-600 dark:text-gray-400">
             Experience: {experienceYears[0]}-{experienceYears[1]} years
           </Label>
@@ -192,22 +194,24 @@ const AdvancedFiltersPanel: React.FC<AdvancedFiltersPanelProps> = ({
             className="w-full"
           />
         </div>
-      </div>
 
-      {/* Row 3: Project Name & Description */}
-      <div className="space-y-1">
-        <div className="flex items-center gap-2">
-          <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
-          <Label className="text-xs font-medium text-orange-700 dark:text-orange-300">Projects</Label>
-        </div>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+        {/* Project Name */}
+        <div className="flex-1 min-w-[120px] space-y-1">
+          <div className="flex items-center gap-1">
+            <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
+            <Label className="text-xs font-medium text-orange-700 dark:text-orange-300">Project</Label>
+          </div>
           <Input
             placeholder="Project name..."
             value={projectNameInput}
             onChange={(e) => handleProjectNameChange(e.target.value)}
             className="text-xs h-7 w-full"
           />
+        </div>
+
+        {/* Project Description */}
+        <div className="flex-1 min-w-[140px] space-y-1">
+          <Label className="text-xs font-medium text-orange-700 dark:text-orange-300">Description</Label>
           <Input
             placeholder="Project description..."
             value={projectDescriptionInput}
@@ -215,22 +219,9 @@ const AdvancedFiltersPanel: React.FC<AdvancedFiltersPanelProps> = ({
             className="text-xs h-7 w-full"
           />
         </div>
-      </div>
 
-      {/* Row 4: Technology Tags (Full Width) */}
-      <div className="space-y-1">
-        <Label className="text-xs font-medium text-gray-700 dark:text-gray-300">Technologies</Label>
-        <TechnologyTagsInput
-          value={technologyInput}
-          onChange={handleTechnologyChange}
-          placeholder="Add technologies..."
-          disabled={isLoading}
-        />
-      </div>
-
-      {/* Row 5: Graduation Years & Status */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-        <div className="space-y-1">
+        {/* Graduation Years */}
+        <div className="flex-1 min-w-[160px] space-y-1">
           <Label className="text-xs font-medium text-gray-700 dark:text-gray-300">Graduation Years</Label>
           <GraduationYearRangeControl
             minYear={minGraduationYear}
@@ -240,8 +231,9 @@ const AdvancedFiltersPanel: React.FC<AdvancedFiltersPanelProps> = ({
           />
         </div>
 
-        <div className="space-y-1">
-          <Label className="text-xs font-medium text-gray-700 dark:text-gray-300">Profile Status</Label>
+        {/* Profile Status */}
+        <div className="flex-1 min-w-[140px] space-y-1">
+          <Label className="text-xs font-medium text-gray-700 dark:text-gray-300">Status</Label>
           <Select value={completionStatus} onValueChange={handleCompletionStatusChange}>
             <SelectTrigger className="text-xs h-7 w-full">
               <SelectValue placeholder="Select status" />
@@ -256,22 +248,34 @@ const AdvancedFiltersPanel: React.FC<AdvancedFiltersPanelProps> = ({
             </SelectContent>
           </Select>
         </div>
+
+        {/* Clear All Button */}
+        <div className="flex-shrink-0">
+          <Button 
+            variant="outline" 
+            onClick={onClearAllFilters}
+            disabled={isLoading}
+            className="text-xs h-7"
+            size="sm"
+          >
+            Clear All
+          </Button>
+        </div>
       </div>
 
-      {/* Clear All Button */}
-      <div className="pt-1 border-t">
-        <Button 
-          variant="outline" 
-          onClick={onClearAllFilters}
+      {/* Technology Tags (Full Width on Second Row) */}
+      <div className="space-y-1">
+        <Label className="text-xs font-medium text-gray-700 dark:text-gray-300">Technologies</Label>
+        <TechnologyTagsInput
+          value={technologyInput}
+          onChange={handleTechnologyChange}
+          placeholder="Add technologies..."
           disabled={isLoading}
-          className="text-xs h-7 w-full"
-          size="sm"
-        >
-          Clear All Filters
-        </Button>
+        />
       </div>
     </div>
   );
 };
 
 export default AdvancedFiltersPanel;
+
