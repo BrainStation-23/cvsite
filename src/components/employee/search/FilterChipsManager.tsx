@@ -29,7 +29,6 @@ interface FilterChipsManagerProps {
   setSkillInput: (skill: string) => void;
   setUniversityInput: (university: string) => void;
   setCompanyInput: (company: string) => void;
-  setProjectInput: (project: string) => void;
   setTechnologyInput: (tech: string[]) => void;
   technologyInput: string[];
 }
@@ -100,9 +99,6 @@ export const useFilterChipsManager = (props: FilterChipsManagerProps) => {
         break;
       case 'company-input':
         props.setCompanyInput('');
-        break;
-      case 'project-input':
-        props.setProjectInput('');
         break;
       case 'technology':
         const techToRemove = filter.value;

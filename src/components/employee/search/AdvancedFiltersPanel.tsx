@@ -16,8 +16,6 @@ interface AdvancedFiltersPanelProps {
   setUniversityInput: (value: string) => void;
   companyInput: string;
   setCompanyInput: (value: string) => void;
-  projectInput: string;
-  setProjectInput: (value: string) => void;
   technologyInput: string[];
   setTechnologyInput: (value: string[]) => void;
   experienceYears: number[];
@@ -41,8 +39,6 @@ const AdvancedFiltersPanel: React.FC<AdvancedFiltersPanelProps> = ({
   setUniversityInput,
   companyInput,
   setCompanyInput,
-  projectInput,
-  setProjectInput,
   technologyInput,
   setTechnologyInput,
   experienceYears,
@@ -107,23 +103,7 @@ const AdvancedFiltersPanel: React.FC<AdvancedFiltersPanelProps> = ({
           />
         </div>
 
-        {/* Project Filter */}
-        <div className="space-y-2">
-          <Label htmlFor="project-input" className="text-sm font-medium">
-            Project
-          </Label>
-          <Input
-            id="project-input"
-            placeholder="Search by project name..."
-            value={projectInput}
-            onChange={(e) => setProjectInput(e.target.value)}
-            className="text-sm"
-          />
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {/* Technology Filter */}
+        {/* Technology Filter - Updated to use TechnologyTagsInput */}
         <div className="space-y-2">
           <Label className="text-sm font-medium">
             Technologies
@@ -135,7 +115,9 @@ const AdvancedFiltersPanel: React.FC<AdvancedFiltersPanelProps> = ({
             disabled={isLoading}
           />
         </div>
+      </div>
 
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {/* Experience Years Range */}
         <div className="space-y-4">
           <Label className="text-sm font-medium">
@@ -158,9 +140,7 @@ const AdvancedFiltersPanel: React.FC<AdvancedFiltersPanelProps> = ({
           onMinYearChange={setMinGraduationYear}
           onMaxYearChange={setMaxGraduationYear}
         />
-      </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Profile Completion Status */}
         <div className="space-y-2">
           <Label className="text-sm font-medium">
