@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -35,6 +34,11 @@ interface EnhancedEmployeeSearchFiltersProps {
   onTrainingFilter: (training: string) => void;
   onAchievementFilter: (achievement: string) => void;
   onProjectFilter: (project: string) => void;
+  onAdvancedFilters: (filters: {
+    minExperienceYears?: number | null;
+    maxExperienceYears?: number | null;
+    completionStatus?: string | null;
+  }) => void;
   onSortChange: (column: EmployeeProfileSortColumn, order: EmployeeProfileSortOrder) => void;
   onReset: () => void;
   searchQuery: string;
@@ -57,6 +61,7 @@ const EnhancedEmployeeSearchFilters: React.FC<EnhancedEmployeeSearchFiltersProps
   onTrainingFilter,
   onAchievementFilter,
   onProjectFilter,
+  onAdvancedFilters,
   onSortChange,
   onReset,
   searchQuery,
@@ -201,9 +206,21 @@ const EnhancedEmployeeSearchFilters: React.FC<EnhancedEmployeeSearchFiltersProps
         break;
       case 'experience-years':
         setExperienceYears([0, 20]);
+        // Apply the reset to backend
+        onAdvancedFilters({
+          minExperienceYears: null,
+          maxExperienceYears: null,
+          completionStatus: completionStatus !== 'all' ? completionStatus : null
+        });
         break;
       case 'completion':
         setCompletionStatus('all');
+        // Apply the reset to backend
+        onAdvancedFilters({
+          minExperienceYears: experienceYears[0] > 0 || experienceYears[1] < 20 ? experienceYears[0] : null,
+          maxExperienceYears: experienceYears[0] > 0 || experienceYears[1] < 20 ? experienceYears[1] : null,
+          completionStatus: null
+        });
         break;
       case 'skill-input':
         setSkillInput('');
@@ -248,8 +265,12 @@ const EnhancedEmployeeSearchFilters: React.FC<EnhancedEmployeeSearchFiltersProps
       onProjectFilter(technologyInput);
     }
 
-    // Note: Experience years and completion status would need backend support
-    // For now, they are tracked in the active filters for UI feedback
+    // Apply experience years and completion status filters via the new backend support
+    onAdvancedFilters({
+      minExperienceYears: experienceYears[0] > 0 || experienceYears[1] < 20 ? experienceYears[0] : null,
+      maxExperienceYears: experienceYears[0] > 0 || experienceYears[1] < 20 ? experienceYears[1] : null,
+      completionStatus: completionStatus !== 'all' ? completionStatus : null
+    });
   };
 
   const clearAllFilters = () => {

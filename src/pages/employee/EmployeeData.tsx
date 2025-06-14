@@ -46,6 +46,7 @@ const EmployeeData: React.FC = () => {
     handleAchievementFilter,
     handleProjectFilter,
     handleSortChange,
+    handleAdvancedFilters,
     resetFilters
   } = useEmployeeProfiles();
 
@@ -122,6 +123,7 @@ const EmployeeData: React.FC = () => {
           onTrainingFilter={handleTrainingFilter}
           onAchievementFilter={handleAchievementFilter}
           onProjectFilter={handleProjectFilter}
+          onAdvancedFilters={handleAdvancedFilters}
           onSortChange={handleSortChange}
           onReset={resetFilters}
           searchQuery={searchQuery}
