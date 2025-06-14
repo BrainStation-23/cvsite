@@ -133,9 +133,45 @@ const EnhancedEmployeeSearchFilters: React.FC<EnhancedEmployeeSearchFiltersProps
         type: 'completion' 
       });
     }
+
+    if (skillInput) {
+      filters.push({ 
+        id: 'skill-input', 
+        label: `Skills: ${skillInput}`, 
+        value: skillInput, 
+        type: 'skill-input' 
+      });
+    }
+
+    if (universityInput) {
+      filters.push({ 
+        id: 'university-input', 
+        label: `University: ${universityInput}`, 
+        value: universityInput, 
+        type: 'university-input' 
+      });
+    }
+
+    if (companyInput) {
+      filters.push({ 
+        id: 'company-input', 
+        label: `Company: ${companyInput}`, 
+        value: companyInput, 
+        type: 'company-input' 
+      });
+    }
+
+    if (technologyInput) {
+      filters.push({ 
+        id: 'technology-input', 
+        label: `Technology: ${technologyInput}`, 
+        value: technologyInput, 
+        type: 'technology-input' 
+      });
+    }
     
     setActiveFilters(filters);
-  }, [searchQuery, skillFilter, experienceFilter, educationFilter, trainingFilter, achievementFilter, projectFilter, experienceYears, completionStatus]);
+  }, [searchQuery, skillFilter, experienceFilter, educationFilter, trainingFilter, achievementFilter, projectFilter, experienceYears, completionStatus, skillInput, universityInput, companyInput, technologyInput]);
 
   const removeFilter = (filterId: string) => {
     const filter = activeFilters.find(f => f.id === filterId);
@@ -169,15 +205,30 @@ const EnhancedEmployeeSearchFilters: React.FC<EnhancedEmployeeSearchFiltersProps
       case 'completion':
         setCompletionStatus('all');
         break;
+      case 'skill-input':
+        setSkillInput('');
+        break;
+      case 'university-input':
+        setUniversityInput('');
+        break;
+      case 'company-input':
+        setCompanyInput('');
+        break;
+      case 'technology-input':
+        setTechnologyInput('');
+        break;
     }
   };
 
   const handleApplyAdvancedFilters = () => {
-    // Apply experience years filter
-    if (experienceYears[0] > 0 || experienceYears[1] < 20) {
-      // This would need to be implemented in the backend to handle experience years
-      console.log('Experience years filter:', experienceYears);
-    }
+    console.log('Applying advanced filters:', {
+      skillInput,
+      universityInput, 
+      companyInput,
+      technologyInput,
+      experienceYears,
+      completionStatus
+    });
 
     // Apply skill selections
     if (skillInput) {
@@ -196,6 +247,9 @@ const EnhancedEmployeeSearchFilters: React.FC<EnhancedEmployeeSearchFiltersProps
     if (technologyInput) {
       onProjectFilter(technologyInput);
     }
+
+    // Note: Experience years and completion status would need backend support
+    // For now, they are tracked in the active filters for UI feedback
   };
 
   const clearAllFilters = () => {
