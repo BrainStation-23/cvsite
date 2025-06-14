@@ -318,12 +318,25 @@ const EnhancedEmployeeSearchFilters: React.FC<EnhancedEmployeeSearchFiltersProps
 
   return (
     <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border space-y-6">
-      {/* Main Search Bar */}
-      <BasicSearchBar
-        searchQuery={searchQuery}
-        onSearch={onSearch}
-        isLoading={isLoading}
-      />
+      {/* Header with Search Bar and Sort Controls */}
+      <div className="flex flex-col lg:flex-row gap-4 items-start lg:items-center justify-between">
+        <div className="flex-1 w-full lg:w-auto">
+          <BasicSearchBar
+            searchQuery={searchQuery}
+            onSearch={onSearch}
+            isLoading={isLoading}
+          />
+        </div>
+        
+        {/* Sort Controls */}
+        <div className="flex-shrink-0">
+          <SortControls
+            sortBy={sortBy}
+            sortOrder={sortOrder}
+            onSortChange={onSortChange}
+          />
+        </div>
+      </div>
 
       {/* Active Filters */}
       {hasActiveFilters && (
@@ -335,7 +348,7 @@ const EnhancedEmployeeSearchFilters: React.FC<EnhancedEmployeeSearchFiltersProps
       )}
 
       {/* Advanced Filters Toggle */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-start">
         <Collapsible open={isFiltersOpen} onOpenChange={setIsFiltersOpen}>
           <CollapsibleTrigger asChild>
             <Button variant="outline" className="flex items-center gap-2">
@@ -373,13 +386,6 @@ const EnhancedEmployeeSearchFilters: React.FC<EnhancedEmployeeSearchFiltersProps
             />
           </CollapsibleContent>
         </Collapsible>
-
-        {/* Sort Controls */}
-        <SortControls
-          sortBy={sortBy}
-          sortOrder={sortOrder}
-          onSortChange={onSortChange}
-        />
       </div>
     </div>
   );
