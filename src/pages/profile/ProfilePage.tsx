@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import DashboardLayout from '../../components/Layout/DashboardLayout';
 import { useToast } from '@/hooks/use-toast';
@@ -7,12 +6,20 @@ import { useForm } from 'react-hook-form';
 import { ProfileTabs } from '@/components/profile/ProfileTabs';
 import { GeneralInfoFormData } from '@/components/profile/GeneralInfoTab';
 import { Skill } from '@/types';
-
 const ProfilePage: React.FC = () => {
-  const { toast } = useToast();
-  const [newTechnicalSkill, setNewTechnicalSkill] = useState<Omit<Skill, 'id'>>({ name: '', proficiency: 1, priority: 0 });
-  const [newSpecializedSkill, setNewSpecializedSkill] = useState<Omit<Skill, 'id'>>({ name: '', proficiency: 1, priority: 0 });
-
+  const {
+    toast
+  } = useToast();
+  const [newTechnicalSkill, setNewTechnicalSkill] = useState<Omit<Skill, 'id'>>({
+    name: '',
+    proficiency: 1,
+    priority: 0
+  });
+  const [newSpecializedSkill, setNewSpecializedSkill] = useState<Omit<Skill, 'id'>>({
+    name: '',
+    proficiency: 1,
+    priority: 0
+  });
   const {
     isLoading,
     isSaving,
@@ -59,7 +66,6 @@ const ProfilePage: React.FC = () => {
       currentDesignation: generalInfo.currentDesignation || null
     }
   });
-
   useEffect(() => {
     if (!isLoading) {
       form.reset({
@@ -71,7 +77,6 @@ const ProfilePage: React.FC = () => {
       });
     }
   }, [isLoading, generalInfo, form.reset]);
-
   const handleUpdateProfile = async (data: GeneralInfoFormData) => {
     const success = await saveGeneralInfo({
       firstName: data.firstName,
@@ -82,11 +87,9 @@ const ProfilePage: React.FC = () => {
     });
     return success;
   };
-
   const handleImageUpdate = (imageUrl: string | null) => {
     form.setValue('profileImage', imageUrl);
   };
-
   const handleAddTechnicalSkill = async () => {
     if (!newTechnicalSkill.name) {
       toast({
@@ -96,13 +99,15 @@ const ProfilePage: React.FC = () => {
       });
       return;
     }
-
     const success = await saveTechnicalSkill(newTechnicalSkill as Skill);
     if (success) {
-      setNewTechnicalSkill({ name: '', proficiency: 1, priority: 0 });
+      setNewTechnicalSkill({
+        name: '',
+        proficiency: 1,
+        priority: 0
+      });
     }
   };
-
   const handleAddSpecializedSkill = async () => {
     if (!newSpecializedSkill.name) {
       toast({
@@ -112,78 +117,27 @@ const ProfilePage: React.FC = () => {
       });
       return;
     }
-
     const success = await saveSpecializedSkill(newSpecializedSkill as Skill);
     if (success) {
-      setNewSpecializedSkill({ name: '', proficiency: 1, priority: 0 });
+      setNewSpecializedSkill({
+        name: '',
+        proficiency: 1,
+        priority: 0
+      });
     }
   };
-
-  return (
-    <DashboardLayout>
+  return <DashboardLayout>
       <div className="flex flex-col h-full">
         {/* Simple header without tour button */}
-        <div className="flex-shrink-0 py-4 border-b">
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">My Profile</h1>
-            <p className="text-gray-600 dark:text-gray-400">Complete your professional profile</p>
-          </div>
-        </div>
+        
 
         {/* Content area - now takes full height */}
         <div className="flex-1 min-h-0 py-4">
-          {isLoading ? (
-            <div className="flex justify-center items-center h-64">
+          {isLoading ? <div className="flex justify-center items-center h-64">
               <p>Loading profile information...</p>
-            </div>
-          ) : (
-            <ProfileTabs
-              form={form}
-              isEditing={true}
-              onImageUpdate={handleImageUpdate}
-              technicalSkills={technicalSkills}
-              specializedSkills={specializedSkills}
-              experiences={experiences}
-              education={education}
-              trainings={trainings}
-              achievements={achievements}
-              projects={projects}
-              isSaving={isSaving}
-              newTechnicalSkill={newTechnicalSkill}
-              newSpecializedSkill={newSpecializedSkill}
-              setNewTechnicalSkill={setNewTechnicalSkill}
-              setNewSpecializedSkill={setNewSpecializedSkill}
-              handleAddTechnicalSkill={handleAddTechnicalSkill}
-              handleAddSpecializedSkill={handleAddSpecializedSkill}
-              saveExperience={saveExperience}
-              updateExperience={updateExperience}
-              deleteExperience={deleteExperience}
-              saveEducation={saveEducation}
-              updateEducation={updateEducation}
-              deleteEducation={deleteEducation}
-              saveTraining={saveTraining}
-              updateTraining={updateTraining}
-              deleteTraining={deleteTraining}
-              saveAchievement={saveAchievement}
-              updateAchievement={updateAchievement}
-              deleteAchievement={deleteAchievement}
-              saveProject={saveProject}
-              updateProject={updateProject}
-              deleteProject={deleteProject}
-              reorderProjects={reorderProjects}
-              deleteTechnicalSkill={deleteTechnicalSkill}
-              deleteSpecializedSkill={deleteSpecializedSkill}
-              saveTechnicalSkill={saveTechnicalSkill}
-              saveSpecializedSkill={saveSpecializedSkill}
-              reorderTechnicalSkills={reorderTechnicalSkills}
-              reorderSpecializedSkills={reorderSpecializedSkills}
-              saveGeneralInfo={handleUpdateProfile}
-            />
-          )}
+            </div> : <ProfileTabs form={form} isEditing={true} onImageUpdate={handleImageUpdate} technicalSkills={technicalSkills} specializedSkills={specializedSkills} experiences={experiences} education={education} trainings={trainings} achievements={achievements} projects={projects} isSaving={isSaving} newTechnicalSkill={newTechnicalSkill} newSpecializedSkill={newSpecializedSkill} setNewTechnicalSkill={setNewTechnicalSkill} setNewSpecializedSkill={setNewSpecializedSkill} handleAddTechnicalSkill={handleAddTechnicalSkill} handleAddSpecializedSkill={handleAddSpecializedSkill} saveExperience={saveExperience} updateExperience={updateExperience} deleteExperience={deleteExperience} saveEducation={saveEducation} updateEducation={updateEducation} deleteEducation={deleteEducation} saveTraining={saveTraining} updateTraining={updateTraining} deleteTraining={deleteTraining} saveAchievement={saveAchievement} updateAchievement={updateAchievement} deleteAchievement={deleteAchievement} saveProject={saveProject} updateProject={updateProject} deleteProject={deleteProject} reorderProjects={reorderProjects} deleteTechnicalSkill={deleteTechnicalSkill} deleteSpecializedSkill={deleteSpecializedSkill} saveTechnicalSkill={saveTechnicalSkill} saveSpecializedSkill={saveSpecializedSkill} reorderTechnicalSkills={reorderTechnicalSkills} reorderSpecializedSkills={reorderSpecializedSkills} saveGeneralInfo={handleUpdateProfile} />}
         </div>
       </div>
-    </DashboardLayout>
-  );
+    </DashboardLayout>;
 };
-
 export default ProfilePage;
