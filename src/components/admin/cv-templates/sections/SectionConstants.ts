@@ -8,8 +8,7 @@ import {
   FolderOpen, 
   Award, 
   BookOpen,
-  FileText,
-  Users
+  FileText
 } from 'lucide-react';
 import { CVSectionType } from '@/types/cv-templates';
 
@@ -61,12 +60,6 @@ export const SECTION_TYPES = [
     label: 'Achievements', 
     icon: Award,
     description: 'Notable accomplishments and recognitions'
-  },
-  { 
-    value: 'references' as CVSectionType, 
-    label: 'References', 
-    icon: Users,
-    description: 'Professional references and contacts'
   },
   { 
     value: 'page_break' as CVSectionType, 

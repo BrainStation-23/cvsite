@@ -38,10 +38,9 @@ export class HTMLPageDistributor {
       specializedSkills: profile?.specialized_skills
     });
 
-    // Only prevent rendering if there are no sections configured
-    if (sections.length === 0) {
-      console.log('HTML Page Distributor - No sections configured, returning empty page');
-      return ['<div class="empty-page">No sections configured</div>'];
+    if (!profile || sections.length === 0) {
+      console.log('HTML Page Distributor - No profile or sections, returning empty page');
+      return ['<div class="empty-page">No content to display</div>'];
     }
 
     const A4_CONTENT_HEIGHT = SectionSplitter.getContentHeight(orientation);
@@ -51,8 +50,7 @@ export class HTMLPageDistributor {
     console.log('HTML Page Distributor - Layout config:', {
       layoutType,
       orientation,
-      contentHeight: A4_CONTENT_HEIGHT,
-      hasProfile: !!profile
+      contentHeight: A4_CONTENT_HEIGHT
     });
 
     // Use the same strategy as the preview

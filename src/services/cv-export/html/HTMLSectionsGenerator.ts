@@ -1,4 +1,3 @@
-
 import { HTMLFieldProcessor } from './HTMLFieldProcessor';
 import { GeneralSectionRenderer } from './sections/GeneralSectionRenderer';
 import { ExperienceSectionRenderer } from './sections/ExperienceSectionRenderer';
@@ -199,11 +198,6 @@ export class HTMLSectionsGenerator {
         console.log('HTML Sections Generator - Rendering achievements section');
         html = this.achievementsRenderer.render(profileForSection, sectionFieldMappings, section, partialData?.title);
         break;
-      case 'references':
-        console.log('HTML Sections Generator - Rendering references section');
-        // References will fetch their own data from global references table
-        html = this.renderReferencesSection(profileForSection, sectionFieldMappings, section, partialData?.title);
-        break;
       default:
         console.warn(`HTML Sections Generator - Unknown section type: ${section.section_type}`);
         html = `<div class="unknown-section">Unknown section type: ${section.section_type}</div>`;
@@ -211,30 +205,6 @@ export class HTMLSectionsGenerator {
 
     console.log(`HTML Sections Generator - Rendered ${section.section_type}, HTML length:`, html.length);
     return html;
-  }
-
-  private renderReferencesSection(
-    profile: any,
-    fieldMappings: any[],
-    section: any,
-    customTitle?: string
-  ): string {
-    console.log('HTML Sections Generator - renderReferencesSection called');
-    
-    const title = customTitle || 'References';
-    
-    // For references section, we show the section with placeholder text
-    // since references are fetched independently by the ReferencesSection component
-    return `
-      <div class="section references-section">
-        <h3 class="section-title">${title}</h3>
-        <div class="references-grid">
-          <div class="reference-item">
-            <div class="reference-name">Available upon request</div>
-          </div>
-        </div>
-      </div>
-    `;
   }
 
   private getSectionDataKey(sectionType: string): string {
@@ -257,8 +227,6 @@ export class HTMLSectionsGenerator {
         return 'trainings';
       case 'achievements':
         return 'achievements';
-      case 'references':
-        return 'references';
       default:
         return sectionType;
     }

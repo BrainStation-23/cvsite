@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { GeneralInfoSection } from './sections/GeneralInfoSection';
 import { ExperienceSection } from './sections/ExperienceSection';
@@ -8,7 +7,6 @@ import { SpecializedSkillsSection } from './sections/SpecializedSkillsSection';
 import { ProjectsSection } from './sections/ProjectsSection';
 import { TrainingsSection } from './sections/TrainingsSection';
 import { AchievementsSection } from './sections/AchievementsSection';
-import { ReferencesSection } from './sections/ReferencesSection';
 import { PageBreakSection } from './sections/PageBreakSection';
 
 interface TemplateSection {
@@ -106,8 +104,6 @@ export const DynamicSectionRenderer: React.FC<DynamicSectionRendererProps> = ({
         return <TrainingsSection key={section.id} {...commonProps} />;
       case 'achievements':
         return <AchievementsSection key={section.id} {...commonProps} />;
-      case 'references':
-        return <ReferencesSection key={section.id} {...commonProps} />;
       default:
         console.warn(`Unknown section type: ${section.section_type}`);
         return (
@@ -158,8 +154,6 @@ function getSectionDataKey(sectionType: string): string {
       return 'trainings';
     case 'achievements':
       return 'achievements';
-    case 'references':
-      return 'references';
     default:
       return sectionType;
   }

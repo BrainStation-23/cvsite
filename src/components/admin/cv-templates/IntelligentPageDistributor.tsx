@@ -28,8 +28,7 @@ export const IntelligentPageDistributor: React.FC<IntelligentPageDistributorProp
   const MAX_PAGES = 20;
 
   const distributedPages = useMemo((): PageContent[] => {
-    // Only prevent rendering if there are no sections configured
-    if (sections.length === 0) {
+    if (!profile || sections.length === 0) {
       return [{
         pageNumber: 1,
         sections: [],
@@ -43,8 +42,7 @@ export const IntelligentPageDistributor: React.FC<IntelligentPageDistributorProp
         id: s.id,
         type: s.section_type,
         placement: s.styling_config?.layout_placement || 'main'
-      })),
-      hasProfile: !!profile
+      }))
     });
 
     const layoutType = layoutConfig.layoutType || 'single-column';
