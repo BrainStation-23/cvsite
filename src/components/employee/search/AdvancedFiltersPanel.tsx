@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { UniversityCombobox } from '@/components/admin/university/UniversityCombobox';
 import GraduationYearRangeControl from './GraduationYearRangeControl';
 
 interface AdvancedFiltersPanelProps {
@@ -69,15 +70,13 @@ const AdvancedFiltersPanel: React.FC<AdvancedFiltersPanelProps> = ({
 
         {/* University Filter */}
         <div className="space-y-2">
-          <Label htmlFor="university-input" className="text-sm font-medium">
+          <Label className="text-sm font-medium">
             University
           </Label>
-          <Input
-            id="university-input"
-            placeholder="Search by university..."
+          <UniversityCombobox
             value={universityInput}
-            onChange={(e) => setUniversityInput(e.target.value)}
-            className="text-sm"
+            onValueChange={setUniversityInput}
+            placeholder="Search by university..."
           />
         </div>
 
