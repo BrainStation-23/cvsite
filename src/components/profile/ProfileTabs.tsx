@@ -1,5 +1,7 @@
+
 import React, { useEffect } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Badge } from '@/components/ui/badge';
 import { UseFormReturn } from 'react-hook-form';
 import { GeneralInfoTab, GeneralInfoFormData } from './GeneralInfoTab';
 import { SkillsTab } from './SkillsTab';
@@ -11,6 +13,17 @@ import { ProjectsTab } from './ProjectsTab';
 import { JSONImportExport } from './JSONImportExport';
 import { useProfileImport } from '@/hooks/profile/use-profile-import';
 import { Skill, Experience, Education, Training, Achievement, Project } from '@/types';
+import { 
+  User, 
+  Code, 
+  Briefcase, 
+  GraduationCap, 
+  Certificate, 
+  Trophy, 
+  FolderOpen, 
+  FileJson,
+  AlertCircle
+} from 'lucide-react';
 
 interface ProfileTabsProps {
   form: UseFormReturn<GeneralInfoFormData>;
@@ -147,35 +160,108 @@ export const ProfileTabs: React.FC<ProfileTabsProps> = ({
     projects
   };
 
+  // Helper function to check if general info is incomplete
+  const isGeneralInfoIncomplete = () => {
+    const firstName = form.getValues('firstName');
+    const lastName = form.getValues('lastName');
+    const biography = form.getValues('biography');
+    const profileImage = form.getValues('profileImage');
+    
+    return !firstName || !lastName || !biography || !profileImage;
+  };
+
+  // Helper function to create tab trigger with icon and notification
+  const TabTriggerWithIcon = ({ 
+    value, 
+    icon: Icon, 
+    label, 
+    isEmpty, 
+    dataTour 
+  }: { 
+    value: string; 
+    icon: React.ElementType; 
+    label: string; 
+    isEmpty: boolean;
+    dataTour: string;
+  }) => (
+    <TabsTrigger 
+      value={value} 
+      data-tour={dataTour} 
+      className="text-xs py-2 px-3 data-[state=active]:bg-white dark:data-[state=active]:bg-gray-700 relative"
+    >
+      <div className="flex items-center gap-1.5">
+        <Icon className="h-3.5 w-3.5" />
+        <span>{label}</span>
+        {isEmpty && (
+          <Badge variant="destructive" className="ml-1 h-4 w-4 p-0 flex items-center justify-center">
+            <AlertCircle className="h-2.5 w-2.5" />
+          </Badge>
+        )}
+      </div>
+    </TabsTrigger>
+  );
+
   return (
     <Tabs defaultValue="general" className="w-full h-full flex flex-col">
-      {/* Updated tabs header to include tour data attributes */}
+      {/* Updated tabs header with icons and notifications */}
       <div className="flex-shrink-0">
-        <TabsList className="grid w-full grid-cols-8 h-10 bg-gray-100 dark:bg-gray-800 rounded-md p-1">
-          <TabsTrigger value="general" data-tour="general-tab" className="text-xs py-2 px-3 data-[state=active]:bg-white dark:data-[state=active]:bg-gray-700">
-            General
-          </TabsTrigger>
-          <TabsTrigger value="skills" data-tour="skills-tab" className="text-xs py-2 px-3 data-[state=active]:bg-white dark:data-[state=active]:bg-gray-700">
-            Skills
-          </TabsTrigger>
-          <TabsTrigger value="experience" data-tour="experience-tab" className="text-xs py-2 px-3 data-[state=active]:bg-white dark:data-[state=active]:bg-gray-700">
-            Experience
-          </TabsTrigger>
-          <TabsTrigger value="education" data-tour="education-tab" className="text-xs py-2 px-3 data-[state=active]:bg-white dark:data-[state=active]:bg-gray-700">
-            Education
-          </TabsTrigger>
-          <TabsTrigger value="training" data-tour="training-tab" className="text-xs py-2 px-3 data-[state=active]:bg-white dark:data-[state=active]:bg-gray-700">
-            Training
-          </TabsTrigger>
-          <TabsTrigger value="achievements" data-tour="achievements-tab" className="text-xs py-2 px-3 data-[state=active]:bg-white dark:data-[state=active]:bg-gray-700">
-            Achievements
-          </TabsTrigger>
-          <TabsTrigger value="projects" data-tour="projects-tab" className="text-xs py-2 px-3 data-[state=active]:bg-white dark:data-[state=active]:bg-gray-700">
-            Projects
-          </TabsTrigger>
-          <TabsTrigger value="json" data-tour="json-tab" className="text-xs py-2 px-3 data-[state=active]:bg-white dark:data-[state=active]:bg-gray-700">
-            JSON
-          </TabsTrigger>
+        <TabsList className="grid w-full grid-cols-8 h-12 bg-gray-100 dark:bg-gray-800 rounded-md p-1">
+          <TabTriggerWithIcon
+            value="general"
+            icon={User}
+            label="General"
+            isEmpty={isGeneralInfoIncomplete()}
+            dataTour="general-tab"
+          />
+          <TabTriggerWithIcon
+            value="skills"
+            icon={Code}
+            label="Skills"
+            isEmpty={technicalSkills.length === 0 && specializedSkills.length === 0}
+            dataTour="skills-tab"
+          />
+          <TabTriggerWithIcon
+            value="experience"
+            icon={Briefcase}
+            label="Experience"
+            isEmpty={experiences.length === 0}
+            dataTour="experience-tab"
+          />
+          <TabTriggerWithIcon
+            value="education"
+            icon={GraduationCap}
+            label="Education"
+            isEmpty={education.length === 0}
+            dataTour="education-tab"
+          />
+          <TabTriggerWithIcon
+            value="training"
+            icon={Certificate}
+            label="Training"
+            isEmpty={trainings.length === 0}
+            dataTour="training-tab"
+          />
+          <TabTriggerWithIcon
+            value="achievements"
+            icon={Trophy}
+            label="Achievements"
+            isEmpty={achievements.length === 0}
+            dataTour="achievements-tab"
+          />
+          <TabTriggerWithIcon
+            value="projects"
+            icon={FolderOpen}
+            label="Projects"
+            isEmpty={projects.length === 0}
+            dataTour="projects-tab"
+          />
+          <TabTriggerWithIcon
+            value="json"
+            icon={FileJson}
+            label="JSON"
+            isEmpty={false}
+            dataTour="json-tab"
+          />
         </TabsList>
       </div>
       
