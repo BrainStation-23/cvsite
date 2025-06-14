@@ -111,12 +111,12 @@ const AdvancedFiltersPanel: React.FC<AdvancedFiltersPanelProps> = ({
           />
         </div>
 
-        {/* Experience Years Range */}
+        {/* Experience Years Range with proper dual knobs */}
         <div className="space-y-2">
           <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
             Experience (Years)
           </label>
-          <div className="px-3">
+          <div className="px-3 py-2">
             <Slider
               value={experienceYears}
               onValueChange={setExperienceYears}
@@ -125,9 +125,9 @@ const AdvancedFiltersPanel: React.FC<AdvancedFiltersPanelProps> = ({
               step={1}
               className="w-full"
             />
-            <div className="flex justify-between text-xs text-gray-500 mt-1">
-              <span>{experienceYears[0]} years</span>
-              <span>{experienceYears[1]}+ years</span>
+            <div className="flex justify-between text-xs text-gray-500 mt-2">
+              <span>{experienceYears[0]} {experienceYears[0] === 1 ? 'year' : 'years'}</span>
+              <span>{experienceYears[1] === 20 ? '20+ years' : `${experienceYears[1]} ${experienceYears[1] === 1 ? 'year' : 'years'}`}</span>
             </div>
           </div>
         </div>
