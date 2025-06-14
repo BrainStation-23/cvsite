@@ -21,6 +21,51 @@ const GraduationYearRangeControl: React.FC<GraduationYearRangeControlProps> = ({
   const maxValidYear = currentYear + 10;
 
   const handleMinYearChange = (value: string) => {
+    // Allow empty input
+    if (value === '') {
+      onMinYearChange(null);
+      return;
+    }
+    
+    // Allow partial typing (1-4 digits)
+    const numericValue = value.replace(/\D/g, '');
+    if (numericValue.length <= 4) {
+      // Only validate and set if it's a complete 4-digit year
+      if (numericValue.length === 4) {
+        const year = parseInt(numericValue);
+        if (year >= minValidYear && year <= maxValidYear) {
+          onMinYearChange(year);
+        }
+      }
+      // For partial inputs (1-3 digits), we don't call onMinYearChange
+      // but we allow the typing to continue
+    }
+  };
+
+  const handleMaxYearChange = (value: string) => {
+    // Allow empty input
+    if (value === '') {
+      onMaxYearChange(null);
+      return;
+    }
+    
+    // Allow partial typing (1-4 digits)
+    const numericValue = value.replace(/\D/g, '');
+    if (numericValue.length <= 4) {
+      // Only validate and set if it's a complete 4-digit year
+      if (numericValue.length === 4) {
+        const year = parseInt(numericValue);
+        if (year >= minValidYear && year <= maxValidYear) {
+          onMaxYearChange(year);
+        }
+      }
+      // For partial inputs (1-3 digits), we don't call onMaxYearChange
+      // but we allow the typing to continue
+    }
+  };
+
+  const handleMinYearBlur = (e: React.FocusEvent<HTMLInputElement>) => {
+    const value = e.target.value;
     if (value === '') {
       onMinYearChange(null);
       return;
@@ -29,10 +74,14 @@ const GraduationYearRangeControl: React.FC<GraduationYearRangeControlProps> = ({
     const year = parseInt(value);
     if (!isNaN(year) && year >= minValidYear && year <= maxValidYear) {
       onMinYearChange(year);
+    } else {
+      // Reset to previous valid value or null
+      e.target.value = minYear ? minYear.toString() : '';
     }
   };
 
-  const handleMaxYearChange = (value: string) => {
+  const handleMaxYearBlur = (e: React.FocusEvent<HTMLInputElement>) => {
+    const value = e.target.value;
     if (value === '') {
       onMaxYearChange(null);
       return;
@@ -41,6 +90,9 @@ const GraduationYearRangeControl: React.FC<GraduationYearRangeControlProps> = ({
     const year = parseInt(value);
     if (!isNaN(year) && year >= minValidYear && year <= maxValidYear) {
       onMaxYearChange(year);
+    } else {
+      // Reset to previous valid value or null
+      e.target.value = maxYear ? maxYear.toString() : '';
     }
   };
 
@@ -53,25 +105,25 @@ const GraduationYearRangeControl: React.FC<GraduationYearRangeControlProps> = ({
         <div className="flex items-center gap-2 mt-2">
           <div className="flex-1">
             <Input
-              type="number"
+              type="text"
               placeholder="From year"
-              value={minYear || ''}
+              defaultValue={minYear || ''}
               onChange={(e) => handleMinYearChange(e.target.value)}
-              min={minValidYear}
-              max={maxValidYear}
+              onBlur={handleMinYearBlur}
               className="text-sm"
+              maxLength={4}
             />
           </div>
           <span className="text-sm text-gray-500">to</span>
           <div className="flex-1">
             <Input
-              type="number"
+              type="text"
               placeholder="To year"
-              value={maxYear || ''}
+              defaultValue={maxYear || ''}
               onChange={(e) => handleMaxYearChange(e.target.value)}
-              min={minValidYear}
-              max={maxValidYear}
+              onBlur={handleMaxYearBlur}
               className="text-sm"
+              maxLength={4}
             />
           </div>
         </div>
