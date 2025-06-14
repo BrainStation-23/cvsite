@@ -80,7 +80,7 @@ export const useProfileTour = () => {
   const handleJoyrideCallback = useCallback((data: CallBackProps) => {
     const { status, type, index } = data;
 
-    if ([STATUS.FINISHED, STATUS.SKIPPED].includes(status)) {
+    if (status === STATUS.FINISHED || status === STATUS.SKIPPED) {
       setTourState(prev => ({ ...prev, run: false, stepIndex: 0 }));
     } else if (type === 'step:after') {
       setTourState(prev => ({ ...prev, stepIndex: index + 1 }));
