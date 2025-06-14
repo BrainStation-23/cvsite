@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -134,10 +135,10 @@ const AdvancedFiltersPanel: React.FC<AdvancedFiltersPanelProps> = ({
   };
 
   return (
-    <div className="w-full p-3 bg-gray-50 dark:bg-gray-900/50 rounded-lg border space-y-3">
-      {/* Skills & Education */}
-      <div className="space-y-3">
-        <div className="space-y-2">
+    <div className="w-full p-3 bg-gray-50 dark:bg-gray-900/50 rounded-lg border space-y-2">
+      {/* Row 1: Skills & Education */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+        <div className="space-y-1">
           <div className="flex items-center gap-2">
             <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
             <Label className="text-xs font-medium text-blue-700 dark:text-blue-300">Skills</Label>
@@ -150,7 +151,7 @@ const AdvancedFiltersPanel: React.FC<AdvancedFiltersPanelProps> = ({
           />
         </div>
         
-        <div className="space-y-2">
+        <div className="space-y-1">
           <div className="flex items-center gap-2">
             <div className="w-2 h-2 bg-green-500 rounded-full"></div>
             <Label className="text-xs font-medium text-green-700 dark:text-green-300">Education</Label>
@@ -163,9 +164,9 @@ const AdvancedFiltersPanel: React.FC<AdvancedFiltersPanelProps> = ({
         </div>
       </div>
 
-      {/* Experience & Company */}
-      <div className="space-y-3">
-        <div className="space-y-2">
+      {/* Row 2: Company & Experience */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+        <div className="space-y-1">
           <div className="flex items-center gap-2">
             <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
             <Label className="text-xs font-medium text-purple-700 dark:text-purple-300">Company</Label>
@@ -178,7 +179,7 @@ const AdvancedFiltersPanel: React.FC<AdvancedFiltersPanelProps> = ({
           />
         </div>
 
-        <div className="space-y-2">
+        <div className="space-y-1">
           <Label className="text-xs font-medium text-gray-600 dark:text-gray-400">
             Experience: {experienceYears[0]}-{experienceYears[1]} years
           </Label>
@@ -193,14 +194,14 @@ const AdvancedFiltersPanel: React.FC<AdvancedFiltersPanelProps> = ({
         </div>
       </div>
 
-      {/* Projects */}
-      <div className="space-y-3">
+      {/* Row 3: Project Name & Description */}
+      <div className="space-y-1">
         <div className="flex items-center gap-2">
           <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
           <Label className="text-xs font-medium text-orange-700 dark:text-orange-300">Projects</Label>
         </div>
         
-        <div className="space-y-2">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
           <Input
             placeholder="Project name..."
             value={projectNameInput}
@@ -214,7 +215,11 @@ const AdvancedFiltersPanel: React.FC<AdvancedFiltersPanelProps> = ({
             className="text-xs h-7 w-full"
           />
         </div>
-        
+      </div>
+
+      {/* Row 4: Technology Tags (Full Width) */}
+      <div className="space-y-1">
+        <Label className="text-xs font-medium text-gray-700 dark:text-gray-300">Technologies</Label>
         <TechnologyTagsInput
           value={technologyInput}
           onChange={handleTechnologyChange}
@@ -223,9 +228,9 @@ const AdvancedFiltersPanel: React.FC<AdvancedFiltersPanelProps> = ({
         />
       </div>
 
-      {/* Graduation Years & Status */}
-      <div className="space-y-3">
-        <div className="space-y-2">
+      {/* Row 5: Graduation Years & Status */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+        <div className="space-y-1">
           <Label className="text-xs font-medium text-gray-700 dark:text-gray-300">Graduation Years</Label>
           <GraduationYearRangeControl
             minYear={minGraduationYear}
@@ -235,7 +240,7 @@ const AdvancedFiltersPanel: React.FC<AdvancedFiltersPanelProps> = ({
           />
         </div>
 
-        <div className="space-y-2">
+        <div className="space-y-1">
           <Label className="text-xs font-medium text-gray-700 dark:text-gray-300">Profile Status</Label>
           <Select value={completionStatus} onValueChange={handleCompletionStatusChange}>
             <SelectTrigger className="text-xs h-7 w-full">
@@ -254,7 +259,7 @@ const AdvancedFiltersPanel: React.FC<AdvancedFiltersPanelProps> = ({
       </div>
 
       {/* Clear All Button */}
-      <div className="pt-2 border-t">
+      <div className="pt-1 border-t">
         <Button 
           variant="outline" 
           onClick={onClearAllFilters}
