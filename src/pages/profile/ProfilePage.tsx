@@ -5,22 +5,13 @@ import { useToast } from '@/hooks/use-toast';
 import { useProfile } from '@/hooks/use-profile';
 import { useForm } from 'react-hook-form';
 import { ProfileTabs } from '@/components/profile/ProfileTabs';
-import { ProfileTourButton } from '@/components/profile/ProfileTourButton';
 import { GeneralInfoFormData } from '@/components/profile/GeneralInfoTab';
-import { useProfileTour } from '@/hooks/use-profile-tour';
 import { Skill } from '@/types';
-import Joyride from 'react-joyride';
 
 const ProfilePage: React.FC = () => {
   const { toast } = useToast();
   const [newTechnicalSkill, setNewTechnicalSkill] = useState<Omit<Skill, 'id'>>({ name: '', proficiency: 1, priority: 0 });
   const [newSpecializedSkill, setNewSpecializedSkill] = useState<Omit<Skill, 'id'>>({ name: '', proficiency: 1, priority: 0 });
-  
-  const {
-    tourState,
-    handleJoyrideCallback,
-    startTour,
-  } = useProfileTour();
 
   const {
     isLoading,
@@ -130,51 +121,13 @@ const ProfilePage: React.FC = () => {
 
   return (
     <DashboardLayout>
-      <Joyride
-        callback={handleJoyrideCallback}
-        continuous
-        hideCloseButton
-        run={tourState.run}
-        scrollToFirstStep
-        showProgress
-        showSkipButton
-        steps={tourState.steps}
-        stepIndex={tourState.stepIndex}
-        styles={{
-          options: {
-            primaryColor: '#0ea5e9',
-            textColor: '#374151',
-            backgroundColor: '#ffffff',
-            overlayColor: 'rgba(0, 0, 0, 0.4)',
-            spotlightShadow: '0 0 15px rgba(0, 0, 0, 0.5)',
-            beaconSize: 36,
-            zIndex: 10000,
-          },
-          tooltip: {
-            borderRadius: 8,
-            boxShadow: '0 10px 25px rgba(0, 0, 0, 0.1)',
-          },
-          buttonNext: {
-            backgroundColor: '#0ea5e9',
-            borderRadius: 6,
-          },
-          buttonBack: {
-            color: '#6b7280',
-          },
-          buttonSkip: {
-            color: '#6b7280',
-          },
-        }}
-      />
-      
       <div className="flex flex-col h-full">
-        {/* Header with tour button */}
-        <div className="flex-shrink-0 flex justify-between items-center py-4 border-b">
+        {/* Simple header without tour button */}
+        <div className="flex-shrink-0 py-4 border-b">
           <div>
             <h1 className="text-2xl font-bold text-gray-900 dark:text-white">My Profile</h1>
             <p className="text-gray-600 dark:text-gray-400">Complete your professional profile</p>
           </div>
-          <ProfileTourButton onStartTour={startTour} />
         </div>
 
         {/* Content area - now takes full height */}
