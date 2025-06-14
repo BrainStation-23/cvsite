@@ -164,7 +164,7 @@ const EnhancedEmployeeSearchFilters: React.FC<EnhancedEmployeeSearchFiltersProps
     if (universityInput) {
       filters.push({ 
         id: 'university-input', 
-        label: `University: ${universityInput}`, 
+        label: `Education: ${universityInput}`, 
         value: universityInput, 
         type: 'university-input' 
       });
@@ -283,7 +283,7 @@ const EnhancedEmployeeSearchFilters: React.FC<EnhancedEmployeeSearchFiltersProps
       onSkillFilter(skillInput);
     }
 
-    // Apply other advanced filters
+    // Apply university input to education filter (not separate university filter)
     if (universityInput) {
       onEducationFilter(universityInput);
     }
