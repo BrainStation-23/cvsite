@@ -4,12 +4,12 @@ import { cn } from '@/lib/utils';
 import { ProfileCompletionProgress } from './profile-completion-progress';
 import { XPLevelDisplay } from './xp-level-display';
 import { AchievementBadge, AchievementTier } from './achievement-badge';
-import { Award, Target, Users, Calendar } from 'lucide-react';
+import { Award, Target, Users, Calendar, LucideIcon } from 'lucide-react';
 
 interface Achievement {
   id: string;
   tier: AchievementTier;
-  icon: React.ComponentType<any>;
+  icon: LucideIcon;
   title: string;
   description: string;
   isUnlocked: boolean;
