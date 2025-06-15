@@ -74,8 +74,14 @@ export const useProjectsTour = () => {
       },
       {
         target: '[data-tour="project-save-button"]',
-        content: 'Click here to save your project entry. Make sure all required fields are filled before saving.',
+        content: 'Click here to save your project entry and close the form. Make sure all required fields are filled before saving.',
         placement: 'top',
+        disableBeacon: true,
+      },
+      {
+        target: '[data-testid="drag-handle"]',
+        content: 'Use this drag handle to reorder your projects. Simply drag and drop to change the order in which they appear on your profile.',
+        placement: 'right',
         disableBeacon: true,
       },
     ],
@@ -103,6 +109,21 @@ export const useProjectsTour = () => {
           return;
         }
       }
+      
+      // If we're on step 10 (save button), simulate clicking it to close the form
+      if (index === 10) {
+        // Find and click cancel button to close the form without saving
+        const cancelButton = document.querySelector('button[type="button"]') as HTMLButtonElement;
+        if (cancelButton && cancelButton.textContent?.includes('Cancel')) {
+          cancelButton.click();
+          // Wait a bit for the form to close before proceeding
+          setTimeout(() => {
+            setTourState(prev => ({ ...prev, stepIndex: index + 1 }));
+          }, 300);
+          return;
+        }
+      }
+      
       setTourState(prev => ({ ...prev, stepIndex: index + 1 }));
     }
   }, []);
