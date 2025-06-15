@@ -3,10 +3,10 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Info } from 'lucide-react';
 import Joyride from 'react-joyride';
-import { useExperienceTour } from '@/hooks/use-experience-tour';
+import { useExperienceFormTour } from '@/hooks/use-experience-form-tour';
 
-export const ExperienceTourButton: React.FC = () => {
-  const { tourState, handleJoyrideCallback, startTour } = useExperienceTour();
+export const ExperienceFormTourButton: React.FC = () => {
+  const { tourState, handleJoyrideCallback, startTour } = useExperienceFormTour();
 
   return (
     <>
@@ -15,7 +15,7 @@ export const ExperienceTourButton: React.FC = () => {
         size="sm"
         onClick={startTour}
         className="h-8 w-8 p-0"
-        title="Start Experience Tour"
+        title="Start Experience Form Tour"
       >
         <Info className="h-4 w-4" />
       </Button>
