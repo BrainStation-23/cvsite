@@ -532,7 +532,8 @@ export function useProfile() {
         if (error) throw error;
       }
 
-      await fetchTechnicalSkills();
+      // Update local state directly instead of re-fetching
+      setTechnicalSkills(skills);
 
       toast({
         title: 'Success',
@@ -570,7 +571,8 @@ export function useProfile() {
         if (error) throw error;
       }
 
-      await fetchSpecializedSkills();
+      // Update local state directly instead of re-fetching
+      setSpecializedSkills(skills);
 
       toast({
         title: 'Success',
