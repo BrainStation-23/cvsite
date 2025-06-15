@@ -7,6 +7,7 @@ import { CompanyExperienceCard } from './CompanyExperienceCard';
 import { useExperienceGrouped } from '@/hooks/profile/use-experience-grouped';
 import { useExperience } from '@/hooks/profile/use-experience';
 import { Experience } from '@/types';
+import { ExperienceTourButton } from '../ExperienceTourButton';
 
 interface ExperienceGroupedTabProps {
   isEditing: boolean;
@@ -68,7 +69,10 @@ export const ExperienceGroupedTab: React.FC<ExperienceGroupedTabProps> = ({
     <Card>
       <CardHeader>
         <div className="flex justify-between items-center">
-          <CardTitle>Work Experience</CardTitle>
+          <div className="flex items-center space-x-2">
+            <CardTitle>Work Experience</CardTitle>
+            <ExperienceTourButton />
+          </div>
           {isEditing && (
             <Button variant="outline" onClick={onAddNew} data-tour="add-experience-button">
               <PlusCircle className="mr-2 h-4 w-4" />
