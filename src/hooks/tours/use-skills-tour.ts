@@ -60,9 +60,12 @@ export const useSkillsTour = () => {
       return;
     }
 
-    if (type === 'step:after' && action === 'next') {
-      const nextStepIndex = index + 1;
-      setTourState(prev => ({ ...prev, stepIndex: nextStepIndex }));
+    if (type === 'step:after') {
+      if (action === 'next') {
+        setTourState(prev => ({ ...prev, stepIndex: index + 1 }));
+      } else if (action === 'prev') {
+        setTourState(prev => ({ ...prev, stepIndex: Math.max(0, index - 1) }));
+      }
     }
   }, []);
 
