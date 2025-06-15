@@ -246,18 +246,34 @@ export function useProjects(profileId?: string) {
     try {
       setIsSaving(true);
       
-      // Update display_order for all projects
-      const updates = reorderedProjects.map((project, index) => 
-        supabase
+      console.log('Starting project reorder for profile:', targetProfileId);
+      console.log('Reordered projects:', reorderedProjects.map(p => ({ id: p.id, name: p.name, newOrder: reorderedProjects.indexOf(p) + 1 })));
+      
+      // Update display_order for all projects sequentially to avoid race conditions
+      const updatePromises = reorderedProjects.map(async (project, index) => {
+        const newDisplayOrder = index + 1;
+        console.log(`Updating project ${project.id} (${project.name}) to display_order: ${newDisplayOrder}`);
+        
+        const { error } = await supabase
           .from('projects')
-          .update({ display_order: index + 1 })
+          .update({ display_order: newDisplayOrder })
           .eq('id', project.id)
-          .eq('profile_id', targetProfileId)
-      );
+          .eq('profile_id', targetProfileId);
+        
+        if (error) {
+          console.error(`Failed to update project ${project.id}:`, error);
+          throw error;
+        }
+        
+        console.log(`Successfully updated project ${project.id} to display_order: ${newDisplayOrder}`);
+        return { success: true, projectId: project.id, newOrder: newDisplayOrder };
+      });
       
-      await Promise.all(updates);
+      // Execute all updates and wait for completion
+      const results = await Promise.all(updatePromises);
+      console.log('All project updates completed:', results);
       
-      // Update local state
+      // Update local state only after all database updates succeed
       setProjects(reorderedProjects);
       
       toast({
