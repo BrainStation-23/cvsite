@@ -54,30 +54,35 @@ export const useProjectsTour = () => {
         placement: 'top',
         disableBeacon: true,
       },
+      // Step 8: Description
       {
         target: '[data-tour="project-description"]',
         content: 'Provide a detailed description of the project, your contributions, and the impact. You can use rich text formatting here.',
         placement: 'top',
         disableBeacon: true,
       },
+      // Step 9: Technologies used
       {
         target: '[data-tour="project-technologies"]',
         content: 'Add the technologies, programming languages, and tools used in this project. Type each technology and click "Add".',
         placement: 'top',
         disableBeacon: true,
       },
+      // Step 10: Project URL
       {
         target: '[data-tour="project-url"]',
         content: 'If available, add a link to the live project, repository, or demo. This is optional but adds credibility.',
         placement: 'top',
         disableBeacon: true,
       },
+      // Step 11: Save project (this triggers cancel to close the form)
       {
         target: '[data-tour="project-save-button"]',
         content: 'Click here to save your project entry and close the form. Make sure all required fields are filled before saving.',
         placement: 'top',
         disableBeacon: true,
       },
+      // Step 12: Drag handle
       {
         target: '[data-testid="drag-handle"]',
         content: 'Use this drag handle to reorder your projects. Simply drag and drop to change the order in which they appear on your profile.',
@@ -102,37 +107,34 @@ export const useProjectsTour = () => {
         const addButton = document.querySelector('[data-tour="add-project-button"]') as HTMLButtonElement;
         if (addButton) {
           addButton.click();
-          // Wait a bit for the form to render before proceeding
           setTimeout(() => {
             setTourState(prev => ({ ...prev, stepIndex: index + 1 }));
           }, 300);
           return;
         }
       }
-      
-      // If we're on step 10 (save button), simulate clicking it to close the form
+      // If we're on the save button (step 10, which is index 10), simulate clicking Cancel to close form
       if (index === 10) {
-        // Find and click cancel button to close the form without saving
         const cancelButton = document.querySelector('button[type="button"]') as HTMLButtonElement;
         if (cancelButton && cancelButton.textContent?.includes('Cancel')) {
           cancelButton.click();
-          // Wait a bit for the form to close before proceeding
           setTimeout(() => {
             setTourState(prev => ({ ...prev, stepIndex: index + 1 }));
           }, 300);
           return;
         }
       }
-      
+
+      // Any other step should proceed normally
       setTourState(prev => ({ ...prev, stepIndex: index + 1 }));
     }
   }, []);
 
   const startTour = useCallback(() => {
-    setTourState(prev => ({ 
-      ...prev, 
-      run: true, 
-      stepIndex: 0 
+    setTourState(prev => ({
+      ...prev,
+      run: true,
+      stepIndex: 0
     }));
   }, []);
 
