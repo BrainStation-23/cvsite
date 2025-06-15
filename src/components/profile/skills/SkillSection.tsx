@@ -46,6 +46,8 @@ export const SkillSection: React.FC<SkillSectionProps> = ({
     setShowAddForm(false);
   };
 
+  const tourAttribute = skillType === 'technical' ? 'add-technical-skill' : 'add-specialized-skill';
+
   return (
     <Card>
       <CardHeader className="pb-4">
@@ -61,6 +63,7 @@ export const SkillSection: React.FC<SkillSectionProps> = ({
                 size="sm" 
                 onClick={() => setShowAddForm(true)}
                 className="w-full h-9 text-cvsite-teal border-cvsite-teal hover:bg-cvsite-teal hover:text-white border-dashed"
+                data-tour={tourAttribute}
               >
                 <Plus className="mr-2 h-4 w-4" />
                 Add {title.slice(0, -1)}
