@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -9,6 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { UniversityCombobox } from '@/components/admin/university/UniversityCombobox';
 import GraduationYearRangeControl from './GraduationYearRangeControl';
 import TechnologyTagsInput from './TechnologyTagsInput';
+import SkillTagsInput from './SkillTagsInput';
 
 interface AdvancedFiltersPanelProps {
   skillInput: string;
@@ -134,6 +134,12 @@ const AdvancedFiltersPanel: React.FC<AdvancedFiltersPanelProps> = ({
     });
   };
 
+  // Instead of Input, use SkillTagsInput for skills
+  const handleSkillTagsChange = (skills: string[]) => {
+    setSkillInput(skills.join(', ')); // join for backward compatibility with string filter
+    onSkillFilter(skills.join(', ')); // if your filter accepts an array, just pass skills
+  };
+
   return (
     <div className="w-full p-3 bg-gray-50 dark:bg-gray-900/50 rounded-lg border space-y-2">
       {/* Row 1: Skills & Education */}
@@ -143,11 +149,11 @@ const AdvancedFiltersPanel: React.FC<AdvancedFiltersPanelProps> = ({
             <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
             <Label className="text-xs font-medium text-blue-700 dark:text-blue-300">Skills</Label>
           </div>
-          <Input
-            placeholder="Search by skill..."
-            value={skillInput}
-            onChange={(e) => handleSkillChange(e.target.value)}
-            className="text-xs h-7 w-full"
+          <SkillTagsInput
+            value={skillInput ? skillInput.split(',').map(s=>s.trim()).filter(Boolean) : []}
+            onChange={handleSkillTagsChange}
+            placeholder="Search/add skills..."
+            disabled={isLoading}
           />
         </div>
         
