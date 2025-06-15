@@ -13,8 +13,7 @@ export const GameNotificationBadge: React.FC<GameNotificationBadgeProps> = ({
     <div
       className={cn(
         "w-4 h-4 bg-gradient-to-br from-orange-400 to-orange-600 rounded-full flex items-center justify-center text-white text-xs font-bold shadow-lg ml-1",
-        "animate-pulse",
-        "before:absolute before:inset-0 before:rounded-full before:bg-orange-400 before:opacity-30 before:animate-ping",
+        "animate-pulse relative",
         "hover:scale-110 transition-transform duration-200",
         className
       )}
@@ -24,17 +23,13 @@ export const GameNotificationBadge: React.FC<GameNotificationBadgeProps> = ({
       }}
     >
       <span className="relative z-10 leading-none text-[10px]">!</span>
-      <style jsx>{`
-        @keyframes ping {
-          75%, 100% {
-            transform: scale(2);
-            opacity: 0;
-          }
-        }
-        .before\\:animate-ping::before {
-          animation: ping 4s cubic-bezier(0, 0, 0.2, 1) infinite;
-        }
-      `}</style>
+      {/* Ping effect using pseudo-element */}
+      <div 
+        className="absolute inset-0 rounded-full bg-orange-400 opacity-30 animate-ping"
+        style={{
+          animationDuration: '4s',
+        }}
+      />
     </div>
   );
 };
