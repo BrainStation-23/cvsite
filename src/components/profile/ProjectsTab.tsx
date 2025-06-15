@@ -78,11 +78,17 @@ export const ProjectsTab: React.FC<ProjectsTabProps> = ({
     const { active, over } = event;
 
     if (active.id !== over.id) {
-      const oldIndex = filteredProjects.findIndex(item => item.id === active.id);
-      const newIndex = filteredProjects.findIndex(item => item.id === over.id);
+      // If we're searching, don't allow reordering to avoid confusion
+      if (searchQuery) {
+        console.log('Cannot reorder while searching');
+        return;
+      }
+
+      const oldIndex = displayProjects.findIndex(item => item.id === active.id);
+      const newIndex = displayProjects.findIndex(item => item.id === over.id);
       
       // Optimistically update the UI immediately
-      const reorderedProjects = arrayMove(filteredProjects, oldIndex, newIndex);
+      const reorderedProjects = arrayMove(displayProjects, oldIndex, newIndex);
       setOptimisticProjects(reorderedProjects);
       setIsReordering(true);
       
@@ -95,6 +101,7 @@ export const ProjectsTab: React.FC<ProjectsTabProps> = ({
           setOptimisticProjects(projects);
         }
       } catch (error) {
+        console.error('Error reordering projects:', error);
         // If error, revert to original order
         setOptimisticProjects(projects);
       } finally {
@@ -162,6 +169,12 @@ export const ProjectsTab: React.FC<ProjectsTabProps> = ({
           </div>
         )}
         
+        {searchQuery && (
+          <div className="mb-4 text-sm text-amber-600 dark:text-amber-400">
+            Drag-and-drop reordering is disabled while searching. Clear the search to reorder projects.
+          </div>
+        )}
+        
         {filteredProjects.length > 0 ? (
           <DndContext 
             sensors={sensors}
@@ -177,7 +190,7 @@ export const ProjectsTab: React.FC<ProjectsTabProps> = ({
                   <SortableProjectItem
                     key={project.id}
                     project={project}
-                    isEditing={isEditing}
+                    isEditing={isEditing && !searchQuery}
                     isSaving={isSaving}
                     onUpdate={onUpdate}
                     onDelete={onDelete}
