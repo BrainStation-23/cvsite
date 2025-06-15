@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -197,13 +198,14 @@ export const ProjectForm: React.FC<ProjectFormProps> = ({
           <FormItem>
             <FormLabel>Description</FormLabel>
             <FormControl>
-              <RichTextEditor
-                value={description}
-                onChange={setDescription}
-                placeholder="Describe the project and your contributions"
-                className="min-h-[150px]"
-                data-tour="project-description"
-              />
+              <div data-tour="project-description">
+                <RichTextEditor
+                  value={description}
+                  onChange={setDescription}
+                  placeholder="Describe the project and your contributions"
+                  className="min-h-[150px]"
+                />
+              </div>
             </FormControl>
             {!description && (
               <p className="text-sm text-destructive">Description is required</p>
