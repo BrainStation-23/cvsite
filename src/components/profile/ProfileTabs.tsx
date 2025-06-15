@@ -1,7 +1,5 @@
-
 import React, { useEffect } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Badge } from '@/components/ui/badge';
 import { UseFormReturn } from 'react-hook-form';
 import { GeneralInfoTab, GeneralInfoFormData } from './GeneralInfoTab';
 import { SkillsTab } from './SkillsTab';
@@ -12,6 +10,7 @@ import { AchievementsTab } from './AchievementsTab';
 import { ProjectsTab } from './ProjectsTab';
 import { JSONImportExport } from './JSONImportExport';
 import { useProfileImport } from '@/hooks/profile/use-profile-import';
+import { GameNotificationBadge } from '@/components/ui/game-notification-badge';
 import { Skill, Experience, Education, Training, Achievement, Project } from '@/types';
 import { 
   User, 
@@ -21,8 +20,7 @@ import {
   Award, 
   Trophy, 
   FolderOpen, 
-  FileJson,
-  AlertCircle
+  FileJson
 } from 'lucide-react';
 
 interface ProfileTabsProps {
@@ -170,7 +168,7 @@ export const ProfileTabs: React.FC<ProfileTabsProps> = ({
     return !firstName || !lastName || !biography || !profileImage;
   };
 
-  // Helper function to create tab trigger with icon and notification
+  // Helper function to create tab trigger with icon and game-style notification
   const TabTriggerWithIcon = ({ 
     value, 
     icon: Icon, 
@@ -189,21 +187,17 @@ export const ProfileTabs: React.FC<ProfileTabsProps> = ({
       data-tour={dataTour} 
       className="text-xs py-2 px-3 data-[state=active]:bg-white dark:data-[state=active]:bg-gray-700 relative"
     >
-      <div className="flex items-center gap-1.5">
+      <div className="flex items-center gap-1.5 relative">
         <Icon className="h-3.5 w-3.5" />
         <span>{label}</span>
-        {isEmpty && (
-          <Badge variant="destructive" className="ml-1 h-4 w-4 p-0 flex items-center justify-center">
-            <AlertCircle className="h-2.5 w-2.5" />
-          </Badge>
-        )}
+        {isEmpty && <GameNotificationBadge />}
       </div>
     </TabsTrigger>
   );
 
   return (
     <Tabs defaultValue="general" className="w-full h-full flex flex-col">
-      {/* Updated tabs header with icons and notifications */}
+      {/* Updated tabs header with icons and game-style notifications */}
       <div className="flex-shrink-0">
         <TabsList className="grid w-full grid-cols-8 h-12 bg-gray-100 dark:bg-gray-800 rounded-md p-1">
           <TabTriggerWithIcon
