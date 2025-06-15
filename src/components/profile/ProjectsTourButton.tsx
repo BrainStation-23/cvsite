@@ -1,9 +1,8 @@
-
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Info } from 'lucide-react';
 import Joyride from 'react-joyride';
-import { useProjectsTour } from '@/hooks/use-projects-tour';
+import { useProjectsTour } from '@/hooks/tours/use-projects-tour';
 
 export const ProjectsTourButton: React.FC = () => {
   const { tourState, handleJoyrideCallback, startTour } = useProjectsTour();

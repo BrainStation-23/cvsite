@@ -1,9 +1,8 @@
-
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Info } from 'lucide-react';
 import Joyride from 'react-joyride';
-import { useGeneralInfoTour } from '@/hooks/use-general-info-tour';
+import { useGeneralInfoTour } from '@/hooks/tours/use-general-info-tour';
 
 export const GeneralInfoTourButton: React.FC = () => {
   const { tourState, handleJoyrideCallback, startTour } = useGeneralInfoTour();

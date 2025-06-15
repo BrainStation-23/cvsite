@@ -1,9 +1,8 @@
-
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Info } from 'lucide-react';
 import Joyride from 'react-joyride';
-import { useExperienceFormTour } from '@/hooks/use-experience-form-tour';
+import { useExperienceFormTour } from '@/hooks/tours/use-experience-form-tour';
 
 export const ExperienceFormTourButton: React.FC = () => {
   const { tourState, handleJoyrideCallback, startTour } = useExperienceFormTour();

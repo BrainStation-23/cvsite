@@ -1,9 +1,8 @@
-
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Info } from 'lucide-react';
 import Joyride from 'react-joyride';
-import { useEducationTour } from '@/hooks/use-education-tour';
+import { useEducationTour } from '@/hooks/tours/use-education-tour';
 
 export const EducationTourButton: React.FC = () => {
   const { tourState, handleJoyrideCallback, startTour } = useEducationTour();

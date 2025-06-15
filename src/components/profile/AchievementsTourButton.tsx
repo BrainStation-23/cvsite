@@ -1,9 +1,8 @@
-
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Info } from 'lucide-react';
 import Joyride from 'react-joyride';
-import { useAchievementsTour } from '@/hooks/use-achievements-tour';
+import { useAchievementsTour } from '@/hooks/tours/use-achievements-tour';
 
 export const AchievementsTourButton: React.FC = () => {
   const { tourState, handleJoyrideCallback, startTour } = useAchievementsTour();
