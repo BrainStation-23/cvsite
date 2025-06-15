@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -101,7 +100,7 @@ export const ProjectForm: React.FC<ProjectFormProps> = ({
               <FormItem>
                 <FormLabel>Project Name</FormLabel>
                 <FormControl>
-                  <Input {...field} placeholder="Enter project name" />
+                  <Input {...field} placeholder="Enter project name" data-tour="project-name" />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -116,7 +115,7 @@ export const ProjectForm: React.FC<ProjectFormProps> = ({
               <FormItem>
                 <FormLabel>Your Role</FormLabel>
                 <FormControl>
-                  <Input {...field} placeholder="e.g. Lead Developer" />
+                  <Input {...field} placeholder="e.g. Lead Developer" data-tour="project-role" />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -131,6 +130,7 @@ export const ProjectForm: React.FC<ProjectFormProps> = ({
                   <Button
                     variant="outline"
                     className="w-full justify-start text-left font-normal"
+                    data-tour="project-start-date"
                   >
                     <CalendarIcon className="mr-2 h-4 w-4" />
                     {startDate ? format(startDate, 'PPP') : <span>Pick a date</span>}
@@ -156,6 +156,7 @@ export const ProjectForm: React.FC<ProjectFormProps> = ({
                       variant="outline"
                       className="w-full justify-start text-left font-normal"
                       disabled={isCurrent}
+                      data-tour="project-end-date"
                     >
                       <CalendarIcon className="mr-2 h-4 w-4" />
                       {endDate && !isCurrent ? format(endDate, 'PPP') : <span>Pick a date</span>}
@@ -180,6 +181,7 @@ export const ProjectForm: React.FC<ProjectFormProps> = ({
                     id="current-project-form" 
                     checked={isCurrent}
                     onCheckedChange={handleCurrentCheckboxChange}
+                    data-tour="current-project-checkbox"
                   />
                   <label
                     htmlFor="current-project-form"
@@ -200,6 +202,7 @@ export const ProjectForm: React.FC<ProjectFormProps> = ({
                 onChange={setDescription}
                 placeholder="Describe the project and your contributions"
                 className="min-h-[150px]"
+                data-tour="project-description"
               />
             </FormControl>
             {!description && (
@@ -220,6 +223,7 @@ export const ProjectForm: React.FC<ProjectFormProps> = ({
                     addTechnology();
                   }
                 }}
+                data-tour="project-technologies"
               />
               <Button type="button" onClick={addTechnology}>Add</Button>
             </div>
@@ -251,7 +255,7 @@ export const ProjectForm: React.FC<ProjectFormProps> = ({
               <FormItem>
                 <FormLabel>Project URL (Optional)</FormLabel>
                 <FormControl>
-                  <Input {...field} placeholder="https://..." type="url" />
+                  <Input {...field} placeholder="https://..." type="url" data-tour="project-url" />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -262,7 +266,7 @@ export const ProjectForm: React.FC<ProjectFormProps> = ({
             <Button type="button" variant="outline" onClick={onCancel}>
               Cancel
             </Button>
-            <Button type="submit" disabled={isSaving || !description.trim()}>
+            <Button type="submit" disabled={isSaving || !description.trim()} data-tour="project-save-button">
               {isSaving ? "Saving..." : isEditing ? "Save Changes" : "Save Project"}
             </Button>
           </div>
