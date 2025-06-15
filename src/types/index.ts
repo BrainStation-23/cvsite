@@ -1,3 +1,4 @@
+
 export type UserRole = "admin" | "manager" | "employee";
 
 export interface User {
@@ -7,6 +8,14 @@ export interface User {
   lastName: string;
   role: UserRole;
   profileImageUrl?: string;
+}
+
+export interface GeneralInfo {
+  firstName: string;
+  lastName: string;
+  biography: string | null;
+  profileImage: string | null;
+  currentDesignation: string | null;
 }
 
 export interface EmployeeProfile {
