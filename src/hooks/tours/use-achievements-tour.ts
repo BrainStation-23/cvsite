@@ -1,4 +1,5 @@
 
+
 import { useState, useCallback } from 'react';
 import { CallBackProps, Step, STATUS } from 'react-joyride';
 
@@ -54,15 +55,19 @@ export const useAchievementsTour = () => {
       return;
     }
 
-    if (type === 'step:after' && action === 'next') {
-      // If we're on the first step (add button), simulate clicking it
-      if (index === 0) {
-        const addButton = document.querySelector('[data-tour="add-achievement-button"]') as HTMLButtonElement;
-        if (addButton) {
-          addButton.click();
+    if (type === 'step:after') {
+      if (action === 'next') {
+        // If we're on the first step (add button), simulate clicking it
+        if (index === 0) {
+          const addButton = document.querySelector('[data-tour="add-achievement-button"]') as HTMLButtonElement;
+          if (addButton) {
+            addButton.click();
+          }
         }
+        setTourState(prev => ({ ...prev, stepIndex: index + 1 }));
+      } else if (action === 'prev') {
+        setTourState(prev => ({ ...prev, stepIndex: Math.max(0, index - 1) }));
       }
-      setTourState(prev => ({ ...prev, stepIndex: index + 1 }));
     }
   }, []);
 
@@ -85,3 +90,4 @@ export const useAchievementsTour = () => {
     stopTour,
   };
 };
+
