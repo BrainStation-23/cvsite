@@ -154,31 +154,53 @@ export function useProjects(profileId?: string) {
     try {
       setIsSaving(true);
       
-      // Convert partial project data to database format - only include defined fields
-      const dbData: Partial<Omit<ProjectDB, 'id' | 'profile_id' | 'created_at'>> = {};
+      // Create a clean database update object with only the fields that need updating
+      const updateData: Record<string, any> = {};
       
-      if (project.name !== undefined) dbData.name = project.name;
-      if (project.role !== undefined) dbData.role = project.role;
-      if (project.description !== undefined) dbData.description = project.description;
-      if (project.startDate !== undefined) dbData.start_date = project.startDate.toISOString().split('T')[0];
-      
+      // Map each field explicitly to ensure correct column names
+      if (project.name !== undefined) {
+        updateData.name = project.name;
+      }
+      if (project.role !== undefined) {
+        updateData.role = project.role;
+      }
+      if (project.description !== undefined) {
+        updateData.description = project.description;
+      }
+      if (project.startDate !== undefined) {
+        updateData.start_date = project.startDate.toISOString().split('T')[0];
+      }
       if (project.endDate !== undefined) {
-        if (project.endDate === null) {
-          dbData.end_date = null;
-        } else {
-          dbData.end_date = project.endDate.toISOString().split('T')[0];
-        }
+        updateData.end_date = project.endDate ? project.endDate.toISOString().split('T')[0] : null;
+      }
+      if (project.isCurrent !== undefined) {
+        updateData.is_current = project.isCurrent;
+      }
+      if (project.technologiesUsed !== undefined) {
+        updateData.technologies_used = project.technologiesUsed;
+      }
+      if (project.url !== undefined) {
+        updateData.url = project.url || null;
       }
       
-      if (project.isCurrent !== undefined) dbData.is_current = project.isCurrent;
-      if (project.technologiesUsed !== undefined) dbData.technologies_used = project.technologiesUsed;
-      if (project.url !== undefined) dbData.url = project.url || null;
+      console.log('Updating project with database data:', updateData);
+      console.log('Original project data received:', project);
       
-      console.log('Updating project with data:', dbData);
+      // Validate that we're not sending any camelCase properties to the database
+      const invalidKeys = Object.keys(updateData).filter(key => 
+        key.includes('technologiesUsed') || 
+        key.includes('startDate') || 
+        key.includes('endDate') || 
+        key.includes('isCurrent')
+      );
+      
+      if (invalidKeys.length > 0) {
+        throw new Error(`Invalid camelCase keys detected: ${invalidKeys.join(', ')}`);
+      }
       
       const { error } = await supabase
         .from('projects')
-        .update(dbData)
+        .update(updateData)
         .eq('id', id)
         .eq('profile_id', targetProfileId);
       
@@ -248,16 +270,20 @@ export function useProjects(profileId?: string) {
     try {
       setIsSaving(true);
       
-      // Update display_order for all projects
-      const updates = reorderedProjects.map((project, index) => 
-        supabase
+      // Update display_order for all projects sequentially to avoid race conditions
+      for (let i = 0; i < reorderedProjects.length; i++) {
+        const project = reorderedProjects[i];
+        const { error } = await supabase
           .from('projects')
-          .update({ display_order: index + 1 })
+          .update({ display_order: i + 1 })
           .eq('id', project.id)
-          .eq('profile_id', targetProfileId)
-      );
-      
-      await Promise.all(updates);
+          .eq('profile_id', targetProfileId);
+        
+        if (error) {
+          console.error(`Error updating display order for project ${project.id}:`, error);
+          throw error;
+        }
+      }
       
       // Update local state
       setProjects(reorderedProjects);
