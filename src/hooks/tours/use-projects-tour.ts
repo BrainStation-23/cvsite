@@ -91,23 +91,24 @@ export const useProjectsTour = () => {
 
   const handleJoyrideCallback = useCallback((data: CallBackProps) => {
     const { status, type, index, action } = data;
-    // Debug
+
+    // Debug (optional)
     // @ts-ignore
     if (process.env.NODE_ENV === 'development') console.log("Joyride callback", data);
 
-    // Tour finished
+    // If finished or skipped, stop the tour
     if (status === STATUS.FINISHED || status === STATUS.SKIPPED) {
       setTourState(prev => ({ ...prev, run: false, stepIndex: 0 }));
       return;
     }
 
-    // Respond to "next" after a step
+    // Next step handler
     if (type === EVENTS.STEP_AFTER && action === ACTIONS.NEXT) {
-      // Step 1 is "Add Project" (index 1): simulate click and go to the next step after wait
+      // Step 1: Add Project button (index 1)
       if (index === 1) {
-        const addBtn: HTMLButtonElement | null = document.querySelector('[data-tour="add-project-button"]');
-        if (addBtn) {
-          addBtn.click();
+        const element = document.querySelector('[data-tour="add-project-button"]');
+        if (element instanceof HTMLButtonElement) {
+          element.click();
           setTimeout(() => {
             setTourState(prev => ({ ...prev, stepIndex: index + 1 }));
           }, 400);
@@ -116,12 +117,13 @@ export const useProjectsTour = () => {
         }
         return;
       }
-      // Step 10: Save Project (index 10) - actually trigger Cancel so tour continues
+      // Step 10: Save Project (index 10) - close new project modal by clicking Cancel
       if (index === 10) {
-        const cancelBtn: HTMLButtonElement | null = Array.from(document.querySelectorAll('button[type="button"]')).find(
+        const allButtons = Array.from(document.querySelectorAll('button[type="button"]'));
+        const cancelBtn = allButtons.find(
           btn => btn.textContent && btn.textContent.trim().toLowerCase() === 'cancel'
-        ) || null;
-        if (cancelBtn) {
+        );
+        if (cancelBtn instanceof HTMLButtonElement) {
           cancelBtn.click();
           setTimeout(() => {
             setTourState(prev => ({ ...prev, stepIndex: index + 1 }));
@@ -131,7 +133,7 @@ export const useProjectsTour = () => {
         }
         return;
       }
-      // Otherwise just advance to the next step
+      // Default: Advance by one step
       setTourState(prev => ({ ...prev, stepIndex: index + 1 }));
     }
 
@@ -139,7 +141,8 @@ export const useProjectsTour = () => {
     if (type === EVENTS.STEP_AFTER && action === ACTIONS.PREV) {
       setTourState(prev => ({ ...prev, stepIndex: Math.max(0, index - 1) }));
     }
-    // Re-run on target not found (keeps tour on the same step)
+
+    // If target not found, stay on the same step and retry after delay
     if (type === EVENTS.TARGET_NOT_FOUND) {
       setTimeout(() => {
         setTourState(prev => ({ ...prev, stepIndex: prev.stepIndex }));
