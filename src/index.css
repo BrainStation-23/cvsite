@@ -43,6 +43,23 @@
     --sidebar-accent-foreground: 210 40% 98%;
     --sidebar-border: 210 64% 30%;
     --sidebar-ring: 217.2 91.2% 59.8%;
+
+    /* Gamification Colors */
+    --game-xp-start: 52 94% 68%; /* Golden yellow */
+    --game-xp-end: 45 93% 58%; /* Deep gold */
+    --game-achievement-bronze: 25 60% 55%;
+    --game-achievement-silver: 220 13% 69%;
+    --game-achievement-gold: 51 100% 50%;
+    --game-achievement-platinum: 267 84% 81%;
+    --game-level-bg: 217 33% 17%;
+    --game-level-text: 210 40% 98%;
+    --game-progress-bg: 215 28% 17%;
+    --game-progress-fill: 142 76% 36%;
+    --game-milestone: 280 100% 70%;
+    --game-reward: 31 100% 71%;
+    --game-interactive-hover: 217 91% 65%;
+    --game-celebration: 280 100% 85%;
+    --game-completion: 120 100% 35%;
   }
 
   .dark {
@@ -73,6 +90,23 @@
     --border: 217.2 32.6% 17.5%;
     --input: 217.2 32.6% 17.5%;
     --ring: 224.3 76.3% 48%;
+
+    /* Dark mode gamification adjustments */
+    --game-xp-start: 52 84% 58%;
+    --game-xp-end: 45 83% 48%;
+    --game-achievement-bronze: 25 50% 45%;
+    --game-achievement-silver: 220 13% 59%;
+    --game-achievement-gold: 51 90% 45%;
+    --game-achievement-platinum: 267 74% 71%;
+    --game-level-bg: 217 43% 25%;
+    --game-level-text: 210 40% 98%;
+    --game-progress-bg: 215 38% 25%;
+    --game-progress-fill: 142 66% 32%;
+    --game-milestone: 280 90% 65%;
+    --game-reward: 31 90% 65%;
+    --game-interactive-hover: 217 81% 70%;
+    --game-celebration: 280 90% 80%;
+    --game-completion: 120 90% 32%;
   }
 }
 
@@ -106,5 +140,61 @@
 
   .cvsite-form-group {
     @apply mb-4;
+  }
+
+  /* Gamification Components */
+  .game-xp-gradient {
+    background: linear-gradient(135deg, hsl(var(--game-xp-start)), hsl(var(--game-xp-end)));
+  }
+
+  .game-progress-gradient {
+    background: linear-gradient(90deg, hsl(var(--game-progress-fill)), hsl(var(--game-completion)));
+  }
+
+  .game-achievement-bronze {
+    background: linear-gradient(135deg, hsl(var(--game-achievement-bronze)), hsl(25 50% 45%));
+  }
+
+  .game-achievement-silver {
+    background: linear-gradient(135deg, hsl(var(--game-achievement-silver)), hsl(220 13% 59%));
+  }
+
+  .game-achievement-gold {
+    background: linear-gradient(135deg, hsl(var(--game-achievement-gold)), hsl(51 90% 40%));
+  }
+
+  .game-achievement-platinum {
+    background: linear-gradient(135deg, hsl(var(--game-achievement-platinum)), hsl(267 74% 71%));
+  }
+
+  .game-level-badge {
+    @apply bg-game-level text-game-level-text rounded-full px-3 py-1 text-sm font-bold shadow-lg;
+    background: hsl(var(--game-level-bg));
+    color: hsl(var(--game-level-text));
+  }
+
+  .game-interactive-hover {
+    @apply transition-all duration-200 hover:scale-105;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .game-interactive-hover:hover {
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    transform: translateY(-2px) scale(1.02);
+  }
+
+  .game-celebration-pulse {
+    animation: celebration-pulse 2s ease-in-out infinite;
+  }
+
+  @keyframes celebration-pulse {
+    0%, 100% {
+      transform: scale(1);
+      opacity: 1;
+    }
+    50% {
+      transform: scale(1.05);
+      opacity: 0.9;
+    }
   }
 }
