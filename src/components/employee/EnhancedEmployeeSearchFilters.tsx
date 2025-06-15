@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -77,7 +76,6 @@ const EnhancedEmployeeSearchFilters: React.FC<EnhancedEmployeeSearchFiltersProps
   const [isFiltersOpen, setIsFiltersOpen] = useState(false);
   const [searchMode, setSearchMode] = useState<'manual' | 'ai'>('manual');
   
-  // Advanced filter states
   const [experienceYears, setExperienceYears] = useState<number[]>([0, 20]);
   const [minGraduationYear, setMinGraduationYear] = useState<number | null>(null);
   const [maxGraduationYear, setMaxGraduationYear] = useState<number | null>(null);
@@ -89,6 +87,9 @@ const EnhancedEmployeeSearchFilters: React.FC<EnhancedEmployeeSearchFiltersProps
   const [technologyInput, setTechnologyInput] = useState<string[]>([]);
   const [projectNameInput, setProjectNameInput] = useState('');
   const [projectDescriptionInput, setProjectDescriptionInput] = useState('');
+
+  // Added: Track which filters have been set/changed recently by AI search.
+  const [highlightedFilters, setHighlightedFilters] = useState<string[]>([]);
 
   // Use custom hooks for state management
   const { activeFilters } = useFilterState({
@@ -176,54 +177,80 @@ const EnhancedEmployeeSearchFilters: React.FC<EnhancedEmployeeSearchFiltersProps
 
   const handleAISearch = (filters: any) => {
     console.log('Applying AI search filters:', filters);
-    
-    // Clear any existing filters first
-    onReset();
-    
-    // Apply each filter if present
-    if (filters.search_query) {
+
+    // Keep a record of what was changed.
+    const changed: string[] = [];
+    // We'll merge the AI filters with the existing/current filters.
+    let updates: Record<string, any> = {};
+
+    // For each known filter key, if it is present in AI filters and is different from the current value, collect it.
+    if ('search_query' in filters && filters.search_query !== searchQuery) {
       onSearch(filters.search_query);
+      changed.push('search');
+      updates.searchQuery = filters.search_query;
     }
-    if (filters.skill_filter) {
+    if ('skill_filter' in filters && filters.skill_filter !== skillFilter) {
       onSkillFilter(filters.skill_filter);
+      changed.push('skill');
+      updates.skillFilter = filters.skill_filter;
     }
-    if (filters.experience_filter) {
+    if ('experience_filter' in filters && filters.experience_filter !== experienceFilter) {
       onExperienceFilter(filters.experience_filter);
+      changed.push('experience');
+      updates.experienceFilter = filters.experience_filter;
     }
-    if (filters.education_filter) {
+    if ('education_filter' in filters && filters.education_filter !== educationFilter) {
       onEducationFilter(filters.education_filter);
+      changed.push('education');
+      updates.educationFilter = filters.education_filter;
     }
-    if (filters.training_filter) {
+    if ('training_filter' in filters && filters.training_filter !== trainingFilter) {
       onTrainingFilter(filters.training_filter);
+      changed.push('training');
+      updates.trainingFilter = filters.training_filter;
     }
-    if (filters.achievement_filter) {
+    if ('achievement_filter' in filters && filters.achievement_filter !== achievementFilter) {
       onAchievementFilter(filters.achievement_filter);
+      changed.push('achievement');
+      updates.achievementFilter = filters.achievement_filter;
     }
-    if (filters.project_filter) {
+    if ('project_filter' in filters && filters.project_filter !== projectFilter) {
       onProjectFilter(filters.project_filter);
+      changed.push('project');
+      updates.projectFilter = filters.project_filter;
     }
-    
-    // Apply advanced filters
+    // Advanced filters
     const advancedFilters: any = {};
-    if (filters.min_experience_years !== undefined) {
+    if ('min_experience_years' in filters) {
       advancedFilters.minExperienceYears = filters.min_experience_years;
+      changed.push('experience-years');
     }
-    if (filters.max_experience_years !== undefined) {
+    if ('max_experience_years' in filters) {
       advancedFilters.maxExperienceYears = filters.max_experience_years;
+      changed.push('experience-years');
     }
-    if (filters.min_graduation_year !== undefined) {
+    if ('min_graduation_year' in filters) {
       advancedFilters.minGraduationYear = filters.min_graduation_year;
+      changed.push('graduation-years');
     }
-    if (filters.max_graduation_year !== undefined) {
+    if ('max_graduation_year' in filters) {
       advancedFilters.maxGraduationYear = filters.max_graduation_year;
+      changed.push('graduation-years');
     }
-    if (filters.completion_status) {
+    if ('completion_status' in filters && filters.completion_status !== completionStatus) {
       advancedFilters.completionStatus = filters.completion_status;
+      changed.push('completion');
     }
-    
+    // Only send if some advanced filters exist.
     if (Object.keys(advancedFilters).length > 0) {
       onAdvancedFilters(advancedFilters);
     }
+
+    // Show which filters changed (removed dups).
+    setHighlightedFilters(Array.from(new Set(changed)));
+
+    // Remove highlight after a short time.
+    setTimeout(() => setHighlightedFilters([]), 2000);
   };
 
   const hasActiveFilters = activeFilters.length > 0;
@@ -278,6 +305,7 @@ const EnhancedEmployeeSearchFilters: React.FC<EnhancedEmployeeSearchFiltersProps
           activeFilters={activeFilters}
           onRemoveFilter={removeFilter}
           onClearAllFilters={clearAllFilters}
+          highlightedFilters={highlightedFilters}
         />
       )}
 

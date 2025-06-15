@@ -9,12 +9,14 @@ interface FilterChipsListProps {
   activeFilters: FilterChip[];
   onRemoveFilter: (filterId: string) => void;
   onClearAllFilters: () => void;
+  highlightedFilters?: string[]; // The ids/types of filters to highlight (optional)
 }
 
 const FilterChipsList: React.FC<FilterChipsListProps> = ({
   activeFilters,
   onRemoveFilter,
-  onClearAllFilters
+  onClearAllFilters,
+  highlightedFilters = []
 }) => {
   // Group filters by table source for better organization
   const groupedFilters = activeFilters.reduce((acc, filter) => {
@@ -50,23 +52,30 @@ const FilterChipsList: React.FC<FilterChipsListProps> = ({
               {tableSource}
             </div>
             <div className="flex flex-wrap gap-2">
-              {filters.map((filter) => (
-                <Badge
-                  key={filter.id}
-                  variant="secondary"
-                  className="flex items-center gap-2 px-3 py-1 bg-blue-100 text-blue-800 hover:bg-blue-200 dark:bg-blue-900/30 dark:text-blue-300"
-                >
-                  <span className="text-xs font-medium">{filter.label}:</span>
-                  <span className="text-xs">{filter.value}</span>
-                  <button
-                    onClick={() => onRemoveFilter(filter.id)}
-                    className="ml-1 hover:bg-blue-200 dark:hover:bg-blue-800 rounded-full p-0.5"
-                    aria-label={`Remove ${filter.label} filter`}
+              {filters.map((filter) => {
+                const isHighlighted =
+                  highlightedFilters.includes(filter.id) ||
+                  highlightedFilters.includes(filter.type);
+                return (
+                  <Badge
+                    key={filter.id}
+                    variant="secondary"
+                    className={`flex items-center gap-2 px-3 py-1 bg-blue-100 text-blue-800 hover:bg-blue-200 dark:bg-blue-900/30 dark:text-blue-300
+                      ${isHighlighted ? 'border-2 border-purple-400 bg-purple-100 dark:bg-purple-700/40 animate-pulse' : ''}
+                    `}
                   >
-                    <X className="h-3 w-3" />
-                  </button>
-                </Badge>
-              ))}
+                    <span className="text-xs font-medium">{filter.label}:</span>
+                    <span className="text-xs">{filter.value}</span>
+                    <button
+                      onClick={() => onRemoveFilter(filter.id)}
+                      className="ml-1 hover:bg-blue-200 dark:hover:bg-blue-800 rounded-full p-0.5"
+                      aria-label={`Remove ${filter.label} filter`}
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
+                  </Badge>
+                );
+              })}
             </div>
           </div>
         ))}
