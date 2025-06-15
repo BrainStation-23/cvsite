@@ -77,53 +77,31 @@ export const ProjectsTab: React.FC<ProjectsTabProps> = ({
   const handleDragEnd = async (event: any) => {
     const { active, over } = event;
 
-    if (!active || !over || active.id === over.id) {
-      return;
-    }
-
-    // Prevent reordering while searching
-    if (searchQuery) {
-      console.log('Cannot reorder while searching');
-      return;
-    }
-
-    console.log('Drag end - moving project:', active.id, 'to position of:', over.id);
-
-    const oldIndex = displayProjects.findIndex(item => item.id === active.id);
-    const newIndex = displayProjects.findIndex(item => item.id === over.id);
-    
-    if (oldIndex === -1 || newIndex === -1) {
-      console.error('Could not find project indices:', { oldIndex, newIndex, activeId: active.id, overId: over.id });
-      return;
-    }
-
-    console.log('Moving project from index', oldIndex, 'to index', newIndex);
-    
-    // Optimistically update the UI immediately
-    const reorderedProjects = arrayMove(displayProjects, oldIndex, newIndex);
-    setOptimisticProjects(reorderedProjects);
-    setIsReordering(true);
-    
-    try {
-      console.log('Attempting to save reordered projects to database...');
-      // Attempt to sync with backend
-      const success = await onReorder(reorderedProjects);
+    if (active.id !== over.id) {
+      const oldIndex = filteredProjects.findIndex(item => item.id === active.id);
+      const newIndex = filteredProjects.findIndex(item => item.id === over.id);
       
-      if (!success) {
-        console.error('Failed to save reordered projects - reverting to original order');
-        // If failed, revert to original order
+      // Optimistically update the UI immediately
+      const reorderedProjects = arrayMove(filteredProjects, oldIndex, newIndex);
+      setOptimisticProjects(reorderedProjects);
+      setIsReordering(true);
+      
+      try {
+        // Attempt to sync with backend
+        const success = await onReorder(reorderedProjects);
+        
+        if (!success) {
+          // If failed, revert to original order
+          setOptimisticProjects(projects);
+        }
+      } catch (error) {
+        // If error, revert to original order
         setOptimisticProjects(projects);
-      } else {
-        console.log('Successfully saved reordered projects');
+      } finally {
+        // Reset optimistic state after backend sync
+        setIsReordering(false);
+        setOptimisticProjects([]);
       }
-    } catch (error) {
-      console.error('Error reordering projects:', error);
-      // If error, revert to original order
-      setOptimisticProjects(projects);
-    } finally {
-      // Reset optimistic state after backend sync
-      setIsReordering(false);
-      setOptimisticProjects([]);
     }
   };
 
@@ -184,18 +162,6 @@ export const ProjectsTab: React.FC<ProjectsTabProps> = ({
           </div>
         )}
         
-        {searchQuery && (
-          <div className="mb-4 text-sm text-amber-600 dark:text-amber-400">
-            Drag-and-drop reordering is disabled while searching. Clear the search to reorder projects.
-          </div>
-        )}
-        
-        {isReordering && (
-          <div className="mb-4 text-sm text-blue-600 dark:text-blue-400">
-            Saving project order...
-          </div>
-        )}
-        
         {filteredProjects.length > 0 ? (
           <DndContext 
             sensors={sensors}
@@ -211,7 +177,7 @@ export const ProjectsTab: React.FC<ProjectsTabProps> = ({
                   <SortableProjectItem
                     key={project.id}
                     project={project}
-                    isEditing={isEditing && !searchQuery}
+                    isEditing={isEditing}
                     isSaving={isSaving}
                     onUpdate={onUpdate}
                     onDelete={onDelete}
