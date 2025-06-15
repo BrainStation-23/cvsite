@@ -154,25 +154,27 @@ export function useProjects(profileId?: string) {
     try {
       setIsSaving(true);
       
-      // Convert partial project data to database format
-      const dbData: Partial<ProjectDB> = {};
+      // Convert partial project data to database format - only include defined fields
+      const dbData: Partial<Omit<ProjectDB, 'id' | 'profile_id' | 'created_at'>> = {};
       
-      if (project.name) dbData.name = project.name;
-      if (project.role) dbData.role = project.role;
+      if (project.name !== undefined) dbData.name = project.name;
+      if (project.role !== undefined) dbData.role = project.role;
       if (project.description !== undefined) dbData.description = project.description;
-      if (project.startDate) dbData.start_date = project.startDate.toISOString().split('T')[0];
+      if (project.startDate !== undefined) dbData.start_date = project.startDate.toISOString().split('T')[0];
       
-      if (project.endDate) {
-        dbData.end_date = project.endDate.toISOString().split('T')[0];
-      } else if (project.endDate === null) {
-        dbData.end_date = null;
+      if (project.endDate !== undefined) {
+        if (project.endDate === null) {
+          dbData.end_date = null;
+        } else {
+          dbData.end_date = project.endDate.toISOString().split('T')[0];
+        }
       }
       
       if (project.isCurrent !== undefined) dbData.is_current = project.isCurrent;
       if (project.technologiesUsed !== undefined) dbData.technologies_used = project.technologiesUsed;
-      if (project.url !== undefined) dbData.url = project.url;
+      if (project.url !== undefined) dbData.url = project.url || null;
       
-      dbData.updated_at = new Date().toISOString();
+      console.log('Updating project with data:', dbData);
       
       const { error } = await supabase
         .from('projects')
