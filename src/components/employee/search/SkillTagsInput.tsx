@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -13,7 +14,7 @@ interface SkillTagsInputProps {
 }
 
 /**
- * Suggests skills that have been used in any employee's technical or specialized skills fields.
+ * Suggests skills used in any employee's tech/specialized skills (distinct names).
  */
 const SkillTagsInput: React.FC<SkillTagsInputProps> = ({
   value,
@@ -25,48 +26,34 @@ const SkillTagsInput: React.FC<SkillTagsInputProps> = ({
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
 
-  // Fetch distinct skill names used by any profile
+  // Fetch all unique skill names from technical_skills and specialized_skills tables
   useEffect(() => {
     const fetchSkills = async () => {
       try {
-        // This assumes a "skills" column on an "employee_skills" or similar table
-        // Adapt as needed for your schema. Here, we try to generalize.
-        // We'll fetch all skill names from `profile_skills` table if it exists,
-        // otherwise, fetch from the `employee_profiles` with "skills" field if it's an array.
-        // Example using a `skills` table:
-        const { data, error } = await supabase
-          .from('skills')
-          .select('name')
-          .order('name', { ascending: true });
-        if (error) throw error;
+        // Get technical_skills
+        const { data: techData, error: techError } = await supabase
+          .from('technical_skills')
+          .select('name');
+        if (techError) throw techError;
 
-        if (data && Array.isArray(data)) {
-          setSuggestions(data.map(row => row.name).filter(Boolean));
-        } else {
-          setSuggestions([]);
+        // Get specialized_skills
+        const { data: specData, error: specError } = await supabase
+          .from('specialized_skills')
+          .select('name');
+        if (specError) throw specError;
+
+        // Collect all names, remove duplicates and falsy/empty values, then sort
+        const allNames: string[] = [];
+        if (techData && Array.isArray(techData)) {
+          allNames.push(...techData.map(row => row.name).filter(Boolean));
         }
+        if (specData && Array.isArray(specData)) {
+          allNames.push(...specData.map(row => row.name).filter(Boolean));
+        }
+        // Use Set to deduplicate, sort alphabetically
+        setSuggestions(Array.from(new Set(allNames.map(n => n.trim()))).sort((a, b) => a.localeCompare(b)));
       } catch (err) {
-        // Fallback: If you have no 'skills' table, try to select distinct skills from profiles
-        // This fallback assumes 'employee_profiles' table has an array column named 'skills'
-        try {
-          const { data } = await supabase
-            .from('employee_profiles')
-            .select('skills')
-            .not('skills', 'is', null);
-          const allSkillsSet = new Set<string>();
-          if (data) {
-            data.forEach(profile => {
-              if (Array.isArray(profile.skills)) {
-                profile.skills.forEach((s: string) => {
-                  if (s && typeof s === 'string') allSkillsSet.add(s.trim());
-                });
-              }
-            });
-          }
-          setSuggestions(Array.from(allSkillsSet).sort());
-        } catch (error2) {
-          setSuggestions([]);
-        }
+        setSuggestions([]);
       }
     };
     fetchSkills();
