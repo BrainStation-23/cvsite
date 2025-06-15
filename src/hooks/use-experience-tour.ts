@@ -82,26 +82,30 @@ export const useExperienceTour = () => {
         if (addButton) {
           addButton.click();
           
-          // Wait for the form to appear before advancing to the next step
-          setTimeout(() => {
+          // Use a more robust approach to wait for the form
+          const waitForForm = (attempts: number = 0) => {
             const form = document.querySelector('[data-tour="experience-form"]');
             if (form) {
+              // Form found, advance to next step
               setTourState(prev => ({ ...prev, stepIndex: index + 1 }));
+            } else if (attempts < 10) {
+              // Try again after a short delay, up to 10 attempts (3 seconds total)
+              setTimeout(() => waitForForm(attempts + 1), 300);
             } else {
-              // If form doesn't appear, try again after a longer delay
-              setTimeout(() => {
-                setTourState(prev => ({ ...prev, stepIndex: index + 1 }));
-              }, 500);
+              // Fallback: advance anyway after timeout
+              setTourState(prev => ({ ...prev, stepIndex: index + 1 }));
             }
-          }, 300);
+          };
+          
+          // Start waiting for the form
+          waitForForm();
         } else {
           // If button not found, just advance
           setTourState(prev => ({ ...prev, stepIndex: index + 1 }));
         }
       } else {
         // For other steps, advance normally
-        const nextStepIndex = index + 1;
-        setTourState(prev => ({ ...prev, stepIndex: nextStepIndex }));
+        setTourState(prev => ({ ...prev, stepIndex: index + 1 }));
       }
     }
 
@@ -114,6 +118,12 @@ export const useExperienceTour = () => {
           setTourState(prev => ({ ...prev, stepIndex: index + 1 }));
         }, 100);
       }
+    }
+
+    // Handle cases where joyride can't find the target
+    if (status === STATUS.ERROR) {
+      // Skip to next step on error
+      setTourState(prev => ({ ...prev, stepIndex: index + 1 }));
     }
   }, []);
 
