@@ -71,24 +71,6 @@ export default {
 					gray: '#718096',
 					'light-gray': '#EDF2F7',
 					'dark-gray': '#2D3748'
-				},
-				// Gamification colors
-				game: {
-					'xp-start': 'hsl(var(--game-xp-start))',
-					'xp-end': 'hsl(var(--game-xp-end))',
-					'achievement-bronze': 'hsl(var(--game-achievement-bronze))',
-					'achievement-silver': 'hsl(var(--game-achievement-silver))',
-					'achievement-gold': 'hsl(var(--game-achievement-gold))',
-					'achievement-platinum': 'hsl(var(--game-achievement-platinum))',
-					'level': 'hsl(var(--game-level-bg))',
-					'level-text': 'hsl(var(--game-level-text))',
-					'progress-bg': 'hsl(var(--game-progress-bg))',
-					'progress-fill': 'hsl(var(--game-progress-fill))',
-					'milestone': 'hsl(var(--game-milestone))',
-					'reward': 'hsl(var(--game-reward))',
-					'interactive-hover': 'hsl(var(--game-interactive-hover))',
-					'celebration': 'hsl(var(--game-celebration))',
-					'completion': 'hsl(var(--game-completion))'
 				}
 			},
 			borderRadius: {
@@ -112,35 +94,11 @@ export default {
 					to: {
 						height: '0'
 					}
-				},
-				// Gamification animations
-				'xp-fill': {
-					'0%': { width: '0%' },
-					'100%': { width: 'var(--xp-width)' }
-				},
-				'achievement-bounce': {
-					'0%, 20%, 50%, 80%, 100%': { transform: 'translateY(0)' },
-					'40%': { transform: 'translateY(-10px)' },
-					'60%': { transform: 'translateY(-5px)' }
-				},
-				'level-up': {
-					'0%': { transform: 'scale(1)', opacity: '1' },
-					'50%': { transform: 'scale(1.2)', opacity: '0.8' },
-					'100%': { transform: 'scale(1)', opacity: '1' }
-				},
-				'milestone-glow': {
-					'0%, 100%': { boxShadow: '0 0 5px hsl(var(--game-milestone))' },
-					'50%': { boxShadow: '0 0 20px hsl(var(--game-milestone)), 0 0 30px hsl(var(--game-milestone))' }
 				}
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
-				'accordion-up': 'accordion-up 0.2s ease-out',
-				// Gamification animations
-				'xp-fill': 'xp-fill 1s ease-out',
-				'achievement-bounce': 'achievement-bounce 1s ease-in-out',
-				'level-up': 'level-up 0.6s ease-in-out',
-				'milestone-glow': 'milestone-glow 2s ease-in-out infinite'
+				'accordion-up': 'accordion-up 0.2s ease-out'
 			}
 		}
 	},

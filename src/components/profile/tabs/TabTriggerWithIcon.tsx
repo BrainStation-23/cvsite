@@ -8,7 +8,6 @@ interface TabTriggerWithIconProps {
   icon: React.ElementType;
   label: string;
   isEmpty: boolean;
-  notificationVariant?: 'warning' | 'success' | 'info';
   dataTour: string;
 }
 
@@ -17,7 +16,6 @@ export const TabTriggerWithIcon: React.FC<TabTriggerWithIconProps> = ({
   icon: Icon, 
   label, 
   isEmpty, 
-  notificationVariant = 'warning',
   dataTour 
 }) => (
   <TabsTrigger 
@@ -28,12 +26,7 @@ export const TabTriggerWithIcon: React.FC<TabTriggerWithIconProps> = ({
     <div className="flex items-center gap-1.5">
       <Icon className="h-3.5 w-3.5" />
       <span>{label}</span>
-      {isEmpty && (
-        <GameNotificationBadge 
-          variant={notificationVariant}
-          className="ml-1"
-        />
-      )}
+      {isEmpty && <GameNotificationBadge />}
     </div>
   </TabsTrigger>
 );

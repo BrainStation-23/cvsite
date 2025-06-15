@@ -12,13 +12,7 @@ import { ProjectsTab } from '../ProjectsTab';
 import { JSONImportExport } from '../JSONImportExport';
 import { Skill, Experience, Education, Training, Achievement, Project } from '@/types';
 
-// Simplified interface for standalone usage
-interface ProfileTabsContentStandaloneProps {
-  profileId?: string;
-}
-
-// Full interface for external data usage
-interface ProfileTabsContentWithDataProps {
+interface ProfileTabsContentProps {
   form: UseFormReturn<GeneralInfoFormData>;
   isEditing: boolean;
   onImageUpdate: (imageUrl: string | null) => void;
@@ -64,174 +58,147 @@ interface ProfileTabsContentWithDataProps {
   importProfile: (data: any) => Promise<boolean>;
 }
 
-export type ProfileTabsContentProps = ProfileTabsContentStandaloneProps | ProfileTabsContentWithDataProps;
-
-// Type guard
-function isProfileTabsContentWithDataProps(props: ProfileTabsContentProps): props is ProfileTabsContentWithDataProps {
-  return 'form' in props;
-}
-
-export const ProfileTabsContent: React.FC<ProfileTabsContentProps> = (props) => {
-  if (isProfileTabsContentWithDataProps(props)) {
-    // Full data mode - render all tabs with provided data
-    const {
-      form,
-      isEditing,
-      onImageUpdate,
-      technicalSkills,
-      specializedSkills,
-      experiences,
-      education,
-      trainings,
-      achievements,
-      projects,
-      isSaving,
-      newTechnicalSkill,
-      newSpecializedSkill,
-      setNewTechnicalSkill,
-      setNewSpecializedSkill,
-      handleAddTechnicalSkill,
-      handleAddSpecializedSkill,
-      saveExperience,
-      updateExperience,
-      deleteExperience,
-      saveEducation,
-      updateEducation,
-      deleteEducation,
-      saveTraining,
-      updateTraining,
-      deleteTraining,
-      saveAchievement,
-      updateAchievement,
-      deleteAchievement,
-      saveProject,
-      updateProject,
-      deleteProject,
-      reorderProjects,
-      deleteTechnicalSkill,
-      deleteSpecializedSkill,
-      saveTechnicalSkill,
-      saveSpecializedSkill,
-      reorderTechnicalSkills,
-      reorderSpecializedSkills,
-      profileId,
-      handleGeneralInfoSave,
-      profileData,
-      importProfile
-    } = props;
-
-    return (
-      <div className="flex-1 min-h-0 mt-4">
-        <TabsContent value="general" className="mt-0 h-full overflow-auto">
-          <GeneralInfoTab 
-            form={form} 
-            isEditing={isEditing} 
-            onImageUpdate={onImageUpdate}
-            profileId={profileId}
-            onSave={handleGeneralInfoSave}
-            isSaving={isSaving}
-          />
-        </TabsContent>
-        
-        <TabsContent value="skills" className="mt-0 h-full overflow-auto">
-          <SkillsTab
-            technicalSkills={technicalSkills}
-            specializedSkills={specializedSkills}
-            isEditing={isEditing}
-            newTechnicalSkill={newTechnicalSkill}
-            newSpecializedSkill={newSpecializedSkill}
-            setNewTechnicalSkill={setNewTechnicalSkill}
-            setNewSpecializedSkill={setNewSpecializedSkill}
-            handleAddTechnicalSkill={handleAddTechnicalSkill}
-            handleAddSpecializedSkill={handleAddSpecializedSkill}
-            deleteTechnicalSkill={deleteTechnicalSkill}
-            deleteSpecializedSkill={deleteSpecializedSkill}
-            saveTechnicalSkill={saveTechnicalSkill}
-            saveSpecializedSkill={saveSpecializedSkill}
-            onReorderTechnicalSkills={reorderTechnicalSkills}
-            onReorderSpecializedSkills={reorderSpecializedSkills}
-          />
-        </TabsContent>
-        
-        <TabsContent value="experience" className="mt-0 h-full overflow-auto">
-          <ExperienceTab
-            experiences={experiences}
-            isEditing={isEditing}
-            isSaving={isSaving}
-            profileId={profileId}
-            onSave={saveExperience}
-            onUpdate={updateExperience}
-            onDelete={deleteExperience}
-          />
-        </TabsContent>
-        
-        <TabsContent value="education" className="mt-0 h-full overflow-auto">
-          <EducationTab
-            education={education}
-            isEditing={isEditing}
-            isSaving={isSaving}
-            onSave={saveEducation}
-            onUpdate={updateEducation}
-            onDelete={deleteEducation}
-          />
-        </TabsContent>
-        
-        <TabsContent value="training" className="mt-0 h-full overflow-auto">
-          <TrainingTab
-            trainings={trainings}
-            isEditing={isEditing}
-            isSaving={isSaving}
-            onSave={saveTraining}
-            onUpdate={updateTraining}
-            onDelete={deleteTraining}
-          />
-        </TabsContent>
-        
-        <TabsContent value="achievements" className="mt-0 h-full overflow-auto">
-          <AchievementsTab
-            achievements={achievements}
-            isEditing={isEditing}
-            isSaving={isSaving}
-            onSave={saveAchievement}
-            onUpdate={updateAchievement}
-            onDelete={deleteAchievement}
-          />
-        </TabsContent>
-        
-        <TabsContent value="projects" className="mt-0 h-full overflow-auto">
-          <ProjectsTab
-            projects={projects}
-            isEditing={isEditing}
-            isSaving={isSaving}
-            onSave={saveProject}
-            onUpdate={updateProject}
-            onDelete={deleteProject}
-            onReorder={reorderProjects}
-          />
-        </TabsContent>
-        
-        <TabsContent value="json" className="mt-0 h-full overflow-auto">
-          <JSONImportExport
-            profileData={profileData}
-            onImport={importProfile}
-          />
-        </TabsContent>
-      </div>
-    );
-  } else {
-    // Standalone mode - just show placeholder content for now
-    const { profileId } = props;
-    
-    return (
-      <div className="flex-1 min-h-0 mt-4">
-        <TabsContent value="general" className="mt-0 h-full overflow-auto">
-          <div className="p-4">
-            <p>Profile content for {profileId} - View only mode</p>
-          </div>
-        </TabsContent>
-        
-        {/* Add other tabs as needed for view-only mode */}
-      </div>
-    );
-  }
+export const ProfileTabsContent: React.FC<ProfileTabsContentProps> = ({
+  form,
+  isEditing,
+  onImageUpdate,
+  technicalSkills,
+  specializedSkills,
+  experiences,
+  education,
+  trainings,
+  achievements,
+  projects,
+  isSaving,
+  newTechnicalSkill,
+  newSpecializedSkill,
+  setNewTechnicalSkill,
+  setNewSpecializedSkill,
+  handleAddTechnicalSkill,
+  handleAddSpecializedSkill,
+  saveExperience,
+  updateExperience,
+  deleteExperience,
+  saveEducation,
+  updateEducation,
+  deleteEducation,
+  saveTraining,
+  updateTraining,
+  deleteTraining,
+  saveAchievement,
+  updateAchievement,
+  deleteAchievement,
+  saveProject,
+  updateProject,
+  deleteProject,
+  reorderProjects,
+  deleteTechnicalSkill,
+  deleteSpecializedSkill,
+  saveTechnicalSkill,
+  saveSpecializedSkill,
+  reorderTechnicalSkills,
+  reorderSpecializedSkills,
+  profileId,
+  handleGeneralInfoSave,
+  profileData,
+  importProfile
+}) => {
+  return (
+    <div className="flex-1 min-h-0 mt-4">
+      <TabsContent value="general" className="mt-0 h-full overflow-auto">
+        <GeneralInfoTab 
+          form={form} 
+          isEditing={isEditing} 
+          onImageUpdate={onImageUpdate}
+          profileId={profileId}
+          onSave={handleGeneralInfoSave}
+          isSaving={isSaving}
+        />
+      </TabsContent>
+      
+      <TabsContent value="skills" className="mt-0 h-full overflow-auto">
+        <SkillsTab
+          technicalSkills={technicalSkills}
+          specializedSkills={specializedSkills}
+          isEditing={isEditing}
+          newTechnicalSkill={newTechnicalSkill}
+          newSpecializedSkill={newSpecializedSkill}
+          setNewTechnicalSkill={setNewTechnicalSkill}
+          setNewSpecializedSkill={setNewSpecializedSkill}
+          handleAddTechnicalSkill={handleAddTechnicalSkill}
+          handleAddSpecializedSkill={handleAddSpecializedSkill}
+          deleteTechnicalSkill={deleteTechnicalSkill}
+          deleteSpecializedSkill={deleteSpecializedSkill}
+          saveTechnicalSkill={saveTechnicalSkill}
+          saveSpecializedSkill={saveSpecializedSkill}
+          onReorderTechnicalSkills={reorderTechnicalSkills}
+          onReorderSpecializedSkills={reorderSpecializedSkills}
+        />
+      </TabsContent>
+      
+      <TabsContent value="experience" className="mt-0 h-full overflow-auto">
+        <ExperienceTab
+          experiences={experiences}
+          isEditing={isEditing}
+          isSaving={isSaving}
+          profileId={profileId}
+          onSave={saveExperience}
+          onUpdate={updateExperience}
+          onDelete={deleteExperience}
+        />
+      </TabsContent>
+      
+      <TabsContent value="education" className="mt-0 h-full overflow-auto">
+        <EducationTab
+          education={education}
+          isEditing={isEditing}
+          isSaving={isSaving}
+          onSave={saveEducation}
+          onUpdate={updateEducation}
+          onDelete={deleteEducation}
+        />
+      </TabsContent>
+      
+      <TabsContent value="training" className="mt-0 h-full overflow-auto">
+        <TrainingTab
+          trainings={trainings}
+          isEditing={isEditing}
+          isSaving={isSaving}
+          onSave={saveTraining}
+          onUpdate={updateTraining}
+          onDelete={deleteTraining}
+        />
+      </TabsContent>
+      
+      <TabsContent value="achievements" className="mt-0 h-full overflow-auto">
+        <AchievementsTab
+          achievements={achievements}
+          isEditing={isEditing}
+          isSaving={isSaving}
+          onSave={saveAchievement}
+          onUpdate={updateAchievement}
+          onDelete={deleteAchievement}
+        />
+      </TabsContent>
+      
+      <TabsContent value="projects" className="mt-0 h-full overflow-auto">
+        <ProjectsTab
+          projects={projects}
+          isEditing={isEditing}
+          isSaving={isSaving}
+          onSave={saveProject}
+          onUpdate={updateProject}
+          onDelete={deleteProject}
+          onReorder={reorderProjects}
+        />
+      </TabsContent>
+      
+      <TabsContent value="json" className="mt-0 h-full overflow-auto">
+        <JSONImportExport
+          profileData={profileData}
+          onImport={importProfile}
+        />
+      </TabsContent>
+    </div>
+  );
 };

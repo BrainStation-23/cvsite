@@ -1,28 +1,14 @@
 
-import React, { useState } from 'react';
-import { Tabs, TabsContent } from '@/components/ui/tabs';
+import React from 'react';
+import { Tabs } from '@/components/ui/tabs';
+import { UseFormReturn } from 'react-hook-form';
+import { GeneralInfoFormData } from './GeneralInfoTab';
+import { useProfileImport } from '@/hooks/profile/use-profile-import';
+import { Skill, Experience, Education, Training, Achievement, Project } from '@/types';
 import { ProfileTabsList } from './tabs/ProfileTabsList';
 import { ProfileTabsContent } from './tabs/ProfileTabsContent';
-import { GamificationHeader } from '@/components/ui/gamification-header';
-import { useForm, UseFormReturn } from 'react-hook-form';
-import { GeneralInfoFormData } from './GeneralInfoTab';
-import { useProfileGeneralInfo } from '@/hooks/profile/use-profile-general-info';
-import { useProfileSkills } from '@/hooks/profile/use-profile-skills';
-import { useProfileExperience } from '@/hooks/profile/use-profile-experience';
-import { useProfileEducation } from '@/hooks/profile/use-profile-education';
-import { useProfileTraining } from '@/hooks/profile/use-profile-training';
-import { useProfileAchievements } from '@/hooks/profile/use-profile-achievements';
-import { useProfileProjects } from '@/hooks/profile/use-profile-projects';
-import { useProfileGamification } from '@/hooks/profile/use-profile-gamification';
-import { Skill, Experience, Education, Training, Achievement, Project } from '@/types';
 
-// New interface for when ProfileTabs is used standalone (like in ViewProfilePage)
-interface ProfileTabsStandaloneProps {
-  profileId?: string;
-}
-
-// Interface for when ProfileTabs is used with external data (like in ProfilePage)
-interface ProfileTabsWithDataProps {
+interface ProfileTabsProps {
   form: UseFormReturn<GeneralInfoFormData>;
   isEditing: boolean;
   onImageUpdate: (imageUrl: string | null) => void;
@@ -66,160 +52,155 @@ interface ProfileTabsWithDataProps {
   saveGeneralInfo: (data: GeneralInfoFormData) => Promise<boolean>;
 }
 
-export type ProfileTabsProps = ProfileTabsStandaloneProps | ProfileTabsWithDataProps;
+export const ProfileTabs: React.FC<ProfileTabsProps> = ({
+  form,
+  isEditing,
+  onImageUpdate,
+  technicalSkills,
+  specializedSkills,
+  experiences,
+  education,
+  trainings,
+  achievements,
+  projects,
+  isSaving,
+  newTechnicalSkill,
+  newSpecializedSkill,
+  setNewTechnicalSkill,
+  setNewSpecializedSkill,
+  handleAddTechnicalSkill,
+  handleAddSpecializedSkill,
+  saveExperience,
+  updateExperience,
+  deleteExperience,
+  saveEducation,
+  updateEducation,
+  deleteEducation,
+  saveTraining,
+  updateTraining,
+  deleteTraining,
+  saveAchievement,
+  updateAchievement,
+  deleteAchievement,
+  saveProject,
+  updateProject,
+  deleteProject,
+  reorderProjects,
+  deleteTechnicalSkill,
+  deleteSpecializedSkill,
+  saveTechnicalSkill,
+  saveSpecializedSkill,
+  reorderTechnicalSkills,
+  reorderSpecializedSkills,
+  profileId,
+  saveGeneralInfo
+}) => {
+  // Handle general info save with proper conversion and return boolean
+  const handleGeneralInfoSave = async (data: GeneralInfoFormData): Promise<boolean> => {
+    const saveData = {
+      firstName: data.firstName,
+      lastName: data.lastName,
+      biography: data.biography || null,
+      profileImage: data.profileImage,
+      currentDesignation: data.currentDesignation || null
+    };
+    
+    try {
+      const success = await saveGeneralInfo(saveData);
+      return success;
+    } catch (error) {
+      console.error('Failed to save general information:', error);
+      return false;
+    }
+  };
 
-// Type guard to check if props include external data
-function isProfileTabsWithDataProps(props: ProfileTabsProps): props is ProfileTabsWithDataProps {
-  return 'form' in props;
-}
+  // Set up import handlers for JSON import
+  const { importProfile } = useProfileImport({
+    saveGeneralInfo: handleGeneralInfoSave,
+    saveTechnicalSkill,
+    saveSpecializedSkill,
+    saveExperience,
+    saveEducation,
+    saveTraining,
+    saveAchievement,
+    saveProject
+  });
 
-export const ProfileTabs: React.FC<ProfileTabsProps> = (props) => {
-  const [activeTab, setActiveTab] = useState('general');
-
-  // If external data is provided, use it; otherwise fetch it internally
-  if (isProfileTabsWithDataProps(props)) {
-    // External data mode (ProfilePage)
-    const {
-      form,
-      isEditing,
-      onImageUpdate,
-      technicalSkills,
-      specializedSkills,
-      experiences,
-      education,
-      trainings,
-      achievements,
-      projects,
-      profileId,
-      ...otherProps
-    } = props;
-
-    // Get general info from form
-    const generalInfo = {
+  // Prepare profile data for export
+  const profileData = {
+    generalInfo: {
       firstName: form.getValues('firstName'),
       lastName: form.getValues('lastName'),
       biography: form.getValues('biography'),
-      profileImage: form.getValues('profileImage'),
-      currentDesignation: form.getValues('currentDesignation')
-    };
+      profileImage: form.getValues('profileImage')
+    },
+    technicalSkills,
+    specializedSkills,
+    experiences,
+    education,
+    trainings,
+    achievements,
+    projects
+  };
 
-    // Get gamification stats
-    const gamificationStats = useProfileGamification({
-      generalInfo,
-      technicalSkills,
-      specializedSkills,
-      experiences,
-      education,
-      trainings,
-      achievements,
-      projects
-    });
-
-    return (
-      <div className="space-y-6">
-        {/* Gamification Header */}
-        <GamificationHeader
-          profileCompletion={gamificationStats.profileCompletion}
-          currentXP={gamificationStats.currentXP}
-          currentLevel={gamificationStats.currentLevel}
-          xpForNextLevel={gamificationStats.xpForNextLevel}
-          xpToNextLevel={gamificationStats.xpToNextLevel}
-        />
-
-        {/* Profile Tabs */}
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <ProfileTabsList
-            form={form}
-            technicalSkills={technicalSkills}
-            specializedSkills={specializedSkills}
-            experiences={experiences}
-            education={education}
-            trainings={trainings}
-            achievements={achievements}
-            projects={projects}
-          />
-          
-          <ProfileTabsContent 
-            {...props}
-            handleGeneralInfoSave={props.saveGeneralInfo}
-            profileData={{
-              generalInfo,
-              technicalSkills,
-              specializedSkills,
-              experiences,
-              education,
-              trainings,
-              achievements,
-              projects
-            }}
-            importProfile={async () => false} // Placeholder - needs implementation
-          />
-        </Tabs>
-      </div>
-    );
-  } else {
-    // Internal data fetching mode (ViewProfilePage)
-    const { profileId } = props;
-
-    // Initialize all profile data hooks
-    const { generalInfo } = useProfileGeneralInfo(profileId);
-    const { technicalSkills, specializedSkills } = useProfileSkills(profileId);
-    const { experiences } = useProfileExperience(profileId);
-    const { education } = useProfileEducation(profileId);
-    const { trainings } = useProfileTraining(profileId);
-    const { achievements } = useProfileAchievements(profileId);
-    const { projects } = useProfileProjects(profileId);
-
-    // Initialize form with general info
-    const form = useForm<GeneralInfoFormData>({
-      defaultValues: {
-        firstName: generalInfo?.firstName || '',
-        lastName: generalInfo?.lastName || '',
-        biography: generalInfo?.biography || '',
-        profileImage: generalInfo?.profileImage || '',
-        currentDesignation: generalInfo?.currentDesignation || ''
-      }
-    });
-
-    // Get gamification stats
-    const gamificationStats = useProfileGamification({
-      generalInfo,
-      technicalSkills,
-      specializedSkills,
-      experiences,
-      education,
-      trainings,
-      achievements,
-      projects
-    });
-
-    return (
-      <div className="space-y-6">
-        {/* Gamification Header */}
-        <GamificationHeader
-          profileCompletion={gamificationStats.profileCompletion}
-          currentXP={gamificationStats.currentXP}
-          currentLevel={gamificationStats.currentLevel}
-          xpForNextLevel={gamificationStats.xpForNextLevel}
-          xpToNextLevel={gamificationStats.xpToNextLevel}
-        />
-
-        {/* Profile Tabs */}
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <ProfileTabsList
-            form={form}
-            technicalSkills={technicalSkills}
-            specializedSkills={specializedSkills}
-            experiences={experiences}
-            education={education}
-            trainings={trainings}
-            achievements={achievements}
-            projects={projects}
-          />
-          
-          <ProfileTabsContent profileId={profileId} />
-        </Tabs>
-      </div>
-    );
-  }
+  return (
+    <Tabs defaultValue="general" className="w-full h-full flex flex-col">
+      <ProfileTabsList
+        form={form}
+        technicalSkills={technicalSkills}
+        specializedSkills={specializedSkills}
+        experiences={experiences}
+        education={education}
+        trainings={trainings}
+        achievements={achievements}
+        projects={projects}
+      />
+      
+      <ProfileTabsContent
+        form={form}
+        isEditing={isEditing}
+        onImageUpdate={onImageUpdate}
+        technicalSkills={technicalSkills}
+        specializedSkills={specializedSkills}
+        experiences={experiences}
+        education={education}
+        trainings={trainings}
+        achievements={achievements}
+        projects={projects}
+        isSaving={isSaving}
+        newTechnicalSkill={newTechnicalSkill}
+        newSpecializedSkill={newSpecializedSkill}
+        setNewTechnicalSkill={setNewTechnicalSkill}
+        setNewSpecializedSkill={setNewSpecializedSkill}
+        handleAddTechnicalSkill={handleAddTechnicalSkill}
+        handleAddSpecializedSkill={handleAddSpecializedSkill}
+        saveExperience={saveExperience}
+        updateExperience={updateExperience}
+        deleteExperience={deleteExperience}
+        saveEducation={saveEducation}
+        updateEducation={updateEducation}
+        deleteEducation={deleteEducation}
+        saveTraining={saveTraining}
+        updateTraining={updateTraining}
+        deleteTraining={deleteTraining}
+        saveAchievement={saveAchievement}
+        updateAchievement={updateAchievement}
+        deleteAchievement={deleteAchievement}
+        saveProject={saveProject}
+        updateProject={updateProject}
+        deleteProject={deleteProject}
+        reorderProjects={reorderProjects}
+        deleteTechnicalSkill={deleteTechnicalSkill}
+        deleteSpecializedSkill={deleteSpecializedSkill}
+        saveTechnicalSkill={saveTechnicalSkill}
+        saveSpecializedSkill={saveSpecializedSkill}
+        reorderTechnicalSkills={reorderTechnicalSkills}
+        reorderSpecializedSkills={reorderSpecializedSkills}
+        profileId={profileId}
+        handleGeneralInfoSave={handleGeneralInfoSave}
+        profileData={profileData}
+        importProfile={importProfile}
+      />
+    </Tabs>
+  );
 };
