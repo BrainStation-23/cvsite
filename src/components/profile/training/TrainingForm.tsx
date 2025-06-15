@@ -66,7 +66,7 @@ export const TrainingForm: React.FC<TrainingFormProps> = ({
               <FormItem>
                 <FormLabel>Certification Title</FormLabel>
                 <FormControl>
-                  <Input {...field} placeholder="e.g. AWS Certified Solutions Architect" />
+                  <Input {...field} placeholder="e.g. AWS Certified Solutions Architect" data-tour="training-title" />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -81,7 +81,7 @@ export const TrainingForm: React.FC<TrainingFormProps> = ({
               <FormItem>
                 <FormLabel>Provider</FormLabel>
                 <FormControl>
-                  <Input {...field} placeholder="e.g. Amazon Web Services" />
+                  <Input {...field} placeholder="e.g. Amazon Web Services" data-tour="training-provider" />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -95,6 +95,7 @@ export const TrainingForm: React.FC<TrainingFormProps> = ({
                 <Button
                   variant="outline"
                   className="w-full justify-start text-left font-normal"
+                  data-tour="training-date"
                 >
                   <CalendarIcon className="mr-2 h-4 w-4" />
                   {date ? format(date, 'PPP') : <span>Pick a date</span>}
@@ -122,6 +123,7 @@ export const TrainingForm: React.FC<TrainingFormProps> = ({
                     {...field} 
                     placeholder="Brief description of the certification or training" 
                     rows={3}
+                    data-tour="training-description"
                   />
                 </FormControl>
                 <FormMessage />
@@ -136,7 +138,7 @@ export const TrainingForm: React.FC<TrainingFormProps> = ({
               <FormItem>
                 <FormLabel>Certificate URL (Optional)</FormLabel>
                 <FormControl>
-                  <Input {...field} placeholder="https://..." type="url" />
+                  <Input {...field} placeholder="https://..." type="url" data-tour="training-certificate-url" />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -147,7 +149,7 @@ export const TrainingForm: React.FC<TrainingFormProps> = ({
             <Button type="button" variant="outline" onClick={onCancel}>
               Cancel
             </Button>
-            <Button type="submit" disabled={isSaving}>
+            <Button type="submit" disabled={isSaving} data-tour="training-save-button">
               {isSaving ? "Saving..." : isNew ? "Save Training" : "Save Changes"}
             </Button>
           </div>
