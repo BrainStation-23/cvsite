@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
@@ -1224,7 +1223,8 @@ export function useProfile() {
         }
       }
 
-      await fetchProjects();
+      // Update local state directly instead of re-fetching
+      setProjects(projects);
 
       toast({
         title: 'Success',
