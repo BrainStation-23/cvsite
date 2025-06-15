@@ -187,7 +187,7 @@ export const ProfileTabs: React.FC<ProfileTabsProps> = ({
       data-tour={dataTour} 
       className="text-xs py-2 px-3 data-[state=active]:bg-white dark:data-[state=active]:bg-gray-700 relative"
     >
-      <div className="flex items-center gap-1.5 relative">
+      <div className="flex items-center gap-1.5">
         <Icon className="h-3.5 w-3.5" />
         <span>{label}</span>
         {isEmpty && <GameNotificationBadge />}
