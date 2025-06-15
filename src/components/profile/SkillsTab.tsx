@@ -2,7 +2,6 @@
 import React from 'react';
 import { Skill } from '@/types';
 import { SkillSection } from './skills/SkillSection';
-import { SkillsTourButton } from './SkillsTourButton';
 
 interface SkillsTabProps {
   technicalSkills: Skill[];
@@ -43,7 +42,6 @@ export const SkillsTab: React.FC<SkillsTabProps> = ({
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h2 className="text-xl font-semibold">Skills</h2>
-        <SkillsTourButton />
       </div>
       
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -60,6 +58,7 @@ export const SkillsTab: React.FC<SkillsTabProps> = ({
             onDeleteSkill={deleteTechnicalSkill}
             onReorderSkills={onReorderTechnicalSkills}
             skillType="technical"
+            showTourButton={true}
           />
         </div>
         
@@ -76,6 +75,7 @@ export const SkillsTab: React.FC<SkillsTabProps> = ({
             onDeleteSkill={deleteSpecializedSkill}
             onReorderSkills={onReorderSpecializedSkills}
             skillType="specialized"
+            showTourButton={true}
           />
         </div>
       </div>

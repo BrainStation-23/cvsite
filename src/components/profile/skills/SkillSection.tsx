@@ -6,6 +6,7 @@ import { Plus } from 'lucide-react';
 import { Skill } from '@/types';
 import { SkillAddForm } from './SkillAddForm';
 import { SkillList } from './SkillList';
+import { SkillsTourButton } from '../SkillsTourButton';
 
 interface SkillSectionProps {
   title: string;
@@ -19,6 +20,7 @@ interface SkillSectionProps {
   onDeleteSkill: (id: string) => void;
   onReorderSkills?: (reorderedSkills: Skill[]) => void;
   skillType?: 'technical' | 'specialized';
+  showTourButton?: boolean;
 }
 
 export const SkillSection: React.FC<SkillSectionProps> = ({
@@ -32,7 +34,8 @@ export const SkillSection: React.FC<SkillSectionProps> = ({
   onUpdateSkill,
   onDeleteSkill,
   onReorderSkills,
-  skillType = 'specialized'
+  skillType = 'specialized',
+  showTourButton = false
 }) => {
   const [showAddForm, setShowAddForm] = useState(false);
 
@@ -51,7 +54,10 @@ export const SkillSection: React.FC<SkillSectionProps> = ({
   return (
     <Card>
       <CardHeader className="pb-4">
-        <CardTitle className="text-lg">{title}</CardTitle>
+        <div className="flex items-center justify-between">
+          <CardTitle className="text-lg">{title}</CardTitle>
+          {showTourButton && <SkillsTourButton />}
+        </div>
       </CardHeader>
       <CardContent className="space-y-3">
         {/* Add skill section - now inside the card content */}
