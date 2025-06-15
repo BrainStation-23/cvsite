@@ -51,7 +51,7 @@ export const AchievementForm: React.FC<AchievementFormProps> = ({
               <FormItem>
                 <FormLabel>Achievement Title</FormLabel>
                 <FormControl>
-                  <Input {...field} placeholder="e.g. Employee of the Month" data-tour="achievement-title" />
+                  <Input {...field} placeholder="e.g. Employee of the Month" />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -65,7 +65,6 @@ export const AchievementForm: React.FC<AchievementFormProps> = ({
                 <Button
                   variant="outline"
                   className="w-full justify-start text-left font-normal"
-                  data-tour="achievement-date"
                 >
                   <CalendarIcon className="mr-2 h-4 w-4" />
                   {date ? format(date, 'PPP') : <span>Pick a date</span>}
@@ -94,7 +93,6 @@ export const AchievementForm: React.FC<AchievementFormProps> = ({
                     {...field} 
                     placeholder="Describe your achievement and its significance" 
                     rows={4}
-                    data-tour="achievement-description"
                   />
                 </FormControl>
                 <FormMessage />
@@ -106,7 +104,7 @@ export const AchievementForm: React.FC<AchievementFormProps> = ({
             <Button type="button" variant="outline" onClick={onCancel}>
               Cancel
             </Button>
-            <Button type="submit" disabled={isSaving} data-tour="achievement-save-button">
+            <Button type="submit" disabled={isSaving}>
               {isSaving ? "Saving..." : submitButtonText}
             </Button>
           </div>

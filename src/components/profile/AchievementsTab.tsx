@@ -7,7 +7,6 @@ import { useForm } from 'react-hook-form';
 import { Achievement } from '@/types';
 import { AchievementForm } from './achievements/AchievementForm';
 import { AchievementsList } from './achievements/AchievementsList';
-import { AchievementsTourButton } from './AchievementsTourButton';
 
 interface AchievementsTabProps {
   achievements: Achievement[];
@@ -99,12 +98,9 @@ export const AchievementsTab: React.FC<AchievementsTabProps> = ({
     <Card>
       <CardHeader>
         <div className="flex justify-between items-center">
-          <div className="flex items-center space-x-2">
-            <CardTitle>Achievements</CardTitle>
-            <AchievementsTourButton />
-          </div>
+          <CardTitle>Achievements</CardTitle>
           {isEditing && !isAdding && !editingId && (
-            <Button variant="outline" onClick={handleStartAddNew} data-tour="add-achievement-button">
+            <Button variant="outline" onClick={handleStartAddNew}>
               <PlusCircle className="mr-2 h-4 w-4" />
               Add Achievement
             </Button>

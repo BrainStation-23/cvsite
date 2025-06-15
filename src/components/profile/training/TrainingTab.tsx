@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -5,7 +6,6 @@ import { PlusCircle } from 'lucide-react';
 import { Training } from '@/types';
 import { TrainingForm } from './TrainingForm';
 import { TrainingList } from './TrainingList';
-import { TrainingTourButton } from '../TrainingTourButton';
 
 interface TrainingTabProps {
   trainings: Training[];
@@ -66,12 +66,9 @@ export const TrainingTab: React.FC<TrainingTabProps> = ({
     <Card>
       <CardHeader>
         <div className="flex justify-between items-center">
-          <div className="flex items-center space-x-2">
-            <CardTitle>Training & Certifications</CardTitle>
-            <TrainingTourButton />
-          </div>
+          <CardTitle>Training & Certifications</CardTitle>
           {isEditing && !isAdding && !editingId && (
-            <Button variant="outline" onClick={handleStartAddNew} data-tour="add-training-button">
+            <Button variant="outline" onClick={handleStartAddNew}>
               <PlusCircle className="mr-2 h-4 w-4" />
               Add Training
             </Button>

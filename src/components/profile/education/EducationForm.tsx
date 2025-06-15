@@ -73,13 +73,11 @@ export const EducationForm: React.FC<EducationFormProps> = ({
             <FormItem>
               <FormLabel>University / Institution</FormLabel>
               <FormControl>
-                <div data-tour="education-university">
-                  <UniversityCombobox
-                    value={field.value}
-                    onValueChange={field.onChange}
-                    placeholder="Select university"
-                  />
-                </div>
+                <UniversityCombobox
+                  value={field.value}
+                  onValueChange={field.onChange}
+                  placeholder="Select university"
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -95,13 +93,11 @@ export const EducationForm: React.FC<EducationFormProps> = ({
               <FormItem>
                 <FormLabel>Degree</FormLabel>
                 <FormControl>
-                  <div data-tour="education-degree">
-                    <DegreeCombobox
-                      value={field.value}
-                      onValueChange={field.onChange}
-                      placeholder="Select degree"
-                    />
-                  </div>
+                  <DegreeCombobox
+                    value={field.value}
+                    onValueChange={field.onChange}
+                    placeholder="Select degree"
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -115,13 +111,11 @@ export const EducationForm: React.FC<EducationFormProps> = ({
               <FormItem>
                 <FormLabel>Department</FormLabel>
                 <FormControl>
-                  <div data-tour="education-department">
-                    <DepartmentCombobox
-                      value={field.value}
-                      onValueChange={field.onChange}
-                      placeholder="Select department"
-                    />
-                  </div>
+                  <DepartmentCombobox
+                    value={field.value}
+                    onValueChange={field.onChange}
+                    placeholder="Select department"
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -137,7 +131,6 @@ export const EducationForm: React.FC<EducationFormProps> = ({
                 <Button
                   variant="outline"
                   className="w-full justify-start text-left font-normal"
-                  data-tour="education-start-date"
                 >
                   <CalendarIcon className="mr-2 h-4 w-4" />
                   {startDate ? format(startDate, 'PPP') : <span>Pick a date</span>}
@@ -163,7 +156,6 @@ export const EducationForm: React.FC<EducationFormProps> = ({
                     variant="outline"
                     className="w-full justify-start text-left font-normal"
                     disabled={isCurrent}
-                    data-tour="education-end-date"
                   >
                     <CalendarIcon className="mr-2 h-4 w-4" />
                     {endDate && !isCurrent ? format(endDate, 'PPP') : <span>Pick a date</span>}
@@ -183,7 +175,7 @@ export const EducationForm: React.FC<EducationFormProps> = ({
                 </PopoverContent>
               </Popover>
               
-              <div className="flex items-center space-x-2" data-tour="education-current-checkbox">
+              <div className="flex items-center space-x-2">
                 <Checkbox 
                   id={`current-education-${initialData?.id || 'new'}`}
                   checked={isCurrent}
@@ -207,7 +199,7 @@ export const EducationForm: React.FC<EducationFormProps> = ({
             <FormItem>
               <FormLabel>GPA / Grade (Optional)</FormLabel>
               <FormControl>
-                <Input {...field} placeholder="e.g. 3.8/4.0" data-tour="education-gpa" />
+                <Input {...field} placeholder="e.g. 3.8/4.0" />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -218,7 +210,7 @@ export const EducationForm: React.FC<EducationFormProps> = ({
           <Button type="button" variant="outline" onClick={onCancel}>
             Cancel
           </Button>
-          <Button type="submit" disabled={isSaving} data-tour="education-save-button">
+          <Button type="submit" disabled={isSaving}>
             {isSaving ? "Saving..." : initialData ? "Save Changes" : "Save Education"}
           </Button>
         </div>

@@ -83,7 +83,6 @@ export const SortableProjectItem: React.FC<SortableProjectItemProps> = ({
               {...attributes} 
               {...listeners}
               className="flex items-center cursor-grab active:cursor-grabbing mr-3"
-              data-testid="drag-handle"
             >
               <GripVertical className="h-4 w-4 text-gray-400" />
             </div>

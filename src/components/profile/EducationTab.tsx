@@ -6,7 +6,6 @@ import { PlusCircle, X } from 'lucide-react';
 import { Education } from '@/types';
 import { EducationForm } from './education/EducationForm';
 import { EducationList } from './education/EducationList';
-import { EducationTourButton } from './EducationTourButton';
 
 interface EducationTabProps {
   education: Education[];
@@ -75,12 +74,9 @@ export const EducationTab: React.FC<EducationTabProps> = ({
     <Card>
       <CardHeader>
         <div className="flex justify-between items-center">
-          <div className="flex items-center space-x-2">
-            <CardTitle>Education</CardTitle>
-            <EducationTourButton />
-          </div>
+          <CardTitle>Education</CardTitle>
           {showAddButton && (
-            <Button variant="outline" onClick={handleStartAddNew} data-tour="add-education-button">
+            <Button variant="outline" onClick={handleStartAddNew}>
               <PlusCircle className="mr-2 h-4 w-4" />
               Add Education
             </Button>
@@ -112,14 +108,12 @@ export const EducationTab: React.FC<EducationTabProps> = ({
           </div>
         )}
         
-        <div data-tour="education-empty-state">
-          <EducationList
-            education={education}
-            isEditing={isEditing}
-            onEdit={handleStartEdit}
-            onDelete={handleDelete}
-          />
-        </div>
+        <EducationList
+          education={education}
+          isEditing={isEditing}
+          onEdit={handleStartEdit}
+          onDelete={handleDelete}
+        />
       </CardContent>
     </Card>
   );

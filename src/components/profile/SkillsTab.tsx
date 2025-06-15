@@ -39,45 +39,37 @@ export const SkillsTab: React.FC<SkillsTabProps> = ({
   onReorderSpecializedSkills
 }) => {
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h2 className="text-xl font-semibold">Skills</h2>
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div data-tour="technical-skills">
+        <SkillSection
+          title="Technical Skills"
+          skills={technicalSkills}
+          isEditing={isEditing}
+          isDraggable={true}
+          newSkill={newTechnicalSkill}
+          setNewSkill={setNewTechnicalSkill}
+          onAddSkill={handleAddTechnicalSkill}
+          onUpdateSkill={saveTechnicalSkill}
+          onDeleteSkill={deleteTechnicalSkill}
+          onReorderSkills={onReorderTechnicalSkills}
+          skillType="technical"
+        />
       </div>
       
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div data-tour="technical-skills">
-          <SkillSection
-            title="Technical Skills"
-            skills={technicalSkills}
-            isEditing={isEditing}
-            isDraggable={true}
-            newSkill={newTechnicalSkill}
-            setNewSkill={setNewTechnicalSkill}
-            onAddSkill={handleAddTechnicalSkill}
-            onUpdateSkill={saveTechnicalSkill}
-            onDeleteSkill={deleteTechnicalSkill}
-            onReorderSkills={onReorderTechnicalSkills}
-            skillType="technical"
-            showTourButton={true}
-          />
-        </div>
-        
-        <div data-tour="specialized-skills">
-          <SkillSection
-            title="Specialized Skills"
-            skills={specializedSkills}
-            isEditing={isEditing}
-            isDraggable={true}
-            newSkill={newSpecializedSkill}
-            setNewSkill={setNewSpecializedSkill}
-            onAddSkill={handleAddSpecializedSkill}
-            onUpdateSkill={saveSpecializedSkill}
-            onDeleteSkill={deleteSpecializedSkill}
-            onReorderSkills={onReorderSpecializedSkills}
-            skillType="specialized"
-            showTourButton={true}
-          />
-        </div>
+      <div data-tour="specialized-skills">
+        <SkillSection
+          title="Specialized Skills"
+          skills={specializedSkills}
+          isEditing={isEditing}
+          isDraggable={true}
+          newSkill={newSpecializedSkill}
+          setNewSkill={setNewSpecializedSkill}
+          onAddSkill={handleAddSpecializedSkill}
+          onUpdateSkill={saveSpecializedSkill}
+          onDeleteSkill={deleteSpecializedSkill}
+          onReorderSkills={onReorderSpecializedSkills}
+          skillType="specialized"
+        />
       </div>
     </div>
   );
