@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
@@ -1069,12 +1070,12 @@ export function useProfile() {
           profile_id: user.id,
           name: project.name,
           role: project.role,
-          start_date: project.startDate.toISOString(),
-          end_date: project.endDate?.toISOString() || null,
+          start_date: project.startDate.toISOString().split('T')[0],
+          end_date: project.endDate ? project.endDate.toISOString().split('T')[0] : null,
           is_current: project.isCurrent || false,
           description: project.description,
-          technologiesUsed: project.technologiesUsed,
-          url: project.url
+          technologies_used: project.technologiesUsed,
+          url: project.url || null
         });
 
       if (error) throw error;
@@ -1106,18 +1107,41 @@ export function useProfile() {
     try {
       setIsSaving(true);
 
+      // Create a clean database update object with only the fields that need updating
+      const updateData: Record<string, any> = {};
+      
+      // Map each field explicitly to ensure correct column names
+      if (project.name !== undefined) {
+        updateData.name = project.name;
+      }
+      if (project.role !== undefined) {
+        updateData.role = project.role;
+      }
+      if (project.description !== undefined) {
+        updateData.description = project.description;
+      }
+      if (project.startDate !== undefined) {
+        updateData.start_date = project.startDate.toISOString().split('T')[0];
+      }
+      if (project.endDate !== undefined) {
+        updateData.end_date = project.endDate ? project.endDate.toISOString().split('T')[0] : null;
+      }
+      if (project.isCurrent !== undefined) {
+        updateData.is_current = project.isCurrent;
+      }
+      if (project.technologiesUsed !== undefined) {
+        updateData.technologies_used = project.technologiesUsed;
+      }
+      if (project.url !== undefined) {
+        updateData.url = project.url || null;
+      }
+
+      console.log('Updating project with database data:', updateData);
+      console.log('Original project data received:', project);
+
       const { error } = await supabase
         .from('projects')
-        .update({
-          name: project.name,
-          role: project.role,
-          start_date: project.startDate?.toISOString(),
-          end_date: project.endDate?.toISOString() || null,
-          is_current: project.isCurrent,
-          description: project.description,
-          technologiesUsed: project.technologiesUsed,
-          url: project.url
-        })
+        .update(updateData)
         .eq('id', id)
         .eq('profile_id', user.id);
 
@@ -1185,15 +1209,19 @@ export function useProfile() {
     try {
       setIsSaving(true);
 
-      // Update the order of each project
-      for (const project of projects) {
+      // Update the display_order of each project sequentially to avoid race conditions
+      for (let i = 0; i < projects.length; i++) {
+        const project = projects[i];
         const { error } = await supabase
           .from('projects')
-          .update({ /* order: project.order */ }) // Replace 'order' with the actual column name if different
+          .update({ display_order: i + 1 })
           .eq('id', project.id)
           .eq('profile_id', user.id);
 
-        if (error) throw error;
+        if (error) {
+          console.error(`Error updating display order for project ${project.id}:`, error);
+          throw error;
+        }
       }
 
       await fetchProjects();
