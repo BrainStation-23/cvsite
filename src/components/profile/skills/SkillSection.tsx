@@ -54,7 +54,7 @@ export const SkillSection: React.FC<SkillSectionProps> = ({
   return (
     <Card>
       <CardHeader className="pb-4">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center space-x-2">
           <CardTitle className="text-lg">{title}</CardTitle>
           {showTourButton && <SkillsTourButton />}
         </div>
