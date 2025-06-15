@@ -49,6 +49,12 @@ export const useProjectsTour = () => {
         disableBeacon: true,
       },
       {
+        target: '[data-tour="current-project-checkbox"]',
+        content: 'Check this box if you\'re currently working on this project. This will disable the end date field.',
+        placement: 'top',
+        disableBeacon: true,
+      },
+      {
         target: '[data-tour="project-description"]',
         content: 'Provide a detailed description of the project, your contributions, and the impact. You can use rich text formatting here.',
         placement: 'top',
@@ -72,12 +78,6 @@ export const useProjectsTour = () => {
         placement: 'top',
         disableBeacon: true,
       },
-      {
-        target: '.space-y-4 .border.rounded-md.p-4:first-child [data-testid="drag-handle"]',
-        content: 'You can reorder your projects by dragging this handle. This helps you prioritize which projects appear first.',
-        placement: 'right',
-        disableBeacon: true,
-      },
     ],
     stepIndex: 0,
   });
@@ -91,11 +91,16 @@ export const useProjectsTour = () => {
     }
 
     if (type === 'step:after' && action === 'next') {
-      // If we're on the second step (add button), simulate clicking it
+      // If we're on the second step (add button), simulate clicking it and wait for form to render
       if (index === 1) {
         const addButton = document.querySelector('[data-tour="add-project-button"]') as HTMLButtonElement;
         if (addButton) {
           addButton.click();
+          // Wait a bit for the form to render before proceeding
+          setTimeout(() => {
+            setTourState(prev => ({ ...prev, stepIndex: index + 1 }));
+          }, 300);
+          return;
         }
       }
       setTourState(prev => ({ ...prev, stepIndex: index + 1 }));

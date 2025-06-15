@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -182,6 +181,7 @@ export const ProjectForm: React.FC<ProjectFormProps> = ({
                     id="current-project-form" 
                     checked={isCurrent}
                     onCheckedChange={handleCurrentCheckboxChange}
+                    data-tour="current-project-checkbox"
                   />
                   <label
                     htmlFor="current-project-form"
