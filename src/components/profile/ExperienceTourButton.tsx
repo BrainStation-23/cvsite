@@ -28,6 +28,9 @@ export const ExperienceTourButton: React.FC = () => {
         continuous={true}
         showSkipButton={true}
         showProgress={true}
+        disableOverlayClose={true}
+        disableCloseOnEsc={false}
+        spotlightClicks={false}
         styles={{
           options: {
             primaryColor: '#0ea5e9',

@@ -14,7 +14,7 @@ export const useExperienceTour = () => {
     steps: [
       {
         target: '[data-tour="add-experience-button"]',
-        content: 'Click this button to add a new work experience entry. You can add multiple positions at different companies.',
+        content: 'Click this button to add a new work experience entry. You can add multiple positions at different companies. The tour will automatically click this for you to show the form.',
         placement: 'bottom',
         disableBeacon: true,
       },
@@ -68,7 +68,7 @@ export const useExperienceTour = () => {
   });
 
   const handleJoyrideCallback = useCallback((data: CallBackProps) => {
-    const { status, type, index, action } = data;
+    const { status, type, index, action, step } = data;
 
     if (status === STATUS.FINISHED || status === STATUS.SKIPPED) {
       setTourState(prev => ({ ...prev, run: false, stepIndex: 0 }));
@@ -76,8 +76,44 @@ export const useExperienceTour = () => {
     }
 
     if (type === 'step:after' && action === 'next') {
-      const nextStepIndex = index + 1;
-      setTourState(prev => ({ ...prev, stepIndex: nextStepIndex }));
+      // Special handling for the first step - automatically click the add experience button
+      if (index === 0) {
+        const addButton = document.querySelector('[data-tour="add-experience-button"]') as HTMLButtonElement;
+        if (addButton) {
+          addButton.click();
+          
+          // Wait for the form to appear before advancing to the next step
+          setTimeout(() => {
+            const form = document.querySelector('[data-tour="experience-form"]');
+            if (form) {
+              setTourState(prev => ({ ...prev, stepIndex: index + 1 }));
+            } else {
+              // If form doesn't appear, try again after a longer delay
+              setTimeout(() => {
+                setTourState(prev => ({ ...prev, stepIndex: index + 1 }));
+              }, 500);
+            }
+          }, 300);
+        } else {
+          // If button not found, just advance
+          setTourState(prev => ({ ...prev, stepIndex: index + 1 }));
+        }
+      } else {
+        // For other steps, advance normally
+        const nextStepIndex = index + 1;
+        setTourState(prev => ({ ...prev, stepIndex: nextStepIndex }));
+      }
+    }
+
+    // Handle step skipping - if we're trying to show a step but the target doesn't exist, skip it
+    if (type === 'tooltip' && step?.target) {
+      const targetElement = document.querySelector(step.target as string);
+      if (!targetElement && index > 0) {
+        // Skip this step if target doesn't exist (except for the first step)
+        setTimeout(() => {
+          setTourState(prev => ({ ...prev, stepIndex: index + 1 }));
+        }, 100);
+      }
     }
   }, []);
 
