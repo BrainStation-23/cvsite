@@ -3,8 +3,8 @@ import React from 'react';
 import { GeneralInfoSection } from './sections/GeneralInfoSection';
 import { ExperienceSection } from './sections/ExperienceSection';
 import { EducationSection } from './sections/EducationSection';
-import { TechnicalSkillsSection } from './sections/TechnicalSkillsSection';
-import { SpecializedSkillsSection } from './sections/SpecializedSkillsSection';
+import { SkillsSection } from './sections/SkillsSection';
+
 import { ProjectsSection } from './sections/ProjectsSection';
 import { TrainingsSection } from './sections/TrainingsSection';
 import { AchievementsSection } from './sections/AchievementsSection';
@@ -97,9 +97,9 @@ export const DynamicSectionRenderer: React.FC<DynamicSectionRendererProps> = ({
       case 'education':
         return <EducationSection key={section.id} {...commonProps} />;
       case 'technical_skills':
-        return <TechnicalSkillsSection key={section.id} {...commonProps} />;
+        return <SkillsSection key={section.id} {...commonProps} skillType="technical" sectionConfig={section} />;
       case 'specialized_skills':
-        return <SpecializedSkillsSection key={section.id} {...commonProps} />;
+        return <SkillsSection key={section.id} {...commonProps} skillType="specialized" sectionConfig={section} />;
       case 'projects':
         return <ProjectsSection key={section.id} {...commonProps} />;
       case 'training':

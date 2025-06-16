@@ -1,10 +1,10 @@
-
 import React from 'react';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { CVSectionType } from '@/types/cv-templates';
 import ReferenceSectionConfig from './ReferenceSectionConfig';
+import { SkillsSection } from './SkillsSection';
 
 const DISPLAY_STYLES = [
   { value: 'default', label: 'Default' },
@@ -12,7 +12,6 @@ const DISPLAY_STYLES = [
   { value: 'detailed', label: 'Detailed' },
   { value: 'timeline', label: 'Timeline' },
 ];
-
 
 const HIDE_DISPLAY_STYLE_FOR: CVSectionType[] = [
   'references',
