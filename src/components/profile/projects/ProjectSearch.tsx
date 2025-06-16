@@ -20,6 +20,7 @@ export const ProjectSearch: React.FC<ProjectSearchProps> = ({
         value={searchQuery}
         onChange={(e) => onSearchChange(e.target.value)}
         className="pl-10 w-64"
+        data-tour="project-search"
       />
     </div>
   );

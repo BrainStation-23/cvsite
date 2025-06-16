@@ -23,6 +23,7 @@ import {
 import { ProjectForm } from './projects/ProjectForm';
 import { ProjectSearch } from './projects/ProjectSearch';
 import { SortableProjectItem } from './projects/SortableProjectItem';
+import { ProjectsTourButton } from './ProjectsTourButton';
 
 interface ProjectsTabProps {
   projects: Project[];
@@ -132,14 +133,17 @@ export const ProjectsTab: React.FC<ProjectsTabProps> = ({
     <Card>
       <CardHeader>
         <div className="flex justify-between items-center">
-          <CardTitle>Projects</CardTitle>
+          <div className="flex items-center space-x-2">
+            <CardTitle>Projects</CardTitle>
+            <ProjectsTourButton />
+          </div>
           <div className="flex items-center space-x-2">
             <ProjectSearch 
               searchQuery={searchQuery}
               onSearchChange={setSearchQuery}
             />
             {isEditing && !isAdding && !editingId && (
-              <Button variant="outline" onClick={handleStartAddNew}>
+              <Button variant="outline" onClick={handleStartAddNew} data-tour="add-project-button">
                 <PlusCircle className="mr-2 h-4 w-4" />
                 Add Project
               </Button>

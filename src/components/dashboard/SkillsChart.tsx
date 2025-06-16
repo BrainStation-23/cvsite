@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line } from 'recharts';
 
 interface SkillsChartProps {
@@ -36,10 +37,11 @@ export const SkillsChart: React.FC<SkillsChartProps> = ({ data, isLoading }) => 
       </CardHeader>
       <CardContent>
         <Tabs defaultValue="bar" className="w-full">
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="bar">Bar Chart</TabsTrigger>
             <TabsTrigger value="pie">Pie Chart</TabsTrigger>
             <TabsTrigger value="line">Trend Line</TabsTrigger>
+            <TabsTrigger value="table">Table View</TabsTrigger>
           </TabsList>
           
           <TabsContent value="bar" className="mt-4">
@@ -137,6 +139,36 @@ export const SkillsChart: React.FC<SkillsChartProps> = ({ data, isLoading }) => 
                   />
                 </LineChart>
               </ResponsiveContainer>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="table" className="mt-4">
+            <div className="h-[350px] overflow-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Rank</TableHead>
+                    <TableHead>Skill</TableHead>
+                    <TableHead className="text-right">Count</TableHead>
+                    <TableHead className="text-right">Percentage</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {data.map((skill, index) => {
+                    const totalCount = data.reduce((sum, item) => sum + item.count, 0);
+                    const percentage = totalCount > 0 ? ((skill.count / totalCount) * 100).toFixed(1) : '0.0';
+                    
+                    return (
+                      <TableRow key={skill.skill}>
+                        <TableCell className="font-medium">#{index + 1}</TableCell>
+                        <TableCell>{skill.skill}</TableCell>
+                        <TableCell className="text-right">{skill.count}</TableCell>
+                        <TableCell className="text-right">{percentage}%</TableCell>
+                      </TableRow>
+                    );
+                  })}
+                </TableBody>
+              </Table>
             </div>
           </TabsContent>
         </Tabs>

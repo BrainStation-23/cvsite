@@ -16,48 +16,49 @@ export class ExperienceSectionRenderer extends BaseSectionRenderer {
     const baseStyles = styles?.baseStyles || {};
     
     try {
+      // Assume fieldMappings is available via styles or passed as an argument (update signature if needed)
+      const fieldMappings = styles?.fieldMappings || [];
+      const getOrderedFields = () => {
+        return fieldMappings
+          .filter((f: any) => f.section_type === 'experience')
+          .sort((a: any, b: any) => a.field_order - b.field_order);
+      };
+
       experiences.forEach((exp) => {
-        // Check field visibility and apply masking
-        const showDesignation = this.isFieldVisible('designation', 'experience');
-        const showCompanyName = this.isFieldVisible('company_name', 'experience');
-        const showDescription = this.isFieldVisible('description', 'experience');
-        const showDateRange = this.isFieldVisible('date_range', 'experience');
-
-        // Job Title and Company
-        if (showDesignation || showCompanyName) {
-          let titleText = '';
-          let companyText = '';
-          
-          if (showDesignation) {
-            const designation = this.applyFieldMasking(exp.designation || exp.job_title, 'designation', 'experience');
-            titleText = designation || '';
+        const orderedFields = getOrderedFields();
+        orderedFields.forEach((field: any) => {
+          const fieldName = field.original_field_name;
+          let value = '';
+          switch (fieldName) {
+            case 'designation':
+              value = this.applyFieldMasking(exp.designation || exp.job_title, 'designation', 'experience');
+              if (value) elements.push(this.styler.createItemTitle(value, baseStyles));
+              break;
+            case 'company_name':
+              value = this.applyFieldMasking(exp.company_name, 'company_name', 'experience');
+              if (value) elements.push(this.styler.createItemSubtitle(value, baseStyles));
+              break;
+            case 'date_range':
+              if (exp.start_date || exp.end_date) {
+                const dateRange = this.formatDateRange(exp.start_date, exp.end_date, exp.is_current);
+                value = this.applyFieldMasking(dateRange, 'date_range', 'experience');
+                if (value) elements.push(this.styler.createItemSubtitle(value, baseStyles));
+              }
+              break;
+            case 'description':
+              value = this.applyFieldMasking(exp.description, 'description', 'experience');
+              if (value) {
+                const richTextParagraphs = this.richTextProcessor.parseRichTextToDocx(value, baseStyles);
+                elements.push(...richTextParagraphs);
+              }
+              break;
+            default:
+              value = this.applyFieldMasking(exp[fieldName], fieldName, 'experience');
+              if (value) elements.push(this.styler.createItemSubtitle(value, baseStyles));
           }
-          
-          if (showCompanyName) {
-            const companyName = this.applyFieldMasking(exp.company_name, 'company_name', 'experience');
-            companyText = companyName ? ` at ${companyName}` : '';
-          }
-          
-          if (titleText || companyText) {
-            elements.push(this.styler.createItemTitle(`${titleText}${companyText}`, baseStyles));
-          }
-        }
-
-        // Date Range
-        if (showDateRange && (exp.start_date || exp.end_date)) {
-          const dateRange = this.formatDateRange(exp.start_date, exp.end_date, exp.is_current);
-          const maskedDateRange = this.applyFieldMasking(dateRange, 'date_range', 'experience');
-          elements.push(this.styler.createItemSubtitle(maskedDateRange, baseStyles));
-        }
-
-        // Description with rich text parsing and masking
-        if (showDescription) {
-          const description = this.applyFieldMasking(exp.description, 'description', 'experience');
-          if (description) {
-            const richTextParagraphs = this.richTextProcessor.parseRichTextToDocx(description, baseStyles);
-            elements.push(...richTextParagraphs);
-          }
-        }
+        });
+        // Optionally add a blank paragraph for spacing between experiences
+        elements.push(new Paragraph({ text: '', spacing: { after: 200 } }));
       });
     } catch (error) {
       console.error('Error rendering experience section:', error);

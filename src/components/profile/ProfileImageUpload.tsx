@@ -168,7 +168,7 @@ export const ProfileImageUpload: React.FC<ProfileImageUploadProps> = ({
   return (
     <div className="flex flex-col items-center space-y-6">
       {/* Profile Image Preview */}
-      <div className="relative w-64">
+      <div className="relative w-64" data-tour="profile-image">
         <AspectRatio ratio={3/4} className="bg-gray-100 dark:bg-gray-800 rounded-lg overflow-hidden border-2 border-gray-200 dark:border-gray-700">
           {currentImageUrl ? (
             <img
@@ -236,6 +236,7 @@ export const ProfileImageUpload: React.FC<ProfileImageUploadProps> = ({
               onClick={handleRemoveImage}
               disabled={deleting || uploading}
               className="flex-1"
+              data-tour="remove-image-button"
             >
               <Trash2 className="h-4 w-4 mr-2" />
               {deleting ? 'Removing...' : 'Remove'}

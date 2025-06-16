@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import DashboardLayout from '../../components/Layout/DashboardLayout';
 import { useToast } from '@/hooks/use-toast';
-import { useProfile } from '@/hooks/use-profile';
+import { useProfileComposite } from '@/hooks/profile/use-profile-composite';
 import { useForm } from 'react-hook-form';
 import { ProfileTabs } from '@/components/profile/ProfileTabs';
 import { GeneralInfoFormData } from '@/components/profile/GeneralInfoTab';
@@ -10,9 +10,17 @@ import { Skill } from '@/types';
 
 const ProfilePage: React.FC = () => {
   const { toast } = useToast();
-  const [newTechnicalSkill, setNewTechnicalSkill] = useState<Omit<Skill, 'id'>>({ name: '', proficiency: 1, priority: 0 });
-  const [newSpecializedSkill, setNewSpecializedSkill] = useState<Omit<Skill, 'id'>>({ name: '', proficiency: 1, priority: 0 });
-  
+  const [newTechnicalSkill, setNewTechnicalSkill] = useState<Omit<Skill, 'id'>>({
+    name: '',
+    proficiency: 1,
+    priority: 0
+  });
+  const [newSpecializedSkill, setNewSpecializedSkill] = useState<Omit<Skill, 'id'>>({
+    name: '',
+    proficiency: 1,
+    priority: 0
+  });
+
   const {
     isLoading,
     isSaving,
@@ -47,7 +55,7 @@ const ProfilePage: React.FC = () => {
     updateProject,
     deleteProject,
     reorderProjects
-  } = useProfile();
+  } = useProfileComposite();
 
   // Updated form to match the GeneralInfoFormData interface
   const form = useForm<GeneralInfoFormData>({
@@ -73,13 +81,7 @@ const ProfilePage: React.FC = () => {
   }, [isLoading, generalInfo, form.reset]);
 
   const handleUpdateProfile = async (data: GeneralInfoFormData) => {
-    const success = await saveGeneralInfo({
-      firstName: data.firstName,
-      lastName: data.lastName,
-      biography: data.biography || null,
-      profileImage: data.profileImage,
-      currentDesignation: data.currentDesignation || null
-    });
+    const success = await saveGeneralInfo(data);
     return success;
   };
 
@@ -96,10 +98,13 @@ const ProfilePage: React.FC = () => {
       });
       return;
     }
-
     const success = await saveTechnicalSkill(newTechnicalSkill as Skill);
     if (success) {
-      setNewTechnicalSkill({ name: '', proficiency: 1, priority: 0 });
+      setNewTechnicalSkill({
+        name: '',
+        proficiency: 1,
+        priority: 0
+      });
     }
   };
 
@@ -112,10 +117,13 @@ const ProfilePage: React.FC = () => {
       });
       return;
     }
-
     const success = await saveSpecializedSkill(newSpecializedSkill as Skill);
     if (success) {
-      setNewSpecializedSkill({ name: '', proficiency: 1, priority: 0 });
+      setNewSpecializedSkill({
+        name: '',
+        proficiency: 1,
+        priority: 0
+      });
     }
   };
 

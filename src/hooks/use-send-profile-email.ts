@@ -3,8 +3,16 @@ import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
+interface CcOptions {
+  includeSbuHead?: boolean;
+  includeHrContacts?: boolean;
+  includeMe?: boolean;
+}
+
 interface SendEmailData {
   profileId: string;
+  ccOptions?: CcOptions;
+  userEmail?: string; // The authenticated user's email for CC
 }
 
 export function useSendProfileEmail() {
@@ -15,6 +23,8 @@ export function useSendProfileEmail() {
     
     try {
       console.log('Sending profile email for profile ID:', data.profileId);
+      console.log('CC Options:', data.ccOptions);
+      console.log('User Email for CC:', data.userEmail);
       
       const { data: result, error } = await supabase.functions.invoke('send-profile-email', {
         body: data
@@ -32,7 +42,12 @@ export function useSendProfileEmail() {
 
       console.log('Email sent successfully:', result);
       
-      toast.success(`Profile completion email sent to ${result.sentTo}`);
+      let successMessage = `Profile completion email sent to ${result.sentTo}`;
+      if (result.ccSent && result.ccSent.length > 0) {
+        successMessage += ` (CC: ${result.ccSent.join(', ')})`;
+      }
+      
+      toast.success(successMessage);
 
       return result;
     } catch (error: any) {

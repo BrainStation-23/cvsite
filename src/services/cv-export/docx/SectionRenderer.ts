@@ -100,35 +100,39 @@ export class SectionRenderer {
       // Render section content based on type with zone information
       switch (section.section_type) {
         case 'general':
-          const generalElements = await this.generalRenderer.render(profile, styles);
+          const generalElements = await this.generalRenderer.render(profile, { ...styles, fieldMappings });
           elements.push(...generalElements);
           break;
         case 'experience':
-          const experienceElements = this.experienceRenderer.render(profile.experiences || [], styles);
+          // Inject fieldMappings into styles for experienceRenderer
+          const experienceElements = this.experienceRenderer.render(
+            profile.experiences || [],
+            { ...styles, fieldMappings }
+          );
           elements.push(...experienceElements);
           break;
         case 'education':
-          const educationElements = this.educationRenderer.render(profile.education || [], styles);
+          const educationElements = this.educationRenderer.render(profile.education || [], { ...styles, fieldMappings });
           elements.push(...educationElements);
           break;
         case 'projects':
-          const projectElements = this.projectsRenderer.render(profile.projects || [], styles);
+          const projectElements = this.projectsRenderer.render(profile.projects || [], { ...styles, fieldMappings });
           elements.push(...projectElements);
           break;
         case 'technical_skills':
-          const techSkillsElements = this.skillsRenderer.render(profile.technical_skills || [], styles);
+          const techSkillsElements = this.skillsRenderer.render(profile.technical_skills || [], { ...styles, fieldMappings });
           elements.push(...techSkillsElements);
           break;
         case 'specialized_skills':
-          const specSkillsElements = this.skillsRenderer.render(profile.specialized_skills || [], styles);
+          const specSkillsElements = this.skillsRenderer.render(profile.specialized_skills || [], { ...styles, fieldMappings });
           elements.push(...specSkillsElements);
           break;
         case 'training':
-          const trainingElements = this.trainingRenderer.render(profile.trainings || [], styles);
+          const trainingElements = this.trainingRenderer.render(profile.trainings || [], { ...styles, fieldMappings });
           elements.push(...trainingElements);
           break;
         case 'achievements':
-          const achievementElements = this.achievementsRenderer.render(profile.achievements || [], styles);
+          const achievementElements = this.achievementsRenderer.render(profile.achievements || [], { ...styles, fieldMappings });
           elements.push(...achievementElements);
           break;
         default:

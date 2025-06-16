@@ -2,6 +2,7 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, BarChart, Bar, XAxis, YAxis, CartesianGrid, RadialBarChart, RadialBar, Legend } from 'recharts';
 
 interface ExperienceChartProps {
@@ -42,10 +43,11 @@ export const ExperienceChart: React.FC<ExperienceChartProps> = ({ data, isLoadin
       </CardHeader>
       <CardContent>
         <Tabs defaultValue="pie" className="w-full">
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="pie">Pie Chart</TabsTrigger>
             <TabsTrigger value="bar">Bar Chart</TabsTrigger>
             <TabsTrigger value="radial">Radial Chart</TabsTrigger>
+            <TabsTrigger value="table">Table View</TabsTrigger>
           </TabsList>
           
           <TabsContent value="pie" className="mt-4">
@@ -129,6 +131,41 @@ export const ExperienceChart: React.FC<ExperienceChartProps> = ({ data, isLoadin
                   <Legend />
                 </RadialBarChart>
               </ResponsiveContainer>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="table" className="mt-4">
+            <div className="h-[350px] overflow-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Experience Range</TableHead>
+                    <TableHead className="text-right">Employee Count</TableHead>
+                    <TableHead className="text-right">Percentage</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {data.map((experience) => {
+                    const totalCount = data.reduce((sum, item) => sum + item.count, 0);
+                    const percentage = totalCount > 0 ? ((experience.count / totalCount) * 100).toFixed(1) : '0.0';
+                    
+                    return (
+                      <TableRow key={experience.range}>
+                        <TableCell className="font-medium">{experience.range}</TableCell>
+                        <TableCell className="text-right">{experience.count}</TableCell>
+                        <TableCell className="text-right">{percentage}%</TableCell>
+                      </TableRow>
+                    );
+                  })}
+                  <TableRow className="border-t-2 font-semibold bg-muted/50">
+                    <TableCell>Total</TableCell>
+                    <TableCell className="text-right">
+                      {data.reduce((sum, item) => sum + item.count, 0)}
+                    </TableCell>
+                    <TableCell className="text-right">100.0%</TableCell>
+                  </TableRow>
+                </TableBody>
+              </Table>
             </div>
           </TabsContent>
         </Tabs>

@@ -29,7 +29,7 @@ export class HTMLExporter extends BaseExporter {
         email: profile?.email,
         phone: profile?.phone,
         location: profile?.location,
-        designation: profile?.designation,
+        designation: profile?.current_designation,
         biography: profile?.biography,
         profileImage: profile?.profile_image,
 

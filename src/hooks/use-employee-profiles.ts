@@ -51,6 +51,11 @@ export function useEmployeeProfiles({
     trainingFilter?: string;
     achievementFilter?: string;
     projectFilter?: string;
+    minExperienceYears?: number | null;
+    maxExperienceYears?: number | null;
+    minGraduationYear?: number | null;
+    maxGraduationYear?: number | null;
+    completionStatus?: string | null;
     sortColumn?: EmployeeProfileSortColumn;
     sortDirection?: EmployeeProfileSortOrder;
   } = {}) => {
@@ -64,6 +69,11 @@ export function useEmployeeProfiles({
       trainingFilter: training = trainingFilter,
       achievementFilter: achievement = achievementFilter,
       projectFilter: project = projectFilter,
+      minExperienceYears = null,
+      maxExperienceYears = null,
+      minGraduationYear = null,
+      maxGraduationYear = null,
+      completionStatus = null,
       sortColumn = sortBy,
       sortDirection = sortOrder
     } = options;
@@ -79,6 +89,11 @@ export function useEmployeeProfiles({
         training,
         achievement,
         project,
+        minExperienceYears,
+        maxExperienceYears,
+        minGraduationYear,
+        maxGraduationYear,
+        completionStatus,
         page,
         perPage,
         sortColumn,
@@ -93,6 +108,11 @@ export function useEmployeeProfiles({
         training_filter: training || null,
         achievement_filter: achievement || null,
         project_filter: project || null,
+        min_experience_years: minExperienceYears,
+        max_experience_years: maxExperienceYears,
+        min_graduation_year: minGraduationYear,
+        max_graduation_year: maxGraduationYear,
+        completion_status: completionStatus,
         page_number: page,
         items_per_page: perPage,
         sort_by: sortColumn,
@@ -209,6 +229,19 @@ export function useEmployeeProfiles({
     });
   };
 
+  const handleAdvancedFilters = (filters: {
+    minExperienceYears?: number | null;
+    maxExperienceYears?: number | null;
+    minGraduationYear?: number | null;
+    maxGraduationYear?: number | null;
+    completionStatus?: string | null;
+  }) => {
+    fetchProfiles({ 
+      page: 1,
+      ...filters
+    });
+  };
+
   const resetFilters = () => {
     fetchProfiles({
       page: 1,
@@ -219,6 +252,11 @@ export function useEmployeeProfiles({
       trainingFilter: '',
       achievementFilter: '',
       projectFilter: '',
+      minExperienceYears: null,
+      maxExperienceYears: null,
+      minGraduationYear: null,
+      maxGraduationYear: null,
+      completionStatus: null,
       sortColumn: 'last_name',
       sortDirection: 'asc'
     });
@@ -247,6 +285,7 @@ export function useEmployeeProfiles({
     handleAchievementFilter,
     handleProjectFilter,
     handleSortChange,
+    handleAdvancedFilters,
     resetFilters
   };
 }

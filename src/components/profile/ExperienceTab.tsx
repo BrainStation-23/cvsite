@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -14,6 +13,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { DesignationCombobox } from '@/components/admin/designation/DesignationCombobox';
 import { ExperienceGroupedTab } from './experience/ExperienceGroupedTab';
 import { RichTextEditor } from '@/components/ui/rich-text-editor';
+import { ExperienceFormTourButton } from './ExperienceFormTourButton';
 
 interface ExperienceTabProps {
   experiences: Experience[];
@@ -142,15 +142,18 @@ export const ExperienceTab: React.FC<ExperienceTabProps> = ({
       <Card>
         <CardHeader>
           <div className="flex justify-between items-center">
-            <CardTitle>{title}</CardTitle>
-            <Button variant="ghost" size="sm" onClick={onCancel}>
+            <div className="flex items-center space-x-2">
+              <CardTitle>{title}</CardTitle>
+              <ExperienceFormTourButton />
+            </div>
+            <Button variant="ghost" size="sm" onClick={onCancel} data-tour="experience-form-cancel">
               <X className="h-4 w-4" />
             </Button>
           </div>
         </CardHeader>
         <CardContent>
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4" data-tour="experience-form">
               <FormField
                 control={form.control}
                 name="companyName"
@@ -159,7 +162,7 @@ export const ExperienceTab: React.FC<ExperienceTabProps> = ({
                   <FormItem>
                     <FormLabel>Company</FormLabel>
                     <FormControl>
-                      <Input {...field} placeholder="Company name" />
+                      <Input {...field} placeholder="Company name" data-tour="experience-company" />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -174,11 +177,13 @@ export const ExperienceTab: React.FC<ExperienceTabProps> = ({
                   <FormItem>
                     <FormLabel>Designation</FormLabel>
                     <FormControl>
-                      <DesignationCombobox
-                        value={field.value}
-                        onValueChange={field.onChange}
-                        placeholder="Select designation"
-                      />
+                      <div data-tour="experience-designation">
+                        <DesignationCombobox
+                          value={field.value}
+                          onValueChange={field.onChange}
+                          placeholder="Select designation"
+                        />
+                      </div>
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -193,6 +198,7 @@ export const ExperienceTab: React.FC<ExperienceTabProps> = ({
                       <Button
                         variant="outline"
                         className="w-full justify-start text-left font-normal"
+                        data-tour="experience-start-date"
                       >
                         <CalendarIcon className="mr-2 h-4 w-4" />
                         {startDate ? format(startDate, 'PPP') : <span>Pick a date</span>}
@@ -218,6 +224,7 @@ export const ExperienceTab: React.FC<ExperienceTabProps> = ({
                           variant="outline"
                           className="w-full justify-start text-left font-normal"
                           disabled={isCurrent}
+                          data-tour="experience-end-date"
                         >
                           <CalendarIcon className="mr-2 h-4 w-4" />
                           {endDate && !isCurrent ? format(endDate, 'PPP') : <span>Pick a date</span>}
@@ -237,7 +244,7 @@ export const ExperienceTab: React.FC<ExperienceTabProps> = ({
                       </PopoverContent>
                     </Popover>
                     
-                    <div className="flex items-center space-x-2">
+                    <div className="flex items-center space-x-2" data-tour="experience-current-checkbox">
                       <Checkbox 
                         id="current-position" 
                         checked={isCurrent}
@@ -261,12 +268,14 @@ export const ExperienceTab: React.FC<ExperienceTabProps> = ({
                   <FormItem>
                     <FormLabel>Description</FormLabel>
                     <FormControl>
-                      <RichTextEditor
-                        value={field.value || ''}
-                        onChange={field.onChange}
-                        placeholder="Describe your role and achievements"
-                        className="min-h-[120px]"
-                      />
+                      <div data-tour="experience-description">
+                        <RichTextEditor
+                          value={field.value || ''}
+                          onChange={field.onChange}
+                          placeholder="Describe your role and achievements"
+                          className="min-h-[120px]"
+                        />
+                      </div>
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -277,7 +286,7 @@ export const ExperienceTab: React.FC<ExperienceTabProps> = ({
                 <Button type="button" variant="outline" onClick={onCancel}>
                   Cancel
                 </Button>
-                <Button type="submit" disabled={isSaving}>
+                <Button type="submit" disabled={isSaving} data-tour="experience-save-button">
                   {isSaving ? "Saving..." : isAdding ? "Save Experience" : "Save Changes"}
                 </Button>
               </div>

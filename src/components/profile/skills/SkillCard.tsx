@@ -85,7 +85,7 @@ export const SkillCard: React.FC<SkillCardProps> = ({
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-3 flex-1">
             {isDraggable && isEditing && (
-              <div className="flex-shrink-0 text-gray-400 hover:text-gray-600">
+              <div className="flex-shrink-0 text-gray-400 hover:text-gray-600" data-tour="drag-handle">
                 <GripVertical className="h-4 w-4" />
               </div>
             )}
@@ -111,7 +111,7 @@ export const SkillCard: React.FC<SkillCardProps> = ({
                   
                   <div className="flex items-center space-x-2">
                     <span className="text-sm text-gray-600 whitespace-nowrap">Proficiency:</span>
-                    <div className="flex space-x-1">
+                    <div className="flex space-x-1" data-tour="skill-proficiency">
                       {Array.from({ length: 10 }).map((_, i) => (
                         <button
                           key={i}
@@ -132,7 +132,7 @@ export const SkillCard: React.FC<SkillCardProps> = ({
                   </div>
                   
                   {hasChanges && (
-                    <div className="flex items-center space-x-2 pt-2">
+                    <div className="flex items-center space-x-2 pt-2" data-tour="skill-actions">
                       <Button
                         variant="outline"
                         size="sm"
@@ -197,7 +197,7 @@ export const SkillCard: React.FC<SkillCardProps> = ({
           </div>
 
           {isEditing && (
-            <div className="flex items-center space-x-1 flex-shrink-0">
+            <div className="flex items-center space-x-1 flex-shrink-0" data-tour="skill-actions">
               <Button
                 variant="ghost"
                 size="sm"

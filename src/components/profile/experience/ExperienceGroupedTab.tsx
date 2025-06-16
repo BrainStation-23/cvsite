@@ -7,6 +7,7 @@ import { CompanyExperienceCard } from './CompanyExperienceCard';
 import { useExperienceGrouped } from '@/hooks/profile/use-experience-grouped';
 import { useExperience } from '@/hooks/profile/use-experience';
 import { Experience } from '@/types';
+import { ExperienceTourButton } from '../ExperienceTourButton';
 
 interface ExperienceGroupedTabProps {
   isEditing: boolean;
@@ -68,9 +69,12 @@ export const ExperienceGroupedTab: React.FC<ExperienceGroupedTabProps> = ({
     <Card>
       <CardHeader>
         <div className="flex justify-between items-center">
-          <CardTitle>Work Experience</CardTitle>
+          <div className="flex items-center space-x-2">
+            <CardTitle>Work Experience</CardTitle>
+            <ExperienceTourButton />
+          </div>
           {isEditing && (
-            <Button variant="outline" onClick={onAddNew}>
+            <Button variant="outline" onClick={onAddNew} data-tour="add-experience-button">
               <PlusCircle className="mr-2 h-4 w-4" />
               Add Experience
             </Button>
@@ -92,7 +96,7 @@ export const ExperienceGroupedTab: React.FC<ExperienceGroupedTabProps> = ({
             ))}
           </div>
         ) : (
-          <div className="text-center text-gray-500 dark:text-gray-400 py-8">
+          <div className="text-center text-gray-500 dark:text-gray-400 py-8" data-tour="experience-empty-state">
             No work experience added yet. 
             {isEditing && ' Click "Add Experience" to add your work history.'}
           </div>

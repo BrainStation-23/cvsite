@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { UseFormReturn } from 'react-hook-form';
 import { ProfileImageUpload } from './ProfileImageUpload';
 import { DesignationCombobox } from '@/components/admin/designation/DesignationCombobox';
+import { GeneralInfoTourButton } from './GeneralInfoTourButton';
 import { Save } from 'lucide-react';
 
 // Define this type consistently across all files
@@ -36,8 +37,8 @@ export const GeneralInfoTab: React.FC<GeneralInfoTabProps> = ({
   onSave,
   isSaving = false
 }) => {
-  const [hasChanges, setHasChanges] = useState(false);
-  const [initialValues, setInitialValues] = useState<GeneralInfoFormData | null>(null);
+  // Use react-hook-form's built-in dirty/submitting state
+  const { isDirty, isSubmitting } = form.formState;
 
   const firstName = form.watch('firstName');
   const lastName = form.watch('lastName');
@@ -47,31 +48,6 @@ export const GeneralInfoTab: React.FC<GeneralInfoTabProps> = ({
   
   const userName = `${firstName} ${lastName}`.trim() || 'User';
 
-  // Track initial values and changes
-  useEffect(() => {
-    if (!initialValues) {
-      const currentValues = {
-        firstName,
-        lastName,
-        biography,
-        profileImage,
-        currentDesignation
-      };
-      setInitialValues(currentValues);
-    } else {
-      // Check if any values have changed
-      const currentValues = {
-        firstName,
-        lastName,
-        biography,
-        profileImage,
-        currentDesignation
-      };
-      
-      const hasChanged = JSON.stringify(currentValues) !== JSON.stringify(initialValues);
-      setHasChanges(hasChanged);
-    }
-  }, [firstName, lastName, biography, profileImage, currentDesignation, initialValues]);
 
   const handleImageUpdate = (imageUrl: string | null) => {
     form.setValue('profileImage', imageUrl);
@@ -80,39 +56,37 @@ export const GeneralInfoTab: React.FC<GeneralInfoTabProps> = ({
 
   const handleSave = async () => {
     if (!onSave) return;
-    
     const currentValues = form.getValues();
     try {
-      const success = await onSave(currentValues);
-      if (success) {
-        // Update initial values after successful save
-        setInitialValues(currentValues);
-        setHasChanges(false);
-      }
+      await onSave(currentValues);
+      // react-hook-form will reset isDirty after a successful submission if you use reset()
     } catch (error) {
       console.error('Error saving general info:', error);
     }
-  };
+  }; 
 
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle>General Information</CardTitle>
+        <div className="flex items-center gap-2">
+          <CardTitle>General Information</CardTitle>
+          <GeneralInfoTourButton />
+        </div>
         {isEditing && onSave && (
           <Button 
             onClick={handleSave}
-            disabled={!hasChanges || isSaving}
-            variant={hasChanges ? "default" : "outline"}
+            disabled={!isDirty || isSaving || isSubmitting}
+            variant={isDirty ? "default" : "outline"}
             size="sm"
-            className={hasChanges ? "bg-orange-500 hover:bg-orange-600 text-white" : ""}
+            className={isDirty ? "bg-orange-500 hover:bg-orange-600 text-white" : ""}
           >
             <Save className="h-4 w-4 mr-2" />
-            {isSaving ? 'Saving...' : 'Save'}
+            {isSaving || isSubmitting ? 'Saving...' : 'Save'}
           </Button>
         )}
       </CardHeader>
       <CardContent>
-        {hasChanges && isEditing && (
+        {isDirty && isEditing && (
           <div className="mb-4 p-3 bg-orange-50 border border-orange-200 rounded-md">
             <p className="text-sm text-orange-800">
               You have unsaved changes. Please save your changes to avoid losing them.
@@ -148,6 +122,7 @@ export const GeneralInfoTab: React.FC<GeneralInfoTabProps> = ({
                           {isEditing ? (
                             <Input
                               {...field}
+                              data-tour="first-name-input"
                               className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-cvsite-teal focus:ring focus:ring-cvsite-teal focus:ring-opacity-50"
                             />
                           ) : (
@@ -169,6 +144,7 @@ export const GeneralInfoTab: React.FC<GeneralInfoTabProps> = ({
                           {isEditing ? (
                             <Input
                               {...field}
+                              data-tour="last-name-input"
                               className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-cvsite-teal focus:ring focus:ring-cvsite-teal focus:ring-opacity-50"
                             />
                           ) : (
@@ -189,11 +165,13 @@ export const GeneralInfoTab: React.FC<GeneralInfoTabProps> = ({
                       <FormLabel className="block text-sm font-medium text-gray-700 dark:text-gray-300">Current Designation</FormLabel>
                       <FormControl>
                         {isEditing ? (
-                          <DesignationCombobox
-                            value={field.value || ''}
-                            onValueChange={field.onChange}
-                            placeholder="Select or add designation..."
-                          />
+                          <div data-tour="designation-select">
+                            <DesignationCombobox
+                              value={field.value || ''}
+                              onValueChange={field.onChange}
+                              placeholder="Select or add designation..."
+                            />
+                          </div>
                         ) : (
                           <div className="mt-1 text-gray-900 dark:text-gray-100">{field.value || "No designation provided"}</div>
                         )}
@@ -214,6 +192,7 @@ export const GeneralInfoTab: React.FC<GeneralInfoTabProps> = ({
                           <Textarea
                             {...field}
                             rows={4}
+                            data-tour="biography"
                             className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-cvsite-teal focus:ring focus:ring-cvsite-teal focus:ring-opacity-50"
                           />
                         ) : (
