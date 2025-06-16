@@ -13,6 +13,16 @@ const DISPLAY_STYLES = [
   { value: 'timeline', label: 'Timeline' },
 ];
 
+
+const HIDE_DISPLAY_STYLE_FOR: CVSectionType[] = [
+  'references',
+  'projects',
+  'page_break',
+  'achievements',
+  'training',
+  'education'
+];
+
 interface SectionConfigurationProps {
   sectionId: string;
   sectionType: CVSectionType;
@@ -34,7 +44,7 @@ const SectionConfiguration: React.FC<SectionConfigurationProps> = ({
 }) => {
   const showProjectsToView = sectionType === 'projects';
   const showMaxSkillsCount = sectionType === 'technical_skills' || sectionType === 'specialized_skills';
-  const showDisplayStyle = !showMaxSkillsCount; // Hide display style for skills sections
+  const showDisplayStyle = !HIDE_DISPLAY_STYLE_FOR.includes(sectionType);
   const showReferenceSelection = sectionType === 'references';
 
   return (
