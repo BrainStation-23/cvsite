@@ -3,6 +3,24 @@ import React, { useState } from 'react';
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from '@/components/ui/resizable';
 import { Card } from '@/components/ui/card';
 import CVPreview from './CVPreview';
+import { useTemplateReferences } from '@/hooks/use-template-references';
+
+// Helper component to fetch references and merge into profile
+const MergedProfilePreview: React.FC<{ template: any; profile: any }> = ({ template, profile }) => {
+  const { references, isLoading } = useTemplateReferences();
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center h-full">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-400 mr-3"></div>
+        <span className="text-gray-500 text-sm">Loading references...</span>
+      </div>
+    );
+  }
+
+  const mergedProfile = { ...profile, references };
+  return <CVPreview template={template} profile={mergedProfile} />;
+};
 import TemplateInspector from './TemplateInspector';
 import { CVTemplate } from '@/types/cv-templates';
 
@@ -35,14 +53,13 @@ const LivePreviewLayout: React.FC<LivePreviewLayoutProps> = ({
         {/* Live Preview Panel */}
         <ResizablePanel defaultSize={70} minSize={50}>
           <div className="h-full p-6 overflow-auto bg-gray-50">
+            {/* Fetch references and merge into profile for CVPreview */}
             {selectedProfile ? (
-              <div className="flex justify-center">
-                <CVPreview 
-                  key={previewKey}
-                  template={template} 
-                  profile={selectedProfile} 
-                />
-              </div>
+              <MergedProfilePreview
+                key={previewKey}
+                template={template}
+                profile={selectedProfile}
+              />
             ) : (
               <Card className="h-full flex items-center justify-center">
                 <div className="text-center text-gray-500">
