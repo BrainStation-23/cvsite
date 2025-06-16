@@ -27,6 +27,7 @@ interface SectionConfig {
     display_style?: string;
     projects_to_view?: number;
     max_skills_count?: number;
+    selected_references?: string[];
     fields?: FieldConfig[];
     layout_placement?: 'main' | 'sidebar';
   };
@@ -71,7 +72,8 @@ const SectionCard: React.FC<SectionCardProps> = ({
     hasMoveSectionToPlacement: !!onMoveSectionToPlacement,
     currentPlacement: section.styling_config.layout_placement,
     isExpanded,
-    maxSkillsCount: section.styling_config.max_skills_count
+    maxSkillsCount: section.styling_config.max_skills_count,
+    selectedReferences: section.styling_config.selected_references
   });
 
   const getSectionColor = (sectionType: CVSectionType): string => {
@@ -92,6 +94,8 @@ const SectionCard: React.FC<SectionCardProps> = ({
         return 'border-l-indigo-500 bg-indigo-50';
       case 'achievements':
         return 'border-l-yellow-500 bg-yellow-50';
+      case 'references':
+        return 'border-l-cyan-500 bg-cyan-50';
       case 'page_break':
         return 'border-l-gray-500 bg-gray-50';
       default:
@@ -137,6 +141,7 @@ const SectionCard: React.FC<SectionCardProps> = ({
                   displayStyle={section.styling_config.display_style || 'default'}
                   projectsToView={section.styling_config.projects_to_view}
                   maxSkillsCount={section.styling_config.max_skills_count}
+                  selectedReferences={section.styling_config.selected_references}
                   onUpdateSectionStyling={onUpdateSectionStyling}
                 />
 
