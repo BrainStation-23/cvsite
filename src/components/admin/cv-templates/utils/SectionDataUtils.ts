@@ -18,6 +18,8 @@ export class SectionDataUtils {
         return profile.trainings || [];
       case 'achievements':
         return profile.achievements || [];
+      case 'references':
+        return profile.references || [];
       default:
         return null;
     }

@@ -14,7 +14,7 @@ export interface CVTemplate {
 export interface CVTemplateSection {
   id: string;
   template_id: string;
-  section_type: 'general' | 'technical_skills' | 'specialized_skills' | 'experience' | 'education' | 'training' | 'achievements' | 'projects' | 'page_break';
+  section_type: 'general' | 'technical_skills' | 'specialized_skills' | 'experience' | 'education' | 'training' | 'achievements' | 'projects' | 'references' | 'page_break';
   display_order: number;
   is_required: boolean;
   field_mapping: Record<string, any>;
