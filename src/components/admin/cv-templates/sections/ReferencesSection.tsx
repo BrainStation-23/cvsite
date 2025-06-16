@@ -71,6 +71,7 @@ export const ReferencesSection: React.FC<ReferencesSectionProps> = ({
         style={{
           ...(styles?.fieldStyles || {}),
           fontWeight: fieldName === 'name' ? 'bold' : 'normal',
+          fontSize: fieldName === 'name' ? undefined : '0.9em',
           color: styles?.colors?.text,
           marginBottom: '2px',
         }}

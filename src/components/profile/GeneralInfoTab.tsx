@@ -49,10 +49,18 @@ export const GeneralInfoTab: React.FC<GeneralInfoTabProps> = ({
   const userName = `${firstName} ${lastName}`.trim() || 'User';
 
 
-  const handleImageUpdate = (imageUrl: string | null) => {
+  const handleImageUpdate = async (imageUrl: string | null) => {
     form.setValue('profileImage', imageUrl);
     onImageUpdate(imageUrl);
+    if (onSave) {
+      try {
+        await onSave(form.getValues());
+      } catch (error) {
+        console.error('Error saving profile image to general info:', error);
+      }
+    }
   };
+
 
   const handleSave = async () => {
     if (!onSave) return;
