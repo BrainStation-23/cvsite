@@ -4,7 +4,6 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Plus, Edit, Trash2, Save } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -192,35 +191,19 @@ const SectionTableMappingsTab: React.FC = () => {
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <Label>Section Type</Label>
-                <Select 
-                  value={newMapping.section_type} 
-                  onValueChange={(value) => setNewMapping({...newMapping, section_type: value})}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {sectionTypes.map(type => (
-                      <SelectItem key={type} value={type}>{type}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+<Input
+  value={newMapping.section_type}
+  onChange={e => setNewMapping({ ...newMapping, section_type: e.target.value })}
+  placeholder="Enter section type"
+/>
               </div>
               <div>
                 <Label>Table Name</Label>
-                <Select 
-                  value={newMapping.table_name} 
-                  onValueChange={(value) => setNewMapping({...newMapping, table_name: value})}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select table..." />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {commonTables.map(table => (
-                      <SelectItem key={table} value={table}>{table}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <Input
+                  value={newMapping.table_name}
+                  onChange={e => setNewMapping({ ...newMapping, table_name: e.target.value })}
+                  placeholder="Enter table name"
+                />
               </div>
             </div>
             <div>
@@ -301,35 +284,19 @@ const SectionMappingItem: React.FC<SectionMappingItemProps> = ({
           <div className="grid grid-cols-2 gap-4">
             <div>
               <Label>Section Type</Label>
-              <Select 
-                value={editedMapping.section_type} 
-                onValueChange={(value) => setEditedMapping({...editedMapping, section_type: value})}
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {sectionTypes.map(type => (
-                    <SelectItem key={type} value={type}>{type}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+<Input
+  value={editedMapping.section_type}
+  onChange={e => setEditedMapping({ ...editedMapping, section_type: e.target.value })}
+  placeholder="Enter section type"
+/>
             </div>
             <div>
               <Label>Table Name</Label>
-              <Select 
-                value={editedMapping.table_name} 
-                onValueChange={(value) => setEditedMapping({...editedMapping, table_name: value})}
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {commonTables.map(table => (
-                    <SelectItem key={table} value={table}>{table}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+<Input
+  value={editedMapping.table_name}
+  onChange={e => setEditedMapping({ ...editedMapping, table_name: e.target.value })}
+  placeholder="Enter table name"
+/>
             </div>
           </div>
           <div className="mt-4">

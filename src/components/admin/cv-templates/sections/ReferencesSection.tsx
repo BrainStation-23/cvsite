@@ -62,19 +62,19 @@ export const ReferencesSection: React.FC<ReferencesSectionProps> = ({
 
   const renderFieldValue = (reference: Reference, fieldName: string) => {
     if (!isFieldEnabled(fieldName)) return null;
-    
     const value = reference[fieldName as keyof Reference];
     if (!value) return null;
-    
     const maskedValue = applyMasking(value, fieldName);
-    
     return (
-      <div key={fieldName} style={{
-        fontSize: styles?.typography?.bodySize || '14px',
-        color: fieldName === 'name' ? styles?.colors?.text || '#000' : styles?.colors?.secondary || '#666',
-        marginBottom: '2px',
-        fontWeight: fieldName === 'name' ? 'bold' : 'normal'
-      }}>
+      <div
+        key={fieldName}
+        style={{
+          ...(styles?.fieldStyles || {}),
+          fontWeight: fieldName === 'name' ? 'bold' : 'normal',
+          color: styles?.colors?.text,
+          marginBottom: '2px',
+        }}
+      >
         {fieldName === 'email' && `Email: ${maskedValue}`}
         {fieldName === 'phone' && `Phone: ${maskedValue}`}
         {!['email', 'phone'].includes(fieldName) && maskedValue}
@@ -83,36 +83,37 @@ export const ReferencesSection: React.FC<ReferencesSectionProps> = ({
   };
 
   return (
-    <div style={{ marginBottom: styles?.spacing?.sectionMargin || '16px' }}>
-      <h3 style={{
-        fontSize: styles?.typography?.sectionTitleSize || '18px',
-        fontWeight: styles?.typography?.sectionTitleWeight || 'bold',
-        color: styles?.colors?.primary || '#000',
-        marginBottom: styles?.spacing?.titleMargin || '12px',
-        borderBottom: `2px solid ${styles?.colors?.primary || '#000'}`,
-        paddingBottom: '4px'
-      }}>
+    <div style={styles.sectionStyles}>
+      <h2 style={styles.sectionTitleStyles}>
         {finalSectionTitle}
-      </h3>
-      
-      <div style={{ 
-        display: 'grid', 
-        gap: styles?.spacing?.itemMargin || '12px',
-        gridTemplateColumns: displayStyle === 'compact' 
-          ? 'repeat(auto-fit, minmax(250px, 1fr))' 
-          : '1fr'
-      }}>
+      </h2>
+      <div
+        style={{
+          ...(styles?.bodyStyles || {}),
+          display: 'grid',
+          gap: styles?.spacing?.itemMargin || '12px',
+          gridTemplateColumns:
+            displayStyle === 'compact'
+              ? 'repeat(auto-fit, minmax(250px, 1fr))'
+              : '1fr',
+        }}
+      >
         {selectedReferences.map((reference: Reference) => (
-          <div key={reference.id} style={{
-            padding: styles?.spacing?.itemPadding || '8px',
-            border: displayStyle === 'detailed' 
-              ? `1px solid ${styles?.colors?.border || '#e0e0e0'}` 
-              : 'none',
-            borderRadius: '4px'
-          }}>
-            {orderedFields.map(field => 
-              renderFieldValue(reference, field.field)
-            )}
+          <div
+            key={reference.id}
+            style={{
+              ...(styles?.itemStyles || {}),
+              padding: styles?.spacing?.itemPadding || '8px',
+              border:
+                displayStyle === 'detailed'
+                  ? styles?.itemStyles?.border || `1px solid ${styles?.colors?.border || '#e0e0e0'}`
+                  : 'none',
+              borderRadius: '4px',
+              background: styles?.itemStyles?.background,
+              color: styles?.itemStyles?.color || styles?.colors?.text,
+            }}
+          >
+            {orderedFields.map(field => renderFieldValue(reference, field.field))}
           </div>
         ))}
       </div>

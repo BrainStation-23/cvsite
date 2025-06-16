@@ -26,7 +26,7 @@ const FieldDisplayConfigTab: React.FC = () => {
 
   const sectionTypes = [
     'general', 'technical_skills', 'specialized_skills', 
-    'experience', 'education', 'training', 'achievements', 'projects'
+    'experience', 'education', 'training', 'achievements', 'projects', 'references'
   ];
   const sectionLabels: Record<string, string> = {
     general: 'General',
@@ -37,6 +37,7 @@ const FieldDisplayConfigTab: React.FC = () => {
     training: 'Training',
     achievements: 'Achievements',
     projects: 'Projects',
+    references: 'References',
   };
 
   const fieldTypes = ['text', 'number', 'date', 'boolean', 'array', 'image', 'richtext'];
