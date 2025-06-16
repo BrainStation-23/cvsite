@@ -40,8 +40,11 @@ export class ReferencesSectionRenderer {
     // Add references content
     references.forEach((reference, index) => {
       if (index > 0) {
-        // Add spacing between references
-        elements.push(this.styler.createSpacing(styles?.spacing?.itemMargin || 8));
+        // Add spacing between references using a regular paragraph
+        elements.push(new Paragraph({
+          children: [],
+          spacing: { after: styles?.spacing?.itemMargin * 56.7 || 450 }
+        }));
       }
 
       // Reference name
@@ -50,7 +53,8 @@ export class ReferencesSectionRenderer {
           new TextRun({
             text: reference.name,
             bold: true,
-            size: styles?.typography?.bodySize || 24,
+            size: this.styler.getFontSize('base'),
+            color: this.styler.parseColor(styles?.colors?.primary || '#000000')
           }),
         ],
         spacing: { after: 100 },
@@ -61,7 +65,8 @@ export class ReferencesSectionRenderer {
         children: [
           new TextRun({
             text: reference.designation,
-            size: styles?.typography?.bodySize || 24,
+            size: this.styler.getFontSize('base'),
+            color: this.styler.parseColor(styles?.colors?.text || '#000000')
           }),
         ],
         spacing: { after: 50 },
@@ -72,7 +77,8 @@ export class ReferencesSectionRenderer {
         children: [
           new TextRun({
             text: reference.company,
-            size: styles?.typography?.bodySize || 24,
+            size: this.styler.getFontSize('base'),
+            color: this.styler.parseColor(styles?.colors?.text || '#000000')
           }),
         ],
         spacing: { after: 50 },
@@ -92,8 +98,9 @@ export class ReferencesSectionRenderer {
           children: [
             new TextRun({
               text: contactInfo.join(' | '),
-              size: styles?.typography?.captionSize || 20,
+              size: this.styler.getFontSize('base') * 0.9,
               italics: true,
+              color: this.styler.parseColor(styles?.colors?.secondary || '#666666')
             }),
           ],
           spacing: { after: 100 },
