@@ -195,7 +195,7 @@ export const ProfileImageUpload: React.FC<ProfileImageUploadProps> = ({
         dragActive={dragActive}
         setDragActive={setDragActive}
         uploading={uploading}
-        handleFileSelect={handleFileSelect}
+        onValidFile={uploadImage}
       />
     </div>
   );

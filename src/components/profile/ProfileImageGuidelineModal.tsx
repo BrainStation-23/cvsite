@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 
 interface ProfileImageGuidelineModalProps {
   show: boolean;
@@ -6,7 +6,7 @@ interface ProfileImageGuidelineModalProps {
   dragActive: boolean;
   setDragActive: (active: boolean) => void;
   uploading: boolean;
-  handleFileSelect: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onValidFile: (file: File) => Promise<void>;
 }
 
 const EXAMPLES = [
@@ -46,9 +46,57 @@ const ProfileImageGuidelineModal: React.FC<ProfileImageGuidelineModalProps> = ({
   dragActive,
   setDragActive,
   uploading,
-  handleFileSelect,
+  onValidFile,
 }) => {
+  const [error, setError] = useState<string | null>(null);
+
   if (!show) return null;
+
+  // Validate file size before upload
+  const IMAGE_TYPES = [
+    'image/jpeg',
+    'image/png',
+    'image/gif',
+    'image/bmp',
+    'image/webp',
+    'image/tiff',
+    'image/svg+xml',
+  ];
+
+  const handleValidatedFile = async (file: File | undefined | null) => {
+    if (!file) return;
+    if (!IMAGE_TYPES.includes(file.type)) {
+      setError('File must be an image (jpeg, png, gif, bmp, webp, tiff, svg).');
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      setError('File must be less than 5MB.');
+      return;
+    }
+    setError(null);
+    try {
+      await onValidFile(file);
+      onClose();
+    } catch (e) {
+      setError('Upload failed. Please try again.');
+    }
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    handleValidatedFile(e.target.files?.[0]);
+  };
+
+  const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    setDragActive(false);
+    handleValidatedFile(e.dataTransfer.files?.[0]);
+  };
+
+  const handleModalClose = () => {
+    setError(null);
+    onClose();
+  };
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
       <div className="bg-white dark:bg-gray-900 rounded-lg shadow-lg max-w-3xl w-full p-8 relative">
@@ -82,23 +130,14 @@ const ProfileImageGuidelineModal: React.FC<ProfileImageGuidelineModalProps> = ({
           className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${dragActive ? 'border-blue-400 bg-blue-50' : 'border-gray-300 bg-gray-50 dark:bg-gray-800'}`}
           onDragOver={e => { e.preventDefault(); setDragActive(true); }}
           onDragLeave={e => { e.preventDefault(); setDragActive(false); }}
-          onDrop={e => {
-            e.preventDefault();
-            setDragActive(false);
-            const file = e.dataTransfer.files?.[0];
-            if (file) handleFileSelect({ target: { files: [file] } } as any);
-            onClose();
-          }}
+          onDrop={handleDrop}
         >
           <input
             id="profile-image-upload-modal"
             type="file"
-            accept="image/*"
+            accept="image/jpeg,image/png,image/gif,image/bmp,image/webp,image/tiff,image/svg+xml"
             className="hidden"
-            onChange={e => {
-              handleFileSelect(e);
-              onClose();
-            }}
+            onChange={handleInputChange}
             disabled={uploading}
           />
           <label htmlFor="profile-image-upload-modal" className="block cursor-pointer">
@@ -106,6 +145,7 @@ const ProfileImageGuidelineModal: React.FC<ProfileImageGuidelineModalProps> = ({
             <span className="inline-block px-6 py-3 bg-blue-600 text-white rounded shadow hover:bg-blue-700 transition-colors text-sm">Choose File</span>
           </label>
           <p className="mt-3 text-xs text-gray-500 dark:text-gray-400">JPG or PNG, max 5MB</p>
+          {error && <p className="mt-2 text-sm text-red-600">{error}</p>}
         </div>
       </div>
     </div>
