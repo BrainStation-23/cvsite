@@ -1,12 +1,11 @@
 
 import React, { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { AspectRatio } from '@/components/ui/aspect-ratio';
-import { Camera, Trash2, Upload } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import ProfileImagePreview from './ProfileImagePreview';
+import ProfileImageActionButtons from './ProfileImageActionButtons';
+import ProfileImageGuidelineModal from './ProfileImageGuidelineModal';
 
 interface ProfileImageUploadProps {
   currentImageUrl?: string | null;
@@ -23,6 +22,9 @@ export const ProfileImageUpload: React.FC<ProfileImageUploadProps> = ({
   isEditing,
   userName
 }) => {
+  // Modal and drag state for guideline overlay
+  const [showGuidelineModal, setShowGuidelineModal] = useState(false);
+  const [dragActive, setDragActive] = useState(false);
   const { user } = useAuth();
   const { toast } = useToast();
   const [uploading, setUploading] = useState(false);
@@ -168,91 +170,32 @@ export const ProfileImageUpload: React.FC<ProfileImageUploadProps> = ({
   return (
     <div className="flex flex-col items-center space-y-6">
       {/* Profile Image Preview */}
-      <div className="relative w-64" data-tour="profile-image">
-        <AspectRatio ratio={3/4} className="bg-gray-100 dark:bg-gray-800 rounded-lg overflow-hidden border-2 border-gray-200 dark:border-gray-700">
-          {currentImageUrl ? (
-            <img
-              src={currentImageUrl}
-              alt={userName}
-              className="w-full h-full object-cover"
-              style={{ objectPosition: 'center' }}
-            />
-          ) : (
-            <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-900">
-              <div className="text-center">
-                <div className="text-3xl font-bold text-gray-400 dark:text-gray-500 mb-2">
-                  {getInitials(userName)}
-                </div>
-                <p className="text-sm text-gray-500 dark:text-gray-400">No image uploaded</p>
-              </div>
-            </div>
-          )}
-        </AspectRatio>
-        
-        {/* Camera overlay button for editing */}
-        {isEditing && (
-          <div className="absolute top-3 right-3">
-            <label htmlFor="profile-image-upload">
-              <Button
-                type="button"
-                size="sm"
-                className="rounded-full h-10 w-10 p-0 shadow-lg"
-                disabled={uploading}
-                asChild
-              >
-                <span className="cursor-pointer">
-                  <Camera className="h-4 w-4" />
-                </span>
-              </Button>
-            </label>
-          </div>
-        )}
-      </div>
+      <ProfileImagePreview
+        currentImageUrl={currentImageUrl}
+        userName={userName}
+        isEditing={isEditing}
+        uploading={uploading}
+      />
 
       {/* Action Buttons */}
       {isEditing && (
-        <div className="flex flex-col sm:flex-row gap-3 w-full max-w-xs">
-          <label htmlFor="profile-image-upload" className="flex-1">
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              disabled={uploading}
-              className="w-full"
-              asChild
-            >
-              <span className="cursor-pointer flex items-center justify-center gap-2">
-                <Upload className="h-4 w-4" />
-                {uploading ? 'Uploading...' : 'Upload Image'}
-              </span>
-            </Button>
-          </label>
-          
-          {currentImageUrl && (
-            <Button
-              type="button"
-              variant="destructive"
-              size="sm"
-              onClick={handleRemoveImage}
-              disabled={deleting || uploading}
-              className="flex-1"
-              data-tour="remove-image-button"
-            >
-              <Trash2 className="h-4 w-4 mr-2" />
-              {deleting ? 'Removing...' : 'Remove'}
-            </Button>
-          )}
-        </div>
+        <ProfileImageActionButtons
+          uploading={uploading}
+          deleting={deleting}
+          currentImageUrl={currentImageUrl}
+          onUploadClick={() => setShowGuidelineModal(true)}
+          onRemoveClick={handleRemoveImage}
+        />
       )}
 
-      {/* Hidden file input */}
-      <Input
-        id="profile-image-upload"
-        type="file"
-        accept="image/*"
-        onChange={handleFileSelect}
-        className="hidden"
-        disabled={uploading}
+      {/* Profile Image Guideline Modal */}
+      <ProfileImageGuidelineModal
+        show={isEditing && showGuidelineModal}
+        onClose={() => setShowGuidelineModal(false)}
+        dragActive={dragActive}
+        setDragActive={setDragActive}
+        uploading={uploading}
+        handleFileSelect={handleFileSelect}
       />
     </div>
   );
