@@ -10,6 +10,7 @@ import { ProjectsSectionRenderer } from './sections/ProjectsSectionRenderer';
 import { SkillsSectionRenderer } from './sections/SkillsSectionRenderer';
 import { TrainingSectionRenderer } from './sections/TrainingSectionRenderer';
 import { AchievementsSectionRenderer } from './sections/AchievementsSectionRenderer';
+import { ReferencesSectionRenderer } from './sections/ReferencesSectionRenderer';
 
 export class SectionRenderer {
   private styler!: DocumentStyler;
@@ -23,6 +24,7 @@ export class SectionRenderer {
   private skillsRenderer: SkillsSectionRenderer;
   private trainingRenderer: TrainingSectionRenderer;
   private achievementsRenderer: AchievementsSectionRenderer;
+  private referencesRenderer: ReferencesSectionRenderer;
 
   constructor() {
     this.generalRenderer = new GeneralSectionRenderer();
@@ -32,6 +34,7 @@ export class SectionRenderer {
     this.skillsRenderer = new SkillsSectionRenderer();
     this.trainingRenderer = new TrainingSectionRenderer();
     this.achievementsRenderer = new AchievementsSectionRenderer();
+    this.referencesRenderer = new ReferencesSectionRenderer();
   }
 
   setStyler(styler: DocumentStyler): void {
@@ -44,6 +47,7 @@ export class SectionRenderer {
     this.skillsRenderer.setStyler(styler);
     this.trainingRenderer.setStyler(styler);
     this.achievementsRenderer.setStyler(styler);
+    this.referencesRenderer.setStyler(styler);
   }
 
   setMaskingService(maskingService: FieldMaskingService): void {
@@ -56,6 +60,7 @@ export class SectionRenderer {
     this.skillsRenderer.setMaskingService(maskingService);
     this.trainingRenderer.setMaskingService(maskingService);
     this.achievementsRenderer.setMaskingService(maskingService);
+    this.referencesRenderer.setMaskingService(maskingService);
   }
 
   setVisibilityService(visibilityService: FieldVisibilityService): void {
@@ -68,6 +73,7 @@ export class SectionRenderer {
     this.skillsRenderer.setVisibilityService(visibilityService);
     this.trainingRenderer.setVisibilityService(visibilityService);
     this.achievementsRenderer.setVisibilityService(visibilityService);
+    this.referencesRenderer.setVisibilityService(visibilityService);
   }
 
   async renderSection(
@@ -135,6 +141,15 @@ export class SectionRenderer {
           const achievementElements = this.achievementsRenderer.render(profile.achievements || [], { ...styles, fieldMappings });
           elements.push(...achievementElements);
           break;
+        case 'references':
+          // Get selected references based on section config
+          const selectedReferenceIds = section.styling_config?.selected_references || [];
+          const selectedReferences = (profile.references || []).filter((ref: any) => 
+            selectedReferenceIds.includes(ref.id)
+          );
+          const referenceElements = this.referencesRenderer.render(selectedReferences, { ...styles, fieldMappings });
+          elements.push(...referenceElements);
+          break;
         default:
           console.log(`Unknown section type: ${section.section_type}`);
       }
@@ -165,6 +180,8 @@ export class SectionRenderer {
         return profile.trainings || [];
       case 'achievements':
         return profile.achievements || [];
+      case 'references':
+        return profile.references || [];
       default:
         return null;
     }

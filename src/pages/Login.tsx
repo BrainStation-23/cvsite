@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { toast } from 'sonner';
 import { HeroSection } from '../components/auth/HeroSection';
@@ -10,13 +10,20 @@ const Login = () => {
   const [loading, setLoading] = useState(false);
   const { signIn, isAuthenticated, user } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
 
   useEffect(() => {
     // Redirect if already authenticated
     if (isAuthenticated && user) {
-      redirectBasedOnRole(user.role);
+      // If redirected from a protected route, go back there
+      const from = location.state?.from?.pathname;
+      if (from) {
+        navigate(from, { replace: true });
+      } else {
+        redirectBasedOnRole(user.role);
+      }
     }
-  }, [isAuthenticated, user, navigate]);
+  }, [isAuthenticated, user, navigate, location]);
 
   const redirectBasedOnRole = (role: string) => {
     switch (role) {
