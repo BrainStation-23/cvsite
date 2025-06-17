@@ -1,7 +1,9 @@
+
 export interface Skill {
   id: string;
   name: string;
   proficiency: number;
+  priority: number;
 }
 
 export interface Experience {
@@ -62,3 +64,16 @@ export interface Reference {
   email?: string;
   phone?: string;
 }
+
+export interface User {
+  id: string;
+  email: string;
+  first_name?: string;
+  last_name?: string;
+  employee_id?: string;
+  sbu_id?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export type UserRole = 'admin' | 'manager' | 'employee';

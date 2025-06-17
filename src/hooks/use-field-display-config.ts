@@ -209,6 +209,54 @@ export const useFieldDisplayConfig = () => {
     }
   };
 
+  const reorderConfigs = async (reorderedConfigs: FieldDisplayConfig[], sectionType: string): Promise<boolean> => {
+    try {
+      // Optimistic update - update local state immediately
+      setConfigs(prevConfigs => {
+        const otherSectionConfigs = prevConfigs.filter(c => c.section_type !== sectionType);
+        return [...otherSectionConfigs, ...reorderedConfigs].sort((a, b) => {
+          if (a.section_type !== b.section_type) {
+            return a.section_type.localeCompare(b.section_type);
+          }
+          return a.default_order - b.default_order;
+        });
+      });
+
+      // Update database in batch
+      const updates = reorderedConfigs.map(config => ({
+        id: config.id,
+        default_order: config.default_order
+      }));
+
+      for (const update of updates) {
+        const { error } = await supabase
+          .from('cv_field_display_config')
+          .update({ default_order: update.default_order })
+          .eq('id', update.id);
+
+        if (error) throw error;
+      }
+
+      toast({
+        title: "Success",
+        description: "Field order updated successfully"
+      });
+      
+      return true;
+    } catch (error) {
+      console.error('Error reordering configs:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update field order",
+        variant: "destructive"
+      });
+      
+      // Revert optimistic update on error
+      await loadConfigs();
+      return false;
+    }
+  };
+
   useEffect(() => {
     loadConfigs();
   }, [loadConfigs]);
@@ -225,6 +273,7 @@ export const useFieldDisplayConfig = () => {
     saveConfig,
     addConfig,
     deleteConfig,
+    reorderConfigs,
     refetch: loadConfigs
   };
 };

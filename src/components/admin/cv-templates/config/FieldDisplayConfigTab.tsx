@@ -6,6 +6,77 @@ import { useFieldDisplayConfig } from '@/hooks/use-field-display-config';
 import FieldDisplayConfigItem from './FieldDisplayConfigItem';
 import AddFieldConfigForm from './AddFieldConfigForm';
 import FieldDisplaySearchControls from './FieldDisplaySearchControls';
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+} from '@dnd-kit/core';
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  verticalListSortingStrategy,
+} from '@dnd-kit/sortable';
+import {
+  useSortable,
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
+
+interface SortableItemProps {
+  config: any;
+  isEditing: boolean;
+  onEdit: () => void;
+  onSave: (config: any) => void;
+  onCancel: () => void;
+  onDelete: () => void;
+  sectionTypes: string[];
+  fieldTypes: string[];
+}
+
+const SortableFieldDisplayItem: React.FC<SortableItemProps> = ({
+  config,
+  isEditing,
+  onEdit,
+  onSave,
+  onCancel,
+  onDelete,
+  sectionTypes,
+  fieldTypes
+}) => {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: config.id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+  };
+
+  return (
+    <div ref={setNodeRef} style={style} {...attributes} {...listeners}>
+      <FieldDisplayConfigItem
+        config={config}
+        isEditing={isEditing}
+        onEdit={onEdit}
+        onSave={onSave}
+        onCancel={onCancel}
+        onDelete={onDelete}
+        sectionTypes={sectionTypes}
+        fieldTypes={fieldTypes}
+      />
+    </div>
+  );
+};
 
 const FieldDisplayConfigTab: React.FC = () => {
   const { 
@@ -19,7 +90,8 @@ const FieldDisplayConfigTab: React.FC = () => {
     setSortOrder,
     saveConfig, 
     addConfig, 
-    deleteConfig 
+    deleteConfig,
+    reorderConfigs
   } = useFieldDisplayConfig();
   const [editingId, setEditingId] = useState<string | null>(null);
   const [isAdding, setIsAdding] = useState(false);
@@ -55,6 +127,33 @@ const FieldDisplayConfigTab: React.FC = () => {
   const filteredConfigs = (groupedConfigs[activeSection] || []).filter((config) =>
     !searchQuery || config.display_name?.toLowerCase().includes(searchQuery.toLowerCase())
   );
+
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+
+    if (active.id !== over?.id) {
+      const oldIndex = filteredConfigs.findIndex(config => config.id === active.id);
+      const newIndex = filteredConfigs.findIndex(config => config.id === over?.id);
+
+      const reorderedConfigs = arrayMove(filteredConfigs, oldIndex, newIndex);
+      
+      // Update order values based on new positions
+      const configsWithNewOrder = reorderedConfigs.map((config, index) => ({
+        ...config,
+        default_order: index + 1
+      }));
+
+      // Call the reorder function with optimistic update
+      reorderConfigs(configsWithNewOrder, activeSection);
+    }
+  };
 
   const handleSave = async (config: any) => {
     const success = await saveConfig(config);
@@ -123,27 +222,35 @@ const FieldDisplayConfigTab: React.FC = () => {
           />
         )}
 
-        <div className="space-y-2">
-          {filteredConfigs.length === 0 ? (
-            <div className="text-center py-8 text-gray-500">
-              No field configurations found for this section{searchQuery ? ` matching "${searchQuery}"` : ''}
+        <DndContext
+          sensors={sensors}
+          collisionDetection={closestCenter}
+          onDragEnd={handleDragEnd}
+        >
+          <SortableContext items={filteredConfigs.map(config => config.id)} strategy={verticalListSortingStrategy}>
+            <div className="space-y-2">
+              {filteredConfigs.length === 0 ? (
+                <div className="text-center py-8 text-gray-500">
+                  No field configurations found for this section{searchQuery ? ` matching "${searchQuery}"` : ''}
+                </div>
+              ) : (
+                filteredConfigs.map((config) => (
+                  <SortableFieldDisplayItem
+                    key={config.id}
+                    config={config}
+                    isEditing={editingId === config.id}
+                    onEdit={() => setEditingId(config.id)}
+                    onSave={handleSave}
+                    onCancel={() => setEditingId(null)}
+                    onDelete={() => handleDelete(config.id)}
+                    sectionTypes={sectionTypes}
+                    fieldTypes={fieldTypes}
+                  />
+                ))
+              )}
             </div>
-          ) : (
-            filteredConfigs.map((config) => (
-              <FieldDisplayConfigItem
-                key={config.id}
-                config={config}
-                isEditing={editingId === config.id}
-                onEdit={() => setEditingId(config.id)}
-                onSave={handleSave}
-                onCancel={() => setEditingId(null)}
-                onDelete={() => handleDelete(config.id)}
-                sectionTypes={sectionTypes}
-                fieldTypes={fieldTypes}
-              />
-            ))
-          )}
-        </div>
+          </SortableContext>
+        </DndContext>
       </div>
     </div>
   );
