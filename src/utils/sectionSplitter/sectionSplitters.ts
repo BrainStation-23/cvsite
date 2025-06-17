@@ -9,13 +9,15 @@ export class SectionSplitters {
     availableHeight: number,
     sectionTitle: string,
     layoutType: string = 'single-column',
-    placement: 'main' | 'sidebar' = 'main'
+    placement: 'main' | 'sidebar' = 'main',
+    isDescriptionEnabled: boolean = true,
+    enabledFields: string[] = ['designation', 'company_name', 'date_range', 'description']
   ): SectionSplit {
     return this.splitGenericSection(
       experiences,
       availableHeight,
       sectionTitle,
-      (exp) => ItemEstimators.estimateExperienceItemHeight(exp, layoutType, placement),
+      (exp) => ItemEstimators.estimateExperienceItemHeight(exp, layoutType, placement, isDescriptionEnabled, enabledFields),
       'experience',
       layoutType,
       placement

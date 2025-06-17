@@ -35,6 +35,8 @@ interface ExperienceSectionProps {
   customTitle?: string;
 }
 
+import { VerticalTimeline } from './VerticalTimeline';
+
 export const ExperienceSection: React.FC<ExperienceSectionProps> = ({ 
   profile, 
   styles, 
@@ -200,6 +202,39 @@ export const ExperienceSection: React.FC<ExperienceSectionProps> = ({
     }
   };
 
+  // Check for timeline display style
+  const displayStyle = sectionConfig?.styling_config?.display_style || 'default';
+
+  if (displayStyle === 'timeline') {
+    // Prepare timeline items
+    const timelineItems = profile.experiences.map((exp: any, index: number) => {
+      // Use the same field logic as the default render
+      const title = isFieldEnabled('designation') ? (exp.designation || '') : '';
+      const subtitle = isFieldEnabled('company_name') ? (exp.company_name || '') : '';
+      const startDate = formatDate(exp.start_date);
+      const endDate = exp.is_current ? 'Present' : formatDate(exp.end_date);
+      const dateRange = isFieldEnabled('date_range') ? `${startDate} - ${endDate}` : '';
+      const description = isFieldEnabled('description') ? cleanHtmlContent(exp.description || '') : '';
+      return {
+        title,
+        subtitle,
+        dateRange,
+        description
+      };
+    });
+
+    return (
+      <div style={styles.sectionStyles}>
+        <h2 style={styles.sectionTitleStyles}>{customTitle || sectionTitle || 'Work Experience'}</h2>
+        <VerticalTimeline
+          items={timelineItems}
+          accentColor={styles?.layoutConfig?.accentColor || '#3b82f6'}
+        />
+      </div>
+    );
+  }
+
+  // Default rendering (list)
   return (
     <div style={styles.sectionStyles}>
       <h2 style={styles.sectionTitleStyles}>{customTitle || sectionTitle || 'Work Experience'}</h2>

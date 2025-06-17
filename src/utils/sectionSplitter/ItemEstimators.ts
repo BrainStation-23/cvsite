@@ -37,17 +37,39 @@ export class ItemEstimators {
   }
 
   static estimateExperienceItemHeight(
-    exp: any, 
+    exp: any,
     layoutType: string = 'single-column',
-    placement: 'main' | 'sidebar' = 'main'
+    placement: 'main' | 'sidebar' = 'main',
+    isDescriptionEnabled: boolean = true,
+    enabledFields: string[] = ['designation', 'company_name', 'date_range', 'description']
   ): number {
-    const baseHeight = this.getBaseItemHeight(layoutType, placement) + 10; // Experience has more header info
-    const descriptionHeight = exp.description 
+    // Dynamic per-field heights and margin for main column in multi-column layouts
+    let baseHeight = 0;
+    let designationHeight = 22;
+    let companyNameHeight = 18;
+    let dateRangeHeight = 16;
+    let itemMargin = SectionSplitterConstants.ITEM_MARGIN;
+
+    // Refine for two-column/sidebar layouts (main placement)
+    if ((layoutType === 'two-column' || layoutType === 'sidebar') && placement === 'main') {
+      designationHeight = 18;
+      companyNameHeight = 14;
+      dateRangeHeight = 12;
+      itemMargin = 10;
+    }
+
+    if (enabledFields.includes('designation')) baseHeight += designationHeight;
+    if (enabledFields.includes('company_name')) baseHeight += companyNameHeight;
+    if (enabledFields.includes('date_range')) baseHeight += dateRangeHeight;
+    // Only count description if enabled
+    const descriptionHeight = (isDescriptionEnabled && exp.description)
       ? TextEstimators.estimateRichTextHeight(exp.description, layoutType, placement)
       : 0;
-    
-    const safetyMultiplier = this.getReducedSafetyMultiplier(layoutType, placement, exp.description);
-    return (baseHeight + descriptionHeight + SectionSplitterConstants.ITEM_MARGIN) * safetyMultiplier;
+    // Add item margin
+    baseHeight += itemMargin;
+    // Safety multiplier as before
+    const safetyMultiplier = this.getReducedSafetyMultiplier(layoutType, placement, isDescriptionEnabled ? exp.description : undefined);
+    return (baseHeight + descriptionHeight) * safetyMultiplier;
   }
 
   static estimateEducationItemHeight(
