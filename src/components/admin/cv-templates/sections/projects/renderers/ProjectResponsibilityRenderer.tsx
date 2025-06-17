@@ -29,14 +29,24 @@ export const ProjectResponsibilityRenderer = (
   if (!responsibility) return null;
 
   return (
-    <div 
-      key={`responsibility-${index}`}
-      style={{
-        ...styles.fieldStyles,
-        marginBottom: styles?.spacing?.fieldMargin || '8px',
-        lineHeight: '1.5'
-      }}
-      dangerouslySetInnerHTML={{ __html: responsibility }}
-    />
+    <div key={`responsibility-${index}`} style={{ marginTop: '8pt' }}>
+      <h5 style={{ 
+        fontSize: '0.9em',
+        fontWeight: 'bold',
+        margin: '0 0 4pt 0',
+        color: '#374151'
+      }}>
+        Responsibility
+      </h5>
+      <div 
+        style={{
+          ...styles.fieldStyles,
+          fontSize: '0.9em',
+          lineHeight: '1.4',
+          textAlign: 'justify'
+        }}
+        dangerouslySetInnerHTML={{ __html: responsibility }}
+      />
+    </div>
   );
 };
