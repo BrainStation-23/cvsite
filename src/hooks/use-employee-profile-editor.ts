@@ -669,6 +669,7 @@ export function useEmployeeProfileEditor(profileId: string) {
           name: project.name,
           role: project.role,
           description: project.description,
+          responsibility: project.responsibility,
           start_date: project.startDate.toISOString().split('T')[0],
           end_date: project.endDate ? project.endDate.toISOString().split('T')[0] : null,
           is_current: project.isCurrent,
@@ -708,6 +709,7 @@ export function useEmployeeProfileEditor(profileId: string) {
       if (project.name) updateData.name = project.name;
       if (project.role) updateData.role = project.role;
       if (project.description !== undefined) updateData.description = project.description;
+      if (project.responsibility !== undefined) updateData.responsibility = project.responsibility;
       if (project.startDate) updateData.start_date = project.startDate.toISOString().split('T')[0];
       if (project.endDate !== undefined) updateData.end_date = project.endDate ? project.endDate.toISOString().split('T')[0] : null;
       if (project.isCurrent !== undefined) updateData.is_current = project.isCurrent;

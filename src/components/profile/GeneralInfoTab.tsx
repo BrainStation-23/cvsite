@@ -1,5 +1,3 @@
-
-import React, { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
@@ -42,17 +40,23 @@ export const GeneralInfoTab: React.FC<GeneralInfoTabProps> = ({
 
   const firstName = form.watch('firstName');
   const lastName = form.watch('lastName');
-  const biography = form.watch('biography');
   const profileImage = form.watch('profileImage');
-  const currentDesignation = form.watch('currentDesignation');
   
   const userName = `${firstName} ${lastName}`.trim() || 'User';
 
 
-  const handleImageUpdate = (imageUrl: string | null) => {
+  const handleImageUpdate = async (imageUrl: string | null) => {
     form.setValue('profileImage', imageUrl);
     onImageUpdate(imageUrl);
+    if (onSave) {
+      try {
+        await onSave(form.getValues());
+      } catch (error) {
+        console.error('Error saving profile image to general info:', error);
+      }
+    }
   };
+
 
   const handleSave = async () => {
     if (!onSave) return;

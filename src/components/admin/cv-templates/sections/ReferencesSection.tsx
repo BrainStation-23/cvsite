@@ -71,6 +71,7 @@ export const ReferencesSection: React.FC<ReferencesSectionProps> = ({
         style={{
           ...(styles?.fieldStyles || {}),
           fontWeight: fieldName === 'name' ? 'bold' : 'normal',
+          fontSize: fieldName === 'name' ? undefined : '0.9em',
           color: styles?.colors?.text,
           marginBottom: '2px',
         }}
@@ -83,7 +84,7 @@ export const ReferencesSection: React.FC<ReferencesSectionProps> = ({
   };
 
   return (
-    <div style={styles.sectionStyles}>
+    <div style={{ ...styles.sectionStyles, width: '100%', minWidth: 0 }}>
       <h2 style={styles.sectionTitleStyles}>
         {finalSectionTitle}
       </h2>
@@ -94,8 +95,10 @@ export const ReferencesSection: React.FC<ReferencesSectionProps> = ({
           gap: styles?.spacing?.itemMargin || '12px',
           gridTemplateColumns:
             displayStyle === 'compact'
-              ? 'repeat(auto-fit, minmax(250px, 1fr))'
+              ? 'repeat(auto-fit, minmax(0, 1fr))'
               : '1fr',
+          width: '100%',
+          minWidth: 0,
         }}
       >
         {selectedReferences.map((reference: Reference) => (
@@ -111,9 +114,27 @@ export const ReferencesSection: React.FC<ReferencesSectionProps> = ({
               borderRadius: '4px',
               background: styles?.itemStyles?.background,
               color: styles?.itemStyles?.color || styles?.colors?.text,
+              width: '100%',
+              minWidth: 0,
+              boxSizing: 'border-box',
             }}
           >
-            {orderedFields.map(field => renderFieldValue(reference, field.field))}
+            {orderedFields.map(field => (
+              <div
+                key={field.field}
+                style={{
+                  ...(styles?.fieldStyles || {}),
+                  fontWeight: field.field === 'name' ? 'bold' : 'normal',
+                  fontSize: field.field === 'name' ? undefined : '0.9em',
+                  color: styles?.colors?.text,
+                  marginBottom: '2px',
+                  overflowWrap: 'anywhere',
+                  wordBreak: 'break-word',
+                }}
+              >
+                {renderFieldValue(reference, field.field)}
+              </div>
+            ))}
           </div>
         ))}
       </div>

@@ -38,6 +38,49 @@ export class TextEstimators {
     return estimatedHeight;
   }
 
+  static estimateProjectItemHeight(
+    project: any,
+    layoutType: string = 'single-column',
+    placement: 'main' | 'sidebar' = 'main'
+  ): number {
+    let totalHeight = 0;
+    
+    // Project name (title)
+    if (project.name) {
+      totalHeight += 25; // Bold title height
+    }
+    
+    // Role and date range (subtitle)
+    if (project.role || project.start_date) {
+      totalHeight += 20; // Subtitle height
+    }
+    
+    // Description (rich text)
+    if (project.description) {
+      totalHeight += this.estimateRichTextHeight(project.description, layoutType, placement);
+    }
+    
+    // Responsibility (rich text) - reuse same logic as description
+    if (project.responsibility) {
+      totalHeight += this.estimateRichTextHeight(project.responsibility, layoutType, placement);
+    }
+    
+    // Technologies
+    if (project.technologies_used && project.technologies_used.length > 0) {
+      totalHeight += this.estimateTechnologiesHeight(project.technologies_used, layoutType, placement);
+    }
+    
+    // URL
+    if (project.url) {
+      totalHeight += 20;
+    }
+    
+    // Bottom margin
+    totalHeight += 16;
+    
+    return Math.round(totalHeight);
+  }
+
   static estimateTechnologiesHeight(
     technologies: string[], 
     layoutType: string = 'single-column',

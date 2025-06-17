@@ -74,6 +74,13 @@ export class ProjectsSectionRenderer extends BaseSectionRenderer {
                 elements.push(...richTextParagraphs);
               }
               break;
+            case 'responsibility':
+              value = this.applyFieldMasking(project.responsibility, 'responsibility', 'projects');
+              if (value) {
+                const richTextParagraphs = this.richTextProcessor.parseRichTextToDocx(value, baseStyles);
+                elements.push(...richTextParagraphs);
+              }
+              break;
             case 'technologies_used':
               value = this.applyFieldMasking(project.technologies_used, 'technologies_used', 'projects');
               if (value && value.length > 0) {

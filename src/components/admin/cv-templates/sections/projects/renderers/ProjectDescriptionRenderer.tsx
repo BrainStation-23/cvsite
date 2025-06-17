@@ -30,15 +30,24 @@ export const ProjectDescriptionRenderer = (
     >
       {(processedValue, displayName, shouldShow) => (
         shouldShow && processedValue && (
-          <div 
-            style={{ 
-              marginTop: '4pt', 
+          <div style={{ marginTop: '8pt' }}>
+            <h5 style={{ 
               fontSize: '0.9em',
-              lineHeight: '1.4',
-              textAlign: 'justify'
-            }}
-            dangerouslySetInnerHTML={{ __html: processedValue }}
-          />
+              fontWeight: 'bold',
+              margin: '0 0 4pt 0',
+              color: '#374151'
+            }}>
+              Description
+            </h5>
+            <div 
+              style={{ 
+                fontSize: '0.9em',
+                lineHeight: '1.4',
+                textAlign: 'justify'
+              }}
+              dangerouslySetInnerHTML={{ __html: processedValue }}
+            />
+          </div>
         )
       )}
     </FieldProcessor>

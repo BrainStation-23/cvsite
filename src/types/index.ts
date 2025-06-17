@@ -1,32 +1,8 @@
-export type UserRole = "admin" | "manager" | "employee";
-
-export interface User {
-  id: string;
-  email: string;
-  firstName: string;
-  lastName: string;
-  role: UserRole;
-  profileImageUrl?: string;
-}
-
-export interface EmployeeProfile {
-  id: string;
-  userId: string;
-  designation: string;
-  biography: string;
-  technicalSkills: Skill[];
-  specializedSkills: Skill[];
-  experiences: Experience[];
-  education: Education[];
-  training: Training[];
-  achievements: Achievement[];
-  projects: Project[];
-}
 
 export interface Skill {
   id: string;
   name: string;
-  proficiency: number; // 1-5
+  proficiency: number;
   priority: number;
 }
 
@@ -36,18 +12,18 @@ export interface Experience {
   designation: string;
   startDate: Date;
   endDate?: Date;
-  isCurrent?: boolean;
-  description: string;
+  isCurrent: boolean;
+  description?: string;
 }
 
 export interface Education {
   id: string;
   university: string;
-  degree: string;
+  degree?: string;
   department?: string;
   startDate: Date;
   endDate?: Date;
-  isCurrent?: boolean;
+  isCurrent: boolean;
   gpa?: string;
 }
 
@@ -71,19 +47,37 @@ export interface Project {
   id: string;
   name: string;
   role: string;
+  description: string;
+  responsibility: string;
   startDate: Date;
   endDate?: Date;
-  isCurrent?: boolean;
-  description: string;
+  isCurrent: boolean;
   technologiesUsed: string[];
   url?: string;
 }
 
-export interface PlatformSettings {
-  universities: string[];
-  departments: string[];
-  degrees: string[];
-  designations: string[];
-  references: string[];
-  sbus: string[]; // Strategic Business Units
+export interface Reference {
+  id: string;
+  name: string;
+  designation: string;
+  company: string;
+  email?: string;
+  phone?: string;
 }
+
+export interface User {
+  id: string;
+  email: string;
+  first_name?: string;
+  last_name?: string;
+  firstName?: string;
+  lastName?: string;
+  employee_id?: string;
+  sbu_id?: string;
+  created_at: string;
+  updated_at: string;
+  role: UserRole;
+  profileImageUrl?: string;
+}
+
+export type UserRole = 'admin' | 'manager' | 'employee';

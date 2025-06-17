@@ -1,25 +1,14 @@
 
-import { useState, useEffect, useCallback } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/hooks/use-toast';
 
 export function useEmployeeData(profileId: string) {
-  const [data, setData] = useState<any>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const { toast } = useToast();
+  return useQuery({
+    queryKey: ['employee-data', profileId],
+    queryFn: async () => {
+      if (!profileId) return null;
 
-  const fetchEmployeeData = useCallback(async () => {
-    if (!profileId) {
-      setData(null);
-      setIsLoading(false);
-      return;
-    }
-
-    try {
-      setIsLoading(true);
-      console.log('Fetching employee data for profile:', profileId);
-
-      const { data: result, error } = await supabase.rpc('get_employee_data', {
+      const { data, error } = await supabase.rpc('get_employee_data', {
         profile_uuid: profileId
       });
 
@@ -28,32 +17,21 @@ export function useEmployeeData(profileId: string) {
         throw error;
       }
 
-      console.log('Employee data fetched successfully:', result);
-      setData(result);
-    } catch (error) {
-      console.error('Error fetching employee data:', error);
-      toast({
-        title: "Error",
-        description: "Failed to load employee data",
-        variant: "destructive"
-      });
-      setData(null);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [profileId, toast]);
+      // Ensure projects include responsibility field
+      if (data && typeof data === 'object' && data !== null && 'projects' in data) {
+        const typedData = data as any;
+        if (typedData.projects) {
+          typedData.projects = typedData.projects.map((project: any) => ({
+            ...project,
+            // Ensure responsibility field is included, with fallback to empty string
+            responsibility: project.responsibility || ''
+          }));
+        }
+      }
 
-  useEffect(() => {
-    fetchEmployeeData();
-  }, [fetchEmployeeData]);
-
-  const refetch = useCallback(() => {
-    fetchEmployeeData();
-  }, [fetchEmployeeData]);
-
-  return {
-    data,
-    isLoading,
-    refetch
-  };
+      console.log('Employee data fetched:', data);
+      return data;
+    },
+    enabled: !!profileId,
+  });
 }

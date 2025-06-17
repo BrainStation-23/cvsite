@@ -1,5 +1,4 @@
 
-
 import React from 'react';
 import { ProjectItem } from './projects/ProjectItem';
 import { useSectionFieldConfig } from '@/hooks/use-section-field-config';
@@ -51,8 +50,9 @@ export const ProjectsSection: React.FC<ProjectsSectionProps> = ({
     { field: 'role', label: 'Role', order: 2, enabled: true, masked: false },
     { field: 'date_range', label: 'Date Range', order: 3, enabled: true, masked: false },
     { field: 'description', label: 'Description', order: 4, enabled: true, masked: false },
-    { field: 'technologies_used', label: 'Technologies', order: 5, enabled: true, masked: false },
-    { field: 'url', label: 'URL', order: 6, enabled: true, masked: false }
+    { field: 'responsibility', label: 'Responsibility', order: 5, enabled: true, masked: false },
+    { field: 'technologies_used', label: 'Technologies', order: 6, enabled: true, masked: false },
+    { field: 'url', label: 'URL', order: 7, enabled: true, masked: false }
   ];
 
   const {
@@ -72,7 +72,7 @@ export const ProjectsSection: React.FC<ProjectsSectionProps> = ({
     if (a.display_order !== undefined && b.display_order !== undefined) {
       return a.display_order - b.display_order;
     }
-    return new Date(b.start_date).getTime() - new Date(a.start_date).getTime();
+    return new Date(b.start_date || b.startDate).getTime() - new Date(a.start_date || a.startDate).getTime();
   });
 
   // Get the maximum number of projects to show from section config
@@ -83,6 +83,7 @@ export const ProjectsSection: React.FC<ProjectsSectionProps> = ({
   console.log(`Total projects: ${sortedProjects.length}`);
   console.log(`Max projects to show: ${maxProjects}`);
   console.log(`Projects to display: ${projectsToShow.length}`);
+  console.log(`Sample project data:`, projectsToShow[0]);
   console.log(`Section config:`, sectionConfig?.styling_config);
 
   return (
@@ -111,4 +112,3 @@ export const ProjectsSection: React.FC<ProjectsSectionProps> = ({
     </div>
   );
 };
-

@@ -1,16 +1,25 @@
-
 import React from 'react';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { CVSectionType } from '@/types/cv-templates';
 import ReferenceSectionConfig from './ReferenceSectionConfig';
+import { SkillsSection } from './SkillsSection';
 
 const DISPLAY_STYLES = [
   { value: 'default', label: 'Default' },
   { value: 'compact', label: 'Compact' },
   { value: 'detailed', label: 'Detailed' },
   { value: 'timeline', label: 'Timeline' },
+];
+
+const HIDE_DISPLAY_STYLE_FOR: CVSectionType[] = [
+  'references',
+  'projects',
+  'page_break',
+  'achievements',
+  'training',
+  'education'
 ];
 
 interface SectionConfigurationProps {
@@ -34,7 +43,7 @@ const SectionConfiguration: React.FC<SectionConfigurationProps> = ({
 }) => {
   const showProjectsToView = sectionType === 'projects';
   const showMaxSkillsCount = sectionType === 'technical_skills' || sectionType === 'specialized_skills';
-  const showDisplayStyle = !showMaxSkillsCount; // Hide display style for skills sections
+  const showDisplayStyle = !HIDE_DISPLAY_STYLE_FOR.includes(sectionType);
   const showReferenceSelection = sectionType === 'references';
 
   return (

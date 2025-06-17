@@ -52,6 +52,7 @@ export class ProjectsSectionRenderer {
           </div>
         </div>
         ${project.description ? `<div class="item-description">${project.description}</div>` : ''}
+        ${project.responsibility ? `<div class="item-description">${project.responsibility}</div>` : ''}
         ${technologies.length > 0 ? `<div class="technologies">${techTags}</div>` : ''}
         ${project.url ? `<div class="project-url"><a href="${project.url}" target="_blank">${project.url}</a></div>` : ''}
       </div>`;

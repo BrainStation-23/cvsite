@@ -37,6 +37,7 @@ export const ProjectForm: React.FC<ProjectFormProps> = ({
     project?.technologiesUsed || []
   );
   const [description, setDescription] = useState<string>(project?.description || '');
+  const [responsibility, setResponsibility] = useState<string>(project?.responsibility || '');
 
   const form = useForm({
     defaultValues: {
@@ -68,6 +69,7 @@ export const ProjectForm: React.FC<ProjectFormProps> = ({
     const projectData = {
       ...data,
       description: description,
+      responsibility: responsibility,
       startDate: startDate || new Date(),
       endDate: isCurrent ? undefined : endDate,
       isCurrent: isCurrent,
@@ -210,6 +212,20 @@ export const ProjectForm: React.FC<ProjectFormProps> = ({
             {!description && (
               <p className="text-sm text-destructive">Description is required</p>
             )}
+          </FormItem>
+
+          <FormItem>
+            <FormLabel>Responsibility</FormLabel>
+            <FormControl>
+              <div>
+                <RichTextEditor
+                  value={responsibility}
+                  onChange={setResponsibility}
+                  placeholder="Describe your specific responsibilities and duties"
+                  className="min-h-[150px]"
+                />
+              </div>
+            </FormControl>
           </FormItem>
           
           <FormItem>

@@ -1,4 +1,3 @@
-
 export class MarkdownSectionRenderer {
   static renderSkillsSection(skills: any[]): string {
     let content = '';
@@ -94,6 +93,10 @@ export class MarkdownSectionRenderer {
       
       if (project.description) {
         content += `**Description:** ${project.description}\n\n`;
+      }
+      
+      if (project.responsibility) {
+        content += `**Responsibility:** ${project.responsibility}\n\n`;
       }
       
       if (project.technologies_used && project.technologies_used.length > 0) {
