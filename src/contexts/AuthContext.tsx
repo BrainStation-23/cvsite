@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { User as SupabaseUser, Session } from '@supabase/supabase-js';
 import { supabase } from '../integrations/supabase/client';
@@ -56,16 +55,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setUser({
         id: supabaseUser.id,
         email: supabaseUser.email || '',
-        firstName: profileData?.first_name || 
-                  supabaseUser.user_metadata.first_name || 
-                  supabaseUser.user_metadata.name?.split(' ')[0] || '',
-        lastName: profileData?.last_name || 
-                 supabaseUser.user_metadata.last_name || 
-                 supabaseUser.user_metadata.name?.split(' ').slice(1).join(' ') || '',
+        first_name: profileData?.first_name || supabaseUser.user_metadata.first_name || supabaseUser.user_metadata.name?.split(' ')[0] || '',
+        last_name: profileData?.last_name || supabaseUser.user_metadata.last_name || supabaseUser.user_metadata.name?.split(' ').slice(1).join(' ') || '',
+        firstName: profileData?.first_name || supabaseUser.user_metadata.first_name || supabaseUser.user_metadata.name?.split(' ')[0] || '',
+        lastName: profileData?.last_name || supabaseUser.user_metadata.last_name || supabaseUser.user_metadata.name?.split(' ').slice(1).join(' ') || '',
+        employee_id: profileData?.employee_id,
         role: userRole,
-        profileImageUrl: supabaseUser.user_metadata.avatar_url || 
-                        supabaseUser.user_metadata.picture || 
-                        '/placeholder.svg',
+        profileImageUrl: supabaseUser.user_metadata.avatar_url || supabaseUser.user_metadata.picture || '/placeholder.svg',
+        created_at: supabaseUser.created_at,
+        updated_at: supabaseUser.updated_at || supabaseUser.created_at,
       });
     } catch (error) {
       console.error('Error setting up user profile:', error);

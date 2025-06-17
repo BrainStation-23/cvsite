@@ -1,4 +1,3 @@
-
 export interface ProfileJSONData {
   personalInfo: {
     firstName: string;
@@ -47,12 +46,25 @@ export interface ProfileJSONData {
     name: string;
     role: string;
     description: string;
+    responsibility?: string;
     startDate: string;
     endDate?: string;
     isCurrent: boolean;
     technologiesUsed: string[];
     url?: string;
   }>;
+}
+
+export interface ProjectJSON {
+  name: string;
+  role: string;
+  description: string;
+  responsibility?: string;
+  startDate: string;
+  endDate?: string;
+  isCurrent: boolean;
+  technologiesUsed: string[];
+  url?: string;
 }
 
 export class ProfileJSONService {
@@ -68,10 +80,10 @@ export class ProfileJSONService {
   }): ProfileJSONData {
     return {
       personalInfo: {
-        firstName: profileData.generalInfo.firstName || '',
-        lastName: profileData.generalInfo.lastName || '',
-        biography: profileData.generalInfo.biography || '',
-        profileImage: profileData.generalInfo.profileImage || undefined
+        firstName: profileData.generalInfo?.firstName || profileData.generalInfo?.first_name || '',
+        lastName: profileData.generalInfo?.lastName || profileData.generalInfo?.last_name || '',
+        biography: profileData.generalInfo?.biography || '',
+        profileImage: profileData.generalInfo?.profileImage || profileData.generalInfo?.profile_image
       },
       technicalSkills: profileData.technicalSkills.map(skill => ({
         name: skill.name,
@@ -82,42 +94,43 @@ export class ProfileJSONService {
         proficiency: skill.proficiency
       })),
       experiences: profileData.experiences.map(exp => ({
-        companyName: exp.companyName,
+        companyName: exp.companyName || exp.company_name,
         designation: exp.designation,
-        description: exp.description,
-        startDate: exp.startDate.toISOString().split('T')[0],
-        endDate: exp.endDate ? exp.endDate.toISOString().split('T')[0] : undefined,
-        isCurrent: exp.isCurrent
+        description: exp.description || '',
+        startDate: exp.startDate instanceof Date ? exp.startDate.toISOString().split('T')[0] : exp.start_date,
+        endDate: exp.endDate ? (exp.endDate instanceof Date ? exp.endDate.toISOString().split('T')[0] : exp.end_date) : undefined,
+        isCurrent: exp.isCurrent || exp.is_current || false
       })),
       education: profileData.education.map(edu => ({
         university: edu.university,
-        degree: edu.degree,
-        department: edu.department,
-        gpa: edu.gpa,
-        startDate: edu.startDate.toISOString().split('T')[0],
-        endDate: edu.endDate ? edu.endDate.toISOString().split('T')[0] : undefined,
-        isCurrent: edu.isCurrent
+        degree: edu.degree || '',
+        department: edu.department || '',
+        gpa: edu.gpa || '',
+        startDate: edu.startDate instanceof Date ? edu.startDate.toISOString().split('T')[0] : edu.start_date,
+        endDate: edu.endDate ? (edu.endDate instanceof Date ? edu.endDate.toISOString().split('T')[0] : edu.end_date) : undefined,
+        isCurrent: edu.isCurrent || edu.is_current || false
       })),
       trainings: profileData.trainings.map(training => ({
         title: training.title,
         provider: training.provider,
-        description: training.description,
-        date: training.date.toISOString().split('T')[0],
-        certificateUrl: training.certificateUrl
+        description: training.description || '',
+        date: training.date instanceof Date ? training.date.toISOString().split('T')[0] : training.certification_date,
+        certificateUrl: training.certificateUrl || training.certificate_url
       })),
       achievements: profileData.achievements.map(achievement => ({
         title: achievement.title,
         description: achievement.description,
-        date: achievement.date.toISOString().split('T')[0]
+        date: achievement.date instanceof Date ? achievement.date.toISOString().split('T')[0] : achievement.date
       })),
       projects: profileData.projects.map(project => ({
         name: project.name,
         role: project.role,
         description: project.description,
-        startDate: project.startDate.toISOString().split('T')[0],
-        endDate: project.endDate ? project.endDate.toISOString().split('T')[0] : undefined,
-        isCurrent: project.isCurrent,
-        technologiesUsed: project.technologiesUsed,
+        responsibility: project.responsibility || '',
+        startDate: project.startDate instanceof Date ? project.startDate.toISOString().split('T')[0] : project.start_date,
+        endDate: project.endDate ? (project.endDate instanceof Date ? project.endDate.toISOString().split('T')[0] : project.end_date) : undefined,
+        isCurrent: project.isCurrent || project.is_current || false,
+        technologiesUsed: project.technologiesUsed || project.technologies_used || [],
         url: project.url
       }))
     };
