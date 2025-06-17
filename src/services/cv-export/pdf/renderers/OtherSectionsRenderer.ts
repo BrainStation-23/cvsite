@@ -1,4 +1,3 @@
-
 import { BasePDFRenderer } from './BasePDFRenderer';
 import { RichTextParser } from '../utils/RichTextParser';
 import { RichTextRenderer } from '../utils/RichTextRenderer';
@@ -62,6 +61,16 @@ export class OtherSectionsRenderer extends BasePDFRenderer {
           const parsedContent = this.richTextParser.parseRichText(description);
           const descHeight = this.richTextRenderer.renderRichTextContent(parsedContent, x, currentY, width);
           currentY += descHeight + 3;
+        }
+      }
+
+      // Responsibility with proper rich text parsing (same logic as description)
+      if (this.visibilityService.isFieldVisible('responsibility', sectionType)) {
+        const responsibility = this.maskingService.applyMasking(project.responsibility, 'responsibility', sectionType);
+        if (responsibility) {
+          const parsedContent = this.richTextParser.parseRichText(responsibility);
+          const respHeight = this.richTextRenderer.renderRichTextContent(parsedContent, x, currentY, width);
+          currentY += respHeight + 3;
         }
       }
 
