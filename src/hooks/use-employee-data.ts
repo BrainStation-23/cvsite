@@ -9,7 +9,7 @@ export function useEmployeeData(profileId: string) {
       if (!profileId) return null;
 
       const { data, error } = await supabase.rpc('get_employee_data', {
-        profile_id: profileId
+        profile_uuid: profileId
       });
 
       if (error) {
@@ -18,12 +18,15 @@ export function useEmployeeData(profileId: string) {
       }
 
       // Ensure projects include responsibility field
-      if (data && data.projects) {
-        data.projects = data.projects.map((project: any) => ({
-          ...project,
-          // Ensure responsibility field is included, with fallback to empty string
-          responsibility: project.responsibility || ''
-        }));
+      if (data && typeof data === 'object' && data !== null && 'projects' in data) {
+        const typedData = data as any;
+        if (typedData.projects) {
+          typedData.projects = typedData.projects.map((project: any) => ({
+            ...project,
+            // Ensure responsibility field is included, with fallback to empty string
+            responsibility: project.responsibility || ''
+          }));
+        }
       }
 
       console.log('Employee data fetched:', data);
