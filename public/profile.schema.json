@@ -1,0 +1,130 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "ProfileJSONData",
+  "type": "object",
+  "required": [
+    "personalInfo",
+    "technicalSkills",
+    "specializedSkills",
+    "experiences",
+    "education",
+    "trainings",
+    "achievements",
+    "projects"
+  ],
+  "properties": {
+    "personalInfo": { "$ref": "#/definitions/PersonalInfo" },
+    "technicalSkills": {
+      "type": "array",
+      "items": { "$ref": "#/definitions/Skill" }
+    },
+    "specializedSkills": {
+      "type": "array",
+      "items": { "$ref": "#/definitions/Skill" }
+    },
+    "experiences": {
+      "type": "array",
+      "items": { "$ref": "#/definitions/Experience" }
+    },
+    "education": {
+      "type": "array",
+      "items": { "$ref": "#/definitions/Education" }
+    },
+    "trainings": {
+      "type": "array",
+      "items": { "$ref": "#/definitions/Training" }
+    },
+    "achievements": {
+      "type": "array",
+      "items": { "$ref": "#/definitions/Achievement" }
+    },
+    "projects": {
+      "type": "array",
+      "items": { "$ref": "#/definitions/ProjectJSON" }
+    }
+  },
+  "definitions": {
+    "PersonalInfo": {
+      "type": "object",
+      "required": ["firstName", "lastName", "biography"],
+      "properties": {
+        "firstName": { "type": "string" },
+        "lastName": { "type": "string" },
+        "biography": { "type": "string" },
+        "profileImage": { "type": "string" },
+        "current_designation": { "type": "string" }
+      }
+    },
+    "Skill": {
+      "type": "object",
+      "required": ["name", "proficiency"],
+      "properties": {
+        "name": { "type": "string" },
+        "proficiency": { "type": "number" }
+      }
+    },
+    "Experience": {
+      "type": "object",
+      "required": ["companyName", "designation", "description", "startDate", "isCurrent"],
+      "properties": {
+        "companyName": { "type": "string" },
+        "designation": { "type": "string" },
+        "description": { "type": "string" },
+        "startDate": { "type": "string" },
+        "endDate": { "type": "string" },
+        "isCurrent": { "type": "boolean" }
+      }
+    },
+    "Education": {
+      "type": "object",
+      "required": ["university", "degree", "startDate", "isCurrent"],
+      "properties": {
+        "university": { "type": "string" },
+        "degree": { "type": "string" },
+        "department": { "type": "string" },
+        "gpa": { "type": "string" },
+        "startDate": { "type": "string" },
+        "endDate": { "type": "string" },
+        "isCurrent": { "type": "boolean" }
+      }
+    },
+    "Training": {
+      "type": "object",
+      "required": ["title", "provider", "date"],
+      "properties": {
+        "title": { "type": "string" },
+        "provider": { "type": "string" },
+        "description": { "type": "string" },
+        "date": { "type": "string" },
+        "certificateUrl": { "type": "string" }
+      }
+    },
+    "Achievement": {
+      "type": "object",
+      "required": ["title", "description", "date"],
+      "properties": {
+        "title": { "type": "string" },
+        "description": { "type": "string" },
+        "date": { "type": "string" }
+      }
+    },
+    "ProjectJSON": {
+      "type": "object",
+      "required": ["name", "role", "description", "startDate", "isCurrent", "technologiesUsed"],
+      "properties": {
+        "name": { "type": "string" },
+        "role": { "type": "string" },
+        "description": { "type": "string" },
+        "responsibility": { "type": "string" },
+        "startDate": { "type": "string" },
+        "endDate": { "type": "string" },
+        "isCurrent": { "type": "boolean" },
+        "technologiesUsed": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "url": { "type": "string" }
+      }
+    }
+  }
+}
