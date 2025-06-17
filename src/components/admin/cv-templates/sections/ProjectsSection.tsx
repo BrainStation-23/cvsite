@@ -72,7 +72,7 @@ export const ProjectsSection: React.FC<ProjectsSectionProps> = ({
     if (a.display_order !== undefined && b.display_order !== undefined) {
       return a.display_order - b.display_order;
     }
-    return new Date(b.start_date).getTime() - new Date(a.start_date).getTime();
+    return new Date(b.start_date || b.startDate).getTime() - new Date(a.start_date || a.startDate).getTime();
   });
 
   // Get the maximum number of projects to show from section config
@@ -83,6 +83,7 @@ export const ProjectsSection: React.FC<ProjectsSectionProps> = ({
   console.log(`Total projects: ${sortedProjects.length}`);
   console.log(`Max projects to show: ${maxProjects}`);
   console.log(`Projects to display: ${projectsToShow.length}`);
+  console.log(`Sample project data:`, projectsToShow[0]);
   console.log(`Section config:`, sectionConfig?.styling_config);
 
   return (

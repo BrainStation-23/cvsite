@@ -18,6 +18,12 @@ export const ProjectResponsibilityRenderer = (
   styles: any,
   applyMasking: (value: any, fieldName: string) => any
 ) => {
+  console.log(`ProjectResponsibilityRenderer called for project ${index}:`, {
+    hasResponsibility: !!project.responsibility,
+    responsibilityValue: project.responsibility,
+    projectKeys: Object.keys(project)
+  });
+
   const responsibility = applyMasking(project.responsibility, 'responsibility');
   
   if (!responsibility) return null;
