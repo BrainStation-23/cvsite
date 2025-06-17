@@ -70,10 +70,14 @@ export interface User {
   email: string;
   first_name?: string;
   last_name?: string;
+  firstName?: string;
+  lastName?: string;
   employee_id?: string;
   sbu_id?: string;
   created_at: string;
   updated_at: string;
+  role: UserRole;
+  profileImageUrl?: string;
 }
 
 export type UserRole = 'admin' | 'manager' | 'employee';

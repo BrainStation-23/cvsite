@@ -27,6 +27,7 @@ export function useProjectsFetch(profileId: string) {
           name: project.name,
           role: project.role,
           description: project.description,
+          responsibility: project.responsibility || '', // Add responsibility field with fallback
           startDate: new Date(project.start_date),
           endDate: project.end_date ? new Date(project.end_date) : undefined,
           isCurrent: project.is_current || false,

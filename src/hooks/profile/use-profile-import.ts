@@ -98,6 +98,7 @@ export function useProfileImport(handlers: ImportHandlers) {
           name: project.name,
           role: project.role,
           description: project.description,
+          responsibility: project.responsibility || '', // Add default value for responsibility
           startDate: new Date(project.startDate),
           endDate: project.endDate ? new Date(project.endDate) : undefined,
           isCurrent: project.isCurrent,
