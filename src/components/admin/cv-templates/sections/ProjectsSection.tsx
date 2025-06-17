@@ -1,5 +1,4 @@
 
-
 import React from 'react';
 import { ProjectItem } from './projects/ProjectItem';
 import { useSectionFieldConfig } from '@/hooks/use-section-field-config';
@@ -51,8 +50,9 @@ export const ProjectsSection: React.FC<ProjectsSectionProps> = ({
     { field: 'role', label: 'Role', order: 2, enabled: true, masked: false },
     { field: 'date_range', label: 'Date Range', order: 3, enabled: true, masked: false },
     { field: 'description', label: 'Description', order: 4, enabled: true, masked: false },
-    { field: 'technologies_used', label: 'Technologies', order: 5, enabled: true, masked: false },
-    { field: 'url', label: 'URL', order: 6, enabled: true, masked: false }
+    { field: 'responsibility', label: 'Responsibility', order: 5, enabled: true, masked: false },
+    { field: 'technologies_used', label: 'Technologies', order: 6, enabled: true, masked: false },
+    { field: 'url', label: 'URL', order: 7, enabled: true, masked: false }
   ];
 
   const {
@@ -111,4 +111,3 @@ export const ProjectsSection: React.FC<ProjectsSectionProps> = ({
     </div>
   );
 };
-

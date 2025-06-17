@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
@@ -12,6 +11,7 @@ type ProjectDB = {
   name: string;
   role: string;
   description: string;
+  responsibility?: string;
   start_date: string;
   end_date?: string;
   is_current?: boolean;
@@ -28,6 +28,7 @@ const mapToProject = (data: ProjectDB): Project => ({
   name: data.name,
   role: data.role,
   description: data.description,
+  responsibility: data.responsibility || '',
   startDate: new Date(data.start_date),
   endDate: data.end_date ? new Date(data.end_date) : undefined,
   isCurrent: data.is_current || false,
@@ -41,6 +42,7 @@ const mapToProjectDB = (project: Omit<Project, 'id'>, profileId: string) => ({
   name: project.name,
   role: project.role,
   description: project.description,
+  responsibility: project.responsibility || null,
   start_date: project.startDate.toISOString().split('T')[0],
   end_date: project.endDate ? project.endDate.toISOString().split('T')[0] : null,
   is_current: project.isCurrent || false,
@@ -166,6 +168,9 @@ export function useProjects(profileId?: string) {
       }
       if (project.description !== undefined) {
         updateData.description = project.description;
+      }
+      if (project.responsibility !== undefined) {
+        updateData.responsibility = project.responsibility;
       }
       if (project.startDate !== undefined) {
         updateData.start_date = project.startDate.toISOString().split('T')[0];

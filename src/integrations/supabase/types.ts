@@ -653,6 +653,7 @@ export type Database = {
           is_current: boolean | null
           name: string
           profile_id: string
+          responsibility: string | null
           role: string
           start_date: string
           technologies_used: string[] | null
@@ -668,6 +669,7 @@ export type Database = {
           is_current?: boolean | null
           name: string
           profile_id: string
+          responsibility?: string | null
           role: string
           start_date: string
           technologies_used?: string[] | null
@@ -683,6 +685,7 @@ export type Database = {
           is_current?: boolean | null
           name?: string
           profile_id?: string
+          responsibility?: string | null
           role?: string
           start_date?: string
           technologies_used?: string[] | null
