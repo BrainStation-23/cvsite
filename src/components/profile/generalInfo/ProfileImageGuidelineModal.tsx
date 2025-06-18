@@ -1,8 +1,11 @@
-
 import React, { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import ProfileImageAnalysisResult from './ProfileImageAnalysisResult';
+import GuidelineDropzone from './ProfileImageGuidelineModal/GuidelineDropzone';
+import GuidelinePreview from './ProfileImageGuidelineModal/GuidelinePreview';
+import GuidelineAnalysisActions from './ProfileImageGuidelineModal/GuidelineAnalysisActions';
+import { validateSolidBackground } from '@/utils/imageBackgroundValidation';
 import { Button } from '@/components/ui/button';
 import { Upload, X } from 'lucide-react';
 
@@ -132,6 +135,28 @@ const ProfileImageGuidelineModal: React.FC<ProfileImageGuidelineModalProps> = ({
       return;
     }
     setError(null);
+
+    // === Mediapipe solid background validation ===
+    try {
+      // Create an image element for mediapipe
+      const img = document.createElement('img');
+      img.src = URL.createObjectURL(file);
+      await new Promise((resolve, reject) => {
+        img.onload = resolve;
+        img.onerror = reject;
+      });
+      const { isSolid, score } = await validateSolidBackground(img);
+      URL.revokeObjectURL(img.src);
+      if (!isSolid) {
+        setError(`Background must be a solid color (variance: ${score.toFixed(1)}). Please use a plain wall or curtain behind you.`);
+        return;
+      }
+    } catch (err) {
+      setError('Could not validate background. Please try again.');
+      return;
+    }
+    // === End Mediapipe validation ===
+
     await analyzeImage(file);
   };
 
@@ -245,43 +270,16 @@ const ProfileImageGuidelineModal: React.FC<ProfileImageGuidelineModalProps> = ({
 
           {/* Upload/Preview Column - Only one shown at a time */}
           <div className="flex-1 p-4 flex flex-col min-h-0">
-            {/* Show upload area if not analyzing or previewing */}
-            {(!previewImage && !isAnalyzing) && (
-              <div
-                className={`border-2 border-dashed rounded-xl p-8 text-center transition-all duration-200 ${
-                  dragActive 
-                    ? 'border-blue-400 bg-blue-50 dark:bg-blue-950/20' 
-                    : 'border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-800/50 hover:border-gray-400 dark:hover:border-gray-500'
-                }`}
-                onDragOver={e => { e.preventDefault(); setDragActive(true); }}
-                onDragLeave={e => { e.preventDefault(); setDragActive(false); }}
-                onDrop={handleDrop}
-                style={{ minHeight: 360 }}
-              >
-                <input
-                  id="profile-image-upload-modal"
-                  type="file"
-                  accept="image/jpeg,image/png,image/gif,image/bmp,image/webp,image/tiff,image/svg+xml"
-                  className="hidden"
-                  onChange={handleInputChange}
-                  disabled={uploading || isAnalyzing}
-                />
-                <label htmlFor="profile-image-upload-modal" className="block cursor-pointer">
-                  <Upload className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                  <span className="block text-lg font-medium text-gray-700 dark:text-gray-200 mb-2">
-                    Drop your image here
-                  </span>
-                  <span className="block text-sm text-gray-500 dark:text-gray-400 mb-4">
-                  or click to browse
-                </span>
-              </label>
-              <p className="mt-4 text-xs text-gray-500 dark:text-gray-400">JPG or PNG, max 5MB</p>
-              {error && (
-                <div className="mt-4 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
-                  <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
-                </div>
-              )}
-            </div>
+            {/* Dropzone upload area */}
+            {!previewImage && !isAnalyzing && (
+              <GuidelineDropzone
+                dragActive={dragActive}
+                setDragActive={setDragActive}
+                uploading={uploading}
+                isAnalyzing={isAnalyzing}
+                error={error}
+                handleInputChange={handleInputChange}
+              />
             )}
 
             {/* Show preview/analysis if analyzing or preview is available */}
@@ -291,17 +289,7 @@ const ProfileImageGuidelineModal: React.FC<ProfileImageGuidelineModalProps> = ({
                   Analysis Results
                 </h3>
                 {/* Compact Image Preview */}
-                {previewImage && (
-                  <div className="flex justify-center mb-4">
-                    <div className="w-32 h-32 rounded-lg overflow-hidden border-2 border-gray-200 dark:border-gray-700 shadow-sm">
-                      <img 
-                        src={previewImage} 
-                        alt="Preview" 
-                        className="object-cover w-full h-full"
-                      />
-                    </div>
-                  </div>
-                )}
+                <GuidelinePreview previewImage={previewImage} />
                 {/* Analysis Component */}
                 <div className="flex-1 min-h-0 overflow-y-auto">
                   <ProfileImageAnalysisResult 
@@ -311,25 +299,11 @@ const ProfileImageGuidelineModal: React.FC<ProfileImageGuidelineModalProps> = ({
                 </div>
                 {/* Action Buttons - Fixed at bottom */}
                 {analysisResult && (
-                  <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700 space-y-2">
-                    <Button
-                    type="button"
-                      onClick={handleProceedWithUpload}
-                      disabled={uploading}
-                      className="w-full"
-                      size="sm"
-                    >
-                      {uploading ? 'Uploading...' : 'Use This Image'}
-                    </Button>
-                    <Button
-                      onClick={handleTryAnother}
-                      variant="outline"
-                      className="w-full"
-                      size="sm"
-                    >
-                      Try Another Image
-                    </Button>
-                  </div>
+                  <GuidelineAnalysisActions
+                    uploading={uploading}
+                    onProceed={handleProceedWithUpload}
+                    onTryAnother={handleTryAnother}
+                  />
                 )}
               </div>
             )}
