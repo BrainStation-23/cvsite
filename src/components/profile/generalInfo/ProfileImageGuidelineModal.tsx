@@ -64,6 +64,14 @@ const EXAMPLES = [
   },
 ];
 
+type ValidationResult = {
+  id: string;
+  label: string;
+  passed: boolean;
+  details?: string;
+  source: 'local' | 'azure';
+};
+
 const ProfileImageGuidelineModal: React.FC<ProfileImageGuidelineModalProps> = ({
   show,
   onClose,
@@ -76,6 +84,7 @@ const ProfileImageGuidelineModal: React.FC<ProfileImageGuidelineModalProps> = ({
   const [analysisResult, setAnalysisResult] = useState<ImageAnalysisResult | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [previewImage, setPreviewImage] = useState<string | null>(null);
+  const [validationResults, setValidationResults] = useState<ValidationResult[]>([]);
   const { toast } = useToast();
 
   if (!show) return null;
@@ -94,7 +103,32 @@ const ProfileImageGuidelineModal: React.FC<ProfileImageGuidelineModalProps> = ({
     try {
       setIsAnalyzing(true);
       setError(null);
+      setValidationResults([]);
 
+      // 1. Local background check
+      let localBgResult: ValidationResult | null = null;
+      try {
+        const img = await createImageBitmap(file);
+        const bg = await validateSolidBackground(img);
+        localBgResult = {
+          id: 'background',
+          label: 'Background is solid',
+          passed: bg.isSolid,
+          details: `Variance: ${Math.round(bg.score)}`,
+          source: 'local',
+        };
+      } catch (e) {
+        localBgResult = {
+          id: 'background',
+          label: 'Background is solid',
+          passed: false,
+          details: 'Error running background check',
+          source: 'local',
+        };
+      }
+      setValidationResults(localBgResult ? [localBgResult] : []);
+
+      // 2. Call edge function (Azure)
       const base64 = await new Promise<string>((resolve, reject) => {
         const reader = new FileReader();
         reader.onload = () => resolve(reader.result as string);
@@ -105,11 +139,42 @@ const ProfileImageGuidelineModal: React.FC<ProfileImageGuidelineModalProps> = ({
       const { data, error } = await supabase.functions.invoke('analyze-profile-image', {
         body: { imageBase64: base64 }
       });
-
       if (error) throw new Error(error.message);
-
       setAnalysisResult(data);
       setPreviewImage(base64);
+
+      // 3. Map Azure/edge function results to checklist
+      const azureChecklist: ValidationResult[] = [
+        {
+          id: 'professional',
+          label: 'Professional headshot',
+          passed: data.isProfessionalHeadshot,
+          details: data.isProfessionalHeadshot ? undefined : 'Not a professional headshot',
+          source: 'azure',
+        },
+        {
+          id: 'face-centered',
+          label: 'Face is centered',
+          passed: data.isFaceCentered,
+          details: data.isFaceCentered ? undefined : 'Face is not centered',
+          source: 'azure',
+        },
+        {
+          id: 'no-accessories',
+          label: 'No sunglasses or hats',
+          passed: data.hasNoSunglassesOrHats,
+          details: data.hasNoSunglassesOrHats ? undefined : 'Sunglasses or hats detected',
+          source: 'azure',
+        },
+        {
+          id: 'not-group',
+          label: 'Not a group photo',
+          passed: data.isNotGroupPhoto,
+          details: data.isNotGroupPhoto ? undefined : 'Group photo detected',
+          source: 'azure',
+        },
+      ];
+      setValidationResults(prev => (localBgResult ? [localBgResult, ...azureChecklist] : azureChecklist));
 
     } catch (error) {
       console.error('Error analyzing image:', error);
@@ -130,6 +195,7 @@ const ProfileImageGuidelineModal: React.FC<ProfileImageGuidelineModalProps> = ({
       setError('File must be an image (jpeg, png, gif, bmp, webp, tiff, svg).');
       return;
     }
+    setError(null); // Clear error on valid selection
     if (file.size > 5 * 1024 * 1024) {
       setError('File must be less than 5MB.');
       return;
@@ -137,8 +203,8 @@ const ProfileImageGuidelineModal: React.FC<ProfileImageGuidelineModalProps> = ({
     setError(null);
 
     // === Mediapipe solid background validation ===
+    let localBgResult = null;
     try {
-      // Create an image element for mediapipe
       const img = document.createElement('img');
       img.src = URL.createObjectURL(file);
       await new Promise((resolve, reject) => {
@@ -147,14 +213,23 @@ const ProfileImageGuidelineModal: React.FC<ProfileImageGuidelineModalProps> = ({
       });
       const { isSolid, score } = await validateSolidBackground(img);
       URL.revokeObjectURL(img.src);
-      if (!isSolid) {
-        setError(`Background must be a solid color (variance: ${score.toFixed(1)}). Please use a plain wall or curtain behind you.`);
-        return;
-      }
+      localBgResult = {
+        id: 'background',
+        label: 'Background is solid',
+        passed: isSolid,
+        details: `Variance: ${score.toFixed(1)}`,
+        source: 'local',
+      };
     } catch (err) {
-      setError('Could not validate background. Please try again.');
-      return;
+      localBgResult = {
+        id: 'background',
+        label: 'Background is solid',
+        passed: false,
+        details: 'Error running background check',
+        source: 'local',
+      };
     }
+    setValidationResults(localBgResult ? [localBgResult] : []);
     // === End Mediapipe validation ===
 
     await analyzeImage(file);
@@ -204,6 +279,7 @@ const ProfileImageGuidelineModal: React.FC<ProfileImageGuidelineModalProps> = ({
     setAnalysisResult(null);
     setPreviewImage(null);
     setIsAnalyzing(false);
+    setValidationResults([]);
   };
 
   return (
@@ -271,7 +347,7 @@ const ProfileImageGuidelineModal: React.FC<ProfileImageGuidelineModalProps> = ({
           {/* Upload/Preview Column - Only one shown at a time */}
           <div className="flex-1 p-4 flex flex-col min-h-0">
             {/* Dropzone upload area */}
-            {!previewImage && !isAnalyzing && (
+            {(!previewImage && !isAnalyzing && validationResults.length === 0) && (
               <GuidelineDropzone
                 dragActive={dragActive}
                 setDragActive={setDragActive}
@@ -282,8 +358,8 @@ const ProfileImageGuidelineModal: React.FC<ProfileImageGuidelineModalProps> = ({
               />
             )}
 
-            {/* Show preview/analysis if analyzing or preview is available */}
-            {(previewImage || isAnalyzing) && (
+            {/* Always show analysis view after image selection, regardless of validation outcome */}
+            {(previewImage || isAnalyzing || validationResults.length > 0) && (
               <div className="flex flex-col h-full">
                 <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-3">
                   Analysis Results
@@ -292,6 +368,24 @@ const ProfileImageGuidelineModal: React.FC<ProfileImageGuidelineModalProps> = ({
                 <GuidelinePreview previewImage={previewImage} />
                 {/* Analysis Component */}
                 <div className="flex-1 min-h-0 overflow-y-auto">
+                  {/* Checklist UI */}
+                  <div className="mb-4">
+                    <h4 className="font-medium text-sm text-gray-700 dark:text-gray-300 mb-2">Checklist</h4>
+                    <ul className="space-y-2">
+                      {validationResults.map(item => (
+                        <li key={item.id} className={`flex items-center gap-2 ${item.passed ? 'text-green-600' : 'text-red-600'}`}>
+                          {item.passed ? (
+                            <span title="Passed" className="inline-block w-4 h-4"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" /></svg></span>
+                          ) : (
+                            <span title="Failed" className="inline-block w-4 h-4"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" /></svg></span>
+                          )}
+                          <span>{item.label}</span>
+                          {item.details && <span className="ml-2 text-xs text-gray-500">{item.details}</span>}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                  {/* Old detailed analysis UI, still shown for now */}
                   <ProfileImageAnalysisResult 
                     result={analysisResult!} 
                     isAnalyzing={isAnalyzing} 
@@ -303,6 +397,7 @@ const ProfileImageGuidelineModal: React.FC<ProfileImageGuidelineModalProps> = ({
                     uploading={uploading}
                     onProceed={handleProceedWithUpload}
                     onTryAnother={handleTryAnother}
+                    allPassed={validationResults.every(item => item.passed)}
                   />
                 )}
               </div>
