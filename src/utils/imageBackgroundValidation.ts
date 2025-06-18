@@ -1,7 +1,6 @@
 // Utility for background solidness validation using Mediapipe Selfie Segmentation
 // This file assumes you will install @mediapipe/selfie_segmentation and @mediapipe/drawing_utils
 
-import { SelfieSegmentation } from '@mediapipe/selfie_segmentation';
 
 /**
  * Analyze if the background of an image is solid (low color variance, not busy)
@@ -18,17 +17,36 @@ function imageBitmapToCanvas(imageBitmap: ImageBitmap): HTMLCanvasElement {
 }
 
 export async function validateSolidBackground(image: HTMLImageElement | HTMLCanvasElement | ImageBitmap): Promise<{ isSolid: boolean, score: number }> {
-  return new Promise((resolve, reject) => {
-    const selfieSegmentation = new SelfieSegmentation({
-      locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/selfie_segmentation/${file}`,
-    });
-    selfieSegmentation.setOptions({ modelSelection: 1 });
-
-    selfieSegmentation.onResults(async (results) => {
-      if (!results.segmentationMask) {
-        return resolve({ isSolid: false, score: 0 });
+  return new Promise(async (resolve, reject) => {
+    try {
+      console.log('[BackgroundValidation] Loading Mediapipe SelfieSegmentation module...');
+      const SelfieSegmentationModule = await import('@mediapipe/selfie_segmentation');
+      const SelfieSegmentation =
+        typeof SelfieSegmentationModule.SelfieSegmentation === 'function'
+          ? SelfieSegmentationModule.SelfieSegmentation
+          : typeof SelfieSegmentationModule.default === 'function'
+            ? SelfieSegmentationModule.default
+            : undefined;
+      if (typeof SelfieSegmentation !== 'function') {
+        const keys = Object.keys(SelfieSegmentationModule).join(', ');
+        throw new Error('SelfieSegmentation is not a constructor. Module keys: ' + keys);
       }
-      // Draw mask to canvas
+      console.log('[BackgroundValidation] Initializing Mediapipe SelfieSegmentation instance...');
+      const selfieSegmentation = new SelfieSegmentation({
+        locateFile: (file: string) => {
+          const url = `https://cdn.jsdelivr.net/npm/@mediapipe/selfie_segmentation/${file}`;
+          console.log(`[BackgroundValidation] Loading Mediapipe file: ${url}`);
+          return url;
+        },
+      });
+      selfieSegmentation.setOptions({ modelSelection: 1 });
+
+      selfieSegmentation.onResults(async (results: any) => {
+        if (!results.segmentationMask) {
+          console.warn('[BackgroundValidation] No segmentationMask returned by Mediapipe. Results:', results);
+          return resolve({ isSolid: false, score: 0 });
+        }
+        // Draw mask to canvas
       const maskCanvas = document.createElement('canvas');
       maskCanvas.width = results.segmentationMask.width;
       maskCanvas.height = results.segmentationMask.height;
@@ -83,10 +101,22 @@ export async function validateSolidBackground(image: HTMLImageElement | HTMLCanv
     // Prepare input
     let inputImage: HTMLImageElement | HTMLCanvasElement;
     if (image instanceof ImageBitmap) {
+      console.log('[BackgroundValidation] Converting ImageBitmap to Canvas.');
       inputImage = imageBitmapToCanvas(image);
     } else {
       inputImage = image;
     }
-    selfieSegmentation.send({ image: inputImage });
+    try {
+      selfieSegmentation.send({ image: inputImage });
+      console.log('[BackgroundValidation] Sent image to Mediapipe for segmentation.');
+    } catch (err) {
+      console.error('[BackgroundValidation] Error sending image to Mediapipe:', err);
+      reject(new Error('Failed to send image to Mediapipe: ' + (err instanceof Error ? err.message : String(err))));
+    }
+    } catch (err) {
+      console.error('[BackgroundValidation] Error initializing Mediapipe SelfieSegmentation:', err);
+      reject(new Error('Failed to initialize Mediapipe SelfieSegmentation: ' + (err instanceof Error ? err.message : String(err))));
+    }
   });
 }
+
