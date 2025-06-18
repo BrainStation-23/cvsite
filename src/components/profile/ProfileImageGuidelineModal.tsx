@@ -32,31 +32,31 @@ interface ImageAnalysisResult {
 
 const EXAMPLES = [
   {
-    src: 'https://images.unsplash.com/photo-1652471943570-f3590a4e52ed?auto=format&fit=facearea&w=400&h=400&facepad=2&sat=-100',
+    src: 'https://images.unsplash.com/photo-1652471943570-f3590a4e52ed?auto=format&fit=facearea&w=200&h=200&facepad=2&sat=-100',
     label: 'Good',
     border: 'border-green-400',
-    reason: 'Clear, professional headshot with centered face and neutral background.',
+    reason: 'Clear, professional headshot',
     color: 'text-green-700',
   },
   {
-    src: 'https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?auto=format&fit=facearea&w=400&h=400&facepad=2&sat=-100',
+    src: 'https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?auto=format&fit=facearea&w=200&h=200&facepad=2&sat=-100',
     label: 'Too Dark',
     border: 'border-red-400',
-    reason: 'Poor lighting makes the face unclear. Use a well-lit photo.',
+    reason: 'Poor lighting',
     color: 'text-red-700',
   },
   {
-    src: 'https://images.unsplash.com/photo-1508214751196-bcfd4ca60f91?auto=format&fit=facearea&w=400&h=400&facepad=2',
+    src: 'https://images.unsplash.com/photo-1508214751196-bcfd4ca60f91?auto=format&fit=facearea&w=200&h=200&facepad=2',
     label: 'Obstructed',
     border: 'border-red-400',
-    reason: 'Face is not fully visible (e.g., sunglasses or objects blocking).',
+    reason: 'Face not visible',
     color: 'text-red-700',
   },
   {
-    src: 'https://images.unsplash.com/photo-1650784854790-fb6c2ed400d3?auto=format&fit=facearea&w=400&h=400&facepad=2',
+    src: 'https://images.unsplash.com/photo-1650784854790-fb6c2ed400d3?auto=format&fit=facearea&w=200&h=200&facepad=2',
     label: 'Group Photo',
     border: 'border-red-400',
-    reason: 'Avoid group shots. Only your face should be visible and centered.',
+    reason: 'Multiple people',
     color: 'text-red-700',
   },
 ];
@@ -151,13 +151,19 @@ const ProfileImageGuidelineModal: React.FC<ProfileImageGuidelineModalProps> = ({
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    handleValidatedFile(e.target.files?.[0]);
+    const file = e.target.files?.[0];
+    if (file) {
+      handleValidatedFile(file);
+    }
   };
 
   const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     setDragActive(false);
-    handleValidatedFile(e.dataTransfer.files?.[0]);
+    const file = e.dataTransfer.files?.[0];
+    if (file) {
+      handleValidatedFile(file);
+    }
   };
 
   const handleModalClose = () => {
@@ -177,10 +183,10 @@ const ProfileImageGuidelineModal: React.FC<ProfileImageGuidelineModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40 p-4">
-      <div className="bg-white dark:bg-gray-900 rounded-xl shadow-2xl max-w-7xl w-full max-h-[95vh] overflow-hidden relative">
-        {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Profile Image Guidelines</h2>
+      <div className="bg-white dark:bg-gray-900 rounded-xl shadow-2xl w-full max-w-6xl h-[90vh] overflow-hidden relative flex flex-col">
+        {/* Compact Header */}
+        <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700 flex-shrink-0">
+          <h2 className="text-xl font-bold text-gray-900 dark:text-white">Profile Image Guidelines</h2>
           <Button
             variant="ghost"
             size="icon"
@@ -191,43 +197,42 @@ const ProfileImageGuidelineModal: React.FC<ProfileImageGuidelineModalProps> = ({
           </Button>
         </div>
 
-        {/* Main Content - Two Column Layout */}
-        <div className="flex h-[calc(95vh-120px)]">
-          {/* Left Column - Guidelines & Upload */}
-          <div className="flex-1 p-6 border-r border-gray-200 dark:border-gray-700 overflow-y-auto">
-            <div className="space-y-6">
-              {/* Guidelines */}
+        {/* Main Content - Three Column Layout */}
+        <div className="flex-1 flex min-h-0">
+          {/* Left Column - Guidelines */}
+          <div className="w-80 p-4 border-r border-gray-200 dark:border-gray-700 flex flex-col">
+            <div className="space-y-4">
               <div>
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-                  Photo Requirements
+                <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-2">
+                  Requirements
                 </h3>
-                <ul className="list-disc pl-5 text-sm text-gray-700 dark:text-gray-300 space-y-2 mb-6">
-                  <li>Use a recent, clear, and professional headshot</li>
-                  <li>Face should be centered and visible (no sunglasses, hats, or heavy filters)</li>
-                  <li>High resolution, well-lit, neutral background preferred</li>
-                  <li>File format: JPG or PNG. Max size: 5MB</li>
-                  <li>Avoid group photos, logos, or full-body shots</li>
+                <ul className="list-disc pl-4 text-xs text-gray-700 dark:text-gray-300 space-y-1">
+                  <li>Recent, clear headshot</li>
+                  <li>Face centered, no sunglasses/hats</li>
+                  <li>Well-lit, neutral background</li>
+                  <li>JPG/PNG, max 5MB</li>
+                  <li>No group photos or logos</li>
                 </ul>
               </div>
 
-              {/* Examples Grid */}
+              {/* Compact Examples */}
               <div>
-                <h4 className="text-md font-medium text-gray-900 dark:text-white mb-4">Examples</h4>
-                <div className="grid grid-cols-2 gap-4">
+                <h4 className="text-sm font-medium text-gray-900 dark:text-white mb-2">Examples</h4>
+                <div className="grid grid-cols-2 gap-2">
                   {EXAMPLES.map(example => (
-                    <div key={example.label} className="space-y-2">
-                      <div className={`aspect-square rounded-lg overflow-hidden border-2 ${example.border} bg-gray-100`}>
+                    <div key={example.label} className="space-y-1">
+                      <div className={`aspect-square rounded-md overflow-hidden border ${example.border} bg-gray-100`}>
                         <img 
                           src={example.src} 
-                          alt={example.label + ' Example'} 
+                          alt={example.label} 
                           className="object-cover w-full h-full" 
                         />
                       </div>
                       <div className="text-center">
-                        <span className={`text-sm font-semibold ${example.color}`}>
+                        <span className={`text-xs font-semibold ${example.color}`}>
                           {example.label}
                         </span>
-                        <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
+                        <p className="text-xs text-gray-600 dark:text-gray-400">
                           {example.reason}
                         </p>
                       </div>
@@ -235,114 +240,116 @@ const ProfileImageGuidelineModal: React.FC<ProfileImageGuidelineModalProps> = ({
                   ))}
                 </div>
               </div>
+            </div>
+          </div>
 
-              {/* Upload Area */}
-              <div>
-                <h4 className="text-md font-medium text-gray-900 dark:text-white mb-4">Upload Your Photo</h4>
-                <div
-                  className={`border-2 border-dashed rounded-xl p-8 text-center transition-all duration-200 ${
-                    dragActive 
-                      ? 'border-blue-400 bg-blue-50 dark:bg-blue-950/20' 
-                      : 'border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-800/50 hover:border-gray-400 dark:hover:border-gray-500'
-                  }`}
-                  onDragOver={e => { e.preventDefault(); setDragActive(true); }}
-                  onDragLeave={e => { e.preventDefault(); setDragActive(false); }}
-                  onDrop={handleDrop}
-                >
-                  <input
-                    id="profile-image-upload-modal"
-                    type="file"
-                    accept="image/jpeg,image/png,image/gif,image/bmp,image/webp,image/tiff,image/svg+xml"
-                    className="hidden"
-                    onChange={handleInputChange}
-                    disabled={uploading || isAnalyzing}
-                  />
-                  <label htmlFor="profile-image-upload-modal" className="block cursor-pointer">
-                    <Upload className="h-8 w-8 text-gray-400 mx-auto mb-3" />
-                    <span className="block text-base font-medium text-gray-700 dark:text-gray-200 mb-2">
-                      Click or drag and drop
-                    </span>
-                    <Button className="mt-2" disabled={uploading || isAnalyzing}>
-                      Choose File
-                    </Button>
-                  </label>
-                  <p className="mt-3 text-xs text-gray-500 dark:text-gray-400">JPG or PNG, max 5MB</p>
-                  {error && (
-                    <div className="mt-3 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
-                      <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
-                    </div>
-                  )}
+          {/* Center Column - Upload Area */}
+          <div className="flex-1 p-4 flex flex-col justify-center">
+            <div
+              className={`border-2 border-dashed rounded-xl p-8 text-center transition-all duration-200 ${
+                dragActive 
+                  ? 'border-blue-400 bg-blue-50 dark:bg-blue-950/20' 
+                  : 'border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-800/50 hover:border-gray-400 dark:hover:border-gray-500'
+              }`}
+              onDragOver={e => { e.preventDefault(); setDragActive(true); }}
+              onDragLeave={e => { e.preventDefault(); setDragActive(false); }}
+              onDrop={handleDrop}
+            >
+              <input
+                id="profile-image-upload-modal"
+                type="file"
+                accept="image/jpeg,image/png,image/gif,image/bmp,image/webp,image/tiff,image/svg+xml"
+                className="hidden"
+                onChange={handleInputChange}
+                disabled={uploading || isAnalyzing}
+              />
+              <label htmlFor="profile-image-upload-modal" className="block cursor-pointer">
+                <Upload className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                <span className="block text-lg font-medium text-gray-700 dark:text-gray-200 mb-2">
+                  Drop your image here
+                </span>
+                <span className="block text-sm text-gray-500 dark:text-gray-400 mb-4">
+                  or click to browse
+                </span>
+                <Button disabled={uploading || isAnalyzing} size="lg">
+                  Choose File
+                </Button>
+              </label>
+              <p className="mt-4 text-xs text-gray-500 dark:text-gray-400">JPG or PNG, max 5MB</p>
+              {error && (
+                <div className="mt-4 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+                  <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
                 </div>
-              </div>
+              )}
             </div>
           </div>
 
           {/* Right Column - Preview & Analysis */}
-          <div className="flex-1 p-6 overflow-y-auto">
+          <div className="w-96 p-4 border-l border-gray-200 dark:border-gray-700 flex flex-col">
             {!previewImage && !isAnalyzing && (
-              <div className="h-full flex items-center justify-center">
+              <div className="flex-1 flex items-center justify-center">
                 <div className="text-center">
-                  <div className="w-32 h-32 mx-auto mb-4 bg-gray-100 dark:bg-gray-800 rounded-xl flex items-center justify-center">
-                    <Upload className="h-12 w-12 text-gray-400" />
+                  <div className="w-24 h-24 mx-auto mb-3 bg-gray-100 dark:bg-gray-800 rounded-xl flex items-center justify-center">
+                    <Upload className="h-8 w-8 text-gray-400" />
                   </div>
-                  <h3 className="text-lg font-medium text-gray-500 dark:text-gray-400 mb-2">
-                    Upload a photo to analyze
+                  <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">
+                    Upload to analyze
                   </h3>
-                  <p className="text-sm text-gray-400 dark:text-gray-500">
-                    Your image will appear here with analysis results
+                  <p className="text-xs text-gray-400 dark:text-gray-500">
+                    Preview and analysis will appear here
                   </p>
                 </div>
               </div>
             )}
 
             {(previewImage || isAnalyzing) && (
-              <div className="space-y-6">
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-                    Analysis Results
-                  </h3>
-                  
-                  {/* Image Preview */}
-                  {previewImage && (
-                    <div className="flex justify-center mb-6">
-                      <div className="w-64 h-64 rounded-xl overflow-hidden border-2 border-gray-200 dark:border-gray-700 shadow-lg">
-                        <img 
-                          src={previewImage} 
-                          alt="Preview" 
-                          className="object-cover w-full h-full"
-                        />
-                      </div>
+              <div className="flex flex-col h-full">
+                <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-3">
+                  Analysis Results
+                </h3>
+                
+                {/* Compact Image Preview */}
+                {previewImage && (
+                  <div className="flex justify-center mb-4">
+                    <div className="w-32 h-32 rounded-lg overflow-hidden border-2 border-gray-200 dark:border-gray-700 shadow-sm">
+                      <img 
+                        src={previewImage} 
+                        alt="Preview" 
+                        className="object-cover w-full h-full"
+                      />
                     </div>
-                  )}
+                  </div>
+                )}
 
-                  {/* Analysis Component */}
+                {/* Analysis Component */}
+                <div className="flex-1 min-h-0 overflow-y-auto">
                   <ProfileImageAnalysisResult 
                     result={analysisResult!} 
                     isAnalyzing={isAnalyzing} 
                   />
-
-                  {/* Action Buttons */}
-                  {analysisResult && (
-                    <div className="flex flex-col gap-3 pt-6">
-                      <Button
-                        onClick={handleProceedWithUpload}
-                        disabled={uploading}
-                        className="w-full"
-                        size="lg"
-                      >
-                        {uploading ? 'Uploading...' : 'Use This Image'}
-                      </Button>
-                      <Button
-                        onClick={handleTryAnother}
-                        variant="outline"
-                        className="w-full"
-                        size="lg"
-                      >
-                        Try Another Image
-                      </Button>
-                    </div>
-                  )}
                 </div>
+
+                {/* Action Buttons - Fixed at bottom */}
+                {analysisResult && (
+                  <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700 space-y-2">
+                    <Button
+                      onClick={handleProceedWithUpload}
+                      disabled={uploading}
+                      className="w-full"
+                      size="sm"
+                    >
+                      {uploading ? 'Uploading...' : 'Use This Image'}
+                    </Button>
+                    <Button
+                      onClick={handleTryAnother}
+                      variant="outline"
+                      className="w-full"
+                      size="sm"
+                    >
+                      Try Another Image
+                    </Button>
+                  </div>
+                )}
               </div>
             )}
           </div>
