@@ -186,7 +186,7 @@ const ProfileImageGuidelineModal: React.FC<ProfileImageGuidelineModalProps> = ({
       <div className="bg-white dark:bg-gray-900 rounded-xl shadow-2xl w-full max-w-6xl h-[90vh] overflow-hidden relative flex flex-col">
         {/* Compact Header */}
         <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700 flex-shrink-0">
-          <h2 className="text-xl font-bold text-gray-900 dark:text-white">Profile Image Guidelines</h2>
+          <h2 className="text-xl font-bold text-gray-900 dark:text-white">Profile Image Wizard</h2>
           <Button
             variant="ghost"
             size="icon"
@@ -243,32 +243,35 @@ const ProfileImageGuidelineModal: React.FC<ProfileImageGuidelineModalProps> = ({
             </div>
           </div>
 
-          {/* Center Column - Upload Area */}
-          <div className="flex-1 p-4 flex flex-col justify-center">
-            <div
-              className={`border-2 border-dashed rounded-xl p-8 text-center transition-all duration-200 ${
-                dragActive 
-                  ? 'border-blue-400 bg-blue-50 dark:bg-blue-950/20' 
-                  : 'border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-800/50 hover:border-gray-400 dark:hover:border-gray-500'
-              }`}
-              onDragOver={e => { e.preventDefault(); setDragActive(true); }}
-              onDragLeave={e => { e.preventDefault(); setDragActive(false); }}
-              onDrop={handleDrop}
-            >
-              <input
-                id="profile-image-upload-modal"
-                type="file"
-                accept="image/jpeg,image/png,image/gif,image/bmp,image/webp,image/tiff,image/svg+xml"
-                className="hidden"
-                onChange={handleInputChange}
-                disabled={uploading || isAnalyzing}
-              />
-              <label htmlFor="profile-image-upload-modal" className="block cursor-pointer">
-                <Upload className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                <span className="block text-lg font-medium text-gray-700 dark:text-gray-200 mb-2">
-                  Drop your image here
-                </span>
-                <span className="block text-sm text-gray-500 dark:text-gray-400 mb-4">
+          {/* Upload/Preview Column - Only one shown at a time */}
+          <div className="flex-1 p-4 flex flex-col min-h-0">
+            {/* Show upload area if not analyzing or previewing */}
+            {(!previewImage && !isAnalyzing) && (
+              <div
+                className={`border-2 border-dashed rounded-xl p-8 text-center transition-all duration-200 ${
+                  dragActive 
+                    ? 'border-blue-400 bg-blue-50 dark:bg-blue-950/20' 
+                    : 'border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-800/50 hover:border-gray-400 dark:hover:border-gray-500'
+                }`}
+                onDragOver={e => { e.preventDefault(); setDragActive(true); }}
+                onDragLeave={e => { e.preventDefault(); setDragActive(false); }}
+                onDrop={handleDrop}
+                style={{ minHeight: 360 }}
+              >
+                <input
+                  id="profile-image-upload-modal"
+                  type="file"
+                  accept="image/jpeg,image/png,image/gif,image/bmp,image/webp,image/tiff,image/svg+xml"
+                  className="hidden"
+                  onChange={handleInputChange}
+                  disabled={uploading || isAnalyzing}
+                />
+                <label htmlFor="profile-image-upload-modal" className="block cursor-pointer">
+                  <Upload className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                  <span className="block text-lg font-medium text-gray-700 dark:text-gray-200 mb-2">
+                    Drop your image here
+                  </span>
+                  <span className="block text-sm text-gray-500 dark:text-gray-400 mb-4">
                   or click to browse
                 </span>
               </label>
@@ -279,32 +282,14 @@ const ProfileImageGuidelineModal: React.FC<ProfileImageGuidelineModalProps> = ({
                 </div>
               )}
             </div>
-          </div>
-
-          {/* Right Column - Preview & Analysis */}
-          <div className="w-96 p-4 border-l border-gray-200 dark:border-gray-700 flex flex-col">
-            {!previewImage && !isAnalyzing && (
-              <div className="flex-1 flex items-center justify-center">
-                <div className="text-center">
-                  <div className="w-24 h-24 mx-auto mb-3 bg-gray-100 dark:bg-gray-800 rounded-xl flex items-center justify-center">
-                    <Upload className="h-8 w-8 text-gray-400" />
-                  </div>
-                  <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">
-                    Upload to analyze
-                  </h3>
-                  <p className="text-xs text-gray-400 dark:text-gray-500">
-                    Preview and analysis will appear here
-                  </p>
-                </div>
-              </div>
             )}
 
+            {/* Show preview/analysis if analyzing or preview is available */}
             {(previewImage || isAnalyzing) && (
               <div className="flex flex-col h-full">
                 <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-3">
                   Analysis Results
                 </h3>
-                
                 {/* Compact Image Preview */}
                 {previewImage && (
                   <div className="flex justify-center mb-4">
@@ -317,7 +302,6 @@ const ProfileImageGuidelineModal: React.FC<ProfileImageGuidelineModalProps> = ({
                     </div>
                   </div>
                 )}
-
                 {/* Analysis Component */}
                 <div className="flex-1 min-h-0 overflow-y-auto">
                   <ProfileImageAnalysisResult 
@@ -325,7 +309,6 @@ const ProfileImageGuidelineModal: React.FC<ProfileImageGuidelineModalProps> = ({
                     isAnalyzing={isAnalyzing} 
                   />
                 </div>
-
                 {/* Action Buttons - Fixed at bottom */}
                 {analysisResult && (
                   <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700 space-y-2">
