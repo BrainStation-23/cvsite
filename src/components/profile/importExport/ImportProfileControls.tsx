@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import Ajv, { ErrorObject } from 'ajv';
-import profileSchema from '../../../public/profile.schema.json';
+import profileSchema from '../../../../public/profile.schema.json';
 import { Button } from '@/components/ui/button';
 import { MonacoJsonEditor } from './MonacoJsonEditor';
 import { useToast } from '@/hooks/use-toast';

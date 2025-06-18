@@ -20,9 +20,9 @@ import {
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
 
-import { ProjectForm } from './projects/ProjectForm';
-import { ProjectSearch } from './projects/ProjectSearch';
-import { SortableProjectItem } from './projects/SortableProjectItem';
+import { ProjectForm } from './ProjectForm';
+import { ProjectSearch } from './ProjectSearch';
+import { SortableProjectItem } from './SortableProjectItem';
 import { ProjectsTourButton } from './ProjectsTourButton';
 
 interface ProjectsTabProps {

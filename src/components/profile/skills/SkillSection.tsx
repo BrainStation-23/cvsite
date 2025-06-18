@@ -6,7 +6,7 @@ import { Plus } from 'lucide-react';
 import { Skill } from '@/types';
 import { SkillAddForm } from './SkillAddForm';
 import { SkillList } from './SkillList';
-import { SkillsTourButton } from '../SkillsTourButton';
+import { SkillsTourButton } from './SkillsTourButton';
 
 interface SkillSectionProps {
   title: string;

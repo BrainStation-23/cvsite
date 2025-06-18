@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
 import { ProfileTabs } from '@/components/profile/ProfileTabs';
 import { useForm } from 'react-hook-form';
-import { GeneralInfoFormData } from '@/components/profile/GeneralInfoTab';
+import { GeneralInfoFormData } from '@/components/profile/generalInfo/GeneralInfoTab';
 import { useAuth } from '@/contexts/AuthContext';
 import { useGeneralInfo } from '@/hooks/profile/use-general-info';
 import { useSkills } from '@/hooks/profile/use-skills';

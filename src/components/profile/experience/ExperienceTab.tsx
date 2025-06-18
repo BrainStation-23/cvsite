@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form';
-import { PlusCircle, X, CalendarIcon } from 'lucide-react';
+import { X, CalendarIcon } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { Experience } from '@/types';
 import { format } from 'date-fns';
@@ -11,7 +11,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Calendar } from '@/components/ui/calendar';
 import { Checkbox } from '@/components/ui/checkbox';
 import { DesignationCombobox } from '@/components/admin/designation/DesignationCombobox';
-import { ExperienceGroupedTab } from './experience/ExperienceGroupedTab';
+import { ExperienceGroupedTab } from './ExperienceGroupedTab';
 import { RichTextEditor } from '@/components/ui/rich-text-editor';
 import { ExperienceFormTourButton } from './ExperienceFormTourButton';
 

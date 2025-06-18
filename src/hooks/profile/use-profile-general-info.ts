@@ -1,6 +1,6 @@
 
 import { useGeneralInfo } from './use-general-info';
-import { GeneralInfoFormData } from '@/components/profile/GeneralInfoTab';
+import { GeneralInfoFormData } from '@/components/profile/generalInfo/GeneralInfoTab';
 
 export function useProfileGeneralInfo(profileId?: string) {
   const { generalInfo, isLoading, isSaving, saveGeneralInfo } = useGeneralInfo(profileId);

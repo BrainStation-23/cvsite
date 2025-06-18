@@ -13,7 +13,7 @@ import {
   FileJson
 } from 'lucide-react';
 import { UseFormReturn } from 'react-hook-form';
-import { GeneralInfoFormData } from '../GeneralInfoTab';
+import { GeneralInfoFormData } from '../generalInfo/GeneralInfoTab';
 import { Skill, Experience, Education, Training, Achievement, Project } from '@/types';
 
 interface ProfileTabsListProps {

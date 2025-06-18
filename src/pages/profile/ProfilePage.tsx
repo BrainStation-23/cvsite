@@ -5,7 +5,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useProfileComposite } from '@/hooks/profile/use-profile-composite';
 import { useForm } from 'react-hook-form';
 import { ProfileTabs } from '@/components/profile/ProfileTabs';
-import { GeneralInfoFormData } from '@/components/profile/GeneralInfoTab';
+import { GeneralInfoFormData } from '@/components/profile/generalInfo/GeneralInfoTab';
 import { Skill } from '@/types';
 
 const ProfilePage: React.FC = () => {

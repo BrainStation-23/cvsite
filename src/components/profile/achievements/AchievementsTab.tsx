@@ -5,8 +5,8 @@ import { Button } from '@/components/ui/button';
 import { PlusCircle } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { Achievement } from '@/types';
-import { AchievementForm } from './achievements/AchievementForm';
-import { AchievementsList } from './achievements/AchievementsList';
+import { AchievementForm } from './AchievementForm';
+import { AchievementsList } from './AchievementsList';
 import { AchievementsTourButton } from './AchievementsTourButton';
 
 interface AchievementsTabProps {

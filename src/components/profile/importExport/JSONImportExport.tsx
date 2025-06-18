@@ -4,7 +4,7 @@ import { MonacoJsonEditor } from './MonacoJsonEditor';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import Ajv, { ErrorObject } from 'ajv';
-import profileSchema from '../../../public/profile.schema.json';
+import profileSchema from '../../../../public/profile.schema.json';
 import { Copy, Download } from 'lucide-react';
 
 interface JSONImportExportProps {

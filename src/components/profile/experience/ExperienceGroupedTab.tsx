@@ -1,13 +1,10 @@
-
-import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { PlusCircle } from 'lucide-react';
 import { CompanyExperienceCard } from './CompanyExperienceCard';
 import { useExperienceGrouped } from '@/hooks/profile/use-experience-grouped';
-import { useExperience } from '@/hooks/profile/use-experience';
 import { Experience } from '@/types';
-import { ExperienceTourButton } from '../ExperienceTourButton';
+import { ExperienceTourButton } from './ExperienceTourButton';
 
 interface ExperienceGroupedTabProps {
   isEditing: boolean;

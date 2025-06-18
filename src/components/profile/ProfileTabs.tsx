@@ -2,7 +2,7 @@
 import React from 'react';
 import { Tabs } from '@/components/ui/tabs';
 import { UseFormReturn } from 'react-hook-form';
-import { GeneralInfoFormData } from './GeneralInfoTab';
+import { GeneralInfoFormData } from './generalInfo/GeneralInfoTab';
 import { useProfileImport } from '@/hooks/profile/use-profile-import';
 import { Skill, Experience, Education, Training, Achievement, Project } from '@/types';
 import { ProfileTabsList } from './tabs/ProfileTabsList';

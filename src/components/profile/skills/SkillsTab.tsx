@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Skill } from '@/types';
-import { SkillSection } from './skills/SkillSection';
+import { SkillSection } from './SkillSection';
 
 interface SkillsTabProps {
   technicalSkills: Skill[];

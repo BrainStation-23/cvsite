@@ -4,8 +4,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { PlusCircle, X } from 'lucide-react';
 import { Education } from '@/types';
-import { EducationForm } from './education/EducationForm';
-import { EducationList } from './education/EducationList';
+import { EducationForm } from './EducationForm';
+import { EducationList } from './EducationList';
 import { EducationTourButton } from './EducationTourButton';
 
 interface EducationTabProps {

@@ -5,7 +5,7 @@ import { PlusCircle } from 'lucide-react';
 import { Training } from '@/types';
 import { TrainingForm } from './TrainingForm';
 import { TrainingList } from './TrainingList';
-import { TrainingTourButton } from '../TrainingTourButton';
+import { TrainingTourButton } from './TrainingTourButton';
 
 interface TrainingTabProps {
   trainings: Training[];

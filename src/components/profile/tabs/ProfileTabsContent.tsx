@@ -2,14 +2,14 @@
 import React from 'react';
 import { TabsContent } from '@/components/ui/tabs';
 import { UseFormReturn } from 'react-hook-form';
-import { GeneralInfoTab, GeneralInfoFormData } from '../GeneralInfoTab';
-import { SkillsTab } from '../SkillsTab';
-import { ExperienceTab } from '../ExperienceTab';
-import { EducationTab } from '../EducationTab';
+import { GeneralInfoTab, GeneralInfoFormData } from '../generalInfo/GeneralInfoTab';
+import { SkillsTab } from '../skills/SkillsTab';
+import { ExperienceTab } from '../experience/ExperienceTab';
+import { EducationTab } from '../education/EducationTab';
 import { TrainingTab } from '../training/TrainingTab';
-import { AchievementsTab } from '../AchievementsTab';
-import { ProjectsTab } from '../ProjectsTab';
-import { JSONImportExport } from '../JSONImportExport';
+import { AchievementsTab } from '../achievements/AchievementsTab';
+import { ProjectsTab } from '../projects/ProjectsTab';
+import { JSONImportExport } from '../importExport/JSONImportExport';
 import { Skill, Experience, Education, Training, Achievement, Project } from '@/types';
 
 interface ProfileTabsContentProps {
