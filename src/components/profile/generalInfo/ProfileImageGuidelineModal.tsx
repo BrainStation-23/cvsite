@@ -313,6 +313,7 @@ const ProfileImageGuidelineModal: React.FC<ProfileImageGuidelineModalProps> = ({
                 {analysisResult && (
                   <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700 space-y-2">
                     <Button
+                    type="button"
                       onClick={handleProceedWithUpload}
                       disabled={uploading}
                       className="w-full"
