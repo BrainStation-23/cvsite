@@ -271,9 +271,6 @@ const ProfileImageGuidelineModal: React.FC<ProfileImageGuidelineModalProps> = ({
                 <span className="block text-sm text-gray-500 dark:text-gray-400 mb-4">
                   or click to browse
                 </span>
-                <Button disabled={uploading || isAnalyzing} size="lg">
-                  Choose File
-                </Button>
               </label>
               <p className="mt-4 text-xs text-gray-500 dark:text-gray-400">JPG or PNG, max 5MB</p>
               {error && (
