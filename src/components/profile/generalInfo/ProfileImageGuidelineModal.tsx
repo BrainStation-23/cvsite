@@ -140,41 +140,27 @@ const ProfileImageGuidelineModal: React.FC<ProfileImageGuidelineModalProps> = ({
         body: { imageBase64: base64 }
       });
       if (error) throw new Error(error.message);
-      setAnalysisResult(data);
-      setPreviewImage(base64);
+      // Inject background result into AI analysis result
+      // If background check failed, add a recommendation
+      let recommendations = data.details.recommendations ? [...data.details.recommendations] : [];
+      if (localBgResult && localBgResult.passed === false) {
+        recommendations.unshift('Use a plain, solid-color background like a wall or curtain.');
+      }
+      const mergedResult = {
+        ...data,
+        background: localBgResult ? {
+          passed: localBgResult.passed,
+          details: localBgResult.details,
+        } : undefined,
+        details: {
+          ...data.details,
+          recommendations,
+        },
+      };
 
-      // 3. Map Azure/edge function results to checklist
-      const azureChecklist: ValidationResult[] = [
-        {
-          id: 'professional',
-          label: 'Professional headshot',
-          passed: data.isProfessionalHeadshot,
-          details: data.isProfessionalHeadshot ? undefined : 'Not a professional headshot',
-          source: 'azure',
-        },
-        {
-          id: 'face-centered',
-          label: 'Face is centered',
-          passed: data.isFaceCentered,
-          details: data.isFaceCentered ? undefined : 'Face is not centered',
-          source: 'azure',
-        },
-        {
-          id: 'no-accessories',
-          label: 'No sunglasses or hats',
-          passed: data.hasNoSunglassesOrHats,
-          details: data.hasNoSunglassesOrHats ? undefined : 'Sunglasses or hats detected',
-          source: 'azure',
-        },
-        {
-          id: 'not-group',
-          label: 'Not a group photo',
-          passed: data.isNotGroupPhoto,
-          details: data.isNotGroupPhoto ? undefined : 'Group photo detected',
-          source: 'azure',
-        },
-      ];
-      setValidationResults(prev => (localBgResult ? [localBgResult, ...azureChecklist] : azureChecklist));
+      setAnalysisResult(mergedResult);
+      setPreviewImage(base64);
+      // No need to update validationResults, as the checklist is now unified in analysisResult
 
     } catch (error) {
       console.error('Error analyzing image:', error);

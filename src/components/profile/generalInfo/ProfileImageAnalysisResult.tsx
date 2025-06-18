@@ -16,6 +16,10 @@ interface ImageAnalysisResult {
     facePosition: string;
     recommendations: string[];
   };
+  background?: {
+    passed: boolean;
+    details: string;
+  };
 }
 
 interface ProfileImageAnalysisResultProps {
@@ -79,16 +83,23 @@ const ProfileImageAnalysisResult: React.FC<ProfileImageAnalysisResultProps> = ({
         <h4 className="font-medium text-sm text-gray-700 dark:text-gray-300">Analysis Details:</h4>
         
         <div className="grid grid-cols-1 gap-2 text-sm">
+          {result.background && (
+            <div className="flex items-center justify-between">
+              <span>Background is solid</span>
+              <span className="flex items-center gap-1">
+                {getStatusIcon(result.background.passed)}
+                <span className="text-xs text-gray-500">{result.background.details}</span>
+              </span>
+            </div>
+          )}
           <div className="flex items-center justify-between">
             <span>Single person (not group photo)</span>
             {getStatusIcon(result.isNotGroupPhoto)}
           </div>
-          
           <div className="flex items-center justify-between">
             <span>Face centered</span>
             {getStatusIcon(result.isFaceCentered)}
           </div>
-          
           <div className="flex items-center justify-between">
             <span>No sunglasses or hats</span>
             {getStatusIcon(result.hasNoSunglassesOrHats)}
