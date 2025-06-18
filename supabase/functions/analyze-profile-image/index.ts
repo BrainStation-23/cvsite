@@ -84,7 +84,7 @@ serve(async (req) => {
 
     // Call Azure Face API for face detection with attributes
     const azureResponse = await fetch(
-      `${azureEndpoint}/face/v1.0/detect?returnFaceAttributes=accessories,glasses,headPose&returnFaceId=true`,
+      `${azureEndpoint}/face/v1.0/detect?returnFaceAttributes=accessories,glasses,headPose`,
       {
         method: 'POST',
         headers: {
