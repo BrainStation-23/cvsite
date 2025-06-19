@@ -1,7 +1,8 @@
 
 import React from 'react';
 import { CheckCircle, XCircle, AlertCircle } from 'lucide-react';
-import { Badge } from '@/components/ui/badge';
+import ValidationProgressChecklist from './ProfileImageGuidelineModal/ValidationProgressChecklist';
+import { ValidationProgress } from './ProfileImageGuidelineModal/types';
 
 interface ImageAnalysisResult {
   isProfessionalHeadshot: boolean;
@@ -30,24 +31,27 @@ interface ImageAnalysisResult {
 interface ProfileImageAnalysisResultProps {
   result: ImageAnalysisResult | null;
   isAnalyzing: boolean;
+  validationProgress?: ValidationProgress[];
 }
 
 const ProfileImageAnalysisResult: React.FC<ProfileImageAnalysisResultProps> = ({
   result,
-  isAnalyzing
+  isAnalyzing,
+  validationProgress = []
 }) => {
-  if (isAnalyzing) {
+  // Show progress checklist during analysis or if we have progress data
+  if (isAnalyzing || validationProgress.length > 0) {
     return (
-      <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
-        <div className="flex items-center gap-2">
-          <div className="animate-spin h-4 w-4 border-2 border-blue-500 border-t-transparent rounded-full"></div>
-          <span className="text-sm text-blue-700 dark:text-blue-300">Analyzing image...</span>
-        </div>
+      <div className="space-y-4">
+        <ValidationProgressChecklist 
+          progress={validationProgress} 
+          isAnalyzing={isAnalyzing} 
+        />
       </div>
     );
   }
 
-  // Don't render anything if there's no result
+  // Don't render anything if there's no result and not analyzing
   if (!result) {
     return null;
   }
@@ -60,37 +64,11 @@ const ProfileImageAnalysisResult: React.FC<ProfileImageAnalysisResultProps> = ({
     );
   };
 
-  const getConfidenceColor = (confidence: number) => {
-    if (confidence >= 75) return 'bg-green-500';
-    if (confidence >= 50) return 'bg-yellow-500';
-    return 'bg-red-500';
-  };
-
   return (
     <div className="space-y-4">
-      {/* Overall Assessment */}
-      <div className={`border rounded-lg p-4 ${
-        result.isProfessionalHeadshot 
-          ? 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800' 
-          : 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800'
-      }`}>
-        <div className="flex items-center justify-between mb-2">
-          <div className="flex items-center gap-2">
-            {getStatusIcon(result.isProfessionalHeadshot)}
-            <span className="font-medium">
-              {result.isProfessionalHeadshot ? 'Professional Headshot' : 'Needs Improvement'}
-            </span>
-          </div>
-          <Badge variant="outline" className="flex items-center gap-1">
-            <div className={`w-2 h-2 rounded-full ${getConfidenceColor(result.confidence)}`}></div>
-            {result.confidence}% confidence
-          </Badge>
-        </div>
-      </div>
-
       {/* Detailed Criteria */}
       <div className="space-y-2">
-        <h4 className="font-medium text-sm text-gray-700 dark:text-gray-300">Analysis Details:</h4>
+        <h4 className="font-medium text-sm text-gray-700 dark:text-gray-300">Final Results:</h4>
         
         <div className="grid grid-cols-1 gap-2 text-sm">
           {result.background && (

@@ -31,6 +31,14 @@ export type ValidationResult = {
   source: 'local' | 'azure';
 };
 
+export interface ValidationProgress {
+  id: string;
+  label: string;
+  status: 'pending' | 'running' | 'completed' | 'failed';
+  passed?: boolean;
+  details?: string;
+}
+
 export interface ProfileImageGuidelineModalProps {
   show: boolean;
   onClose: () => void;

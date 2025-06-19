@@ -1,17 +1,19 @@
 
 import React from 'react';
 import ProfileImageAnalysisResult from '../ProfileImageAnalysisResult';
-import { ImageAnalysisResult } from './types';
+import { ImageAnalysisResult, ValidationProgress } from './types';
 
 interface AnalysisResultsAreaProps {
   isAnalyzing: boolean;
   analysisResult: ImageAnalysisResult | null;
+  validationProgress: ValidationProgress[];
   showResults: boolean;
 }
 
 const AnalysisResultsArea: React.FC<AnalysisResultsAreaProps> = ({
   isAnalyzing,
   analysisResult,
+  validationProgress,
   showResults,
 }) => {
   if (!showResults) return null;
@@ -25,7 +27,8 @@ const AnalysisResultsArea: React.FC<AnalysisResultsAreaProps> = ({
       <div className="flex-1 overflow-y-auto">
         <ProfileImageAnalysisResult 
           result={analysisResult} 
-          isAnalyzing={isAnalyzing} 
+          isAnalyzing={isAnalyzing}
+          validationProgress={validationProgress}
         />
       </div>
     </div>

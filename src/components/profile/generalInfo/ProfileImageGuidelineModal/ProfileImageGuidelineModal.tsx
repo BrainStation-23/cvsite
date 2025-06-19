@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { X } from 'lucide-react';
@@ -22,6 +21,7 @@ const ProfileImageGuidelineModal: React.FC<ProfileImageGuidelineModalProps> = ({
     analysisResult,
     isAnalyzing,
     validationResults,
+    validationProgress,
     error,
     analyzeImage,
     resetAnalysis,
@@ -91,7 +91,7 @@ const ProfileImageGuidelineModal: React.FC<ProfileImageGuidelineModalProps> = ({
   };
 
   // Fix the type error by properly checking if analysisResult exists
-  const showResults = isAnalyzing || analysisResult !== null || validationResults.length > 0;
+  const showResults = isAnalyzing || analysisResult !== null || validationResults.length > 0 || validationProgress.length > 0;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40 p-4">
@@ -138,6 +138,7 @@ const ProfileImageGuidelineModal: React.FC<ProfileImageGuidelineModalProps> = ({
             <AnalysisResultsArea
               isAnalyzing={isAnalyzing}
               analysisResult={analysisResult}
+              validationProgress={validationProgress}
               showResults={showResults}
             />
           </div>
