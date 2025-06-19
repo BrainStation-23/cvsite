@@ -10,9 +10,25 @@ function mediapipe_workaround() {
   return {
     name: 'mediapipe_workaround',
     load(id: string) {
-      if (basename(id) === 'selfie_segmentation.js') {
+      const file = basename(id);
+      if (file === 'selfie_segmentation.js') {
         let code = fs.readFileSync(id, 'utf-8');
         code += '\nexports.SelfieSegmentation = SelfieSegmentation;';
+        return { code };
+      }
+      if (file === 'pose.js') {
+        let code = fs.readFileSync(id, 'utf-8');
+        code += '\nexports.Pose = Pose;';
+        return { code };
+      }
+      if (file === 'holistic.js') {
+        let code = fs.readFileSync(id, 'utf-8');
+        code += '\nexports.Holistic = Holistic;';
+        return { code };
+      }
+      if (file === 'hand.js' || file === 'hands.js') {
+        let code = fs.readFileSync(id, 'utf-8');
+        code += '\nexports.Hands = Hands;';
         return { code };
       }
       return null;
