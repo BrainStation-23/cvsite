@@ -1,35 +1,31 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import path from "path";
-import { componentTagger } from "lovable-tagger";
 import fs from "fs";
 import { basename } from "path";
+import { componentTagger } from "lovable-tagger";
 
-// 👇 Add this plugin inline
-function mediapipe_workaround() {
+// 👇 MediaPipe export fix plugin
+function mediapipeWorkaround() {
+  const exportMap: Record<string, string> = {
+    'selfie_segmentation.js': 'SelfieSegmentation',
+    'pose.js': 'Pose',
+    'holistic.js': 'Holistic',
+    'hands.js': 'Hands',
+  };
+
   return {
-    name: 'mediapipe_workaround',
+    name: 'mediapipe-export-fix',
     load(id: string) {
       const file = basename(id);
-      if (file === 'selfie_segmentation.js') {
-        let code = fs.readFileSync(id, 'utf-8');
-        code += '\nexports.SelfieSegmentation = SelfieSegmentation;';
-        return { code };
-      }
-      if (file === 'pose.js') {
-        let code = fs.readFileSync(id, 'utf-8');
-        code += '\nexports.Pose = Pose;';
-        return { code };
-      }
-      if (file === 'holistic.js') {
-        let code = fs.readFileSync(id, 'utf-8');
-        code += '\nexports.Holistic = Holistic;';
-        return { code };
-      }
-      if (file === 'hand.js' || file === 'hands.js') {
-        let code = fs.readFileSync(id, 'utf-8');
-        code += '\nexports.Hands = Hands;';
-        return { code };
+      const exportSymbol = exportMap[file];
+      if (exportSymbol) {
+        try {
+          const code = fs.readFileSync(id, 'utf-8');
+          return { code: `${code}\nexports.${exportSymbol} = ${exportSymbol};` };
+        } catch (error) {
+          console.warn(`⚠️ Failed to patch MediaPipe file: ${file}`, error);
+        }
       }
       return null;
     },
@@ -44,7 +40,7 @@ export default defineConfig(({ mode }) => ({
   plugins: [
     react(),
     mode === 'development' && componentTagger(),
-    mediapipe_workaround() // 👈 Include here
+    mediapipeWorkaround()
   ].filter(Boolean),
   resolve: {
     alias: {

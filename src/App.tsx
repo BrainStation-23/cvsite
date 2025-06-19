@@ -21,6 +21,7 @@ import CVTemplateEdit from '@/pages/admin/CVTemplateEdit';
 import CVTemplatesConfigurationPage from '@/pages/cv-templates/configuration';
 import SecurityPage from '@/pages/security/SecurityPage';
 import NotFound from '@/pages/NotFound';
+import TrainingCertification from '@/pages/TrainingCertification';
 import './App.css';
 
 
@@ -169,6 +170,23 @@ function App() {
               element={
                 <ProtectedRoute allowedRoles={['manager']}>
                   <EmployeeData />
+                </ProtectedRoute>
+              }
+            />
+            {/* Training and Certification Route (admin/manager) */}
+            <Route
+              path="/admin/training-certification"
+              element={
+                <ProtectedRoute allowedRoles={['admin', 'manager']}>
+                  <TrainingCertification />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/manager/training-certification"
+              element={
+                <ProtectedRoute allowedRoles={['manager', 'admin']}>
+                  <TrainingCertification />
                 </ProtectedRoute>
               }
             />
