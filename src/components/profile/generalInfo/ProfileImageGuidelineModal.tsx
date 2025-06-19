@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+
+import React, { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import ProfileImageAnalysisResult from './ProfileImageAnalysisResult';
@@ -30,6 +31,10 @@ interface ImageAnalysisResult {
     accessories: string[];
     facePosition: string;
     recommendations: string[];
+  };
+  background?: {
+    passed: boolean;
+    details: string;
   };
 }
 
@@ -87,6 +92,18 @@ const ProfileImageGuidelineModal: React.FC<ProfileImageGuidelineModalProps> = ({
   const [validationResults, setValidationResults] = useState<ValidationResult[]>([]);
   const { toast } = useToast();
 
+  // Reset state when modal opens/closes
+  useEffect(() => {
+    if (!show) {
+      // Reset all state when modal is closed
+      setError(null);
+      setAnalysisResult(null);
+      setPreviewImage(null);
+      setIsAnalyzing(false);
+      setValidationResults([]);
+    }
+  }, [show]);
+
   if (!show) return null;
 
   const IMAGE_TYPES = [
@@ -140,8 +157,8 @@ const ProfileImageGuidelineModal: React.FC<ProfileImageGuidelineModalProps> = ({
         body: { imageBase64: base64 }
       });
       if (error) throw new Error(error.message);
+      
       // Inject background result into AI analysis result
-      // If background check failed, add a recommendation
       let recommendations = data.details.recommendations ? [...data.details.recommendations] : [];
       if (localBgResult && localBgResult.passed === false) {
         recommendations.unshift('Use a plain, solid-color background like a wall or curtain.');
@@ -160,7 +177,6 @@ const ProfileImageGuidelineModal: React.FC<ProfileImageGuidelineModalProps> = ({
 
       setAnalysisResult(mergedResult);
       setPreviewImage(base64);
-      // No need to update validationResults, as the checklist is now unified in analysisResult
 
     } catch (error) {
       console.error('Error analyzing image:', error);
@@ -181,42 +197,12 @@ const ProfileImageGuidelineModal: React.FC<ProfileImageGuidelineModalProps> = ({
       setError('File must be an image (jpeg, png, gif, bmp, webp, tiff, svg).');
       return;
     }
-    setError(null); // Clear error on valid selection
+    setError(null);
     if (file.size > 5 * 1024 * 1024) {
       setError('File must be less than 5MB.');
       return;
     }
     setError(null);
-
-    // === Mediapipe solid background validation ===
-    let localBgResult = null;
-    try {
-      const img = document.createElement('img');
-      img.src = URL.createObjectURL(file);
-      await new Promise((resolve, reject) => {
-        img.onload = resolve;
-        img.onerror = reject;
-      });
-      const { isSolid, score } = await validateSolidBackground(img);
-      URL.revokeObjectURL(img.src);
-      localBgResult = {
-        id: 'background',
-        label: 'Background is solid',
-        passed: isSolid,
-        details: `Variance: ${score.toFixed(1)}`,
-        source: 'local',
-      };
-    } catch (err) {
-      localBgResult = {
-        id: 'background',
-        label: 'Background is solid',
-        passed: false,
-        details: 'Error running background check',
-        source: 'local',
-      };
-    }
-    setValidationResults(localBgResult ? [localBgResult] : []);
-    // === End Mediapipe validation ===
 
     await analyzeImage(file);
   };
@@ -253,10 +239,6 @@ const ProfileImageGuidelineModal: React.FC<ProfileImageGuidelineModalProps> = ({
   };
 
   const handleModalClose = () => {
-    setError(null);
-    setAnalysisResult(null);
-    setPreviewImage(null);
-    setIsAnalyzing(false);
     onClose();
   };
 
@@ -330,10 +312,10 @@ const ProfileImageGuidelineModal: React.FC<ProfileImageGuidelineModalProps> = ({
             </div>
           </div>
 
-          {/* Upload/Preview Column - Only one shown at a time */}
+          {/* Middle Column - Upload/Preview */}
           <div className="flex-1 p-4 flex flex-col min-h-0">
-            {/* Dropzone upload area */}
-            {(!previewImage && !isAnalyzing && validationResults.length === 0) && (
+            {/* Show upload area when no image is selected */}
+            {!previewImage && !isAnalyzing && (
               <GuidelineDropzone
                 dragActive={dragActive}
                 setDragActive={setDragActive}
@@ -344,40 +326,14 @@ const ProfileImageGuidelineModal: React.FC<ProfileImageGuidelineModalProps> = ({
               />
             )}
 
-            {/* Always show analysis view after image selection, regardless of validation outcome */}
-            {(previewImage || isAnalyzing || validationResults.length > 0) && (
+            {/* Show preview and actions when image is selected */}
+            {(previewImage || isAnalyzing) && (
               <div className="flex flex-col h-full">
                 <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-3">
-                  Analysis Results
+                  Image Preview
                 </h3>
-                {/* Compact Image Preview */}
                 <GuidelinePreview previewImage={previewImage} />
-                {/* Analysis Component */}
-                <div className="flex-1 min-h-0 overflow-y-auto">
-                  {/* Checklist UI */}
-                  <div className="mb-4">
-                    <h4 className="font-medium text-sm text-gray-700 dark:text-gray-300 mb-2">Checklist</h4>
-                    <ul className="space-y-2">
-                      {validationResults.map(item => (
-                        <li key={item.id} className={`flex items-center gap-2 ${item.passed ? 'text-green-600' : 'text-red-600'}`}>
-                          {item.passed ? (
-                            <span title="Passed" className="inline-block w-4 h-4"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" /></svg></span>
-                          ) : (
-                            <span title="Failed" className="inline-block w-4 h-4"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" /></svg></span>
-                          )}
-                          <span>{item.label}</span>
-                          {item.details && <span className="ml-2 text-xs text-gray-500">{item.details}</span>}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                  {/* Old detailed analysis UI, still shown for now */}
-                  <ProfileImageAnalysisResult 
-                    result={analysisResult!} 
-                    isAnalyzing={isAnalyzing} 
-                  />
-                </div>
-                {/* Action Buttons - Fixed at bottom */}
+                
                 {analysisResult && (
                   <GuidelineAnalysisActions
                     uploading={uploading}
@@ -386,6 +342,27 @@ const ProfileImageGuidelineModal: React.FC<ProfileImageGuidelineModalProps> = ({
                     allPassed={validationResults.every(item => item.passed)}
                   />
                 )}
+              </div>
+            )}
+          </div>
+
+          {/* Right Column - Analysis Results */}
+          <div className="w-80 p-4 border-l border-gray-200 dark:border-gray-700 flex flex-col min-h-0">
+            {(isAnalyzing || analysisResult || validationResults.length > 0) && (
+              <div className="flex flex-col h-full">
+                <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-3">
+                  Analysis Results
+                </h3>
+                
+                <div className="flex-1 overflow-y-auto">
+                  {/* Only render ProfileImageAnalysisResult if we have a valid analysisResult */}
+                  {(isAnalyzing || analysisResult) && (
+                    <ProfileImageAnalysisResult 
+                      result={analysisResult} 
+                      isAnalyzing={isAnalyzing} 
+                    />
+                  )}
+                </div>
               </div>
             )}
           </div>

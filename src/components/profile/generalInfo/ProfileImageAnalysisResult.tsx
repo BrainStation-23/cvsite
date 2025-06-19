@@ -23,7 +23,7 @@ interface ImageAnalysisResult {
 }
 
 interface ProfileImageAnalysisResultProps {
-  result: ImageAnalysisResult;
+  result: ImageAnalysisResult | null;
   isAnalyzing: boolean;
 }
 
@@ -40,6 +40,11 @@ const ProfileImageAnalysisResult: React.FC<ProfileImageAnalysisResultProps> = ({
         </div>
       </div>
     );
+  }
+
+  // Don't render anything if there's no result
+  if (!result) {
+    return null;
   }
 
   const getStatusIcon = (status: boolean) => {
