@@ -2,8 +2,8 @@
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { validateSolidBackground } from '@/utils/imageBackgroundValidation';
-import { validateImagePosture } from '@/utils/imagePostureValidation';
+import { validateSolidBackground } from '@/utils/imageValidation/imageBackgroundValidation';
+import { validateImagePosture } from '@/utils/imageValidation/imagePostureValidation';
 import { ImageAnalysisResult, ValidationResult, ValidationProgress } from '../types';
 
 export const useImageAnalysis = () => {
