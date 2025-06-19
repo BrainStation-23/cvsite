@@ -18,15 +18,45 @@ export const useImageAnalysis = () => {
     const initialProgress: ValidationProgress[] = [
       { id: 'background', label: 'Checking background quality', status: 'pending' },
       { id: 'posture', label: 'Analyzing posture and positioning', status: 'pending' },
-      { id: 'azure', label: 'Verifying facial features and composition', status: 'pending' },
+      {
+        id: 'azure',
+        label: 'Verifying facial features and composition',
+        status: 'pending',
+        subtasks: [
+          { id: 'not_group', label: 'Not a group photo', status: 'pending' },
+          { id: 'face_centered', label: 'Face is centered', status: 'pending' },
+          { id: 'no_accessories', label: 'No sunglasses or hat', status: 'pending' },
+        ]
+      },
     ];
     setValidationProgress(initialProgress);
   };
 
-  const updateProgress = (id: string, status: ValidationProgress['status'], passed?: boolean, details?: string) => {
-    setValidationProgress(prev => prev.map(item => 
-      item.id === id ? { ...item, status, passed, details } : item
-    ));
+  const updateProgress = (
+    id: string,
+    status: ValidationProgress['status'],
+    passed?: boolean,
+    details?: string,
+    subtaskId?: string
+  ) => {
+    setValidationProgress(prev =>
+      prev.map(item => {
+        if (item.id !== id) return item;
+        // If subtaskId is provided, update only the subtask
+        if (subtaskId && item.subtasks) {
+          return {
+            ...item,
+            subtasks: item.subtasks.map(sub =>
+              sub.id === subtaskId
+                ? { ...sub, status, passed, details }
+                : sub
+            )
+          };
+        }
+        // Otherwise, update the main item
+        return { ...item, status, passed, details };
+      })
+    );
   };
 
   const analyzeImage = async (file: File) => {
@@ -107,19 +137,48 @@ export const useImageAnalysis = () => {
       });
       if (error) throw new Error(error.message);
       
-      updateProgress('azure', 'completed', data.isProfessionalHeadshot);
+      // Update subtasks for facial features and composition
+      updateProgress(
+        'azure',
+        'completed',
+        data.isNotGroupPhoto,
+        undefined,
+        'not_group'
+      );
+      updateProgress(
+        'azure',
+        'completed',
+        data.isFaceCentered,
+        undefined,
+        'face_centered'
+      );
+      updateProgress(
+        'azure',
+        'completed',
+        data.hasNoSunglassesOrHats,
+        undefined,
+        'no_accessories'
+      );
+      // Mark main azure task as completed if all subtasks pass
+      const allAzurePassed = data.isNotGroupPhoto && data.isFaceCentered && data.hasNoSunglassesOrHats;
+      updateProgress('azure', 'completed', allAzurePassed);
 
-      // Inject background and posture results into AI analysis result
-      let recommendations = data.details.recommendations ? [...data.details.recommendations] : [];
-      
-      // Add background recommendation if failed
+      // Build recommendations based on failed requirements
+      const recommendations: string[] = [];
       if (localBgResult && localBgResult.passed === false) {
-        recommendations.unshift('Use a plain, solid-color background like a wall or curtain.');
+        recommendations.push('Use a plain, solid-color background like a wall or curtain.');
       }
-      
-      // Add posture recommendation if failed
       if (postureResult && postureResult.passed === false) {
-        recommendations.unshift('Stand or sit straight with shoulders at a slight angle (5-20°) to the camera.');
+        recommendations.push('Stand or sit straight with shoulders at a slight angle (5-20°) to the camera.');
+      }
+      if (!data.isNotGroupPhoto) {
+        recommendations.push('Make sure the photo contains only you (no group photos).');
+      }
+      if (!data.isFaceCentered) {
+        recommendations.push('Center your face in the frame for best results.');
+      }
+      if (!data.hasNoSunglassesOrHats) {
+        recommendations.push('Remove sunglasses, hats, or any accessories covering your face.');
       }
 
       const mergedResult = {

@@ -53,7 +53,29 @@ const ImageUploadArea: React.FC<ImageUploadAreaProps> = ({
             Image Preview
           </h3>
           <GuidelinePreview previewImage={previewImage} />
-          
+
+          {/* Recommendations Section */}
+          {analysisResult && analysisResult.details?.recommendations?.length > 0 && (
+            <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-3 mb-3 mt-2">
+              <div className="flex items-start gap-2">
+                <svg className="h-4 w-4 text-blue-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                <div>
+                  <h5 className="text-sm font-medium text-blue-700 dark:text-blue-300 mb-1">
+                    Recommendations:
+                  </h5>
+                  <ul className="text-sm text-blue-600 dark:text-blue-400 space-y-1">
+                    {analysisResult.details.recommendations.map((rec, idx) => (
+                      <li key={idx} className="flex items-start gap-1">
+                        <span className="text-blue-400">•</span>
+                        <span>{rec}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+            </div>
+          )}
+
           {analysisResult && (
             <GuidelineAnalysisActions
               uploading={uploading}

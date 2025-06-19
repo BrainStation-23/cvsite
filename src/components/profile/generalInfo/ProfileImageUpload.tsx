@@ -5,7 +5,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import ProfileImagePreview from './ProfileImagePreview';
 import ProfileImageActionButtons from './ProfileImageActionButtons';
-import ProfileImageGuidelineModal from './ProfileImageGuidelineModal';
+import ProfileImageGuidelineModal from './ProfileImageGuidelineModal/ProfileImageGuidelineModal';
 
 interface ProfileImageUploadProps {
   currentImageUrl?: string | null;

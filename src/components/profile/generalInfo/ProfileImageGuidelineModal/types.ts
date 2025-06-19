@@ -31,12 +31,21 @@ export type ValidationResult = {
   source: 'local' | 'azure';
 };
 
+export interface ValidationSubtask {
+  id: string;
+  label: string;
+  status: 'pending' | 'running' | 'completed' | 'failed';
+  passed?: boolean;
+  details?: string;
+}
+
 export interface ValidationProgress {
   id: string;
   label: string;
   status: 'pending' | 'running' | 'completed' | 'failed';
   passed?: boolean;
   details?: string;
+  subtasks?: ValidationSubtask[];
 }
 
 export interface ProfileImageGuidelineModalProps {
