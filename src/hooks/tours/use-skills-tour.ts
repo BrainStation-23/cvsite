@@ -1,4 +1,3 @@
-
 import { useState, useCallback } from 'react';
 import { CallBackProps, Step, STATUS } from 'react-joyride';
 
@@ -55,7 +54,13 @@ export const useSkillsTour = () => {
   const handleJoyrideCallback = useCallback((data: CallBackProps) => {
     const { status, type, index, action } = data;
 
-    if (status === STATUS.FINISHED || status === STATUS.SKIPPED) {
+    // Handle tour close
+    if (
+      status === STATUS.FINISHED || 
+      status === STATUS.SKIPPED || 
+      status === STATUS.PAUSED ||
+      action === 'close'
+    ) {
       setTourState(prev => ({ ...prev, run: false, stepIndex: 0 }));
       return;
     }

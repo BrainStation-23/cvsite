@@ -97,7 +97,7 @@ export const useProjectsTour = () => {
     if (process.env.NODE_ENV === 'development') console.log("Joyride callback", data);
 
     // If finished or skipped, stop the tour
-    if (status === STATUS.FINISHED || status === STATUS.SKIPPED) {
+    if (status === STATUS.FINISHED || status === STATUS.SKIPPED || action === 'close') {
       setTourState(prev => ({ ...prev, run: false, stepIndex: 0 }));
       return;
     }

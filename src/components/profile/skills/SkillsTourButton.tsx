@@ -25,7 +25,6 @@ export const SkillsTourButton: React.FC = () => {
         stepIndex={tourState.stepIndex}
         callback={handleJoyrideCallback}
         continuous={true}
-        showSkipButton={true}
         showProgress={true}
         styles={{
           options: {

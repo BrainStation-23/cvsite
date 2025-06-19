@@ -62,7 +62,10 @@ export const useTrainingTour = () => {
   const handleJoyrideCallback = useCallback((data: CallBackProps) => {
     const { status, type, index, action } = data;
 
-    if (status === STATUS.FINISHED || status === STATUS.SKIPPED) {
+    if (status === STATUS.FINISHED 
+      || status === STATUS.SKIPPED
+      ||  action === 'close'
+    ) {
       setTourState(prev => ({ ...prev, run: false, stepIndex: 0 }));
       return;
     }

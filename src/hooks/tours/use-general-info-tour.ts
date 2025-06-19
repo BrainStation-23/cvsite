@@ -1,4 +1,3 @@
-
 import { useState, useCallback } from 'react';
 import { CallBackProps, Step, STATUS } from 'react-joyride';
 
@@ -17,11 +16,6 @@ export const useGeneralInfoTour = () => {
         content: 'Upload a professional profile picture here. Click the camera icon to add a new image, or use the "Upload Image" button below.',
         placement: 'right',
         disableBeacon: true,
-      },
-      {
-        target: '[data-tour="remove-image-button"]',
-        content: 'If you want to remove your current profile image, click the "Remove" button.',
-        placement: 'bottom',
       },
       {
         target: '[data-tour="first-name-input"]',
@@ -78,37 +72,42 @@ export const useGeneralInfoTour = () => {
   const handleJoyrideCallback = useCallback(async (data: CallBackProps) => {
     const { status, type, index, action } = data;
 
-    if (status === STATUS.FINISHED || status === STATUS.SKIPPED) {
+    // Handle tour close
+    if (
+      status === STATUS.FINISHED || 
+      status === STATUS.SKIPPED || 
+      status === STATUS.PAUSED ||
+      action === 'close'
+    ) {
       setTourState(prev => ({ ...prev, run: false, stepIndex: 0 }));
       return;
     }
 
     if (type === 'step:after' && action === 'next') {
-      const nextStepIndex = index + 1;
+      // Joyride already increments step index, so use current index
+      const nextStepIndex = index;
       
-      if (nextStepIndex < tourState.steps.length) {
-        // Wait for the element to be available
-        const nextStep = tourState.steps[nextStepIndex];
+      if (nextStepIndex < tourState.steps.length - 1) {
+        // Wait for next target element
+        const nextStep = tourState.steps[nextStepIndex + 1];
         const elementFound = await waitForElement(nextStep.target as string, 2000);
         
         if (elementFound) {
-          setTourState(prev => ({ 
-            ...prev, 
-            stepIndex: nextStepIndex
+          setTourState(prev => ({
+            ...prev,
+            stepIndex: nextStepIndex + 1
           }));
         } else {
-          console.warn(`Tour target ${nextStep.target} not found, skipping to next step`);
-          // Skip to the next step if element not found
-          setTourState(prev => ({ 
-            ...prev, 
-            stepIndex: nextStepIndex + 1 
+          console.warn(`Tour target ${nextStep.target} not found, skipping step`);
+          // Skip to next step if target not found
+          setTourState(prev => ({
+            ...prev,
+            stepIndex: nextStepIndex + 1
           }));
         }
-      } else {
-        setTourState(prev => ({ ...prev, stepIndex: nextStepIndex }));
       }
     }
-  }, [tourState.steps, waitForElement]);
+  }, [tourState.steps.length, waitForElement]);
 
   const startTour = useCallback(() => {
     setTourState(prev => ({ 

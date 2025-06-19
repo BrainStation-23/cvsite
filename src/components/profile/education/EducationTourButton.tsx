@@ -25,11 +25,8 @@ export const EducationTourButton: React.FC = () => {
         stepIndex={tourState.stepIndex}
         callback={handleJoyrideCallback}
         continuous={true}
-        showSkipButton={true}
         showProgress={true}
-        disableOverlayClose={true}
-        disableCloseOnEsc={false}
-        spotlightClicks={false}
+        spotlightClicks={true}
         styles={{
           options: {
             primaryColor: '#0ea5e9',
