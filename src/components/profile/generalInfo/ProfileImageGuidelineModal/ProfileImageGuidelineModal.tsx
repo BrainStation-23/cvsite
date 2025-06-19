@@ -90,7 +90,8 @@ const ProfileImageGuidelineModal: React.FC<ProfileImageGuidelineModalProps> = ({
     resetAnalysis();
   };
 
-  const showResults = isAnalyzing || analysisResult || validationResults.length > 0;
+  // Fix the type error by properly checking if analysisResult exists
+  const showResults = isAnalyzing || analysisResult !== null || validationResults.length > 0;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40 p-4">
