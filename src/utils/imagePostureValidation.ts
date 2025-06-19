@@ -91,8 +91,8 @@ export async function validateImagePosture(
             }
           }
 
-          const idealMinAngle = 5;
-          const idealMaxAngle = 20;
+          const idealMinAngle = 0.5;
+          const idealMaxAngle = 15;
           const hasGoodShoulderAngle = shoulderAngleDeg >= idealMinAngle && shoulderAngleDeg <= idealMaxAngle;
           const hasGoodPosture = hasGoodShoulderAngle && headFacingForward;
 
