@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { validateSolidBackground } from '@/utils/imageBackgroundValidation';
+import { validateImagePosture } from '@/utils/imagePostureValidation';
 import { ImageAnalysisResult, ValidationResult } from '../types';
 
 export const useImageAnalysis = () => {
@@ -39,9 +40,37 @@ export const useImageAnalysis = () => {
           source: 'local',
         };
       }
-      setValidationResults(localBgResult ? [localBgResult] : []);
 
-      // 2. Call edge function (Azure)
+      // 2. Posture validation
+      let postureResult: ValidationResult | null = null;
+      try {
+        const img = await createImageBitmap(file);
+        const posture = await validateImagePosture(img);
+        postureResult = {
+          id: 'posture',
+          label: 'Good posture (5-20° shoulder angle)',
+          passed: posture.hasGoodPosture,
+          details: posture.details,
+          source: 'local',
+        };
+      } catch (e) {
+        console.error('Posture validation error:', e);
+        postureResult = {
+          id: 'posture',
+          label: 'Good posture (5-20° shoulder angle)',
+          passed: false,
+          details: 'Error analyzing posture',
+          source: 'local',
+        };
+      }
+
+      // Update validation results with background and posture
+      const currentResults = [];
+      if (localBgResult) currentResults.push(localBgResult);
+      if (postureResult) currentResults.push(postureResult);
+      setValidationResults(currentResults);
+
+      // 3. Call edge function (Azure Face API)
       const base64 = await new Promise<string>((resolve, reject) => {
         const reader = new FileReader();
         reader.onload = () => resolve(reader.result as string);
@@ -54,16 +83,30 @@ export const useImageAnalysis = () => {
       });
       if (error) throw new Error(error.message);
       
-      // Inject background result into AI analysis result
+      // Inject background and posture results into AI analysis result
       let recommendations = data.details.recommendations ? [...data.details.recommendations] : [];
+      
+      // Add background recommendation if failed
       if (localBgResult && localBgResult.passed === false) {
         recommendations.unshift('Use a plain, solid-color background like a wall or curtain.');
       }
+      
+      // Add posture recommendation if failed
+      if (postureResult && postureResult.passed === false) {
+        recommendations.unshift('Stand or sit straight with shoulders at a slight angle (5-20°) to the camera.');
+      }
+
       const mergedResult = {
         ...data,
         background: localBgResult ? {
           passed: localBgResult.passed,
           details: localBgResult.details,
+        } : undefined,
+        posture: postureResult ? {
+          passed: postureResult.passed,
+          shoulderAngle: postureResult.details.includes('angle:') ? 
+            parseFloat(postureResult.details.match(/angle: ([\d.]+)°/)?.[1] || '0') : 0,
+          details: postureResult.details,
         } : undefined,
         details: {
           ...data.details,

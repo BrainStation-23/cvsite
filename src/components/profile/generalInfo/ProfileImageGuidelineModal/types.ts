@@ -16,6 +16,11 @@ export interface ImageAnalysisResult {
     passed: boolean;
     details: string;
   };
+  posture?: {
+    passed: boolean;
+    shoulderAngle: number;
+    details: string;
+  };
 }
 
 export type ValidationResult = {

@@ -20,6 +20,11 @@ interface ImageAnalysisResult {
     passed: boolean;
     details: string;
   };
+  posture?: {
+    passed: boolean;
+    shoulderAngle: number;
+    details: string;
+  };
 }
 
 interface ProfileImageAnalysisResultProps {
@@ -94,6 +99,17 @@ const ProfileImageAnalysisResult: React.FC<ProfileImageAnalysisResultProps> = ({
               <span className="flex items-center gap-1">
                 {getStatusIcon(result.background.passed)}
                 <span className="text-xs text-gray-500">{result.background.details}</span>
+              </span>
+            </div>
+          )}
+          {result.posture && (
+            <div className="flex items-center justify-between">
+              <span>Good posture (5-20° shoulder angle)</span>
+              <span className="flex items-center gap-1">
+                {getStatusIcon(result.posture.passed)}
+                <span className="text-xs text-gray-500">
+                  {result.posture.shoulderAngle > 0 ? `${result.posture.shoulderAngle.toFixed(1)}°` : result.posture.details}
+                </span>
               </span>
             </div>
           )}
