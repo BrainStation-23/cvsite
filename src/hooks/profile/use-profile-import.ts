@@ -14,6 +14,20 @@ interface ImportHandlers {
   saveProject: (project: Omit<Project, 'id'>) => Promise<boolean>;
 }
 
+// Helper function to convert string or Date to Date or undefined
+const ensureDate = (dateValue: string | Date | undefined): Date | undefined => {
+  if (!dateValue) return undefined;
+  if (dateValue instanceof Date) return dateValue;
+  if (typeof dateValue === 'string' && dateValue.trim() === '') return undefined;
+  
+  try {
+    const parsed = new Date(dateValue);
+    return isNaN(parsed.getTime()) ? undefined : parsed;
+  } catch {
+    return undefined;
+  }
+};
+
 export function useProfileImport(handlers: ImportHandlers) {
   const { toast } = useToast();
 
@@ -94,8 +108,8 @@ export function useProfileImport(handlers: ImportHandlers) {
             companyName: exp.companyName,
             designation: exp.designation,
             description: exp.description || '',
-            startDate: exp.startDate || new Date(),
-            endDate: exp.endDate || undefined,
+            startDate: ensureDate(exp.startDate) || new Date(),
+            endDate: ensureDate(exp.endDate),
             isCurrent: exp.isCurrent || false
           });
           if (success) importStats.sections.experiences++;
@@ -112,8 +126,8 @@ export function useProfileImport(handlers: ImportHandlers) {
             degree: edu.degree || '',
             department: edu.department || '',
             gpa: edu.gpa || '',
-            startDate: edu.startDate || new Date(),
-            endDate: edu.endDate || undefined,
+            startDate: ensureDate(edu.startDate) || new Date(),
+            endDate: ensureDate(edu.endDate),
             isCurrent: edu.isCurrent || false
           });
           if (success) importStats.sections.education++;
@@ -129,7 +143,7 @@ export function useProfileImport(handlers: ImportHandlers) {
             title: training.title,
             provider: training.provider || '',
             description: training.description || '',
-            date: training.date || new Date(),
+            date: ensureDate(training.date) || new Date(),
             certificateUrl: training.certificateUrl || ''
           });
           if (success) importStats.sections.trainings++;
@@ -144,7 +158,7 @@ export function useProfileImport(handlers: ImportHandlers) {
           const success = await handlers.saveAchievement({
             title: achievement.title,
             description: achievement.description,
-            date: achievement.date || new Date()
+            date: ensureDate(achievement.date) || new Date()
           });
           if (success) importStats.sections.achievements++;
         } catch (error) {
@@ -160,8 +174,8 @@ export function useProfileImport(handlers: ImportHandlers) {
             role: project.role || '',
             description: project.description,
             responsibility: project.responsibility || '',
-            startDate: project.startDate || new Date(),
-            endDate: project.endDate || undefined,
+            startDate: ensureDate(project.startDate) || new Date(),
+            endDate: ensureDate(project.endDate),
             isCurrent: project.isCurrent || false,
             technologiesUsed: project.technologiesUsed || [],
             url: project.url || ''
