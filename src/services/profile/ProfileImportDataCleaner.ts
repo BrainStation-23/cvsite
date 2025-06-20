@@ -54,7 +54,7 @@ export class ProfileImportDataCleaner {
       lastName: personalInfo.lastName || '',
       biography: personalInfo.biography || '',
       profileImage: personalInfo.profileImage || '',
-      currentDesignation: personalInfo.current_designation || personalInfo.currentDesignation || null
+      current_designation: personalInfo.current_designation || null
     };
   }
 
