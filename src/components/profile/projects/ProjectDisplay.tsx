@@ -5,6 +5,8 @@ import { Pencil, Trash2, ExternalLink } from 'lucide-react';
 import { AccordionContent, AccordionTrigger } from '@/components/ui/accordion';
 import { Project } from '@/types';
 import { format } from 'date-fns';
+import { useConfirmationDialog } from '@/hooks/use-confirmation-dialog';
+import { ConfirmationDialog } from '@/components/ui/confirmation-dialog';
 
 interface ProjectDisplayProps {
   project: Project;
@@ -21,10 +23,23 @@ export const ProjectDisplay: React.FC<ProjectDisplayProps> = ({
   onDelete,
   children
 }) => {
-  const handleDelete = async () => {
-    if (window.confirm('Are you sure you want to delete this project?')) {
-      onDelete();
-    }
+  const {
+    isOpen,
+    config,
+    showConfirmation,
+    hideConfirmation,
+    handleConfirm
+  } = useConfirmationDialog();
+
+  const handleDelete = () => {
+    showConfirmation({
+      title: 'Delete Project',
+      description: 'Are you sure you want to delete this project? This action cannot be undone.',
+      confirmText: 'Delete',
+      cancelText: 'Cancel',
+      variant: 'destructive',
+      onConfirm: onDelete
+    });
   };
 
   // Helper function to format date for display
@@ -92,6 +107,17 @@ export const ProjectDisplay: React.FC<ProjectDisplayProps> = ({
           )}
         </div>
       </AccordionContent>
+
+      <ConfirmationDialog
+        isOpen={isOpen}
+        onClose={hideConfirmation}
+        onConfirm={handleConfirm}
+        title={config?.title || ''}
+        description={config?.description || ''}
+        confirmText={config?.confirmText}
+        cancelText={config?.cancelText}
+        variant={config?.variant}
+      />
     </>
   );
 };
