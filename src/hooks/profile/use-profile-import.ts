@@ -47,7 +47,7 @@ export function useProfileImport(handlers: ImportHandlers) {
           lastName: cleanedData.personalInfo.lastName,
           biography: cleanedData.personalInfo.biography || '',
           profileImage: cleanedData.personalInfo.profileImage || '',
-          currentDesignation: cleanedData.personalInfo.currentDesignation || null
+          currentDesignation: cleanedData.personalInfo.current_designation || null
         });
         importStats.sections.generalInfo = success;
         if (success) importStats.successful++;
@@ -95,7 +95,7 @@ export function useProfileImport(handlers: ImportHandlers) {
             designation: exp.designation,
             description: exp.description || '',
             startDate: exp.startDate || new Date(),
-            endDate: exp.endDate,
+            endDate: exp.endDate || undefined,
             isCurrent: exp.isCurrent || false
           });
           if (success) importStats.sections.experiences++;
@@ -113,7 +113,7 @@ export function useProfileImport(handlers: ImportHandlers) {
             department: edu.department || '',
             gpa: edu.gpa || '',
             startDate: edu.startDate || new Date(),
-            endDate: edu.endDate,
+            endDate: edu.endDate || undefined,
             isCurrent: edu.isCurrent || false
           });
           if (success) importStats.sections.education++;
@@ -161,7 +161,7 @@ export function useProfileImport(handlers: ImportHandlers) {
             description: project.description,
             responsibility: project.responsibility || '',
             startDate: project.startDate || new Date(),
-            endDate: project.endDate,
+            endDate: project.endDate || undefined,
             isCurrent: project.isCurrent || false,
             technologiesUsed: project.technologiesUsed || [],
             url: project.url || ''
