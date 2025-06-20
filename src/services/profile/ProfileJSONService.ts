@@ -1,9 +1,13 @@
+
+import { ProfileImportDataCleaner } from './ProfileImportDataCleaner';
+
 export interface ProfileJSONData {
   personalInfo: {
     firstName: string;
     lastName: string;
-    biography: string;
+    biography?: string;
     profileImage?: string;
+    current_designation?: string;
   };
   technicalSkills: Array<{
     name: string;
@@ -16,54 +20,54 @@ export interface ProfileJSONData {
   experiences: Array<{
     companyName: string;
     designation: string;
-    description: string;
-    startDate: string;
+    description?: string;
+    startDate?: string;
     endDate?: string;
-    isCurrent: boolean;
+    isCurrent?: boolean;
   }>;
   education: Array<{
     university: string;
-    degree: string;
+    degree?: string;
     department?: string;
     gpa?: string;
-    startDate: string;
+    startDate?: string;
     endDate?: string;
-    isCurrent: boolean;
+    isCurrent?: boolean;
   }>;
   trainings: Array<{
     title: string;
-    provider: string;
+    provider?: string;
     description?: string;
-    date: string;
+    date?: string;
     certificateUrl?: string;
   }>;
   achievements: Array<{
     title: string;
     description: string;
-    date: string;
+    date?: string;
   }>;
   projects: Array<{
     name: string;
-    role: string;
+    role?: string;
     description: string;
     responsibility?: string;
-    startDate: string;
+    startDate?: string;
     endDate?: string;
-    isCurrent: boolean;
-    technologiesUsed: string[];
+    isCurrent?: boolean;
+    technologiesUsed?: string[];
     url?: string;
   }>;
 }
 
 export interface ProjectJSON {
   name: string;
-  role: string;
+  role?: string;
   description: string;
   responsibility?: string;
-  startDate: string;
+  startDate?: string;
   endDate?: string;
-  isCurrent: boolean;
-  technologiesUsed: string[];
+  isCurrent?: boolean;
+  technologiesUsed?: string[];
   url?: string;
 }
 
@@ -83,7 +87,8 @@ export class ProfileJSONService {
         firstName: profileData.generalInfo?.firstName || profileData.generalInfo?.first_name || '',
         lastName: profileData.generalInfo?.lastName || profileData.generalInfo?.last_name || '',
         biography: profileData.generalInfo?.biography || '',
-        profileImage: profileData.generalInfo?.profileImage || profileData.generalInfo?.profile_image
+        profileImage: profileData.generalInfo?.profileImage || profileData.generalInfo?.profile_image,
+        current_designation: profileData.generalInfo?.currentDesignation || profileData.generalInfo?.current_designation
       },
       technicalSkills: profileData.technicalSkills.map(skill => ({
         name: skill.name,
@@ -136,8 +141,6 @@ export class ProfileJSONService {
     };
   }
 
- 
-
   static downloadJSON(data: ProfileJSONData, filename: string = 'profile') {
     const jsonString = JSON.stringify(data, null, 2);
     const blob = new Blob([jsonString], { type: 'application/json' });
@@ -151,5 +154,30 @@ export class ProfileJSONService {
     URL.revokeObjectURL(url);
   }
 
- 
+  static cleanImportData(data: ProfileJSONData): ProfileJSONData {
+    return {
+      personalInfo: ProfileImportDataCleaner.cleanPersonalInfo(data.personalInfo),
+      technicalSkills: data.technicalSkills
+        .filter(skill => skill.name && skill.name.trim() !== '')
+        .map(skill => ProfileImportDataCleaner.cleanSkill(skill)),
+      specializedSkills: data.specializedSkills
+        .filter(skill => skill.name && skill.name.trim() !== '')
+        .map(skill => ProfileImportDataCleaner.cleanSkill(skill)),
+      experiences: data.experiences
+        .filter(exp => exp.companyName && exp.companyName.trim() !== '' && exp.designation && exp.designation.trim() !== '')
+        .map(exp => ProfileImportDataCleaner.cleanExperience(exp)),
+      education: data.education
+        .filter(edu => edu.university && edu.university.trim() !== '')
+        .map(edu => ProfileImportDataCleaner.cleanEducation(edu)),
+      trainings: data.trainings
+        .filter(training => training.title && training.title.trim() !== '')
+        .map(training => ProfileImportDataCleaner.cleanTraining(training)),
+      achievements: data.achievements
+        .filter(achievement => achievement.title && achievement.title.trim() !== '' && achievement.description && achievement.description.trim() !== '')
+        .map(achievement => ProfileImportDataCleaner.cleanAchievement(achievement)),
+      projects: data.projects
+        .filter(project => project.name && project.name.trim() !== '' && project.description && project.description.trim() !== '')
+        .map(project => ProfileImportDataCleaner.cleanProject(project))
+    };
+  }
 }

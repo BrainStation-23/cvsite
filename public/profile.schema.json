@@ -1,3 +1,4 @@
+
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "title": "ProfileJSONData",
@@ -46,7 +47,7 @@
   "definitions": {
     "PersonalInfo": {
       "type": "object",
-      "required": ["firstName", "lastName", "biography"],
+      "required": ["firstName", "lastName"],
       "properties": {
         "firstName": { "type": "string" },
         "lastName": { "type": "string" },
@@ -65,7 +66,7 @@
     },
     "Experience": {
       "type": "object",
-      "required": ["companyName", "designation", "description", "startDate", "isCurrent"],
+      "required": ["companyName", "designation"],
       "properties": {
         "companyName": { "type": "string" },
         "designation": { "type": "string" },
@@ -77,7 +78,7 @@
     },
     "Education": {
       "type": "object",
-      "required": ["university", "degree", "startDate", "isCurrent"],
+      "required": ["university"],
       "properties": {
         "university": { "type": "string" },
         "degree": { "type": "string" },
@@ -90,7 +91,7 @@
     },
     "Training": {
       "type": "object",
-      "required": ["title", "provider", "date"],
+      "required": ["title"],
       "properties": {
         "title": { "type": "string" },
         "provider": { "type": "string" },
@@ -101,7 +102,7 @@
     },
     "Achievement": {
       "type": "object",
-      "required": ["title", "description", "date"],
+      "required": ["title", "description"],
       "properties": {
         "title": { "type": "string" },
         "description": { "type": "string" },
@@ -110,7 +111,7 @@
     },
     "ProjectJSON": {
       "type": "object",
-      "required": ["name", "role", "description", "startDate", "isCurrent", "technologiesUsed"],
+      "required": ["name", "description"],
       "properties": {
         "name": { "type": "string" },
         "role": { "type": "string" },

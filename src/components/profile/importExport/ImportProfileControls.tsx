@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import Ajv, { ErrorObject } from 'ajv';
 import profileSchema from '../../../../public/profile.schema.json';
@@ -15,9 +16,10 @@ export const ImportProfileControls: React.FC<ImportProfileControlsProps> = ({ on
   const [jsonInput, setJsonInput] = useState('');
   const [isImporting, setIsImporting] = useState(false);
 
-  const ajv = new Ajv();
-const validate = ajv.compile(profileSchema);
-const handleImport = async () => {
+  const ajv = new Ajv({ allErrors: true, strict: false });
+  const validate = ajv.compile(profileSchema);
+
+  const handleImport = async () => {
     if (!jsonInput.trim()) {
       toast({
         title: 'Error',
@@ -26,29 +28,49 @@ const handleImport = async () => {
       });
       return;
     }
+    
     try {
       setIsImporting(true);
       const data = JSON.parse(jsonInput);
+      
+      // Validate but be more lenient with errors
       const valid = validate(data);
-      if (!valid) {
-        const errors = (validate.errors || []).map((err: ErrorObject) => {
-  // Ajv v8 uses instancePath, v6/v7 use dataPath
-  const path = (err as any).instancePath || (err as any).dataPath || err.schemaPath || '';
-  return `${path}: ${err.message}`;
-}).join('\n');
-        toast({
-          title: 'Validation Error',
-          description: errors,
-          variant: 'destructive'
+      if (!valid && validate.errors) {
+        const criticalErrors = validate.errors.filter((err: ErrorObject) => {
+          // Only treat missing required fields as critical errors
+          return err.keyword === 'required' && 
+                 ['personalInfo', 'technicalSkills', 'specializedSkills', 'experiences', 'education', 'trainings', 'achievements', 'projects'].includes(err.params?.missingProperty);
         });
-        return;
+        
+        if (criticalErrors.length > 0) {
+          const errors = criticalErrors.map((err: ErrorObject) => {
+            const path = (err as any).instancePath || (err as any).dataPath || err.schemaPath || '';
+            return `${path}: ${err.message}`;
+          }).join('\n');
+          
+          toast({
+            title: 'Critical Validation Error',
+            description: `Missing required sections: ${errors}`,
+            variant: 'destructive'
+          });
+          return;
+        }
+        
+        // Show warning for non-critical errors but continue with import
+        if (validate.errors.length > 0) {
+          toast({
+            title: 'Data Format Warning', 
+            description: 'Some fields may not match expected format but import will continue. Invalid data will be skipped.',
+          });
+        }
       }
+      
       const success = await onImport(data as ProfileJSONData);
       if (success) {
         setJsonInput('');
         toast({
           title: 'Success',
-          description: 'Profile data imported successfully',
+          description: 'Profile data imported successfully. Invalid fields were automatically handled.',
         });
       } else {
         toast({
@@ -61,7 +83,7 @@ const handleImport = async () => {
       console.error('Import error:', error);
       toast({
         title: 'Error',
-        description: 'Invalid JSON format or structure',
+        description: 'Invalid JSON format. Please check your JSON syntax.',
         variant: 'destructive'
       });
     } finally {
@@ -92,10 +114,11 @@ const handleImport = async () => {
       <div className="bg-muted p-3 rounded text-xs text-gray-700 dark:text-gray-300">
         <strong>Import Guidelines:</strong>
         <ul className="list-disc ml-5 mt-1">
-          <li>Paste or upload a valid profile JSON file matching the required schema.</li>
-          <li>All required fields (personalInfo, technicalSkills, specializedSkills, experiences, education, trainings, achievements, projects) must be present.</li>
-          <li>Each section must match the expected structure. See <code>profile.schema.json</code> for full details.</li>
-          <li>Validation errors will be shown if the JSON does not match the schema.</li>
+          <li>Only required fields: Personal Info (firstName, lastName), Training (title), Education (university), Experience (companyName, designation), Project (name, description), Achievement (title, description).</li>
+          <li>Invalid dates like "Jan 2024", "Continuing" are automatically parsed. Invalid dates are skipped rather than rejecting the entire entry.</li>
+          <li>Missing optional fields are handled gracefully with sensible defaults.</li>
+          <li>The system will import valid data and skip invalid entries, showing a detailed report.</li>
+          <li>Use current_designation for personal info (will be mapped correctly).</li>
         </ul>
       </div>
       <div className="border rounded">
@@ -107,7 +130,7 @@ const handleImport = async () => {
       </div>
       <div className="flex gap-2">
         <Button onClick={handleImport} disabled={isImporting}>
-          Import Profile Data
+          {isImporting ? 'Importing...' : 'Import Profile Data'}
         </Button>
         <input
           type="file"
