@@ -65,12 +65,12 @@ const TrainingCertification: React.FC = () => {
 
   return (
     <DashboardLayout>
-      <div className="space-y-6">
+      <div className="p-6 space-y-6 max-w-7xl mx-auto">
         {/* Page Header */}
-        <div className="flex justify-between items-center">
+        <div className="flex justify-between items-start">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Training & Certifications</h1>
-            <p className="text-gray-600">Manage and track employee certifications</p>
+            <h1 className="text-3xl font-bold text-gray-900">Training & Certifications</h1>
+            <p className="text-gray-600 mt-1">Manage and track employee certifications</p>
           </div>
           <div className="flex items-center gap-3">
             <Button
@@ -78,6 +78,7 @@ const TrainingCertification: React.FC = () => {
               size="sm"
               onClick={() => refetch()}
               disabled={isLoading}
+              className="h-9"
             >
               <RefreshCw className={`h-4 w-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
               Refresh
@@ -87,26 +88,22 @@ const TrainingCertification: React.FC = () => {
         </div>
 
         {/* Search and Filters */}
-        <Card>
-          <CardContent className="p-6">
-            <CertificationSearchFilters
-              searchQuery={searchQuery}
-              providerFilter={providerFilter}
-              sbuFilter={sbuFilter}
-              onSearchChange={handleSearch}
-              onProviderFilterChange={handleProviderFilter}
-              onSbuFilterChange={handleSbuFilter}
-              onClearFilters={handleClearFilters}
-            />
-          </CardContent>
-        </Card>
+        <CertificationSearchFilters
+          searchQuery={searchQuery}
+          providerFilter={providerFilter}
+          sbuFilter={sbuFilter}
+          onSearchChange={handleSearch}
+          onProviderFilterChange={handleProviderFilter}
+          onSbuFilterChange={handleSbuFilter}
+          onClearFilters={handleClearFilters}
+        />
 
         {/* Results Section */}
-        <Card>
-          <CardHeader className="border-b border-gray-100">
+        <Card className="shadow-sm">
+          <CardHeader className="border-b border-gray-100 bg-gray-50/50">
             <div className="flex justify-between items-center">
               <div>
-                <CardTitle className="text-xl font-semibold">
+                <CardTitle className="text-xl font-semibold text-gray-900">
                   Certifications
                 </CardTitle>
                 {!isLoading && (
@@ -121,10 +118,10 @@ const TrainingCertification: React.FC = () => {
                   value={itemsPerPage.toString()} 
                   onValueChange={(value) => handleItemsPerPageChange(parseInt(value))}
                 >
-                  <SelectTrigger className="w-20 h-8">
+                  <SelectTrigger className="w-20 h-8 bg-white">
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="bg-white border shadow-lg z-50">
                     <SelectItem value="10">10</SelectItem>
                     <SelectItem value="25">25</SelectItem>
                     <SelectItem value="50">50</SelectItem>
