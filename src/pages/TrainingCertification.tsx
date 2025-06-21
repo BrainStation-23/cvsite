@@ -26,14 +26,9 @@ const TrainingCertification: React.FC = () => {
     handleSbuFilter,
     handleSort,
     handlePageChange,
-    handleItemsPerPageChange
+    handleItemsPerPageChange,
+    handleClearFilters
   } = useCertificationsSearch();
-
-  const handleClearFilters = () => {
-    handleSearch('');
-    handleProviderFilter('');
-    handleSbuFilter('');
-  };
 
   const renderPagination = () => {
     if (pagination.page_count <= 1) return null;

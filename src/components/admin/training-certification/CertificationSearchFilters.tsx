@@ -45,7 +45,7 @@ export const CertificationSearchFilters: React.FC<CertificationSearchFiltersProp
               <SelectValue placeholder="Provider" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">All Providers</SelectItem>
+              <SelectItem value="all">All Providers</SelectItem>
               <SelectItem value="ISTQB">ISTQB</SelectItem>
               <SelectItem value="Scrum.org">Scrum.org</SelectItem>
               <SelectItem value="PMP">PMP</SelectItem>
@@ -60,7 +60,7 @@ export const CertificationSearchFilters: React.FC<CertificationSearchFiltersProp
               <SelectValue placeholder="SBU" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">All SBUs</SelectItem>
+              <SelectItem value="all">All SBUs</SelectItem>
               <SelectItem value="Engineering">Engineering</SelectItem>
               <SelectItem value="QA">QA</SelectItem>
               <SelectItem value="DevOps">DevOps</SelectItem>

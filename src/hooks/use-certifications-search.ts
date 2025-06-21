@@ -59,8 +59,8 @@ export function useCertificationsSearch() {
       
       const { data, error } = await supabase.rpc('search_certifications', {
         search_query: searchQuery || null,
-        provider_filter: providerFilter || null,
-        sbu_filter: sbuFilter || null,
+        provider_filter: (providerFilter && providerFilter !== 'all') ? providerFilter : null,
+        sbu_filter: (sbuFilter && sbuFilter !== 'all') ? sbuFilter : null,
         page_number: currentPage,
         items_per_page: itemsPerPage,
         sort_by: sortBy,
@@ -69,9 +69,22 @@ export function useCertificationsSearch() {
 
       if (error) throw error;
 
-      const response = data as CertificationsResponse;
-      setCertifications(response.certifications || []);
-      setPagination(response.pagination);
+      // Handle the JSON response properly
+      if (data && typeof data === 'object' && 'certifications' in data && 'pagination' in data) {
+        const response = data as unknown as CertificationsResponse;
+        setCertifications(response.certifications || []);
+        setPagination(response.pagination);
+      } else {
+        // Fallback for unexpected response format
+        setCertifications([]);
+        setPagination({
+          total_count: 0,
+          filtered_count: 0,
+          page: currentPage,
+          per_page: itemsPerPage,
+          page_count: 0
+        });
+      }
     } catch (error) {
       console.error('Error fetching certifications:', error);
       toast({
@@ -118,6 +131,13 @@ export function useCertificationsSearch() {
     setCurrentPage(1);
   };
 
+  const handleClearFilters = () => {
+    setSearchQuery('');
+    setProviderFilter('');
+    setSbuFilter('');
+    setCurrentPage(1);
+  };
+
   return {
     certifications,
     pagination,
@@ -135,6 +155,7 @@ export function useCertificationsSearch() {
     handleSort,
     handlePageChange,
     handleItemsPerPageChange,
+    handleClearFilters,
     refetch: fetchCertifications
   };
 }
