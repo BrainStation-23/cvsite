@@ -1,12 +1,16 @@
 import React from 'react';
 import DashboardLayout from '@/components/Layout/DashboardLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@/components/ui/pagination';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { RefreshCw } from 'lucide-react';
 import { useCertificationsSearch } from '@/hooks/use-certifications-search';
 import { CertificationSearchFilters } from '@/components/admin/training-certification/CertificationSearchFilters';
 import { CertificationTable } from '@/components/admin/training-certification/CertificationTable';
+import { TrainingBulkUploadDialog } from '@/components/admin/training-certification/TrainingBulkUploadDialog';
 import { Skeleton } from '@/components/ui/skeleton';
+
 const TrainingCertification: React.FC = () => {
   const {
     certifications,
@@ -25,8 +29,10 @@ const TrainingCertification: React.FC = () => {
     handleSort,
     handlePageChange,
     handleItemsPerPageChange,
-    handleClearFilters
+    handleClearFilters,
+    refetch
   } = useCertificationsSearch();
+
   const renderPagination = () => {
     if (pagination.page_count <= 1) return null;
     const pages = [];
@@ -56,29 +62,65 @@ const TrainingCertification: React.FC = () => {
         </PaginationContent>
       </Pagination>;
   };
-  return <DashboardLayout>
+
+  return (
+    <DashboardLayout>
+      <div className="space-y-6">
+        {/* Page Header */}
+        <div className="flex justify-between items-center">
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900">Training & Certifications</h1>
+            <p className="text-gray-600">Manage and track employee certifications</p>
+          </div>
+          <div className="flex items-center gap-3">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => refetch()}
+              disabled={isLoading}
+            >
+              <RefreshCw className={`h-4 w-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
+              Refresh
+            </Button>
+            <TrainingBulkUploadDialog onUploadComplete={refetch} />
+          </div>
+        </div>
+
         {/* Search and Filters */}
-        <Card className="shadow-sm">
-          <CardContent className="p-4">
-            <CertificationSearchFilters searchQuery={searchQuery} providerFilter={providerFilter} sbuFilter={sbuFilter} onSearchChange={handleSearch} onProviderFilterChange={handleProviderFilter} onSbuFilterChange={handleSbuFilter} onClearFilters={handleClearFilters} />
+        <Card>
+          <CardContent className="p-6">
+            <CertificationSearchFilters
+              searchQuery={searchQuery}
+              providerFilter={providerFilter}
+              sbuFilter={sbuFilter}
+              onSearchChange={handleSearch}
+              onProviderFilterChange={handleProviderFilter}
+              onSbuFilterChange={handleSbuFilter}
+              onClearFilters={handleClearFilters}
+            />
           </CardContent>
         </Card>
 
         {/* Results Section */}
-        <Card className="shadow-sm">
-          <CardHeader className="pb-3">
+        <Card>
+          <CardHeader className="border-b border-gray-100">
             <div className="flex justify-between items-center">
               <div>
-                <CardTitle className="text-lg">
+                <CardTitle className="text-xl font-semibold">
                   Certifications
                 </CardTitle>
-                {!isLoading && <p className="text-sm text-gray-500 mt-1">
+                {!isLoading && (
+                  <p className="text-sm text-gray-500 mt-1">
                     Showing {pagination.filtered_count} of {pagination.total_count} certifications
-                  </p>}
+                  </p>
+                )}
               </div>
               <div className="flex items-center gap-2">
                 <span className="text-sm text-gray-500">Show:</span>
-                <Select value={itemsPerPage.toString()} onValueChange={value => handleItemsPerPageChange(parseInt(value))}>
+                <Select 
+                  value={itemsPerPage.toString()} 
+                  onValueChange={(value) => handleItemsPerPageChange(parseInt(value))}
+                >
                   <SelectTrigger className="w-20 h-8">
                     <SelectValue />
                   </SelectTrigger>
@@ -92,20 +134,37 @@ const TrainingCertification: React.FC = () => {
               </div>
             </div>
           </CardHeader>
+          
           <CardContent className="p-0">
-            {isLoading ? <div className="p-4 space-y-3">
-                {[...Array(5)].map((_, i) => <Skeleton key={i} className="h-12 w-full" />)}
-              </div> : <>
-                <CertificationTable certifications={certifications} sortBy={sortBy} sortOrder={sortOrder} onSort={handleSort} />
+            {isLoading ? (
+              <div className="p-6 space-y-3">
+                {[...Array(5)].map((_, i) => (
+                  <Skeleton key={i} className="h-12 w-full" />
+                ))}
+              </div>
+            ) : (
+              <>
+                <CertificationTable
+                  certifications={certifications}
+                  sortBy={sortBy}
+                  sortOrder={sortOrder}
+                  onSort={handleSort}
+                />
                 
-                {pagination.page_count > 1 && <div className="p-4 border-t bg-gray-50/50">
+                {pagination.page_count > 1 && (
+                  <div className="p-4 border-t bg-gray-50/50">
                     <div className="flex justify-center">
                       {renderPagination()}
                     </div>
-                  </div>}
-              </>}
+                  </div>
+                )}
+              </>
+            )}
           </CardContent>
         </Card>
-    </DashboardLayout>;
+      </div>
+    </DashboardLayout>
+  );
 };
+
 export default TrainingCertification;
