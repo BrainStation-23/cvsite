@@ -4,7 +4,7 @@ import { format } from 'date-fns';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { ExternalLink, Calendar, Award } from 'lucide-react';
+import { ExternalLink, Calendar, Award, ArrowUpDown } from 'lucide-react';
 import { CertificationRecord } from '@/hooks/use-certifications-search';
 
 interface CertificationTableProps {
@@ -26,130 +26,161 @@ export const CertificationTable: React.FC<CertificationTableProps> = ({
   };
 
   const getSortIcon = (field: string) => {
-    if (sortBy !== field) return '↕️';
+    if (sortBy !== field) {
+      return <ArrowUpDown className="h-3 w-3 text-gray-400" />;
+    }
     return sortOrder === 'asc' ? '↑' : '↓';
   };
 
+  if (certifications.length === 0) {
+    return (
+      <div className="text-center py-12 text-gray-500">
+        <div className="text-4xl mb-2">📄</div>
+        <h3 className="text-lg font-medium text-gray-900 mb-1">No certifications found</h3>
+        <p className="text-sm">Try adjusting your search criteria or filters</p>
+      </div>
+    );
+  }
+
   return (
-    <div className="border rounded-md">
+    <div className="overflow-x-auto">
       <Table>
         <TableHeader>
-          <TableRow>
+          <TableRow className="bg-gray-50/50">
             <TableHead 
-              className="cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800"
+              className="cursor-pointer hover:bg-gray-100 transition-colors px-4 py-3"
               onClick={() => handleSort('first_name')}
             >
-              Employee {getSortIcon('first_name')}
+              <div className="flex items-center gap-1 font-medium">
+                Employee
+                {getSortIcon('first_name')}
+              </div>
             </TableHead>
             <TableHead 
-              className="cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800"
+              className="cursor-pointer hover:bg-gray-100 transition-colors px-4 py-3"
               onClick={() => handleSort('employee_id')}
             >
-              Employee ID {getSortIcon('employee_id')}
+              <div className="flex items-center gap-1 font-medium">
+                ID
+                {getSortIcon('employee_id')}
+              </div>
             </TableHead>
             <TableHead 
-              className="cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800"
+              className="cursor-pointer hover:bg-gray-100 transition-colors px-4 py-3"
               onClick={() => handleSort('sbu_name')}
             >
-              SBU {getSortIcon('sbu_name')}
+              <div className="flex items-center gap-1 font-medium">
+                SBU
+                {getSortIcon('sbu_name')}
+              </div>
             </TableHead>
             <TableHead 
-              className="cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800"
+              className="cursor-pointer hover:bg-gray-100 transition-colors px-4 py-3"
               onClick={() => handleSort('title')}
             >
-              Certification {getSortIcon('title')}
+              <div className="flex items-center gap-1 font-medium">
+                Certification
+                {getSortIcon('title')}
+              </div>
             </TableHead>
             <TableHead 
-              className="cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800"
+              className="cursor-pointer hover:bg-gray-100 transition-colors px-4 py-3"
               onClick={() => handleSort('provider')}
             >
-              Provider {getSortIcon('provider')}
+              <div className="flex items-center gap-1 font-medium">
+                Provider
+                {getSortIcon('provider')}
+              </div>
             </TableHead>
             <TableHead 
-              className="cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800"
+              className="cursor-pointer hover:bg-gray-100 transition-colors px-4 py-3"
               onClick={() => handleSort('certification_date')}
             >
-              Date {getSortIcon('certification_date')}
+              <div className="flex items-center gap-1 font-medium">
+                Date
+                {getSortIcon('certification_date')}
+              </div>
             </TableHead>
-            <TableHead>Status</TableHead>
-            <TableHead>Actions</TableHead>
+            <TableHead className="px-4 py-3 font-medium">Status</TableHead>
+            <TableHead className="px-4 py-3 font-medium">Actions</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
-          {certifications.length === 0 ? (
-            <TableRow>
-              <TableCell colSpan={8} className="text-center py-8 text-gray-500">
-                No certifications found
+          {certifications.map((cert, index) => (
+            <TableRow key={cert.id} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50/30'}>
+              <TableCell className="px-4 py-3">
+                <div className="font-medium text-gray-900">
+                  {cert.first_name} {cert.last_name}
+                </div>
+              </TableCell>
+              <TableCell className="px-4 py-3">
+                <Badge variant="secondary" className="text-xs">
+                  {cert.employee_id}
+                </Badge>
+              </TableCell>
+              <TableCell className="px-4 py-3">
+                <Badge variant="outline" className="text-xs">
+                  {cert.sbu_name || 'N/A'}
+                </Badge>
+              </TableCell>
+              <TableCell className="px-4 py-3">
+                <div className="max-w-xs">
+                  <div className="font-medium text-gray-900 truncate" title={cert.title}>
+                    {cert.title}
+                  </div>
+                  {cert.description && (
+                    <div className="text-xs text-gray-500 truncate mt-1" title={cert.description}>
+                      {cert.description}
+                    </div>
+                  )}
+                </div>
+              </TableCell>
+              <TableCell className="px-4 py-3">
+                <span className="text-sm font-medium text-gray-700">
+                  {cert.provider}
+                </span>
+              </TableCell>
+              <TableCell className="px-4 py-3">
+                <div className="flex items-center gap-1 text-sm text-gray-600">
+                  <Calendar className="h-3 w-3" />
+                  {format(new Date(cert.certification_date), 'MMM d, yyyy')}
+                </div>
+              </TableCell>
+              <TableCell className="px-4 py-3">
+                <div className="space-y-1">
+                  <Badge className="bg-green-100 text-green-800 border-green-200 text-xs">
+                    <Award className="h-3 w-3 mr-1" />
+                    Certified
+                  </Badge>
+                  {cert.expiry_date && (
+                    <div className="text-xs text-gray-500">
+                      Expires: {format(new Date(cert.expiry_date), 'MMM yyyy')}
+                    </div>
+                  )}
+                </div>
+              </TableCell>
+              <TableCell className="px-4 py-3">
+                {cert.certificate_url && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    asChild
+                    className="h-8 px-2 text-blue-600 hover:text-blue-800 hover:bg-blue-50"
+                  >
+                    <a
+                      href={cert.certificate_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-1"
+                    >
+                      <ExternalLink className="h-3 w-3" />
+                      View
+                    </a>
+                  </Button>
+                )}
               </TableCell>
             </TableRow>
-          ) : (
-            certifications.map((cert) => (
-              <TableRow key={cert.id}>
-                <TableCell>
-                  <div className="font-medium">
-                    {cert.first_name} {cert.last_name}
-                  </div>
-                </TableCell>
-                <TableCell>
-                  <Badge variant="outline">{cert.employee_id}</Badge>
-                </TableCell>
-                <TableCell>
-                  <Badge variant="secondary">{cert.sbu_name || 'N/A'}</Badge>
-                </TableCell>
-                <TableCell>
-                  <div className="max-w-xs">
-                    <div className="font-medium truncate" title={cert.title}>
-                      {cert.title}
-                    </div>
-                    {cert.description && (
-                      <div className="text-sm text-gray-500 truncate" title={cert.description}>
-                        {cert.description}
-                      </div>
-                    )}
-                  </div>
-                </TableCell>
-                <TableCell>{cert.provider}</TableCell>
-                <TableCell>
-                  <div className="flex items-center gap-1">
-                    <Calendar className="h-3 w-3 text-gray-400" />
-                    {format(new Date(cert.certification_date), 'MMM d, yyyy')}
-                  </div>
-                </TableCell>
-                <TableCell>
-                  <div className="flex flex-col gap-1">
-                    <Badge variant="default" className="w-fit">
-                      <Award className="h-3 w-3 mr-1" />
-                      Certified
-                    </Badge>
-                    {cert.expiry_date && (
-                      <div className="text-xs text-gray-500">
-                        Expires: {format(new Date(cert.expiry_date), 'MMM yyyy')}
-                      </div>
-                    )}
-                  </div>
-                </TableCell>
-                <TableCell>
-                  {cert.certificate_url && (
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      asChild
-                    >
-                      <a
-                        href={cert.certificate_url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex items-center gap-1"
-                      >
-                        <ExternalLink className="h-3 w-3" />
-                        View
-                      </a>
-                    </Button>
-                  )}
-                </TableCell>
-              </TableRow>
-            ))
-          )}
+          ))}
         </TableBody>
       </Table>
     </div>

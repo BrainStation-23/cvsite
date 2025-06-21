@@ -85,21 +85,18 @@ const TrainingCertification: React.FC = () => {
 
   return (
     <DashboardLayout>
-      <div className="container mx-auto p-6 space-y-6">
-        <div className="flex justify-between items-center">
-          <div>
-            <h1 className="text-3xl font-bold">Training & Certifications</h1>
-            <p className="text-gray-600 mt-1">
-              Manage and view all employee training and certifications
-            </p>
-          </div>
+      <div className="p-4 space-y-4 max-w-7xl mx-auto">
+        {/* Header Section */}
+        <div className="border-b pb-4">
+          <h1 className="text-2xl font-bold text-gray-900">Training & Certifications</h1>
+          <p className="text-sm text-gray-600 mt-1">
+            Manage and view all employee training and certifications
+          </p>
         </div>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Search & Filter</CardTitle>
-          </CardHeader>
-          <CardContent>
+        {/* Search and Filters */}
+        <Card className="shadow-sm">
+          <CardContent className="p-4">
             <CertificationSearchFilters
               searchQuery={searchQuery}
               providerFilter={providerFilter}
@@ -112,24 +109,27 @@ const TrainingCertification: React.FC = () => {
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader>
+        {/* Results Section */}
+        <Card className="shadow-sm">
+          <CardHeader className="pb-3">
             <div className="flex justify-between items-center">
-              <CardTitle>
-                Certifications 
+              <div>
+                <CardTitle className="text-lg">
+                  Certifications
+                </CardTitle>
                 {!isLoading && (
-                  <span className="text-sm font-normal text-gray-500 ml-2">
-                    ({pagination.filtered_count} of {pagination.total_count})
-                  </span>
+                  <p className="text-sm text-gray-500 mt-1">
+                    Showing {pagination.filtered_count} of {pagination.total_count} certifications
+                  </p>
                 )}
-              </CardTitle>
+              </div>
               <div className="flex items-center gap-2">
                 <span className="text-sm text-gray-500">Show:</span>
                 <Select
                   value={itemsPerPage.toString()}
                   onValueChange={(value) => handleItemsPerPageChange(parseInt(value))}
                 >
-                  <SelectTrigger className="w-20">
+                  <SelectTrigger className="w-20 h-8">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -142,11 +142,11 @@ const TrainingCertification: React.FC = () => {
               </div>
             </div>
           </CardHeader>
-          <CardContent>
+          <CardContent className="p-0">
             {isLoading ? (
-              <div className="space-y-4">
+              <div className="p-4 space-y-3">
                 {[...Array(5)].map((_, i) => (
-                  <Skeleton key={i} className="h-16 w-full" />
+                  <Skeleton key={i} className="h-12 w-full" />
                 ))}
               </div>
             ) : (
@@ -159,8 +159,10 @@ const TrainingCertification: React.FC = () => {
                 />
                 
                 {pagination.page_count > 1 && (
-                  <div className="mt-6 flex justify-center">
-                    {renderPagination()}
+                  <div className="p-4 border-t bg-gray-50/50">
+                    <div className="flex justify-center">
+                      {renderPagination()}
+                    </div>
                   </div>
                 )}
               </>
