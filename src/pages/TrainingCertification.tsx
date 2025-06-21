@@ -57,10 +57,6 @@ const TrainingCertification: React.FC = () => {
       </Pagination>;
   };
   return <DashboardLayout>
-      <div className="p-4 space-y-4 max-w-7xl mx-auto">
-        {/* Header Section */}
-        
-
         {/* Search and Filters */}
         <Card className="shadow-sm">
           <CardContent className="p-4">
@@ -110,7 +106,6 @@ const TrainingCertification: React.FC = () => {
               </>}
           </CardContent>
         </Card>
-      </div>
     </DashboardLayout>;
 };
 export default TrainingCertification;
