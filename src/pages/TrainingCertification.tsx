@@ -65,9 +65,9 @@ const TrainingCertification: React.FC = () => {
 
   return (
     <DashboardLayout>
-      <div className="p-6 space-y-6 max-w-7xl mx-auto">
+      <div className="space-y-6">
         {/* Page Header */}
-        <div className="flex justify-between items-start">
+        <div className="flex justify-between items-center">
           <div>
             <h1 className="text-3xl font-bold text-gray-900">Training & Certifications</h1>
             <p className="text-gray-600 mt-1">Manage and track employee certifications</p>
