@@ -846,7 +846,9 @@ export type Database = {
           certification_date: string
           created_at: string
           description: string | null
+          expiry_date: string | null
           id: string
+          is_renewable: boolean | null
           profile_id: string
           provider: string
           title: string
@@ -857,7 +859,9 @@ export type Database = {
           certification_date: string
           created_at?: string
           description?: string | null
+          expiry_date?: string | null
           id?: string
+          is_renewable?: boolean | null
           profile_id: string
           provider: string
           title: string
@@ -868,7 +872,9 @@ export type Database = {
           certification_date?: string
           created_at?: string
           description?: string | null
+          expiry_date?: string | null
           id?: string
+          is_renewable?: boolean | null
           profile_id?: string
           provider?: string
           title?: string
@@ -1027,6 +1033,18 @@ export type Database = {
         Args: {
           search_query?: string
           filter_role?: string
+          page_number?: number
+          items_per_page?: number
+          sort_by?: string
+          sort_order?: string
+        }
+        Returns: Json
+      }
+      search_certifications: {
+        Args: {
+          search_query?: string
+          provider_filter?: string
+          sbu_filter?: string
           page_number?: number
           items_per_page?: number
           sort_by?: string
