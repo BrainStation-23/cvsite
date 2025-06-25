@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
@@ -14,6 +13,8 @@ type TrainingDB = {
   description?: string;
   certification_date: string;
   certificate_url?: string;
+  is_renewable: boolean;
+  expiry_date?: string;
   created_at: string;
   updated_at: string;
 };
@@ -25,7 +26,9 @@ const mapToTraining = (data: TrainingDB): Training => ({
   provider: data.provider,
   description: data.description || '',
   date: new Date(data.certification_date),
-  certificateUrl: data.certificate_url
+  certificateUrl: data.certificate_url,
+  isRenewable: data.is_renewable || false,
+  expiryDate: data.expiry_date ? new Date(data.expiry_date) : undefined
 });
 
 // Map from application model to database format
@@ -35,7 +38,9 @@ const mapToTrainingDB = (training: Omit<Training, 'id'>, profileId: string) => (
   provider: training.provider,
   description: training.description || null,
   certification_date: training.date.toISOString().split('T')[0],
-  certificate_url: training.certificateUrl || null
+  certificate_url: training.certificateUrl || null,
+  is_renewable: training.isRenewable || false,
+  expiry_date: training.expiryDate ? training.expiryDate.toISOString().split('T')[0] : null
 });
 
 export function useTraining(profileId?: string) {
@@ -136,6 +141,10 @@ export function useTraining(profileId?: string) {
       if (training.description !== undefined) dbData.description = training.description;
       if (training.date) dbData.certification_date = training.date.toISOString().split('T')[0];
       if (training.certificateUrl !== undefined) dbData.certificate_url = training.certificateUrl;
+      if (training.isRenewable !== undefined) dbData.is_renewable = training.isRenewable;
+      if (training.expiryDate !== undefined) {
+        dbData.expiry_date = training.expiryDate ? training.expiryDate.toISOString().split('T')[0] : null;
+      }
       
       dbData.updated_at = new Date().toISOString();
       

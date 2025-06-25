@@ -1,7 +1,9 @@
+
 import React from 'react';
 import { format } from 'date-fns';
 import { Button } from '@/components/ui/button';
-import { Pencil, Trash2, ExternalLink } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { Pencil, Trash2, ExternalLink, Calendar, AlertTriangle } from 'lucide-react';
 import { Training } from '@/types';
 import { useConfirmationDialog } from '@/hooks/use-confirmation-dialog';
 import { ConfirmationDialog } from '@/components/ui/confirmation-dialog';
@@ -40,14 +42,45 @@ export const TrainingItem: React.FC<TrainingItemProps> = ({
     });
   };
 
+  const isExpired = training.expiryDate && new Date(training.expiryDate) < new Date();
+  const isExpiringSoon = training.expiryDate && 
+    new Date(training.expiryDate) > new Date() && 
+    new Date(training.expiryDate) <= new Date(Date.now() + 30 * 24 * 60 * 60 * 1000); // 30 days
+
   return (
     <>
       <div className="border rounded-md p-4">
         <div className="flex justify-between items-start">
-          <div>
-            <h3 className="font-medium">{training.title}</h3>
+          <div className="flex-1">
+            <div className="flex items-center gap-2 mb-2">
+              <h3 className="font-medium">{training.title}</h3>
+              {training.isRenewable && (
+                <Badge variant="outline" className="text-xs">
+                  Renewable
+                </Badge>
+              )}
+              {isExpired && (
+                <Badge variant="destructive" className="text-xs flex items-center gap-1">
+                  <AlertTriangle className="h-3 w-3" />
+                  Expired
+                </Badge>
+              )}
+              {isExpiringSoon && (
+                <Badge variant="secondary" className="text-xs flex items-center gap-1">
+                  <Calendar className="h-3 w-3" />
+                  Expires Soon
+                </Badge>
+              )}
+            </div>
             <div className="text-sm text-muted-foreground">{training.provider}</div>
-            <div className="text-sm text-muted-foreground mt-1">{format(training.date, 'PPP')}</div>
+            <div className="text-sm text-muted-foreground mt-1">
+              Certified: {format(training.date, 'PPP')}
+            </div>
+            {training.expiryDate && (
+              <div className={`text-sm mt-1 ${isExpired ? 'text-red-600' : isExpiringSoon ? 'text-yellow-600' : 'text-muted-foreground'}`}>
+                Expires: {format(training.expiryDate, 'PPP')}
+              </div>
+            )}
           </div>
           {training.certificateUrl && (
             <a 
