@@ -19,65 +19,63 @@ const PlatformSettings: React.FC = () => {
         <Tabs defaultValue="universities" className="flex flex-col h-full">
           {/* Fixed header with tabs */}
           <div className="flex-shrink-0 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 pb-0">
-            <div className="overflow-x-auto">
-              <TabsList className="h-10 md:h-12 w-full justify-start rounded-none bg-transparent p-0 border-b-0 min-w-max">
-                <TabsTrigger 
-                  value="universities" 
-                  className="h-10 md:h-12 rounded-none border-b-2 border-transparent data-[state=active]:border-cvsite-teal data-[state=active]:bg-transparent data-[state=active]:shadow-none px-3 md:px-6 font-medium text-xs md:text-sm whitespace-nowrap"
-                >
-                  Universities
-                </TabsTrigger>
-                <TabsTrigger 
-                  value="departments" 
-                  className="h-10 md:h-12 rounded-none border-b-2 border-transparent data-[state=active]:border-cvsite-teal data-[state=active]:bg-transparent data-[state=active]:shadow-none px-3 md:px-6 font-medium text-xs md:text-sm whitespace-nowrap"
-                >
-                  Departments
-                </TabsTrigger>
-                <TabsTrigger 
-                  value="degrees" 
-                  className="h-10 md:h-12 rounded-none border-b-2 border-transparent data-[state=active]:border-cvsite-teal data-[state=active]:bg-transparent data-[state=active]:shadow-none px-3 md:px-6 font-medium text-xs md:text-sm whitespace-nowrap"
-                >
-                  Degrees
-                </TabsTrigger>
-                <TabsTrigger 
-                  value="designations" 
-                  className="h-10 md:h-12 rounded-none border-b-2 border-transparent data-[state=active]:border-cvsite-teal data-[state=active]:bg-transparent data-[state=active]:shadow-none px-3 md:px-6 font-medium text-xs md:text-sm whitespace-nowrap"
-                >
-                  Designations
-                </TabsTrigger>
-                <TabsTrigger 
-                  value="references" 
-                  className="h-10 md:h-12 rounded-none border-b-2 border-transparent data-[state=active]:border-cvsite-teal data-[state=active]:bg-transparent data-[state=active]:shadow-none px-3 md:px-6 font-medium text-xs md:text-sm whitespace-nowrap"
-                >
-                  References
-                </TabsTrigger>
-                <TabsTrigger 
-                  value="sbus" 
-                  className="h-10 md:h-12 rounded-none border-b-2 border-transparent data-[state=active]:border-cvsite-teal data-[state=active]:bg-transparent data-[state=active]:shadow-none px-3 md:px-6 font-medium text-xs md:text-sm whitespace-nowrap"
-                >
-                  SBUs
-                </TabsTrigger>
-                <TabsTrigger 
-                  value="hr-contacts" 
-                  className="h-10 md:h-12 rounded-none border-b-2 border-transparent data-[state=active]:border-cvsite-teal data-[state=active]:bg-transparent data-[state=active]:shadow-none px-3 md:px-6 font-medium text-xs md:text-sm whitespace-nowrap"
-                >
-                  HR Contacts
-                </TabsTrigger>
-                <TabsTrigger 
-                  value="note-categories" 
-                  className="h-10 md:h-12 rounded-none border-b-2 border-transparent data-[state=active]:border-cvsite-teal data-[state=active]:bg-transparent data-[state=active]:shadow-none px-3 md:px-6 font-medium text-xs md:text-sm whitespace-nowrap"
-                >
-                  Note Categories
-                </TabsTrigger>
-              </TabsList>
-            </div>
+            <TabsList className="h-12 w-full justify-start rounded-none bg-transparent p-0 border-b-0">
+              <TabsTrigger 
+                value="universities" 
+                className="h-12 rounded-none border-b-2 border-transparent data-[state=active]:border-cvsite-teal data-[state=active]:bg-transparent data-[state=active]:shadow-none px-6 font-medium"
+              >
+                Universities
+              </TabsTrigger>
+              <TabsTrigger 
+                value="departments" 
+                className="h-12 rounded-none border-b-2 border-transparent data-[state=active]:border-cvsite-teal data-[state=active]:bg-transparent data-[state=active]:shadow-none px-6 font-medium"
+              >
+                Departments
+              </TabsTrigger>
+              <TabsTrigger 
+                value="degrees" 
+                className="h-12 rounded-none border-b-2 border-transparent data-[state=active]:border-cvsite-teal data-[state=active]:bg-transparent data-[state=active]:shadow-none px-6 font-medium"
+              >
+                Degrees
+              </TabsTrigger>
+              <TabsTrigger 
+                value="designations" 
+                className="h-12 rounded-none border-b-2 border-transparent data-[state=active]:border-cvsite-teal data-[state=active]:bg-transparent data-[state=active]:shadow-none px-6 font-medium"
+              >
+                Designations
+              </TabsTrigger>
+              <TabsTrigger 
+                value="references" 
+                className="h-12 rounded-none border-b-2 border-transparent data-[state=active]:border-cvsite-teal data-[state=active]:bg-transparent data-[state=active]:shadow-none px-6 font-medium"
+              >
+                References
+              </TabsTrigger>
+              <TabsTrigger 
+                value="sbus" 
+                className="h-12 rounded-none border-b-2 border-transparent data-[state=active]:border-cvsite-teal data-[state=active]:bg-transparent data-[state=active]:shadow-none px-6 font-medium"
+              >
+                SBUs
+              </TabsTrigger>
+              <TabsTrigger 
+                value="hr-contacts" 
+                className="h-12 rounded-none border-b-2 border-transparent data-[state=active]:border-cvsite-teal data-[state=active]:bg-transparent data-[state=active]:shadow-none px-6 font-medium"
+              >
+                HR Contacts
+              </TabsTrigger>
+              <TabsTrigger 
+                value="note-categories" 
+                className="h-12 rounded-none border-b-2 border-transparent data-[state=active]:border-cvsite-teal data-[state=active]:bg-transparent data-[state=active]:shadow-none px-6 font-medium"
+              >
+                Note Categories
+              </TabsTrigger>
+            </TabsList>
           </div>
           
           {/* Scrollable content area */}
           <div className="flex-1 min-h-0">
             <TabsContent value="universities" className="mt-0 h-full">
               <ScrollArea className="h-full">
-                <div className="p-4 md:p-6">
+                <div className="p-6">
                   <UniversitySettings />
                 </div>
               </ScrollArea>
@@ -85,7 +83,7 @@ const PlatformSettings: React.FC = () => {
             
             <TabsContent value="departments" className="mt-0 h-full">
               <ScrollArea className="h-full">
-                <div className="p-4 md:p-6">
+                <div className="p-6">
                   <DepartmentSettings />
                 </div>
               </ScrollArea>
@@ -93,7 +91,7 @@ const PlatformSettings: React.FC = () => {
             
             <TabsContent value="degrees" className="mt-0 h-full">
               <ScrollArea className="h-full">
-                <div className="p-4 md:p-6">
+                <div className="p-6">
                   <DegreeSettings />
                 </div>
               </ScrollArea>
@@ -101,7 +99,7 @@ const PlatformSettings: React.FC = () => {
             
             <TabsContent value="designations" className="mt-0 h-full">
               <ScrollArea className="h-full">
-                <div className="p-4 md:p-6">
+                <div className="p-6">
                   <DesignationSettings />
                 </div>
               </ScrollArea>
@@ -109,7 +107,7 @@ const PlatformSettings: React.FC = () => {
             
             <TabsContent value="references" className="mt-0 h-full">
               <ScrollArea className="h-full">
-                <div className="p-4 md:p-6">
+                <div className="p-6">
                   <ReferenceSettings />
                 </div>
               </ScrollArea>
@@ -117,7 +115,7 @@ const PlatformSettings: React.FC = () => {
             
             <TabsContent value="sbus" className="mt-0 h-full">
               <ScrollArea className="h-full">
-                <div className="p-4 md:p-6">
+                <div className="p-6">
                   <SbuSettings />
                 </div>
               </ScrollArea>
@@ -125,7 +123,7 @@ const PlatformSettings: React.FC = () => {
             
             <TabsContent value="hr-contacts" className="mt-0 h-full">
               <ScrollArea className="h-full">
-                <div className="p-4 md:p-6">
+                <div className="p-6">
                   <HrContactSettings />
                 </div>
               </ScrollArea>
@@ -133,7 +131,7 @@ const PlatformSettings: React.FC = () => {
             
             <TabsContent value="note-categories" className="mt-0 h-full">
               <ScrollArea className="h-full">
-                <div className="p-4 md:p-6">
+                <div className="p-6">
                   <NoteCategorySettings />
                 </div>
               </ScrollArea>
