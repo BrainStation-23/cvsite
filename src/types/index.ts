@@ -82,3 +82,11 @@ export interface GeneralInfo {
   profileImage?: string;
   currentDesignation?: string;
 }
+
+export interface NoteCategory {
+  id: string;
+  name: string;
+  icon?: string;
+  created_at: string;
+  updated_at: string;
+}

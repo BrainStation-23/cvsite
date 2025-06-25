@@ -10,6 +10,7 @@ import DesignationSettings from '@/components/admin/DesignationSettings';
 import ReferenceSettings from '@/components/admin/reference/ReferenceSettings';
 import SbuSettings from '@/components/admin/SbuSettings';
 import HrContactSettings from '@/components/admin/HrContactSettings';
+import NoteCategorySettings from '@/components/admin/NoteCategorySettings';
 
 const PlatformSettings: React.FC = () => {
   return (
@@ -60,6 +61,12 @@ const PlatformSettings: React.FC = () => {
                 className="h-12 rounded-none border-b-2 border-transparent data-[state=active]:border-cvsite-teal data-[state=active]:bg-transparent data-[state=active]:shadow-none px-6 font-medium"
               >
                 HR Contacts
+              </TabsTrigger>
+              <TabsTrigger 
+                value="note-categories" 
+                className="h-12 rounded-none border-b-2 border-transparent data-[state=active]:border-cvsite-teal data-[state=active]:bg-transparent data-[state=active]:shadow-none px-6 font-medium"
+              >
+                Note Categories
               </TabsTrigger>
             </TabsList>
           </div>
@@ -118,6 +125,14 @@ const PlatformSettings: React.FC = () => {
               <ScrollArea className="h-full">
                 <div className="p-6">
                   <HrContactSettings />
+                </div>
+              </ScrollArea>
+            </TabsContent>
+            
+            <TabsContent value="note-categories" className="mt-0 h-full">
+              <ScrollArea className="h-full">
+                <div className="p-6">
+                  <NoteCategorySettings />
                 </div>
               </ScrollArea>
             </TabsContent>
