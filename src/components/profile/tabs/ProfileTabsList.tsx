@@ -15,7 +15,6 @@ import {
 import { UseFormReturn } from 'react-hook-form';
 import { GeneralInfoFormData } from '../generalInfo/GeneralInfoTab';
 import { Skill, Experience, Education, Training, Achievement, Project } from '@/types';
-import { useIsMobile } from '@/hooks/use-mobile';
 
 interface ProfileTabsListProps {
   form: UseFormReturn<GeneralInfoFormData>;
@@ -38,8 +37,6 @@ export const ProfileTabsList: React.FC<ProfileTabsListProps> = ({
   achievements,
   projects
 }) => {
-  const isMobile = useIsMobile();
-
   // Helper function to check if general info is incomplete
   const isGeneralInfoIncomplete = () => {
     const firstName = form.getValues('firstName');
@@ -52,11 +49,11 @@ export const ProfileTabsList: React.FC<ProfileTabsListProps> = ({
 
   return (
     <div className="flex-shrink-0">
-      <TabsList className={`grid w-full ${isMobile ? 'grid-cols-4' : 'grid-cols-8'} h-12 bg-gray-100 dark:bg-gray-800 rounded-md p-1 ${isMobile ? 'overflow-x-auto' : ''}`}>
+      <TabsList className="grid w-full grid-cols-8 h-12 bg-gray-100 dark:bg-gray-800 rounded-md p-1">
         <TabTriggerWithIcon
           value="general"
           icon={User}
-          label={isMobile ? "Info" : "General"}
+          label="General"
           isEmpty={isGeneralInfoIncomplete()}
           dataTour="general-tab"
         />
@@ -70,83 +67,46 @@ export const ProfileTabsList: React.FC<ProfileTabsListProps> = ({
         <TabTriggerWithIcon
           value="experience"
           icon={Briefcase}
-          label={isMobile ? "Exp" : "Experience"}
+          label="Experience"
           isEmpty={experiences.length === 0}
           dataTour="experience-tab"
         />
         <TabTriggerWithIcon
           value="education"
           icon={GraduationCap}
-          label={isMobile ? "Edu" : "Education"}
+          label="Education"
           isEmpty={education.length === 0}
           dataTour="education-tab"
         />
-        {!isMobile && (
-          <>
-            <TabTriggerWithIcon
-              value="training"
-              icon={Award}
-              label="Training"
-              isEmpty={trainings.length === 0}
-              dataTour="training-tab"
-            />
-            <TabTriggerWithIcon
-              value="achievements"
-              icon={Trophy}
-              label="Achievements"
-              isEmpty={achievements.length === 0}
-              dataTour="achievements-tab"
-            />
-            <TabTriggerWithIcon
-              value="projects"
-              icon={FolderOpen}
-              label="Projects"
-              isEmpty={projects.length === 0}
-              dataTour="projects-tab"
-            />
-            <TabTriggerWithIcon
-              value="json"
-              icon={FileJson}
-              label="JSON"
-              isEmpty={false}
-              dataTour="json-tab"
-            />
-          </>
-        )}
+        <TabTriggerWithIcon
+          value="training"
+          icon={Award}
+          label="Training"
+          isEmpty={trainings.length === 0}
+          dataTour="training-tab"
+        />
+        <TabTriggerWithIcon
+          value="achievements"
+          icon={Trophy}
+          label="Achievements"
+          isEmpty={achievements.length === 0}
+          dataTour="achievements-tab"
+        />
+        <TabTriggerWithIcon
+          value="projects"
+          icon={FolderOpen}
+          label="Projects"
+          isEmpty={projects.length === 0}
+          dataTour="projects-tab"
+        />
+        <TabTriggerWithIcon
+          value="json"
+          icon={FileJson}
+          label="JSON"
+          isEmpty={false}
+          dataTour="json-tab"
+        />
       </TabsList>
-      
-      {isMobile && (
-        <TabsList className="grid w-full grid-cols-4 h-12 bg-gray-100 dark:bg-gray-800 rounded-md p-1 mt-2">
-          <TabTriggerWithIcon
-            value="training"
-            icon={Award}
-            label="Training"
-            isEmpty={trainings.length === 0}
-            dataTour="training-tab"
-          />
-          <TabTriggerWithIcon
-            value="achievements"
-            icon={Trophy}
-            label="Awards"
-            isEmpty={achievements.length === 0}
-            dataTour="achievements-tab"
-          />
-          <TabTriggerWithIcon
-            value="projects"
-            icon={FolderOpen}
-            label="Projects"
-            isEmpty={projects.length === 0}
-            dataTour="projects-tab"
-          />
-          <TabTriggerWithIcon
-            value="json"
-            icon={FileJson}
-            label="JSON"
-            isEmpty={false}
-            dataTour="json-tab"
-          />
-        </TabsList>
-      )}
     </div>
   );
 };

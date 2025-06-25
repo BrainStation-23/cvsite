@@ -7,11 +7,9 @@ import { useForm } from 'react-hook-form';
 import { ProfileTabs } from '@/components/profile/ProfileTabs';
 import { GeneralInfoFormData } from '@/components/profile/generalInfo/GeneralInfoTab';
 import { Skill } from '@/types';
-import { useIsMobile } from '@/hooks/use-mobile';
 
 const ProfilePage: React.FC = () => {
   const { toast } = useToast();
-  const isMobile = useIsMobile();
   const [newTechnicalSkill, setNewTechnicalSkill] = useState<Omit<Skill, 'id'>>({
     name: '',
     proficiency: 1,
@@ -132,57 +130,55 @@ const ProfilePage: React.FC = () => {
   return (
     <DashboardLayout>
       <div className="flex flex-col h-full">
-        {/* Content area - responsive padding */}
-        <div className={`flex-1 min-h-0 ${isMobile ? 'py-2 px-1' : 'py-4'}`}>
+        {/* Content area - now takes full height */}
+        <div className="flex-1 min-h-0 py-4">
           {isLoading ? (
             <div className="flex justify-center items-center h-64">
               <p>Loading profile information...</p>
             </div>
           ) : (
-            <div className={`${isMobile ? 'max-w-full' : ''} mx-auto`}>
-              <ProfileTabs
-                form={form}
-                isEditing={true}
-                onImageUpdate={handleImageUpdate}
-                technicalSkills={technicalSkills}
-                specializedSkills={specializedSkills}
-                experiences={experiences}
-                education={education}
-                trainings={trainings}
-                achievements={achievements}
-                projects={projects}
-                isSaving={isSaving}
-                newTechnicalSkill={newTechnicalSkill}
-                newSpecializedSkill={newSpecializedSkill}
-                setNewTechnicalSkill={setNewTechnicalSkill}
-                setNewSpecializedSkill={setNewSpecializedSkill}
-                handleAddTechnicalSkill={handleAddTechnicalSkill}
-                handleAddSpecializedSkill={handleAddSpecializedSkill}
-                saveExperience={saveExperience}
-                updateExperience={updateExperience}
-                deleteExperience={deleteExperience}
-                saveEducation={saveEducation}
-                updateEducation={updateEducation}
-                deleteEducation={deleteEducation}
-                saveTraining={saveTraining}
-                updateTraining={updateTraining}
-                deleteTraining={deleteTraining}
-                saveAchievement={saveAchievement}
-                updateAchievement={updateAchievement}
-                deleteAchievement={deleteAchievement}
-                saveProject={saveProject}
-                updateProject={updateProject}
-                deleteProject={deleteProject}
-                reorderProjects={reorderProjects}
-                deleteTechnicalSkill={deleteTechnicalSkill}
-                deleteSpecializedSkill={deleteSpecializedSkill}
-                saveTechnicalSkill={saveTechnicalSkill}
-                saveSpecializedSkill={saveSpecializedSkill}
-                reorderTechnicalSkills={reorderTechnicalSkills}
-                reorderSpecializedSkills={reorderSpecializedSkills}
-                saveGeneralInfo={handleUpdateProfile}
-              />
-            </div>
+            <ProfileTabs
+              form={form}
+              isEditing={true}
+              onImageUpdate={handleImageUpdate}
+              technicalSkills={technicalSkills}
+              specializedSkills={specializedSkills}
+              experiences={experiences}
+              education={education}
+              trainings={trainings}
+              achievements={achievements}
+              projects={projects}
+              isSaving={isSaving}
+              newTechnicalSkill={newTechnicalSkill}
+              newSpecializedSkill={newSpecializedSkill}
+              setNewTechnicalSkill={setNewTechnicalSkill}
+              setNewSpecializedSkill={setNewSpecializedSkill}
+              handleAddTechnicalSkill={handleAddTechnicalSkill}
+              handleAddSpecializedSkill={handleAddSpecializedSkill}
+              saveExperience={saveExperience}
+              updateExperience={updateExperience}
+              deleteExperience={deleteExperience}
+              saveEducation={saveEducation}
+              updateEducation={updateEducation}
+              deleteEducation={deleteEducation}
+              saveTraining={saveTraining}
+              updateTraining={updateTraining}
+              deleteTraining={deleteTraining}
+              saveAchievement={saveAchievement}
+              updateAchievement={updateAchievement}
+              deleteAchievement={deleteAchievement}
+              saveProject={saveProject}
+              updateProject={updateProject}
+              deleteProject={deleteProject}
+              reorderProjects={reorderProjects}
+              deleteTechnicalSkill={deleteTechnicalSkill}
+              deleteSpecializedSkill={deleteSpecializedSkill}
+              saveTechnicalSkill={saveTechnicalSkill}
+              saveSpecializedSkill={saveSpecializedSkill}
+              reorderTechnicalSkills={reorderTechnicalSkills}
+              reorderSpecializedSkills={reorderSpecializedSkills}
+              saveGeneralInfo={handleUpdateProfile}
+            />
           )}
         </div>
       </div>
