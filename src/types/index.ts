@@ -1,4 +1,20 @@
 
+export type UserRole = 'admin' | 'manager' | 'employee';
+
+export interface User {
+  id: string;
+  email: string;
+  first_name: string;
+  last_name: string;
+  firstName: string;
+  lastName: string;
+  employee_id?: string;
+  role: UserRole;
+  profileImageUrl?: string;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface Skill {
   id: string;
   name: string;

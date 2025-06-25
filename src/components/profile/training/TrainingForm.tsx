@@ -57,6 +57,10 @@ export const TrainingForm: React.FC<TrainingFormProps> = ({
     await onSubmit(data);
   };
 
+  const handleRenewableChange = (checked: boolean | 'indeterminate') => {
+    setIsRenewable(checked === true);
+  };
+
   return (
     <div className="space-y-4">
       <div className="flex justify-between">
@@ -128,7 +132,7 @@ export const TrainingForm: React.FC<TrainingFormProps> = ({
             <Checkbox 
               id="is-renewable" 
               checked={isRenewable}
-              onCheckedChange={setIsRenewable}
+              onCheckedChange={handleRenewableChange}
             />
             <label
               htmlFor="is-renewable"
