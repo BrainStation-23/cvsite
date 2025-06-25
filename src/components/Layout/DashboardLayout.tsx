@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
@@ -11,7 +12,8 @@ import {
   Database,
   Menu,
   FileText,
-  Bell
+  Bell,
+  X
 } from 'lucide-react';
 
 interface DashboardLayoutProps {
@@ -22,7 +24,8 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false); // Changed default to false for mobile-first
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   
   const getPageTitle = () => {
     const path = location.pathname;
@@ -49,6 +52,14 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
 
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
+  };
+
+  const toggleMobileMenu = () => {
+    setIsMobileMenuOpen(!isMobileMenuOpen);
+  };
+
+  const closeMobileMenu = () => {
+    setIsMobileMenuOpen(false);
   };
 
   const handleSignOut = async () => {
@@ -97,9 +108,17 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
 
   return (
     <div className="flex h-screen bg-gray-100 dark:bg-gray-900">
-      {/* Sidebar */}
+      {/* Mobile menu overlay */}
+      {isMobileMenuOpen && (
+        <div 
+          className="fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden"
+          onClick={closeMobileMenu}
+        />
+      )}
+
+      {/* Desktop Sidebar */}
       <aside 
-        className={`${isSidebarOpen ? 'w-64' : 'w-16'} transition-width duration-300 ease-in-out fixed h-full z-10 bg-gradient-to-b from-slate-900 to-slate-800 text-slate-100`}
+        className={`${isSidebarOpen ? 'w-64' : 'w-16'} transition-all duration-300 ease-in-out fixed h-full z-30 bg-gradient-to-b from-slate-900 to-slate-800 text-slate-100 hidden md:block`}
       >
         <div className="p-4 flex justify-between items-center bg-slate-900/90 border-b border-slate-700">
           {isSidebarOpen && <h1 className="font-bold text-xl">CVSite</h1>}
@@ -107,10 +126,11 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
             onClick={toggleSidebar}
             className="p-1 rounded hover:bg-cvsite-teal"
           >
-            {isSidebarOpen ? <Menu className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+            <Menu className="w-5 h-5" />
           </button>
         </div>
-        {/* Redesigned Sidebar Navigation */}
+        
+        {/* Desktop Navigation */}
         <nav className="mt-5">
           {sidebarGroups.map((group, groupIdx) => (
             <div key={group.label || groupIdx} className="mb-4">
@@ -146,26 +166,86 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
         </div>
       </aside>
 
+      {/* Mobile Sidebar */}
+      <aside 
+        className={`${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'} fixed inset-y-0 left-0 z-50 w-64 bg-gradient-to-b from-slate-900 to-slate-800 text-slate-100 transform transition-transform duration-300 ease-in-out md:hidden`}
+      >
+        <div className="p-4 flex justify-between items-center bg-slate-900/90 border-b border-slate-700">
+          <h1 className="font-bold text-xl">CVSite</h1>
+          <button 
+            onClick={closeMobileMenu}
+            className="p-1 rounded hover:bg-cvsite-teal"
+          >
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+        
+        {/* Mobile Navigation */}
+        <nav className="mt-5">
+          {sidebarGroups.map((group, groupIdx) => (
+            <div key={group.label || groupIdx} className="mb-4">
+              {group.label && (
+                <div className="px-4 py-2.5 text-sm font-bold bg-slate-800/70 text-teal-300 uppercase tracking-wider border-b border-slate-700">
+                  {group.label}
+                </div>
+              )}
+              <ul>
+                {group.items.map((link) => (
+                  <li key={link.to} className="mb-1.5 mx-2">
+                    <Link
+                      to={link.to}
+                      onClick={closeMobileMenu}
+                      className="flex items-center px-4 py-2.5 hover:bg-teal-900/40 transition-colors rounded-lg group"
+                    >
+                      {React.cloneElement(link.icon, { className: 'w-5 h-5 text-teal-400 group-hover:text-teal-200' })}
+                      <span className="ml-3 group-hover:text-white">{link.label}</span>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </nav>
+        <div className="absolute bottom-0 w-full p-4">
+          <button
+            onClick={handleSignOut}
+            className="flex items-center w-full px-4 py-2 text-sm hover:bg-cvsite-teal rounded transition-colors"
+          >
+            <LogOut className="w-5 h-5" />
+            <span className="ml-3">Sign Out</span>
+          </button>
+        </div>
+      </aside>
+
       {/* Main content */}
-      <div className={`flex-1 ${isSidebarOpen ? 'ml-64' : 'ml-16'} transition-margin duration-300 ease-in-out flex flex-col`}>
+      <div className={`flex-1 ${isSidebarOpen ? 'md:ml-64' : 'md:ml-16'} transition-all duration-300 ease-in-out flex flex-col`}>
         {/* Header */}
-        <header className="bg-white dark:bg-slate-800 shadow-sm py-3 px-6 flex-shrink-0">
+        <header className="bg-white dark:bg-slate-800 shadow-sm py-3 px-4 md:px-6 flex-shrink-0">
           <div className="flex justify-between items-center">
-            <h2 className="text-xl font-semibold text-slate-800 dark:text-white">
-              {getPageTitle()}
-            </h2>
-            <div className="flex items-center space-x-4">
+            <div className="flex items-center">
+              {/* Mobile menu button */}
+              <button 
+                onClick={toggleMobileMenu}
+                className="p-2 rounded hover:bg-gray-100 dark:hover:bg-slate-700 md:hidden mr-2"
+              >
+                <Menu className="w-5 h-5" />
+              </button>
+              <h2 className="text-lg md:text-xl font-semibold text-slate-800 dark:text-white truncate">
+                {getPageTitle()}
+              </h2>
+            </div>
+            <div className="flex items-center space-x-2 md:space-x-4">
               <div className="relative">
                 <button className="text-slate-600 hover:text-slate-800 dark:text-slate-300 dark:hover:text-white">
                   <Bell className="w-5 h-5" />
                 </button>
                 <span className="absolute top-0 right-0 w-2 h-2 bg-red-500 rounded-full"></span>
               </div>
-              <div className="flex items-center space-x-3">
-                <span className="text-sm text-slate-600 dark:text-slate-300">
+              <div className="flex items-center space-x-2 md:space-x-3">
+                <span className="text-xs md:text-sm text-slate-600 dark:text-slate-300 hidden sm:block">
                   {user?.firstName} {user?.lastName}
                 </span>
-                <div className="w-9 h-9 bg-gradient-to-r from-teal-500 to-cyan-600 rounded-full flex items-center justify-center text-white">
+                <div className="w-8 h-8 md:w-9 md:h-9 bg-gradient-to-r from-teal-500 to-cyan-600 rounded-full flex items-center justify-center text-white text-sm">
                   {user?.firstName.charAt(0)}{user?.lastName.charAt(0)}
                 </div>
               </div>
@@ -174,8 +254,8 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
         </header>
 
         {/* Content */}
-        <main className="flex-1 px-6 py-6 bg-slate-50 dark:bg-slate-900">
-          <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm p-6">
+        <main className="flex-1 px-4 md:px-6 py-4 md:py-6 bg-slate-50 dark:bg-slate-900 overflow-auto">
+          <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm p-4 md:p-6 h-full">
             {children}
           </div>
         </main>
