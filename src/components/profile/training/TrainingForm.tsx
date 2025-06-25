@@ -11,6 +11,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Calendar } from '@/components/ui/calendar';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Training } from '@/types';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface TrainingFormProps {
   initialData?: Omit<Training, 'id'>;
@@ -31,6 +32,7 @@ export const TrainingForm: React.FC<TrainingFormProps> = ({
   setDate,
   isNew = false
 }) => {
+  const isMobile = useIsMobile();
   const [expiryDate, setExpiryDate] = React.useState<Date | undefined>(
     initialData?.expiryDate
   );
@@ -62,9 +64,9 @@ export const TrainingForm: React.FC<TrainingFormProps> = ({
   };
 
   return (
-    <div className="space-y-4">
-      <div className="flex justify-between">
-        <h3 className="text-lg font-medium">
+    <div className={`space-y-4 ${isMobile ? 'p-4' : ''}`}>
+      <div className="flex justify-between items-center">
+        <h3 className={`${isMobile ? 'text-base' : 'text-lg'} font-medium`}>
           {isNew ? 'Add New Training/Certification' : 'Edit Training'}
         </h3>
         <Button variant="ghost" size="sm" onClick={onCancel}>
@@ -114,10 +116,12 @@ export const TrainingForm: React.FC<TrainingFormProps> = ({
                   data-tour="training-date"
                 >
                   <CalendarIcon className="mr-2 h-4 w-4" />
-                  {date ? format(date, 'PPP') : <span>Pick a date</span>}
+                  <span className={isMobile ? 'text-sm' : ''}>
+                    {date ? format(date, 'PPP') : 'Pick a date'}
+                  </span>
                 </Button>
               </PopoverTrigger>
-              <PopoverContent className="w-auto p-0">
+              <PopoverContent className="w-auto p-0" align={isMobile ? "center" : "start"}>
                 <Calendar
                   mode="single"
                   selected={date}
@@ -136,7 +140,7 @@ export const TrainingForm: React.FC<TrainingFormProps> = ({
             />
             <label
               htmlFor="is-renewable"
-              className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+              className={`${isMobile ? 'text-sm' : ''} font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70`}
             >
               Renewable Certification
             </label>
@@ -152,10 +156,12 @@ export const TrainingForm: React.FC<TrainingFormProps> = ({
                     className="w-full justify-start text-left font-normal"
                   >
                     <CalendarIcon className="mr-2 h-4 w-4" />
-                    {expiryDate ? format(expiryDate, 'PPP') : <span>Pick expiry date</span>}
+                    <span className={isMobile ? 'text-sm' : ''}>
+                      {expiryDate ? format(expiryDate, 'PPP') : 'Pick expiry date'}
+                    </span>
                   </Button>
                 </PopoverTrigger>
-                <PopoverContent className="w-auto p-0">
+                <PopoverContent className="w-auto p-0" align={isMobile ? "center" : "start"}>
                   <Calendar
                     mode="single"
                     selected={expiryDate}
@@ -178,7 +184,7 @@ export const TrainingForm: React.FC<TrainingFormProps> = ({
                   <Textarea 
                     {...field} 
                     placeholder="Brief description of the certification or training" 
-                    rows={3}
+                    rows={isMobile ? 2 : 3}
                     data-tour="training-description"
                   />
                 </FormControl>
@@ -201,11 +207,11 @@ export const TrainingForm: React.FC<TrainingFormProps> = ({
             )}
           />
           
-          <div className="flex justify-end space-x-2">
-            <Button type="button" variant="outline" onClick={onCancel}>
+          <div className={`flex ${isMobile ? 'flex-col space-y-2' : 'justify-end space-x-2'}`}>
+            <Button type="button" variant="outline" onClick={onCancel} className={isMobile ? 'w-full' : ''}>
               Cancel
             </Button>
-            <Button type="submit" disabled={isSaving} data-tour="training-save-button">
+            <Button type="submit" disabled={isSaving} data-tour="training-save-button" className={isMobile ? 'w-full' : ''}>
               {isSaving ? "Saving..." : isNew ? "Save Training" : "Save Changes"}
             </Button>
           </div>

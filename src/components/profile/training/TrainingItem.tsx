@@ -7,6 +7,7 @@ import { Pencil, Trash2, ExternalLink, Calendar, AlertTriangle } from 'lucide-re
 import { Training } from '@/types';
 import { useConfirmationDialog } from '@/hooks/use-confirmation-dialog';
 import { ConfirmationDialog } from '@/components/ui/confirmation-dialog';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface TrainingItemProps {
   training: Training;
@@ -21,6 +22,7 @@ export const TrainingItem: React.FC<TrainingItemProps> = ({
   onEdit,
   onDelete
 }) => {
+  const isMobile = useIsMobile();
   const {
     isOpen,
     config,
@@ -49,11 +51,11 @@ export const TrainingItem: React.FC<TrainingItemProps> = ({
 
   return (
     <>
-      <div className="border rounded-md p-4">
-        <div className="flex justify-between items-start">
+      <div className={`border rounded-md p-4 ${isMobile ? 'p-3' : ''}`}>
+        <div className={`flex ${isMobile ? 'flex-col space-y-2' : 'justify-between items-start'}`}>
           <div className="flex-1">
-            <div className="flex items-center gap-2 mb-2">
-              <h3 className="font-medium">{training.title}</h3>
+            <div className={`flex items-center gap-2 mb-2 ${isMobile ? 'flex-wrap' : ''}`}>
+              <h3 className={`font-medium ${isMobile ? 'text-sm' : ''}`}>{training.title}</h3>
               {training.isRenewable && (
                 <Badge variant="outline" className="text-xs">
                   Renewable
@@ -72,13 +74,13 @@ export const TrainingItem: React.FC<TrainingItemProps> = ({
                 </Badge>
               )}
             </div>
-            <div className="text-sm text-muted-foreground">{training.provider}</div>
-            <div className="text-sm text-muted-foreground mt-1">
-              Certified: {format(training.date, 'PPP')}
+            <div className={`text-muted-foreground ${isMobile ? 'text-sm' : ''}`}>{training.provider}</div>
+            <div className={`text-muted-foreground mt-1 ${isMobile ? 'text-sm' : ''}`}>
+              Certified: {format(training.date, isMobile ? 'MMM d, yyyy' : 'PPP')}
             </div>
             {training.expiryDate && (
-              <div className={`text-sm mt-1 ${isExpired ? 'text-red-600' : isExpiringSoon ? 'text-yellow-600' : 'text-muted-foreground'}`}>
-                Expires: {format(training.expiryDate, 'PPP')}
+              <div className={`mt-1 ${isMobile ? 'text-sm' : ''} ${isExpired ? 'text-red-600' : isExpiringSoon ? 'text-yellow-600' : 'text-muted-foreground'}`}>
+                Expires: {format(training.expiryDate, isMobile ? 'MMM d, yyyy' : 'PPP')}
               </div>
             )}
           </div>
@@ -87,7 +89,7 @@ export const TrainingItem: React.FC<TrainingItemProps> = ({
               href={training.certificateUrl} 
               target="_blank" 
               rel="noopener noreferrer"
-              className="text-cvsite-teal flex items-center text-sm hover:underline"
+              className={`text-cvsite-teal flex items-center hover:underline ${isMobile ? 'text-sm self-start' : 'text-sm'}`}
             >
               View Certificate <ExternalLink className="h-3 w-3 ml-1" />
             </a>
@@ -95,22 +97,24 @@ export const TrainingItem: React.FC<TrainingItemProps> = ({
         </div>
         
         {training.description && (
-          <p className="text-sm text-muted-foreground mt-3">{training.description}</p>
+          <p className={`text-muted-foreground mt-3 ${isMobile ? 'text-sm' : ''}`}>{training.description}</p>
         )}
         
         {isEditing && (
-          <div className="flex justify-end space-x-2 mt-4">
+          <div className={`flex mt-4 ${isMobile ? 'flex-col space-y-2' : 'justify-end space-x-2'}`}>
             <Button 
               variant="outline" 
-              size="sm" 
+              size={isMobile ? "default" : "sm"} 
               onClick={() => onEdit(training)}
+              className={isMobile ? 'w-full' : ''}
             >
               <Pencil className="h-4 w-4 mr-2" /> Edit
             </Button>
             <Button 
               variant="destructive" 
-              size="sm" 
+              size={isMobile ? "default" : "sm"} 
               onClick={handleDelete}
+              className={isMobile ? 'w-full' : ''}
             >
               <Trash2 className="h-4 w-4 mr-2" /> Delete
             </Button>
