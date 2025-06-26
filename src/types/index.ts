@@ -90,3 +90,15 @@ export interface NoteCategory {
   created_at: string;
   updated_at: string;
 }
+
+export interface Note {
+  id: string;
+  profile_id: string;
+  category_id?: string;
+  title: string;
+  content?: string;
+  created_by: string;
+  created_at: string;
+  updated_at: string;
+  category?: NoteCategory;
+}
