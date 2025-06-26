@@ -18,7 +18,8 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
-import { Eye, User, Mail, Loader2, CheckSquare, Square } from 'lucide-react';
+import { Eye, User, Mail, Loader2, MessageSquare } from 'lucide-react';
+import NotesDialog from './NotesDialog';
 
 interface EnhancedEmployeeTableProps {
   profiles: any[];
@@ -26,7 +27,7 @@ interface EnhancedEmployeeTableProps {
   onViewProfile: (profileId: string) => void;
   onSendEmail: (profile: any) => void;
   selectedProfiles: string[];
-  onProfileSelect: (profileId: string, selected: boolean) => void;
+  onProfileSelect: (profileId: string) => void;
   onSelectAll: () => void;
   onClearSelection: () => void;
   isAllSelected: boolean;
@@ -43,6 +44,12 @@ const EnhancedEmployeeTable: React.FC<EnhancedEmployeeTableProps> = ({
   onClearSelection,
   isAllSelected
 }) => {
+  const [notesDialogOpen, setNotesDialogOpen] = useState(false);
+  const [selectedProfileForNotes, setSelectedProfileForNotes] = useState<{
+    id: string;
+    name: string;
+  } | null>(null);
+
   const getSkillsSummary = (technicalSkills: any[], specializedSkills: any[]) => {
     const allSkills = [...(technicalSkills || []), ...(specializedSkills || [])];
     if (allSkills.length === 0) return 'No skills listed';
@@ -60,24 +67,17 @@ const EnhancedEmployeeTable: React.FC<EnhancedEmployeeTableProps> = ({
     return `${latest.designation} at ${latest.company_name}`;
   };
 
-  const getProfileCompleteness = (profile: any) => {
-    let completeness = 0;
-    let total = 6;
-
-    if (profile.first_name && profile.last_name) completeness++;
-    if (profile.technical_skills?.length > 0 || profile.specialized_skills?.length > 0) completeness++;
-    if (profile.experiences?.length > 0) completeness++;
-    if (profile.education?.length > 0) completeness++;
-    if (profile.projects?.length > 0) completeness++;
-    if (profile.biography) completeness++;
-
-    return Math.round((completeness / total) * 100);
+  const handleNotesClick = (profile: any) => {
+    setSelectedProfileForNotes({
+      id: profile.id,
+      name: `${profile.first_name || 'N/A'} ${profile.last_name || ''}`.trim()
+    });
+    setNotesDialogOpen(true);
   };
 
-  const getCompletenessColor = (percentage: number) => {
-    if (percentage >= 80) return 'bg-green-500';
-    if (percentage >= 60) return 'bg-yellow-500';
-    return 'bg-red-500';
+  const handleCloseNotesDialog = () => {
+    setNotesDialogOpen(false);
+    setSelectedProfileForNotes(null);
   };
 
   if (isLoading && profiles.length === 0) {
@@ -103,7 +103,6 @@ const EnhancedEmployeeTable: React.FC<EnhancedEmployeeTableProps> = ({
                     onClearSelection();
                   }
                 }}
-                aria-label="Select all profiles"
               />
             </TableHead>
             <TableHead>Employee</TableHead>
@@ -111,180 +110,163 @@ const EnhancedEmployeeTable: React.FC<EnhancedEmployeeTableProps> = ({
             <TableHead>Current Experience</TableHead>
             <TableHead>Skills Summary</TableHead>
             <TableHead>Education</TableHead>
-            <TableHead>Completeness</TableHead>
             <TableHead className="text-right">Actions</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {profiles.length > 0 ? (
-            profiles.map((profile) => {
-              const completeness = getProfileCompleteness(profile);
-              const isSelected = selectedProfiles.includes(profile.id);
-              
-              return (
-                <TableRow 
-                  key={profile.id}
-                  className={isSelected ? 'bg-blue-50 dark:bg-blue-900/20' : ''}
-                >
-                  <TableCell>
-                    <Checkbox
-                      checked={isSelected}
-                      onCheckedChange={(checked) => {
-                        onProfileSelect(profile.id, checked as boolean);
-                      }}
-                      aria-label={`Select ${profile.first_name} ${profile.last_name}`}
-                    />
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-3">
-                      <Avatar className="h-10 w-10">
-                        <AvatarImage src={profile.profile_image} alt={`${profile.first_name} ${profile.last_name}`} />
-                        <AvatarFallback>
-                          <User className="h-4 w-4" />
-                        </AvatarFallback>
-                      </Avatar>
-                      <div>
-                        <div className="font-medium">
-                          {profile.first_name || 'N/A'} {profile.last_name || ''}
-                        </div>
-                        {profile.biography && (
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <div className="text-sm text-gray-500 truncate max-w-[200px] cursor-help">
-                                {profile.biography}
-                              </div>
-                            </TooltipTrigger>
-                            <TooltipContent>
-                              <p className="max-w-[300px]">{profile.biography}</p>
-                            </TooltipContent>
-                          </Tooltip>
-                        )}
+            profiles.map((profile) => (
+              <TableRow key={profile.id}>
+                <TableCell>
+                  <Checkbox
+                    checked={selectedProfiles.includes(profile.id)}
+                    onCheckedChange={() => onProfileSelect(profile.id)}
+                  />
+                </TableCell>
+                <TableCell>
+                  <div className="flex items-center gap-3">
+                    <Avatar className="h-10 w-10">
+                      <AvatarImage src={profile.profile_image} alt={`${profile.first_name} ${profile.last_name}`} />
+                      <AvatarFallback>
+                        <User className="h-4 w-4" />
+                      </AvatarFallback>
+                    </Avatar>
+                    <div>
+                      <div className="font-medium">
+                        {profile.first_name || 'N/A'} {profile.last_name || ''}
                       </div>
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <Badge variant="outline" className="font-mono text-xs">
-                      {profile.employee_id || 'N/A'}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    <div className="text-sm">
-                      {getCurrentExperience(profile.experiences || [])}
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <div className="text-sm text-gray-600 dark:text-gray-400 cursor-help">
-                          {getSkillsSummary(profile.technical_skills || [], profile.specialized_skills || [])}
-                        </div>
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        <div className="space-y-2 max-w-[300px]">
-                          {profile.technical_skills && profile.technical_skills.length > 0 && (
-                            <div>
-                              <div className="font-medium">Technical Skills:</div>
-                              <div className="text-sm">
-                                {profile.technical_skills.map(skill => skill.name).join(', ')}
-                              </div>
-                            </div>
-                          )}
-                          {profile.specialized_skills && profile.specialized_skills.length > 0 && (
-                            <div>
-                              <div className="font-medium">Specialized Skills:</div>
-                              <div className="text-sm">
-                                {profile.specialized_skills.map(skill => skill.name).join(', ')}
-                              </div>
-                            </div>
-                          )}
-                        </div>
-                      </TooltipContent>
-                    </Tooltip>
-                  </TableCell>
-                  <TableCell>
-                    <div className="text-sm">
-                      {profile.education && profile.education.length > 0 ? (
+                      {profile.biography && (
                         <Tooltip>
                           <TooltipTrigger asChild>
-                            <div className="cursor-help">
-                              {profile.education[0].degree || 'Degree'} from {profile.education[0].university}
-                              {profile.education.length > 1 && (
-                                <span className="text-gray-500"> +{profile.education.length - 1} more</span>
-                              )}
+                            <div className="text-sm text-gray-500 truncate max-w-[200px] cursor-help">
+                              {profile.biography}
                             </div>
                           </TooltipTrigger>
                           <TooltipContent>
-                            <div className="space-y-1 max-w-[300px]">
-                              {profile.education.map((edu, index) => (
-                                <div key={index} className="text-sm">
-                                  {edu.degree || 'Degree'} from {edu.university}
-                                  {edu.department && ` (${edu.department})`}
-                                </div>
-                              ))}
-                            </div>
+                            <p className="max-w-[300px]">{profile.biography}</p>
                           </TooltipContent>
                         </Tooltip>
-                      ) : (
-                        'No education listed'
                       )}
                     </div>
-                  </TableCell>
-                  <TableCell>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <div className="flex items-center gap-2 cursor-help">
-                          <div className="w-16 bg-gray-200 rounded-full h-2">
-                            <div 
-                              className={`h-2 rounded-full ${getCompletenessColor(completeness)}`}
-                              style={{ width: `${completeness}%` }}
-                            />
+                  </div>
+                </TableCell>
+                <TableCell>
+                  <Badge variant="outline" className="font-mono text-xs">
+                    {profile.employee_id || 'N/A'}
+                  </Badge>
+                </TableCell>
+                <TableCell>
+                  <div className="text-sm">
+                    {getCurrentExperience(profile.experiences || [])}
+                  </div>
+                </TableCell>
+                <TableCell>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <div className="text-sm text-gray-600 dark:text-gray-400 cursor-help">
+                        {getSkillsSummary(profile.technical_skills || [], profile.specialized_skills || [])}
+                      </div>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <div className="space-y-2 max-w-[300px]">
+                        {profile.technical_skills && profile.technical_skills.length > 0 && (
+                          <div>
+                            <div className="font-medium">Technical Skills:</div>
+                            <div className="text-sm">
+                              {profile.technical_skills.map(skill => skill.name).join(', ')}
+                            </div>
                           </div>
-                          <span className="text-xs font-medium">{completeness}%</span>
-                        </div>
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        <p>Profile completion: {completeness}%</p>
-                        <p className="text-xs text-gray-500">
-                          Based on name, skills, experience, education, projects, and biography
-                        </p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <div className="flex items-center justify-end gap-2">
+                        )}
+                        {profile.specialized_skills && profile.specialized_skills.length > 0 && (
+                          <div>
+                            <div className="font-medium">Specialized Skills:</div>
+                            <div className="text-sm">
+                              {profile.specialized_skills.map(skill => skill.name).join(', ')}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </TooltipContent>
+                  </Tooltip>
+                </TableCell>
+                <TableCell>
+                  <div className="text-sm">
+                    {profile.education && profile.education.length > 0 ? (
                       <Tooltip>
                         <TooltipTrigger asChild>
-                          <Button 
-                            variant="outline" 
-                            size="sm"
-                            onClick={() => onSendEmail(profile)}
-                            className="h-8 px-3"
-                          >
-                            <Mail className="h-4 w-4" />
-                          </Button>
+                          <div className="cursor-help">
+                            {profile.education[0].degree || 'Degree'} from {profile.education[0].university}
+                            {profile.education.length > 1 && (
+                              <span className="text-gray-500"> +{profile.education.length - 1} more</span>
+                            )}
+                          </div>
                         </TooltipTrigger>
                         <TooltipContent>
-                          <p>Send profile completion email</p>
+                          <div className="space-y-1 max-w-[300px]">
+                            {profile.education.map((edu, index) => (
+                              <div key={index} className="text-sm">
+                                {edu.degree || 'Degree'} from {edu.university}
+                                {edu.department && ` (${edu.department})`}
+                              </div>
+                            ))}
+                          </div>
                         </TooltipContent>
                       </Tooltip>
-                      
-                      <Button 
-                        variant="outline" 
-                        size="sm"
-                        onClick={() => onViewProfile(profile.id)}
-                        className="h-8 px-3"
-                      >
-                        <Eye className="h-4 w-4 mr-1" />
-                        View
-                      </Button>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              );
-            })
+                    ) : (
+                      'No education listed'
+                    )}
+                  </div>
+                </TableCell>
+                <TableCell className="text-right">
+                  <div className="flex items-center justify-end gap-2">
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => handleNotesClick(profile)}
+                          className="h-8 px-3"
+                        >
+                          <MessageSquare className="h-4 w-4" />
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>View/Add Notes</p>
+                      </TooltipContent>
+                    </Tooltip>
+                    
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => onSendEmail(profile)}
+                          className="h-8 px-3"
+                        >
+                          <Mail className="h-4 w-4" />
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>Send profile completion email</p>
+                      </TooltipContent>
+                    </Tooltip>
+                    
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => onViewProfile(profile.id)}
+                      className="h-8 px-3"
+                    >
+                      <Eye className="h-4 w-4 mr-1" />
+                      View Profile
+                    </Button>
+                  </div>
+                </TableCell>
+              </TableRow>
+            ))
           ) : (
             <TableRow>
-              <TableCell colSpan={8} className="text-center py-8">
+              <TableCell colSpan={7} className="text-center py-8">
                 {isLoading ? (
                   <div className="flex items-center justify-center">
                     <Loader2 className="h-6 w-6 animate-spin text-cvsite-teal mr-2" />
@@ -298,6 +280,16 @@ const EnhancedEmployeeTable: React.FC<EnhancedEmployeeTableProps> = ({
           )}
         </TableBody>
       </Table>
+
+      {/* Notes Dialog */}
+      {selectedProfileForNotes && (
+        <NotesDialog
+          isOpen={notesDialogOpen}
+          onClose={handleCloseNotesDialog}
+          profileId={selectedProfileForNotes.id}
+          employeeName={selectedProfileForNotes.name}
+        />
+      )}
     </TooltipProvider>
   );
 };
