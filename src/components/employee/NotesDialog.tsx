@@ -13,7 +13,7 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useNotes } from '@/hooks/use-notes';
-import { Plus, Calendar, User, Edit, Trash2, MessageSquare } from 'lucide-react';
+import { Plus, Calendar, User, Edit, Trash2, MessageSquare, Check, X } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 
 interface NotesDialogProps {
@@ -34,6 +34,7 @@ const NotesDialog: React.FC<NotesDialogProps> = ({
     categories,
     isLoading,
     isAddingNote,
+    isUpdatingNote,
     addNote,
     updateNote,
     deleteNote
@@ -41,6 +42,11 @@ const NotesDialog: React.FC<NotesDialogProps> = ({
 
   const [showAddForm, setShowAddForm] = useState(false);
   const [editingNote, setEditingNote] = useState<string | null>(null);
+  const [editForm, setEditForm] = useState({
+    title: '',
+    content: '',
+    category_id: ''
+  });
   const [newNote, setNewNote] = useState({
     title: '',
     content: '',
@@ -61,9 +67,31 @@ const NotesDialog: React.FC<NotesDialogProps> = ({
     setShowAddForm(false);
   };
 
-  const handleUpdateNote = async (noteId: string, updates: any) => {
-    await updateNote(noteId, updates);
+  const handleStartEdit = (note: any) => {
+    setEditingNote(note.id);
+    setEditForm({
+      title: note.title,
+      content: note.content || '',
+      category_id: note.category_id || ''
+    });
+  };
+
+  const handleSaveEdit = async () => {
+    if (!editForm.title.trim() || !editingNote) return;
+
+    await updateNote(editingNote, {
+      title: editForm.title,
+      content: editForm.content,
+      category_id: editForm.category_id || undefined
+    });
+
     setEditingNote(null);
+    setEditForm({ title: '', content: '', category_id: '' });
+  };
+
+  const handleCancelEdit = () => {
+    setEditingNote(null);
+    setEditForm({ title: '', content: '', category_id: '' });
   };
 
   const handleDeleteNote = async (noteId: string) => {
@@ -175,44 +203,113 @@ const NotesDialog: React.FC<NotesDialogProps> = ({
                   <CardHeader className="pb-2">
                     <div className="flex items-start justify-between">
                       <div className="flex-1 min-w-0">
-                        <CardTitle className="text-base truncate">
-                          {note.title}
-                        </CardTitle>
-                        <div className="flex items-center gap-2 mt-1 text-sm text-gray-500">
-                          <Calendar className="h-3 w-3" />
-                          {formatDistanceToNow(new Date(note.created_at), { addSuffix: true })}
-                          {note.category && (
-                            <Badge variant="secondary" className="text-xs">
-                              {note.category.name}
-                            </Badge>
-                          )}
-                        </div>
+                        {editingNote === note.id ? (
+                          <div className="space-y-3">
+                            <div>
+                              <label className="text-sm font-medium">Title *</label>
+                              <Input
+                                value={editForm.title}
+                                onChange={(e) => setEditForm(prev => ({ ...prev, title: e.target.value }))}
+                                placeholder="Enter note title"
+                              />
+                            </div>
+                            <div>
+                              <label className="text-sm font-medium">Category</label>
+                              <Select
+                                value={editForm.category_id}
+                                onValueChange={(value) => setEditForm(prev => ({ ...prev, category_id: value }))}
+                              >
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Select category (optional)" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {categories.map((category) => (
+                                    <SelectItem key={category.id} value={category.id}>
+                                      {category.name}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                            </div>
+                          </div>
+                        ) : (
+                          <>
+                            <CardTitle className="text-base truncate">
+                              {note.title}
+                            </CardTitle>
+                            <div className="flex items-center gap-2 mt-1 text-sm text-gray-500">
+                              <Calendar className="h-3 w-3" />
+                              {formatDistanceToNow(new Date(note.created_at), { addSuffix: true })}
+                              {note.category && (
+                                <Badge variant="secondary" className="text-xs">
+                                  {note.category.name}
+                                </Badge>
+                              )}
+                            </div>
+                          </>
+                        )}
                       </div>
                       <div className="flex items-center gap-1 ml-2">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => setEditingNote(note.id)}
-                          className="h-7 w-7 p-0"
-                        >
-                          <Edit className="h-3 w-3" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleDeleteNote(note.id)}
-                          className="h-7 w-7 p-0 text-red-500 hover:text-red-600"
-                        >
-                          <Trash2 className="h-3 w-3" />
-                        </Button>
+                        {editingNote === note.id ? (
+                          <>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={handleSaveEdit}
+                              disabled={!editForm.title.trim() || isUpdatingNote}
+                              className="h-7 w-7 p-0 text-green-600 hover:text-green-700"
+                            >
+                              <Check className="h-3 w-3" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={handleCancelEdit}
+                              className="h-7 w-7 p-0 text-gray-500 hover:text-gray-600"
+                            >
+                              <X className="h-3 w-3" />
+                            </Button>
+                          </>
+                        ) : (
+                          <>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleStartEdit(note)}
+                              className="h-7 w-7 p-0"
+                            >
+                              <Edit className="h-3 w-3" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleDeleteNote(note.id)}
+                              className="h-7 w-7 p-0 text-red-500 hover:text-red-600"
+                            >
+                              <Trash2 className="h-3 w-3" />
+                            </Button>
+                          </>
+                        )}
                       </div>
                     </div>
                   </CardHeader>
-                  {note.content && (
+                  {(note.content || editingNote === note.id) && (
                     <CardContent className="pt-0">
-                      <p className="text-sm text-gray-600 whitespace-pre-wrap">
-                        {note.content}
-                      </p>
+                      {editingNote === note.id ? (
+                        <div>
+                          <label className="text-sm font-medium">Content</label>
+                          <Textarea
+                            value={editForm.content}
+                            onChange={(e) => setEditForm(prev => ({ ...prev, content: e.target.value }))}
+                            placeholder="Enter note content"
+                            rows={4}
+                          />
+                        </div>
+                      ) : (
+                        <p className="text-sm text-gray-600 whitespace-pre-wrap">
+                          {note.content}
+                        </p>
+                      )}
                     </CardContent>
                   )}
                 </Card>
