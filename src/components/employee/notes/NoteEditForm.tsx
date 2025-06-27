@@ -4,6 +4,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { NoteFormData } from './types';
+import { AlertCircle, AlertTriangle, Info, CheckCircle, HelpCircle, Zap, Star, Heart, Bell } from 'lucide-react';
 
 interface NoteEditFormProps {
   formData: NoteFormData;
@@ -16,6 +17,39 @@ const NoteEditForm: React.FC<NoteEditFormProps> = ({
   categories,
   onChange
 }) => {
+  // Map of icon names to components
+  const iconMap = {
+    'AlertCircle': AlertCircle,
+    'AlertTriangle': AlertTriangle,
+    'Info': Info,
+    'CheckCircle': CheckCircle,
+    'HelpCircle': HelpCircle,
+    'Zap': Zap,
+    'Star': Star,
+    'Heart': Heart,
+    'Bell': Bell,
+  };
+
+  // Color mapping for categories
+  const colorMap = {
+    'AlertCircle': 'text-red-500',
+    'AlertTriangle': 'text-yellow-500',
+    'Info': 'text-blue-500',
+    'CheckCircle': 'text-green-500',
+    'HelpCircle': 'text-purple-500',
+    'Zap': 'text-orange-500',
+    'Star': 'text-amber-500',
+    'Heart': 'text-pink-500',
+    'Bell': 'text-indigo-500',
+  };
+
+  const getIconComponent = (iconName?: string) => {
+    if (!iconName) return null;
+    const IconComponent = iconMap[iconName as keyof typeof iconMap];
+    const colorClass = colorMap[iconName as keyof typeof colorMap] || 'text-gray-500';
+    return IconComponent ? <IconComponent className={`h-4 w-4 ${colorClass}`} /> : null;
+  };
+
   return (
     <div className="space-y-3">
       <div>
@@ -39,7 +73,10 @@ const NoteEditForm: React.FC<NoteEditFormProps> = ({
           <SelectContent>
             {categories.map((category) => (
               <SelectItem key={category.id} value={category.id}>
-                {category.name}
+                <div className="flex items-center gap-2">
+                  {getIconComponent(category.icon)}
+                  <span>{category.name}</span>
+                </div>
               </SelectItem>
             ))}
           </SelectContent>
