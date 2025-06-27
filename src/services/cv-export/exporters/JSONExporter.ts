@@ -27,7 +27,7 @@ export class JSONExporter extends BaseExporter {
         },
         profile: {
           id: profile.id,
-          personalInfo: {
+          generalInfo: {
             firstName: profile.first_name,
             lastName: profile.last_name,
             fullName: `${profile.first_name || ''} ${profile.last_name || ''}`.trim(),

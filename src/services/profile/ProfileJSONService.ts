@@ -2,7 +2,7 @@
 import { ProfileImportDataCleaner } from './ProfileImportDataCleaner';
 
 export interface ProfileJSONData {
-  personalInfo: {
+  generalInfo: {
     firstName: string;
     lastName: string;
     biography?: string;
@@ -83,7 +83,7 @@ export class ProfileJSONService {
     projects: any[];
   }): ProfileJSONData {
     return {
-      personalInfo: {
+      generalInfo: {
         firstName: profileData.generalInfo?.firstName || profileData.generalInfo?.first_name || '',
         lastName: profileData.generalInfo?.lastName || profileData.generalInfo?.last_name || '',
         biography: profileData.generalInfo?.biography || '',
@@ -156,7 +156,7 @@ export class ProfileJSONService {
 
   static cleanImportData(data: ProfileJSONData): ProfileJSONData {
     return {
-      personalInfo: ProfileImportDataCleaner.cleanPersonalInfo(data.personalInfo),
+      generalInfo: ProfileImportDataCleaner.cleanPersonalInfo(data.generalInfo),
       technicalSkills: data.technicalSkills
         .filter(skill => skill.name && skill.name.trim() !== '')
         .map(skill => ProfileImportDataCleaner.cleanSkill(skill)),
@@ -179,5 +179,17 @@ export class ProfileJSONService {
         .filter(project => project.name && project.name.trim() !== '' && project.description && project.description.trim() !== '')
         .map(project => ProfileImportDataCleaner.cleanProject(project))
     };
+  }
+
+  // Add backward compatibility helper
+  static migratePersonalInfoToGeneralInfo(data: any): ProfileJSONData {
+    if (data.personalInfo && !data.generalInfo) {
+      return {
+        ...data,
+        generalInfo: data.personalInfo,
+        personalInfo: undefined
+      };
+    }
+    return data;
   }
 }

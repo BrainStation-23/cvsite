@@ -4,7 +4,7 @@
   "title": "ProfileJSONData",
   "type": "object",
   "required": [
-    "personalInfo",
+    "generalInfo",
     "technicalSkills",
     "specializedSkills",
     "experiences",
@@ -14,7 +14,7 @@
     "projects"
   ],
   "properties": {
-    "personalInfo": { "$ref": "#/definitions/PersonalInfo" },
+    "generalInfo": { "$ref": "#/definitions/GeneralInfo" },
     "technicalSkills": {
       "type": "array",
       "items": { "$ref": "#/definitions/Skill" }
@@ -45,7 +45,7 @@
     }
   },
   "definitions": {
-    "PersonalInfo": {
+    "GeneralInfo": {
       "type": "object",
       "required": ["firstName", "lastName"],
       "properties": {
