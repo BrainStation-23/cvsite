@@ -5,7 +5,7 @@ import profileSchema from '../../../../public/profile.schema.json';
 import { Button } from '@/components/ui/button';
 import { MonacoJsonEditor } from './MonacoJsonEditor';
 import { useToast } from '@/hooks/use-toast';
-import { ProfileJSONData } from '@/services/profile/ProfileJSONService';
+import { ProfileJSONData, ProfileJSONService } from '@/services/profile/ProfileJSONService';
 
 interface ImportProfileControlsProps {
   onImport: (data: ProfileJSONData) => Promise<boolean>;
@@ -31,7 +31,17 @@ export const ImportProfileControls: React.FC<ImportProfileControlsProps> = ({ on
     
     try {
       setIsImporting(true);
-      const data = JSON.parse(jsonInput);
+      let data = JSON.parse(jsonInput);
+      
+      // Handle backward compatibility
+      if (data.personalInfo && !data.generalInfo) {
+        console.log('Migrating personalInfo to generalInfo for validation');
+        data = ProfileJSONService.migratePersonalInfoToGeneralInfo(data);
+        toast({
+          title: 'Data Format Updated',
+          description: 'Your data uses the old format (personalInfo). It will be automatically converted to the current format (generalInfo).',
+        });
+      }
       
       // Validate but be more lenient with errors
       const valid = validate(data);
@@ -39,7 +49,7 @@ export const ImportProfileControls: React.FC<ImportProfileControlsProps> = ({ on
         const criticalErrors = validate.errors.filter((err: ErrorObject) => {
           // Only treat missing required fields as critical errors
           return err.keyword === 'required' && 
-                 ['personalInfo', 'technicalSkills', 'specializedSkills', 'experiences', 'education', 'trainings', 'achievements', 'projects'].includes(err.params?.missingProperty);
+                 ['generalInfo', 'technicalSkills', 'specializedSkills', 'experiences', 'education', 'trainings', 'achievements', 'projects'].includes(err.params?.missingProperty);
         });
         
         if (criticalErrors.length > 0) {
@@ -114,11 +124,12 @@ export const ImportProfileControls: React.FC<ImportProfileControlsProps> = ({ on
       <div className="bg-muted p-3 rounded text-xs text-gray-700 dark:text-gray-300">
         <strong>Import Guidelines:</strong>
         <ul className="list-disc ml-5 mt-1">
-          <li>Only required fields: Personal Info (firstName, lastName), Training (title), Education (university), Experience (companyName, designation), Project (name, description), Achievement (title, description).</li>
+          <li>Only required fields: General Info (firstName, lastName), Training (title), Education (university), Experience (companyName, designation), Project (name, description), Achievement (title, description).</li>
+          <li>The main section is now called "generalInfo" (previously "personalInfo" - old format will be automatically converted).</li>
           <li>Invalid dates like "Jan 2024", "Continuing" are automatically parsed. Invalid dates are skipped rather than rejecting the entire entry.</li>
           <li>Missing optional fields are handled gracefully with sensible defaults.</li>
           <li>The system will import valid data and skip invalid entries, showing a detailed report.</li>
-          <li>Use current_designation for personal info (will be mapped correctly).</li>
+          <li>Use current_designation for general info (will be mapped correctly).</li>
         </ul>
       </div>
       <div className="border rounded">

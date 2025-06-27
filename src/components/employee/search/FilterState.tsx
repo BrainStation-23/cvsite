@@ -9,6 +9,7 @@ export interface FilterChip {
         'skill-input' | 'university-input' | 'company-input' | 'technology' | 
         'project-name-input' | 'project-description-input';
   tableSource?: string;
+  categoryIcon?: string; // Icon name from note categories
 }
 
 interface FilterStateProps {
@@ -42,7 +43,8 @@ export const useFilterState = (props: FilterStateProps) => {
         label: 'Search',
         value: props.searchQuery,
         type: 'search',
-        tableSource: 'All tables'
+        tableSource: 'All tables',
+        categoryIcon: 'AlertCircle'
       });
     }
 
@@ -54,7 +56,8 @@ export const useFilterState = (props: FilterStateProps) => {
         label: 'Skills',
         value: value,
         type: 'skill',
-        tableSource: 'technical_skills, specialized_skills'
+        tableSource: 'technical_skills, specialized_skills',
+        categoryIcon: 'Zap'
       });
     }
 
@@ -66,7 +69,8 @@ export const useFilterState = (props: FilterStateProps) => {
         label: 'University',
         value: value,
         type: 'education',
-        tableSource: 'education, universities'
+        tableSource: 'education, universities',
+        categoryIcon: 'CheckCircle'
       });
     }
 
@@ -78,7 +82,8 @@ export const useFilterState = (props: FilterStateProps) => {
         label: 'Company',
         value: value,
         type: 'experience',
-        tableSource: 'experiences'
+        tableSource: 'experiences',
+        categoryIcon: 'Star'
       });
     }
 
@@ -92,7 +97,8 @@ export const useFilterState = (props: FilterStateProps) => {
         label: label,
         value: value,
         type: 'project',
-        tableSource: 'projects'
+        tableSource: 'projects',
+        categoryIcon: 'Heart'
       });
     }
 
@@ -103,7 +109,8 @@ export const useFilterState = (props: FilterStateProps) => {
         label: 'Training',
         value: props.trainingFilter,
         type: 'training',
-        tableSource: 'trainings'
+        tableSource: 'trainings',
+        categoryIcon: 'Bell'
       });
     }
 
@@ -113,7 +120,8 @@ export const useFilterState = (props: FilterStateProps) => {
         label: 'Achievement',
         value: props.achievementFilter,
         type: 'achievement',
-        tableSource: 'achievements'
+        tableSource: 'achievements',
+        categoryIcon: 'AlertTriangle'
       });
     }
 
@@ -124,7 +132,8 @@ export const useFilterState = (props: FilterStateProps) => {
         label: 'Project Technology',
         value: tech,
         type: 'technology',
-        tableSource: 'projects.technologies_used'
+        tableSource: 'projects.technologies_used',
+        categoryIcon: 'Info'
       });
     });
 
@@ -135,7 +144,8 @@ export const useFilterState = (props: FilterStateProps) => {
         label: 'Experience Range',
         value: `${props.experienceYears[0]}-${props.experienceYears[1]} years`,
         type: 'experience-years',
-        tableSource: 'experiences (calculated)'
+        tableSource: 'experiences (calculated)',
+        categoryIcon: 'HelpCircle'
       });
     }
 
@@ -148,7 +158,8 @@ export const useFilterState = (props: FilterStateProps) => {
         label: 'Graduation Range',
         value: `${minYear} - ${maxYear}`,
         type: 'graduation-years',
-        tableSource: 'education'
+        tableSource: 'education',
+        categoryIcon: 'CheckCircle'
       });
     }
 
@@ -167,7 +178,8 @@ export const useFilterState = (props: FilterStateProps) => {
         label: 'Profile Status',
         value: statusLabels[props.completionStatus as keyof typeof statusLabels] || props.completionStatus,
         type: 'completion',
-        tableSource: 'Profile analysis'
+        tableSource: 'Profile analysis',
+        categoryIcon: 'AlertCircle'
       });
     }
 

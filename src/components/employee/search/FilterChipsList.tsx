@@ -2,7 +2,7 @@
 import React from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { X, Database } from 'lucide-react';
+import { X, Database, AlertCircle, AlertTriangle, Info, CheckCircle, HelpCircle, Zap, Star, Heart, Bell } from 'lucide-react';
 import { FilterChip } from './FilterState';
 
 interface FilterChipsListProps {
@@ -18,6 +18,25 @@ const FilterChipsList: React.FC<FilterChipsListProps> = ({
   onClearAllFilters,
   highlightedFilters = []
 }) => {
+  // Map of icon names to components
+  const iconMap = {
+    'AlertCircle': AlertCircle,
+    'AlertTriangle': AlertTriangle,
+    'Info': Info,
+    'CheckCircle': CheckCircle,
+    'HelpCircle': HelpCircle,
+    'Zap': Zap,
+    'Star': Star,
+    'Heart': Heart,
+    'Bell': Bell,
+  };
+
+  const getIconComponent = (iconName?: string) => {
+    if (!iconName) return null;
+    const IconComponent = iconMap[iconName as keyof typeof iconMap];
+    return IconComponent ? <IconComponent className="h-3 w-3" /> : null;
+  };
+
   // Group filters by table source for better organization
   const groupedFilters = activeFilters.reduce((acc, filter) => {
     const source = filter.tableSource || 'Other';
@@ -56,6 +75,10 @@ const FilterChipsList: React.FC<FilterChipsListProps> = ({
                 const isHighlighted =
                   highlightedFilters.includes(filter.id) ||
                   highlightedFilters.includes(filter.type);
+                
+                // Check if this filter has category information with icon
+                const categoryIcon = filter.categoryIcon;
+                
                 return (
                   <Badge
                     key={filter.id}
@@ -64,6 +87,7 @@ const FilterChipsList: React.FC<FilterChipsListProps> = ({
                       ${isHighlighted ? 'border-2 border-purple-400 bg-purple-100 dark:bg-purple-700/40 animate-pulse' : ''}
                     `}
                   >
+                    {categoryIcon && getIconComponent(categoryIcon)}
                     <span className="text-xs font-medium">{filter.label}:</span>
                     <span className="text-xs">{filter.value}</span>
                     <button

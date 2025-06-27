@@ -9,6 +9,7 @@ import { X, CalendarIcon } from 'lucide-react';
 import { format } from 'date-fns';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Training } from '@/types';
 
 interface TrainingFormProps {
@@ -30,19 +31,34 @@ export const TrainingForm: React.FC<TrainingFormProps> = ({
   setDate,
   isNew = false
 }) => {
+  const [expiryDate, setExpiryDate] = React.useState<Date | undefined>(
+    initialData?.expiryDate
+  );
+  const [isRenewable, setIsRenewable] = React.useState<boolean>(
+    initialData?.isRenewable || false
+  );
+
   const form = useForm<Omit<Training, 'id'>>({
     defaultValues: initialData || {
       title: '',
       provider: '',
       description: '',
       date: new Date(),
-      certificateUrl: ''
+      certificateUrl: '',
+      isRenewable: false,
+      expiryDate: undefined
     }
   });
 
   const handleSubmit = async (data: Omit<Training, 'id'>) => {
     data.date = date || new Date();
+    data.isRenewable = isRenewable;
+    data.expiryDate = expiryDate;
     await onSubmit(data);
+  };
+
+  const handleRenewableChange = (checked: boolean | 'indeterminate') => {
+    setIsRenewable(checked === true);
   };
 
   return (
@@ -89,7 +105,7 @@ export const TrainingForm: React.FC<TrainingFormProps> = ({
           />
           
           <FormItem>
-            <FormLabel>Date</FormLabel>
+            <FormLabel>Certification Date</FormLabel>
             <Popover>
               <PopoverTrigger asChild>
                 <Button
@@ -111,6 +127,46 @@ export const TrainingForm: React.FC<TrainingFormProps> = ({
               </PopoverContent>
             </Popover>
           </FormItem>
+
+          <div className="flex items-center space-x-2">
+            <Checkbox 
+              id="is-renewable" 
+              checked={isRenewable}
+              onCheckedChange={handleRenewableChange}
+            />
+            <label
+              htmlFor="is-renewable"
+              className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+            >
+              Renewable Certification
+            </label>
+          </div>
+
+          {isRenewable && (
+            <FormItem>
+              <FormLabel>Expiry Date</FormLabel>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className="w-full justify-start text-left font-normal"
+                  >
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {expiryDate ? format(expiryDate, 'PPP') : <span>Pick expiry date</span>}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0">
+                  <Calendar
+                    mode="single"
+                    selected={expiryDate}
+                    onSelect={setExpiryDate}
+                    initialFocus
+                    disabled={(date) => date < new Date()}
+                  />
+                </PopoverContent>
+              </Popover>
+            </FormItem>
+          )}
           
           <FormField
             control={form.control}

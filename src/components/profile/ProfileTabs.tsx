@@ -4,6 +4,7 @@ import { Tabs } from '@/components/ui/tabs';
 import { UseFormReturn } from 'react-hook-form';
 import { GeneralInfoFormData } from './generalInfo/GeneralInfoTab';
 import { useProfileImport } from '@/hooks/profile/use-profile-import';
+import { ProfileJSONService } from '@/services/profile/ProfileJSONService';
 import { Skill, Experience, Education, Training, Achievement, Project } from '@/types';
 import { ProfileTabsList } from './tabs/ProfileTabsList';
 import { ProfileTabsContent } from './tabs/ProfileTabsContent';
@@ -126,13 +127,14 @@ export const ProfileTabs: React.FC<ProfileTabsProps> = ({
     saveProject
   });
 
-  // Prepare profile data for export
-  const profileData = {
+  // Prepare raw profile data for processing
+  const rawProfileData = {
     generalInfo: {
       firstName: form.getValues('firstName'),
       lastName: form.getValues('lastName'),
       biography: form.getValues('biography'),
-      profileImage: form.getValues('profileImage')
+      profileImage: form.getValues('profileImage'),
+      currentDesignation: form.getValues('currentDesignation')
     },
     technicalSkills,
     specializedSkills,
@@ -142,6 +144,9 @@ export const ProfileTabs: React.FC<ProfileTabsProps> = ({
     achievements,
     projects
   };
+
+  // Use ProfileJSONService to get clean, properly formatted data for JSON display
+  const profileData = ProfileJSONService.exportProfile(rawProfileData);
 
   return (
     <Tabs defaultValue="general" className="w-full h-full flex flex-col">

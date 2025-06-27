@@ -1,4 +1,20 @@
 
+export type UserRole = 'admin' | 'manager' | 'employee';
+
+export interface User {
+  id: string;
+  email: string;
+  first_name: string;
+  last_name: string;
+  firstName: string;
+  lastName: string;
+  employee_id?: string;
+  role: UserRole;
+  profileImageUrl?: string;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface Skill {
   id: string;
   name: string;
@@ -10,10 +26,10 @@ export interface Experience {
   id: string;
   companyName: string;
   designation: string;
+  description?: string;
   startDate: Date;
   endDate?: Date;
-  isCurrent: boolean;
-  description?: string;
+  isCurrent?: boolean;
 }
 
 export interface Education {
@@ -23,7 +39,7 @@ export interface Education {
   department?: string;
   startDate: Date;
   endDate?: Date;
-  isCurrent: boolean;
+  isCurrent?: boolean;
   gpa?: string;
 }
 
@@ -31,9 +47,11 @@ export interface Training {
   id: string;
   title: string;
   provider: string;
-  date: Date;
   description?: string;
+  date: Date;
   certificateUrl?: string;
+  isRenewable?: boolean;
+  expiryDate?: Date;
 }
 
 export interface Achievement {
@@ -48,36 +66,39 @@ export interface Project {
   name: string;
   role: string;
   description: string;
-  responsibility: string;
   startDate: Date;
   endDate?: Date;
-  isCurrent: boolean;
-  technologiesUsed: string[];
+  isCurrent?: boolean;
+  technologiesUsed?: string[];
   url?: string;
+  displayOrder?: number;
+  responsibility?: string;
 }
 
-export interface Reference {
+export interface GeneralInfo {
+  firstName: string;
+  lastName: string;
+  biography?: string;
+  profileImage?: string;
+  currentDesignation?: string;
+}
+
+export interface NoteCategory {
   id: string;
   name: string;
-  designation: string;
-  company: string;
-  email?: string;
-  phone?: string;
-}
-
-export interface User {
-  id: string;
-  email: string;
-  first_name?: string;
-  last_name?: string;
-  firstName?: string;
-  lastName?: string;
-  employee_id?: string;
-  sbu_id?: string;
+  icon?: string;
   created_at: string;
   updated_at: string;
-  role: UserRole;
-  profileImageUrl?: string;
 }
 
-export type UserRole = 'admin' | 'manager' | 'employee';
+export interface Note {
+  id: string;
+  profile_id: string;
+  category_id?: string;
+  title: string;
+  content?: string;
+  created_by: string;
+  created_at: string;
+  updated_at: string;
+  category?: NoteCategory;
+}

@@ -52,7 +52,7 @@ const EmployeeData: React.FC = () => {
 
   const {
     selectedItems: selectedProfiles,
-    selectItem: selectProfile,
+    selectItem,
     selectAll,
     clearSelection,
     isAllSelected,
@@ -65,6 +65,11 @@ const EmployeeData: React.FC = () => {
 
   const handlePerPageChange = (perPage: number) => {
     fetchProfiles({ perPage, page: 1 });
+  };
+
+  const handleProfileSelect = (profileId: string) => {
+    const isCurrentlySelected = selectedProfiles.includes(profileId);
+    selectItem(profileId, !isCurrentlySelected);
   };
 
   const handleBulkEmail = (profileIds: string[]) => {
@@ -158,7 +163,7 @@ const EmployeeData: React.FC = () => {
               onViewProfile={handleViewProfile}
               onSendEmail={handleSendEmail}
               selectedProfiles={selectedProfiles}
-              onProfileSelect={selectProfile}
+              onProfileSelect={handleProfileSelect}
               onSelectAll={selectAll}
               onClearSelection={clearSelection}
               isAllSelected={isAllSelected}

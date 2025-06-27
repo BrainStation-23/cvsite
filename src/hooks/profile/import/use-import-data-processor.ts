@@ -1,3 +1,4 @@
+
 import { ProfileJSONData } from '@/services/profile/ProfileJSONService';
 import { Skill, Experience, Education, Training, Achievement, Project } from '@/types';
 import { ensureDate } from './use-import-date-utils';
@@ -28,11 +29,11 @@ export const useImportDataProcessor = () => {
   ) => {
     try {
       const success = await handlers.saveGeneralInfo({
-        firstName: data.personalInfo.firstName,
-        lastName: data.personalInfo.lastName,
-        biography: data.personalInfo.biography || '',
-        profileImage: data.personalInfo.profileImage || '',
-        currentDesignation: data.personalInfo.current_designation || null
+        firstName: data.generalInfo.firstName,
+        lastName: data.generalInfo.lastName,
+        biography: data.generalInfo.biography || '',
+        profileImage: data.generalInfo.profileImage || '',
+        currentDesignation: data.generalInfo.current_designation || null
       });
       stats.setGeneralInfoStatus(success);
       if (success) stats.incrementSuccessful();

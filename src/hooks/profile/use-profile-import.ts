@@ -39,12 +39,23 @@ export function useProfileImport(handlers: ImportHandlers) {
     processProjects
   } = useImportDataProcessor();
 
-  const importProfile = async (data: ProfileJSONData): Promise<boolean> => {
+  const importProfile = async (data: ProfileJSONData | any): Promise<boolean> => {
     try {
       console.log('Starting profile import with data:', data);
       
+      // Handle backward compatibility - migrate personalInfo to generalInfo
+      let migratedData = data;
+      if ((data as any).personalInfo && !(data as any).generalInfo) {
+        console.log('Migrating personalInfo to generalInfo for backward compatibility');
+        migratedData = ProfileJSONService.migratePersonalInfoToGeneralInfo(data);
+        toast({
+          title: 'Data Format Updated',
+          description: 'Your data format has been automatically updated to the current standard.',
+        });
+      }
+      
       // Clean and validate data before importing
-      const cleanedData = ProfileJSONService.cleanImportData(data);
+      const cleanedData = ProfileJSONService.cleanImportData(migratedData as ProfileJSONData);
       console.log('Cleaned data:', cleanedData);
 
       // Reset stats for new import
