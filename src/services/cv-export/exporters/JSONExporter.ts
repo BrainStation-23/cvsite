@@ -20,13 +20,11 @@ export class JSONExporter extends BaseExporter {
           exportFormat: 'json',
           version: '1.0',
           template: {
-            id: template.id,
             name: template.name,
             orientation: template.orientation
           }
         },
         profile: {
-          id: profile.id,
           generalInfo: {
             firstName: profile.first_name,
             lastName: profile.last_name,
@@ -34,12 +32,12 @@ export class JSONExporter extends BaseExporter {
             email: profile.email,
             phone: profile.phone,
             location: profile.location,
-            biography: profile.biography
+            biography: profile.biography,
+            currentDesignation: profile.current_designation
           }
         },
         sections: this.processSections(sections, profile),
         fieldMappings: fieldMappings?.map(mapping => ({
-          id: mapping.id,
           originalField: mapping.original_field_name,
           displayName: mapping.display_name,
           isMasked: mapping.is_masked,
@@ -83,7 +81,6 @@ export class JSONExporter extends BaseExporter {
     return sections
       .sort((a, b) => a.display_order - b.display_order)
       .map(section => ({
-        id: section.id,
         type: section.section_type,
         displayOrder: section.display_order,
         isRequired: section.is_required,
@@ -103,7 +100,8 @@ export class JSONExporter extends BaseExporter {
           email: profile.email,
           phone: profile.phone,
           location: profile.location,
-          biography: profile.biography
+          biography: profile.biography,
+          currentDesignation: profile.current_designation
         };
       case 'technical_skills':
         return profile.technical_skills || [];
