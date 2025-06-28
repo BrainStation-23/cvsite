@@ -4,6 +4,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Button } from '@/components/ui/button';
 import { Trash2, ArrowUpDown } from 'lucide-react';
 import { DegreeItem } from '@/utils/degreeCsvUtils';
+import { ConfirmationDialog } from '@/components/ui/confirmation-dialog';
+import { useConfirmationDialog } from '@/hooks/use-confirmation-dialog';
 
 interface DegreeTableProps {
   degrees: DegreeItem[];
@@ -22,6 +24,18 @@ const DegreeTable: React.FC<DegreeTableProps> = ({
   sortOrder,
   onSort,
 }) => {
+  const { isOpen, config, showConfirmation, hideConfirmation, handleConfirm } = useConfirmationDialog();
+
+  const handleDelete = (item: DegreeItem) => {
+    showConfirmation({
+      title: 'Delete Degree',
+      description: `Are you sure you want to delete "${item.name}"? This action cannot be undone.`,
+      confirmText: 'Delete',
+      variant: 'destructive',
+      onConfirm: () => onDelete(item.id, item.name)
+    });
+  };
+
   const getSortIcon = (field: string) => {
     if (sortBy !== field) return <ArrowUpDown className="ml-2 h-4 w-4" />;
     return <ArrowUpDown className={`ml-2 h-4 w-4 ${sortOrder === 'desc' ? 'rotate-180' : ''}`} />;
@@ -36,51 +50,67 @@ const DegreeTable: React.FC<DegreeTableProps> = ({
   }
 
   return (
-    <Table>
-      <TableHeader>
-        <TableRow>
-          <TableHead>
-            <Button variant="ghost" onClick={() => onSort('name')} className="h-auto p-0 font-medium">
-              Name
-              {getSortIcon('name')}
-            </Button>
-          </TableHead>
-          <TableHead>
-            <Button variant="ghost" onClick={() => onSort('full_form')} className="h-auto p-0 font-medium">
-              Full Form
-              {getSortIcon('full_form')}
-            </Button>
-          </TableHead>
-          <TableHead>
-            <Button variant="ghost" onClick={() => onSort('created_at')} className="h-auto p-0 font-medium">
-              Created
-              {getSortIcon('created_at')}
-            </Button>
-          </TableHead>
-          <TableHead className="w-[100px]">Actions</TableHead>
-        </TableRow>
-      </TableHeader>
-      <TableBody>
-        {degrees.map((degree) => (
-          <TableRow key={degree.id}>
-            <TableCell className="font-medium">{degree.name}</TableCell>
-            <TableCell>{degree.full_form || '-'}</TableCell>
-            <TableCell>{new Date(degree.created_at).toLocaleDateString()}</TableCell>
-            <TableCell>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => onDelete(degree.id, degree.name)}
-                disabled={isLoading}
-                className="text-red-600 hover:text-red-800 hover:bg-red-50"
-              >
-                <Trash2 className="h-4 w-4" />
+    <>
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>
+              <Button variant="ghost" onClick={() => onSort('name')} className="h-auto p-0 font-medium">
+                Name
+                {getSortIcon('name')}
               </Button>
-            </TableCell>
+            </TableHead>
+            <TableHead>
+              <Button variant="ghost" onClick={() => onSort('full_form')} className="h-auto p-0 font-medium">
+                Full Form
+                {getSortIcon('full_form')}
+              </Button>
+            </TableHead>
+            <TableHead>
+              <Button variant="ghost" onClick={() => onSort('created_at')} className="h-auto p-0 font-medium">
+                Created
+                {getSortIcon('created_at')}
+              </Button>
+            </TableHead>
+            <TableHead className="w-[100px]">Actions</TableHead>
           </TableRow>
-        ))}
-      </TableBody>
-    </Table>
+        </TableHeader>
+        <TableBody>
+          {degrees.map((degree) => (
+            <TableRow key={degree.id}>
+              <TableCell className="font-medium">{degree.name}</TableCell>
+              <TableCell>{degree.full_form || '-'}</TableCell>
+              <TableCell>{new Date(degree.created_at).toLocaleDateString()}</TableCell>
+              <TableCell>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => handleDelete(degree)}
+                  disabled={isLoading}
+                  className="text-red-600 hover:text-red-800 hover:bg-red-50"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+
+      {/* Confirmation Dialog */}
+      {config && (
+        <ConfirmationDialog
+          isOpen={isOpen}
+          onClose={hideConfirmation}
+          onConfirm={handleConfirm}
+          title={config.title}
+          description={config.description}
+          confirmText={config.confirmText}
+          cancelText={config.cancelText}
+          variant={config.variant}
+        />
+      )}
+    </>
   );
 };
 

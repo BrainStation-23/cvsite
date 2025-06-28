@@ -6,6 +6,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Edit, Trash2 } from 'lucide-react';
 import { DesignationCombobox } from '@/components/admin/designation/DesignationCombobox';
 import { ReferenceItem, ReferenceFormData } from '@/hooks/use-reference-settings';
+import { ConfirmationDialog } from '@/components/ui/confirmation-dialog';
+import { useConfirmationDialog } from '@/hooks/use-confirmation-dialog';
 
 interface ReferenceTableProps {
   references: ReferenceItem[];
@@ -34,6 +36,18 @@ const ReferenceTable: React.FC<ReferenceTableProps> = ({
   isRemoving,
   isLoading
 }) => {
+  const { isOpen, config, showConfirmation, hideConfirmation, handleConfirm } = useConfirmationDialog();
+
+  const handleDelete = (item: ReferenceItem) => {
+    showConfirmation({
+      title: 'Delete Reference',
+      description: `Are you sure you want to delete "${item.name}"? This action cannot be undone.`,
+      confirmText: 'Delete',
+      variant: 'destructive',
+      onConfirm: () => onDelete(item.id, item.name)
+    });
+  };
+
   return (
     <>
       <Table>
@@ -121,7 +135,7 @@ const ReferenceTable: React.FC<ReferenceTableProps> = ({
                       <Button
                         size="sm"
                         variant="outline"
-                        onClick={() => onDelete(item.id, item.name)}
+                        onClick={() => handleDelete(item)}
                         disabled={isRemoving}
                       >
                         <Trash2 className="h-4 w-4" />
@@ -139,6 +153,20 @@ const ReferenceTable: React.FC<ReferenceTableProps> = ({
         <div className="text-center py-8 text-gray-500">
           No references found.
         </div>
+      )}
+
+      {/* Confirmation Dialog */}
+      {config && (
+        <ConfirmationDialog
+          isOpen={isOpen}
+          onClose={hideConfirmation}
+          onConfirm={handleConfirm}
+          title={config.title}
+          description={config.description}
+          confirmText={config.confirmText}
+          cancelText={config.cancelText}
+          variant={config.variant}
+        />
       )}
     </>
   );

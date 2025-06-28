@@ -6,7 +6,9 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { X, AlertCircle, AlertTriangle, Info, CheckCircle, HelpCircle, Zap, Star, Heart, Bell } from 'lucide-react';
 import { Spinner } from '@/components/ui/spinner';
-import { useNoteCategorySettings } from '@/hooks/use-note-category-settings';
+import { useNoteCategorySettings, NoteCategory } from '@/hooks/use-note-category-settings';
+import { ConfirmationDialog } from '@/components/ui/confirmation-dialog';
+import { useConfirmationDialog } from '@/hooks/use-confirmation-dialog';
 
 const NoteCategorySettings: React.FC = () => {
   const [newCategoryName, setNewCategoryName] = useState('');
@@ -20,6 +22,8 @@ const NoteCategorySettings: React.FC = () => {
     isAddingCategory, 
     isRemovingCategory 
   } = useNoteCategorySettings();
+
+  const { isOpen, config, showConfirmation, hideConfirmation, handleConfirm } = useConfirmationDialog();
 
   // Available icons similar to toast/alert types
   const availableIcons = [
@@ -42,6 +46,16 @@ const NoteCategorySettings: React.FC = () => {
     }
     return <AlertCircle className="h-4 w-4" />;
   };
+
+  const handleDelete = (category: NoteCategory) => {
+    showConfirmation({
+      title: 'Delete Note Category',
+      description: `Are you sure you want to delete "${category.name}"? This action cannot be undone.`,
+      confirmText: 'Delete',
+      variant: 'destructive',
+      onConfirm: () => removeCategory(category.id, category.name)
+    });
+  };
   
   const handleAddCategory = () => {
     if (!newCategoryName.trim()) return;
@@ -59,76 +73,92 @@ const NoteCategorySettings: React.FC = () => {
   };
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Note Categories</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div className="space-y-4 mb-4">
-          <Input 
-            placeholder="Category name..."
-            value={newCategoryName}
-            onChange={(e) => setNewCategoryName(e.target.value)}
-            onKeyDown={handleKeyDown}
-          />
-          <Select value={newCategoryIcon} onValueChange={setNewCategoryIcon}>
-            <SelectTrigger>
-              <SelectValue placeholder="Select an icon (optional)" />
-            </SelectTrigger>
-            <SelectContent>
-              {availableIcons.map((icon) => {
-                const IconComponent = icon.icon;
-                return (
-                  <SelectItem key={icon.value} value={icon.value}>
-                    <div className="flex items-center gap-2">
-                      <IconComponent className="h-4 w-4" />
-                      {icon.label}
-                    </div>
-                  </SelectItem>
-                );
-              })}
-            </SelectContent>
-          </Select>
-          <Button 
-            onClick={handleAddCategory}
-            disabled={isAddingCategory || !newCategoryName.trim()}
-            className="w-full"
-          >
-            {isAddingCategory ? 'Adding...' : 'Add Category'}
-          </Button>
-        </div>
-        
-        {isLoading ? (
-          <div className="flex justify-center p-4">
-            <Spinner />
+    <>
+      <Card>
+        <CardHeader>
+          <CardTitle>Note Categories</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4 mb-4">
+            <Input 
+              placeholder="Category name..."
+              value={newCategoryName}
+              onChange={(e) => setNewCategoryName(e.target.value)}
+              onKeyDown={handleKeyDown}
+            />
+            <Select value={newCategoryIcon} onValueChange={setNewCategoryIcon}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select an icon (optional)" />
+              </SelectTrigger>
+              <SelectContent>
+                {availableIcons.map((icon) => {
+                  const IconComponent = icon.icon;
+                  return (
+                    <SelectItem key={icon.value} value={icon.value}>
+                      <div className="flex items-center gap-2">
+                        <IconComponent className="h-4 w-4" />
+                        {icon.label}
+                      </div>
+                    </SelectItem>
+                  );
+                })}
+              </SelectContent>
+            </Select>
+            <Button 
+              onClick={handleAddCategory}
+              disabled={isAddingCategory || !newCategoryName.trim()}
+              className="w-full"
+            >
+              {isAddingCategory ? 'Adding...' : 'Add Category'}
+            </Button>
           </div>
-        ) : (
-          <div className="space-y-2">
-            {categories?.map((category) => (
-              <div 
-                key={category.id} 
-                className="flex items-center justify-between bg-gray-100 dark:bg-gray-700 px-3 py-2 rounded-md"
-              >
-                <div className="flex items-center gap-2">
-                  {category.icon && getIconComponent(category.icon)}
-                  <span>{category.name}</span>
-                </div>
-                <button 
-                  onClick={() => removeCategory(category.id, category.name)}
-                  className="text-gray-500 hover:text-red-500"
-                  disabled={isRemovingCategory}
+          
+          {isLoading ? (
+            <div className="flex justify-center p-4">
+              <Spinner />
+            </div>
+          ) : (
+            <div className="space-y-2">
+              {categories?.map((category) => (
+                <div 
+                  key={category.id} 
+                  className="flex items-center justify-between bg-gray-100 dark:bg-gray-700 px-3 py-2 rounded-md"
                 >
-                  <X size={16} />
-                </button>
-              </div>
-            ))}
-            {categories?.length === 0 && (
-              <p className="text-gray-500 text-center py-4">No categories created yet</p>
-            )}
-          </div>
-        )}
-      </CardContent>
-    </Card>
+                  <div className="flex items-center gap-2">
+                    {category.icon && getIconComponent(category.icon)}
+                    <span>{category.name}</span>
+                  </div>
+                  <button 
+                    onClick={() => handleDelete(category)}
+                    className="text-gray-500 hover:text-red-500"
+                    disabled={isRemovingCategory}
+                  >
+                    <X size={16} />
+                  </button>
+                </div>
+              ))}
+              {categories?.length === 0 && (
+                <p className="text-gray-500 text-center py-4">No categories created yet</p>
+              )}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Confirmation Dialog */}
+      {config && (
+        <ConfirmationDialog
+          isOpen={isOpen}
+          onClose={hideConfirmation}
+          onConfirm={handleConfirm}
+          title={config.title}
+          description={config.description}
+          confirmText={config.confirmText}
+          cancelText={config.cancelText}
+          variant={config.variant}
+        />
+      )}
+    </>
   );
 };
 
