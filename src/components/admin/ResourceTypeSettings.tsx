@@ -1,6 +1,6 @@
 
 import React from 'react';
-import SettingCategory from './SettingCategory';
+import { ResourceTypeTable } from './resource-type/ResourceTypeTable';
 
 const ResourceTypeSettings: React.FC = () => {
   return (
@@ -14,7 +14,7 @@ const ResourceTypeSettings: React.FC = () => {
         </p>
       </div>
       
-      <SettingCategory title="Resource Types" table="resource_types" />
+      <ResourceTypeTable />
     </div>
   );
 };
