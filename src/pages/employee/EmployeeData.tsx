@@ -5,7 +5,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { useEmployeeProfiles } from '@/hooks/use-employee-profiles';
 import { useEmployeeList } from '@/hooks/use-employee-list';
 import { useBulkSelection } from '@/hooks/use-bulk-selection';
-import RedesignedEmployeeSearchFilters from '@/components/employee/RedesignedEmployeeSearchFilters';
+import EnhancedEmployeeSearchFilters from '@/components/employee/EnhancedEmployeeSearchFilters';
 import EnhancedEmployeeTable from '@/components/employee/EnhancedEmployeeTable';
 import BulkActionsToolbar from '@/components/employee/BulkActionsToolbar';
 import EmployeePageHeader from '@/components/employee/EmployeePageHeader';
@@ -73,6 +73,7 @@ const EmployeeData: React.FC = () => {
   };
 
   const handleBulkEmail = (profileIds: string[]) => {
+    // Find the profiles for the selected IDs
     const selectedProfilesData = profiles.filter(profile => profileIds.includes(profile.id));
     
     if (selectedProfilesData.length === 0) {
@@ -89,6 +90,7 @@ const EmployeeData: React.FC = () => {
       description: `Sending emails to ${selectedProfilesData.length} employees...`,
     });
 
+    // Here you would implement the actual bulk email functionality
     console.log('Sending bulk emails to:', selectedProfilesData);
   };
 
@@ -109,19 +111,16 @@ const EmployeeData: React.FC = () => {
       description: `Exporting ${selectedProfilesData.length} profiles as ${format.toUpperCase()}...`,
     });
 
+    // Here you would implement the actual export functionality
     console.log('Exporting profiles:', selectedProfilesData, 'Format:', format);
   };
 
   return (
     <DashboardLayout>
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-        {/* Header */}
-        <div className="bg-white dark:bg-gray-800 border-b p-6">
-          <EmployeePageHeader />
-        </div>
+      <div className="space-y-6">
+        <EmployeePageHeader />
 
-        {/* Search Filters - Full Width Sticky */}
-        <RedesignedEmployeeSearchFilters
+        <EnhancedEmployeeSearchFilters
           onSearch={handleSearch}
           onSkillFilter={handleSkillFilter}
           onExperienceFilter={handleExperienceFilter}
@@ -142,64 +141,53 @@ const EmployeeData: React.FC = () => {
           sortBy={sortBy}
           sortOrder={sortOrder}
           isLoading={isLoading}
-          totalResults={pagination.totalCount}
-          filteredResults={pagination.filteredCount}
         />
 
-        {/* Main Content */}
-        <div className="p-6">
-          {hasSelection && (
-            <div className="mb-4">
-              <BulkActionsToolbar
-                selectedProfiles={selectedProfiles}
-                totalProfiles={profiles.length}
-                onSelectAll={selectAll}
-                onClearSelection={clearSelection}
-                onBulkEmail={handleBulkEmail}
-                onBulkExport={handleBulkExport}
-                isAllSelected={isAllSelected}
-              />
-            </div>
-          )}
+        {hasSelection && (
+          <BulkActionsToolbar
+            selectedProfiles={selectedProfiles}
+            totalProfiles={profiles.length}
+            onSelectAll={selectAll}
+            onClearSelection={clearSelection}
+            onBulkEmail={handleBulkEmail}
+            onBulkExport={handleBulkExport}
+            isAllSelected={isAllSelected}
+          />
+        )}
 
-          <Card className="shadow-sm">
-            <CardContent className="p-0">
-              <div className="overflow-x-auto">
-                <EnhancedEmployeeTable
-                  profiles={profiles}
-                  isLoading={isLoading}
-                  onViewProfile={handleViewProfile}
-                  onSendEmail={handleSendEmail}
-                  selectedProfiles={selectedProfiles}
-                  onProfileSelect={handleProfileSelect}
-                  onSelectAll={selectAll}
-                  onClearSelection={clearSelection}
-                  isAllSelected={isAllSelected}
-                />
-              </div>
-            </CardContent>
-          </Card>
+        <Card>
+          <CardContent className="p-0">
+            <EnhancedEmployeeTable
+              profiles={profiles}
+              isLoading={isLoading}
+              onViewProfile={handleViewProfile}
+              onSendEmail={handleSendEmail}
+              selectedProfiles={selectedProfiles}
+              onProfileSelect={handleProfileSelect}
+              onSelectAll={selectAll}
+              onClearSelection={clearSelection}
+              isAllSelected={isAllSelected}
+            />
+          </CardContent>
+        </Card>
 
-          {pagination.pageCount > 1 && (
-            <div className="mt-6">
-              <UserPagination
-                pagination={pagination}
-                onPageChange={handlePageChange}
-                onPerPageChange={handlePerPageChange}
-                isLoading={isLoading}
-              />
-            </div>
-          )}
-        </div>
+        {pagination.pageCount > 1 && (
+          <UserPagination
+            pagination={pagination}
+            onPageChange={handlePageChange}
+            onPerPageChange={handlePerPageChange}
+            isLoading={isLoading}
+          />
+        )}
+
+        {selectedProfile && (
+          <SendEmailModal
+            isOpen={isEmailModalOpen}
+            onClose={handleCloseEmailModal}
+            profile={selectedProfile}
+          />
+        )}
       </div>
-
-      {selectedProfile && (
-        <SendEmailModal
-          isOpen={isEmailModalOpen}
-          onClose={handleCloseEmailModal}
-          profile={selectedProfile}
-        />
-      )}
     </DashboardLayout>
   );
 };
