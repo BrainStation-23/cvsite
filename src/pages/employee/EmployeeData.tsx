@@ -114,57 +114,57 @@ const EmployeeData: React.FC = () => {
 
   return (
     <DashboardLayout>
-      <div className="min-h-screen flex">
-        {/* Main Content Area */}
-        <div className="flex-1 flex flex-col">
-          <div className="p-6 pb-0">
-            <EmployeePageHeader />
-          </div>
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+        {/* Header */}
+        <div className="bg-white dark:bg-gray-800 border-b p-6">
+          <EmployeePageHeader />
+        </div>
 
-          {/* Search Filters */}
-          <RedesignedEmployeeSearchFilters
-            onSearch={handleSearch}
-            onSkillFilter={handleSkillFilter}
-            onExperienceFilter={handleExperienceFilter}
-            onEducationFilter={handleEducationFilter}
-            onTrainingFilter={handleTrainingFilter}
-            onAchievementFilter={handleAchievementFilter}
-            onProjectFilter={handleProjectFilter}
-            onAdvancedFilters={handleAdvancedFilters}
-            onSortChange={handleSortChange}
-            onReset={resetFilters}
-            searchQuery={searchQuery}
-            skillFilter={skillFilter}
-            experienceFilter={experienceFilter}
-            educationFilter={educationFilter}
-            trainingFilter={trainingFilter}
-            achievementFilter={achievementFilter}
-            projectFilter={projectFilter}
-            sortBy={sortBy}
-            sortOrder={sortOrder}
-            isLoading={isLoading}
-            totalResults={pagination.totalCount}
-            filteredResults={pagination.filteredCount}
-          />
+        {/* Search Filters - Full Width Sticky */}
+        <RedesignedEmployeeSearchFilters
+          onSearch={handleSearch}
+          onSkillFilter={handleSkillFilter}
+          onExperienceFilter={handleExperienceFilter}
+          onEducationFilter={handleEducationFilter}
+          onTrainingFilter={handleTrainingFilter}
+          onAchievementFilter={handleAchievementFilter}
+          onProjectFilter={handleProjectFilter}
+          onAdvancedFilters={handleAdvancedFilters}
+          onSortChange={handleSortChange}
+          onReset={resetFilters}
+          searchQuery={searchQuery}
+          skillFilter={skillFilter}
+          experienceFilter={experienceFilter}
+          educationFilter={educationFilter}
+          trainingFilter={trainingFilter}
+          achievementFilter={achievementFilter}
+          projectFilter={projectFilter}
+          sortBy={sortBy}
+          sortOrder={sortOrder}
+          isLoading={isLoading}
+          totalResults={pagination.totalCount}
+          filteredResults={pagination.filteredCount}
+        />
 
-          {/* Content Area */}
-          <div className="flex-1 p-6 pt-0">
-            {hasSelection && (
-              <div className="mb-4">
-                <BulkActionsToolbar
-                  selectedProfiles={selectedProfiles}
-                  totalProfiles={profiles.length}
-                  onSelectAll={selectAll}
-                  onClearSelection={clearSelection}
-                  onBulkEmail={handleBulkEmail}
-                  onBulkExport={handleBulkExport}
-                  isAllSelected={isAllSelected}
-                />
-              </div>
-            )}
+        {/* Main Content */}
+        <div className="p-6">
+          {hasSelection && (
+            <div className="mb-4">
+              <BulkActionsToolbar
+                selectedProfiles={selectedProfiles}
+                totalProfiles={profiles.length}
+                onSelectAll={selectAll}
+                onClearSelection={clearSelection}
+                onBulkEmail={handleBulkEmail}
+                onBulkExport={handleBulkExport}
+                isAllSelected={isAllSelected}
+              />
+            </div>
+          )}
 
-            <Card className="shadow-sm">
-              <CardContent className="p-0">
+          <Card className="shadow-sm">
+            <CardContent className="p-0">
+              <div className="overflow-x-auto">
                 <EnhancedEmployeeTable
                   profiles={profiles}
                   isLoading={isLoading}
@@ -176,20 +176,20 @@ const EmployeeData: React.FC = () => {
                   onClearSelection={clearSelection}
                   isAllSelected={isAllSelected}
                 />
-              </CardContent>
-            </Card>
-
-            {pagination.pageCount > 1 && (
-              <div className="mt-6">
-                <UserPagination
-                  pagination={pagination}
-                  onPageChange={handlePageChange}
-                  onPerPageChange={handlePerPageChange}
-                  isLoading={isLoading}
-                />
               </div>
-            )}
-          </div>
+            </CardContent>
+          </Card>
+
+          {pagination.pageCount > 1 && (
+            <div className="mt-6">
+              <UserPagination
+                pagination={pagination}
+                onPageChange={handlePageChange}
+                onPerPageChange={handlePerPageChange}
+                isLoading={isLoading}
+              />
+            </div>
+          )}
         </div>
       </div>
 

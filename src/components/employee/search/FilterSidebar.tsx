@@ -172,12 +172,12 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({
       
       {/* Sidebar */}
       <div
-        className={`fixed left-0 top-0 h-full w-80 bg-white dark:bg-gray-800 border-r shadow-lg z-50 transform transition-transform duration-300 ease-in-out ${
+        className={`fixed left-0 top-0 h-full w-96 bg-white dark:bg-gray-800 border-r shadow-lg z-50 transform transition-transform duration-300 ease-in-out ${
           isOpen ? 'translate-x-0' : '-translate-x-full'
         } lg:sticky lg:translate-x-0`}
       >
         {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b">
+        <div className="flex items-center justify-between p-6 border-b">
           <h2 className="text-lg font-semibold">Advanced Filters</h2>
           <Button
             variant="ghost"
@@ -191,14 +191,14 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({
 
         {/* Content */}
         <ScrollArea className="h-[calc(100vh-80px)]">
-          <div className="p-4">
+          <div className="p-6">
             <Tabs defaultValue="professional" className="w-full">
-              <TabsList className="grid w-full grid-cols-2 mb-4">
-                <TabsTrigger value="professional" className="text-xs">Professional</TabsTrigger>
-                <TabsTrigger value="projects" className="text-xs">Projects</TabsTrigger>
+              <TabsList className="grid w-full grid-cols-2 mb-6">
+                <TabsTrigger value="professional" className="text-sm">Professional</TabsTrigger>
+                <TabsTrigger value="projects" className="text-sm">Projects</TabsTrigger>
               </TabsList>
               
-              <TabsContent value="professional" className="space-y-4 mt-0">
+              <TabsContent value="professional" className="space-y-6 mt-0">
                 <ProfessionalFiltersSection
                   skillInput={skillInput}
                   companyInput={companyInput}
@@ -226,7 +226,7 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({
                 />
               </TabsContent>
               
-              <TabsContent value="projects" className="space-y-4 mt-0">
+              <TabsContent value="projects" className="space-y-6 mt-0">
                 <ProjectsFiltersSection
                   projectNameInput={projectNameInput}
                   projectDescriptionInput={projectDescriptionInput}
@@ -242,7 +242,7 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({
             </Tabs>
 
             {/* Clear All Button */}
-            <div className="pt-6 border-t mt-6">
+            <div className="pt-6 border-t mt-8">
               <Button 
                 variant="outline" 
                 onClick={onClearAllFilters}
