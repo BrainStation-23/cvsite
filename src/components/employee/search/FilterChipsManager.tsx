@@ -32,6 +32,8 @@ interface FilterChipsManagerProps {
   setTechnologyInput: (tech: string[]) => void;
   setProjectNameInput: (name: string) => void;
   setProjectDescriptionInput: (description: string) => void;
+  setTrainingInput: (training: string) => void;
+  setAchievementInput: (achievement: string) => void;
   technologyInput: string[];
 }
 
@@ -66,10 +68,14 @@ export const useFilterChipsManager = (props: FilterChipsManagerProps) => {
         break;
       
       case 'training':
+      case 'training-input':
+        props.setTrainingInput('');
         props.onTrainingFilter('');
         break;
       
       case 'achievement':
+      case 'achievement-input':
+        props.setAchievementInput('');
         props.onAchievementFilter('');
         break;
       
