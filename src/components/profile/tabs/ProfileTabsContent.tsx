@@ -123,7 +123,6 @@ export const ProfileTabsContent: React.FC<ProfileTabsContentProps> = ({
           technicalSkills={technicalSkills}
           specializedSkills={specializedSkills}
           isEditing={isEditing}
-          isSaving={isSaving}
           newTechnicalSkill={newTechnicalSkill}
           newSpecializedSkill={newSpecializedSkill}
           setNewTechnicalSkill={setNewTechnicalSkill}
@@ -134,8 +133,8 @@ export const ProfileTabsContent: React.FC<ProfileTabsContentProps> = ({
           deleteSpecializedSkill={deleteSpecializedSkill}
           saveTechnicalSkill={saveTechnicalSkill}
           saveSpecializedSkill={saveSpecializedSkill}
-          reorderTechnicalSkills={reorderTechnicalSkills}
-          reorderSpecializedSkills={reorderSpecializedSkills}
+          onReorderTechnicalSkills={reorderTechnicalSkills}
+          onReorderSpecializedSkills={reorderSpecializedSkills}
         />
       </TabsContent>
 

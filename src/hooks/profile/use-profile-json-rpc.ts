@@ -79,8 +79,8 @@ export function useProfileJsonRpc() {
         throw error;
       }
 
-      // Cast the Json type to our interface
-      const result = data as ImportResult;
+      // Properly cast the Json type to our interface with unknown first
+      const result = data as unknown as ImportResult;
 
       if (!result.success) {
         throw new Error(result.error || 'Import failed');
