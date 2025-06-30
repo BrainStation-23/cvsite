@@ -3,6 +3,20 @@ import { useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 
+interface ImportResult {
+  success: boolean;
+  error?: string;
+  totalImported?: number;
+  generalInfo?: boolean;
+  technicalSkills?: number;
+  specializedSkills?: number;
+  experiences?: number;
+  education?: number;
+  trainings?: number;
+  achievements?: number;
+  projects?: number;
+}
+
 export function useProfileJsonRpc() {
   const { toast } = useToast();
   const [isExporting, setIsExporting] = useState(false);
@@ -39,7 +53,7 @@ export function useProfileJsonRpc() {
       });
 
       return { success: true, data };
-    } catch (error) {
+    } catch (error: any) {
       console.error('Export error:', error);
       toast({
         title: 'Export Failed',
@@ -65,18 +79,20 @@ export function useProfileJsonRpc() {
         throw error;
       }
 
-      if (!data.success) {
-        throw new Error(data.error || 'Import failed');
+      // Cast the Json type to our interface
+      const result = data as ImportResult;
+
+      if (!result.success) {
+        throw new Error(result.error || 'Import failed');
       }
 
-      const stats = data;
       toast({
         title: 'Import Successful',
-        description: `Successfully imported ${stats.totalImported} items. General info: ${stats.generalInfo ? 'Updated' : 'Not updated'}, Technical skills: ${stats.technicalSkills}, Specialized skills: ${stats.specializedSkills}, Experiences: ${stats.experiences}, Education: ${stats.education}, Trainings: ${stats.trainings}, Achievements: ${stats.achievements}, Projects: ${stats.projects}`,
+        description: `Successfully imported ${result.totalImported} items. General info: ${result.generalInfo ? 'Updated' : 'Not updated'}, Technical skills: ${result.technicalSkills}, Specialized skills: ${result.specializedSkills}, Experiences: ${result.experiences}, Education: ${result.education}, Trainings: ${result.trainings}, Achievements: ${result.achievements}, Projects: ${result.projects}`,
       });
 
-      return { success: true, stats };
-    } catch (error) {
+      return { success: true, stats: result };
+    } catch (error: any) {
       console.error('Import error:', error);
       toast({
         title: 'Import Failed',
