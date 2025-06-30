@@ -194,7 +194,7 @@ export const ProfileTabsContent: React.FC<ProfileTabsContentProps> = ({
         />
       </TabsContent>
 
-      <TabsContent value="import-export" className="mt-6">
+      <TabsContent value="json" className="mt-6">
         <div className="space-y-6">
           <div>
             <h2 className="text-2xl font-bold mb-4">Import/Export Profile Data</h2>
