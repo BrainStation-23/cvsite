@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import { MonacoJsonEditor } from './MonacoJsonEditor';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
@@ -21,26 +21,30 @@ export const ServerSideJSONImportExport: React.FC<ServerSideJSONImportExportProp
   const { exportProfile, importProfile, isExporting, isImporting } = useProfileJsonRpc();
   const [jsonInput, setJsonInput] = useState<string>('{}');
   const [showSchema, setShowSchema] = useState(false);
-  const ajv = new Ajv();
-  const validate = ajv.compile(profileSchema);
+  
+  // Memoize the AJV validator to prevent re-creation on every render
+  const validate = useMemo(() => {
+    const ajv = new Ajv();
+    return ajv.compile(profileSchema);
+  }, []);
 
-  const handleExport = async () => {
+  const handleExport = useCallback(async () => {
     const result = await exportProfile(profileId);
     if (result.success && result.data) {
       setJsonInput(JSON.stringify(result.data, null, 2));
     }
-  };
+  }, [exportProfile, profileId]);
 
-  const handleCopy = async () => {
+  const handleCopy = useCallback(async () => {
     try {
       await navigator.clipboard.writeText(jsonInput);
       toast({ title: 'Copied!', description: 'JSON copied to clipboard.' });
     } catch {
       toast({ title: 'Error', description: 'Failed to copy JSON.', variant: 'destructive' });
     }
-  };
+  }, [jsonInput, toast]);
 
-  const handleDownload = () => {
+  const handleDownload = useCallback(() => {
     try {
       const blob = new Blob([jsonInput], { type: 'application/json' });
       const url = URL.createObjectURL(blob);
@@ -53,9 +57,9 @@ export const ServerSideJSONImportExport: React.FC<ServerSideJSONImportExportProp
     } catch {
       toast({ title: 'Error', description: 'Failed to download JSON.', variant: 'destructive' });
     }
-  };
+  }, [jsonInput, toast]);
 
-  const handleImport = async () => {
+  const handleImport = useCallback(async () => {
     if (!jsonInput.trim() || jsonInput.trim() === '{}') {
       toast({ title: 'Error', description: 'Please paste or load JSON data to import.', variant: 'destructive' });
       return;
@@ -85,7 +89,16 @@ export const ServerSideJSONImportExport: React.FC<ServerSideJSONImportExportProp
         variant: 'destructive' 
       });
     }
-  };
+  }, [jsonInput, validate, importProfile, profileId, onImportSuccess, toast]);
+
+  const handleCopySchema = useCallback(async () => {
+    try {
+      await navigator.clipboard.writeText(JSON.stringify(profileSchema, null, 2));
+      toast({ title: 'Copied!', description: 'Schema copied to clipboard.' });
+    } catch {
+      toast({ title: 'Error', description: 'Failed to copy schema.', variant: 'destructive' });
+    }
+  }, [toast]);
 
   return (
     <div className="flex flex-col w-full h-[80vh]" style={{ minHeight: 500 }}>
@@ -130,14 +143,7 @@ export const ServerSideJSONImportExport: React.FC<ServerSideJSONImportExportProp
                   <Button
                     size="sm"
                     variant="outline"
-                    onClick={async () => {
-                      try {
-                        await navigator.clipboard.writeText(JSON.stringify(profileSchema, null, 2));
-                        toast({ title: 'Copied!', description: 'Schema copied to clipboard.' });
-                      } catch {
-                        toast({ title: 'Error', description: 'Failed to copy schema.', variant: 'destructive' });
-                      }
-                    }}
+                    onClick={handleCopySchema}
                   >
                     Copy Schema
                   </Button>
