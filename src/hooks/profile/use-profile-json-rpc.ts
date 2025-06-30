@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
@@ -22,7 +21,7 @@ export function useProfileJsonRpc() {
   const [isExporting, setIsExporting] = useState(false);
   const [isImporting, setIsImporting] = useState(false);
 
-  const exportProfile = async (targetUserId?: string) => {
+  const exportProfile = async (targetUserId?: string, shouldDownload: boolean = true) => {
     try {
       setIsExporting(true);
       
@@ -34,23 +33,25 @@ export function useProfileJsonRpc() {
         throw error;
       }
 
-      // Create and download the JSON file
-      const blob = new Blob([JSON.stringify(data, null, 2)], { 
-        type: 'application/json' 
-      });
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = `profile-${new Date().toISOString().split('T')[0]}.json`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      URL.revokeObjectURL(url);
+      // Only download if explicitly requested
+      if (shouldDownload) {
+        const blob = new Blob([JSON.stringify(data, null, 2)], { 
+          type: 'application/json' 
+        });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `profile-${new Date().toISOString().split('T')[0]}.json`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
 
-      toast({
-        title: 'Export Successful',
-        description: 'Profile data has been exported successfully',
-      });
+        toast({
+          title: 'Export Successful',
+          description: 'Profile data has been exported successfully',
+        });
+      }
 
       return { success: true, data };
     } catch (error: any) {

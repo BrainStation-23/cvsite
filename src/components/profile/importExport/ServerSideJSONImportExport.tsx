@@ -1,5 +1,5 @@
 
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import { MonacoJsonEditor } from './MonacoJsonEditor';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
@@ -28,8 +28,20 @@ export const ServerSideJSONImportExport: React.FC<ServerSideJSONImportExportProp
     return ajv.compile(profileSchema);
   }, []);
 
-  const handleExport = useCallback(async () => {
-    const result = await exportProfile(profileId);
+  // Fetch data automatically when component mounts
+  useEffect(() => {
+    const fetchInitialData = async () => {
+      const result = await exportProfile(profileId, false); // Don't download
+      if (result.success && result.data) {
+        setJsonInput(JSON.stringify(result.data, null, 2));
+      }
+    };
+    
+    fetchInitialData();
+  }, [profileId, exportProfile]);
+
+  const handleFetch = useCallback(async () => {
+    const result = await exportProfile(profileId, false); // Don't download
     if (result.success && result.data) {
       setJsonInput(JSON.stringify(result.data, null, 2));
     }
@@ -108,12 +120,12 @@ export const ServerSideJSONImportExport: React.FC<ServerSideJSONImportExportProp
           <div className="flex gap-2">
             <Button 
               variant="outline" 
-              onClick={handleExport} 
+              onClick={handleFetch} 
               disabled={isExporting}
-              title="Load current profile data"
+              title="Fetch current profile data"
             >
               <Upload className="h-4 w-4 mr-1" /> 
-              {isExporting ? 'Loading...' : 'Load'}
+              {isExporting ? 'Fetching...' : 'Fetch'}
             </Button>
             <Button variant="outline" onClick={handleDownload} title="Download JSON">
               <Download className="h-4 w-4 mr-1" /> Download
@@ -171,7 +183,7 @@ export const ServerSideJSONImportExport: React.FC<ServerSideJSONImportExportProp
         </div>
 
         <div className="mt-2 bg-muted p-2 rounded text-xs text-gray-700 dark:text-gray-300">
-          <strong>Server-Side Import/Export:</strong> Click <b>Load</b> to fetch current profile data from the server. Edit or paste your profile JSON above. Click <b>Import</b> to validate and update your profile on the server. All operations are handled securely server-side with proper permissions.
+          <strong>Server-Side Import/Export:</strong> Click <b>Fetch</b> to load current profile data from the server. Edit or paste your profile JSON above. Click <b>Import</b> to validate and update your profile on the server. All operations are handled securely server-side with proper permissions.
         </div>
       </div>
     </div>
