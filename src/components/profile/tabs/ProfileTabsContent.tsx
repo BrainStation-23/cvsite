@@ -113,7 +113,7 @@ export const ProfileTabsContent: React.FC<ProfileTabsContentProps> = ({
           form={form}
           isEditing={isEditing}
           onImageUpdate={onImageUpdate}
-          saveGeneralInfo={handleGeneralInfoSave}
+          onSave={handleGeneralInfoSave}
           profileId={profileId}
         />
       </TabsContent>
