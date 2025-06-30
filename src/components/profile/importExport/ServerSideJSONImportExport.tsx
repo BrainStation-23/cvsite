@@ -1,4 +1,3 @@
-
 import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import { MonacoJsonEditor } from './MonacoJsonEditor';
 import { Button } from '@/components/ui/button';
@@ -28,17 +27,21 @@ export const ServerSideJSONImportExport: React.FC<ServerSideJSONImportExportProp
     return ajv.compile(profileSchema);
   }, []);
 
-  // Fetch data automatically when component mounts
+  // Fetch data automatically when component mounts - fix infinite loop
   useEffect(() => {
     const fetchInitialData = async () => {
-      const result = await exportProfile(profileId, false); // Don't download
-      if (result.success && result.data) {
-        setJsonInput(JSON.stringify(result.data, null, 2));
+      try {
+        const result = await exportProfile(profileId, false); // Don't download
+        if (result.success && result.data) {
+          setJsonInput(JSON.stringify(result.data, null, 2));
+        }
+      } catch (error) {
+        console.error('Failed to fetch initial data:', error);
       }
     };
     
     fetchInitialData();
-  }, [profileId, exportProfile]);
+  }, [profileId]); // Only depend on profileId, not exportProfile
 
   const handleFetch = useCallback(async () => {
     const result = await exportProfile(profileId, false); // Don't download
