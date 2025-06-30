@@ -1043,6 +1043,10 @@ export type Database = {
         Args: { start_date: string; end_date: string; is_current: boolean }
         Returns: number
       }
+      export_profile_json: {
+        Args: { target_user_id?: string }
+        Returns: Json
+      }
       get_dashboard_analytics: {
         Args: Record<PropertyKey, never>
         Returns: Json
@@ -1109,6 +1113,10 @@ export type Database = {
       has_role: {
         Args: { _role: string } | { _user_id: string; _role: string }
         Returns: boolean
+      }
+      import_profile_json: {
+        Args: { profile_data: Json; target_user_id?: string }
+        Returns: Json
       }
       is_admin: {
         Args: Record<PropertyKey, never>
