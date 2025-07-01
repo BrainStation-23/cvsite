@@ -5,8 +5,9 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Search, Plus, ArrowUpDown } from 'lucide-react';
+import { Search, ArrowUpDown } from 'lucide-react';
 import { useResourcePlanning } from '@/hooks/use-resource-planning';
+import { AddResourceAssignmentDialog } from './AddResourceAssignmentDialog';
 
 export const ResourcePlanningTable: React.FC = () => {
   const {
@@ -62,10 +63,7 @@ export const ResourcePlanningTable: React.FC = () => {
       <CardHeader>
         <div className="flex items-center justify-between">
           <CardTitle>Resource Planning</CardTitle>
-          <Button>
-            <Plus className="h-4 w-4 mr-2" />
-            Add Resource Assignment
-          </Button>
+          <AddResourceAssignmentDialog />
         </div>
         <div className="flex items-center space-x-2">
           <div className="relative flex-1 max-w-sm">
