@@ -63,7 +63,7 @@ export function useResourcePlanning() {
       });
 
       if (error) throw error;
-      return data as ResourcePlanningResponse;
+      return data as unknown as ResourcePlanningResponse;
     },
   });
 
