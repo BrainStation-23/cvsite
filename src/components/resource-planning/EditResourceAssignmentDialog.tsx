@@ -1,13 +1,13 @@
 
-import React, { useState } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import React, { useState, useEffect } from 'react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { CalendarIcon, Plus } from 'lucide-react';
+import { CalendarIcon } from 'lucide-react';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { useResourcePlanning } from '@/hooks/use-resource-planning';
@@ -15,19 +15,51 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { EmployeeCombobox } from '@/components/admin/cv-templates/EmployeeCombobox';
 
-interface AddResourceAssignmentDialogProps {
-  onSuccess?: () => void;
+interface ResourcePlanningData {
+  id: string;
+  profile_id: string;
+  engagement_percentage: number;
+  release_date: string;
+  created_at: string;
+  updated_at: string;
+  profile: {
+    id: string;
+    employee_id: string;
+    first_name: string;
+    last_name: string;
+    current_designation: string;
+  };
+  resource_type: {
+    id: string;
+    name: string;
+  };
+  project: {
+    id: string;
+    project_name: string;
+    project_manager: string;
+    client_name: string;
+    budget: number;
+  };
 }
 
-export const AddResourceAssignmentDialog: React.FC<AddResourceAssignmentDialogProps> = ({ onSuccess }) => {
-  const [open, setOpen] = useState(false);
+interface EditResourceAssignmentDialogProps {
+  isOpen: boolean;
+  onOpenChange: (open: boolean) => void;
+  item: ResourcePlanningData | null;
+}
+
+export const EditResourceAssignmentDialog: React.FC<EditResourceAssignmentDialogProps> = ({
+  isOpen,
+  onOpenChange,
+  item
+}) => {
   const [selectedProfileId, setSelectedProfileId] = useState<string>('');
   const [selectedResourceTypeId, setSelectedResourceTypeId] = useState<string>('');
   const [selectedProjectId, setSelectedProjectId] = useState<string>('');
   const [engagementPercentage, setEngagementPercentage] = useState<string>('');
   const [releaseDate, setReleaseDate] = useState<Date>();
 
-  const { createResourcePlanning, isCreating } = useResourcePlanning();
+  const { updateResourcePlanning, isUpdating } = useResourcePlanning();
 
   // Fetch resource types for the dropdown
   const { data: resourceTypes } = useQuery({
@@ -57,10 +89,21 @@ export const AddResourceAssignmentDialog: React.FC<AddResourceAssignmentDialogPr
     },
   });
 
+  // Reset form when item changes
+  useEffect(() => {
+    if (item && isOpen) {
+      setSelectedProfileId(item.profile_id);
+      setSelectedResourceTypeId(item.resource_type?.id || '');
+      setSelectedProjectId(item.project?.id || '');
+      setEngagementPercentage(item.engagement_percentage.toString());
+      setReleaseDate(item.release_date ? new Date(item.release_date) : undefined);
+    }
+  }, [item, isOpen]);
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!selectedProfileId || !engagementPercentage) {
+    if (!item || !selectedProfileId || !engagementPercentage) {
       return;
     }
 
@@ -69,38 +112,24 @@ export const AddResourceAssignmentDialog: React.FC<AddResourceAssignmentDialogPr
       return;
     }
 
-    createResourcePlanning({
-      profile_id: selectedProfileId,
-      resource_type_id: selectedResourceTypeId || undefined,
-      project_id: selectedProjectId || undefined,
-      engagement_percentage: percentage,
-      release_date: releaseDate ? format(releaseDate, 'yyyy-MM-dd') : undefined,
+    updateResourcePlanning({
+      id: item.id,
+      updates: {
+        resource_type_id: selectedResourceTypeId || undefined,
+        project_id: selectedProjectId || undefined,
+        engagement_percentage: percentage,
+        release_date: releaseDate ? format(releaseDate, 'yyyy-MM-dd') : undefined,
+      }
     });
 
-    // Reset form
-    setSelectedProfileId('');
-    setSelectedResourceTypeId('');
-    setSelectedProjectId('');
-    setEngagementPercentage('');
-    setReleaseDate(undefined);
-    setOpen(false);
-    
-    if (onSuccess) {
-      onSuccess();
-    }
+    onOpenChange(false);
   };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button>
-          <Plus className="h-4 w-4 mr-2" />
-          Add Resource Assignment
-        </Button>
-      </DialogTrigger>
+    <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle>Add Resource Assignment</DialogTitle>
+          <DialogTitle>Edit Resource Assignment</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
@@ -109,7 +138,7 @@ export const AddResourceAssignmentDialog: React.FC<AddResourceAssignmentDialogPr
               value={selectedProfileId}
               onValueChange={setSelectedProfileId}
               placeholder="Select an employee"
-              disabled={isCreating}
+              disabled={true} // Employee cannot be changed in edit mode
             />
           </div>
 
@@ -194,16 +223,16 @@ export const AddResourceAssignmentDialog: React.FC<AddResourceAssignmentDialogPr
             <Button
               type="button"
               variant="outline"
-              onClick={() => setOpen(false)}
-              disabled={isCreating}
+              onClick={() => onOpenChange(false)}
+              disabled={isUpdating}
             >
               Cancel
             </Button>
             <Button
               type="submit"
-              disabled={isCreating || !selectedProfileId || !engagementPercentage}
+              disabled={isUpdating || !selectedProfileId || !engagementPercentage}
             >
-              {isCreating ? 'Creating...' : 'Create Assignment'}
+              {isUpdating ? 'Updating...' : 'Update Assignment'}
             </Button>
           </div>
         </form>
