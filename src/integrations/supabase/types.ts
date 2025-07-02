@@ -1261,6 +1261,16 @@ export type Database = {
         }
         Returns: Json
       }
+      search_projects: {
+        Args: {
+          search_query?: string
+          page_number?: number
+          items_per_page?: number
+          sort_by?: string
+          sort_order?: string
+        }
+        Returns: Json
+      }
       search_references: {
         Args: {
           search_query?: string
