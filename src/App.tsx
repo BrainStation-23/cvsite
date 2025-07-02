@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -22,6 +23,8 @@ import CVTemplatesConfigurationPage from '@/pages/cv-templates/configuration';
 import SecurityPage from '@/pages/security/SecurityPage';
 import NotFound from '@/pages/NotFound';
 import TrainingCertification from '@/pages/TrainingCertification';
+import ResourcePlanning from '@/pages/ResourcePlanning';
+import ProjectsManagement from '@/pages/admin/ProjectsManagement';
 import './App.css';
 
 
@@ -190,11 +193,36 @@ function App() {
                 </ProtectedRoute>
               }
             />
+            {/* Resource Planning Routes (admin/manager) */}
+            <Route
+              path="/admin/resource-planning"
+              element={
+                <ProtectedRoute allowedRoles={['admin', 'manager']}>
+                  <ResourcePlanning />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/manager/resource-planning"
+              element={
+                <ProtectedRoute allowedRoles={['manager', 'admin']}>
+                  <ResourcePlanning />
+                </ProtectedRoute>
+              }
+            />
             <Route
               path="/admin/platform-settings"
               element={
                 <ProtectedRoute allowedRoles={['admin']}>
                   <PlatformSettings />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/projects"
+              element={
+                <ProtectedRoute allowedRoles={['admin']}>
+                  <ProjectsManagement />
                 </ProtectedRoute>
               }
             />

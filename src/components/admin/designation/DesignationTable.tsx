@@ -5,6 +5,8 @@ import { Input } from '@/components/ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Edit, Trash2 } from 'lucide-react';
 import { DesignationItem } from '@/hooks/use-designation-settings';
+import { ConfirmationDialog } from '@/components/ui/confirmation-dialog';
+import { useConfirmationDialog } from '@/hooks/use-confirmation-dialog';
 
 interface DesignationTableProps {
   designations: DesignationItem[];
@@ -33,6 +35,18 @@ const DesignationTable: React.FC<DesignationTableProps> = ({
   isRemoving,
   isLoading
 }) => {
+  const { isOpen, config, showConfirmation, hideConfirmation, handleConfirm } = useConfirmationDialog();
+
+  const handleDelete = (item: DesignationItem) => {
+    showConfirmation({
+      title: 'Delete Designation',
+      description: `Are you sure you want to delete "${item.name}"? This action cannot be undone.`,
+      confirmText: 'Delete',
+      variant: 'destructive',
+      onConfirm: () => onDelete(item.id, item.name)
+    });
+  };
+
   return (
     <>
       <Table>
@@ -83,7 +97,7 @@ const DesignationTable: React.FC<DesignationTableProps> = ({
                       <Button
                         size="sm"
                         variant="outline"
-                        onClick={() => onDelete(item.id, item.name)}
+                        onClick={() => handleDelete(item)}
                         disabled={isRemoving}
                       >
                         <Trash2 className="h-4 w-4" />
@@ -101,6 +115,20 @@ const DesignationTable: React.FC<DesignationTableProps> = ({
         <div className="text-center py-8 text-gray-500">
           No designations found.
         </div>
+      )}
+
+      {/* Confirmation Dialog */}
+      {config && (
+        <ConfirmationDialog
+          isOpen={isOpen}
+          onClose={hideConfirmation}
+          onConfirm={handleConfirm}
+          title={config.title}
+          description={config.description}
+          confirmText={config.confirmText}
+          cancelText={config.cancelText}
+          variant={config.variant}
+        />
       )}
     </>
   );

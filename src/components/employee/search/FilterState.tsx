@@ -1,3 +1,4 @@
+
 import { useMemo } from 'react';
 
 export interface FilterChip {
@@ -7,7 +8,7 @@ export interface FilterChip {
   type: 'search' | 'skill' | 'experience' | 'education' | 'training' | 'achievement' | 'project' | 
         'experience-years' | 'graduation-years' | 'completion' | 
         'skill-input' | 'university-input' | 'company-input' | 'technology' | 
-        'project-name-input' | 'project-description-input';
+        'project-name-input' | 'project-description-input' | 'training-input' | 'achievement-input';
   tableSource?: string;
   categoryIcon?: string; // Icon name from note categories
 }
@@ -30,6 +31,8 @@ interface FilterStateProps {
   technologyInput: string[];
   projectNameInput: string;
   projectDescriptionInput: string;
+  trainingInput: string;
+  achievementInput: string;
 }
 
 export const useFilterState = (props: FilterStateProps) => {
@@ -102,23 +105,26 @@ export const useFilterState = (props: FilterStateProps) => {
       });
     }
 
-    // Other applied filters
-    if (props.trainingFilter) {
+    // Training filters
+    if (props.trainingFilter || props.trainingInput) {
+      const value = props.trainingFilter || props.trainingInput;
       filters.push({
         id: 'training',
         label: 'Training',
-        value: props.trainingFilter,
+        value: value,
         type: 'training',
         tableSource: 'trainings',
         categoryIcon: 'Bell'
       });
     }
 
-    if (props.achievementFilter) {
+    // Achievement filters
+    if (props.achievementFilter || props.achievementInput) {
+      const value = props.achievementFilter || props.achievementInput;
       filters.push({
         id: 'achievement',
         label: 'Achievement',
-        value: props.achievementFilter,
+        value: value,
         type: 'achievement',
         tableSource: 'achievements',
         categoryIcon: 'AlertTriangle'
@@ -201,7 +207,9 @@ export const useFilterState = (props: FilterStateProps) => {
     props.companyInput,
     props.technologyInput,
     props.projectNameInput,
-    props.projectDescriptionInput
+    props.projectDescriptionInput,
+    props.trainingInput,
+    props.achievementInput
   ]);
 
   return { activeFilters };

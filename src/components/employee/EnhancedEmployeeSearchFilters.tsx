@@ -87,8 +87,9 @@ const EnhancedEmployeeSearchFilters: React.FC<EnhancedEmployeeSearchFiltersProps
   const [technologyInput, setTechnologyInput] = useState<string[]>([]);
   const [projectNameInput, setProjectNameInput] = useState('');
   const [projectDescriptionInput, setProjectDescriptionInput] = useState('');
+  const [trainingInput, setTrainingInput] = useState('');
+  const [achievementInput, setAchievementInput] = useState('');
 
-  // Added: Track which filters have been set/changed recently by AI search.
   const [highlightedFilters, setHighlightedFilters] = useState<string[]>([]);
 
   // Use custom hooks for state management
@@ -109,7 +110,9 @@ const EnhancedEmployeeSearchFilters: React.FC<EnhancedEmployeeSearchFiltersProps
     companyInput,
     technologyInput,
     projectNameInput,
-    projectDescriptionInput
+    projectDescriptionInput,
+    trainingInput,
+    achievementInput
   });
 
   const { removeFilter } = useFilterChipsManager({
@@ -136,6 +139,8 @@ const EnhancedEmployeeSearchFilters: React.FC<EnhancedEmployeeSearchFiltersProps
     setTechnologyInput,
     setProjectNameInput,
     setProjectDescriptionInput,
+    setTrainingInput,
+    setAchievementInput,
     technologyInput
   });
 
@@ -145,6 +150,8 @@ const EnhancedEmployeeSearchFilters: React.FC<EnhancedEmployeeSearchFiltersProps
     applyProjectNameFilter,
     applyProjectDescriptionFilter,
     applyTechnologyFilter,
+    applyTrainingFilter,
+    applyAchievementFilter,
     applyAdvancedFilters,
     clearAllFilters 
   } = useAdvancedFiltersManager({
@@ -154,6 +161,8 @@ const EnhancedEmployeeSearchFilters: React.FC<EnhancedEmployeeSearchFiltersProps
     technologyInput,
     projectNameInput,
     projectDescriptionInput,
+    trainingInput,
+    achievementInput,
     experienceYears,
     minGraduationYear,
     maxGraduationYear,
@@ -161,6 +170,8 @@ const EnhancedEmployeeSearchFilters: React.FC<EnhancedEmployeeSearchFiltersProps
     onSkillFilter,
     onExperienceFilter,
     onProjectFilter,
+    onTrainingFilter,
+    onAchievementFilter,
     onAdvancedFilters,
     setSkillInput,
     setUniversityInput,
@@ -168,6 +179,8 @@ const EnhancedEmployeeSearchFilters: React.FC<EnhancedEmployeeSearchFiltersProps
     setTechnologyInput,
     setProjectNameInput,
     setProjectDescriptionInput,
+    setTrainingInput,
+    setAchievementInput,
     setExperienceYears,
     setMinGraduationYear,
     setMaxGraduationYear,
@@ -178,12 +191,9 @@ const EnhancedEmployeeSearchFilters: React.FC<EnhancedEmployeeSearchFiltersProps
   const handleAISearch = (filters: any) => {
     console.log('Applying AI search filters:', filters);
 
-    // Keep a record of what was changed.
     const changed: string[] = [];
-    // We'll merge the AI filters with the existing/current filters.
     let updates: Record<string, any> = {};
 
-    // For each known filter key, if it is present in AI filters and is different from the current value, collect it.
     if ('search_query' in filters && filters.search_query !== searchQuery) {
       onSearch(filters.search_query);
       changed.push('search');
@@ -219,6 +229,7 @@ const EnhancedEmployeeSearchFilters: React.FC<EnhancedEmployeeSearchFiltersProps
       changed.push('project');
       updates.projectFilter = filters.project_filter;
     }
+
     // Advanced filters
     const advancedFilters: any = {};
     if ('min_experience_years' in filters) {
@@ -241,15 +252,12 @@ const EnhancedEmployeeSearchFilters: React.FC<EnhancedEmployeeSearchFiltersProps
       advancedFilters.completionStatus = filters.completion_status;
       changed.push('completion');
     }
-    // Only send if some advanced filters exist.
+
     if (Object.keys(advancedFilters).length > 0) {
       onAdvancedFilters(advancedFilters);
     }
 
-    // Show which filters changed (removed dups).
     setHighlightedFilters(Array.from(new Set(changed)));
-
-    // Remove highlight after a short time.
     setTimeout(() => setHighlightedFilters([]), 2000);
   };
 
@@ -337,6 +345,10 @@ const EnhancedEmployeeSearchFilters: React.FC<EnhancedEmployeeSearchFiltersProps
               setProjectNameInput={setProjectNameInput}
               projectDescriptionInput={projectDescriptionInput}
               setProjectDescriptionInput={setProjectDescriptionInput}
+              trainingInput={trainingInput}
+              setTrainingInput={setTrainingInput}
+              achievementInput={achievementInput}
+              setAchievementInput={setAchievementInput}
               experienceYears={experienceYears}
               setExperienceYears={setExperienceYears}
               completionStatus={completionStatus}
@@ -350,6 +362,8 @@ const EnhancedEmployeeSearchFilters: React.FC<EnhancedEmployeeSearchFiltersProps
               onProjectNameFilter={applyProjectNameFilter}
               onProjectDescriptionFilter={applyProjectDescriptionFilter}
               onTechnologyFilter={applyTechnologyFilter}
+              onTrainingFilter={applyTrainingFilter}
+              onAchievementFilter={applyAchievementFilter}
               onAdvancedFilters={applyAdvancedFilters}
               onEducationFilter={onEducationFilter}
               onClearAllFilters={clearAllFilters}

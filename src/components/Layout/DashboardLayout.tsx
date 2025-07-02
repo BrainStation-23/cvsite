@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
@@ -11,7 +12,8 @@ import {
   Database,
   Menu,
   FileText,
-  Bell
+  Bell,
+  Calendar
 } from 'lucide-react';
 
 interface DashboardLayoutProps {
@@ -75,7 +77,8 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
       label: 'Admin Configuration',
       items: [
         { to: '/admin/user-management', icon: <Users className="w-5 h-5" />, label: 'User Management' },
-        { to: '/admin/platform-settings', icon: <Settings className="w-5 h-5" />, label: 'Platform Settings' }
+        { to: '/admin/platform-settings', icon: <Settings className="w-5 h-5" />, label: 'Platform Settings' },
+        { to: '/admin/projects', icon: <Database className="w-5 h-5" />, label: 'Projects' }
       ],
     },
     // Employee Database group (admin/manager)
@@ -83,7 +86,8 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
       label: 'Employee Database',
       items: [
         { to: `/${user?.role}/employee-data`, icon: <Database className="w-5 h-5" />, label: 'Employee Data' },
-        { to: `/${user?.role}/training-certification`, icon: <FileText className="w-5 h-5" />, label: 'Training and Certification' }
+        { to: `/${user?.role}/training-certification`, icon: <FileText className="w-5 h-5" />, label: 'Training and Certification' },
+        { to: `/${user?.role}/resource-planning`, icon: <Calendar className="w-5 h-5" />, label: 'Resource Planning' }
       ],
     },
     // Admin only: CV Templates (not grouped)

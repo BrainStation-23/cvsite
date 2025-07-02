@@ -774,6 +774,36 @@ export type Database = {
           },
         ]
       }
+      projects_management: {
+        Row: {
+          budget: number | null
+          client_name: string | null
+          created_at: string
+          id: string
+          project_manager: string | null
+          project_name: string
+          updated_at: string
+        }
+        Insert: {
+          budget?: number | null
+          client_name?: string | null
+          created_at?: string
+          id?: string
+          project_manager?: string | null
+          project_name: string
+          updated_at?: string
+        }
+        Update: {
+          budget?: number | null
+          client_name?: string | null
+          created_at?: string
+          id?: string
+          project_manager?: string | null
+          project_name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       references: {
         Row: {
           company: string | null
@@ -811,6 +841,75 @@ export type Database = {
             referencedColumns: ["name"]
           },
         ]
+      }
+      resource_planning: {
+        Row: {
+          created_at: string
+          engagement_percentage: number | null
+          id: string
+          profile_id: string
+          project_id: string | null
+          release_date: string | null
+          resource_type_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          engagement_percentage?: number | null
+          id?: string
+          profile_id: string
+          project_id?: string | null
+          release_date?: string | null
+          resource_type_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          engagement_percentage?: number | null
+          id?: string
+          profile_id?: string
+          project_id?: string | null
+          release_date?: string | null
+          resource_type_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_resource_planning_project"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects_management"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_resource_planning_resource_type"
+            columns: ["resource_type_id"]
+            isOneToOne: false
+            referencedRelation: "resource_types"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      resource_types: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          updated_at?: string
+        }
+        Relationships: []
       }
       sbus: {
         Row: {
@@ -1022,6 +1121,10 @@ export type Database = {
         Args: { start_date: string; end_date: string; is_current: boolean }
         Returns: number
       }
+      export_profile_json: {
+        Args: { target_user_id?: string }
+        Returns: Json
+      }
       get_dashboard_analytics: {
         Args: Record<PropertyKey, never>
         Returns: Json
@@ -1062,6 +1165,16 @@ export type Database = {
         Args: { profile_uuid: string }
         Returns: Json
       }
+      get_resource_planning_data: {
+        Args: {
+          search_query?: string
+          page_number?: number
+          items_per_page?: number
+          sort_by?: string
+          sort_order?: string
+        }
+        Returns: Json
+      }
       get_section_fields: {
         Args: { section_type_param: string }
         Returns: {
@@ -1088,6 +1201,10 @@ export type Database = {
       has_role: {
         Args: { _role: string } | { _user_id: string; _role: string }
         Returns: boolean
+      }
+      import_profile_json: {
+        Args: { profile_data: Json; target_user_id?: string }
+        Returns: Json
       }
       is_admin: {
         Args: Record<PropertyKey, never>
@@ -1135,6 +1252,16 @@ export type Database = {
         Returns: Json
       }
       search_departments: {
+        Args: {
+          search_query?: string
+          page_number?: number
+          items_per_page?: number
+          sort_by?: string
+          sort_order?: string
+        }
+        Returns: Json
+      }
+      search_projects: {
         Args: {
           search_query?: string
           page_number?: number

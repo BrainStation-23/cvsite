@@ -8,6 +8,8 @@ interface AdvancedFiltersManagerProps {
   technologyInput: string[];
   projectNameInput: string;
   projectDescriptionInput: string;
+  trainingInput: string;
+  achievementInput: string;
   experienceYears: number[];
   minGraduationYear: number | null;
   maxGraduationYear: number | null;
@@ -15,6 +17,8 @@ interface AdvancedFiltersManagerProps {
   onSkillFilter: (skill: string) => void;
   onExperienceFilter: (experience: string) => void;
   onProjectFilter: (project: string) => void;
+  onTrainingFilter: (training: string) => void;
+  onAchievementFilter: (achievement: string) => void;
   onAdvancedFilters: (filters: {
     minExperienceYears?: number | null;
     maxExperienceYears?: number | null;
@@ -28,6 +32,8 @@ interface AdvancedFiltersManagerProps {
   setTechnologyInput: (tech: string[]) => void;
   setProjectNameInput: (name: string) => void;
   setProjectDescriptionInput: (description: string) => void;
+  setTrainingInput: (training: string) => void;
+  setAchievementInput: (achievement: string) => void;
   setExperienceYears: (years: number[]) => void;
   setMinGraduationYear: (year: number | null) => void;
   setMaxGraduationYear: (year: number | null) => void;
@@ -74,6 +80,16 @@ export const useAdvancedFiltersManager = (props: AdvancedFiltersManagerProps) =>
     }
   };
 
+  const applyTrainingFilter = (training: string) => {
+    props.setTrainingInput(training);
+    props.onTrainingFilter(training);
+  };
+
+  const applyAchievementFilter = (achievement: string) => {
+    props.setAchievementInput(achievement);
+    props.onAchievementFilter(achievement);
+  };
+
   const applyAdvancedFilters = (updates: Partial<{
     experienceYears: number[];
     minGraduationYear: number | null;
@@ -111,6 +127,8 @@ export const useAdvancedFiltersManager = (props: AdvancedFiltersManagerProps) =>
     props.setProjectNameInput('');
     props.setProjectDescriptionInput('');
     props.setTechnologyInput([]);
+    props.setTrainingInput('');
+    props.setAchievementInput('');
     props.setExperienceYears([0, 20]);
     props.setMinGraduationYear(null);
     props.setMaxGraduationYear(null);
@@ -126,6 +144,8 @@ export const useAdvancedFiltersManager = (props: AdvancedFiltersManagerProps) =>
     applyProjectNameFilter,
     applyProjectDescriptionFilter,
     applyTechnologyFilter,
+    applyTrainingFilter,
+    applyAchievementFilter,
     applyAdvancedFilters,
     clearAllFilters 
   };

@@ -1,15 +1,16 @@
 
 import React from 'react';
 import { TabsContent } from '@/components/ui/tabs';
-import { UseFormReturn } from 'react-hook-form';
-import { GeneralInfoTab, GeneralInfoFormData } from '../generalInfo/GeneralInfoTab';
+import { GeneralInfoTab } from '../generalInfo/GeneralInfoTab';
 import { SkillsTab } from '../skills/SkillsTab';
 import { ExperienceTab } from '../experience/ExperienceTab';
 import { EducationTab } from '../education/EducationTab';
 import { TrainingTab } from '../training/TrainingTab';
 import { AchievementsTab } from '../achievements/AchievementsTab';
 import { ProjectsTab } from '../projects/ProjectsTab';
-import { JSONImportExport } from '../importExport/JSONImportExport';
+import { ServerSideJSONImportExport } from '../importExport/ServerSideJSONImportExport';
+import { UseFormReturn } from 'react-hook-form';
+import { GeneralInfoFormData } from '../generalInfo/GeneralInfoTab';
 import { Skill, Experience, Education, Training, Achievement, Project } from '@/types';
 
 interface ProfileTabsContentProps {
@@ -55,10 +56,11 @@ interface ProfileTabsContentProps {
   profileId?: string;
   handleGeneralInfoSave: (data: GeneralInfoFormData) => Promise<boolean>;
   profileData: any;
-  importProfile: (data: any) => Promise<boolean>;
+  importProfile: (data: any) => Promise<any>;
+  onDataChange?: () => void;
 }
 
-export const ProfileTabsContent: React.FC<ProfileTabsContentProps> = ({
+export const ProfileTabsContent: React.FC<ProfileTabsContentProps> = ({ 
   form,
   isEditing,
   onImageUpdate,
@@ -101,23 +103,23 @@ export const ProfileTabsContent: React.FC<ProfileTabsContentProps> = ({
   profileId,
   handleGeneralInfoSave,
   profileData,
-  importProfile
+  importProfile,
+  onDataChange
 }) => {
   return (
-    <div className="flex-1 min-h-0 mt-4">
-      <TabsContent value="general" className="mt-0 h-full overflow-auto">
+    <>
+      <TabsContent value="general" className="mt-6">
         <GeneralInfoTab 
-          form={form} 
-          isEditing={isEditing} 
+          form={form}
+          isEditing={isEditing}
           onImageUpdate={onImageUpdate}
-          profileId={profileId}
           onSave={handleGeneralInfoSave}
-          isSaving={isSaving}
+          profileId={profileId}
         />
       </TabsContent>
-      
-      <TabsContent value="skills" className="mt-0 h-full overflow-auto">
-        <SkillsTab
+
+      <TabsContent value="skills" className="mt-6">
+        <SkillsTab 
           technicalSkills={technicalSkills}
           specializedSkills={specializedSkills}
           isEditing={isEditing}
@@ -135,21 +137,20 @@ export const ProfileTabsContent: React.FC<ProfileTabsContentProps> = ({
           onReorderSpecializedSkills={reorderSpecializedSkills}
         />
       </TabsContent>
-      
-      <TabsContent value="experience" className="mt-0 h-full overflow-auto">
-        <ExperienceTab
+
+      <TabsContent value="experience" className="mt-6">
+        <ExperienceTab 
           experiences={experiences}
           isEditing={isEditing}
           isSaving={isSaving}
-          profileId={profileId}
           onSave={saveExperience}
           onUpdate={updateExperience}
           onDelete={deleteExperience}
         />
       </TabsContent>
-      
-      <TabsContent value="education" className="mt-0 h-full overflow-auto">
-        <EducationTab
+
+      <TabsContent value="education" className="mt-6">
+        <EducationTab 
           education={education}
           isEditing={isEditing}
           isSaving={isSaving}
@@ -158,9 +159,9 @@ export const ProfileTabsContent: React.FC<ProfileTabsContentProps> = ({
           onDelete={deleteEducation}
         />
       </TabsContent>
-      
-      <TabsContent value="training" className="mt-0 h-full overflow-auto">
-        <TrainingTab
+
+      <TabsContent value="training" className="mt-6">
+        <TrainingTab 
           trainings={trainings}
           isEditing={isEditing}
           isSaving={isSaving}
@@ -169,9 +170,9 @@ export const ProfileTabsContent: React.FC<ProfileTabsContentProps> = ({
           onDelete={deleteTraining}
         />
       </TabsContent>
-      
-      <TabsContent value="achievements" className="mt-0 h-full overflow-auto">
-        <AchievementsTab
+
+      <TabsContent value="achievements" className="mt-6">
+        <AchievementsTab 
           achievements={achievements}
           isEditing={isEditing}
           isSaving={isSaving}
@@ -180,9 +181,9 @@ export const ProfileTabsContent: React.FC<ProfileTabsContentProps> = ({
           onDelete={deleteAchievement}
         />
       </TabsContent>
-      
-      <TabsContent value="projects" className="mt-0 h-full overflow-auto">
-        <ProjectsTab
+
+      <TabsContent value="projects" className="mt-6">
+        <ProjectsTab 
           projects={projects}
           isEditing={isEditing}
           isSaving={isSaving}
@@ -192,13 +193,22 @@ export const ProfileTabsContent: React.FC<ProfileTabsContentProps> = ({
           onReorder={reorderProjects}
         />
       </TabsContent>
-      
-      <TabsContent value="json" className="mt-0 h-full overflow-auto">
-        <JSONImportExport
-          profileData={profileData}
-          onImport={importProfile}
-        />
+
+      <TabsContent value="json" className="mt-6">
+        <div className="space-y-6">
+          <div>
+            <h2 className="text-2xl font-bold mb-4">Import/Export Profile Data</h2>
+            <p className="text-muted-foreground mb-6">
+              Import or export your complete profile data as JSON. All operations are processed securely on the server.
+            </p>
+          </div>
+          
+          <ServerSideJSONImportExport 
+            profileId={profileId}
+            onImportSuccess={onDataChange}
+          />
+        </div>
       </TabsContent>
-    </div>
+    </>
   );
 };
