@@ -3,7 +3,7 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody } from '@/components/ui/table';
 import { useResourcePlanning } from '@/hooks/use-resource-planning';
-import { AddResourceAssignmentDialog } from './AddResourceAssignmentDialog';
+import { ResourceAssignmentDialog } from './ResourceAssignmentDialog';
 import { ResourcePlanningSearchControls } from './ResourcePlanningSearchControls';
 import { ResourcePlanningTableHeader } from './ResourcePlanningTableHeader';
 import { ResourcePlanningTableRow } from './ResourcePlanningTableRow';
@@ -50,7 +50,7 @@ export const ResourcePlanningTable: React.FC = () => {
       <CardHeader>
         <div className="flex items-center justify-between">
           <CardTitle>Resource Planning</CardTitle>
-          <AddResourceAssignmentDialog />
+          <ResourceAssignmentDialog mode="create" />
         </div>
         <ResourcePlanningSearchControls 
           searchQuery={searchQuery}

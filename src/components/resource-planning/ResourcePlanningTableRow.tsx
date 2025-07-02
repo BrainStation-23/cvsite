@@ -1,12 +1,12 @@
 
 import React, { useState } from 'react';
+import { TableCell, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { TableCell, TableRow } from '@/components/ui/table';
-import { ConfirmationDialog } from '@/components/ui/confirmation-dialog';
-import { EditResourceAssignmentDialog } from './EditResourceAssignmentDialog';
+import { Edit2, Trash2 } from 'lucide-react';
+import { format } from 'date-fns';
 import { useResourcePlanning } from '@/hooks/use-resource-planning';
-import { useConfirmationDialog } from '@/hooks/use-confirmation-dialog';
+import { ResourceAssignmentDialog } from './ResourceAssignmentDialog';
 
 interface ResourcePlanningData {
   id: string;
@@ -42,111 +42,86 @@ interface ResourcePlanningTableRowProps {
 export const ResourcePlanningTableRow: React.FC<ResourcePlanningTableRowProps> = ({ item }) => {
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const { deleteResourcePlanning, isDeleting } = useResourcePlanning();
-  const { isOpen, config, showConfirmation, hideConfirmation, handleConfirm } = useConfirmationDialog();
-
-  const formatDate = (dateString: string) => {
-    if (!dateString) return 'N/A';
-    return new Date(dateString).toLocaleDateString();
-  };
-
-  const formatCurrency = (amount: number) => {
-    if (!amount) return 'N/A';
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-    }).format(amount);
-  };
 
   const handleDelete = () => {
-    showConfirmation({
-      title: 'Delete Resource Assignment',
-      description: `Are you sure you want to delete the resource assignment for ${item.profile.first_name} ${item.profile.last_name}? This action cannot be undone.`,
-      confirmText: 'Delete',
-      cancelText: 'Cancel',
-      variant: 'destructive',
-      onConfirm: () => {
-        deleteResourcePlanning(item.id);
-      }
-    });
+    if (window.confirm('Are you sure you want to delete this resource assignment?')) {
+      deleteResourcePlanning(item.id);
+    }
   };
 
   return (
     <>
       <TableRow>
         <TableCell>
-          <div>
-            <div className="font-medium">
+          <div className="flex flex-col">
+            <span className="font-medium">
               {item.profile.first_name} {item.profile.last_name}
-            </div>
-            <div className="text-sm text-muted-foreground">
-              {item.profile.employee_id} • {item.profile.current_designation}
-            </div>
+            </span>
+            <span className="text-sm text-muted-foreground">
+              {item.profile.employee_id}
+            </span>
           </div>
         </TableCell>
         <TableCell>
           {item.resource_type ? (
             <Badge variant="secondary">{item.resource_type.name}</Badge>
           ) : (
-            <span className="text-muted-foreground">Not assigned</span>
+            <span className="text-muted-foreground">Not specified</span>
           )}
         </TableCell>
         <TableCell>
           {item.project ? (
-            <div>
-              <div className="font-medium">{item.project.project_name}</div>
-              <div className="text-sm text-muted-foreground">
-                {item.project.client_name} • {formatCurrency(item.project.budget)}
-              </div>
+            <div className="flex flex-col">
+              <span className="font-medium">{item.project.project_name}</span>
+              {item.project.client_name && (
+                <span className="text-sm text-muted-foreground">
+                  Client: {item.project.client_name}
+                </span>
+              )}
             </div>
           ) : (
             <span className="text-muted-foreground">Not assigned</span>
           )}
         </TableCell>
         <TableCell>
-          <Badge variant="outline">
-            {item.engagement_percentage}%
-          </Badge>
+          <Badge variant="outline">{item.engagement_percentage}%</Badge>
         </TableCell>
         <TableCell>
-          {formatDate(item.release_date)}
+          {item.release_date ? (
+            format(new Date(item.release_date), 'MMM dd, yyyy')
+          ) : (
+            <span className="text-muted-foreground">Not set</span>
+          )}
         </TableCell>
         <TableCell>
-          <div className="flex items-center space-x-2">
-            <Button 
-              variant="outline" 
+          {format(new Date(item.created_at), 'MMM dd, yyyy')}
+        </TableCell>
+        <TableCell>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="ghost"
               size="sm"
               onClick={() => setEditDialogOpen(true)}
             >
-              Edit
+              <Edit2 className="h-4 w-4" />
             </Button>
-            <Button 
-              variant="outline" 
-              size="sm" 
-              className="text-destructive"
+            <Button
+              variant="ghost"
+              size="sm"
               onClick={handleDelete}
               disabled={isDeleting}
             >
-              {isDeleting ? 'Removing...' : 'Remove'}
+              <Trash2 className="h-4 w-4" />
             </Button>
           </div>
         </TableCell>
       </TableRow>
 
-      <EditResourceAssignmentDialog
-        isOpen={editDialogOpen}
-        onOpenChange={setEditDialogOpen}
+      <ResourceAssignmentDialog
+        mode="edit"
         item={item}
-      />
-
-      <ConfirmationDialog
-        isOpen={isOpen}
-        onClose={hideConfirmation}
-        onConfirm={handleConfirm}
-        title={config?.title || ''}
-        description={config?.description || ''}
-        confirmText={config?.confirmText || 'Confirm'}
-        cancelText={config?.cancelText || 'Cancel'}
-        variant={config?.variant || 'default'}
+        open={editDialogOpen}
+        onOpenChange={setEditDialogOpen}
       />
     </>
   );
