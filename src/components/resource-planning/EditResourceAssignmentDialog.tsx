@@ -14,6 +14,7 @@ import { useResourcePlanning } from '@/hooks/use-resource-planning';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { EmployeeCombobox } from '@/components/admin/cv-templates/EmployeeCombobox';
+import { ProjectCombobox } from '@/components/projects/ProjectCombobox';
 
 interface ResourcePlanningData {
   id: string;
@@ -69,20 +70,6 @@ export const EditResourceAssignmentDialog: React.FC<EditResourceAssignmentDialog
         .from('resource_types')
         .select('id, name')
         .order('name');
-      
-      if (error) throw error;
-      return data;
-    },
-  });
-
-  // Fetch projects for the dropdown
-  const { data: projects } = useQuery({
-    queryKey: ['projects-management'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('projects_management')
-        .select('id, project_name, client_name')
-        .order('project_name');
       
       if (error) throw error;
       return data;
@@ -160,23 +147,12 @@ export const EditResourceAssignmentDialog: React.FC<EditResourceAssignmentDialog
 
           <div className="space-y-2">
             <Label htmlFor="project">Project</Label>
-            <Select value={selectedProjectId} onValueChange={setSelectedProjectId}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select a project (optional)" />
-              </SelectTrigger>
-              <SelectContent>
-                {projects?.map((project) => (
-                  <SelectItem key={project.id} value={project.id}>
-                    {project.project_name}
-                    {project.client_name && (
-                      <span className="text-muted-foreground ml-2">
-                        - {project.client_name}
-                      </span>
-                    )}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <ProjectCombobox
+              value={selectedProjectId}
+              onValueChange={setSelectedProjectId}
+              placeholder="Select a project (optional)"
+              disabled={isUpdating}
+            />
           </div>
 
           <div className="space-y-2">
