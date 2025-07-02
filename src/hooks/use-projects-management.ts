@@ -68,7 +68,7 @@ export function useProjectsManagement(): UseProjectsManagementReturn {
 
       if (error) throw error;
 
-      const response = data as ProjectsResponse;
+      const response = data as unknown as ProjectsResponse;
       setProjects(response.projects || []);
       setPagination(response.pagination);
     } catch (error) {
