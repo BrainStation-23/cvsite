@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -31,12 +31,24 @@ export const ProjectForm: React.FC<ProjectFormProps> = ({
   title
 }) => {
   const [formData, setFormData] = useState({
-    project_name: initialData?.project_name || '',
-    client_name: initialData?.client_name || '',
-    project_manager: initialData?.project_manager || '',
-    budget: initialData?.budget?.toString() || ''
+    project_name: '',
+    client_name: '',
+    project_manager: '',
+    budget: ''
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Update form data when initialData changes or dialog opens
+  useEffect(() => {
+    if (isOpen) {
+      setFormData({
+        project_name: initialData?.project_name || '',
+        client_name: initialData?.client_name || '',
+        project_manager: initialData?.project_manager || '',
+        budget: initialData?.budget?.toString() || ''
+      });
+    }
+  }, [isOpen, initialData]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
