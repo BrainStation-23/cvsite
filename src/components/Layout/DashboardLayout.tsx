@@ -77,7 +77,8 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
       label: 'Admin Configuration',
       items: [
         { to: '/admin/user-management', icon: <Users className="w-5 h-5" />, label: 'User Management' },
-        { to: '/admin/platform-settings', icon: <Settings className="w-5 h-5" />, label: 'Platform Settings' }
+        { to: '/admin/platform-settings', icon: <Settings className="w-5 h-5" />, label: 'Platform Settings' },
+        { to: '/admin/projects', icon: <Database className="w-5 h-5" />, label: 'Projects' }
       ],
     },
     // Employee Database group (admin/manager)

@@ -24,6 +24,7 @@ import SecurityPage from '@/pages/security/SecurityPage';
 import NotFound from '@/pages/NotFound';
 import TrainingCertification from '@/pages/TrainingCertification';
 import ResourcePlanning from '@/pages/ResourcePlanning';
+import ProjectsManagement from '@/pages/admin/ProjectsManagement';
 import './App.css';
 
 
@@ -214,6 +215,14 @@ function App() {
               element={
                 <ProtectedRoute allowedRoles={['admin']}>
                   <PlatformSettings />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/projects"
+              element={
+                <ProtectedRoute allowedRoles={['admin']}>
+                  <ProjectsManagement />
                 </ProtectedRoute>
               }
             />
