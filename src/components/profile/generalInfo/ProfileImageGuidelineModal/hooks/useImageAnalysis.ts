@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { validateSolidBackground } from '@/utils/imageValidation/imageBackgroundValidation';
@@ -217,13 +217,13 @@ export const useImageAnalysis = () => {
     }
   };
 
-  const resetAnalysis = () => {
+  const resetAnalysis = useCallback(() => {
     setError(null);
     setAnalysisResult(null);
     setIsAnalyzing(false);
     setValidationResults([]);
     setValidationProgress([]);
-  };
+  }, []);
 
   return {
     analysisResult,
