@@ -1,6 +1,6 @@
 
 import React from 'react';
-import SettingCategory from './SettingCategory';
+import { BillTypeTable } from './bill-type/BillTypeTable';
 
 const BillTypeSettings: React.FC = () => {
   return (
@@ -14,10 +14,7 @@ const BillTypeSettings: React.FC = () => {
         </p>
       </div>
       
-      <SettingCategory 
-        title="Bill Types" 
-        table="bill_types" 
-      />
+      <BillTypeTable />
     </div>
   );
 };

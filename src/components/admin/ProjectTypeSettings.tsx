@@ -1,6 +1,6 @@
 
 import React from 'react';
-import SettingCategory from './SettingCategory';
+import { ProjectTypeTable } from './project-type/ProjectTypeTable';
 
 const ProjectTypeSettings: React.FC = () => {
   return (
@@ -14,10 +14,7 @@ const ProjectTypeSettings: React.FC = () => {
         </p>
       </div>
       
-      <SettingCategory 
-        title="Project Types" 
-        table="project_types" 
-      />
+      <ProjectTypeTable />
     </div>
   );
 };
