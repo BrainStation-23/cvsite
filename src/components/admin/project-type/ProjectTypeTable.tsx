@@ -9,7 +9,7 @@ import { ConfirmationDialog } from '@/components/ui/confirmation-dialog';
 import { useConfirmationDialog } from '@/hooks/use-confirmation-dialog';
 
 export const ProjectTypeTable: React.FC = () => {
-  const { items, isLoading, addItem, removeItem, isAddingItem, isRemovingItem } = usePlatformSettings('project_types');
+  const { items, isLoading, addItem, updateItem, removeItem, isAddingItem, isUpdatingItem, isRemovingItem } = usePlatformSettings('project_types');
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editValue, setEditValue] = useState('');
   const [newItemValue, setNewItemValue] = useState('');
@@ -22,10 +22,12 @@ export const ProjectTypeTable: React.FC = () => {
 
   const handleSaveEdit = () => {
     if (editValue.trim() && editingId) {
-      // For now, we'll just cancel the edit since the backend doesn't support updates yet
-      // This can be extended when update functionality is added to the hook
-      setEditingId(null);
-      setEditValue('');
+      const originalItem = items?.find(item => item.id === editingId);
+      if (originalItem) {
+        updateItem(editingId, editValue.trim(), originalItem.name);
+        setEditingId(null);
+        setEditValue('');
+      }
     }
   };
 
@@ -108,10 +110,19 @@ export const ProjectTypeTable: React.FC = () => {
                           className="flex-1"
                           autoFocus
                         />
-                        <Button size="sm" onClick={handleSaveEdit}>
+                        <Button 
+                          size="sm" 
+                          onClick={handleSaveEdit}
+                          disabled={isUpdatingItem || !editValue.trim()}
+                        >
                           <Check className="h-4 w-4" />
                         </Button>
-                        <Button size="sm" variant="outline" onClick={handleCancelEdit}>
+                        <Button 
+                          size="sm" 
+                          variant="outline" 
+                          onClick={handleCancelEdit}
+                          disabled={isUpdatingItem}
+                        >
                           <X className="h-4 w-4" />
                         </Button>
                       </div>
@@ -128,7 +139,7 @@ export const ProjectTypeTable: React.FC = () => {
                         size="sm"
                         variant="ghost"
                         onClick={() => handleEdit(item)}
-                        disabled={editingId === item.id}
+                        disabled={editingId === item.id || isUpdatingItem}
                       >
                         <Pencil className="h-4 w-4" />
                       </Button>
@@ -136,7 +147,7 @@ export const ProjectTypeTable: React.FC = () => {
                         size="sm"
                         variant="ghost"
                         onClick={() => handleDelete(item)}
-                        disabled={isRemovingItem}
+                        disabled={isRemovingItem || editingId === item.id}
                       >
                         <Trash2 className="h-4 w-4" />
                       </Button>
