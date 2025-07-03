@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { BillTypeTable } from './bill-type/BillTypeTable';
+import { GenericSettingsTable } from './common/GenericSettingsTable';
 
 const BillTypeSettings: React.FC = () => {
   return (
@@ -14,7 +14,11 @@ const BillTypeSettings: React.FC = () => {
         </p>
       </div>
       
-      <BillTypeTable />
+      <GenericSettingsTable 
+        tableName="bill_types"
+        entityName="Bill Type"
+        placeholder="Enter new bill type..."
+      />
     </div>
   );
 };

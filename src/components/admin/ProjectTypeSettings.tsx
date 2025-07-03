@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { ProjectTypeTable } from './project-type/ProjectTypeTable';
+import { GenericSettingsTable } from './common/GenericSettingsTable';
 
 const ProjectTypeSettings: React.FC = () => {
   return (
@@ -14,7 +14,11 @@ const ProjectTypeSettings: React.FC = () => {
         </p>
       </div>
       
-      <ProjectTypeTable />
+      <GenericSettingsTable 
+        tableName="project_types"
+        entityName="Project Type"
+        placeholder="Enter new project type..."
+      />
     </div>
   );
 };
