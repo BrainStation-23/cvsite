@@ -12,6 +12,8 @@ import SbuSettings from '@/components/admin/SbuSettings';
 import HrContactSettings from '@/components/admin/HrContactSettings';
 import NoteCategorySettings from '@/components/admin/NoteCategorySettings';
 import ResourceTypeSettings from '@/components/admin/ResourceTypeSettings';
+import BillTypeSettings from '@/components/admin/BillTypeSettings';
+import ProjectTypeSettings from '@/components/admin/ProjectTypeSettings';
 
 const PlatformSettings: React.FC = () => {
   return (
@@ -74,6 +76,18 @@ const PlatformSettings: React.FC = () => {
                 className="h-12 rounded-none border-b-2 border-transparent data-[state=active]:border-cvsite-teal data-[state=active]:bg-transparent data-[state=active]:shadow-none px-6 font-medium"
               >
                 Resource Types
+              </TabsTrigger>
+              <TabsTrigger 
+                value="bill-types" 
+                className="h-12 rounded-none border-b-2 border-transparent data-[state=active]:border-cvsite-teal data-[state=active]:bg-transparent data-[state=active]:shadow-none px-6 font-medium"
+              >
+                Bill Types
+              </TabsTrigger>
+              <TabsTrigger 
+                value="project-types" 
+                className="h-12 rounded-none border-b-2 border-transparent data-[state=active]:border-cvsite-teal data-[state=active]:bg-transparent data-[state=active]:shadow-none px-6 font-medium"
+              >
+                Project Types
               </TabsTrigger>
             </TabsList>
           </div>
@@ -148,6 +162,22 @@ const PlatformSettings: React.FC = () => {
               <ScrollArea className="h-full">
                 <div className="p-6">
                   <ResourceTypeSettings />
+                </div>
+              </ScrollArea>
+            </TabsContent>
+            
+            <TabsContent value="bill-types" className="mt-0 h-full">
+              <ScrollArea className="h-full">
+                <div className="p-6">
+                  <BillTypeSettings />
+                </div>
+              </ScrollArea>
+            </TabsContent>
+            
+            <TabsContent value="project-types" className="mt-0 h-full">
+              <ScrollArea className="h-full">
+                <div className="p-6">
+                  <ProjectTypeSettings />
                 </div>
               </ScrollArea>
             </TabsContent>

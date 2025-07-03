@@ -47,6 +47,27 @@ export type Database = {
           },
         ]
       }
+      bill_types: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       cv_exports: {
         Row: {
           export_format: string
@@ -714,6 +735,27 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      project_types: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          updated_at?: string
+        }
+        Relationships: []
       }
       projects: {
         Row: {
