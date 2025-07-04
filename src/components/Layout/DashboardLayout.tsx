@@ -13,7 +13,12 @@ import {
   Menu,
   FileText,
   Bell,
-  Calendar
+  Calendar,
+  GraduationCap,
+  Briefcase,
+  Building2,
+  ChevronDown,
+  ChevronRight
 } from 'lucide-react';
 
 interface DashboardLayoutProps {
@@ -25,6 +30,9 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [isPlatformSettingsOpen, setIsPlatformSettingsOpen] = useState(
+    location.pathname.startsWith('/admin/platform-settings')
+  );
   
   const getPageTitle = () => {
     const path = location.pathname;
@@ -53,6 +61,10 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
     setIsSidebarOpen(!isSidebarOpen);
   };
 
+  const togglePlatformSettings = () => {
+    setIsPlatformSettingsOpen(!isPlatformSettingsOpen);
+  };
+
   const handleSignOut = async () => {
     try {
       await signOut();
@@ -61,6 +73,14 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
       console.error('Error signing out:', error);
     }
   };
+
+  // Platform settings sub-menu items
+  const platformSettingsItems = [
+    { to: '/admin/platform-settings/profile', icon: <GraduationCap className="w-4 h-4" />, label: 'Profile Management' },
+    { to: '/admin/platform-settings/resources', icon: <Briefcase className="w-4 h-4" />, label: 'Resource Planning' },
+    { to: '/admin/platform-settings/cv-templates', icon: <FileText className="w-4 h-4" />, label: 'CV Templates' },
+    { to: '/admin/platform-settings/system', icon: <Building2 className="w-4 h-4" />, label: 'System Config' },
+  ];
 
   // Grouped sidebar navigation structure
   const sidebarGroups = [
@@ -77,7 +97,15 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
       label: 'Admin Configuration',
       items: [
         { to: '/admin/user-management', icon: <Users className="w-5 h-5" />, label: 'User Management' },
-        { to: '/admin/platform-settings', icon: <Settings className="w-5 h-5" />, label: 'Platform Settings' },
+        { 
+          to: '/admin/platform-settings', 
+          icon: <Settings className="w-5 h-5" />, 
+          label: 'Platform Settings',
+          hasSubmenu: true,
+          submenuItems: platformSettingsItems,
+          isExpanded: isPlatformSettingsOpen,
+          onToggle: togglePlatformSettings
+        },
         { to: '/admin/projects', icon: <Database className="w-5 h-5" />, label: 'Projects' }
       ],
     },
@@ -111,7 +139,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
             onClick={toggleSidebar}
             className="p-1 rounded hover:bg-cvsite-teal"
           >
-            {isSidebarOpen ? <Menu className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+            <Menu className="w-5 h-5" />
           </button>
         </div>
         {/* Redesigned Sidebar Navigation */}
@@ -126,13 +154,57 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
               <ul>
                 {group.items.map((link) => (
                   <li key={link.to} className="mb-1.5 mx-2">
-                    <Link
-                      to={link.to}
-                      className="flex items-center px-4 py-2.5 hover:bg-teal-900/40 transition-colors rounded-lg group"
-                    >
-                      {React.cloneElement(link.icon, { className: 'w-5 h-5 text-teal-400 group-hover:text-teal-200' })}
-                      {isSidebarOpen && <span className="ml-3 group-hover:text-white">{link.label}</span>}
-                    </Link>
+                    {link.hasSubmenu ? (
+                      <>
+                        <div className="flex items-center">
+                          <Link
+                            to={link.to}
+                            className="flex items-center px-4 py-2.5 hover:bg-teal-900/40 transition-colors rounded-lg group flex-1"
+                          >
+                            {React.cloneElement(link.icon, { className: 'w-5 h-5 text-teal-400 group-hover:text-teal-200' })}
+                            {isSidebarOpen && <span className="ml-3 group-hover:text-white">{link.label}</span>}
+                          </Link>
+                          {isSidebarOpen && (
+                            <button
+                              onClick={link.onToggle}
+                              className="p-1 hover:bg-teal-900/40 rounded transition-colors mr-2"
+                            >
+                              {link.isExpanded ? (
+                                <ChevronDown className="w-4 h-4 text-teal-400" />
+                              ) : (
+                                <ChevronRight className="w-4 h-4 text-teal-400" />
+                              )}
+                            </button>
+                          )}
+                        </div>
+                        {/* Submenu */}
+                        {link.isExpanded && isSidebarOpen && (
+                          <ul className="ml-4 mt-1">
+                            {link.submenuItems.map((subItem) => (
+                              <li key={subItem.to} className="mb-1">
+                                <Link
+                                  to={subItem.to}
+                                  className={`flex items-center px-4 py-2 hover:bg-teal-900/40 transition-colors rounded-lg group text-sm ${
+                                    location.pathname === subItem.to ? 'bg-teal-900/60 text-teal-200' : ''
+                                  }`}
+                                >
+                                  {React.cloneElement(subItem.icon, { className: 'text-teal-400 group-hover:text-teal-200' })}
+                                  <span className="ml-3 group-hover:text-white">{subItem.label}</span>
+                                </Link>
+                              </li>
+                            ))}
+                          </ul>
+                        )}
+                      </>
+                    ) : (
+                      <Link
+                        to={link.to}
+                        className="flex items-center px-4 py-2.5 hover:bg-teal-900/40 transition-colors rounded-lg group"
+                      >
+                        {React.cloneElement(link.icon, { className: 'w-5 h-5 text-teal-400 group-hover:text-teal-200' })}
+                        {isSidebarOpen && <span className="ml-3 group-hover:text-white">{link.label}</span>}
+                      </Link>
+                    )}
                   </li>
                 ))}
               </ul>
