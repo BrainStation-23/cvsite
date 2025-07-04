@@ -27,7 +27,7 @@ const ResourcePlanningSettings: React.FC = () => {
               Resource Planning
             </h1>
             <p className="text-gray-600 dark:text-gray-400">
-              Configure resource types, bill types, and project types for resource planning and project management.
+              Manage resource types, bill types, and project types for resource planning and project management.
             </p>
           </div>
         </div>
@@ -90,4 +90,3 @@ const ResourcePlanningSettings: React.FC = () => {
 };
 
 export default ResourcePlanningSettings;
-

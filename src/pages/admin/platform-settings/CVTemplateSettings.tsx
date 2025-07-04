@@ -43,4 +43,3 @@ const CVTemplateSettings: React.FC = () => {
 };
 
 export default CVTemplateSettings;
-

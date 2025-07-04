@@ -105,4 +105,3 @@ const ProfileManagementSettings: React.FC = () => {
 };
 
 export default ProfileManagementSettings;
-
