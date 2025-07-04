@@ -824,6 +824,7 @@ export type Database = {
           id: string
           project_manager: string | null
           project_name: string
+          project_type: string | null
           updated_at: string
         }
         Insert: {
@@ -833,6 +834,7 @@ export type Database = {
           id?: string
           project_manager?: string | null
           project_name: string
+          project_type?: string | null
           updated_at?: string
         }
         Update: {
@@ -842,9 +844,18 @@ export type Database = {
           id?: string
           project_manager?: string | null
           project_name?: string
+          project_type?: string | null
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "projects_management_project_type_fkey"
+            columns: ["project_type"]
+            isOneToOne: false
+            referencedRelation: "project_types"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       references: {
         Row: {
