@@ -20,7 +20,19 @@ serve(async (req) => {
     // Create a Supabase client with the service role key
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
     
-    const { userId, email, firstName, lastName, role, employeeId, sbuId, password } = await req.json();
+    const { 
+      userId, 
+      email, 
+      firstName, 
+      lastName, 
+      role, 
+      employeeId, 
+      sbuId, 
+      password,
+      dateOfJoining,
+      careerStartDate,
+      expertise
+    } = await req.json();
     
     if (!userId) {
       return new Response(
@@ -36,6 +48,9 @@ serve(async (req) => {
       if (lastName) userMetadata.last_name = lastName;
       if (employeeId) userMetadata.employee_id = employeeId;
       if (sbuId !== undefined) userMetadata.sbu_id = sbuId;
+      if (dateOfJoining) userMetadata.date_of_joining = dateOfJoining;
+      if (careerStartDate) userMetadata.career_start_date = careerStartDate;
+      if (expertise !== undefined) userMetadata.expertise = expertise;
       
       const updateData: Record<string, any> = {};
       if (email) updateData.email = email;
@@ -58,12 +73,15 @@ serve(async (req) => {
     }
     
     // Update profile table if profile-related fields are provided
-    if (firstName || lastName || employeeId || sbuId !== undefined) {
+    if (firstName || lastName || employeeId || sbuId !== undefined || dateOfJoining || careerStartDate || expertise !== undefined) {
       const profileUpdates: Record<string, any> = {};
       if (firstName) profileUpdates.first_name = firstName;
       if (lastName) profileUpdates.last_name = lastName;
       if (employeeId) profileUpdates.employee_id = employeeId;
       if (sbuId !== undefined) profileUpdates.sbu_id = sbuId;
+      if (dateOfJoining) profileUpdates.date_of_joining = dateOfJoining;
+      if (careerStartDate) profileUpdates.career_start_date = careerStartDate;
+      if (expertise !== undefined) profileUpdates.expertise = expertise;
       
       const { error: profileError } = await supabase
         .from('profiles')

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import DashboardLayout from '../../components/Layout/DashboardLayout';
 import { Button } from '@/components/ui/button';
 import { Upload, RefreshCw, UserPlus, Download, Users } from 'lucide-react';
@@ -6,16 +7,17 @@ import { useUserManagement } from '@/hooks/use-user-management';
 import UserSearchFilters from '@/components/admin/UserSearchFilters';
 import UserList from '@/components/admin/UserList';
 import UserPagination from '@/components/admin/UserPagination';
-import { AddUserDialog, EditUserDialog, ResetPasswordDialog, DeleteUserDialog, BulkUploadDialog } from '@/components/admin/UserDialogs';
+import { ResetPasswordDialog, DeleteUserDialog, BulkUploadDialog } from '@/components/admin/UserDialogs';
 import { UserData, SortColumn, SortOrder } from '@/hooks/types/user-management';
 import { UserRole } from '@/types';
+
 const UserManagement: React.FC = () => {
-  const [isAddUserDialogOpen, setIsAddUserDialogOpen] = useState(false);
-  const [isEditUserDialogOpen, setIsEditUserDialogOpen] = useState(false);
+  const navigate = useNavigate();
   const [isResetPasswordDialogOpen, setIsResetPasswordDialogOpen] = useState(false);
   const [isDeleteUserDialogOpen, setIsDeleteUserDialogOpen] = useState(false);
   const [isBulkCreateDialogOpen, setIsBulkCreateDialogOpen] = useState(false);
   const [isBulkUpdateDialogOpen, setIsBulkUpdateDialogOpen] = useState(false);
+
   const {
     users,
     pagination,
@@ -31,70 +33,59 @@ const UserManagement: React.FC = () => {
     fetchUsers,
     handlePageChange,
     resetFilters,
-    addUser,
-    updateUser,
     resetPassword,
     deleteUser,
     bulkUpload,
     bulkUpdate,
     exportUsers
   } = useUserManagement();
+
   useEffect(() => {
     fetchUsers();
   }, []);
+
   const handleSearch = (query: string | null) => {
     fetchUsers({
       page: 1,
       search: query
     });
   };
+
   const handleFilterRole = (role: UserRole | null) => {
     fetchUsers({
       page: 1,
       role
     });
   };
+
   const handleSortChange = (column: SortColumn, order: SortOrder) => {
     fetchUsers({
       sortColumn: column,
       sortDirection: order
     });
   };
+
   const handlePerPageChange = (perPage: number) => {
     fetchUsers({
       page: 1,
       perPage
     });
   };
+
   const handleResetPasswordClick = (user: UserData) => {
     setSelectedUser(user);
     setIsResetPasswordDialogOpen(true);
   };
+
   const handleEditClick = (user: UserData) => {
-    setSelectedUser(user);
-    setIsEditUserDialogOpen(true);
+    navigate(`/admin/users/edit/${user.id}`);
   };
+
   const handleDeleteClick = (user: UserData) => {
     setSelectedUser(user);
     setIsDeleteUserDialogOpen(true);
   };
 
-  // Enhanced handlers that automatically close dialogs and refresh
-  const handleAddUserSuccess = async (userData: any) => {
-    const success = await addUser(userData);
-    if (success) {
-      setIsAddUserDialogOpen(false);
-    }
-    return success;
-  };
-  const handleEditUserSuccess = async (userData: any) => {
-    if (!selectedUser) return false;
-    const success = await updateUser(selectedUser.id, userData);
-    if (success) {
-      setIsEditUserDialogOpen(false);
-    }
-    return success;
-  };
   const handleResetPasswordSuccess = async (newPassword: string) => {
     if (!selectedUser) return false;
     const success = await resetPassword(selectedUser.id, newPassword);
@@ -103,6 +94,7 @@ const UserManagement: React.FC = () => {
     }
     return success;
   };
+
   const handleDeleteUserSuccess = async () => {
     if (!selectedUser) return false;
     const success = await deleteUser(selectedUser.id);
@@ -111,6 +103,7 @@ const UserManagement: React.FC = () => {
     }
     return success;
   };
+
   const handleBulkCreateSuccess = async (file: File) => {
     const success = await bulkUpload(file);
     if (success) {
@@ -118,6 +111,7 @@ const UserManagement: React.FC = () => {
     }
     return success;
   };
+
   const handleBulkUpdateSuccess = async (file: File) => {
     const success = await bulkUpdate(file);
     if (success) {
@@ -125,6 +119,7 @@ const UserManagement: React.FC = () => {
     }
     return success;
   };
+
   return <DashboardLayout>
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-semibold text-cvsite-navy dark:text-white">User Management</h1>
@@ -144,9 +139,7 @@ const UserManagement: React.FC = () => {
             <span className="hidden md:inline">Bulk Create</span>
           </Button>
           
-          
-          
-          <Button className="flex items-center gap-2" onClick={() => setIsAddUserDialogOpen(true)}>
+          <Button className="flex items-center gap-2" onClick={() => navigate('/admin/users/add')}>
             <UserPlus size={16} />
             <span className="hidden md:inline">Add User</span>
           </Button>
@@ -159,18 +152,42 @@ const UserManagement: React.FC = () => {
       
       <UserPagination pagination={pagination} onPageChange={handlePageChange} onPerPageChange={handlePerPageChange} isLoading={isLoading} />
       
-      {/* Dialogs */}
-      <AddUserDialog isOpen={isAddUserDialogOpen} onOpenChange={setIsAddUserDialogOpen} onAddUser={handleAddUserSuccess} isLoading={isLoading} />
+      <ResetPasswordDialog 
+        isOpen={isResetPasswordDialogOpen} 
+        onOpenChange={setIsResetPasswordDialogOpen} 
+        user={selectedUser} 
+        onResetPassword={handleResetPasswordSuccess} 
+        isLoading={isLoading} 
+      />
       
-      <EditUserDialog isOpen={isEditUserDialogOpen} onOpenChange={setIsEditUserDialogOpen} user={selectedUser} onUpdateUser={handleEditUserSuccess} isLoading={isLoading} />
+      <DeleteUserDialog 
+        isOpen={isDeleteUserDialogOpen} 
+        onOpenChange={setIsDeleteUserDialogOpen} 
+        user={selectedUser} 
+        onDeleteUser={handleDeleteUserSuccess} 
+        isDeleting={isDeleting} 
+      />
       
-      <ResetPasswordDialog isOpen={isResetPasswordDialogOpen} onOpenChange={setIsResetPasswordDialogOpen} user={selectedUser} onResetPassword={handleResetPasswordSuccess} isLoading={isLoading} />
+      <BulkUploadDialog 
+        isOpen={isBulkCreateDialogOpen} 
+        onOpenChange={setIsBulkCreateDialogOpen} 
+        onBulkUpload={handleBulkCreateSuccess} 
+        isBulkUploading={isBulkUploading} 
+        mode="create" 
+        title="Bulk Create Users" 
+        description="Upload a CSV file to create new users in bulk." 
+      />
       
-      <DeleteUserDialog isOpen={isDeleteUserDialogOpen} onOpenChange={setIsDeleteUserDialogOpen} user={selectedUser} onDeleteUser={handleDeleteUserSuccess} isDeleting={isDeleting} />
-      
-      <BulkUploadDialog isOpen={isBulkCreateDialogOpen} onOpenChange={setIsBulkCreateDialogOpen} onBulkUpload={handleBulkCreateSuccess} isBulkUploading={isBulkUploading} mode="create" title="Bulk Create Users" description="Upload a CSV file to create new users in bulk." />
-      
-      <BulkUploadDialog isOpen={isBulkUpdateDialogOpen} onOpenChange={setIsBulkUpdateDialogOpen} onBulkUpload={handleBulkUpdateSuccess} isBulkUploading={isBulkUploading} mode="update" title="Bulk Update Users" description="Upload a CSV file to update existing users in bulk." />
+      <BulkUploadDialog 
+        isOpen={isBulkUpdateDialogOpen} 
+        onOpenChange={setIsBulkUpdateDialogOpen} 
+        onBulkUpload={handleBulkUpdateSuccess} 
+        isBulkUploading={isBulkUploading} 
+        mode="update" 
+        title="Bulk Update Users" 
+        description="Upload a CSV file to update existing users in bulk." 
+      />
     </DashboardLayout>;
 };
+
 export default UserManagement;
