@@ -5,9 +5,9 @@ import { UserRole } from '@/types';
 
 export function useUserCreation(state: ReturnType<typeof import('./use-user-state').useUserState>) {
   const { toast } = useToast();
-  const { setIsLoading, setIsBulkUploading } = state;
+  const { setIsLoading } = state;
   
-  // Create a new user
+  // Add user
   const addUser = async (userData: {
     email: string;
     firstName: string;
@@ -16,25 +16,19 @@ export function useUserCreation(state: ReturnType<typeof import('./use-user-stat
     password: string;
     employeeId: string;
     sbuId?: string | null;
-    dateOfJoining?: string;
-    careerStartDate?: string;
-    expertise?: string | null;
   }) => {
     try {
       setIsLoading(true);
       
-      const { error } = await supabase.functions.invoke('create-user', {
+      const { data, error } = await supabase.functions.invoke('create-user', {
         body: {
           email: userData.email,
+          password: userData.password,
           firstName: userData.firstName,
           lastName: userData.lastName,
           role: userData.role,
-          password: userData.password,
           employeeId: userData.employeeId,
-          sbuId: userData.sbuId,
-          dateOfJoining: userData.dateOfJoining,
-          careerStartDate: userData.careerStartDate,
-          expertise: userData.expertise,
+          sbuId: userData.sbuId
         }
       });
       
@@ -42,7 +36,7 @@ export function useUserCreation(state: ReturnType<typeof import('./use-user-stat
       
       toast({
         title: "User created",
-        description: `${userData.firstName} ${userData.lastName} (${userData.employeeId}) has been created successfully.`,
+        description: `${userData.firstName} ${userData.lastName} (${userData.employeeId}) has been added successfully.`,
       });
       
       return true;
