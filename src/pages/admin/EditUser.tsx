@@ -73,7 +73,7 @@ const EditUser: React.FC = () => {
           email: authUser.user.email || '',
           firstName: profile.first_name || '',
           lastName: profile.last_name || '',
-          role: profile.user_roles[0]?.role || 'employee',
+          role: (profile.user_roles[0]?.role || 'employee') as UserRole,
           employeeId: profile.employee_id || '',
           sbuId: profile.sbu_id,
           password: '',
