@@ -7,6 +7,7 @@ import { Pencil, Trash2, Plus, Check, X } from 'lucide-react';
 import { usePlatformSettings, SettingItem, SettingTableName } from '@/hooks/use-platform-settings';
 import { ConfirmationDialog } from '@/components/ui/confirmation-dialog';
 import { useConfirmationDialog } from '@/hooks/use-confirmation-dialog';
+import { ResourcePlanningCSVManager } from './ResourcePlanningCSVManager';
 
 interface GenericSettingsTableProps {
   tableName: SettingTableName;
@@ -65,28 +66,56 @@ export const GenericSettingsTable: React.FC<GenericSettingsTableProps> = ({
     }
   };
 
+  const handleBulkCreate = async (bulkItems: { name: string }[]) => {
+    for (const item of bulkItems) {
+      addItem(item.name);
+      // Small delay to prevent overwhelming the API
+      await new Promise(resolve => setTimeout(resolve, 100));
+    }
+  };
+
+  const handleBulkUpdate = async (bulkItems: { id: string; name: string }[]) => {
+    for (const item of bulkItems) {
+      const originalItem = items?.find(existingItem => existingItem.id === item.id);
+      if (originalItem) {
+        updateItem(item.id, item.name, originalItem.name);
+        // Small delay to prevent overwhelming the API
+        await new Promise(resolve => setTimeout(resolve, 100));
+      }
+    }
+  };
+
   if (isLoading) {
     return <div className="flex justify-center p-8">Loading...</div>;
   }
 
   return (
     <div className="space-y-4">
-      {/* Add new item */}
-      <div className="flex gap-2">
-        <Input
-          placeholder={defaultPlaceholder}
-          value={newItemValue}
-          onChange={(e) => setNewItemValue(e.target.value)}
-          onKeyDown={(e) => e.key === 'Enter' && handleAddNew()}
-          className="flex-1"
+      {/* Add new item and CSV operations */}
+      <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-end">
+        <div className="flex gap-2 flex-1">
+          <Input
+            placeholder={defaultPlaceholder}
+            value={newItemValue}
+            onChange={(e) => setNewItemValue(e.target.value)}
+            onKeyDown={(e) => e.key === 'Enter' && handleAddNew()}
+            className="flex-1"
+          />
+          <Button 
+            onClick={handleAddNew}
+            disabled={!newItemValue.trim() || isAddingItem}
+          >
+            <Plus className="h-4 w-4 mr-2" />
+            {isAddingItem ? 'Adding...' : 'Add'}
+          </Button>
+        </div>
+        
+        <ResourcePlanningCSVManager
+          tableName={tableName}
+          items={items || []}
+          onBulkCreate={handleBulkCreate}
+          onBulkUpdate={handleBulkUpdate}
         />
-        <Button 
-          onClick={handleAddNew}
-          disabled={!newItemValue.trim() || isAddingItem}
-        >
-          <Plus className="h-4 w-4 mr-2" />
-          {isAddingItem ? 'Adding...' : 'Add'}
-        </Button>
       </div>
 
       {/* Items table */}
