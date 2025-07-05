@@ -258,6 +258,17 @@ const EditUser: React.FC = () => {
               </div>
 
               <div className="space-y-2">
+                <Label htmlFor="expertise">Expertise</Label>
+                <Textarea
+                  id="expertise"
+                  value={editUser.expertise || ''}
+                  onChange={(e) => setEditUser({ ...editUser, expertise: e.target.value || null })}
+                  placeholder="Enter expertise areas..."
+                  rows={3}
+                />
+              </div>
+
+              <div className="space-y-2">
                 <Label htmlFor="password">New Password (leave blank to keep current)</Label>
                 <Input
                   id="password"

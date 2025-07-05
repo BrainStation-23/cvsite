@@ -185,6 +185,17 @@ const AddUser: React.FC = () => {
               </div>
 
               <div className="space-y-2">
+                <Label htmlFor="expertise">Expertise</Label>
+                <Textarea
+                  id="expertise"
+                  value={newUser.expertise || ''}
+                  onChange={(e) => setNewUser({ ...newUser, expertise: e.target.value || null })}
+                  placeholder="Enter expertise areas..."
+                  rows={3}
+                />
+              </div>
+
+              <div className="space-y-2">
                 <Label htmlFor="password">Password *</Label>
                 <Input
                   id="password"
