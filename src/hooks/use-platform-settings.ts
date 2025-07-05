@@ -12,7 +12,7 @@ export interface SettingItem {
 }
 
 // Define valid table names for type safety
-export type SettingTableName = 'universities' | 'departments' | 'degrees' | 'designations' | 'references' | 'sbus' | 'hr_contacts' | 'resource_types' | 'bill_types' | 'project_types';
+export type SettingTableName = 'universities' | 'departments' | 'degrees' | 'designations' | 'references' | 'sbus' | 'hr_contacts' | 'resource_types' | 'bill_types' | 'project_types' | 'expertise_types';
 
 export const usePlatformSettings = (table: SettingTableName) => {
   const { toast } = useToast();

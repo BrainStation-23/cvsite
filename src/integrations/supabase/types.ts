@@ -548,6 +548,27 @@ export type Database = {
           },
         ]
       }
+      expertise_types: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       general_information: {
         Row: {
           biography: string | null
@@ -697,7 +718,9 @@ export type Database = {
       }
       profiles: {
         Row: {
+          career_start_date: string | null
           created_at: string
+          date_of_joining: string | null
           email: string | null
           employee_id: string | null
           first_name: string | null
@@ -707,7 +730,9 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          career_start_date?: string | null
           created_at?: string
+          date_of_joining?: string | null
           email?: string | null
           employee_id?: string | null
           first_name?: string | null
@@ -717,7 +742,9 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          career_start_date?: string | null
           created_at?: string
+          date_of_joining?: string | null
           email?: string | null
           employee_id?: string | null
           first_name?: string | null
