@@ -723,6 +723,7 @@ export type Database = {
           date_of_joining: string | null
           email: string | null
           employee_id: string | null
+          expertise: string | null
           first_name: string | null
           id: string
           last_name: string | null
@@ -735,6 +736,7 @@ export type Database = {
           date_of_joining?: string | null
           email?: string | null
           employee_id?: string | null
+          expertise?: string | null
           first_name?: string | null
           id: string
           last_name?: string | null
@@ -747,6 +749,7 @@ export type Database = {
           date_of_joining?: string | null
           email?: string | null
           employee_id?: string | null
+          expertise?: string | null
           first_name?: string | null
           id?: string
           last_name?: string | null
@@ -754,6 +757,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "profiles_expertise_fkey"
+            columns: ["expertise"]
+            isOneToOne: false
+            referencedRelation: "expertise_types"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "profiles_sbu_id_fkey"
             columns: ["sbu_id"]

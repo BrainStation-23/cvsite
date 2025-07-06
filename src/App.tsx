@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -15,6 +16,8 @@ import AdminDashboard from '@/pages/dashboard/AdminDashboard';
 import EmployeeDashboard from '@/pages/dashboard/EmployeeDashboard';
 import ManagerDashboard from '@/pages/dashboard/ManagerDashboard';
 import UserManagement from '@/pages/admin/UserManagement';
+import AddUser from '@/pages/admin/AddUser';
+import EditUser from '@/pages/admin/EditUser';
 import PlatformSettings from '@/pages/admin/PlatformSettings';
 import ProfileManagementSettings from '@/pages/admin/platform-settings/ProfileManagementSettings';
 import ResourcePlanningSettings from '@/pages/admin/platform-settings/ResourcePlanningSettings';
@@ -29,7 +32,6 @@ import TrainingCertification from '@/pages/TrainingCertification';
 import ResourcePlanning from '@/pages/ResourcePlanning';
 import ProjectsManagement from '@/pages/admin/ProjectsManagement';
 import './App.css';
-
 
 const queryClient = new QueryClient();
 
@@ -152,6 +154,22 @@ function App() {
               element={
                 <ProtectedRoute allowedRoles={['admin']}>
                   <UserManagement />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/users/add"
+              element={
+                <ProtectedRoute allowedRoles={['admin']}>
+                  <AddUser />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/users/edit/:userId"
+              element={
+                <ProtectedRoute allowedRoles={['admin']}>
+                  <EditUser />
                 </ProtectedRoute>
               }
             />
