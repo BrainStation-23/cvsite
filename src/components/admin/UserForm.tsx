@@ -10,6 +10,7 @@ import { User, Mail, Lock, IdCard, Building, Calendar, Briefcase } from 'lucide-
 import { UserRole } from '@/types';
 import SbuCombobox from './user/SbuCombobox';
 import ExpertiseCombobox from './user/ExpertiseCombobox';
+import DatePicker from './user/DatePicker';
 
 interface UserFormData {
   email: string;
@@ -221,21 +222,19 @@ const UserForm: React.FC<UserFormProps> = ({
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
                   <Label htmlFor="dateOfJoining">Date of Joining</Label>
-                  <Input
-                    id="dateOfJoining"
-                    type="date"
+                  <DatePicker
                     value={formData.dateOfJoining}
-                    onChange={(e) => handleInputChange('dateOfJoining', e.target.value)}
+                    onChange={(value) => handleInputChange('dateOfJoining', value)}
+                    placeholder="Select joining date"
                   />
                 </div>
 
                 <div className="space-y-2">
                   <Label htmlFor="careerStartDate">Career Start Date</Label>
-                  <Input
-                    id="careerStartDate"
-                    type="date"
+                  <DatePicker
                     value={formData.careerStartDate}
-                    onChange={(e) => handleInputChange('careerStartDate', e.target.value)}
+                    onChange={(value) => handleInputChange('careerStartDate', value)}
+                    placeholder="Select career start date"
                   />
                 </div>
               </div>
