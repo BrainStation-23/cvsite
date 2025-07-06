@@ -16,7 +16,10 @@ interface UserData {
   last_name: string;
   role: UserRole;
   employee_id: string;
-  sbu_id: string;
+  sbu_id: string | null;
+  expertise_id: string | null;
+  date_of_joining: string | null;
+  career_start_date: string | null;
 }
 
 const EditUser: React.FC = () => {
@@ -63,7 +66,10 @@ const EditUser: React.FC = () => {
           last_name: user.last_name || '',
           role: user.role || 'employee',
           employee_id: user.employee_id || '',
-          sbu_id: user.sbu_id || ''
+          sbu_id: user.sbu_id || null,
+          expertise_id: user.expertise_id || null,
+          date_of_joining: user.date_of_joining || null,
+          career_start_date: user.career_start_date || null
         });
       } else {
         toast({
@@ -100,6 +106,9 @@ const EditUser: React.FC = () => {
           role: formData.role,
           employeeId: formData.employeeId,
           sbuId: formData.sbuId || null,
+          expertiseId: formData.expertiseId || null,
+          dateOfJoining: formData.dateOfJoining || null,
+          careerStartDate: formData.careerStartDate || null,
           password: formData.password || undefined
         }
       });
@@ -170,7 +179,10 @@ const EditUser: React.FC = () => {
             lastName: userData.last_name,
             role: userData.role,
             employeeId: userData.employee_id,
-            sbuId: userData.sbu_id
+            sbuId: userData.sbu_id,
+            expertiseId: userData.expertise_id,
+            dateOfJoining: userData.date_of_joining || '',
+            careerStartDate: userData.career_start_date || ''
           }}
           onSubmit={handleSubmit}
           isLoading={isLoading}

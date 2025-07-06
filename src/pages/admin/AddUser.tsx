@@ -25,7 +25,10 @@ const AddUser: React.FC = () => {
           lastName: formData.lastName,
           role: formData.role,
           employeeId: formData.employeeId,
-          sbuId: formData.sbuId || null
+          sbuId: formData.sbuId || null,
+          expertiseId: formData.expertiseId || null,
+          dateOfJoining: formData.dateOfJoining || null,
+          careerStartDate: formData.careerStartDate || null
         }
       });
 

@@ -5,8 +5,11 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { User, Mail, Lock, IdCard, Building } from 'lucide-react';
+import { Separator } from '@/components/ui/separator';
+import { User, Mail, Lock, IdCard, Building, Calendar, Briefcase } from 'lucide-react';
 import { UserRole } from '@/types';
+import SbuCombobox from './user/SbuCombobox';
+import ExpertiseCombobox from './user/ExpertiseCombobox';
 
 interface UserFormData {
   email: string;
@@ -15,7 +18,10 @@ interface UserFormData {
   role: UserRole;
   password: string;
   employeeId: string;
-  sbuId: string;
+  sbuId: string | null;
+  expertiseId: string | null;
+  dateOfJoining: string;
+  careerStartDate: string;
 }
 
 interface UserFormProps {
@@ -42,10 +48,13 @@ const UserForm: React.FC<UserFormProps> = ({
     role: initialData.role || 'employee',
     password: initialData.password || '',
     employeeId: initialData.employeeId || '',
-    sbuId: initialData.sbuId || ''
+    sbuId: initialData.sbuId || null,
+    expertiseId: initialData.expertiseId || null,
+    dateOfJoining: initialData.dateOfJoining || '',
+    careerStartDate: initialData.careerStartDate || ''
   });
 
-  const handleInputChange = (field: keyof UserFormData, value: string) => {
+  const handleInputChange = (field: keyof UserFormData, value: string | null) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
@@ -55,134 +64,192 @@ const UserForm: React.FC<UserFormProps> = ({
   };
 
   return (
-    <Card className="max-w-2xl">
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <User size={20} />
-          {title}
-        </CardTitle>
-        <CardDescription>
-          {description}
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="firstName" className="flex items-center gap-2">
-                <User size={16} />
-                First Name *
-              </Label>
-              <Input
-                id="firstName"
-                type="text"
-                value={formData.firstName}
-                onChange={(e) => handleInputChange('firstName', e.target.value)}
-                placeholder="Enter first name"
-                required
-              />
+    <div className="max-w-4xl mx-auto">
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <User size={20} />
+            {title}
+          </CardTitle>
+          <CardDescription>
+            {description}
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleSubmit} className="space-y-8">
+            {/* Basic Information Section */}
+            <div className="space-y-4">
+              <div className="flex items-center gap-2 mb-4">
+                <User size={18} />
+                <h3 className="text-lg font-medium">Basic Information</h3>
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-2">
+                  <Label htmlFor="firstName">First Name *</Label>
+                  <Input
+                    id="firstName"
+                    type="text"
+                    value={formData.firstName}
+                    onChange={(e) => handleInputChange('firstName', e.target.value)}
+                    placeholder="Enter first name"
+                    required
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="lastName">Last Name *</Label>
+                  <Input
+                    id="lastName"
+                    type="text"
+                    value={formData.lastName}
+                    onChange={(e) => handleInputChange('lastName', e.target.value)}
+                    placeholder="Enter last name"
+                    required
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="email" className="flex items-center gap-2">
+                    <Mail size={16} />
+                    Email Address *
+                  </Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    value={formData.email}
+                    onChange={(e) => handleInputChange('email', e.target.value)}
+                    placeholder="Enter email address"
+                    required
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="password" className="flex items-center gap-2">
+                    <Lock size={16} />
+                    {isEdit ? 'New Password (Optional)' : 'Password *'}
+                  </Label>
+                  <Input
+                    id="password"
+                    type="password"
+                    value={formData.password}
+                    onChange={(e) => handleInputChange('password', e.target.value)}
+                    placeholder={isEdit ? "Leave blank to keep current password" : "Enter password"}
+                    required={!isEdit}
+                  />
+                </div>
+              </div>
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="lastName" className="flex items-center gap-2">
-                <User size={16} />
-                Last Name *
-              </Label>
-              <Input
-                id="lastName"
-                type="text"
-                value={formData.lastName}
-                onChange={(e) => handleInputChange('lastName', e.target.value)}
-                placeholder="Enter last name"
-                required
-              />
+            <Separator />
+
+            {/* Professional Information Section */}
+            <div className="space-y-4">
+              <div className="flex items-center gap-2 mb-4">
+                <Briefcase size={18} />
+                <h3 className="text-lg font-medium">Professional Information</h3>
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-2">
+                  <Label htmlFor="employeeId" className="flex items-center gap-2">
+                    <IdCard size={16} />
+                    Employee ID *
+                  </Label>
+                  <Input
+                    id="employeeId"
+                    type="text"
+                    value={formData.employeeId}
+                    onChange={(e) => handleInputChange('employeeId', e.target.value)}
+                    placeholder="Enter employee ID"
+                    required
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="role" className="flex items-center gap-2">
+                    <Building size={16} />
+                    Role *
+                  </Label>
+                  <Select value={formData.role} onValueChange={(value) => handleInputChange('role', value)}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select role" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="admin">Admin</SelectItem>
+                      <SelectItem value="manager">Manager</SelectItem>
+                      <SelectItem value="employee">Employee</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="sbu" className="flex items-center gap-2">
+                    <Building size={16} />
+                    SBU (Optional)
+                  </Label>
+                  <SbuCombobox
+                    value={formData.sbuId}
+                    onValueChange={(value) => handleInputChange('sbuId', value)}
+                    placeholder="Select SBU..."
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="expertise" className="flex items-center gap-2">
+                    <Briefcase size={16} />
+                    Expertise (Optional)
+                  </Label>
+                  <ExpertiseCombobox
+                    value={formData.expertiseId}
+                    onValueChange={(value) => handleInputChange('expertiseId', value)}
+                    placeholder="Select expertise..."
+                  />
+                </div>
+              </div>
             </div>
-          </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="email" className="flex items-center gap-2">
-              <Mail size={16} />
-              Email Address *
-            </Label>
-            <Input
-              id="email"
-              type="email"
-              value={formData.email}
-              onChange={(e) => handleInputChange('email', e.target.value)}
-              placeholder="Enter email address"
-              required
-            />
-          </div>
+            <Separator />
 
-          <div className="space-y-2">
-            <Label htmlFor="password" className="flex items-center gap-2">
-              <Lock size={16} />
-              {isEdit ? 'New Password (Optional)' : 'Password *'}
-            </Label>
-            <Input
-              id="password"
-              type="password"
-              value={formData.password}
-              onChange={(e) => handleInputChange('password', e.target.value)}
-              placeholder={isEdit ? "Leave blank to keep current password" : "Enter password"}
-              required={!isEdit}
-            />
-          </div>
+            {/* Career Information Section */}
+            <div className="space-y-4">
+              <div className="flex items-center gap-2 mb-4">
+                <Calendar size={18} />
+                <h3 className="text-lg font-medium">Career Information</h3>
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-2">
+                  <Label htmlFor="dateOfJoining">Date of Joining</Label>
+                  <Input
+                    id="dateOfJoining"
+                    type="date"
+                    value={formData.dateOfJoining}
+                    onChange={(e) => handleInputChange('dateOfJoining', e.target.value)}
+                  />
+                </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="employeeId" className="flex items-center gap-2">
-              <IdCard size={16} />
-              Employee ID *
-            </Label>
-            <Input
-              id="employeeId"
-              type="text"
-              value={formData.employeeId}
-              onChange={(e) => handleInputChange('employeeId', e.target.value)}
-              placeholder="Enter employee ID"
-              required
-            />
-          </div>
+                <div className="space-y-2">
+                  <Label htmlFor="careerStartDate">Career Start Date</Label>
+                  <Input
+                    id="careerStartDate"
+                    type="date"
+                    value={formData.careerStartDate}
+                    onChange={(e) => handleInputChange('careerStartDate', e.target.value)}
+                  />
+                </div>
+              </div>
+            </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="role" className="flex items-center gap-2">
-              <Building size={16} />
-              Role *
-            </Label>
-            <Select value={formData.role} onValueChange={(value) => handleInputChange('role', value)}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select role" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="admin">Admin</SelectItem>
-                <SelectItem value="manager">Manager</SelectItem>
-                <SelectItem value="employee">Employee</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="sbuId" className="flex items-center gap-2">
-              <Building size={16} />
-              SBU ID (Optional)
-            </Label>
-            <Input
-              id="sbuId"
-              type="text"
-              value={formData.sbuId}
-              onChange={(e) => handleInputChange('sbuId', e.target.value)}
-              placeholder="Enter SBU ID (optional)"
-            />
-          </div>
-
-          <div className="flex justify-end gap-3">
-            <Button type="submit" disabled={isLoading}>
-              {isLoading ? (isEdit ? 'Updating...' : 'Creating...') : (isEdit ? 'Update User' : 'Create User')}
-            </Button>
-          </div>
-        </form>
-      </CardContent>
-    </Card>
+            <div className="flex justify-end gap-3 pt-6">
+              <Button type="submit" disabled={isLoading}>
+                {isLoading ? (isEdit ? 'Updating...' : 'Creating...') : (isEdit ? 'Update User' : 'Create User')}
+              </Button>
+            </div>
+          </form>
+        </CardContent>
+      </Card>
+    </div>
   );
 };
 
