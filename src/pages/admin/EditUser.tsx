@@ -3,14 +3,21 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import DashboardLayout from '@/components/Layout/DashboardLayout';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { ArrowLeft, User, Mail, Lock, IdCard, Building } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { UserRole } from '@/types';
+import UserForm from '@/components/admin/UserForm';
+
+interface UserData {
+  id: string;
+  email: string;
+  first_name: string;
+  last_name: string;
+  role: UserRole;
+  employee_id: string;
+  sbu_id: string;
+}
 
 const EditUser: React.FC = () => {
   const navigate = useNavigate();
@@ -18,15 +25,7 @@ const EditUser: React.FC = () => {
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
   const [isLoadingUser, setIsLoadingUser] = useState(true);
-  const [formData, setFormData] = useState({
-    email: '',
-    firstName: '',
-    lastName: '',
-    role: 'employee' as UserRole,
-    password: '',
-    employeeId: '',
-    sbuId: ''
-  });
+  const [userData, setUserData] = useState<UserData | null>(null);
 
   useEffect(() => {
     if (userId) {
@@ -50,17 +49,21 @@ const EditUser: React.FC = () => {
 
       if (error) throw error;
 
-      const user = data.users.find((u: any) => u.id === id);
+      // Parse the JSON response properly
+      const response = typeof data === 'string' ? JSON.parse(data) : data;
+      const users = response?.users || [];
+      
+      const user = users.find((u: any) => u.id === id);
       
       if (user) {
-        setFormData({
+        setUserData({
+          id: user.id,
           email: user.email || '',
-          firstName: user.first_name || '',
-          lastName: user.last_name || '',
+          first_name: user.first_name || '',
+          last_name: user.last_name || '',
           role: user.role || 'employee',
-          password: '',
-          employeeId: user.employee_id || '',
-          sbuId: user.sbu_id || ''
+          employee_id: user.employee_id || '',
+          sbu_id: user.sbu_id || ''
         });
       } else {
         toast({
@@ -82,12 +85,7 @@ const EditUser: React.FC = () => {
     }
   };
 
-  const handleInputChange = (field: string, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = async (formData: any) => {
     if (!userId) return;
 
     setIsLoading(true);
@@ -136,6 +134,16 @@ const EditUser: React.FC = () => {
     );
   }
 
+  if (!userData) {
+    return (
+      <DashboardLayout>
+        <div className="flex justify-center items-center h-64">
+          <div className="text-lg">User not found</div>
+        </div>
+      </DashboardLayout>
+    );
+  }
+
   return (
     <DashboardLayout>
       <div className="space-y-6">
@@ -155,141 +163,21 @@ const EditUser: React.FC = () => {
           </div>
         </div>
 
-        <Card className="max-w-2xl">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <User size={20} />
-              User Information
-            </CardTitle>
-            <CardDescription>
-              Update the user details below
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="firstName" className="flex items-center gap-2">
-                    <User size={16} />
-                    First Name *
-                  </Label>
-                  <Input
-                    id="firstName"
-                    type="text"
-                    value={formData.firstName}
-                    onChange={(e) => handleInputChange('firstName', e.target.value)}
-                    placeholder="Enter first name"
-                    required
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="lastName" className="flex items-center gap-2">
-                    <User size={16} />
-                    Last Name *
-                  </Label>
-                  <Input
-                    id="lastName"
-                    type="text"
-                    value={formData.lastName}
-                    onChange={(e) => handleInputChange('lastName', e.target.value)}
-                    placeholder="Enter last name"
-                    required
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="email" className="flex items-center gap-2">
-                  <Mail size={16} />
-                  Email Address *
-                </Label>
-                <Input
-                  id="email"
-                  type="email"
-                  value={formData.email}
-                  onChange={(e) => handleInputChange('email', e.target.value)}
-                  placeholder="Enter email address"
-                  required
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="password" className="flex items-center gap-2">
-                  <Lock size={16} />
-                  New Password (Optional)
-                </Label>
-                <Input
-                  id="password"
-                  type="password"
-                  value={formData.password}
-                  onChange={(e) => handleInputChange('password', e.target.value)}
-                  placeholder="Leave blank to keep current password"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="employeeId" className="flex items-center gap-2">
-                  <IdCard size={16} />
-                  Employee ID *
-                </Label>
-                <Input
-                  id="employeeId"
-                  type="text"
-                  value={formData.employeeId}
-                  onChange={(e) => handleInputChange('employeeId', e.target.value)}
-                  placeholder="Enter employee ID"
-                  required
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="role" className="flex items-center gap-2">
-                  <Building size={16} />
-                  Role *
-                </Label>
-                <Select value={formData.role} onValueChange={(value) => handleInputChange('role', value)}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select role" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="admin">Admin</SelectItem>
-                    <SelectItem value="manager">Manager</SelectItem>
-                    <SelectItem value="employee">Employee</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="sbuId" className="flex items-center gap-2">
-                  <Building size={16} />
-                  SBU ID (Optional)
-                </Label>
-                <Input
-                  id="sbuId"
-                  type="text"
-                  value={formData.sbuId}
-                  onChange={(e) => handleInputChange('sbuId', e.target.value)}
-                  placeholder="Enter SBU ID (optional)"
-                />
-              </div>
-
-              <div className="flex justify-end gap-3">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => navigate('/admin/users')}
-                  disabled={isLoading}
-                >
-                  Cancel
-                </Button>
-                <Button type="submit" disabled={isLoading}>
-                  {isLoading ? 'Updating...' : 'Update User'}
-                </Button>
-              </div>
-            </form>
-          </CardContent>
-        </Card>
+        <UserForm
+          initialData={{
+            email: userData.email,
+            firstName: userData.first_name,
+            lastName: userData.last_name,
+            role: userData.role,
+            employeeId: userData.employee_id,
+            sbuId: userData.sbu_id
+          }}
+          onSubmit={handleSubmit}
+          isLoading={isLoading}
+          isEdit={true}
+          title="User Information"
+          description="Update the user details below"
+        />
       </div>
     </DashboardLayout>
   );
