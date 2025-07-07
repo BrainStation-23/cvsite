@@ -97,8 +97,8 @@ export async function validateImageCloseup(
             details = `Distant/full-body shot detected - face occupies only ${faceHeightRatio.toFixed(1)}% of image height`;
           } else {
             // Between 20-30% is considered medium shot
-            isCloseup = false;
-            details = `Medium shot detected - face occupies ${faceHeightRatio.toFixed(1)}% of image height (borderline case)`;
+            isCloseup = true;
+            details = `Medium shot detected - face occupies ${faceHeightRatio.toFixed(1)}% of image height (Hard Pass)`;
           }
 
           console.log('[CloseupValidation] Analysis result:', {
