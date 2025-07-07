@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import DashboardLayout from '../../components/Layout/DashboardLayout';
@@ -95,6 +96,13 @@ const ViewProfilePage: React.FC = () => {
     return success;
   };
 
+  // Handle data refresh after import
+  const handleDataRefresh = () => {
+    console.log('Refreshing all profile data after import...');
+    // Force a page reload to ensure all data is refreshed
+    window.location.reload();
+  };
+
   if (isLoading) {
     return (
       <DashboardLayout>
@@ -167,6 +175,7 @@ const ViewProfilePage: React.FC = () => {
             reorderSpecializedSkills={reorderSpecializedSkills}
             profileId={profileId}
             saveGeneralInfo={handleGeneralInfoSave}
+            onDataChange={handleDataRefresh}
           />
         </div>
       </div>
