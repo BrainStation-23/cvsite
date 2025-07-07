@@ -10,7 +10,10 @@ export function useExperienceFetch(profileId: string) {
   const [experiences, setExperiences] = useState<Experience[]>([]);
 
   const fetchExperiences = async () => {
-    if (!profileId) return;
+    if (!profileId) {
+      setIsLoading(false);
+      return;
+    }
 
     try {
       const { data: expData, error: expError } = await supabase
