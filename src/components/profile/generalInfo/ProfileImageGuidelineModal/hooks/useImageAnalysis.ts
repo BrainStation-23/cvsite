@@ -4,6 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { validateSolidBackground } from '@/utils/imageValidation/imageBackgroundValidation';
 import { validateImagePosture } from '@/utils/imageValidation/imagePostureValidation';
+import { validateImageCloseup } from '@/utils/imageValidation/imageCloseupValidation';
 import { ImageAnalysisResult, ValidationResult, ValidationProgress } from '../types';
 
 export const useImageAnalysis = () => {
@@ -18,6 +19,7 @@ export const useImageAnalysis = () => {
     const initialProgress: ValidationProgress[] = [
       { id: 'background', label: 'Checking background quality', status: 'pending' },
       { id: 'posture', label: 'Analyzing posture and positioning', status: 'pending' },
+      { id: 'closeup', label: 'Checking if image is a close-up shot', status: 'pending' },
       {
         id: 'azure',
         label: 'Verifying facial features and composition',
@@ -117,13 +119,40 @@ export const useImageAnalysis = () => {
         updateProgress('posture', 'failed', false, 'Error analyzing posture');
       }
 
-      // Update validation results with background and posture
+      // 3. Close-up validation
+      updateProgress('closeup', 'running');
+      let closeupResult: ValidationResult | null = null;
+      try {
+        const img = await createImageBitmap(file);
+        const closeup = await validateImageCloseup(img);
+        closeupResult = {
+          id: 'closeup',
+          label: 'Close-up shot detected',
+          passed: closeup.isCloseup,
+          details: closeup.details,
+          source: 'local',
+        };
+        updateProgress('closeup', 'completed', closeup.isCloseup, closeup.details);
+      } catch (e) {
+        console.error('Close-up validation error:', e);
+        closeupResult = {
+          id: 'closeup',
+          label: 'Close-up shot detected',
+          passed: false,
+          details: 'Error analyzing close-up',
+          source: 'local',
+        };
+        updateProgress('closeup', 'failed', false, 'Error analyzing close-up');
+      }
+
+      // Update validation results with background, posture, and close-up
       const currentResults = [];
       if (localBgResult) currentResults.push(localBgResult);
       if (postureResult) currentResults.push(postureResult);
+      if (closeupResult) currentResults.push(closeupResult);
       setValidationResults(currentResults);
 
-      // 3. Call edge function (Azure Face API)
+      // 4. Call edge function (Azure Face API)
       updateProgress('azure', 'running');
       const base64 = await new Promise<string>((resolve, reject) => {
         const reader = new FileReader();
@@ -171,6 +200,9 @@ export const useImageAnalysis = () => {
       if (postureResult && postureResult.passed === false) {
         recommendations.push('Stand or sit straight with shoulders at a slight angle (5-20°) to the camera.');
       }
+      if (closeupResult && closeupResult.passed === false) {
+        recommendations.push('Take a close-up shot where your face occupies at least 30% of the image height.');
+      }
       if (!data.isNotGroupPhoto) {
         recommendations.push('Make sure the photo contains only you (no group photos).');
       }
@@ -192,6 +224,12 @@ export const useImageAnalysis = () => {
           shoulderAngle: postureResult.details.includes('angle:') ? 
             parseFloat(postureResult.details.match(/angle: ([\d.]+)°/)?.[1] || '0') : 0,
           details: postureResult.details,
+        } : undefined,
+        closeup: closeupResult ? {
+          passed: closeupResult.passed,
+          faceHeightRatio: closeupResult.details.includes('occupies') ? 
+            parseFloat(closeupResult.details.match(/([\d.]+)%/)?.[1] || '0') : 0,
+          details: closeupResult.details,
         } : undefined,
         details: {
           ...data.details,

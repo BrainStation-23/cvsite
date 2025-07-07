@@ -21,6 +21,11 @@ export interface ImageAnalysisResult {
     shoulderAngle: number;
     details: string;
   };
+  closeup?: {
+    passed: boolean;
+    faceHeightRatio: number;
+    details: string;
+  };
 }
 
 export type ValidationResult = {

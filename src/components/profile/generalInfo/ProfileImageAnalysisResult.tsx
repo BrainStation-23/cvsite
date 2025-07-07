@@ -26,6 +26,11 @@ interface ImageAnalysisResult {
     shoulderAngle: number;
     details: string;
   };
+  closeup?: {
+    passed: boolean;
+    faceHeightRatio: number;
+    details: string;
+  };
 }
 
 interface ProfileImageAnalysisResultProps {
@@ -87,6 +92,17 @@ const ProfileImageAnalysisResult: React.FC<ProfileImageAnalysisResultProps> = ({
                 {getStatusIcon(result.posture.passed)}
                 <span className="text-xs text-gray-500">
                   {result.posture.shoulderAngle > 0 ? `${result.posture.shoulderAngle.toFixed(1)}°` : result.posture.details}
+                </span>
+              </span>
+            </div>
+          )}
+          {result.closeup && (
+            <div className="flex items-center justify-between">
+              <span>Close-up shot (face ≥30% of image height)</span>
+              <span className="flex items-center gap-1">
+                {getStatusIcon(result.closeup.passed)}
+                <span className="text-xs text-gray-500">
+                  {result.closeup.faceHeightRatio > 0 ? `${result.closeup.faceHeightRatio}%` : result.closeup.details}
                 </span>
               </span>
             </div>
