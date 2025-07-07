@@ -51,6 +51,7 @@ interface ProfileTabsProps {
   reorderSpecializedSkills: (skills: Skill[]) => Promise<boolean>;
   profileId?: string;
   saveGeneralInfo: (data: GeneralInfoFormData) => Promise<boolean>;
+  onDataChange?: () => void;
 }
 
 export const ProfileTabs: React.FC<ProfileTabsProps> = ({
@@ -94,7 +95,8 @@ export const ProfileTabs: React.FC<ProfileTabsProps> = ({
   reorderTechnicalSkills,
   reorderSpecializedSkills,
   profileId,
-  saveGeneralInfo
+  saveGeneralInfo,
+  onDataChange
 }) => {
   // Handle general info save with proper conversion and return boolean
   const handleGeneralInfoSave = async (data: GeneralInfoFormData): Promise<boolean> => {
@@ -205,6 +207,7 @@ export const ProfileTabs: React.FC<ProfileTabsProps> = ({
         handleGeneralInfoSave={handleGeneralInfoSave}
         profileData={profileData}
         importProfile={importProfile}
+        onDataChange={onDataChange}
       />
     </Tabs>
   );
