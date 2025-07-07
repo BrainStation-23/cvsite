@@ -41,9 +41,15 @@ export const GeneralInfoTab: React.FC<GeneralInfoTabProps> = ({
   const firstName = form.watch('firstName');
   const lastName = form.watch('lastName');
   const profileImage = form.watch('profileImage');
+  const currentDesignation = form.watch('currentDesignation');
   
   const userName = `${firstName} ${lastName}`.trim() || 'User';
 
+  console.log('=== GeneralInfoTab Debug ===');
+  console.log('Profile ID:', profileId);
+  console.log('Current designation from form:', currentDesignation);
+  console.log('Is editing:', isEditing);
+  console.log('Form values:', form.getValues());
 
   const handleImageUpdate = async (imageUrl: string | null) => {
     form.setValue('profileImage', imageUrl);
@@ -57,10 +63,10 @@ export const GeneralInfoTab: React.FC<GeneralInfoTabProps> = ({
     }
   };
 
-
   const handleSave = async () => {
     if (!onSave) return;
     const currentValues = form.getValues();
+    console.log('Saving general info with values:', currentValues);
     try {
       await onSave(currentValues);
       // react-hook-form will reset isDirty after a successful submission if you use reset()
@@ -172,7 +178,10 @@ export const GeneralInfoTab: React.FC<GeneralInfoTabProps> = ({
                           <div data-tour="designation-select">
                             <DesignationCombobox
                               value={field.value || ''}
-                              onValueChange={field.onChange}
+                              onValueChange={(newValue) => {
+                                console.log('Designation changed from', field.value, 'to', newValue);
+                                field.onChange(newValue);
+                              }}
                               placeholder="Select or add designation..."
                             />
                           </div>

@@ -23,7 +23,11 @@ const ViewProfilePage: React.FC = () => {
   const [newTechnicalSkill, setNewTechnicalSkill] = useState({ name: '', proficiency: 1, priority: 0 });
   const [newSpecializedSkill, setNewSpecializedSkill] = useState({ name: '', proficiency: 1, priority: 0 });
   
-  // Use the updated hooks with profileId
+  console.log('=== ViewProfilePage Debug ===');
+  console.log('Profile ID from URL:', profileId);
+  console.log('Current user:', user);
+  
+  // Use the same hooks as the regular profile page with profileId
   const { isLoading: generalInfoLoading, generalInfo, saveGeneralInfo, isSaving: generalInfoSaving } = useGeneralInfo(profileId);
   const { isLoading: skillsLoading, technicalSkills, specializedSkills, saveTechnicalSkill, saveSpecializedSkill, deleteTechnicalSkill, deleteSpecializedSkill, reorderTechnicalSkills, reorderSpecializedSkills, isSaving: skillsSaving } = useSkills(profileId);
   const { experiences, saveExperience, updateExperience, deleteExperience, isLoading: experienceLoading, isSaving: experienceSaving } = useExperience(profileId);
@@ -38,24 +42,38 @@ const ViewProfilePage: React.FC = () => {
   const isLoading = generalInfoLoading || skillsLoading || experienceLoading || educationLoading || trainingLoading || achievementsLoading || projectsLoading;
   const isSaving = generalInfoSaving || skillsSaving || experienceSaving || educationSaving || trainingSaving || achievementsSaving || projectsSaving;
 
+  console.log('=== General Info Debug ===');
+  console.log('General info loading:', generalInfoLoading);
+  console.log('General info data:', generalInfo);
+  console.log('Current designation:', generalInfo.currentDesignation);
+
   const form = useForm<GeneralInfoFormData>({
     defaultValues: {
       firstName: generalInfo.firstName || '',
       lastName: generalInfo.lastName || '',
       biography: generalInfo.biography || '',
-      profileImage: generalInfo.profileImage
+      profileImage: generalInfo.profileImage,
+      currentDesignation: generalInfo.currentDesignation || ''
     }
   });
 
   // Update form values when profile data changes
   React.useEffect(() => {
+    console.log('=== Form Update Effect ===');
+    console.log('Is loading:', isLoading);
+    console.log('General info:', generalInfo);
+    
     if (!isLoading) {
-      form.reset({
+      const formData = {
         firstName: generalInfo.firstName || '',
         lastName: generalInfo.lastName || '',
         biography: generalInfo.biography || '',
-        profileImage: generalInfo.profileImage
-      });
+        profileImage: generalInfo.profileImage,
+        currentDesignation: generalInfo.currentDesignation || ''
+      };
+      
+      console.log('Setting form data:', formData);
+      form.reset(formData);
     }
   }, [isLoading, generalInfo, form]);
 
@@ -81,19 +99,6 @@ const ViewProfilePage: React.FC = () => {
       }
     }
     return false;
-  };
-
-  // Handle general info save for employee profile
-  const handleGeneralInfoSave = async (data: GeneralInfoFormData) => {
-    const saveData = {
-      firstName: data.firstName,
-      lastName: data.lastName,
-      biography: data.biography || null,
-      profileImage: data.profileImage
-    };
-    
-    const success = await saveGeneralInfo(saveData);
-    return success;
   };
 
   // Handle data refresh after import
@@ -174,7 +179,7 @@ const ViewProfilePage: React.FC = () => {
             reorderTechnicalSkills={reorderTechnicalSkills}
             reorderSpecializedSkills={reorderSpecializedSkills}
             profileId={profileId}
-            saveGeneralInfo={handleGeneralInfoSave}
+            saveGeneralInfo={saveGeneralInfo}
             onDataChange={handleDataRefresh}
           />
         </div>

@@ -34,6 +34,10 @@ export const DesignationCombobox: React.FC<DesignationComboboxProps> = ({
   const [open, setOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState<string | null>(null);
 
+  console.log('=== DesignationCombobox Debug ===');
+  console.log('Current value:', value);
+  console.log('Search query:', searchQuery);
+
   const { data: searchData, isLoading } = useDesignationSearch({
     searchQuery,
     page: 1,
@@ -44,9 +48,14 @@ export const DesignationCombobox: React.FC<DesignationComboboxProps> = ({
 
   const designations = searchData?.designations || [];
 
+  console.log('Available designations:', designations);
+  console.log('Loading designations:', isLoading);
+
   const selectedDesignation = designations.find(
     (designation) => designation.name === value
   );
+
+  console.log('Selected designation:', selectedDesignation);
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -67,7 +76,10 @@ export const DesignationCombobox: React.FC<DesignationComboboxProps> = ({
           <CommandInput
             placeholder="Search designations..."
             value={searchQuery || ''}
-            onValueChange={(search) => setSearchQuery(search || null)}
+            onValueChange={(search) => {
+              console.log('Search input changed:', search);
+              setSearchQuery(search || null);
+            }}
           />
           <CommandList>
             <CommandEmpty>
@@ -79,6 +91,8 @@ export const DesignationCombobox: React.FC<DesignationComboboxProps> = ({
                   key={designation.id}
                   value={designation.name}
                   onSelect={(currentValue) => {
+                    console.log('Designation selected:', currentValue);
+                    console.log('Current value was:', value);
                     onValueChange(currentValue === value ? "" : currentValue);
                     setOpen(false);
                   }}
