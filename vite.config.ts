@@ -12,6 +12,7 @@ function mediapipeWorkaround() {
     'pose.js': 'Pose',
     'holistic.js': 'Holistic',
     'hands.js': 'Hands',
+    'face_detection.js': 'FaceDetection',
   };
 
   return {
