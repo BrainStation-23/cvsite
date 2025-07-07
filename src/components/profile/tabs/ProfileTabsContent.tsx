@@ -143,6 +143,7 @@ export const ProfileTabsContent: React.FC<ProfileTabsContentProps> = ({
           experiences={experiences}
           isEditing={isEditing}
           isSaving={isSaving}
+          profileId={profileId}
           onSave={saveExperience}
           onUpdate={updateExperience}
           onDelete={deleteExperience}
