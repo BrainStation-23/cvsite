@@ -1,3 +1,4 @@
+
 import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import { MonacoJsonEditor } from './MonacoJsonEditor';
 import { Button } from '@/components/ui/button';
@@ -20,6 +21,7 @@ export const ServerSideJSONImportExport: React.FC<ServerSideJSONImportExportProp
   const { exportProfile, importProfile, isExporting, isImporting } = useProfileJsonRpc();
   const [jsonInput, setJsonInput] = useState<string>('{}');
   const [showSchema, setShowSchema] = useState(false);
+  const [importProgress, setImportProgress] = useState<string>('');
   
   // Memoize the AJV validator to prevent re-creation on every render
   const validate = useMemo(() => {
@@ -31,12 +33,16 @@ export const ServerSideJSONImportExport: React.FC<ServerSideJSONImportExportProp
   useEffect(() => {
     const fetchInitialData = async () => {
       try {
+        console.log('Fetching initial profile data for profileId:', profileId);
         const result = await exportProfile(profileId, false); // Don't download
         if (result.success && result.data) {
+          console.log('Successfully fetched profile data:', result.data);
           setJsonInput(JSON.stringify(result.data, null, 2));
+        } else {
+          console.error('Failed to fetch profile data:', result.error);
         }
       } catch (error) {
-        console.error('Failed to fetch initial data:', error);
+        console.error('Error fetching initial data:', error);
       }
     };
     
@@ -44,9 +50,25 @@ export const ServerSideJSONImportExport: React.FC<ServerSideJSONImportExportProp
   }, [profileId]); // Only depend on profileId, not exportProfile
 
   const handleFetch = useCallback(async () => {
-    const result = await exportProfile(profileId, false); // Don't download
-    if (result.success && result.data) {
-      setJsonInput(JSON.stringify(result.data, null, 2));
+    console.log('Manual fetch requested for profileId:', profileId);
+    setImportProgress('Fetching profile data...');
+    
+    try {
+      const result = await exportProfile(profileId, false); // Don't download
+      if (result.success && result.data) {
+        console.log('Manual fetch successful:', result.data);
+        setJsonInput(JSON.stringify(result.data, null, 2));
+        setImportProgress('Profile data fetched successfully');
+        setTimeout(() => setImportProgress(''), 2000);
+      } else {
+        console.error('Manual fetch failed:', result.error);
+        setImportProgress('Failed to fetch profile data');
+        setTimeout(() => setImportProgress(''), 3000);
+      }
+    } catch (error) {
+      console.error('Manual fetch error:', error);
+      setImportProgress('Error fetching profile data');
+      setTimeout(() => setImportProgress(''), 3000);
     }
   }, [exportProfile, profileId]);
 
@@ -75,35 +97,96 @@ export const ServerSideJSONImportExport: React.FC<ServerSideJSONImportExportProp
   }, [jsonInput, toast]);
 
   const handleImport = useCallback(async () => {
+    console.log('=== IMPORT PROCESS STARTED ===');
+    console.log('Profile ID:', profileId);
+    console.log('JSON Input length:', jsonInput.length);
+    
     if (!jsonInput.trim() || jsonInput.trim() === '{}') {
+      console.log('Empty JSON input detected');
       toast({ title: 'Error', description: 'Please paste or load JSON data to import.', variant: 'destructive' });
       return;
     }
 
+    setImportProgress('Validating JSON format...');
+    
+    let parsedData;
     try {
-      const data = JSON.parse(jsonInput);
-      const valid = validate(data);
-      
-      if (!valid) {
-        const errors = (validate.errors || []).map((err: ErrorObject) => {
-          const path = (err as any).instancePath || (err as any).dataPath || err.schemaPath || '';
-          return `${path}: ${err.message}`;
-        }).join('\n');
-        toast({ title: 'Validation Error', description: errors, variant: 'destructive' });
-        return;
-      }
-
-      const result = await importProfile(data, profileId);
-      if (result.success && onImportSuccess) {
-        onImportSuccess();
-      }
-    } catch (error) {
+      parsedData = JSON.parse(jsonInput);
+      console.log('JSON parsed successfully:', parsedData);
+    } catch (parseError) {
+      console.error('JSON parse error:', parseError);
       toast({ 
-        title: 'Error', 
-        description: 'Invalid JSON format or structure.', 
+        title: 'Invalid JSON', 
+        description: 'The JSON format is invalid. Please check your syntax.', 
         variant: 'destructive' 
       });
+      setImportProgress('');
+      return;
     }
+
+    setImportProgress('Validating against schema...');
+    
+    const valid = validate(parsedData);
+    if (!valid) {
+      const errors = (validate.errors || []).map((err: ErrorObject) => {
+        const path = (err as any).instancePath || (err as any).dataPath || err.schemaPath || '';
+        return `${path}: ${err.message}`;
+      }).join('\n');
+      
+      console.error('Schema validation failed:', errors);
+      toast({ title: 'Validation Error', description: errors, variant: 'destructive' });
+      setImportProgress('');
+      return;
+    }
+
+    console.log('Schema validation passed');
+    setImportProgress('Importing profile data...');
+
+    try {
+      console.log('Calling importProfile with data:', parsedData);
+      console.log('Target profile ID:', profileId);
+      
+      const result = await importProfile(parsedData, profileId);
+      
+      console.log('Import result:', result);
+      
+      if (result.success) {
+        console.log('Import successful, calling onImportSuccess');
+        setImportProgress('Import completed successfully!');
+        
+        toast({
+          title: 'Import Successful',
+          description: `Profile data imported successfully. ${result.stats ? `Total items: ${result.stats.totalImported}` : ''}`,
+        });
+        
+        if (onImportSuccess) {
+          console.log('Calling onImportSuccess callback');
+          onImportSuccess();
+        }
+        
+        setTimeout(() => setImportProgress(''), 3000);
+      } else {
+        console.error('Import failed:', result.error);
+        setImportProgress('Import failed');
+        toast({
+          title: 'Import Failed',
+          description: result.error || 'Unknown error occurred during import',
+          variant: 'destructive'
+        });
+        setTimeout(() => setImportProgress(''), 3000);
+      }
+    } catch (error) {
+      console.error('Import process error:', error);
+      setImportProgress('Import error');
+      toast({ 
+        title: 'Import Error', 
+        description: `An error occurred: ${error instanceof Error ? error.message : 'Unknown error'}`, 
+        variant: 'destructive' 
+      });
+      setTimeout(() => setImportProgress(''), 3000);
+    }
+    
+    console.log('=== IMPORT PROCESS ENDED ===');
   }, [jsonInput, validate, importProfile, profileId, onImportSuccess, toast]);
 
   const handleCopySchema = useCallback(async () => {
@@ -147,6 +230,13 @@ export const ServerSideJSONImportExport: React.FC<ServerSideJSONImportExportProp
             </Button>
           </div>
         </div>
+
+        {/* Progress indicator */}
+        {importProgress && (
+          <div className="mb-2 p-2 bg-blue-50 dark:bg-blue-900/20 rounded text-sm text-blue-700 dark:text-blue-300">
+            {importProgress}
+          </div>
+        )}
 
         {/* Schema Modal */}
         {showSchema && (

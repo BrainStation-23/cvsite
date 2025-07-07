@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
@@ -24,12 +25,18 @@ export function useProfileJsonRpc() {
   const exportProfile = async (targetUserId?: string, shouldDownload: boolean = true) => {
     try {
       setIsExporting(true);
+      console.log('=== EXPORT PROFILE START ===');
+      console.log('Target user ID:', targetUserId);
+      console.log('Should download:', shouldDownload);
       
       const { data, error } = await supabase.rpc('export_profile_json', {
         target_user_id: targetUserId || null
       });
 
+      console.log('Export RPC response:', { data, error });
+
       if (error) {
+        console.error('Export RPC error:', error);
         throw error;
       }
 
@@ -53,6 +60,7 @@ export function useProfileJsonRpc() {
         });
       }
 
+      console.log('=== EXPORT PROFILE END ===');
       return { success: true, data };
     } catch (error: any) {
       console.error('Export error:', error);
@@ -70,13 +78,24 @@ export function useProfileJsonRpc() {
   const importProfile = async (profileData: any, targetUserId?: string) => {
     try {
       setIsImporting(true);
+      console.log('=== IMPORT PROFILE START ===');
+      console.log('Target user ID:', targetUserId);
+      console.log('Profile data to import:', profileData);
       
+      // Validate required data structure
+      if (!profileData || typeof profileData !== 'object') {
+        throw new Error('Invalid profile data format');
+      }
+
       const { data, error } = await supabase.rpc('import_profile_json', {
         profile_data: profileData,
         target_user_id: targetUserId || null
       });
 
+      console.log('Import RPC response:', { data, error });
+
       if (error) {
+        console.error('Import RPC error:', error);
         throw error;
       }
 
@@ -84,14 +103,18 @@ export function useProfileJsonRpc() {
       const result = data as unknown as ImportResult;
 
       if (!result.success) {
+        console.error('Import failed with result:', result);
         throw new Error(result.error || 'Import failed');
       }
 
+      console.log('Import successful with stats:', result);
+
       toast({
         title: 'Import Successful',
-        description: `Successfully imported ${result.totalImported} items. General info: ${result.generalInfo ? 'Updated' : 'Not updated'}, Technical skills: ${result.technicalSkills}, Specialized skills: ${result.specializedSkills}, Experiences: ${result.experiences}, Education: ${result.education}, Trainings: ${result.trainings}, Achievements: ${result.achievements}, Projects: ${result.projects}`,
+        description: `Successfully imported ${result.totalImported || 0} items. General info: ${result.generalInfo ? 'Updated' : 'Not updated'}, Technical skills: ${result.technicalSkills || 0}, Specialized skills: ${result.specializedSkills || 0}, Experiences: ${result.experiences || 0}, Education: ${result.education || 0}, Trainings: ${result.trainings || 0}, Achievements: ${result.achievements || 0}, Projects: ${result.projects || 0}`,
       });
 
+      console.log('=== IMPORT PROFILE END ===');
       return { success: true, stats: result };
     } catch (error: any) {
       console.error('Import error:', error);
