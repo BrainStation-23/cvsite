@@ -732,6 +732,7 @@ export type Database = {
           first_name: string | null
           id: string
           last_name: string | null
+          resource_type: string | null
           sbu_id: string | null
           updated_at: string
         }
@@ -745,6 +746,7 @@ export type Database = {
           first_name?: string | null
           id: string
           last_name?: string | null
+          resource_type?: string | null
           sbu_id?: string | null
           updated_at?: string
         }
@@ -758,6 +760,7 @@ export type Database = {
           first_name?: string | null
           id?: string
           last_name?: string | null
+          resource_type?: string | null
           sbu_id?: string | null
           updated_at?: string
         }
@@ -767,6 +770,13 @@ export type Database = {
             columns: ["expertise"]
             isOneToOne: false
             referencedRelation: "expertise_types"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "profiles_resource_type_fkey"
+            columns: ["resource_type"]
+            isOneToOne: false
+            referencedRelation: "resource_types"
             referencedColumns: ["id"]
           },
           {
