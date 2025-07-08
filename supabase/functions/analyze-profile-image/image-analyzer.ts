@@ -4,21 +4,18 @@ import { GroupPhotoValidator } from './validators/group-photo-validator.ts';
 import { AccessoriesValidator } from './validators/accessories-validator.ts';
 import { HeadPoseValidator } from './validators/head-pose-validator.ts';
 import { FaceCenteringValidator } from './validators/face-centering-validator.ts';
-import { ExpressionValidator } from './validators/expression-validator.ts';
 
 export class ImageAnalyzer {
   private groupPhotoValidator: GroupPhotoValidator;
   private accessoriesValidator: AccessoriesValidator;
   private headPoseValidator: HeadPoseValidator;
   private faceCenteringValidator: FaceCenteringValidator;
-  private expressionValidator: ExpressionValidator;
 
   constructor() {
     this.groupPhotoValidator = new GroupPhotoValidator();
     this.accessoriesValidator = new AccessoriesValidator();
     this.headPoseValidator = new HeadPoseValidator();
     this.faceCenteringValidator = new FaceCenteringValidator();
-    this.expressionValidator = new ExpressionValidator();
   }
 
   analyzeImage(faces: AzureFaceDetectionResponse[]): ImageAnalysisResult {
@@ -46,29 +43,23 @@ export class ImageAnalyzer {
     const centeringValidation = this.faceCenteringValidator.validate(face);
     recommendations.push(...centeringValidation.recommendations);
 
-    // Validate expression
-    const expressionValidation = this.expressionValidator.validate(face);
-    recommendations.push(...expressionValidation.recommendations);
-
     // Determine if it's a professional headshot
     const isProfessionalHeadshot = 
       groupValidation.isValid && 
       centeringValidation.isValid && 
       accessoriesValidation.isValid && 
-      headPoseValidation.isValid &&
-      expressionValidation.isValid;
+      headPoseValidation.isValid;
 
     // Calculate confidence score
     let confidence = 0;
-    if (groupValidation.isValid) confidence += 20;
-    if (centeringValidation.isValid) confidence += 20;
-    if (accessoriesValidation.isValid) confidence += 20;
-    if (headPoseValidation.isValid) confidence += 20;
-    if (expressionValidation.isValid) confidence += 20;
+    if (groupValidation.isValid) confidence += 25;
+    if (centeringValidation.isValid) confidence += 25;
+    if (accessoriesValidation.isValid) confidence += 25;
+    if (headPoseValidation.isValid) confidence += 25;
 
     // Add positive feedback
     if (isProfessionalHeadshot) {
-      recommendations.push('Excellent! This looks like a professional headshot.');
+      recommendations.push('Great! This looks like a professional headshot.');
     } else if (recommendations.length === 0) {
       recommendations.push('Good photo! Minor adjustments could make it even more professional.');
     }
@@ -78,14 +69,12 @@ export class ImageAnalyzer {
       isFaceCentered: centeringValidation.isValid,
       hasNoSunglassesOrHats: accessoriesValidation.isValid,
       isNotGroupPhoto: groupValidation.isValid,
-      hasAppropriateExpression: expressionValidation.isValid,
       confidence,
       details: {
         faceCount: groupValidation.faceCount,
         glasses: accessoriesValidation.glasses,
         accessories: accessoriesValidation.accessories,
         facePosition: centeringValidation.position,
-        expression: expressionValidation.expression,
         recommendations
       }
     };
@@ -100,14 +89,12 @@ export class ImageAnalyzer {
       isFaceCentered: false,
       hasNoSunglassesOrHats: false,
       isNotGroupPhoto: groupValidation.isValid,
-      hasAppropriateExpression: false,
       confidence: 0,
       details: {
         faceCount: groupValidation.faceCount,
         glasses: 'unknown',
         accessories: [],
         facePosition: 'unknown',
-        expression: 'unknown',
         recommendations
       }
     };

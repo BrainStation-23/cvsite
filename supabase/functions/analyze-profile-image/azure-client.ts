@@ -29,9 +29,9 @@ export class AzureFaceClient {
       contentType = 'application/octet-stream';
     }
 
-    // Call Azure Face API for face detection with attributes including emotion and smile
+    // Call Azure Face API for face detection with attributes
     const azureResponse = await fetch(
-      `${this.config.azureEndpoint}/face/v1.0/detect?returnFaceAttributes=accessories,glasses,headPose,emotion,smile`,
+      `${this.config.azureEndpoint}/face/v1.0/detect?returnFaceAttributes=accessories,glasses,headPose`,
       {
         method: 'POST',
         headers: {

@@ -4,14 +4,12 @@ export interface ImageAnalysisResult {
   isFaceCentered: boolean;
   hasNoSunglassesOrHats: boolean;
   isNotGroupPhoto: boolean;
-  hasAppropriateExpression: boolean;
   confidence: number;
   details: {
     faceCount: number;
     glasses: string;
     accessories: string[];
     facePosition: string;
-    expression: string;
     recommendations: string[];
   };
   background?: {
