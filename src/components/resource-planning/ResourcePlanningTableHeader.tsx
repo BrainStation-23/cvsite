@@ -60,16 +60,6 @@ export const ResourcePlanningTableHeader: React.FC<ResourcePlanningTableHeaderPr
             <ArrowUpDown className="ml-2 h-4 w-4" />
           </Button>
         </TableHead>
-        <TableHead>
-          <Button
-            variant="ghost"
-            onClick={() => onSort('created_at')}
-            className="h-auto p-0 font-semibold"
-          >
-            Created
-            <ArrowUpDown className="ml-2 h-4 w-4" />
-          </Button>
-        </TableHead>
         <TableHead>Actions</TableHead>
       </TableRow>
     </TableHeader>

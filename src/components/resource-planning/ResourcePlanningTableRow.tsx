@@ -6,6 +6,8 @@ import { Badge } from '@/components/ui/badge';
 import { Edit2, Trash2 } from 'lucide-react';
 import { format } from 'date-fns';
 import { useResourcePlanning } from '@/hooks/use-resource-planning';
+import { useConfirmationDialog } from '@/hooks/use-confirmation-dialog';
+import { ConfirmationDialog } from '@/components/ui/confirmation-dialog';
 import { ResourceAssignmentDialog } from './ResourceAssignmentDialog';
 
 interface ResourcePlanningData {
@@ -43,11 +45,17 @@ interface ResourcePlanningTableRowProps {
 export const ResourcePlanningTableRow: React.FC<ResourcePlanningTableRowProps> = ({ item }) => {
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const { deleteResourcePlanning, isDeleting } = useResourcePlanning();
+  const { isOpen, config, showConfirmation, hideConfirmation, handleConfirm } = useConfirmationDialog();
 
-  const handleDelete = () => {
-    if (window.confirm('Are you sure you want to delete this resource assignment?')) {
-      deleteResourcePlanning(item.id);
-    }
+  const handleDeleteClick = () => {
+    showConfirmation({
+      title: 'Delete Resource Assignment',
+      description: 'Are you sure you want to delete this resource assignment? This action cannot be undone.',
+      confirmText: 'Delete',
+      cancelText: 'Cancel',
+      variant: 'destructive',
+      onConfirm: () => deleteResourcePlanning(item.id)
+    });
   };
 
   return (
@@ -102,9 +110,6 @@ export const ResourcePlanningTableRow: React.FC<ResourcePlanningTableRowProps> =
           )}
         </TableCell>
         <TableCell>
-          {format(new Date(item.created_at), 'MMM dd, yyyy')}
-        </TableCell>
-        <TableCell>
           <div className="flex items-center gap-2">
             <Button
               variant="ghost"
@@ -116,7 +121,7 @@ export const ResourcePlanningTableRow: React.FC<ResourcePlanningTableRowProps> =
             <Button
               variant="ghost"
               size="sm"
-              onClick={handleDelete}
+              onClick={handleDeleteClick}
               disabled={isDeleting}
             >
               <Trash2 className="h-4 w-4" />
@@ -130,6 +135,17 @@ export const ResourcePlanningTableRow: React.FC<ResourcePlanningTableRowProps> =
         item={item}
         open={editDialogOpen}
         onOpenChange={setEditDialogOpen}
+      />
+
+      <ConfirmationDialog
+        isOpen={isOpen}
+        onClose={hideConfirmation}
+        onConfirm={handleConfirm}
+        title={config?.title || ''}
+        description={config?.description || ''}
+        confirmText={config?.confirmText}
+        cancelText={config?.cancelText}
+        variant={config?.variant}
       />
     </>
   );
