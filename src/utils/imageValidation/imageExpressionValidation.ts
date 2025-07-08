@@ -1,9 +1,9 @@
 
 import * as faceapi from 'face-api.js';
 
-// Load face-api.js models (call this once when the app initializes)
+// Load face-api.js models from CDN
 export const loadFaceApiModels = async () => {
-  const modelUrl = '/models'; // You'll need to add face-api.js models to public/models
+  const modelUrl = 'https://cdn.jsdelivr.net/npm/@vladmandic/face-api@1.7.15/model';
   
   await Promise.all([
     faceapi.nets.tinyFaceDetector.loadFromUri(modelUrl),
