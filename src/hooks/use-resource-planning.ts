@@ -9,6 +9,7 @@ interface ResourcePlanningData {
   profile_id: string;
   engagement_percentage: number;
   release_date: string;
+  engagement_start_date: string;
   created_at: string;
   updated_at: string;
   profile: {
@@ -18,10 +19,10 @@ interface ResourcePlanningData {
     last_name: string;
     current_designation: string;
   };
-  resource_type: {
+  bill_type: {
     id: string;
     name: string;
-  };
+  } | null;
   project: {
     id: string;
     project_name: string;
@@ -70,10 +71,11 @@ export function useResourcePlanning() {
   const createResourcePlanningMutation = useMutation({
     mutationFn: async (newResourcePlanning: {
       profile_id: string;
-      resource_type_id?: string;
+      bill_type_id?: string;
       project_id?: string;
       engagement_percentage: number;
       release_date?: string;
+      engagement_start_date?: string;
     }) => {
       const { data, error } = await supabase
         .from('resource_planning')
@@ -104,10 +106,11 @@ export function useResourcePlanning() {
     mutationFn: async ({ id, updates }: { 
       id: string; 
       updates: Partial<{
-        resource_type_id: string;
+        bill_type_id: string;
         project_id: string;
         engagement_percentage: number;
         release_date: string;
+        engagement_start_date: string;
       }> 
     }) => {
       const { data, error } = await supabase

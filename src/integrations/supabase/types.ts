@@ -949,33 +949,36 @@ export type Database = {
       }
       resource_planning: {
         Row: {
+          bill_type_id: string | null
           created_at: string
           engagement_percentage: number | null
+          engagement_start_date: string | null
           id: string
           profile_id: string
           project_id: string | null
           release_date: string | null
-          resource_type_id: string | null
           updated_at: string
         }
         Insert: {
+          bill_type_id?: string | null
           created_at?: string
           engagement_percentage?: number | null
+          engagement_start_date?: string | null
           id?: string
           profile_id: string
           project_id?: string | null
           release_date?: string | null
-          resource_type_id?: string | null
           updated_at?: string
         }
         Update: {
+          bill_type_id?: string | null
           created_at?: string
           engagement_percentage?: number | null
+          engagement_start_date?: string | null
           id?: string
           profile_id?: string
           project_id?: string | null
           release_date?: string | null
-          resource_type_id?: string | null
           updated_at?: string
         }
         Relationships: [
@@ -987,10 +990,10 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "fk_resource_planning_resource_type"
-            columns: ["resource_type_id"]
+            foreignKeyName: "resource_planning_bill_type_id_fkey"
+            columns: ["bill_type_id"]
             isOneToOne: false
-            referencedRelation: "resource_types"
+            referencedRelation: "bill_types"
             referencedColumns: ["id"]
           },
         ]

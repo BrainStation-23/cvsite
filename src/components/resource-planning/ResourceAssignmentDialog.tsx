@@ -4,23 +4,22 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { CalendarIcon, Plus } from 'lucide-react';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { useResourcePlanning } from '@/hooks/use-resource-planning';
-import { useQuery } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
 import { EmployeeCombobox } from '@/components/admin/cv-templates/EmployeeCombobox';
 import { ProjectCombobox } from '@/components/projects/ProjectCombobox';
+import BillTypeCombobox from './BillTypeCombobox';
 
 interface ResourcePlanningData {
   id: string;
   profile_id: string;
   engagement_percentage: number;
   release_date: string;
+  engagement_start_date: string;
   created_at: string;
   updated_at: string;
   profile: {
@@ -30,10 +29,10 @@ interface ResourcePlanningData {
     last_name: string;
     current_designation: string;
   };
-  resource_type: {
+  bill_type: {
     id: string;
     name: string;
-  };
+  } | null;
   project: {
     id: string;
     project_name: string;
@@ -62,9 +61,10 @@ export const ResourceAssignmentDialog: React.FC<ResourceAssignmentDialogProps> =
 }) => {
   const [internalOpen, setInternalOpen] = useState(false);
   const [selectedProfileId, setSelectedProfileId] = useState<string>('');
-  const [selectedResourceTypeId, setSelectedResourceTypeId] = useState<string>('');
+  const [selectedBillTypeId, setSelectedBillTypeId] = useState<string>('');
   const [selectedProjectId, setSelectedProjectId] = useState<string>('');
   const [engagementPercentage, setEngagementPercentage] = useState<string>('');
+  const [engagementStartDate, setEngagementStartDate] = useState<Date>();
   const [releaseDate, setReleaseDate] = useState<Date>();
 
   const { createResourcePlanning, updateResourcePlanning, isCreating, isUpdating } = useResourcePlanning();
@@ -73,35 +73,23 @@ export const ResourceAssignmentDialog: React.FC<ResourceAssignmentDialogProps> =
   const isOpen = controlledOpen !== undefined ? controlledOpen : internalOpen;
   const setIsOpen = controlledOnOpenChange || setInternalOpen;
 
-  // Fetch resource types for the dropdown
-  const { data: resourceTypes } = useQuery({
-    queryKey: ['resource-types'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('resource_types')
-        .select('id, name')
-        .order('name');
-      
-      if (error) throw error;
-      return data;
-    },
-  });
-
   // Reset form when dialog opens or item changes
   useEffect(() => {
     if (isOpen) {
       if (mode === 'edit' && item) {
         setSelectedProfileId(item.profile_id);
-        setSelectedResourceTypeId(item.resource_type?.id || '');
+        setSelectedBillTypeId(item.bill_type?.id || '');
         setSelectedProjectId(item.project?.id || '');
         setEngagementPercentage(item.engagement_percentage.toString());
+        setEngagementStartDate(item.engagement_start_date ? new Date(item.engagement_start_date) : undefined);
         setReleaseDate(item.release_date ? new Date(item.release_date) : undefined);
       } else {
         // Reset form for create mode
         setSelectedProfileId('');
-        setSelectedResourceTypeId('');
+        setSelectedBillTypeId('');
         setSelectedProjectId('');
         setEngagementPercentage('');
+        setEngagementStartDate(undefined);
         setReleaseDate(undefined);
       }
     }
@@ -121,9 +109,10 @@ export const ResourceAssignmentDialog: React.FC<ResourceAssignmentDialogProps> =
 
     const formData = {
       profile_id: selectedProfileId,
-      resource_type_id: selectedResourceTypeId || undefined,
+      bill_type_id: selectedBillTypeId || undefined,
       project_id: selectedProjectId || undefined,
       engagement_percentage: percentage,
+      engagement_start_date: engagementStartDate ? format(engagementStartDate, 'yyyy-MM-dd') : undefined,
       release_date: releaseDate ? format(releaseDate, 'yyyy-MM-dd') : undefined,
     };
 
@@ -133,9 +122,10 @@ export const ResourceAssignmentDialog: React.FC<ResourceAssignmentDialogProps> =
       updateResourcePlanning({
         id: item.id,
         updates: {
-          resource_type_id: selectedResourceTypeId || undefined,
+          bill_type_id: selectedBillTypeId || undefined,
           project_id: selectedProjectId || undefined,
           engagement_percentage: percentage,
+          engagement_start_date: engagementStartDate ? format(engagementStartDate, 'yyyy-MM-dd') : undefined,
           release_date: releaseDate ? format(releaseDate, 'yyyy-MM-dd') : undefined,
         }
       });
@@ -171,19 +161,13 @@ export const ResourceAssignmentDialog: React.FC<ResourceAssignmentDialogProps> =
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="resource-type">Resource Type</Label>
-          <Select value={selectedResourceTypeId} onValueChange={setSelectedResourceTypeId}>
-            <SelectTrigger>
-              <SelectValue placeholder="Select a resource type (optional)" />
-            </SelectTrigger>
-            <SelectContent>
-              {resourceTypes?.map((type) => (
-                <SelectItem key={type.id} value={type.id}>
-                  {type.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <Label htmlFor="bill-type">Bill Type</Label>
+          <BillTypeCombobox
+            value={selectedBillTypeId}
+            onValueChange={setSelectedBillTypeId}
+            placeholder="Select a bill type (optional)"
+            disabled={isLoading}
+          />
         </div>
 
         <div className="space-y-2">
@@ -211,6 +195,32 @@ export const ResourceAssignmentDialog: React.FC<ResourceAssignmentDialogProps> =
         </div>
 
         <div className="space-y-2">
+          <Label>Engagement Start Date</Label>
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button
+                variant="outline"
+                className={cn(
+                  'w-full justify-start text-left font-normal',
+                  !engagementStartDate && 'text-muted-foreground'
+                )}
+              >
+                <CalendarIcon className="mr-2 h-4 w-4" />
+                {engagementStartDate ? format(engagementStartDate, 'PPP') : 'Pick start date (optional)'}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0">
+              <Calendar
+                mode="single"
+                selected={engagementStartDate}
+                onSelect={setEngagementStartDate}
+                initialFocus
+              />
+            </PopoverContent>
+          </Popover>
+        </div>
+
+        <div className="space-y-2">
           <Label>Release Date</Label>
           <Popover>
             <PopoverTrigger asChild>
@@ -222,7 +232,7 @@ export const ResourceAssignmentDialog: React.FC<ResourceAssignmentDialogProps> =
                 )}
               >
                 <CalendarIcon className="mr-2 h-4 w-4" />
-                {releaseDate ? format(releaseDate, 'PPP') : 'Pick a date (optional)'}
+                {releaseDate ? format(releaseDate, 'PPP') : 'Pick release date (optional)'}
               </Button>
             </PopoverTrigger>
             <PopoverContent className="w-auto p-0">

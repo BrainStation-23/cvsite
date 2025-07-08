@@ -13,6 +13,7 @@ interface ResourcePlanningData {
   profile_id: string;
   engagement_percentage: number;
   release_date: string;
+  engagement_start_date: string;
   created_at: string;
   updated_at: string;
   profile: {
@@ -22,10 +23,10 @@ interface ResourcePlanningData {
     last_name: string;
     current_designation: string;
   };
-  resource_type: {
+  bill_type: {
     id: string;
     name: string;
-  };
+  } | null;
   project: {
     id: string;
     project_name: string;
@@ -63,8 +64,8 @@ export const ResourcePlanningTableRow: React.FC<ResourcePlanningTableRowProps> =
           </div>
         </TableCell>
         <TableCell>
-          {item.resource_type ? (
-            <Badge variant="secondary">{item.resource_type.name}</Badge>
+          {item.bill_type ? (
+            <Badge variant="secondary">{item.bill_type.name}</Badge>
           ) : (
             <span className="text-muted-foreground">Not specified</span>
           )}
@@ -85,6 +86,13 @@ export const ResourcePlanningTableRow: React.FC<ResourcePlanningTableRowProps> =
         </TableCell>
         <TableCell>
           <Badge variant="outline">{item.engagement_percentage}%</Badge>
+        </TableCell>
+        <TableCell>
+          {item.engagement_start_date ? (
+            format(new Date(item.engagement_start_date), 'MMM dd, yyyy')
+          ) : (
+            <span className="text-muted-foreground">Not set</span>
+          )}
         </TableCell>
         <TableCell>
           {item.release_date ? (
