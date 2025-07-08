@@ -31,6 +31,10 @@ interface ImageAnalysisResult {
     faceHeightRatio: number;
     details: string;
   };
+  expression?: {
+    passed: boolean;
+    details: string;
+  };
 }
 
 interface ProfileImageAnalysisResultProps {
@@ -104,6 +108,15 @@ const ProfileImageAnalysisResult: React.FC<ProfileImageAnalysisResultProps> = ({
                 <span className="text-xs text-gray-500">
                   {result.closeup.faceHeightRatio > 0 ? `${result.closeup.faceHeightRatio}%` : result.closeup.details}
                 </span>
+              </span>
+            </div>
+          )}
+          {result.expression && (
+            <div className="flex items-center justify-between">
+              <span>Neutral, confident expression</span>
+              <span className="flex items-center gap-1">
+                {getStatusIcon(result.expression.passed)}
+                <span className="text-xs text-gray-500">{result.expression.details}</span>
               </span>
             </div>
           )}

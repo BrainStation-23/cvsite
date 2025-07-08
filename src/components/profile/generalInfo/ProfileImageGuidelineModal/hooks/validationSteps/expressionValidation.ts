@@ -1,9 +1,12 @@
 
 import { ValidationResult } from '../../types';
-import { validateFacialExpression, fileToImageElement, ExpressionValidationResult } from '@/utils/imageValidation/imageExpressionValidation';
+import { validateFacialExpression, fileToImageElement, loadFaceApiModels, ExpressionValidationResult } from '@/utils/imageValidation/imageExpressionValidation';
 
 export const runExpressionValidation = async (file: File): Promise<ValidationResult> => {
   try {
+    // Ensure models are loaded first
+    await loadFaceApiModels();
+    
     // Convert file to image element
     const imageElement = await fileToImageElement(file);
     

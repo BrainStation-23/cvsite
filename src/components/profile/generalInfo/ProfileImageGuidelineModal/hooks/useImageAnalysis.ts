@@ -47,7 +47,19 @@ export const useImageAnalysis = () => {
 
       // 4. Expression validation
       progressManager.updateProgress('expression', 'running');
-      const expressionResult = await runExpressionValidation(file);
+      let expressionResult: ValidationResult;
+      try {
+        expressionResult = await runExpressionValidation(file);
+      } catch (expressionError) {
+        console.error('Expression validation error:', expressionError);
+        expressionResult = {
+          id: 'expression',
+          label: 'Facial Expression',
+          passed: false,
+          details: 'Expression validation temporarily unavailable',
+          source: 'local'
+        };
+      }
       localResults.push(expressionResult);
       progressManager.updateProgress('expression', 'completed', expressionResult.passed, expressionResult.details);
 
