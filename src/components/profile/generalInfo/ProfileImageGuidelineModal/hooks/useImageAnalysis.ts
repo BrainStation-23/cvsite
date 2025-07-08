@@ -5,6 +5,7 @@ import { ImageAnalysisResult, ValidationResult, ValidationProgress } from '../ty
 import { runBackgroundValidation } from './validationSteps/backgroundValidation';
 import { runPostureValidation } from './validationSteps/postureValidation';
 import { runCloseupValidation } from './validationSteps/closeupValidation';
+import { runExpressionValidation } from './validationSteps/expressionValidation';
 import { runAzureValidation } from './validationSteps/azureValidation';
 import { ProgressManager } from './validationSteps/progressManager';
 import { buildRecommendations } from './validationSteps/recommendationBuilder';
@@ -44,10 +45,16 @@ export const useImageAnalysis = () => {
       localResults.push(closeupResult);
       progressManager.updateProgress('closeup', 'completed', closeupResult.passed, closeupResult.details);
 
+      // 4. Expression validation
+      progressManager.updateProgress('expression', 'running');
+      const expressionResult = await runExpressionValidation(file);
+      localResults.push(expressionResult);
+      progressManager.updateProgress('expression', 'completed', expressionResult.passed, expressionResult.details);
+
       // Update validation results with all local results
       setValidationResults([...localResults]);
 
-      // 4. Azure validation
+      // 5. Azure validation
       progressManager.updateProgress('azure', 'running');
       const azureData = await runAzureValidation(file);
       
@@ -81,6 +88,10 @@ export const useImageAnalysis = () => {
           faceHeightRatio: closeupResult.details.includes('occupies') ? 
             parseFloat(closeupResult.details.match(/([\d.]+)%/)?.[1] || '0') : 0,
           details: closeupResult.details,
+        },
+        expression: {
+          passed: expressionResult.passed,
+          details: expressionResult.details,
         },
         details: {
           ...azureData.details,

@@ -15,6 +15,7 @@ export class ProgressManager {
       { id: 'background', label: 'Checking background quality', status: 'pending' },
       { id: 'posture', label: 'Analyzing posture and positioning', status: 'pending' },
       { id: 'closeup', label: 'Checking if image is a close-up shot', status: 'pending' },
+      { id: 'expression', label: 'Analyzing facial expression', status: 'pending' },
       {
         id: 'azure',
         label: 'Verifying facial features and composition',
