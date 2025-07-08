@@ -29,6 +29,7 @@ serve(async (req) => {
       employeeId, 
       sbuId, 
       expertiseId, 
+      resourceTypeId,
       dateOfJoining, 
       careerStartDate 
     } = await req.json();
@@ -41,6 +42,7 @@ serve(async (req) => {
       employeeId, 
       sbuId, 
       expertiseId, 
+      resourceTypeId,
       dateOfJoining, 
       careerStartDate 
     });
@@ -72,6 +74,7 @@ serve(async (req) => {
         employee_id: employeeId,
         sbu_id: sbuId,
         expertise_id: expertiseId,
+        resource_type_id: resourceTypeId,
         date_of_joining: dateOfJoining,
         career_start_date: careerStartDate
       }
@@ -106,6 +109,7 @@ serve(async (req) => {
     const profileUpdates: any = {};
     if (sbuId) profileUpdates.sbu_id = sbuId;
     if (expertiseId) profileUpdates.expertise = expertiseId;
+    if (resourceTypeId) profileUpdates.resource_type = resourceTypeId;
     if (dateOfJoining) profileUpdates.date_of_joining = dateOfJoining;
     if (careerStartDate) profileUpdates.career_start_date = careerStartDate;
     
@@ -135,6 +139,7 @@ serve(async (req) => {
           employeeId,
           sbuId,
           expertiseId,
+          resourceTypeId,
           dateOfJoining,
           careerStartDate
         } 

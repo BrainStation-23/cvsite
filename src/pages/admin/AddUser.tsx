@@ -27,6 +27,7 @@ const AddUser: React.FC = () => {
           employeeId: formData.employeeId,
           sbuId: formData.sbuId || null,
           expertiseId: formData.expertiseId || null,
+          resourceTypeId: formData.resourceTypeId || null,
           dateOfJoining: formData.dateOfJoining || null,
           careerStartDate: formData.careerStartDate || null
         }

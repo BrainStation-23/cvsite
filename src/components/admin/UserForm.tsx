@@ -10,6 +10,7 @@ import { User, Mail, Lock, IdCard, Building, Calendar, Briefcase } from 'lucide-
 import { UserRole } from '@/types';
 import SbuCombobox from './user/SbuCombobox';
 import ExpertiseCombobox from './user/ExpertiseCombobox';
+import ResourceTypeCombobox from './user/ResourceTypeCombobox';
 import DatePicker from './user/DatePicker';
 
 interface UserFormData {
@@ -21,6 +22,7 @@ interface UserFormData {
   employeeId: string;
   sbuId: string | null;
   expertiseId: string | null;
+  resourceTypeId: string | null;
   dateOfJoining: string;
   careerStartDate: string;
 }
@@ -51,6 +53,7 @@ const UserForm: React.FC<UserFormProps> = ({
     employeeId: initialData.employeeId || '',
     sbuId: initialData.sbuId || null,
     expertiseId: initialData.expertiseId || null,
+    resourceTypeId: initialData.resourceTypeId || null,
     dateOfJoining: initialData.dateOfJoining || '',
     careerStartDate: initialData.careerStartDate || ''
   });
@@ -205,6 +208,18 @@ const UserForm: React.FC<UserFormProps> = ({
                     value={formData.expertiseId}
                     onValueChange={(value) => handleInputChange('expertiseId', value)}
                     placeholder="Select expertise..."
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="resourceType" className="flex items-center gap-2">
+                    <Briefcase size={16} />
+                    Resource Type (Optional)
+                  </Label>
+                  <ResourceTypeCombobox
+                    value={formData.resourceTypeId}
+                    onValueChange={(value) => handleInputChange('resourceTypeId', value)}
+                    placeholder="Select resource type..."
                   />
                 </div>
               </div>

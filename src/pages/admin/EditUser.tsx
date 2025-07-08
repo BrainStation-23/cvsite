@@ -18,6 +18,7 @@ interface UserData {
   employee_id: string;
   sbu_id: string | null;
   expertise_id: string | null;
+  resource_type: string | null;
   date_of_joining: string | null;
   career_start_date: string | null;
 }
@@ -68,6 +69,7 @@ const EditUser: React.FC = () => {
           employee_id: user.employee_id || '',
           sbu_id: user.sbu_id || null,
           expertise_id: user.expertise_id || null,
+          resource_type: user.resource_type || null,
           date_of_joining: user.date_of_joining || null,
           career_start_date: user.career_start_date || null
         });
@@ -107,6 +109,7 @@ const EditUser: React.FC = () => {
           employeeId: formData.employeeId,
           sbuId: formData.sbuId || null,
           expertiseId: formData.expertiseId || null,
+          resourceTypeId: formData.resourceTypeId || null,
           dateOfJoining: formData.dateOfJoining || null,
           careerStartDate: formData.careerStartDate || null,
           password: formData.password || undefined
@@ -181,6 +184,7 @@ const EditUser: React.FC = () => {
             employeeId: userData.employee_id,
             sbuId: userData.sbu_id,
             expertiseId: userData.expertise_id,
+            resourceTypeId: userData.resource_type,
             dateOfJoining: userData.date_of_joining || '',
             careerStartDate: userData.career_start_date || ''
           }}
