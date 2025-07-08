@@ -55,9 +55,10 @@ export const useImageAnalysis = () => {
       progressManager.updateProgress('azure', 'completed', azureData.isNotGroupPhoto, undefined, 'not_group');
       progressManager.updateProgress('azure', 'completed', azureData.isFaceCentered, undefined, 'face_centered');
       progressManager.updateProgress('azure', 'completed', azureData.hasNoSunglassesOrHats, undefined, 'no_accessories');
+      progressManager.updateProgress('azure', 'completed', azureData.hasAppropriateExpression, undefined, 'appropriate_expression');
       
       // Mark main azure task as completed
-      const allAzurePassed = azureData.isNotGroupPhoto && azureData.isFaceCentered && azureData.hasNoSunglassesOrHats;
+      const allAzurePassed = azureData.isNotGroupPhoto && azureData.isFaceCentered && azureData.hasNoSunglassesOrHats && azureData.hasAppropriateExpression;
       progressManager.updateProgress('azure', 'completed', allAzurePassed);
 
       // Build recommendations

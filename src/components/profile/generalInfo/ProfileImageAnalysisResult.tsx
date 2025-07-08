@@ -119,6 +119,13 @@ const ProfileImageAnalysisResult: React.FC<ProfileImageAnalysisResultProps> = ({
             <span>No sunglasses or hats</span>
             {getStatusIcon(result.hasNoSunglassesOrHats)}
           </div>
+          <div className="flex items-center justify-between">
+            <span>Appropriate expression (neutral & confident)</span>
+            <span className="flex items-center gap-1">
+              {getStatusIcon(result.hasAppropriateExpression)}
+              <span className="text-xs text-gray-500">{result.details.expression}</span>
+            </span>
+          </div>
         </div>
 
         {/* Additional Details */}
@@ -130,6 +137,9 @@ const ProfileImageAnalysisResult: React.FC<ProfileImageAnalysisResultProps> = ({
             )}
             {result.details.accessories.length > 0 && (
               <div>Accessories: {result.details.accessories.join(', ')}</div>
+            )}
+            {result.details.expression !== 'unknown' && (
+              <div>Expression: {result.details.expression}</div>
             )}
           </div>
         </div>

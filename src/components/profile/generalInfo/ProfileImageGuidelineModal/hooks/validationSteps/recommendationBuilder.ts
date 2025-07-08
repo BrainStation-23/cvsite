@@ -33,6 +33,9 @@ export const buildRecommendations = (
   if (!azureData.hasNoSunglassesOrHats) {
     recommendations.push('Remove sunglasses, hats, or any accessories covering your face.');
   }
+  if (!azureData.hasAppropriateExpression) {
+    recommendations.push('Maintain a neutral and confident expression with a subtle smile.');
+  }
 
   return recommendations;
 };

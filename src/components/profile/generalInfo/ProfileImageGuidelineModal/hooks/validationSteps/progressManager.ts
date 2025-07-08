@@ -23,6 +23,7 @@ export class ProgressManager {
           { id: 'not_group', label: 'Not a group photo', status: 'pending' },
           { id: 'face_centered', label: 'Face is centered', status: 'pending' },
           { id: 'no_accessories', label: 'No sunglasses or hat', status: 'pending' },
+          { id: 'appropriate_expression', label: 'Neutral and confident expression', status: 'pending' },
         ]
       },
     ];
