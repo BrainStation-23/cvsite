@@ -23,11 +23,6 @@ export const buildRecommendations = (
     recommendations.push('Take a close-up shot where your face occupies at least 30% of the image height.');
   }
 
-  const expressionResult = localResults.find(r => r.id === 'expression');
-  if (expressionResult && !expressionResult.passed) {
-    recommendations.push('Maintain a neutral, confident expression with a soft smile.');
-  }
-
   // Check Azure validation results
   if (!azureData.isNotGroupPhoto) {
     recommendations.push('Make sure the photo contains only you (no group photos).');
