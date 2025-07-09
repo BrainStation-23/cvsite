@@ -1,0 +1,91 @@
+
+import React from 'react';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Plus } from 'lucide-react';
+
+interface UnplannedResource {
+  id: string;
+  employee_id: string;
+  first_name: string;
+  last_name: string;
+  current_designation: string;
+  sbu_name: string;
+  manager_name: string;
+}
+
+interface UnplannedResourcesTableProps {
+  resources: UnplannedResource[];
+  onCreatePlan: (profileId: string) => void;
+}
+
+export const UnplannedResourcesTable: React.FC<UnplannedResourcesTableProps> = ({
+  resources,
+  onCreatePlan,
+}) => {
+  if (resources.length === 0) {
+    return (
+      <div className="flex items-center justify-center h-32 text-muted-foreground">
+        No unplanned resources found with the current filters.
+      </div>
+    );
+  }
+
+  return (
+    <div className="rounded-md border">
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>Employee</TableHead>
+            <TableHead>Designation</TableHead>
+            <TableHead>SBU</TableHead>
+            <TableHead>Manager</TableHead>
+            <TableHead className="w-[100px]">Actions</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {resources.map((resource) => (
+            <TableRow key={resource.id}>
+              <TableCell>
+                <div className="flex flex-col">
+                  <span className="font-medium">
+                    {resource.first_name} {resource.last_name}
+                  </span>
+                  <span className="text-sm text-muted-foreground">
+                    ID: {resource.employee_id}
+                  </span>
+                </div>
+              </TableCell>
+              <TableCell>
+                <Badge variant="outline">
+                  {resource.current_designation}
+                </Badge>
+              </TableCell>
+              <TableCell>
+                <Badge variant="secondary">
+                  {resource.sbu_name}
+                </Badge>
+              </TableCell>
+              <TableCell>
+                <span className="text-sm">
+                  {resource.manager_name}
+                </span>
+              </TableCell>
+              <TableCell>
+                <Button
+                  size="sm"
+                  onClick={() => onCreatePlan(resource.id)}
+                  className="flex items-center gap-1"
+                >
+                  <Plus className="h-3 w-3" />
+                  Plan
+                </Button>
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </div>
+  );
+};

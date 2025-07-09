@@ -1,292 +1,188 @@
 
 import React, { useState, useEffect } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Calendar } from '@/components/ui/calendar';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { CalendarIcon, Plus } from 'lucide-react';
-import { format } from 'date-fns';
-import { cn } from '@/lib/utils';
+import { Plus } from 'lucide-react';
 import { useResourcePlanning } from '@/hooks/use-resource-planning';
-import { EmployeeCombobox } from '@/components/admin/cv-templates/EmployeeCombobox';
+import { ProfileCombobox } from '@/components/admin/user/ProfileCombobox';
+import { BillTypeCombobox } from './BillTypeCombobox';
 import { ProjectCombobox } from '@/components/projects/ProjectCombobox';
-import BillTypeCombobox from './BillTypeCombobox';
-
-interface ResourcePlanningData {
-  id: string;
-  profile_id: string;
-  engagement_percentage: number;
-  release_date: string;
-  engagement_start_date: string;
-  created_at: string;
-  updated_at: string;
-  profile: {
-    id: string;
-    employee_id: string;
-    first_name: string;
-    last_name: string;
-    current_designation: string;
-  };
-  bill_type: {
-    id: string;
-    name: string;
-  } | null;
-  project: {
-    id: string;
-    project_name: string;
-    project_manager: string;
-    client_name: string;
-    budget: number;
-  };
-}
+import DatePicker from '@/components/admin/user/DatePicker';
 
 interface ResourceAssignmentDialogProps {
   mode: 'create' | 'edit';
-  item?: ResourcePlanningData | null;
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
-  onSuccess?: () => void;
-  children?: React.ReactNode;
+  preselectedProfileId?: string | null;
 }
 
 export const ResourceAssignmentDialog: React.FC<ResourceAssignmentDialogProps> = ({
   mode,
-  item,
   open: controlledOpen,
-  onOpenChange: controlledOnOpenChange,
-  onSuccess,
-  children
+  onOpenChange,
+  preselectedProfileId,
 }) => {
   const [internalOpen, setInternalOpen] = useState(false);
-  const [selectedProfileId, setSelectedProfileId] = useState<string>('');
-  const [selectedBillTypeId, setSelectedBillTypeId] = useState<string>('');
-  const [selectedProjectId, setSelectedProjectId] = useState<string>('');
-  const [engagementPercentage, setEngagementPercentage] = useState<string>('');
-  const [engagementStartDate, setEngagementStartDate] = useState<Date>();
-  const [releaseDate, setReleaseDate] = useState<Date>();
+  const [profileId, setProfileId] = useState<string | null>(preselectedProfileId || null);
+  const [billTypeId, setBillTypeId] = useState<string | null>(null);
+  const [projectId, setProjectId] = useState<string | null>(null);
+  const [engagementPercentage, setEngagementPercentage] = useState<number>(100);
+  const [releaseDate, setReleaseDate] = useState<string>('');
+  const [engagementStartDate, setEngagementStartDate] = useState<string>('');
 
-  const { createResourcePlanning, updateResourcePlanning, isCreating, isUpdating } = useResourcePlanning();
+  const { createResourcePlanning, isCreating } = useResourcePlanning();
 
-  // Handle controlled vs uncontrolled open state
-  const isOpen = controlledOpen !== undefined ? controlledOpen : internalOpen;
-  const setIsOpen = controlledOnOpenChange || setInternalOpen;
+  // Use controlled open state if provided, otherwise use internal state
+  const open = controlledOpen !== undefined ? controlledOpen : internalOpen;
+  const setOpen = onOpenChange || setInternalOpen;
 
-  // Reset form when dialog opens or item changes
   useEffect(() => {
-    if (isOpen) {
-      if (mode === 'edit' && item) {
-        setSelectedProfileId(item.profile_id);
-        setSelectedBillTypeId(item.bill_type?.id || '');
-        setSelectedProjectId(item.project?.id || '');
-        setEngagementPercentage(item.engagement_percentage.toString());
-        setEngagementStartDate(item.engagement_start_date ? new Date(item.engagement_start_date) : undefined);
-        setReleaseDate(item.release_date ? new Date(item.release_date) : undefined);
-      } else {
-        // Reset form for create mode
-        setSelectedProfileId('');
-        setSelectedBillTypeId('');
-        setSelectedProjectId('');
-        setEngagementPercentage('');
-        setEngagementStartDate(undefined);
-        setReleaseDate(undefined);
-      }
+    if (preselectedProfileId) {
+      setProfileId(preselectedProfileId);
     }
-  }, [isOpen, mode, item]);
+  }, [preselectedProfileId]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!selectedProfileId || !engagementPercentage) {
+    if (!profileId) {
       return;
     }
 
-    const percentage = parseInt(engagementPercentage);
-    if (percentage < 1 || percentage > 100) {
-      return;
-    }
+    createResourcePlanning({
+      profile_id: profileId,
+      bill_type_id: billTypeId || undefined,
+      project_id: projectId || undefined,
+      engagement_percentage: engagementPercentage,
+      release_date: releaseDate || undefined,
+      engagement_start_date: engagementStartDate || undefined,
+    });
 
-    const formData = {
-      profile_id: selectedProfileId,
-      bill_type_id: selectedBillTypeId || undefined,
-      project_id: selectedProjectId || undefined,
-      engagement_percentage: percentage,
-      engagement_start_date: engagementStartDate ? format(engagementStartDate, 'yyyy-MM-dd') : undefined,
-      release_date: releaseDate ? format(releaseDate, 'yyyy-MM-dd') : undefined,
-    };
-
-    if (mode === 'create') {
-      createResourcePlanning(formData);
-    } else if (mode === 'edit' && item) {
-      updateResourcePlanning({
-        id: item.id,
-        updates: {
-          bill_type_id: selectedBillTypeId || undefined,
-          project_id: selectedProjectId || undefined,
-          engagement_percentage: percentage,
-          engagement_start_date: engagementStartDate ? format(engagementStartDate, 'yyyy-MM-dd') : undefined,
-          release_date: releaseDate ? format(releaseDate, 'yyyy-MM-dd') : undefined,
-        }
-      });
+    // Reset form
+    if (!preselectedProfileId) {
+      setProfileId(null);
     }
-
-    setIsOpen(false);
-    
-    if (onSuccess) {
-      onSuccess();
-    }
+    setBillTypeId(null);
+    setProjectId(null);
+    setEngagementPercentage(100);
+    setReleaseDate('');
+    setEngagementStartDate('');
+    setOpen(false);
   };
 
-  const isLoading = isCreating || isUpdating;
-  const title = mode === 'create' ? 'Add Resource Assignment' : 'Edit Resource Assignment';
-  const submitText = mode === 'create' 
-    ? (isCreating ? 'Creating...' : 'Create Assignment')
-    : (isUpdating ? 'Updating...' : 'Update Assignment');
-
-  const dialogContent = (
-    <DialogContent className="sm:max-w-[500px]">
+  const DialogComponent = () => (
+    <DialogContent className="sm:max-w-[600px]">
       <DialogHeader>
-        <DialogTitle>{title}</DialogTitle>
+        <DialogTitle>Create Resource Assignment</DialogTitle>
+        <DialogDescription>
+          Assign a resource to a project or bill type with engagement details.
+        </DialogDescription>
       </DialogHeader>
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div className="space-y-2">
-          <Label htmlFor="employee">Employee *</Label>
-          <EmployeeCombobox
-            value={selectedProfileId}
-            onValueChange={setSelectedProfileId}
-            placeholder="Select an employee"
-            disabled={isLoading || (mode === 'edit')} // Disable employee selection in edit mode
-          />
+      
+      <form onSubmit={handleSubmit} className="space-y-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <Label htmlFor="profile">Employee *</Label>
+            <ProfileCombobox
+              value={profileId}
+              onValueChange={setProfileId}
+              placeholder="Select employee..."
+              disabled={!!preselectedProfileId}
+              label="Employee"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="engagement">Engagement Percentage *</Label>
+            <Input
+              id="engagement"
+              type="number"
+              min="1"
+              max="100"
+              value={engagementPercentage}
+              onChange={(e) => setEngagementPercentage(Number(e.target.value))}
+              placeholder="100"
+              required
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="billType">Bill Type</Label>
+            <BillTypeCombobox
+              value={billTypeId}
+              onValueChange={setBillTypeId}
+              placeholder="Select bill type..."
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="project">Project</Label>
+            <ProjectCombobox
+              value={projectId}
+              onValueChange={setProjectId}
+              placeholder="Select project..."
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="startDate">Engagement Start Date</Label>
+            <DatePicker
+              value={engagementStartDate}
+              onChange={setEngagementStartDate}
+              placeholder="Select start date"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="releaseDate">Release Date</Label>
+            <DatePicker
+              value={releaseDate}
+              onChange={setReleaseDate}
+              placeholder="Select release date"
+            />
+          </div>
         </div>
 
-        <div className="space-y-2">
-          <Label htmlFor="bill-type">Bill Type</Label>
-          <BillTypeCombobox
-            value={selectedBillTypeId}
-            onValueChange={setSelectedBillTypeId}
-            placeholder="Select a bill type (optional)"
-            disabled={isLoading}
-          />
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="project">Project</Label>
-          <ProjectCombobox
-            value={selectedProjectId}
-            onValueChange={setSelectedProjectId}
-            placeholder="Select a project (optional)"
-            disabled={isLoading}
-          />
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="engagement">Engagement Percentage *</Label>
-          <Input
-            id="engagement"
-            type="number"
-            min="1"
-            max="100"
-            value={engagementPercentage}
-            onChange={(e) => setEngagementPercentage(e.target.value)}
-            placeholder="Enter percentage (1-100)"
-            required
-          />
-        </div>
-
-        <div className="space-y-2">
-          <Label>Engagement Start Date</Label>
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button
-                variant="outline"
-                className={cn(
-                  'w-full justify-start text-left font-normal',
-                  !engagementStartDate && 'text-muted-foreground'
-                )}
-              >
-                <CalendarIcon className="mr-2 h-4 w-4" />
-                {engagementStartDate ? format(engagementStartDate, 'PPP') : 'Pick start date (optional)'}
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-auto p-0">
-              <Calendar
-                mode="single"
-                selected={engagementStartDate}
-                onSelect={setEngagementStartDate}
-                initialFocus
-              />
-            </PopoverContent>
-          </Popover>
-        </div>
-
-        <div className="space-y-2">
-          <Label>Release Date</Label>
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button
-                variant="outline"
-                className={cn(
-                  'w-full justify-start text-left font-normal',
-                  !releaseDate && 'text-muted-foreground'
-                )}
-              >
-                <CalendarIcon className="mr-2 h-4 w-4" />
-                {releaseDate ? format(releaseDate, 'PPP') : 'Pick release date (optional)'}
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-auto p-0">
-              <Calendar
-                mode="single"
-                selected={releaseDate}
-                onSelect={setReleaseDate}
-                initialFocus
-              />
-            </PopoverContent>
-          </Popover>
-        </div>
-
-        <div className="flex justify-end space-x-2 pt-4">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() => setIsOpen(false)}
-            disabled={isLoading}
-          >
+        <div className="flex justify-end space-x-2">
+          <Button type="button" variant="outline" onClick={() => setOpen(false)}>
             Cancel
           </Button>
-          <Button
-            type="submit"
-            disabled={isLoading || !selectedProfileId || !engagementPercentage}
-          >
-            {submitText}
+          <Button type="submit" disabled={isCreating || !profileId}>
+            {isCreating ? 'Creating...' : 'Create Assignment'}
           </Button>
         </div>
       </form>
     </DialogContent>
   );
 
-  // For create mode, wrap in Dialog with trigger
-  if (mode === 'create') {
+  if (controlledOpen !== undefined) {
+    // Controlled mode - don't render DialogTrigger
     return (
-      <Dialog open={isOpen} onOpenChange={setIsOpen}>
-        <DialogTrigger asChild>
-          {children || (
-            <Button>
-              <Plus className="h-4 w-4 mr-2" />
-              Add Resource Assignment
-            </Button>
-          )}
-        </DialogTrigger>
-        {dialogContent}
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogComponent />
       </Dialog>
     );
   }
 
-  // For edit mode, just return the dialog content (assumes Dialog wrapper is provided)
+  // Uncontrolled mode - render with trigger
   return (
-    <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      {dialogContent}
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button>
+          <Plus className="mr-2 h-4 w-4" />
+          Create Assignment
+        </Button>
+      </DialogTrigger>
+      <DialogComponent />
     </Dialog>
   );
 };

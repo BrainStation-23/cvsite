@@ -32,8 +32,19 @@ interface ResourcePlanningData {
   };
 }
 
+interface UnplannedResource {
+  id: string;
+  employee_id: string;
+  first_name: string;
+  last_name: string;
+  current_designation: string;
+  sbu_name: string;
+  manager_name: string;
+}
+
 interface ResourcePlanningResponse {
   resource_planning: ResourcePlanningData[];
+  unplanned_resources: UnplannedResource[];
   pagination: {
     total_count: number;
     filtered_count: number;
@@ -50,21 +61,102 @@ export function useResourcePlanning() {
   const [currentPage, setCurrentPage] = useState(1);
   const [sortBy, setSortBy] = useState('created_at');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
+  const [selectedSbu, setSelectedSbu] = useState<string | null>(null);
+  const [selectedManager, setSelectedManager] = useState<string | null>(null);
+  const [showUnplanned, setShowUnplanned] = useState(false);
   const itemsPerPage = 10;
 
   const { data, isLoading, error } = useQuery({
-    queryKey: ['resource-planning', searchQuery, currentPage, sortBy, sortOrder],
+    queryKey: ['resource-planning', searchQuery, currentPage, sortBy, sortOrder, selectedSbu, selectedManager, showUnplanned],
     queryFn: async () => {
-      const { data, error } = await supabase.rpc('get_resource_planning_data', {
-        search_query: searchQuery || null,
-        page_number: currentPage,
-        items_per_page: itemsPerPage,
-        sort_by: sortBy,
-        sort_order: sortOrder
-      });
+      if (showUnplanned) {
+        // Fetch unplanned resources
+        let query = supabase
+          .from('profiles')
+          .select(`
+            id,
+            employee_id,
+            first_name,
+            last_name,
+            sbu_id,
+            manager,
+            general_information(current_designation),
+            sbus(name),
+            manager_profile:profiles!profiles_manager_fkey(first_name, last_name)
+          `)
+          .is('resource_planning.profile_id', null);
 
-      if (error) throw error;
-      return data as unknown as ResourcePlanningResponse;
+        // Apply SBU filter
+        if (selectedSbu) {
+          query = query.eq('sbu_id', selectedSbu);
+        }
+
+        // Apply Manager filter
+        if (selectedManager) {
+          query = query.eq('manager', selectedManager);
+        }
+
+        // Apply search filter
+        if (searchQuery) {
+          query = query.or(`
+            first_name.ilike.%${searchQuery}%,
+            last_name.ilike.%${searchQuery}%,
+            employee_id.ilike.%${searchQuery}%
+          `);
+        }
+
+        // Left join to check for existing resource planning
+        query = query.leftJoin('resource_planning', 'profiles.id', 'resource_planning.profile_id');
+
+        const { data: unplannedData, error: unplannedError } = await query;
+
+        if (unplannedError) throw unplannedError;
+
+        // Filter out profiles that have resource planning entries
+        const filteredUnplanned = (unplannedData || []).filter(profile => 
+          !profile.resource_planning || profile.resource_planning.length === 0
+        );
+
+        return {
+          resource_planning: [],
+          unplanned_resources: filteredUnplanned.map((profile: any) => ({
+            id: profile.id,
+            employee_id: profile.employee_id,
+            first_name: profile.first_name || 'N/A',
+            last_name: profile.last_name || 'N/A',
+            current_designation: profile.general_information?.[0]?.current_designation || 'N/A',
+            sbu_name: profile.sbus?.name || 'N/A',
+            manager_name: profile.manager_profile ? 
+              `${profile.manager_profile.first_name || ''} ${profile.manager_profile.last_name || ''}`.trim() || 'N/A' 
+              : 'N/A'
+          })),
+          pagination: {
+            total_count: filteredUnplanned.length,
+            filtered_count: filteredUnplanned.length,
+            page: 1,
+            per_page: filteredUnplanned.length,
+            page_count: 1
+          }
+        };
+      } else {
+        // Use the existing RPC function with additional filters
+        const { data, error } = await supabase.rpc('get_resource_planning_data', {
+          search_query: searchQuery || null,
+          page_number: currentPage,
+          items_per_page: itemsPerPage,
+          sort_by: sortBy,
+          sort_order: sortOrder,
+          sbu_filter: selectedSbu,
+          manager_filter: selectedManager
+        });
+
+        if (error) throw error;
+        
+        return {
+          ...data,
+          unplanned_resources: []
+        } as ResourcePlanningResponse;
+      }
     },
   });
 
@@ -164,8 +256,17 @@ export function useResourcePlanning() {
     },
   });
 
+  const clearFilters = () => {
+    setSelectedSbu(null);
+    setSelectedManager(null);
+    setShowUnplanned(false);
+    setSearchQuery('');
+    setCurrentPage(1);
+  };
+
   return {
     data: data?.resource_planning || [],
+    unplannedResources: data?.unplanned_resources || [],
     pagination: data?.pagination,
     isLoading,
     error,
@@ -177,6 +278,13 @@ export function useResourcePlanning() {
     setSortBy,
     sortOrder,
     setSortOrder,
+    selectedSbu,
+    setSelectedSbu,
+    selectedManager,
+    setSelectedManager,
+    showUnplanned,
+    setShowUnplanned,
+    clearFilters,
     createResourcePlanning: createResourcePlanningMutation.mutate,
     updateResourcePlanning: updateResourcePlanningMutation.mutate,
     deleteResourcePlanning: deleteResourcePlanningMutation.mutate,
