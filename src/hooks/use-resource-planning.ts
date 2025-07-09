@@ -1,73 +1,64 @@
 
 import { useState } from 'react';
 import { usePlannedResources } from './use-planned-resources';
-import { useUnplannedResources } from './use-unplanned-resources';
 
 export function useResourcePlanning() {
   const [showUnplanned, setShowUnplanned] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedSbu, setSelectedSbu] = useState<string | null>(null);
+  const [selectedManager, setSelectedManager] = useState<string | null>(null);
 
   const plannedResources = usePlannedResources();
-  const unplannedResources = useUnplannedResources();
 
   const clearFilters = () => {
-    plannedResources.setSelectedSbu(null);
-    plannedResources.setSelectedManager(null);
-    unplannedResources.setSelectedSbu(null);
-    unplannedResources.setSelectedManager(null);
+    setSelectedSbu(null);
+    setSelectedManager(null);
     setShowUnplanned(false);
-    plannedResources.setSearchQuery('');
-    unplannedResources.setSearchQuery('');
+    setSearchQuery('');
     plannedResources.setCurrentPage(1);
-    unplannedResources.setCurrentPage(1);
   };
 
-  // Sync filters between planned and unplanned resources
-  const setSelectedSbu = (sbu: string | null) => {
+  // Sync filters for planned resources only
+  const handleSbuChange = (sbu: string | null) => {
+    setSelectedSbu(sbu);
     plannedResources.setSelectedSbu(sbu);
-    unplannedResources.setSelectedSbu(sbu);
   };
 
-  const setSelectedManager = (manager: string | null) => {
+  const handleManagerChange = (manager: string | null) => {
+    setSelectedManager(manager);
     plannedResources.setSelectedManager(manager);
-    unplannedResources.setSelectedManager(manager);
   };
 
-  const setSearchQuery = (query: string) => {
-    if (showUnplanned) {
-      unplannedResources.setSearchQuery(query);
-    } else {
+  const handleSearchChange = (query: string) => {
+    setSearchQuery(query);
+    if (!showUnplanned) {
       plannedResources.setSearchQuery(query);
     }
   };
 
-  const currentSearchQuery = showUnplanned 
-    ? unplannedResources.searchQuery 
-    : plannedResources.searchQuery;
-
   return {
     // Data
     data: plannedResources.data,
-    unplannedResources: unplannedResources.unplannedResources,
-    pagination: showUnplanned ? unplannedResources.pagination : plannedResources.pagination,
+    pagination: plannedResources.pagination,
     
     // Loading states
-    isLoading: showUnplanned ? unplannedResources.isLoading : plannedResources.isLoading,
-    error: showUnplanned ? unplannedResources.error : plannedResources.error,
+    isLoading: plannedResources.isLoading,
+    error: plannedResources.error,
     
     // Search and filters
-    searchQuery: currentSearchQuery,
-    setSearchQuery,
-    selectedSbu: plannedResources.selectedSbu,
-    setSelectedSbu,
-    selectedManager: plannedResources.selectedManager,
-    setSelectedManager,
+    searchQuery,
+    setSearchQuery: handleSearchChange,
+    selectedSbu,
+    setSelectedSbu: handleSbuChange,
+    selectedManager,
+    setSelectedManager: handleManagerChange,
     showUnplanned,
     setShowUnplanned,
     clearFilters,
     
     // Pagination
-    currentPage: showUnplanned ? unplannedResources.currentPage : plannedResources.currentPage,
-    setCurrentPage: showUnplanned ? unplannedResources.setCurrentPage : plannedResources.setCurrentPage,
+    currentPage: plannedResources.currentPage,
+    setCurrentPage: plannedResources.setCurrentPage,
     
     // Planned resources specific
     sortBy: plannedResources.sortBy,

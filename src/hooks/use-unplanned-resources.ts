@@ -27,11 +27,15 @@ interface UnplannedResourcesResponse {
   pagination: PaginationData;
 }
 
-export function useUnplannedResources() {
+interface UseUnplannedResourcesOptions {
+  searchQuery?: string;
+  selectedSbu?: string | null;
+  selectedManager?: string | null;
+}
+
+export function useUnplannedResources(options: UseUnplannedResourcesOptions = {}) {
   const { toast } = useToast();
-  const [searchQuery, setSearchQuery] = useState('');
-  const [selectedSbu, setSelectedSbu] = useState<string | null>(null);
-  const [selectedManager, setSelectedManager] = useState<string | null>(null);
+  const { searchQuery = '', selectedSbu = null, selectedManager = null } = options;
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
 
@@ -102,12 +106,6 @@ export function useUnplannedResources() {
     pagination: unplannedData?.pagination,
     isLoading,
     error,
-    searchQuery,
-    setSearchQuery,
-    selectedSbu,
-    setSelectedSbu,
-    selectedManager,
-    setSelectedManager,
     currentPage,
     setCurrentPage,
   };

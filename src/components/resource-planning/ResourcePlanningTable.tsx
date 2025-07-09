@@ -6,18 +6,18 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
 import { useResourcePlanning } from '@/hooks/use-resource-planning';
+import { useUnplannedResources } from '@/hooks/use-unplanned-resources';
 import { ResourceAssignmentDialog } from './ResourceAssignmentDialog';
 import { ResourcePlanningSearchControls } from './ResourcePlanningSearchControls';
 import { ResourcePlanningTableHeader } from './ResourcePlanningTableHeader';
 import { ResourcePlanningTableRow } from './ResourcePlanningTableRow';
 import { ResourcePlanningPagination } from './ResourcePlanningPagination';
 import { ResourcePlanningFilters } from './ResourcePlanningFilters';
-import { UnplannedResourcesTable } from './UnplannedResourcesTable';
+import { UnplannedResourcesTab } from './UnplannedResourcesTab';
 
 export const ResourcePlanningTable: React.FC = () => {
   const {
     data,
-    unplannedResources,
     pagination,
     isLoading,
     searchQuery,
@@ -36,6 +36,13 @@ export const ResourcePlanningTable: React.FC = () => {
     setShowUnplanned,
     clearFilters,
   } = useResourcePlanning();
+
+  // Get unplanned resources count for tab display
+  const { unplannedResources } = useUnplannedResources({
+    searchQuery,
+    selectedSbu,
+    selectedManager,
+  });
 
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [preselectedProfileId, setPreselectedProfileId] = useState<string | null>(null);
@@ -64,7 +71,7 @@ export const ResourcePlanningTable: React.FC = () => {
     setPreselectedProfileId(null);
   };
 
-  if (isLoading) {
+  if (isLoading && !showUnplanned) {
     return (
       <Card>
         <CardContent className="p-6">
@@ -166,11 +173,10 @@ export const ResourcePlanningTable: React.FC = () => {
           </TabsContent>
 
           <TabsContent value="unplanned" className="mt-4">
-            <UnplannedResourcesTable 
-              resources={unplannedResources}
-              pagination={pagination}
-              currentPage={currentPage}
-              setCurrentPage={setCurrentPage}
+            <UnplannedResourcesTab
+              searchQuery={searchQuery}
+              selectedSbu={selectedSbu}
+              selectedManager={selectedManager}
               onCreatePlan={handleCreatePlan}
             />
           </TabsContent>
