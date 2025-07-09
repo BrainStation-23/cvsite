@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Edit2, Trash2 } from 'lucide-react';
 import { format } from 'date-fns';
-import { useResourcePlanning } from '@/hooks/use-resource-planning';
+import { usePlannedResources } from '@/hooks/use-planned-resources';
 import { useConfirmationDialog } from '@/hooks/use-confirmation-dialog';
 import { ConfirmationDialog } from '@/components/ui/confirmation-dialog';
 import { ResourceAssignmentDialog } from './ResourceAssignmentDialog';
@@ -44,7 +44,7 @@ interface ResourcePlanningTableRowProps {
 
 export const ResourcePlanningTableRow: React.FC<ResourcePlanningTableRowProps> = ({ item }) => {
   const [editDialogOpen, setEditDialogOpen] = useState(false);
-  const { deleteResourcePlanning, isDeleting } = useResourcePlanning();
+  const { deleteResourcePlanning, isDeleting } = usePlannedResources();
   const { isOpen, config, showConfirmation, hideConfirmation, handleConfirm } = useConfirmationDialog();
 
   const handleDeleteClick = () => {

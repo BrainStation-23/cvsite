@@ -12,7 +12,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Plus } from 'lucide-react';
-import { useResourcePlanning } from '@/hooks/use-resource-planning';
+import { usePlannedResources } from '@/hooks/use-planned-resources';
 import { ProfileCombobox } from '@/components/admin/user/ProfileCombobox';
 import BillTypeCombobox from './BillTypeCombobox';
 import { ProjectCombobox } from '@/components/projects/ProjectCombobox';
@@ -69,7 +69,7 @@ export const ResourceAssignmentDialog: React.FC<ResourceAssignmentDialogProps> =
   const [releaseDate, setReleaseDate] = useState<string>(item?.release_date || '');
   const [engagementStartDate, setEngagementStartDate] = useState<string>(item?.engagement_start_date || '');
 
-  const { createResourcePlanning, updateResourcePlanning, isCreating, isUpdating } = useResourcePlanning();
+  const { createResourcePlanning, updateResourcePlanning, isCreating, isUpdating } = usePlannedResources();
 
   // Use controlled open state if provided, otherwise use internal state
   const open = controlledOpen !== undefined ? controlledOpen : internalOpen;
