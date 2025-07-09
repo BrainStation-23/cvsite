@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -45,6 +44,17 @@ interface UnplannedResource {
 interface ResourcePlanningResponse {
   resource_planning: ResourcePlanningData[];
   unplanned_resources: UnplannedResource[];
+  pagination: {
+    total_count: number;
+    filtered_count: number;
+    page: number;
+    per_page: number;
+    page_count: number;
+  };
+}
+
+interface RpcResponse {
+  resource_planning: ResourcePlanningData[];
   pagination: {
     total_count: number;
     filtered_count: number;
@@ -145,7 +155,7 @@ export function useResourcePlanning() {
         };
       } else {
         // Use the existing RPC function for planned resources
-        const { data, error } = await supabase.rpc('get_resource_planning_data', {
+        const { data: rpcData, error } = await supabase.rpc('get_resource_planning_data', {
           search_query: searchQuery || null,
           page_number: currentPage,
           items_per_page: itemsPerPage,
@@ -155,10 +165,13 @@ export function useResourcePlanning() {
 
         if (error) throw error;
         
+        // Type assertion to handle the Json type from RPC
+        const typedData = rpcData as RpcResponse;
+        
         return {
-          resource_planning: data?.resource_planning || [],
+          resource_planning: typedData?.resource_planning || [],
           unplanned_resources: [],
-          pagination: data?.pagination || {
+          pagination: typedData?.pagination || {
             total_count: 0,
             filtered_count: 0,
             page: 1,
