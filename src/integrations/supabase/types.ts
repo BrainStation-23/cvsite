@@ -1291,23 +1291,15 @@ export type Database = {
         Returns: Json
       }
       get_resource_planning_data: {
-        Args:
-          | {
-              search_query?: string
-              page_number?: number
-              items_per_page?: number
-              sort_by?: string
-              sort_order?: string
-            }
-          | {
-              search_query?: string
-              page_number?: number
-              items_per_page?: number
-              sort_by?: string
-              sort_order?: string
-              sbu_filter?: string
-              manager_filter?: string
-            }
+        Args: {
+          search_query?: string
+          page_number?: number
+          items_per_page?: number
+          sort_by?: string
+          sort_order?: string
+          sbu_filter?: string
+          manager_filter?: string
+        }
         Returns: Json
       }
       get_section_fields: {
