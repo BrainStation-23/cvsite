@@ -3,6 +3,8 @@ import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody } from '@/components/ui/table';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Button } from '@/components/ui/button';
+import { Plus } from 'lucide-react';
 import { useResourcePlanning } from '@/hooks/use-resource-planning';
 import { ResourceAssignmentDialog } from './ResourceAssignmentDialog';
 import { ResourcePlanningSearchControls } from './ResourcePlanningSearchControls';
@@ -49,6 +51,11 @@ export const ResourcePlanningTable: React.FC = () => {
 
   const handleCreatePlan = (profileId: string) => {
     setPreselectedProfileId(profileId);
+    setCreateDialogOpen(true);
+  };
+
+  const handleCreateNewAssignment = () => {
+    setPreselectedProfileId(null);
     setCreateDialogOpen(true);
   };
 
@@ -107,17 +114,25 @@ export const ResourcePlanningTable: React.FC = () => {
               value="planned" 
               onClick={() => setShowUnplanned(false)}
             >
-              Planned Resources
+              Planned Resources ({data.length})
             </TabsTrigger>
             <TabsTrigger 
               value="unplanned" 
               onClick={() => setShowUnplanned(true)}
             >
-              Unplanned Resources
+              Unplanned Resources ({unplannedResources.length})
             </TabsTrigger>
           </TabsList>
 
           <TabsContent value="planned" className="mt-4">
+            <div className="flex justify-between items-center mb-4">
+              <div></div>
+              <Button onClick={handleCreateNewAssignment}>
+                <Plus className="mr-2 h-4 w-4" />
+                Create Assignment
+              </Button>
+            </div>
+
             {data.length === 0 ? (
               <div className="flex items-center justify-center h-32 text-muted-foreground">
                 No resource planning entries found. Create your first assignment to get started.
