@@ -1,323 +1,83 @@
+
 import { useState } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/hooks/use-toast';
-
-interface ResourcePlanningData {
-  id: string;
-  profile_id: string;
-  engagement_percentage: number;
-  release_date: string;
-  engagement_start_date: string;
-  created_at: string;
-  updated_at: string;
-  profile: {
-    id: string;
-    employee_id: string;
-    first_name: string;
-    last_name: string;
-    current_designation: string;
-  };
-  bill_type: {
-    id: string;
-    name: string;
-  } | null;
-  project: {
-    id: string;
-    project_name: string;
-    project_manager: string;
-    client_name: string;
-    budget: number;
-  };
-}
-
-interface UnplannedResource {
-  id: string;
-  employee_id: string;
-  first_name: string;
-  last_name: string;
-  current_designation: string;
-  sbu_name: string;
-  manager_name: string;
-}
-
-interface ResourcePlanningResponse {
-  resource_planning: ResourcePlanningData[];
-  pagination: {
-    total_count: number;
-    filtered_count: number;
-    page: number;
-    per_page: number;
-    page_count: number;
-  };
-}
+import { usePlannedResources } from './use-planned-resources';
+import { useUnplannedResources } from './use-unplanned-resources';
 
 export function useResourcePlanning() {
-  const { toast } = useToast();
-  const queryClient = useQueryClient();
-  const [searchQuery, setSearchQuery] = useState('');
-  const [currentPage, setCurrentPage] = useState(1);
-  const [sortBy, setSortBy] = useState('created_at');
-  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
-  const [selectedSbu, setSelectedSbu] = useState<string | null>(null);
-  const [selectedManager, setSelectedManager] = useState<string | null>(null);
   const [showUnplanned, setShowUnplanned] = useState(false);
-  const itemsPerPage = 10;
 
-  // Query for planned resources
-  const { data: plannedData, isLoading: isLoadingPlanned, error: plannedError } = useQuery({
-    queryKey: ['resource-planning-planned', searchQuery, currentPage, sortBy, sortOrder, selectedSbu, selectedManager],
-    queryFn: async () => {
-      console.log('Planned Resource Planning Query:', {
-        searchQuery,
-        currentPage,
-        sortBy,
-        sortOrder,
-        selectedSbu,
-        selectedManager
-      });
-
-      console.log('Calling RPC with params:', {
-        search_query: searchQuery || null,
-        page_number: currentPage,
-        items_per_page: itemsPerPage,
-        sort_by: sortBy,
-        sort_order: sortOrder,
-        sbu_filter: selectedSbu,
-        manager_filter: selectedManager
-      });
-
-      const { data: rpcData, error } = await supabase.rpc('get_resource_planning_data', {
-        search_query: searchQuery || null,
-        page_number: currentPage,
-        items_per_page: itemsPerPage,
-        sort_by: sortBy,
-        sort_order: sortOrder,
-        sbu_filter: selectedSbu,
-        manager_filter: selectedManager
-      });
-
-      if (error) {
-        console.error('RPC call error:', error);
-        console.error('Error details:', {
-          message: error.message,
-          details: error.details,
-          hint: error.hint,
-          code: error.code
-        });
-        throw error;
-      }
-      
-      console.log('RPC response:', rpcData);
-
-      // Safely handle the RPC response
-      if (rpcData && typeof rpcData === 'object' && 'resource_planning' in rpcData && 'pagination' in rpcData) {
-        return {
-          resource_planning: (rpcData as any).resource_planning || [],
-          pagination: (rpcData as any).pagination || {
-            total_count: 0,
-            filtered_count: 0,
-            page: 1,
-            per_page: itemsPerPage,
-            page_count: 0
-          }
-        };
-      } else {
-        console.warn('Unexpected RPC response structure:', rpcData);
-        return {
-          resource_planning: [],
-          pagination: {
-            total_count: 0,
-            filtered_count: 0,
-            page: 1,
-            per_page: itemsPerPage,
-            page_count: 0
-          }
-        };
-      }
-    },
-    enabled: !showUnplanned
-  });
-
-  // Query for unplanned resources
-  const { data: unplannedData, isLoading: isLoadingUnplanned, error: unplannedError } = useQuery({
-    queryKey: ['resource-planning-unplanned', searchQuery, selectedSbu, selectedManager],
-    queryFn: async () => {
-      console.log('Unplanned Resource Planning Query:', {
-        searchQuery,
-        selectedSbu,
-        selectedManager
-      });
-
-      const { data: rpcData, error } = await supabase.rpc('get_unplanned_resources', {
-        search_query: searchQuery || null,
-        sbu_filter: selectedSbu,
-        manager_filter: selectedManager
-      });
-
-      if (error) {
-        console.error('Unplanned RPC call error:', error);
-        throw error;
-      }
-      
-      console.log('Unplanned RPC response:', rpcData);
-      
-      // Cast the JSON array to UnplannedResource array through unknown
-      if (Array.isArray(rpcData)) {
-        return rpcData as unknown as UnplannedResource[];
-      }
-      return [];
-    },
-    enabled: showUnplanned
-  });
-
-  // Handle errors by showing toast when error occurs
-  const error = showUnplanned ? unplannedError : plannedError;
-  if (error) {
-    console.error('Query error:', error);
-    toast({
-      title: 'Error Loading Resource Planning Data',
-      description: error instanceof Error ? error.message : 'An unexpected error occurred',
-      variant: 'destructive',
-    });
-  }
-
-  const createResourcePlanningMutation = useMutation({
-    mutationFn: async (newResourcePlanning: {
-      profile_id: string;
-      bill_type_id?: string;
-      project_id?: string;
-      engagement_percentage: number;
-      release_date?: string;
-      engagement_start_date?: string;
-    }) => {
-      const { data, error } = await supabase
-        .from('resource_planning')
-        .insert([newResourcePlanning])
-        .select()
-        .single();
-
-      if (error) throw error;
-      return data;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['resource-planning-planned'] });
-      queryClient.invalidateQueries({ queryKey: ['resource-planning-unplanned'] });
-      toast({
-        title: 'Success',
-        description: 'Resource planning entry created successfully.',
-      });
-    },
-    onError: (error: any) => {
-      console.error('Create mutation error:', error);
-      toast({
-        title: 'Error',
-        description: error.message || 'Failed to create resource planning entry.',
-        variant: 'destructive',
-      });
-    },
-  });
-
-  const updateResourcePlanningMutation = useMutation({
-    mutationFn: async ({ id, updates }: { 
-      id: string; 
-      updates: Partial<{
-        bill_type_id: string;
-        project_id: string;
-        engagement_percentage: number;
-        release_date: string;
-        engagement_start_date: string;
-      }> 
-    }) => {
-      const { data, error } = await supabase
-        .from('resource_planning')
-        .update(updates)
-        .eq('id', id)
-        .select()
-        .single();
-
-      if (error) throw error;
-      return data;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['resource-planning-planned'] });
-      queryClient.invalidateQueries({ queryKey: ['resource-planning-unplanned'] });
-      toast({
-        title: 'Success',
-        description: 'Resource planning entry updated successfully.',
-      });
-    },
-    onError: (error: any) => {
-      console.error('Update mutation error:', error);
-      toast({
-        title: 'Error',
-        description: error.message || 'Failed to update resource planning entry.',
-        variant: 'destructive',
-      });
-    },
-  });
-
-  const deleteResourcePlanningMutation = useMutation({
-    mutationFn: async (id: string) => {
-      const { error } = await supabase
-        .from('resource_planning')
-        .delete()
-        .eq('id', id);
-
-      if (error) throw error;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['resource-planning-planned'] });
-      queryClient.invalidateQueries({ queryKey: ['resource-planning-unplanned'] });
-      toast({
-        title: 'Success',
-        description: 'Resource planning entry deleted successfully.',
-      });
-    },
-    onError: (error: any) => {
-      console.error('Delete mutation error:', error);
-      toast({
-        title: 'Error',
-        description: error.message || 'Failed to delete resource planning entry.',
-        variant: 'destructive',
-      });
-    },
-  });
+  const plannedResources = usePlannedResources();
+  const unplannedResources = useUnplannedResources();
 
   const clearFilters = () => {
-    setSelectedSbu(null);
-    setSelectedManager(null);
+    plannedResources.setSelectedSbu(null);
+    plannedResources.setSelectedManager(null);
+    unplannedResources.setSelectedSbu(null);
+    unplannedResources.setSelectedManager(null);
     setShowUnplanned(false);
-    setSearchQuery('');
-    setCurrentPage(1);
+    plannedResources.setSearchQuery('');
+    unplannedResources.setSearchQuery('');
+    plannedResources.setCurrentPage(1);
   };
 
+  // Sync filters between planned and unplanned resources
+  const setSelectedSbu = (sbu: string | null) => {
+    plannedResources.setSelectedSbu(sbu);
+    unplannedResources.setSelectedSbu(sbu);
+  };
+
+  const setSelectedManager = (manager: string | null) => {
+    plannedResources.setSelectedManager(manager);
+    unplannedResources.setSelectedManager(manager);
+  };
+
+  const setSearchQuery = (query: string) => {
+    if (showUnplanned) {
+      unplannedResources.setSearchQuery(query);
+    } else {
+      plannedResources.setSearchQuery(query);
+    }
+  };
+
+  const currentSearchQuery = showUnplanned 
+    ? unplannedResources.searchQuery 
+    : plannedResources.searchQuery;
+
   return {
-    data: plannedData?.resource_planning || [],
-    unplannedResources: unplannedData || [],
-    pagination: plannedData?.pagination,
-    isLoading: showUnplanned ? isLoadingUnplanned : isLoadingPlanned,
-    error,
-    searchQuery,
+    // Data
+    data: plannedResources.data,
+    unplannedResources: unplannedResources.unplannedResources,
+    pagination: plannedResources.pagination,
+    
+    // Loading states
+    isLoading: showUnplanned ? unplannedResources.isLoading : plannedResources.isLoading,
+    error: showUnplanned ? unplannedResources.error : plannedResources.error,
+    
+    // Search and filters
+    searchQuery: currentSearchQuery,
     setSearchQuery,
-    currentPage,
-    setCurrentPage,
-    sortBy,
-    setSortBy,
-    sortOrder,
-    setSortOrder,
-    selectedSbu,
+    selectedSbu: plannedResources.selectedSbu,
     setSelectedSbu,
-    selectedManager,
+    selectedManager: plannedResources.selectedManager,
     setSelectedManager,
     showUnplanned,
     setShowUnplanned,
     clearFilters,
-    createResourcePlanning: createResourcePlanningMutation.mutate,
-    updateResourcePlanning: updateResourcePlanningMutation.mutate,
-    deleteResourcePlanning: deleteResourcePlanningMutation.mutate,
-    isCreating: createResourcePlanningMutation.isPending,
-    isUpdating: updateResourcePlanningMutation.isPending,
-    isDeleting: deleteResourcePlanningMutation.isPending,
+    
+    // Planned resources specific
+    currentPage: plannedResources.currentPage,
+    setCurrentPage: plannedResources.setCurrentPage,
+    sortBy: plannedResources.sortBy,
+    setSortBy: plannedResources.setSortBy,
+    sortOrder: plannedResources.sortOrder,
+    setSortOrder: plannedResources.setSortOrder,
+    
+    // Mutations
+    createResourcePlanning: plannedResources.createResourcePlanning,
+    updateResourcePlanning: plannedResources.updateResourcePlanning,
+    deleteResourcePlanning: plannedResources.deleteResourcePlanning,
+    isCreating: plannedResources.isCreating,
+    isUpdating: plannedResources.isUpdating,
+    isDeleting: plannedResources.isDeleting,
   };
 }
