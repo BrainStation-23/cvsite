@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -223,16 +222,18 @@ export function useResourcePlanning() {
           };
         }
       }
-    },
-    onError: (error) => {
-      console.error('Query error:', error);
-      toast({
-        title: 'Error Loading Resource Planning Data',
-        description: error instanceof Error ? error.message : 'An unexpected error occurred',
-        variant: 'destructive',
-      });
     }
   });
+
+  // Handle errors by showing toast when error occurs
+  if (error) {
+    console.error('Query error:', error);
+    toast({
+      title: 'Error Loading Resource Planning Data',
+      description: error instanceof Error ? error.message : 'An unexpected error occurred',
+      variant: 'destructive',
+    });
+  }
 
   const createResourcePlanningMutation = useMutation({
     mutationFn: async (newResourcePlanning: {
