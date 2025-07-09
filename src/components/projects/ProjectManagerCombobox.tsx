@@ -43,7 +43,25 @@ export const ProjectManagerCombobox: React.FC<ProjectManagerComboboxProps> = ({
   const [open, setOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
 
-  const { data: profiles = [], isLoading } = useQuery({
+  // Fetch selected profile separately to ensure it's always available
+  const { data: selectedProfile } = useQuery({
+    queryKey: ['selected-project-manager', value],
+    queryFn: async () => {
+      if (!value) return null;
+      
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('id, first_name, last_name, employee_id, email')
+        .eq('id', value)
+        .single();
+      
+      if (error) throw error;
+      return data as Profile;
+    },
+    enabled: !!value,
+  });
+
+  const { data: searchResults = [], isLoading } = useQuery({
     queryKey: ['project-managers', searchQuery],
     queryFn: async () => {
       let query = supabase
@@ -64,7 +82,22 @@ export const ProjectManagerCombobox: React.FC<ProjectManagerComboboxProps> = ({
     enabled: open || !!searchQuery, // Only fetch when dropdown is open or there's a search query
   });
 
-  const selectedProfile = profiles.find(profile => profile.id === value);
+  // Combine search results with selected profile to ensure it's always available
+  const profiles = React.useMemo(() => {
+    const combinedProfiles = [...searchResults];
+    
+    // Add selected profile if it's not already in the search results
+    if (selectedProfile && !searchResults.some(p => p.id === selectedProfile.id)) {
+      combinedProfiles.unshift(selectedProfile);
+    }
+    
+    // Remove duplicates based on id
+    const uniqueProfiles = combinedProfiles.filter((profile, index, self) => 
+      index === self.findIndex(p => p.id === profile.id)
+    );
+    
+    return uniqueProfiles;
+  }, [searchResults, selectedProfile]);
 
   const getDisplayName = (profile: Profile) => {
     const name = [profile.first_name, profile.last_name].filter(Boolean).join(' ');
