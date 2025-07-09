@@ -24,6 +24,7 @@ interface Profile {
   first_name: string | null;
   last_name: string | null;
   employee_id: string | null;
+  email: string | null;
 }
 
 interface ProjectManagerComboboxProps {
@@ -47,11 +48,12 @@ export const ProjectManagerCombobox: React.FC<ProjectManagerComboboxProps> = ({
     queryFn: async () => {
       let query = supabase
         .from('profiles')
-        .select('id, first_name, last_name, employee_id')
+        .select('id, first_name, last_name, employee_id, email')
         .order('first_name');
       
-      if (searchQuery) {
-        query = query.or(`first_name.ilike.%${searchQuery}%,last_name.ilike.%${searchQuery}%,employee_id.ilike.%${searchQuery}%`);
+      if (searchQuery.trim()) {
+        // Search across name, employee_id, and email
+        query = query.or(`first_name.ilike.%${searchQuery}%,last_name.ilike.%${searchQuery}%,employee_id.ilike.%${searchQuery}%,email.ilike.%${searchQuery}%`);
       }
       
       const { data, error } = await query.limit(50);
@@ -59,13 +61,20 @@ export const ProjectManagerCombobox: React.FC<ProjectManagerComboboxProps> = ({
       if (error) throw error;
       return data as Profile[];
     },
+    enabled: open || !!searchQuery, // Only fetch when dropdown is open or there's a search query
   });
 
   const selectedProfile = profiles.find(profile => profile.id === value);
 
   const getDisplayName = (profile: Profile) => {
     const name = [profile.first_name, profile.last_name].filter(Boolean).join(' ');
-    return profile.employee_id ? `${name} (${profile.employee_id})` : name;
+    const parts = [name];
+    
+    if (profile.employee_id) {
+      parts.push(`(${profile.employee_id})`);
+    }
+    
+    return parts.join(' ') || profile.email || 'Unknown User';
   };
 
   const handleSelect = (profileId: string) => {
@@ -79,8 +88,15 @@ export const ProjectManagerCombobox: React.FC<ProjectManagerComboboxProps> = ({
     onValueChange(null);
   };
 
+  const handleOpenChange = (newOpen: boolean) => {
+    setOpen(newOpen);
+    if (!newOpen) {
+      setSearchQuery('');
+    }
+  };
+
   return (
-    <Popover open={open} onOpenChange={setOpen}>
+    <Popover open={open} onOpenChange={handleOpenChange}>
       <PopoverTrigger asChild>
         <Button
           variant="outline"
@@ -109,15 +125,15 @@ export const ProjectManagerCombobox: React.FC<ProjectManagerComboboxProps> = ({
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-full p-0" align="start">
-        <Command>
+        <Command shouldFilter={false}>
           <CommandInput
-            placeholder="Search project managers..."
+            placeholder="Search by name, employee ID, or email..."
             value={searchQuery}
             onValueChange={setSearchQuery}
           />
           <CommandList>
             <CommandEmpty>
-              {isLoading ? 'Loading...' : 'No project managers found.'}
+              {isLoading ? 'Searching...' : 'No project managers found.'}
             </CommandEmpty>
             <CommandGroup>
               {profiles.map((profile) => (
@@ -135,6 +151,9 @@ export const ProjectManagerCombobox: React.FC<ProjectManagerComboboxProps> = ({
                   />
                   <div className="flex flex-col">
                     <span className="font-medium">{getDisplayName(profile)}</span>
+                    {profile.email && (
+                      <span className="text-sm text-muted-foreground">{profile.email}</span>
+                    )}
                   </div>
                 </CommandItem>
               ))}
