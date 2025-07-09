@@ -107,13 +107,13 @@ export const ResourcePlanningTable: React.FC = () => {
               value="planned" 
               onClick={() => setShowUnplanned(false)}
             >
-              Planned Resources ({data.length})
+              Planned Resources
             </TabsTrigger>
             <TabsTrigger 
               value="unplanned" 
               onClick={() => setShowUnplanned(true)}
             >
-              Unplanned Resources ({unplannedResources.length})
+              Unplanned Resources
             </TabsTrigger>
           </TabsList>
 
