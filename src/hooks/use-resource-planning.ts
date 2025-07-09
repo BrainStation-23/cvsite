@@ -69,6 +69,16 @@ export function useResourcePlanning() {
   const { data, isLoading, error } = useQuery({
     queryKey: ['resource-planning', searchQuery, currentPage, sortBy, sortOrder, selectedSbu, selectedManager, showUnplanned],
     queryFn: async () => {
+      console.log('Resource Planning Query:', {
+        searchQuery,
+        currentPage,
+        sortBy,
+        sortOrder,
+        selectedSbu,
+        selectedManager,
+        showUnplanned
+      });
+
       if (showUnplanned) {
         // Fetch unplanned resources - profiles without resource planning entries
         let profilesQuery = supabase
@@ -106,14 +116,20 @@ export function useResourcePlanning() {
 
         const { data: profilesData, error: profilesError } = await profilesQuery;
 
-        if (profilesError) throw profilesError;
+        if (profilesError) {
+          console.error('Profiles fetch error:', profilesError);
+          throw profilesError;
+        }
 
         // Get all profile IDs that have resource planning entries
         const { data: plannedProfiles, error: plannedError } = await supabase
           .from('resource_planning')
           .select('profile_id');
 
-        if (plannedError) throw plannedError;
+        if (plannedError) {
+          console.error('Planned profiles fetch error:', plannedError);
+          throw plannedError;
+        }
 
         const plannedProfileIds = new Set(plannedProfiles.map(p => p.profile_id));
 
@@ -144,7 +160,17 @@ export function useResourcePlanning() {
           }
         };
       } else {
-        // Use the existing RPC function for planned resources with new filter parameters
+        // Use the RPC function for planned resources with proper error handling
+        console.log('Calling RPC with params:', {
+          search_query: searchQuery || null,
+          page_number: currentPage,
+          items_per_page: itemsPerPage,
+          sort_by: sortBy,
+          sort_order: sortOrder,
+          sbu_filter: selectedSbu,
+          manager_filter: selectedManager
+        });
+
         const { data: rpcData, error } = await supabase.rpc('get_resource_planning_data', {
           search_query: searchQuery || null,
           page_number: currentPage,
@@ -155,8 +181,19 @@ export function useResourcePlanning() {
           manager_filter: selectedManager
         });
 
-        if (error) throw error;
+        if (error) {
+          console.error('RPC call error:', error);
+          console.error('Error details:', {
+            message: error.message,
+            details: error.details,
+            hint: error.hint,
+            code: error.code
+          });
+          throw error;
+        }
         
+        console.log('RPC response:', rpcData);
+
         // Safely handle the RPC response by checking if it's an object with expected properties
         if (rpcData && typeof rpcData === 'object' && 'resource_planning' in rpcData && 'pagination' in rpcData) {
           return {
@@ -171,6 +208,7 @@ export function useResourcePlanning() {
             }
           };
         } else {
+          console.warn('Unexpected RPC response structure:', rpcData);
           // Fallback if RPC doesn't return expected structure
           return {
             resource_planning: [],
@@ -186,6 +224,14 @@ export function useResourcePlanning() {
         }
       }
     },
+    onError: (error) => {
+      console.error('Query error:', error);
+      toast({
+        title: 'Error Loading Resource Planning Data',
+        description: error instanceof Error ? error.message : 'An unexpected error occurred',
+        variant: 'destructive',
+      });
+    }
   });
 
   const createResourcePlanningMutation = useMutation({
@@ -214,6 +260,7 @@ export function useResourcePlanning() {
       });
     },
     onError: (error: any) => {
+      console.error('Create mutation error:', error);
       toast({
         title: 'Error',
         description: error.message || 'Failed to create resource planning entry.',
@@ -251,6 +298,7 @@ export function useResourcePlanning() {
       });
     },
     onError: (error: any) => {
+      console.error('Update mutation error:', error);
       toast({
         title: 'Error',
         description: error.message || 'Failed to update resource planning entry.',
@@ -276,6 +324,7 @@ export function useResourcePlanning() {
       });
     },
     onError: (error: any) => {
+      console.error('Delete mutation error:', error);
       toast({
         title: 'Error',
         description: error.message || 'Failed to delete resource planning entry.',
