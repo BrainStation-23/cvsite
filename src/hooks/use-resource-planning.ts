@@ -8,6 +8,7 @@ export function useResourcePlanning() {
   const [selectedSbu, setSelectedSbu] = useState<string | null>(null);
   const [selectedManager, setSelectedManager] = useState<string | null>(null);
 
+  // Get planned resources data for count display only
   const plannedResources = usePlannedResources();
 
   const clearFilters = () => {
@@ -15,63 +16,21 @@ export function useResourcePlanning() {
     setSelectedManager(null);
     setShowUnplanned(false);
     setSearchQuery('');
-    plannedResources.setCurrentPage(1);
-  };
-
-  // Sync filters for planned resources only
-  const handleSbuChange = (sbu: string | null) => {
-    setSelectedSbu(sbu);
-    plannedResources.setSelectedSbu(sbu);
-  };
-
-  const handleManagerChange = (manager: string | null) => {
-    setSelectedManager(manager);
-    plannedResources.setSelectedManager(manager);
-  };
-
-  const handleSearchChange = (query: string) => {
-    setSearchQuery(query);
-    if (!showUnplanned) {
-      plannedResources.setSearchQuery(query);
-    }
   };
 
   return {
-    // Data
-    data: plannedResources.data,
-    pagination: plannedResources.pagination,
-    
-    // Loading states
-    isLoading: plannedResources.isLoading,
-    error: plannedResources.error,
-    
-    // Search and filters
+    // Filter states
     searchQuery,
-    setSearchQuery: handleSearchChange,
+    setSearchQuery,
     selectedSbu,
-    setSelectedSbu: handleSbuChange,
+    setSelectedSbu,
     selectedManager,
-    setSelectedManager: handleManagerChange,
+    setSelectedManager,
     showUnplanned,
     setShowUnplanned,
     clearFilters,
     
-    // Pagination
-    currentPage: plannedResources.currentPage,
-    setCurrentPage: plannedResources.setCurrentPage,
-    
-    // Planned resources specific
-    sortBy: plannedResources.sortBy,
-    setSortBy: plannedResources.setSortBy,
-    sortOrder: plannedResources.sortOrder,
-    setSortOrder: plannedResources.setSortOrder,
-    
-    // Mutations
-    createResourcePlanning: plannedResources.createResourcePlanning,
-    updateResourcePlanning: plannedResources.updateResourcePlanning,
-    deleteResourcePlanning: plannedResources.deleteResourcePlanning,
-    isCreating: plannedResources.isCreating,
-    isUpdating: plannedResources.isUpdating,
-    isDeleting: plannedResources.isDeleting,
+    // Data for count display in tabs
+    data: plannedResources.data,
   };
 }
