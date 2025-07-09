@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -163,9 +162,9 @@ export function useResourcePlanning() {
       
       console.log('Unplanned RPC response:', rpcData);
       
-      // Cast the JSON array to UnplannedResource array
+      // Cast the JSON array to UnplannedResource array through unknown
       if (Array.isArray(rpcData)) {
-        return rpcData as UnplannedResource[];
+        return rpcData as unknown as UnplannedResource[];
       }
       return [];
     },
