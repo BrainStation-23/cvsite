@@ -14,15 +14,44 @@ import { Label } from '@/components/ui/label';
 import { Plus } from 'lucide-react';
 import { useResourcePlanning } from '@/hooks/use-resource-planning';
 import { ProfileCombobox } from '@/components/admin/user/ProfileCombobox';
-import { BillTypeCombobox } from './BillTypeCombobox';
+import BillTypeCombobox from './BillTypeCombobox';
 import { ProjectCombobox } from '@/components/projects/ProjectCombobox';
 import DatePicker from '@/components/admin/user/DatePicker';
+
+interface ResourcePlanningData {
+  id: string;
+  profile_id: string;
+  engagement_percentage: number;
+  release_date: string;
+  engagement_start_date: string;
+  created_at: string;
+  updated_at: string;
+  profile: {
+    id: string;
+    employee_id: string;
+    first_name: string;
+    last_name: string;
+    current_designation: string;
+  };
+  bill_type: {
+    id: string;
+    name: string;
+  } | null;
+  project: {
+    id: string;
+    project_name: string;
+    project_manager: string;
+    client_name: string;
+    budget: number;
+  } | null;
+}
 
 interface ResourceAssignmentDialogProps {
   mode: 'create' | 'edit';
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
   preselectedProfileId?: string | null;
+  item?: ResourcePlanningData;
 }
 
 export const ResourceAssignmentDialog: React.FC<ResourceAssignmentDialogProps> = ({
@@ -30,16 +59,17 @@ export const ResourceAssignmentDialog: React.FC<ResourceAssignmentDialogProps> =
   open: controlledOpen,
   onOpenChange,
   preselectedProfileId,
+  item,
 }) => {
   const [internalOpen, setInternalOpen] = useState(false);
-  const [profileId, setProfileId] = useState<string | null>(preselectedProfileId || null);
-  const [billTypeId, setBillTypeId] = useState<string | null>(null);
-  const [projectId, setProjectId] = useState<string | null>(null);
-  const [engagementPercentage, setEngagementPercentage] = useState<number>(100);
-  const [releaseDate, setReleaseDate] = useState<string>('');
-  const [engagementStartDate, setEngagementStartDate] = useState<string>('');
+  const [profileId, setProfileId] = useState<string | null>(preselectedProfileId || item?.profile_id || null);
+  const [billTypeId, setBillTypeId] = useState<string | null>(item?.bill_type?.id || null);
+  const [projectId, setProjectId] = useState<string | null>(item?.project?.id || null);
+  const [engagementPercentage, setEngagementPercentage] = useState<number>(item?.engagement_percentage || 100);
+  const [releaseDate, setReleaseDate] = useState<string>(item?.release_date || '');
+  const [engagementStartDate, setEngagementStartDate] = useState<string>(item?.engagement_start_date || '');
 
-  const { createResourcePlanning, isCreating } = useResourcePlanning();
+  const { createResourcePlanning, updateResourcePlanning, isCreating, isUpdating } = useResourcePlanning();
 
   // Use controlled open state if provided, otherwise use internal state
   const open = controlledOpen !== undefined ? controlledOpen : internalOpen;
@@ -51,6 +81,17 @@ export const ResourceAssignmentDialog: React.FC<ResourceAssignmentDialogProps> =
     }
   }, [preselectedProfileId]);
 
+  useEffect(() => {
+    if (item && mode === 'edit') {
+      setProfileId(item.profile_id);
+      setBillTypeId(item.bill_type?.id || null);
+      setProjectId(item.project?.id || null);
+      setEngagementPercentage(item.engagement_percentage);
+      setReleaseDate(item.release_date || '');
+      setEngagementStartDate(item.engagement_start_date || '');
+    }
+  }, [item, mode]);
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -58,33 +99,50 @@ export const ResourceAssignmentDialog: React.FC<ResourceAssignmentDialogProps> =
       return;
     }
 
-    createResourcePlanning({
+    const resourcePlanningData = {
       profile_id: profileId,
       bill_type_id: billTypeId || undefined,
       project_id: projectId || undefined,
       engagement_percentage: engagementPercentage,
       release_date: releaseDate || undefined,
       engagement_start_date: engagementStartDate || undefined,
-    });
+    };
 
-    // Reset form
-    if (!preselectedProfileId) {
-      setProfileId(null);
+    if (mode === 'edit' && item) {
+      updateResourcePlanning({
+        id: item.id,
+        updates: resourcePlanningData,
+      });
+    } else {
+      createResourcePlanning(resourcePlanningData);
     }
-    setBillTypeId(null);
-    setProjectId(null);
-    setEngagementPercentage(100);
-    setReleaseDate('');
-    setEngagementStartDate('');
+
+    // Reset form for create mode
+    if (mode === 'create') {
+      if (!preselectedProfileId) {
+        setProfileId(null);
+      }
+      setBillTypeId(null);
+      setProjectId(null);
+      setEngagementPercentage(100);
+      setReleaseDate('');
+      setEngagementStartDate('');
+    }
+    
     setOpen(false);
   };
 
   const DialogComponent = () => (
     <DialogContent className="sm:max-w-[600px]">
       <DialogHeader>
-        <DialogTitle>Create Resource Assignment</DialogTitle>
+        <DialogTitle>
+          {mode === 'edit' ? 'Edit Resource Assignment' : 'Create Resource Assignment'}
+        </DialogTitle>
         <DialogDescription>
-          Assign a resource to a project or bill type with engagement details.
+          {mode === 'edit' 
+            ? 'Update the resource assignment details.'
+            : 'Assign a resource to a project or bill type with engagement details.'
+          }
         </DialogDescription>
       </DialogHeader>
       
@@ -96,7 +154,7 @@ export const ResourceAssignmentDialog: React.FC<ResourceAssignmentDialogProps> =
               value={profileId}
               onValueChange={setProfileId}
               placeholder="Select employee..."
-              disabled={!!preselectedProfileId}
+              disabled={!!preselectedProfileId || mode === 'edit'}
               label="Employee"
             />
           </div>
@@ -156,8 +214,11 @@ export const ResourceAssignmentDialog: React.FC<ResourceAssignmentDialogProps> =
           <Button type="button" variant="outline" onClick={() => setOpen(false)}>
             Cancel
           </Button>
-          <Button type="submit" disabled={isCreating || !profileId}>
-            {isCreating ? 'Creating...' : 'Create Assignment'}
+          <Button type="submit" disabled={(mode === 'create' ? isCreating : isUpdating) || !profileId}>
+            {mode === 'create' 
+              ? (isCreating ? 'Creating...' : 'Create Assignment')
+              : (isUpdating ? 'Updating...' : 'Update Assignment')
+            }
           </Button>
         </div>
       </form>

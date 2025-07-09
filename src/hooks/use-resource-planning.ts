@@ -70,8 +70,8 @@ export function useResourcePlanning() {
     queryKey: ['resource-planning', searchQuery, currentPage, sortBy, sortOrder, selectedSbu, selectedManager, showUnplanned],
     queryFn: async () => {
       if (showUnplanned) {
-        // Fetch unplanned resources
-        let query = supabase
+        // Fetch unplanned resources - profiles without resource planning entries
+        let profilesQuery = supabase
           .from('profiles')
           .select(`
             id,
@@ -83,43 +83,48 @@ export function useResourcePlanning() {
             general_information(current_designation),
             sbus(name),
             manager_profile:profiles!profiles_manager_fkey(first_name, last_name)
-          `)
-          .is('resource_planning.profile_id', null);
+          `);
 
         // Apply SBU filter
         if (selectedSbu) {
-          query = query.eq('sbu_id', selectedSbu);
+          profilesQuery = profilesQuery.eq('sbu_id', selectedSbu);
         }
 
         // Apply Manager filter
         if (selectedManager) {
-          query = query.eq('manager', selectedManager);
+          profilesQuery = profilesQuery.eq('manager', selectedManager);
         }
 
         // Apply search filter
         if (searchQuery) {
-          query = query.or(`
+          profilesQuery = profilesQuery.or(`
             first_name.ilike.%${searchQuery}%,
             last_name.ilike.%${searchQuery}%,
             employee_id.ilike.%${searchQuery}%
           `);
         }
 
-        // Left join to check for existing resource planning
-        query = query.leftJoin('resource_planning', 'profiles.id', 'resource_planning.profile_id');
+        const { data: profilesData, error: profilesError } = await profilesQuery;
 
-        const { data: unplannedData, error: unplannedError } = await query;
+        if (profilesError) throw profilesError;
 
-        if (unplannedError) throw unplannedError;
+        // Get all profile IDs that have resource planning entries
+        const { data: plannedProfiles, error: plannedError } = await supabase
+          .from('resource_planning')
+          .select('profile_id');
+
+        if (plannedError) throw plannedError;
+
+        const plannedProfileIds = new Set(plannedProfiles.map(p => p.profile_id));
 
         // Filter out profiles that have resource planning entries
-        const filteredUnplanned = (unplannedData || []).filter(profile => 
-          !profile.resource_planning || profile.resource_planning.length === 0
+        const unplannedProfiles = (profilesData || []).filter(profile => 
+          !plannedProfileIds.has(profile.id)
         );
 
         return {
           resource_planning: [],
-          unplanned_resources: filteredUnplanned.map((profile: any) => ({
+          unplanned_resources: unplannedProfiles.map((profile: any) => ({
             id: profile.id,
             employee_id: profile.employee_id,
             first_name: profile.first_name || 'N/A',
@@ -131,31 +136,36 @@ export function useResourcePlanning() {
               : 'N/A'
           })),
           pagination: {
-            total_count: filteredUnplanned.length,
-            filtered_count: filteredUnplanned.length,
+            total_count: unplannedProfiles.length,
+            filtered_count: unplannedProfiles.length,
             page: 1,
-            per_page: filteredUnplanned.length,
+            per_page: unplannedProfiles.length,
             page_count: 1
           }
         };
       } else {
-        // Use the existing RPC function with additional filters
+        // Use the existing RPC function for planned resources
         const { data, error } = await supabase.rpc('get_resource_planning_data', {
           search_query: searchQuery || null,
           page_number: currentPage,
           items_per_page: itemsPerPage,
           sort_by: sortBy,
-          sort_order: sortOrder,
-          sbu_filter: selectedSbu,
-          manager_filter: selectedManager
+          sort_order: sortOrder
         });
 
         if (error) throw error;
         
         return {
-          ...data,
-          unplanned_resources: []
-        } as ResourcePlanningResponse;
+          resource_planning: data?.resource_planning || [],
+          unplanned_resources: [],
+          pagination: data?.pagination || {
+            total_count: 0,
+            filtered_count: 0,
+            page: 1,
+            per_page: itemsPerPage,
+            page_count: 0
+          }
+        };
       }
     },
   });
