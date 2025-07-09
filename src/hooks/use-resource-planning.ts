@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -44,17 +45,6 @@ interface UnplannedResource {
 interface ResourcePlanningResponse {
   resource_planning: ResourcePlanningData[];
   unplanned_resources: UnplannedResource[];
-  pagination: {
-    total_count: number;
-    filtered_count: number;
-    page: number;
-    per_page: number;
-    page_count: number;
-  };
-}
-
-interface RpcResponse {
-  resource_planning: ResourcePlanningData[];
   pagination: {
     total_count: number;
     filtered_count: number;
@@ -154,31 +144,46 @@ export function useResourcePlanning() {
           }
         };
       } else {
-        // Use the existing RPC function for planned resources
+        // Use the existing RPC function for planned resources with new filter parameters
         const { data: rpcData, error } = await supabase.rpc('get_resource_planning_data', {
           search_query: searchQuery || null,
           page_number: currentPage,
           items_per_page: itemsPerPage,
           sort_by: sortBy,
-          sort_order: sortOrder
+          sort_order: sortOrder,
+          sbu_filter: selectedSbu,
+          manager_filter: selectedManager
         });
 
         if (error) throw error;
         
-        // Type assertion to handle the Json type from RPC
-        const typedData = rpcData as RpcResponse;
-        
-        return {
-          resource_planning: typedData?.resource_planning || [],
-          unplanned_resources: [],
-          pagination: typedData?.pagination || {
-            total_count: 0,
-            filtered_count: 0,
-            page: 1,
-            per_page: itemsPerPage,
-            page_count: 0
-          }
-        };
+        // Safely handle the RPC response by checking if it's an object with expected properties
+        if (rpcData && typeof rpcData === 'object' && 'resource_planning' in rpcData && 'pagination' in rpcData) {
+          return {
+            resource_planning: (rpcData as any).resource_planning || [],
+            unplanned_resources: [],
+            pagination: (rpcData as any).pagination || {
+              total_count: 0,
+              filtered_count: 0,
+              page: 1,
+              per_page: itemsPerPage,
+              page_count: 0
+            }
+          };
+        } else {
+          // Fallback if RPC doesn't return expected structure
+          return {
+            resource_planning: [],
+            unplanned_resources: [],
+            pagination: {
+              total_count: 0,
+              filtered_count: 0,
+              page: 1,
+              per_page: itemsPerPage,
+              page_count: 0
+            }
+          };
+        }
       }
     },
   });
