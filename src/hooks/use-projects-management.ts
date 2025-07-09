@@ -11,6 +11,11 @@ interface Project {
   budget: number | null;
   created_at: string;
   updated_at: string;
+  project_manager_profile?: {
+    first_name: string | null;
+    last_name: string | null;
+    employee_id: string | null;
+  } | null;
 }
 
 interface ProjectsResponse {
@@ -58,19 +63,60 @@ export function useProjectsManagement(): UseProjectsManagementReturn {
   const fetchProjects = async () => {
     try {
       setIsLoading(true);
-      const { data, error } = await supabase.rpc('search_projects', {
-        search_query: searchQuery || null,
-        page_number: currentPage,
-        items_per_page: itemsPerPage,
-        sort_by: sortBy,
-        sort_order: sortOrder
-      });
+      
+      // Build the query with joins for project manager profile
+      let query = supabase
+        .from('projects_management')
+        .select(`
+          *,
+          project_manager_profile:profiles!projects_management_project_manager_fkey(
+            first_name,
+            last_name,
+            employee_id
+          )
+        `);
+
+      // Apply search filter if provided
+      if (searchQuery) {
+        query = query.or(`
+          project_name.ilike.%${searchQuery}%,
+          client_name.ilike.%${searchQuery}%
+        `);
+      }
+
+      // Apply sorting
+      if (sortBy === 'project_manager') {
+        // For project manager sorting, we'll sort by the profile name
+        query = query.order('project_manager_profile(first_name)', { ascending: sortOrder === 'asc' });
+      } else {
+        query = query.order(sortBy, { ascending: sortOrder === 'asc' });
+      }
+
+      // Apply pagination
+      const from = (currentPage - 1) * itemsPerPage;
+      const to = from + itemsPerPage - 1;
+      query = query.range(from, to);
+
+      const { data, error, count } = await query;
 
       if (error) throw error;
 
-      const response = data as unknown as ProjectsResponse;
-      setProjects(response.projects || []);
-      setPagination(response.pagination);
+      // Get total count for pagination
+      const { count: totalCount } = await supabase
+        .from('projects_management')
+        .select('*', { count: 'exact', head: true });
+
+      const totalRecords = totalCount || 0;
+      const filteredRecords = count || 0;
+
+      setProjects(data || []);
+      setPagination({
+        total_count: totalRecords,
+        filtered_count: filteredRecords,
+        page: currentPage,
+        per_page: itemsPerPage,
+        page_count: Math.ceil(filteredRecords / itemsPerPage)
+      });
     } catch (error) {
       console.error('Error fetching projects:', error);
       toast({
@@ -87,7 +133,12 @@ export function useProjectsManagement(): UseProjectsManagementReturn {
     try {
       const { error } = await supabase
         .from('projects_management')
-        .insert(project);
+        .insert({
+          project_name: project.project_name,
+          client_name: project.client_name,
+          project_manager: project.project_manager,
+          budget: project.budget
+        });
 
       if (error) throw error;
 
@@ -111,9 +162,15 @@ export function useProjectsManagement(): UseProjectsManagementReturn {
 
   const updateProject = async (id: string, project: Partial<Omit<Project, 'id' | 'created_at' | 'updated_at'>>): Promise<boolean> => {
     try {
+      const updateData: any = {};
+      if (project.project_name !== undefined) updateData.project_name = project.project_name;
+      if (project.client_name !== undefined) updateData.client_name = project.client_name;
+      if (project.project_manager !== undefined) updateData.project_manager = project.project_manager;
+      if (project.budget !== undefined) updateData.budget = project.budget;
+
       const { error } = await supabase
         .from('projects_management')
-        .update(project)
+        .update(updateData)
         .eq('id', id);
 
       if (error) throw error;

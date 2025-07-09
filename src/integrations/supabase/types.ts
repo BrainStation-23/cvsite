@@ -732,6 +732,7 @@ export type Database = {
           first_name: string | null
           id: string
           last_name: string | null
+          manager: string | null
           resource_type: string | null
           sbu_id: string | null
           updated_at: string
@@ -746,6 +747,7 @@ export type Database = {
           first_name?: string | null
           id: string
           last_name?: string | null
+          manager?: string | null
           resource_type?: string | null
           sbu_id?: string | null
           updated_at?: string
@@ -760,6 +762,7 @@ export type Database = {
           first_name?: string | null
           id?: string
           last_name?: string | null
+          manager?: string | null
           resource_type?: string | null
           sbu_id?: string | null
           updated_at?: string
@@ -770,6 +773,13 @@ export type Database = {
             columns: ["expertise"]
             isOneToOne: false
             referencedRelation: "expertise_types"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "profiles_manager_fkey"
+            columns: ["manager"]
+            isOneToOne: false
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
           {
@@ -900,6 +910,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "projects_management_project_manager_fkey"
+            columns: ["project_manager"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "projects_management_project_type_fkey"
             columns: ["project_type"]

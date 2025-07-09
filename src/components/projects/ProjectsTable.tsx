@@ -13,6 +13,12 @@ interface Project {
   budget: number | null;
   created_at: string;
   updated_at: string;
+  // Added to handle the joined profile data
+  project_manager_profile?: {
+    first_name: string | null;
+    last_name: string | null;
+    employee_id: string | null;
+  } | null;
 }
 
 interface ProjectsTableProps {
@@ -38,6 +44,26 @@ export const ProjectsTable: React.FC<ProjectsTableProps> = ({
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString();
+  };
+
+  const getProjectManagerName = (project: Project) => {
+    if (!project.project_manager_profile) {
+      return <span className="text-muted-foreground">Not assigned</span>;
+    }
+    
+    const profile = project.project_manager_profile;
+    const name = [profile.first_name, profile.last_name].filter(Boolean).join(' ');
+    
+    return (
+      <div className="flex flex-col">
+        <span className="font-medium">{name}</span>
+        {profile.employee_id && (
+          <span className="text-sm text-muted-foreground">
+            ID: {profile.employee_id}
+          </span>
+        )}
+      </div>
+    );
   };
 
   if (isLoading) {
@@ -83,9 +109,7 @@ export const ProjectsTable: React.FC<ProjectsTableProps> = ({
                 )}
               </TableCell>
               <TableCell>
-                {project.project_manager || (
-                  <span className="text-muted-foreground">Not assigned</span>
-                )}
+                {getProjectManagerName(project)}
               </TableCell>
               <TableCell>
                 <span className="font-mono">
