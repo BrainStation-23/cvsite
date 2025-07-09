@@ -1321,6 +1321,14 @@ export type Database = {
           count: number
         }[]
       }
+      get_unplanned_resources: {
+        Args: {
+          search_query?: string
+          sbu_filter?: string
+          manager_filter?: string
+        }
+        Returns: Json
+      }
       has_any_role: {
         Args: { roles: string[] }
         Returns: boolean

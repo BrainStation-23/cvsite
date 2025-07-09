@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -43,7 +44,6 @@ interface UnplannedResource {
 
 interface ResourcePlanningResponse {
   resource_planning: ResourcePlanningData[];
-  unplanned_resources: UnplannedResource[];
   pagination: {
     total_count: number;
     filtered_count: number;
@@ -65,167 +65,110 @@ export function useResourcePlanning() {
   const [showUnplanned, setShowUnplanned] = useState(false);
   const itemsPerPage = 10;
 
-  const { data, isLoading, error } = useQuery({
-    queryKey: ['resource-planning', searchQuery, currentPage, sortBy, sortOrder, selectedSbu, selectedManager, showUnplanned],
+  // Query for planned resources
+  const { data: plannedData, isLoading: isLoadingPlanned, error: plannedError } = useQuery({
+    queryKey: ['resource-planning-planned', searchQuery, currentPage, sortBy, sortOrder, selectedSbu, selectedManager],
     queryFn: async () => {
-      console.log('Resource Planning Query:', {
+      console.log('Planned Resource Planning Query:', {
         searchQuery,
         currentPage,
         sortBy,
         sortOrder,
         selectedSbu,
-        selectedManager,
-        showUnplanned
+        selectedManager
       });
 
-      if (showUnplanned) {
-        // Fetch unplanned resources - profiles without resource planning entries
-        let profilesQuery = supabase
-          .from('profiles')
-          .select(`
-            id,
-            employee_id,
-            first_name,
-            last_name,
-            sbu_id,
-            manager,
-            general_information(current_designation),
-            sbus(name),
-            manager_profile:profiles!profiles_manager_fkey(first_name, last_name)
-          `);
+      console.log('Calling RPC with params:', {
+        search_query: searchQuery || null,
+        page_number: currentPage,
+        items_per_page: itemsPerPage,
+        sort_by: sortBy,
+        sort_order: sortOrder,
+        sbu_filter: selectedSbu,
+        manager_filter: selectedManager
+      });
 
-        // Apply SBU filter
-        if (selectedSbu) {
-          profilesQuery = profilesQuery.eq('sbu_id', selectedSbu);
-        }
+      const { data: rpcData, error } = await supabase.rpc('get_resource_planning_data', {
+        search_query: searchQuery || null,
+        page_number: currentPage,
+        items_per_page: itemsPerPage,
+        sort_by: sortBy,
+        sort_order: sortOrder,
+        sbu_filter: selectedSbu,
+        manager_filter: selectedManager
+      });
 
-        // Apply Manager filter
-        if (selectedManager) {
-          profilesQuery = profilesQuery.eq('manager', selectedManager);
-        }
+      if (error) {
+        console.error('RPC call error:', error);
+        console.error('Error details:', {
+          message: error.message,
+          details: error.details,
+          hint: error.hint,
+          code: error.code
+        });
+        throw error;
+      }
+      
+      console.log('RPC response:', rpcData);
 
-        // Apply search filter
-        if (searchQuery) {
-          profilesQuery = profilesQuery.or(`
-            first_name.ilike.%${searchQuery}%,
-            last_name.ilike.%${searchQuery}%,
-            employee_id.ilike.%${searchQuery}%
-          `);
-        }
-
-        const { data: profilesData, error: profilesError } = await profilesQuery;
-
-        if (profilesError) {
-          console.error('Profiles fetch error:', profilesError);
-          throw profilesError;
-        }
-
-        // Get all profile IDs that have resource planning entries
-        const { data: plannedProfiles, error: plannedError } = await supabase
-          .from('resource_planning')
-          .select('profile_id');
-
-        if (plannedError) {
-          console.error('Planned profiles fetch error:', plannedError);
-          throw plannedError;
-        }
-
-        const plannedProfileIds = new Set(plannedProfiles.map(p => p.profile_id));
-
-        // Filter out profiles that have resource planning entries
-        const unplannedProfiles = (profilesData || []).filter(profile => 
-          !plannedProfileIds.has(profile.id)
-        );
-
+      // Safely handle the RPC response
+      if (rpcData && typeof rpcData === 'object' && 'resource_planning' in rpcData && 'pagination' in rpcData) {
         return {
-          resource_planning: [],
-          unplanned_resources: unplannedProfiles.map((profile: any) => ({
-            id: profile.id,
-            employee_id: profile.employee_id,
-            first_name: profile.first_name || 'N/A',
-            last_name: profile.last_name || 'N/A',
-            current_designation: profile.general_information?.[0]?.current_designation || 'N/A',
-            sbu_name: profile.sbus?.name || 'N/A',
-            manager_name: profile.manager_profile ? 
-              `${profile.manager_profile.first_name || ''} ${profile.manager_profile.last_name || ''}`.trim() || 'N/A' 
-              : 'N/A'
-          })),
-          pagination: {
-            total_count: unplannedProfiles.length,
-            filtered_count: unplannedProfiles.length,
+          resource_planning: (rpcData as any).resource_planning || [],
+          pagination: (rpcData as any).pagination || {
+            total_count: 0,
+            filtered_count: 0,
             page: 1,
-            per_page: unplannedProfiles.length,
-            page_count: 1
+            per_page: itemsPerPage,
+            page_count: 0
           }
         };
       } else {
-        // Use the RPC function for planned resources with proper error handling
-        console.log('Calling RPC with params:', {
-          search_query: searchQuery || null,
-          page_number: currentPage,
-          items_per_page: itemsPerPage,
-          sort_by: sortBy,
-          sort_order: sortOrder,
-          sbu_filter: selectedSbu,
-          manager_filter: selectedManager
-        });
-
-        const { data: rpcData, error } = await supabase.rpc('get_resource_planning_data', {
-          search_query: searchQuery || null,
-          page_number: currentPage,
-          items_per_page: itemsPerPage,
-          sort_by: sortBy,
-          sort_order: sortOrder,
-          sbu_filter: selectedSbu,
-          manager_filter: selectedManager
-        });
-
-        if (error) {
-          console.error('RPC call error:', error);
-          console.error('Error details:', {
-            message: error.message,
-            details: error.details,
-            hint: error.hint,
-            code: error.code
-          });
-          throw error;
-        }
-        
-        console.log('RPC response:', rpcData);
-
-        // Safely handle the RPC response by checking if it's an object with expected properties
-        if (rpcData && typeof rpcData === 'object' && 'resource_planning' in rpcData && 'pagination' in rpcData) {
-          return {
-            resource_planning: (rpcData as any).resource_planning || [],
-            unplanned_resources: [],
-            pagination: (rpcData as any).pagination || {
-              total_count: 0,
-              filtered_count: 0,
-              page: 1,
-              per_page: itemsPerPage,
-              page_count: 0
-            }
-          };
-        } else {
-          console.warn('Unexpected RPC response structure:', rpcData);
-          // Fallback if RPC doesn't return expected structure
-          return {
-            resource_planning: [],
-            unplanned_resources: [],
-            pagination: {
-              total_count: 0,
-              filtered_count: 0,
-              page: 1,
-              per_page: itemsPerPage,
-              page_count: 0
-            }
-          };
-        }
+        console.warn('Unexpected RPC response structure:', rpcData);
+        return {
+          resource_planning: [],
+          pagination: {
+            total_count: 0,
+            filtered_count: 0,
+            page: 1,
+            per_page: itemsPerPage,
+            page_count: 0
+          }
+        };
       }
-    }
+    },
+    enabled: !showUnplanned
+  });
+
+  // Query for unplanned resources
+  const { data: unplannedData, isLoading: isLoadingUnplanned, error: unplannedError } = useQuery({
+    queryKey: ['resource-planning-unplanned', searchQuery, selectedSbu, selectedManager],
+    queryFn: async () => {
+      console.log('Unplanned Resource Planning Query:', {
+        searchQuery,
+        selectedSbu,
+        selectedManager
+      });
+
+      const { data: rpcData, error } = await supabase.rpc('get_unplanned_resources', {
+        search_query: searchQuery || null,
+        sbu_filter: selectedSbu,
+        manager_filter: selectedManager
+      });
+
+      if (error) {
+        console.error('Unplanned RPC call error:', error);
+        throw error;
+      }
+      
+      console.log('Unplanned RPC response:', rpcData);
+      return Array.isArray(rpcData) ? rpcData : [];
+    },
+    enabled: showUnplanned
   });
 
   // Handle errors by showing toast when error occurs
+  const error = showUnplanned ? unplannedError : plannedError;
   if (error) {
     console.error('Query error:', error);
     toast({
@@ -254,7 +197,8 @@ export function useResourcePlanning() {
       return data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['resource-planning'] });
+      queryClient.invalidateQueries({ queryKey: ['resource-planning-planned'] });
+      queryClient.invalidateQueries({ queryKey: ['resource-planning-unplanned'] });
       toast({
         title: 'Success',
         description: 'Resource planning entry created successfully.',
@@ -292,7 +236,8 @@ export function useResourcePlanning() {
       return data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['resource-planning'] });
+      queryClient.invalidateQueries({ queryKey: ['resource-planning-planned'] });
+      queryClient.invalidateQueries({ queryKey: ['resource-planning-unplanned'] });
       toast({
         title: 'Success',
         description: 'Resource planning entry updated successfully.',
@@ -318,7 +263,8 @@ export function useResourcePlanning() {
       if (error) throw error;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['resource-planning'] });
+      queryClient.invalidateQueries({ queryKey: ['resource-planning-planned'] });
+      queryClient.invalidateQueries({ queryKey: ['resource-planning-unplanned'] });
       toast({
         title: 'Success',
         description: 'Resource planning entry deleted successfully.',
@@ -343,10 +289,10 @@ export function useResourcePlanning() {
   };
 
   return {
-    data: data?.resource_planning || [],
-    unplannedResources: data?.unplanned_resources || [],
-    pagination: data?.pagination,
-    isLoading,
+    data: plannedData?.resource_planning || [],
+    unplannedResources: unplannedData || [],
+    pagination: plannedData?.pagination,
+    isLoading: showUnplanned ? isLoadingUnplanned : isLoadingPlanned,
     error,
     searchQuery,
     setSearchQuery,
