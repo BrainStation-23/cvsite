@@ -162,7 +162,12 @@ export function useResourcePlanning() {
       }
       
       console.log('Unplanned RPC response:', rpcData);
-      return Array.isArray(rpcData) ? rpcData : [];
+      
+      // Cast the JSON array to UnplannedResource array
+      if (Array.isArray(rpcData)) {
+        return rpcData as UnplannedResource[];
+      }
+      return [];
     },
     enabled: showUnplanned
   });
