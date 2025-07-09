@@ -139,11 +139,13 @@ export const ResourcePlanningTable: React.FC = () => {
                   </Table>
                 </div>
 
-                <ResourcePlanningPagination 
-                  pagination={pagination}
-                  currentPage={currentPage}
-                  setCurrentPage={setCurrentPage}
-                />
+                {pagination && (
+                  <ResourcePlanningPagination 
+                    pagination={pagination}
+                    currentPage={currentPage}
+                    setCurrentPage={setCurrentPage}
+                  />
+                )}
               </>
             )}
           </TabsContent>
@@ -151,6 +153,9 @@ export const ResourcePlanningTable: React.FC = () => {
           <TabsContent value="unplanned" className="mt-4">
             <UnplannedResourcesTable 
               resources={unplannedResources}
+              pagination={pagination}
+              currentPage={currentPage}
+              setCurrentPage={setCurrentPage}
               onCreatePlan={handleCreatePlan}
             />
           </TabsContent>

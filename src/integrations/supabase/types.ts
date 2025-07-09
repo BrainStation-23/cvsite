@@ -1326,6 +1326,8 @@ export type Database = {
           search_query?: string
           sbu_filter?: string
           manager_filter?: string
+          page_number?: number
+          items_per_page?: number
         }
         Returns: Json
       }

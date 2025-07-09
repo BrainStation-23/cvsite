@@ -14,25 +14,43 @@ interface UnplannedResource {
   manager_name: string;
 }
 
+interface PaginationData {
+  total_count: number;
+  filtered_count: number;
+  page: number;
+  per_page: number;
+  page_count: number;
+}
+
+interface UnplannedResourcesResponse {
+  unplanned_resources: UnplannedResource[];
+  pagination: PaginationData;
+}
+
 export function useUnplannedResources() {
   const { toast } = useToast();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedSbu, setSelectedSbu] = useState<string | null>(null);
   const [selectedManager, setSelectedManager] = useState<string | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
 
   const { data: unplannedData, isLoading, error } = useQuery({
-    queryKey: ['resource-planning-unplanned', searchQuery, selectedSbu, selectedManager],
+    queryKey: ['resource-planning-unplanned', searchQuery, selectedSbu, selectedManager, currentPage],
     queryFn: async () => {
       console.log('Unplanned Resource Planning Query:', {
         searchQuery,
         selectedSbu,
-        selectedManager
+        selectedManager,
+        currentPage
       });
 
       const { data: rpcData, error } = await supabase.rpc('get_unplanned_resources', {
         search_query: searchQuery || null,
         sbu_filter: selectedSbu,
-        manager_filter: selectedManager
+        manager_filter: selectedManager,
+        page_number: currentPage,
+        items_per_page: itemsPerPage
       });
 
       if (error) {
@@ -42,10 +60,30 @@ export function useUnplannedResources() {
       
       console.log('Unplanned RPC response:', rpcData);
       
-      if (Array.isArray(rpcData)) {
-        return rpcData as unknown as UnplannedResource[];
+      if (rpcData && typeof rpcData === 'object' && 'unplanned_resources' in rpcData && 'pagination' in rpcData) {
+        return {
+          unplanned_resources: (rpcData as any).unplanned_resources || [],
+          pagination: (rpcData as any).pagination || {
+            total_count: 0,
+            filtered_count: 0,
+            page: 1,
+            per_page: itemsPerPage,
+            page_count: 0
+          }
+        };
+      } else {
+        console.warn('Unexpected RPC response structure:', rpcData);
+        return {
+          unplanned_resources: [],
+          pagination: {
+            total_count: 0,
+            filtered_count: 0,
+            page: 1,
+            per_page: itemsPerPage,
+            page_count: 0
+          }
+        };
       }
-      return [];
     }
   });
 
@@ -60,7 +98,8 @@ export function useUnplannedResources() {
   }
 
   return {
-    unplannedResources: unplannedData || [],
+    unplannedResources: unplannedData?.unplanned_resources || [],
+    pagination: unplannedData?.pagination,
     isLoading,
     error,
     searchQuery,
@@ -69,5 +108,7 @@ export function useUnplannedResources() {
     setSelectedSbu,
     selectedManager,
     setSelectedManager,
+    currentPage,
+    setCurrentPage,
   };
 }

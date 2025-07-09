@@ -18,6 +18,7 @@ export function useResourcePlanning() {
     plannedResources.setSearchQuery('');
     unplannedResources.setSearchQuery('');
     plannedResources.setCurrentPage(1);
+    unplannedResources.setCurrentPage(1);
   };
 
   // Sync filters between planned and unplanned resources
@@ -47,7 +48,7 @@ export function useResourcePlanning() {
     // Data
     data: plannedResources.data,
     unplannedResources: unplannedResources.unplannedResources,
-    pagination: plannedResources.pagination,
+    pagination: showUnplanned ? unplannedResources.pagination : plannedResources.pagination,
     
     // Loading states
     isLoading: showUnplanned ? unplannedResources.isLoading : plannedResources.isLoading,
@@ -64,9 +65,11 @@ export function useResourcePlanning() {
     setShowUnplanned,
     clearFilters,
     
+    // Pagination
+    currentPage: showUnplanned ? unplannedResources.currentPage : plannedResources.currentPage,
+    setCurrentPage: showUnplanned ? unplannedResources.setCurrentPage : plannedResources.setCurrentPage,
+    
     // Planned resources specific
-    currentPage: plannedResources.currentPage,
-    setCurrentPage: plannedResources.setCurrentPage,
     sortBy: plannedResources.sortBy,
     setSortBy: plannedResources.setSortBy,
     sortOrder: plannedResources.sortOrder,
