@@ -12,6 +12,7 @@ import SbuCombobox from './user/SbuCombobox';
 import ExpertiseCombobox from './user/ExpertiseCombobox';
 import ResourceTypeCombobox from './user/ResourceTypeCombobox';
 import DatePicker from './user/DatePicker';
+import { ProfileCombobox } from './user/ProfileCombobox';
 
 interface UserFormData {
   email: string;
@@ -25,6 +26,7 @@ interface UserFormData {
   resourceTypeId: string | null;
   dateOfJoining: string;
   careerStartDate: string;
+  managerId: string | null;
 }
 
 interface UserFormProps {
@@ -55,7 +57,8 @@ const UserForm: React.FC<UserFormProps> = ({
     expertiseId: initialData.expertiseId || null,
     resourceTypeId: initialData.resourceTypeId || null,
     dateOfJoining: initialData.dateOfJoining || '',
-    careerStartDate: initialData.careerStartDate || ''
+    careerStartDate: initialData.careerStartDate || '',
+    managerId: initialData.managerId || null
   });
 
   const handleInputChange = (field: keyof UserFormData, value: string | null) => {
@@ -185,6 +188,19 @@ const UserForm: React.FC<UserFormProps> = ({
                       <SelectItem value="employee">Employee</SelectItem>
                     </SelectContent>
                   </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="manager" className="flex items-center gap-2">
+                    <User size={16} />
+                    Manager (Optional)
+                  </Label>
+                  <ProfileCombobox
+                    value={formData.managerId}
+                    onValueChange={(value) => handleInputChange('managerId', value)}
+                    placeholder="Select manager..."
+                    label="Manager"
+                  />
                 </div>
 
                 <div className="space-y-2">

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import DashboardLayout from '@/components/Layout/DashboardLayout';
@@ -21,6 +20,7 @@ interface UserData {
   resource_type: string | null;
   date_of_joining: string | null;
   career_start_date: string | null;
+  manager: string | null;
 }
 
 const EditUser: React.FC = () => {
@@ -71,7 +71,8 @@ const EditUser: React.FC = () => {
           expertise_id: user.expertise_id || null,
           resource_type: user.resource_type || null,
           date_of_joining: user.date_of_joining || null,
-          career_start_date: user.career_start_date || null
+          career_start_date: user.career_start_date || null,
+          manager: user.manager || null
         });
       } else {
         toast({
@@ -112,6 +113,7 @@ const EditUser: React.FC = () => {
           resourceTypeId: formData.resourceTypeId || null,
           dateOfJoining: formData.dateOfJoining || null,
           careerStartDate: formData.careerStartDate || null,
+          managerId: formData.managerId || null,
           password: formData.password || undefined
         }
       });
@@ -186,7 +188,8 @@ const EditUser: React.FC = () => {
             expertiseId: userData.expertise_id,
             resourceTypeId: userData.resource_type,
             dateOfJoining: userData.date_of_joining || '',
-            careerStartDate: userData.career_start_date || ''
+            careerStartDate: userData.career_start_date || '',
+            managerId: userData.manager
           }}
           onSubmit={handleSubmit}
           isLoading={isLoading}

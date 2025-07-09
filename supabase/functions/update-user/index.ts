@@ -32,6 +32,7 @@ serve(async (req) => {
       resourceTypeId,
       dateOfJoining, 
       careerStartDate, 
+      managerId,
       password 
     } = await req.json();
     
@@ -53,6 +54,7 @@ serve(async (req) => {
       if (resourceTypeId !== undefined) userMetadata.resource_type_id = resourceTypeId;
       if (dateOfJoining !== undefined) userMetadata.date_of_joining = dateOfJoining;
       if (careerStartDate !== undefined) userMetadata.career_start_date = careerStartDate;
+      if (managerId !== undefined) userMetadata.manager = managerId;
       
       const updateData: Record<string, any> = {};
       if (email) updateData.email = email;
@@ -75,7 +77,7 @@ serve(async (req) => {
     }
     
     // Update profile table if profile-related fields are provided
-    if (firstName || lastName || employeeId || sbuId !== undefined || expertiseId !== undefined || resourceTypeId !== undefined || dateOfJoining !== undefined || careerStartDate !== undefined) {
+    if (firstName || lastName || employeeId || sbuId !== undefined || expertiseId !== undefined || resourceTypeId !== undefined || dateOfJoining !== undefined || careerStartDate !== undefined || managerId !== undefined) {
       const profileUpdates: Record<string, any> = {};
       if (firstName) profileUpdates.first_name = firstName;
       if (lastName) profileUpdates.last_name = lastName;
@@ -85,6 +87,7 @@ serve(async (req) => {
       if (resourceTypeId !== undefined) profileUpdates.resource_type = resourceTypeId;
       if (dateOfJoining !== undefined) profileUpdates.date_of_joining = dateOfJoining;
       if (careerStartDate !== undefined) profileUpdates.career_start_date = careerStartDate;
+      if (managerId !== undefined) profileUpdates.manager = managerId;
       
       const { error: profileError } = await supabase
         .from('profiles')
