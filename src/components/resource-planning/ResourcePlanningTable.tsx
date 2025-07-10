@@ -4,11 +4,13 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useResourcePlanning } from '@/hooks/use-resource-planning';
 import { useUnplannedResources } from '@/hooks/use-unplanned-resources';
-import { ResourceAssignmentDialog } from './ResourceAssignmentDialog';
 import { ResourcePlanningSearchControls } from './ResourcePlanningSearchControls';
 import { ResourcePlanningFilters } from './ResourcePlanningFilters';
 import { UnplannedResourcesTab } from './UnplannedResourcesTab';
 import { PlannedResourcesTab } from './PlannedResourcesTab';
+import { ResourceAssignmentForm } from './ResourceAssignmentForm';
+import { useResourceAssignmentForm } from './hooks/useResourceAssignmentForm';
+import { usePlannedResources } from '@/hooks/use-planned-resources';
 
 export const ResourcePlanningTable: React.FC = () => {
   const {
@@ -34,36 +36,97 @@ export const ResourcePlanningTable: React.FC = () => {
     selectedManager,
   });
 
-  const [createDialogOpen, setCreateDialogOpen] = useState(false);
+  const [showCreateForm, setShowCreateForm] = useState(false);
   const [preselectedProfileId, setPreselectedProfileId] = useState<string | null>(null);
+  const [editingItem, setEditingItem] = useState<any>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  
+  const { createResourcePlanning, updateResourcePlanning } = usePlannedResources();
+
+  const formState = useResourceAssignmentForm({
+    mode: editingItem ? 'edit' : 'create',
+    preselectedProfileId,
+    item: editingItem,
+  });
 
   const handleCreatePlan = (profileId: string) => {
     setPreselectedProfileId(profileId);
-    setCreateDialogOpen(true);
+    setEditingItem(null);
+    setShowCreateForm(true);
   };
 
   const handleCreateNewAssignment = () => {
     setPreselectedProfileId(null);
-    setCreateDialogOpen(true);
+    setEditingItem(null);
+    setShowCreateForm(true);
   };
 
-  const handleDialogClose = () => {
-    setCreateDialogOpen(false);
+  const handleEditAssignment = (item: any) => {
+    setEditingItem(item);
     setPreselectedProfileId(null);
+    setShowCreateForm(true);
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!formState.profileId || isSubmitting) {
+      return;
+    }
+
+    setIsSubmitting(true);
+    const resourcePlanningData = formState.getFormData();
+
+    try {
+      if (editingItem) {
+        await new Promise<void>((resolve, reject) => {
+          updateResourcePlanning(
+            {
+              id: editingItem.id,
+              updates: resourcePlanningData,
+            },
+            {
+              onSuccess: () => {
+                formState.resetForm();
+                setShowCreateForm(false);
+                setEditingItem(null);
+                resolve();
+              },
+              onError: (error) => reject(error),
+            }
+          );
+        });
+      } else {
+        await new Promise<void>((resolve, reject) => {
+          createResourcePlanning(resourcePlanningData, {
+            onSuccess: () => {
+              formState.resetForm();
+              setShowCreateForm(false);
+              setPreselectedProfileId(null);
+              resolve();
+            },
+            onError: (error) => reject(error),
+          });
+        });
+      }
+    } catch (error) {
+      console.error('Mutation error:', error);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleCancel = () => {
+    setShowCreateForm(false);
+    setEditingItem(null);
+    setPreselectedProfileId(null);
+    formState.resetForm();
   };
 
   return (
     <Card>
       <CardHeader>
-        <div className="flex items-center justify-between">
-          <CardTitle>Resource Planning</CardTitle>
-          <ResourceAssignmentDialog 
-            mode="create" 
-            open={createDialogOpen}
-            onOpenChange={handleDialogClose}
-            preselectedProfileId={preselectedProfileId}
-          />
-        </div>
+        <CardTitle>Resource Planning</CardTitle>
         
         <div className="space-y-4">
           <ResourcePlanningFilters
@@ -74,7 +137,7 @@ export const ResourcePlanningTable: React.FC = () => {
             showUnplanned={showUnplanned}
             onShowUnplannedChange={setShowUnplanned}
             onClearFilters={clearFilters}
-          />
+            />
           
           <ResourcePlanningSearchControls 
             searchQuery={searchQuery}
@@ -84,6 +147,33 @@ export const ResourcePlanningTable: React.FC = () => {
       </CardHeader>
       
       <CardContent>
+        {showCreateForm && (
+          <div className="mb-6 p-4 border rounded-lg bg-muted/50">
+            <h3 className="text-lg font-semibold mb-4">
+              {editingItem ? 'Edit Resource Assignment' : 'Create Resource Assignment'}
+            </h3>
+            <ResourceAssignmentForm
+              mode={editingItem ? 'edit' : 'create'}
+              profileId={formState.profileId}
+              setProfileId={formState.setProfileId}
+              billTypeId={formState.billTypeId}
+              setBillTypeId={formState.setBillTypeId}
+              projectId={formState.projectId}
+              setProjectId={formState.setProjectId}
+              engagementPercentage={formState.engagementPercentage}
+              setEngagementPercentage={formState.setEngagementPercentage}
+              releaseDate={formState.releaseDate}
+              setReleaseDate={formState.setReleaseDate}
+              engagementStartDate={formState.engagementStartDate}
+              setEngagementStartDate={formState.setEngagementStartDate}
+              preselectedProfileId={preselectedProfileId}
+              onSubmit={handleSubmit}
+              onCancel={handleCancel}
+              isLoading={isSubmitting}
+            />
+          </div>
+        )}
+
         <Tabs value={showUnplanned ? "unplanned" : "planned"} className="w-full">
           <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger 
@@ -106,6 +196,7 @@ export const ResourcePlanningTable: React.FC = () => {
               selectedSbu={selectedSbu}
               selectedManager={selectedManager}
               onCreateNewAssignment={handleCreateNewAssignment}
+              onEditAssignment={handleEditAssignment}
             />
           </TabsContent>
 

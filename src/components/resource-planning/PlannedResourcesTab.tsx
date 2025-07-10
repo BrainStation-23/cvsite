@@ -13,6 +13,7 @@ interface PlannedResourcesTabProps {
   selectedSbu: string | null;
   selectedManager: string | null;
   onCreateNewAssignment: () => void;
+  onEditAssignment: (item: any) => void;
 }
 
 export const PlannedResourcesTab: React.FC<PlannedResourcesTabProps> = ({
@@ -20,6 +21,7 @@ export const PlannedResourcesTab: React.FC<PlannedResourcesTabProps> = ({
   selectedSbu,
   selectedManager,
   onCreateNewAssignment,
+  onEditAssignment,
 }) => {
   const {
     data,
@@ -91,7 +93,11 @@ export const PlannedResourcesTab: React.FC<PlannedResourcesTabProps> = ({
               />
               <TableBody>
                 {data.map((item) => (
-                  <ResourcePlanningTableRow key={item.id} item={item} />
+                  <ResourcePlanningTableRow 
+                    key={item.id} 
+                    item={item} 
+                    onEdit={onEditAssignment}
+                  />
                 ))}
               </TableBody>
             </Table>
