@@ -50,6 +50,7 @@ export const ResourcePlanningTable: React.FC = () => {
   });
 
   const handleCreatePlan = (profileId: string) => {
+    console.log('Creating plan for profile:', profileId);
     setPreselectedProfileId(profileId);
     setEditingItem(null);
     setShowCreateForm(true);
@@ -90,6 +91,7 @@ export const ResourcePlanningTable: React.FC = () => {
                 formState.resetForm();
                 setShowCreateForm(false);
                 setEditingItem(null);
+                setPreselectedProfileId(null);
                 resolve();
               },
               onError: (error) => reject(error),
