@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { TableCell, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -8,7 +8,6 @@ import { format } from 'date-fns';
 import { usePlannedResources } from '@/hooks/use-planned-resources';
 import { useConfirmationDialog } from '@/hooks/use-confirmation-dialog';
 import { ConfirmationDialog } from '@/components/ui/confirmation-dialog';
-import { ResourceAssignmentDialog } from './ResourceAssignmentDialog';
 
 interface ResourcePlanningData {
   id: string;
@@ -41,10 +40,10 @@ interface ResourcePlanningData {
 
 interface ResourcePlanningTableRowProps {
   item: ResourcePlanningData;
+  onEdit: (item: ResourcePlanningData) => void;
 }
 
-export const ResourcePlanningTableRow: React.FC<ResourcePlanningTableRowProps> = ({ item }) => {
-  const [editDialogOpen, setEditDialogOpen] = useState(false);
+export const ResourcePlanningTableRow: React.FC<ResourcePlanningTableRowProps> = ({ item, onEdit }) => {
   const { updateResourcePlanning, deleteResourcePlanning, isDeleting, isUpdating } = usePlannedResources();
   const { isOpen, config, showConfirmation, hideConfirmation, handleConfirm } = useConfirmationDialog();
 
@@ -129,7 +128,7 @@ export const ResourcePlanningTableRow: React.FC<ResourcePlanningTableRowProps> =
             <Button
               variant="ghost"
               size="sm"
-              onClick={() => setEditDialogOpen(true)}
+              onClick={() => onEdit(item)}
               disabled={isUpdating}
             >
               <Edit2 className="h-4 w-4" />
@@ -154,13 +153,6 @@ export const ResourcePlanningTableRow: React.FC<ResourcePlanningTableRowProps> =
           </div>
         </TableCell>
       </TableRow>
-
-      <ResourceAssignmentDialog
-        mode="edit"
-        item={item}
-        open={editDialogOpen}
-        onOpenChange={setEditDialogOpen}
-      />
 
       <ConfirmationDialog
         isOpen={isOpen}
