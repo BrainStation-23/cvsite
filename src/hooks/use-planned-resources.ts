@@ -116,6 +116,12 @@ export function usePlannedResources() {
     }
   });
 
+  // Optimized query invalidation - only invalidate specific keys
+  const invalidateResourcePlanningQueries = () => {
+    queryClient.invalidateQueries({ queryKey: ['resource-planning-planned'] });
+    queryClient.invalidateQueries({ queryKey: ['resource-planning-unplanned'] });
+  };
+
   const createResourcePlanningMutation = useMutation({
     mutationFn: async (newResourcePlanning: {
       profile_id: string;
@@ -136,8 +142,7 @@ export function usePlannedResources() {
       return data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['resource-planning-planned'] });
-      queryClient.invalidateQueries({ queryKey: ['resource-planning-unplanned'] });
+      // Don't invalidate queries immediately - let the callback handle it
       toast({
         title: 'Success',
         description: 'Resource planning entry created successfully.',
@@ -176,8 +181,7 @@ export function usePlannedResources() {
       return data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['resource-planning-planned'] });
-      queryClient.invalidateQueries({ queryKey: ['resource-planning-unplanned'] });
+      // Don't invalidate queries immediately - let the callback handle it
       toast({
         title: 'Success',
         description: 'Resource planning entry updated successfully.',
@@ -203,8 +207,7 @@ export function usePlannedResources() {
       if (error) throw error;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['resource-planning-planned'] });
-      queryClient.invalidateQueries({ queryKey: ['resource-planning-unplanned'] });
+      invalidateResourcePlanningQueries();
       toast({
         title: 'Success',
         description: 'Resource planning entry deleted successfully.',
@@ -236,6 +239,8 @@ export function usePlannedResources() {
   ) => {
     createResourcePlanningMutation.mutate(data, {
       onSuccess: () => {
+        // Invalidate queries after successful completion
+        invalidateResourcePlanningQueries();
         callbacks?.onSuccess?.();
       },
       onError: (error) => {
@@ -250,6 +255,8 @@ export function usePlannedResources() {
   ) => {
     updateResourcePlanningMutation.mutate(data, {
       onSuccess: () => {
+        // Invalidate queries after successful completion
+        invalidateResourcePlanningQueries();
         callbacks?.onSuccess?.();
       },
       onError: (error) => {

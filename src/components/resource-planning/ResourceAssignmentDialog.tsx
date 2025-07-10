@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -71,7 +71,7 @@ export const ResourceAssignmentDialog: React.FC<ResourceAssignmentDialogProps> =
     item,
   });
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!formState.profileId || isSubmitting) {
@@ -90,7 +90,12 @@ export const ResourceAssignmentDialog: React.FC<ResourceAssignmentDialogProps> =
               updates: resourcePlanningData,
             },
             {
-              onSuccess: () => resolve(),
+              onSuccess: () => {
+                // Only reset form and close dialog on success
+                formState.resetForm();
+                setOpen(false);
+                resolve();
+              },
               onError: (error) => reject(error),
             }
           );
@@ -98,26 +103,27 @@ export const ResourceAssignmentDialog: React.FC<ResourceAssignmentDialogProps> =
       } else {
         await new Promise<void>((resolve, reject) => {
           createResourcePlanning(resourcePlanningData, {
-            onSuccess: () => resolve(),
+            onSuccess: () => {
+              // Only reset form and close dialog on success
+              formState.resetForm();
+              setOpen(false);
+              resolve();
+            },
             onError: (error) => reject(error),
           });
         });
       }
-
-      // Only reset form and close dialog on success
-      formState.resetForm();
-      setOpen(false);
     } catch (error) {
       // Error handling is already done by the mutations via toast
       console.error('Mutation error:', error);
     } finally {
       setIsSubmitting(false);
     }
-  };
+  }, [formState, mode, item, isSubmitting, updateResourcePlanning, createResourcePlanning, setOpen]);
 
-  const handleCancel = () => {
+  const handleCancel = useCallback(() => {
     setOpen(false);
-  };
+  }, [setOpen]);
 
   const DialogComponent = () => (
     <DialogContent className="sm:max-w-[600px]">
