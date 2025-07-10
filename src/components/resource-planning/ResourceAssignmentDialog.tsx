@@ -92,7 +92,20 @@ export const ResourceAssignmentDialog: React.FC<ResourceAssignmentDialogProps> =
     }
   }, [item, mode]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const resetForm = () => {
+    if (mode === 'create') {
+      if (!preselectedProfileId) {
+        setProfileId(null);
+      }
+      setBillTypeId(null);
+      setProjectId(null);
+      setEngagementPercentage(100);
+      setReleaseDate('');
+      setEngagementStartDate('');
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!profileId) {
@@ -108,28 +121,44 @@ export const ResourceAssignmentDialog: React.FC<ResourceAssignmentDialogProps> =
       engagement_start_date: engagementStartDate || undefined,
     };
 
-    if (mode === 'edit' && item) {
-      updateResourcePlanning({
-        id: item.id,
-        updates: resourcePlanningData,
-      });
-    } else {
-      createResourcePlanning(resourcePlanningData);
-    }
-
-    // Reset form for create mode
-    if (mode === 'create') {
-      if (!preselectedProfileId) {
-        setProfileId(null);
+    try {
+      if (mode === 'edit' && item) {
+        await new Promise<void>((resolve, reject) => {
+          updateResourcePlanning(
+            {
+              id: item.id,
+              updates: resourcePlanningData,
+            },
+            {
+              onSuccess: () => {
+                resolve();
+              },
+              onError: (error) => {
+                reject(error);
+              },
+            }
+          );
+        });
+      } else {
+        await new Promise<void>((resolve, reject) => {
+          createResourcePlanning(resourcePlanningData, {
+            onSuccess: () => {
+              resolve();
+            },
+            onError: (error) => {
+              reject(error);
+            },
+          });
+        });
       }
-      setBillTypeId(null);
-      setProjectId(null);
-      setEngagementPercentage(100);
-      setReleaseDate('');
-      setEngagementStartDate('');
+
+      // Only reset form and close dialog on success
+      resetForm();
+      setOpen(false);
+    } catch (error) {
+      // Error handling is already done by the mutations via toast
+      console.error('Mutation error:', error);
     }
-    
-    setOpen(false);
   };
 
   const DialogComponent = () => (

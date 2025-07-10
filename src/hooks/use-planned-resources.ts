@@ -44,6 +44,11 @@ interface ResourcePlanningResponse {
   };
 }
 
+interface MutationCallbacks {
+  onSuccess?: () => void;
+  onError?: (error: any) => void;
+}
+
 export function usePlannedResources() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -225,6 +230,34 @@ export function usePlannedResources() {
     });
   }
 
+  const createResourcePlanning = (
+    data: Parameters<typeof createResourcePlanningMutation.mutate>[0],
+    callbacks?: MutationCallbacks
+  ) => {
+    createResourcePlanningMutation.mutate(data, {
+      onSuccess: () => {
+        callbacks?.onSuccess?.();
+      },
+      onError: (error) => {
+        callbacks?.onError?.(error);
+      },
+    });
+  };
+
+  const updateResourcePlanning = (
+    data: Parameters<typeof updateResourcePlanningMutation.mutate>[0],
+    callbacks?: MutationCallbacks
+  ) => {
+    updateResourcePlanningMutation.mutate(data, {
+      onSuccess: () => {
+        callbacks?.onSuccess?.();
+      },
+      onError: (error) => {
+        callbacks?.onError?.(error);
+      },
+    });
+  };
+
   return {
     data: plannedData?.resource_planning || [],
     pagination: plannedData?.pagination,
@@ -242,8 +275,8 @@ export function usePlannedResources() {
     setSelectedSbu,
     selectedManager,
     setSelectedManager,
-    createResourcePlanning: createResourcePlanningMutation.mutate,
-    updateResourcePlanning: updateResourcePlanningMutation.mutate,
+    createResourcePlanning,
+    updateResourcePlanning,
     deleteResourcePlanning: deleteResourcePlanningMutation.mutate,
     isCreating: createResourcePlanningMutation.isPending,
     isUpdating: updateResourcePlanningMutation.isPending,
