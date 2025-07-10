@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -9,14 +9,10 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Plus } from 'lucide-react';
 import { usePlannedResources } from '@/hooks/use-planned-resources';
-import { ProfileCombobox } from '@/components/admin/user/ProfileCombobox';
-import BillTypeCombobox from './BillTypeCombobox';
-import { ProjectCombobox } from '@/components/projects/ProjectCombobox';
-import DatePicker from '@/components/admin/user/DatePicker';
+import { ResourceAssignmentForm } from './ResourceAssignmentForm';
+import { useResourceAssignmentForm } from './hooks/useResourceAssignmentForm';
 
 interface ResourcePlanningData {
   id: string;
@@ -62,64 +58,28 @@ export const ResourceAssignmentDialog: React.FC<ResourceAssignmentDialogProps> =
   item,
 }) => {
   const [internalOpen, setInternalOpen] = useState(false);
-  const [profileId, setProfileId] = useState<string | null>(preselectedProfileId || item?.profile_id || null);
-  const [billTypeId, setBillTypeId] = useState<string | null>(item?.bill_type?.id || null);
-  const [projectId, setProjectId] = useState<string | null>(item?.project?.id || null);
-  const [engagementPercentage, setEngagementPercentage] = useState<number>(item?.engagement_percentage || 100);
-  const [releaseDate, setReleaseDate] = useState<string>(item?.release_date || '');
-  const [engagementStartDate, setEngagementStartDate] = useState<string>(item?.engagement_start_date || '');
-
-  const { createResourcePlanning, updateResourcePlanning, isCreating, isUpdating } = usePlannedResources();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { createResourcePlanning, updateResourcePlanning } = usePlannedResources();
 
   // Use controlled open state if provided, otherwise use internal state
   const open = controlledOpen !== undefined ? controlledOpen : internalOpen;
   const setOpen = onOpenChange || setInternalOpen;
 
-  useEffect(() => {
-    if (preselectedProfileId) {
-      setProfileId(preselectedProfileId);
-    }
-  }, [preselectedProfileId]);
-
-  useEffect(() => {
-    if (item && mode === 'edit') {
-      setProfileId(item.profile_id);
-      setBillTypeId(item.bill_type?.id || null);
-      setProjectId(item.project?.id || null);
-      setEngagementPercentage(item.engagement_percentage);
-      setReleaseDate(item.release_date || '');
-      setEngagementStartDate(item.engagement_start_date || '');
-    }
-  }, [item, mode]);
-
-  const resetForm = () => {
-    if (mode === 'create') {
-      if (!preselectedProfileId) {
-        setProfileId(null);
-      }
-      setBillTypeId(null);
-      setProjectId(null);
-      setEngagementPercentage(100);
-      setReleaseDate('');
-      setEngagementStartDate('');
-    }
-  };
+  const formState = useResourceAssignmentForm({
+    mode,
+    preselectedProfileId,
+    item,
+  });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!profileId) {
+    if (!formState.profileId || isSubmitting) {
       return;
     }
 
-    const resourcePlanningData = {
-      profile_id: profileId,
-      bill_type_id: billTypeId || undefined,
-      project_id: projectId || undefined,
-      engagement_percentage: engagementPercentage,
-      release_date: releaseDate || undefined,
-      engagement_start_date: engagementStartDate || undefined,
-    };
+    setIsSubmitting(true);
+    const resourcePlanningData = formState.getFormData();
 
     try {
       if (mode === 'edit' && item) {
@@ -130,35 +90,33 @@ export const ResourceAssignmentDialog: React.FC<ResourceAssignmentDialogProps> =
               updates: resourcePlanningData,
             },
             {
-              onSuccess: () => {
-                resolve();
-              },
-              onError: (error) => {
-                reject(error);
-              },
+              onSuccess: () => resolve(),
+              onError: (error) => reject(error),
             }
           );
         });
       } else {
         await new Promise<void>((resolve, reject) => {
           createResourcePlanning(resourcePlanningData, {
-            onSuccess: () => {
-              resolve();
-            },
-            onError: (error) => {
-              reject(error);
-            },
+            onSuccess: () => resolve(),
+            onError: (error) => reject(error),
           });
         });
       }
 
       // Only reset form and close dialog on success
-      resetForm();
+      formState.resetForm();
       setOpen(false);
     } catch (error) {
       // Error handling is already done by the mutations via toast
       console.error('Mutation error:', error);
+    } finally {
+      setIsSubmitting(false);
     }
+  };
+
+  const handleCancel = () => {
+    setOpen(false);
   };
 
   const DialogComponent = () => (
@@ -175,82 +133,25 @@ export const ResourceAssignmentDialog: React.FC<ResourceAssignmentDialogProps> =
         </DialogDescription>
       </DialogHeader>
       
-      <form onSubmit={handleSubmit} className="space-y-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="space-y-2">
-            <Label htmlFor="profile">Employee *</Label>
-            <ProfileCombobox
-              value={profileId}
-              onValueChange={setProfileId}
-              placeholder="Select employee..."
-              disabled={!!preselectedProfileId || mode === 'edit'}
-              label="Employee"
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="engagement">Engagement Percentage *</Label>
-            <Input
-              id="engagement"
-              type="number"
-              min="1"
-              max="100"
-              value={engagementPercentage}
-              onChange={(e) => setEngagementPercentage(Number(e.target.value))}
-              placeholder="100"
-              required
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="billType">Bill Type</Label>
-            <BillTypeCombobox
-              value={billTypeId}
-              onValueChange={setBillTypeId}
-              placeholder="Select bill type..."
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="project">Project</Label>
-            <ProjectCombobox
-              value={projectId}
-              onValueChange={setProjectId}
-              placeholder="Select project..."
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="startDate">Engagement Start Date</Label>
-            <DatePicker
-              value={engagementStartDate}
-              onChange={setEngagementStartDate}
-              placeholder="Select start date"
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="releaseDate">Release Date</Label>
-            <DatePicker
-              value={releaseDate}
-              onChange={setReleaseDate}
-              placeholder="Select release date"
-            />
-          </div>
-        </div>
-
-        <div className="flex justify-end space-x-2">
-          <Button type="button" variant="outline" onClick={() => setOpen(false)}>
-            Cancel
-          </Button>
-          <Button type="submit" disabled={(mode === 'create' ? isCreating : isUpdating) || !profileId}>
-            {mode === 'create' 
-              ? (isCreating ? 'Creating...' : 'Create Assignment')
-              : (isUpdating ? 'Updating...' : 'Update Assignment')
-            }
-          </Button>
-        </div>
-      </form>
+      <ResourceAssignmentForm
+        mode={mode}
+        profileId={formState.profileId}
+        setProfileId={formState.setProfileId}
+        billTypeId={formState.billTypeId}
+        setBillTypeId={formState.setBillTypeId}
+        projectId={formState.projectId}
+        setProjectId={formState.setProjectId}
+        engagementPercentage={formState.engagementPercentage}
+        setEngagementPercentage={formState.setEngagementPercentage}
+        releaseDate={formState.releaseDate}
+        setReleaseDate={formState.setReleaseDate}
+        engagementStartDate={formState.engagementStartDate}
+        setEngagementStartDate={formState.setEngagementStartDate}
+        preselectedProfileId={preselectedProfileId}
+        onSubmit={handleSubmit}
+        onCancel={handleCancel}
+        isLoading={isSubmitting}
+      />
     </DialogContent>
   );
 
