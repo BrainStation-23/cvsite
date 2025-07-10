@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { TableCell, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Edit2, Trash2 } from 'lucide-react';
+import { Edit2, Trash2, CheckCircle } from 'lucide-react';
 import { format } from 'date-fns';
 import { usePlannedResources } from '@/hooks/use-planned-resources';
 import { useConfirmationDialog } from '@/hooks/use-confirmation-dialog';
@@ -16,6 +16,7 @@ interface ResourcePlanningData {
   engagement_percentage: number;
   release_date: string;
   engagement_start_date: string;
+  engagement_complete: boolean;
   created_at: string;
   updated_at: string;
   profile: {
@@ -44,7 +45,7 @@ interface ResourcePlanningTableRowProps {
 
 export const ResourcePlanningTableRow: React.FC<ResourcePlanningTableRowProps> = ({ item }) => {
   const [editDialogOpen, setEditDialogOpen] = useState(false);
-  const { deleteResourcePlanning, isDeleting } = usePlannedResources();
+  const { updateResourcePlanning, deleteResourcePlanning, isDeleting, isUpdating } = usePlannedResources();
   const { isOpen, config, showConfirmation, hideConfirmation, handleConfirm } = useConfirmationDialog();
 
   const handleDeleteClick = () => {
@@ -55,6 +56,20 @@ export const ResourcePlanningTableRow: React.FC<ResourcePlanningTableRowProps> =
       cancelText: 'Cancel',
       variant: 'destructive',
       onConfirm: () => deleteResourcePlanning(item.id)
+    });
+  };
+
+  const handleCompleteEngagement = () => {
+    showConfirmation({
+      title: 'Mark Engagement as Complete',
+      description: 'Are you sure you want to mark this engagement as complete? This will remove it from the planned resources view.',
+      confirmText: 'Mark Complete',
+      cancelText: 'Cancel',
+      variant: 'default',
+      onConfirm: () => updateResourcePlanning({ 
+        id: item.id, 
+        updates: { engagement_complete: true } 
+      })
     });
   };
 
@@ -115,8 +130,18 @@ export const ResourcePlanningTableRow: React.FC<ResourcePlanningTableRowProps> =
               variant="ghost"
               size="sm"
               onClick={() => setEditDialogOpen(true)}
+              disabled={isUpdating}
             >
               <Edit2 className="h-4 w-4" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleCompleteEngagement}
+              disabled={isUpdating}
+              title="Mark engagement as complete"
+            >
+              <CheckCircle className="h-4 w-4" />
             </Button>
             <Button
               variant="ghost"

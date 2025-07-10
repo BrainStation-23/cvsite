@@ -968,6 +968,7 @@ export type Database = {
         Row: {
           bill_type_id: string | null
           created_at: string
+          engagement_complete: boolean
           engagement_percentage: number | null
           engagement_start_date: string | null
           id: string
@@ -979,6 +980,7 @@ export type Database = {
         Insert: {
           bill_type_id?: string | null
           created_at?: string
+          engagement_complete?: boolean
           engagement_percentage?: number | null
           engagement_start_date?: string | null
           id?: string
@@ -990,6 +992,7 @@ export type Database = {
         Update: {
           bill_type_id?: string | null
           created_at?: string
+          engagement_complete?: boolean
           engagement_percentage?: number | null
           engagement_start_date?: string | null
           id?: string

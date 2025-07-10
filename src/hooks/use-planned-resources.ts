@@ -10,6 +10,7 @@ interface ResourcePlanningData {
   engagement_percentage: number;
   release_date: string;
   engagement_start_date: string;
+  engagement_complete: boolean;
   created_at: string;
   updated_at: string;
   profile: {
@@ -118,6 +119,7 @@ export function usePlannedResources() {
       engagement_percentage: number;
       release_date?: string;
       engagement_start_date?: string;
+      engagement_complete?: boolean;
     }) => {
       const { data, error } = await supabase
         .from('resource_planning')
@@ -155,6 +157,7 @@ export function usePlannedResources() {
         engagement_percentage: number;
         release_date: string;
         engagement_start_date: string;
+        engagement_complete: boolean;
       }> 
     }) => {
       const { data, error } = await supabase
