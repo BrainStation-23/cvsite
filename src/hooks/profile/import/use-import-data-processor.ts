@@ -2,7 +2,6 @@
 import { ProfileJSONData } from '@/services/profile/ProfileJSONService';
 import { Skill, Experience, Education, Training, Achievement, Project } from '@/types';
 import { ensureDate } from './use-import-date-utils';
-import { supabase } from '@/integrations/supabase/client';
 
 interface ImportHandlers {
   saveGeneralInfo: (data: any) => Promise<boolean>;
@@ -23,46 +22,18 @@ interface ImportStatsActions {
 }
 
 export const useImportDataProcessor = () => {
-  // Helper function to validate designation exists
-  const validateDesignation = async (designation: string | null | undefined): Promise<string | null> => {
-    if (!designation || designation.trim() === '') {
-      return null;
-    }
-
-    try {
-      const { data, error } = await supabase
-        .from('designations')
-        .select('name')
-        .ilike('name', designation.trim())
-        .limit(1);
-
-      if (error) {
-        console.warn('Error checking designation:', error);
-        return null;
-      }
-
-      return data && data.length > 0 ? data[0].name : null;
-    } catch (error) {
-      console.warn('Failed to validate designation:', designation, error);
-      return null;
-    }
-  };
-
   const processGeneralInfo = async (
     data: ProfileJSONData, 
     handlers: ImportHandlers, 
     stats: ImportStatsActions
   ) => {
     try {
-      // Validate current designation if provided
-      const validatedDesignation = await validateDesignation(data.generalInfo.current_designation);
-      
       const success = await handlers.saveGeneralInfo({
         firstName: data.generalInfo.firstName,
         lastName: data.generalInfo.lastName,
         biography: data.generalInfo.biography || '',
         profileImage: data.generalInfo.profileImage || '',
-        currentDesignation: validatedDesignation
+        currentDesignation: data.generalInfo.current_designation || null
       });
       stats.setGeneralInfoStatus(success);
       if (success) stats.incrementSuccessful();
@@ -120,12 +91,9 @@ export const useImportDataProcessor = () => {
   ) => {
     for (const exp of experiences) {
       try {
-        // Validate designation before saving
-        const validatedDesignation = await validateDesignation(exp.designation);
-        
         const success = await handlers.saveExperience({
           companyName: exp.companyName,
-          designation: validatedDesignation, // Use validated designation or null
+          designation: exp.designation || null, // Let RPC function handle validation
           description: exp.description || '',
           startDate: ensureDate(exp.startDate) || new Date(),
           endDate: ensureDate(exp.endDate),
