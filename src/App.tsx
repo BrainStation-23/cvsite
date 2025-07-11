@@ -30,6 +30,7 @@ import SecurityPage from '@/pages/security/SecurityPage';
 import NotFound from '@/pages/NotFound';
 import TrainingCertification from '@/pages/TrainingCertification';
 import ResourcePlanning from '@/pages/ResourcePlanning';
+import ResourceCalendar from '@/pages/ResourceCalendar';
 import ProjectsManagement from '@/pages/admin/ProjectsManagement';
 import './App.css';
 
@@ -226,6 +227,22 @@ function App() {
               element={
                 <ProtectedRoute allowedRoles={['manager', 'admin']}>
                   <ResourcePlanning />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/resource-calendar"
+              element={
+                <ProtectedRoute allowedRoles={['admin', 'manager']}>
+                  <ResourceCalendar />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/manager/resource-calendar"
+              element={
+                <ProtectedRoute allowedRoles={['manager', 'admin']}>
+                  <ResourceCalendar />
                 </ProtectedRoute>
               }
             />

@@ -18,7 +18,8 @@ import {
   Briefcase,
   Building2,
   ChevronDown,
-  ChevronRight
+  ChevronRight,
+  CalendarDays
 } from 'lucide-react';
 
 interface DashboardLayoutProps {
@@ -115,7 +116,8 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
       items: [
         { to: `/${user?.role}/employee-data`, icon: <Database className="w-5 h-5" />, label: 'Employee Data' },
         { to: `/${user?.role}/training-certification`, icon: <FileText className="w-5 h-5" />, label: 'Training and Certification' },
-        { to: `/${user?.role}/resource-planning`, icon: <Calendar className="w-5 h-5" />, label: 'Resource Planning' }
+        { to: `/${user?.role}/resource-planning`, icon: <Calendar className="w-5 h-5" />, label: 'Resource Planning' },
+        { to: `/${user?.role}/resource-calendar`, icon: <CalendarDays className="w-5 h-5" />, label: 'Resource Calendar' }
       ],
     },
     // Admin only: CV Templates (not grouped)
