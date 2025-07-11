@@ -9,6 +9,7 @@ interface Project {
   client_name: string | null;
   project_manager: string | null;
   budget: number | null;
+  is_active: boolean;
   created_at: string;
   updated_at: string;
   project_manager_profile?: {
@@ -43,9 +44,12 @@ interface UseProjectsManagementReturn {
   setSortBy: (sort: string) => void;
   sortOrder: 'asc' | 'desc';
   setSortOrder: (order: 'asc' | 'desc') => void;
+  showInactiveProjects: boolean;
+  setShowInactiveProjects: (show: boolean) => void;
   createProject: (project: Omit<Project, 'id' | 'created_at' | 'updated_at'>) => Promise<boolean>;
   updateProject: (id: string, project: Partial<Omit<Project, 'id' | 'created_at' | 'updated_at'>>) => Promise<boolean>;
   deleteProject: (id: string) => Promise<boolean>;
+  toggleProjectStatus: (id: string, isActive: boolean) => Promise<boolean>;
   refetch: () => void;
 }
 
@@ -59,6 +63,7 @@ export function useProjectsManagement(): UseProjectsManagementReturn {
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [sortBy, setSortBy] = useState('project_name');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
+  const [showInactiveProjects, setShowInactiveProjects] = useState(false);
 
   const fetchProjects = async () => {
     try {
@@ -75,6 +80,11 @@ export function useProjectsManagement(): UseProjectsManagementReturn {
             employee_id
           )
         `);
+
+      // Apply active/inactive filter
+      if (!showInactiveProjects) {
+        query = query.eq('is_active', true);
+      }
 
       // Apply search filter if provided
       if (searchQuery) {
@@ -102,9 +112,15 @@ export function useProjectsManagement(): UseProjectsManagementReturn {
       if (error) throw error;
 
       // Get total count for pagination
-      const { count: totalCount } = await supabase
+      let countQuery = supabase
         .from('projects_management')
         .select('*', { count: 'exact', head: true });
+      
+      if (!showInactiveProjects) {
+        countQuery = countQuery.eq('is_active', true);
+      }
+
+      const { count: totalCount } = await countQuery;
 
       const totalRecords = totalCount || 0;
       const filteredRecords = count || 0;
@@ -137,7 +153,8 @@ export function useProjectsManagement(): UseProjectsManagementReturn {
           project_name: project.project_name,
           client_name: project.client_name,
           project_manager: project.project_manager,
-          budget: project.budget
+          budget: project.budget,
+          is_active: project.is_active
         });
 
       if (error) throw error;
@@ -167,6 +184,7 @@ export function useProjectsManagement(): UseProjectsManagementReturn {
       if (project.client_name !== undefined) updateData.client_name = project.client_name;
       if (project.project_manager !== undefined) updateData.project_manager = project.project_manager;
       if (project.budget !== undefined) updateData.budget = project.budget;
+      if (project.is_active !== undefined) updateData.is_active = project.is_active;
 
       const { error } = await supabase
         .from('projects_management')
@@ -187,6 +205,33 @@ export function useProjectsManagement(): UseProjectsManagementReturn {
       toast({
         title: 'Error',
         description: 'Failed to update project',
+        variant: 'destructive'
+      });
+      return false;
+    }
+  };
+
+  const toggleProjectStatus = async (id: string, isActive: boolean): Promise<boolean> => {
+    try {
+      const { error } = await supabase
+        .from('projects_management')
+        .update({ is_active: isActive })
+        .eq('id', id);
+
+      if (error) throw error;
+
+      toast({
+        title: 'Success',
+        description: `Project ${isActive ? 'activated' : 'deactivated'} successfully`
+      });
+
+      fetchProjects();
+      return true;
+    } catch (error) {
+      console.error('Error toggling project status:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to update project status',
         variant: 'destructive'
       });
       return false;
@@ -222,11 +267,11 @@ export function useProjectsManagement(): UseProjectsManagementReturn {
 
   useEffect(() => {
     fetchProjects();
-  }, [searchQuery, currentPage, itemsPerPage, sortBy, sortOrder]);
+  }, [searchQuery, currentPage, itemsPerPage, sortBy, sortOrder, showInactiveProjects]);
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchQuery]);
+  }, [searchQuery, showInactiveProjects]);
 
   return {
     projects,
@@ -242,9 +287,12 @@ export function useProjectsManagement(): UseProjectsManagementReturn {
     setSortBy,
     sortOrder,
     setSortOrder,
+    showInactiveProjects,
+    setShowInactiveProjects,
     createProject,
     updateProject,
     deleteProject,
+    toggleProjectStatus,
     refetch: fetchProjects
   };
 }

@@ -3,6 +3,7 @@ import React from 'react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Switch } from '@/components/ui/switch';
 import { Edit, Trash2 } from 'lucide-react';
 
 interface Project {
@@ -11,6 +12,7 @@ interface Project {
   client_name: string | null;
   project_manager: string | null;
   budget: number | null;
+  is_active: boolean;
   created_at: string;
   updated_at: string;
   // Added to handle the joined profile data
@@ -25,6 +27,7 @@ interface ProjectsTableProps {
   projects: Project[];
   onEdit: (project: Project) => void;
   onDelete: (project: Project) => void;
+  onToggleStatus: (id: string, isActive: boolean) => void;
   isLoading: boolean;
 }
 
@@ -32,6 +35,7 @@ export const ProjectsTable: React.FC<ProjectsTableProps> = ({
   projects,
   onEdit,
   onDelete,
+  onToggleStatus,
   isLoading
 }) => {
   const formatCurrency = (amount: number | null) => {
@@ -91,8 +95,9 @@ export const ProjectsTable: React.FC<ProjectsTableProps> = ({
             <TableHead>Client</TableHead>
             <TableHead>Project Manager</TableHead>
             <TableHead>Budget</TableHead>
+            <TableHead>Status</TableHead>
             <TableHead>Created</TableHead>
-            <TableHead className="w-[100px]">Actions</TableHead>
+            <TableHead className="w-[120px]">Actions</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -115,6 +120,17 @@ export const ProjectsTable: React.FC<ProjectsTableProps> = ({
                 <span className="font-mono">
                   {formatCurrency(project.budget)}
                 </span>
+              </TableCell>
+              <TableCell>
+                <div className="flex items-center space-x-2">
+                  <Switch
+                    checked={project.is_active}
+                    onCheckedChange={(checked) => onToggleStatus(project.id, checked)}
+                  />
+                  <Badge variant={project.is_active ? "default" : "secondary"}>
+                    {project.is_active ? "Active" : "Inactive"}
+                  </Badge>
+                </div>
               </TableCell>
               <TableCell className="text-muted-foreground">
                 {formatDate(project.created_at)}

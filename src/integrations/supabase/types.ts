@@ -884,6 +884,7 @@ export type Database = {
           client_name: string | null
           created_at: string
           id: string
+          is_active: boolean
           project_manager: string | null
           project_name: string
           project_type: string | null
@@ -894,6 +895,7 @@ export type Database = {
           client_name?: string | null
           created_at?: string
           id?: string
+          is_active?: boolean
           project_manager?: string | null
           project_name: string
           project_type?: string | null
@@ -904,6 +906,7 @@ export type Database = {
           client_name?: string | null
           created_at?: string
           id?: string
+          is_active?: boolean
           project_manager?: string | null
           project_name?: string
           project_type?: string | null

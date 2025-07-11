@@ -15,6 +15,7 @@ interface Project {
   client_name: string | null;
   project_manager: string | null;
   budget: number | null;
+  is_active: boolean;
   created_at: string;
   updated_at: string;
 }
@@ -30,9 +31,12 @@ const ProjectsManagement: React.FC = () => {
     setCurrentPage,
     itemsPerPage,
     setItemsPerPage,
+    showInactiveProjects,
+    setShowInactiveProjects,
     createProject,
     updateProject,
-    deleteProject
+    deleteProject,
+    toggleProjectStatus
   } = useProjectsManagement();
 
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
@@ -63,8 +67,15 @@ const ProjectsManagement: React.FC = () => {
     });
   };
 
+  const handleToggleProjectStatus = (id: string, isActive: boolean) => {
+    toggleProjectStatus(id, isActive);
+  };
+
   const handleCreateProject = async (projectData: Omit<Project, 'id' | 'created_at' | 'updated_at'>) => {
-    return await createProject(projectData);
+    return await createProject({
+      ...projectData,
+      is_active: true // New projects are active by default
+    });
   };
 
   const handleUpdateProject = async (projectData: Omit<Project, 'id' | 'created_at' | 'updated_at'>) => {
@@ -90,6 +101,8 @@ const ProjectsManagement: React.FC = () => {
             onSearchChange={setSearchQuery}
             itemsPerPage={itemsPerPage}
             onItemsPerPageChange={setItemsPerPage}
+            showInactiveProjects={showInactiveProjects}
+            onShowInactiveProjectsChange={setShowInactiveProjects}
             onAddProject={handleAddProject}
           />
 
@@ -97,6 +110,7 @@ const ProjectsManagement: React.FC = () => {
             projects={projects}
             onEdit={handleEditProject}
             onDelete={handleDeleteProject}
+            onToggleStatus={handleToggleProjectStatus}
             isLoading={isLoading}
           />
 
