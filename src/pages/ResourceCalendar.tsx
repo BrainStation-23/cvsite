@@ -3,8 +3,20 @@ import React from 'react';
 import DashboardLayout from '../components/Layout/DashboardLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { CalendarDays, Users, Clock, TrendingUp } from 'lucide-react';
+import ResourceCalendarView from '../components/calendar/ResourceCalendarView';
+import { usePlannedResources } from '../hooks/use-planned-resources';
 
 const ResourceCalendar: React.FC = () => {
+  const { data: resourceData, isLoading } = usePlannedResources();
+
+  // Calculate quick stats
+  const totalResources = resourceData?.length || 0;
+  const activeProjects = new Set(resourceData?.map(r => r.project?.id).filter(Boolean)).size;
+  const averageUtilization = resourceData?.length > 0 
+    ? Math.round(resourceData.reduce((sum, r) => sum + (r.engagement_percentage || 0), 0) / resourceData.length)
+    : 0;
+  const availableResources = resourceData?.filter(r => (r.engagement_percentage || 0) < 100).length || 0;
+
   return (
     <DashboardLayout>
       <div className="space-y-6">
@@ -26,9 +38,9 @@ const ResourceCalendar: React.FC = () => {
               <Users className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">127</div>
+              <div className="text-2xl font-bold">{totalResources}</div>
               <p className="text-xs text-muted-foreground">
-                +12% from last month
+                Currently planned
               </p>
             </CardContent>
           </Card>
@@ -39,22 +51,22 @@ const ResourceCalendar: React.FC = () => {
               <CalendarDays className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">23</div>
+              <div className="text-2xl font-bold">{activeProjects}</div>
               <p className="text-xs text-muted-foreground">
-                +3 new this week
+                With allocated resources
               </p>
             </CardContent>
           </Card>
 
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Utilization Rate</CardTitle>
+              <CardTitle className="text-sm font-medium">Avg Utilization</CardTitle>
               <TrendingUp className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">87%</div>
+              <div className="text-2xl font-bold">{averageUtilization}%</div>
               <p className="text-xs text-muted-foreground">
-                +5% from last week
+                Across all resources
               </p>
             </CardContent>
           </Card>
@@ -65,87 +77,16 @@ const ResourceCalendar: React.FC = () => {
               <Clock className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">16</div>
+              <div className="text-2xl font-bold">{availableResources}</div>
               <p className="text-xs text-muted-foreground">
-                Ready for assignment
+                Under 100% utilization
               </p>
             </CardContent>
           </Card>
         </div>
 
-        {/* Main Calendar Area - Placeholder */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Resource Calendar View</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex items-center justify-center h-96 bg-gray-50 dark:bg-gray-800 rounded-lg border-2 border-dashed border-gray-300 dark:border-gray-600">
-              <div className="text-center">
-                <CalendarDays className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-                <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
-                  Calendar View Coming Soon
-                </h3>
-                <p className="text-gray-600 dark:text-gray-400 max-w-md">
-                  The interactive resource calendar will be implemented here, showing resource 
-                  allocations, project timelines, and availability across different time periods.
-                </p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Additional placeholder sections */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Upcoming Deadlines</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3">
-                <div className="flex items-center justify-between p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg">
-                  <div>
-                    <p className="font-medium">Project Alpha Release</p>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">3 days remaining</p>
-                  </div>
-                  <div className="text-yellow-600 dark:text-yellow-400">
-                    <Clock className="h-5 w-5" />
-                  </div>
-                </div>
-                <div className="flex items-center justify-between p-3 bg-red-50 dark:bg-red-900/20 rounded-lg">
-                  <div>
-                    <p className="font-medium">Beta Testing Phase</p>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">1 day overdue</p>
-                  </div>
-                  <div className="text-red-600 dark:text-red-400">
-                    <Clock className="h-5 w-5" />
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Resource Conflicts</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3">
-                <div className="flex items-center justify-between p-3 bg-orange-50 dark:bg-orange-900/20 rounded-lg">
-                  <div>
-                    <p className="font-medium">John Doe - Double Booking</p>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">Projects A & B overlap</p>
-                  </div>
-                  <div className="text-orange-600 dark:text-orange-400">
-                    <Users className="h-5 w-5" />
-                  </div>
-                </div>
-                <div className="text-center py-4 text-gray-500 dark:text-gray-400">
-                  <p>No other conflicts detected</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+        {/* Main Calendar */}
+        <ResourceCalendarView />
       </div>
     </DashboardLayout>
   );
