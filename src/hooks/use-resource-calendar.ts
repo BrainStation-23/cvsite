@@ -1,7 +1,8 @@
-
 import { useState, useMemo, useEffect } from 'react';
 import { usePlannedResources } from './use-planned-resources';
-import { startOfMonth, endOfMonth, eachDayOfInterval, format, isSameDay, parseISO } from 'date-fns';
+import { startOfMonth, endOfMonth, eachDayOfInterval, format, isSameDay, parseISO, startOfWeek, endOfWeek } from 'date-fns';
+
+export type CalendarViewType = 'day' | 'week' | 'month';
 
 export interface CalendarResource {
   id: string;
@@ -26,6 +27,7 @@ export interface CalendarDay {
 export function useResourceCalendar() {
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+  const [currentView, setCurrentView] = useState<CalendarViewType>('month');
   
   // Filter states
   const [searchQuery, setSearchQuery] = useState('');
@@ -71,10 +73,27 @@ export function useResourceCalendar() {
       }));
   }, [resourceData, showUnplanned]);
 
-  // Generate calendar days for the current month
+  // Generate calendar days based on current view
   const calendarDays = useMemo(() => {
-    const start = startOfMonth(currentMonth);
-    const end = endOfMonth(currentMonth);
+    let start: Date, end: Date;
+    
+    switch (currentView) {
+      case 'day':
+        start = selectedDate || currentMonth;
+        end = selectedDate || currentMonth;
+        break;
+      case 'week':
+        const targetDate = selectedDate || currentMonth;
+        start = startOfWeek(targetDate, { weekStartsOn: 0 });
+        end = endOfWeek(targetDate, { weekStartsOn: 0 });
+        break;
+      case 'month':
+      default:
+        start = startOfMonth(currentMonth);
+        end = endOfMonth(currentMonth);
+        break;
+    }
+    
     const days = eachDayOfInterval({ start, end });
 
     return days.map(date => {
@@ -109,7 +128,7 @@ export function useResourceCalendar() {
         overAllocatedResources,
       };
     });
-  }, [currentMonth, calendarData]);
+  }, [currentMonth, calendarData, currentView, selectedDate]);
 
   const goToPreviousMonth = () => {
     setCurrentMonth(prev => new Date(prev.getFullYear(), prev.getMonth() - 1, 1));
@@ -135,6 +154,8 @@ export function useResourceCalendar() {
     currentMonth,
     selectedDate,
     setSelectedDate,
+    currentView,
+    setCurrentView,
     calendarDays,
     calendarData,
     isLoading,

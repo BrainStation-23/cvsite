@@ -4,8 +4,11 @@ import { Card, CardContent } from '@/components/ui/card';
 import { useResourceCalendar } from '@/hooks/use-resource-calendar';
 import { CalendarHeader } from './CalendarHeader';
 import { CalendarGrid } from './CalendarGrid';
+import { CalendarDayView } from './CalendarDayView';
+import { CalendarWeekView } from './CalendarWeekView';
 import { DayDetailsPanel } from './DayDetailsPanel';
 import { ResourceCalendarFilters } from './ResourceCalendarFilters';
+import { CalendarViewSelector } from './CalendarViewSelector';
 import { isSameDay } from 'date-fns';
 
 const ResourceCalendarView: React.FC = () => {
@@ -13,6 +16,8 @@ const ResourceCalendarView: React.FC = () => {
     currentMonth,
     selectedDate,
     setSelectedDate,
+    currentView,
+    setCurrentView,
     calendarDays,
     isLoading,
     goToPreviousMonth,
@@ -44,6 +49,53 @@ const ResourceCalendarView: React.FC = () => {
     ? calendarDays.find(day => isSameDay(day.date, selectedDate))
     : null;
 
+  const renderCalendarContent = () => {
+    switch (currentView) {
+      case 'day':
+        return (
+          <CalendarDayView
+            selectedDate={selectedDate || currentMonth}
+            dayData={selectedDayData}
+          />
+        );
+      case 'week':
+        return (
+          <CalendarWeekView
+            currentDate={selectedDate || currentMonth}
+            calendarDays={calendarDays}
+            selectedDate={selectedDate}
+            onDateSelect={setSelectedDate}
+          />
+        );
+      case 'month':
+      default:
+        return (
+          <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+            {/* Calendar Grid */}
+            <div className="lg:col-span-3">
+              <Card>
+                <CardContent className="p-6">
+                  <CalendarGrid 
+                    calendarDays={calendarDays}
+                    selectedDate={selectedDate}
+                    onDateSelect={setSelectedDate}
+                  />
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Day Details Sidebar */}
+            <div className="lg:col-span-1">
+              <DayDetailsPanel
+                selectedDate={selectedDate}
+                dayData={selectedDayData}
+              />
+            </div>
+          </div>
+        );
+    }
+  };
+
   return (
     <div className="space-y-6">
       {/* Search and Filters */}
@@ -59,35 +111,21 @@ const ResourceCalendarView: React.FC = () => {
         onClearFilters={clearFilters}
       />
 
-      <CalendarHeader
-        currentMonth={currentMonth}
-        onPreviousMonth={goToPreviousMonth}
-        onNextMonth={goToNextMonth}
-        onToday={goToToday}
-      />
-
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-        {/* Calendar Grid */}
-        <div className="lg:col-span-3">
-          <Card>
-            <CardContent className="p-6">
-              <CalendarGrid 
-                calendarDays={calendarDays}
-                selectedDate={selectedDate}
-                onDateSelect={setSelectedDate}
-              />
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Day Details Sidebar */}
-        <div className="lg:col-span-1">
-          <DayDetailsPanel
-            selectedDate={selectedDate}
-            dayData={selectedDayData}
-          />
-        </div>
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <CalendarHeader
+          currentMonth={currentMonth}
+          onPreviousMonth={goToPreviousMonth}
+          onNextMonth={goToNextMonth}
+          onToday={goToToday}
+        />
+        
+        <CalendarViewSelector
+          currentView={currentView}
+          onViewChange={setCurrentView}
+        />
       </div>
+
+      {renderCalendarContent()}
     </div>
   );
 };
