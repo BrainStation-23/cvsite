@@ -1,5 +1,5 @@
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { usePlannedResources } from './use-planned-resources';
 import { startOfMonth, endOfMonth, eachDayOfInterval, format, isSameDay, parseISO } from 'date-fns';
 
@@ -37,7 +37,7 @@ export function useResourceCalendar() {
   const plannedResources = usePlannedResources();
   
   // Apply filters to the search query and other filters
-  React.useEffect(() => {
+  useEffect(() => {
     plannedResources.setSearchQuery(searchQuery);
     plannedResources.setSelectedSbu(selectedSbu);
     plannedResources.setSelectedManager(selectedManager);
