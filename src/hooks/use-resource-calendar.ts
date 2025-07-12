@@ -27,25 +27,49 @@ export function useResourceCalendar() {
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   
-  // Get all planned resources without pagination
-  const { data: resourceData, isLoading, error } = usePlannedResources();
+  // Filter states
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedSbu, setSelectedSbu] = useState<string | null>(null);
+  const [selectedManager, setSelectedManager] = useState<string | null>(null);
+  const [showUnplanned, setShowUnplanned] = useState(false);
+  
+  // Get planned resources with filters applied
+  const plannedResources = usePlannedResources();
+  
+  // Apply filters to the search query and other filters
+  React.useEffect(() => {
+    plannedResources.setSearchQuery(searchQuery);
+    plannedResources.setSelectedSbu(selectedSbu);
+    plannedResources.setSelectedManager(selectedManager);
+  }, [searchQuery, selectedSbu, selectedManager]);
+
+  const { data: resourceData, isLoading, error } = plannedResources;
 
   // Convert resource planning data to calendar format
   const calendarData = useMemo(() => {
     if (!resourceData?.length) return [];
 
-    return resourceData.map(resource => ({
-      id: resource.id,
-      profileId: resource.profile_id,
-      profileName: `${resource.profile.first_name} ${resource.profile.last_name}`.trim(),
-      employeeId: resource.profile.employee_id || '',
-      engagementPercentage: resource.engagement_percentage || 0,
-      engagementStartDate: resource.engagement_start_date || '',
-      releaseDate: resource.release_date,
-      projectName: resource.project?.project_name || null,
-      billTypeName: resource.bill_type?.name || null,
-    }));
-  }, [resourceData]);
+    return resourceData
+      .filter(resource => {
+        // Apply showUnplanned filter
+        if (showUnplanned) {
+          // Show only resources without project assignments
+          return !resource.project?.id;
+        }
+        return true; // Show all resources when showUnplanned is false
+      })
+      .map(resource => ({
+        id: resource.id,
+        profileId: resource.profile_id,
+        profileName: `${resource.profile.first_name} ${resource.profile.last_name}`.trim(),
+        employeeId: resource.profile.employee_id || '',
+        engagementPercentage: resource.engagement_percentage || 0,
+        engagementStartDate: resource.engagement_start_date || '',
+        releaseDate: resource.release_date,
+        projectName: resource.project?.project_name || null,
+        billTypeName: resource.bill_type?.name || null,
+      }));
+  }, [resourceData, showUnplanned]);
 
   // Generate calendar days for the current month
   const calendarDays = useMemo(() => {
@@ -100,6 +124,13 @@ export function useResourceCalendar() {
     setSelectedDate(new Date());
   };
 
+  const clearFilters = () => {
+    setSearchQuery('');
+    setSelectedSbu(null);
+    setSelectedManager(null);
+    setShowUnplanned(false);
+  };
+
   return {
     currentMonth,
     selectedDate,
@@ -111,5 +142,16 @@ export function useResourceCalendar() {
     goToPreviousMonth,
     goToNextMonth,
     goToToday,
+    
+    // Filter states and handlers
+    searchQuery,
+    setSearchQuery,
+    selectedSbu,
+    setSelectedSbu,
+    selectedManager,
+    setSelectedManager,
+    showUnplanned,
+    setShowUnplanned,
+    clearFilters,
   };
 }

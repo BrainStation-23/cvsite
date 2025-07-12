@@ -5,6 +5,7 @@ import { useResourceCalendar } from '@/hooks/use-resource-calendar';
 import { CalendarHeader } from './CalendarHeader';
 import { CalendarGrid } from './CalendarGrid';
 import { DayDetailsPanel } from './DayDetailsPanel';
+import { ResourceCalendarFilters } from './ResourceCalendarFilters';
 import { isSameDay } from 'date-fns';
 
 const ResourceCalendarView: React.FC = () => {
@@ -17,6 +18,15 @@ const ResourceCalendarView: React.FC = () => {
     goToPreviousMonth,
     goToNextMonth,
     goToToday,
+    searchQuery,
+    setSearchQuery,
+    selectedSbu,
+    setSelectedSbu,
+    selectedManager,
+    setSelectedManager,
+    showUnplanned,
+    setShowUnplanned,
+    clearFilters,
   } = useResourceCalendar();
 
   if (isLoading) {
@@ -36,6 +46,19 @@ const ResourceCalendarView: React.FC = () => {
 
   return (
     <div className="space-y-6">
+      {/* Search and Filters */}
+      <ResourceCalendarFilters
+        searchQuery={searchQuery}
+        onSearchChange={setSearchQuery}
+        selectedSbu={selectedSbu}
+        onSbuChange={setSelectedSbu}
+        selectedManager={selectedManager}
+        onManagerChange={setSelectedManager}
+        showUnplanned={showUnplanned}
+        onShowUnplannedChange={setShowUnplanned}
+        onClearFilters={clearFilters}
+      />
+
       <CalendarHeader
         currentMonth={currentMonth}
         onPreviousMonth={goToPreviousMonth}
