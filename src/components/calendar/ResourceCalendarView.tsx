@@ -5,7 +5,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { ChevronLeft, ChevronRight, Calendar, Users, AlertTriangle } from 'lucide-react';
-import { useResourceCalendar, CalendarDay } from '@/hooks/use-resource-calendar';
+import { useResourceCalendar } from '@/hooks/use-resource-calendar';
+import type { CalendarDay as CalendarDayType } from '@/hooks/use-resource-calendar';
 import { cn } from '@/lib/utils';
 
 const ResourceCalendarView: React.FC = () => {
@@ -110,7 +111,7 @@ const ResourceCalendarView: React.FC = () => {
 };
 
 interface CalendarGridProps {
-  calendarDays: CalendarDay[];
+  calendarDays: CalendarDayType[];
   selectedDate: Date | null;
   onDateSelect: (date: Date) => void;
 }
@@ -149,7 +150,7 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
 };
 
 interface CalendarDayProps {
-  dayData: CalendarDay;
+  dayData: CalendarDayType;
   isSelected: boolean;
   onClick: () => void;
 }
@@ -215,7 +216,7 @@ const CalendarDay: React.FC<CalendarDayProps> = ({ dayData, isSelected, onClick 
 };
 
 interface DayDetailsPanelProps {
-  dayData: CalendarDay;
+  dayData: CalendarDayType;
 }
 
 const DayDetailsPanel: React.FC<DayDetailsPanelProps> = ({ dayData }) => {
