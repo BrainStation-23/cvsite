@@ -6,6 +6,7 @@ import { CalendarHeader } from './CalendarHeader';
 import { CalendarGrid } from './CalendarGrid';
 import { CalendarDayView } from './CalendarDayView';
 import { CalendarWeekView } from './CalendarWeekView';
+import { CalendarQuarterView } from './CalendarQuarterView';
 import { DayDetailsPanel } from './DayDetailsPanel';
 import { ResourceCalendarFilters } from './ResourceCalendarFilters';
 import { CalendarViewSelector } from './CalendarViewSelector';
@@ -62,6 +63,15 @@ const ResourceCalendarView: React.FC = () => {
         return (
           <CalendarWeekView
             currentDate={selectedDate || currentMonth}
+            calendarDays={calendarDays}
+            selectedDate={selectedDate}
+            onDateSelect={setSelectedDate}
+          />
+        );
+      case 'quarter':
+        return (
+          <CalendarQuarterView
+            currentDate={currentMonth}
             calendarDays={calendarDays}
             selectedDate={selectedDate}
             onDateSelect={setSelectedDate}
