@@ -1,4 +1,5 @@
-import { useState, useEffect, useCallback, useMemo } from 'react';
+
+import { useReducer, useEffect, useCallback } from 'react';
 
 interface ResourcePlanningData {
   id: string;
@@ -16,6 +17,57 @@ interface ResourcePlanningData {
   } | null;
 }
 
+interface FormState {
+  profileId: string | null;
+  billTypeId: string | null;
+  projectId: string | null;
+  engagementPercentage: number;
+  releaseDate: string;
+  engagementStartDate: string;
+}
+
+type FormAction =
+  | { type: 'SET_PROFILE_ID'; payload: string | null }
+  | { type: 'SET_BILL_TYPE_ID'; payload: string | null }
+  | { type: 'SET_PROJECT_ID'; payload: string | null }
+  | { type: 'SET_ENGAGEMENT_PERCENTAGE'; payload: number }
+  | { type: 'SET_RELEASE_DATE'; payload: string }
+  | { type: 'SET_ENGAGEMENT_START_DATE'; payload: string }
+  | { type: 'RESET_FORM'; payload: Partial<FormState> }
+  | { type: 'INITIALIZE_FORM'; payload: FormState };
+
+const initialState: FormState = {
+  profileId: null,
+  billTypeId: null,
+  projectId: null,
+  engagementPercentage: 100,
+  releaseDate: '',
+  engagementStartDate: '',
+};
+
+function formReducer(state: FormState, action: FormAction): FormState {
+  switch (action.type) {
+    case 'SET_PROFILE_ID':
+      return { ...state, profileId: action.payload };
+    case 'SET_BILL_TYPE_ID':
+      return { ...state, billTypeId: action.payload };
+    case 'SET_PROJECT_ID':
+      return { ...state, projectId: action.payload };
+    case 'SET_ENGAGEMENT_PERCENTAGE':
+      return { ...state, engagementPercentage: action.payload };
+    case 'SET_RELEASE_DATE':
+      return { ...state, releaseDate: action.payload };
+    case 'SET_ENGAGEMENT_START_DATE':
+      return { ...state, engagementStartDate: action.payload };
+    case 'RESET_FORM':
+      return { ...initialState, ...action.payload };
+    case 'INITIALIZE_FORM':
+      return action.payload;
+    default:
+      return state;
+  }
+}
+
 interface UseResourceAssignmentFormProps {
   mode: 'create' | 'edit';
   preselectedProfileId?: string | null;
@@ -27,95 +79,89 @@ export const useResourceAssignmentForm = ({
   preselectedProfileId,
   item,
 }: UseResourceAssignmentFormProps) => {
-  // Memoize initial values to prevent unnecessary re-initialization
-  const initialValues = useMemo(() => ({
-    profileId: mode === 'edit' ? item?.profile_id : preselectedProfileId,
-    billTypeId: item?.bill_type?.id || null,
-    projectId: item?.project?.id || null,
-    engagementPercentage: item?.engagement_percentage || 100,
-    releaseDate: item?.release_date || '',
-    engagementStartDate: item?.engagement_start_date || '',
-  }), [mode, item?.profile_id, item?.bill_type?.id, item?.project?.id, item?.engagement_percentage, item?.release_date, item?.engagement_start_date, preselectedProfileId]);
+  const [state, dispatch] = useReducer(formReducer, initialState);
 
-  const [profileId, setProfileId] = useState<string | null>(initialValues.profileId || null);
-  const [billTypeId, setBillTypeId] = useState<string | null>(initialValues.billTypeId);
-  const [projectId, setProjectId] = useState<string | null>(initialValues.projectId);
-  const [engagementPercentage, setEngagementPercentage] = useState<number>(initialValues.engagementPercentage);
-  const [releaseDate, setReleaseDate] = useState<string>(initialValues.releaseDate);
-  const [engagementStartDate, setEngagementStartDate] = useState<string>(initialValues.engagementStartDate);
-
-  // Create a key to track when we should reset the form
-  const formKey = useMemo(() => {
-    if (mode === 'edit' && item) {
-      return `edit-${item.id}`;
-    } else if (mode === 'create') {
-      return `create-${preselectedProfileId || 'new'}`;
-    }
-    return 'default';
-  }, [mode, item?.id, preselectedProfileId]);
-
-  const [lastFormKey, setLastFormKey] = useState<string>(formKey);
-
-  // Reset form when switching between different contexts
+  // Initialize form based on mode
   useEffect(() => {
-    if (formKey !== lastFormKey) {
-      console.log('Form key changed, resetting form:', { formKey, lastFormKey, preselectedProfileId, mode });
-      
-      if (mode === 'edit' && item) {
-        setProfileId(item.profile_id);
-        setBillTypeId(item.bill_type?.id || null);
-        setProjectId(item.project?.id || null);
-        setEngagementPercentage(item.engagement_percentage);
-        setReleaseDate(item.release_date || '');
-        setEngagementStartDate(item.engagement_start_date || '');
-      } else if (mode === 'create') {
-        setProfileId(preselectedProfileId || null);
-        setBillTypeId(null);
-        setProjectId(null);
-        setEngagementPercentage(100);
-        setReleaseDate('');
-        setEngagementStartDate('');
-      }
-      
-      setLastFormKey(formKey);
+    if (mode === 'edit' && item) {
+      dispatch({
+        type: 'INITIALIZE_FORM',
+        payload: {
+          profileId: item.profile_id,
+          billTypeId: item.bill_type?.id || null,
+          projectId: item.project?.id || null,
+          engagementPercentage: item.engagement_percentage,
+          releaseDate: item.release_date || '',
+          engagementStartDate: item.engagement_start_date || '',
+        },
+      });
+    } else if (mode === 'create') {
+      dispatch({
+        type: 'RESET_FORM',
+        payload: {
+          profileId: preselectedProfileId || null,
+        },
+      });
     }
-  }, [formKey, lastFormKey, mode, item, preselectedProfileId]);
+  }, [mode, item, preselectedProfileId]);
+
+  // Action creators
+  const setProfileId = useCallback((value: string | null) => {
+    dispatch({ type: 'SET_PROFILE_ID', payload: value });
+  }, []);
+
+  const setBillTypeId = useCallback((value: string | null) => {
+    dispatch({ type: 'SET_BILL_TYPE_ID', payload: value });
+  }, []);
+
+  const setProjectId = useCallback((value: string | null) => {
+    dispatch({ type: 'SET_PROJECT_ID', payload: value });
+  }, []);
+
+  const setEngagementPercentage = useCallback((value: number) => {
+    dispatch({ type: 'SET_ENGAGEMENT_PERCENTAGE', payload: value });
+  }, []);
+
+  const setReleaseDate = useCallback((value: string) => {
+    dispatch({ type: 'SET_RELEASE_DATE', payload: value });
+  }, []);
+
+  const setEngagementStartDate = useCallback((value: string) => {
+    dispatch({ type: 'SET_ENGAGEMENT_START_DATE', payload: value });
+  }, []);
 
   const resetForm = useCallback(() => {
     if (mode === 'create') {
-      // Keep preselected profile if it exists, otherwise clear it
-      if (!preselectedProfileId) {
-        setProfileId(null);
-      }
-      setBillTypeId(null);
-      setProjectId(null);
-      setEngagementPercentage(100);
-      setReleaseDate('');
-      setEngagementStartDate('');
+      dispatch({
+        type: 'RESET_FORM',
+        payload: {
+          profileId: preselectedProfileId || null,
+        },
+      });
     }
   }, [mode, preselectedProfileId]);
 
   const getFormData = useCallback(() => ({
-    profile_id: profileId!,
-    bill_type_id: billTypeId || undefined,
-    project_id: projectId || undefined,
-    engagement_percentage: engagementPercentage,
-    release_date: releaseDate || undefined,
-    engagement_start_date: engagementStartDate || undefined,
-  }), [profileId, billTypeId, projectId, engagementPercentage, releaseDate, engagementStartDate]);
+    profile_id: state.profileId!,
+    bill_type_id: state.billTypeId || undefined,
+    project_id: state.projectId || undefined,
+    engagement_percentage: state.engagementPercentage,
+    release_date: state.releaseDate || undefined,
+    engagement_start_date: state.engagementStartDate || undefined,
+  }), [state]);
 
   return {
-    profileId,
+    profileId: state.profileId,
     setProfileId,
-    billTypeId,
+    billTypeId: state.billTypeId,
     setBillTypeId,
-    projectId,
+    projectId: state.projectId,
     setProjectId,
-    engagementPercentage,
+    engagementPercentage: state.engagementPercentage,
     setEngagementPercentage,
-    releaseDate,
+    releaseDate: state.releaseDate,
     setReleaseDate,
-    engagementStartDate,
+    engagementStartDate: state.engagementStartDate,
     setEngagementStartDate,
     resetForm,
     getFormData,
