@@ -24,16 +24,15 @@ export interface CalendarDay {
   overAllocatedResources: number;
 }
 
-export function useResourceCalendar() {
+export function useResourceCalendar(
+  searchQuery: string,
+  selectedSbu: string | null,
+  selectedManager: string | null,
+  showUnplanned: boolean
+) {
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [currentView, setCurrentView] = useState<CalendarViewType>('month');
-  
-  // Filter states
-  const [searchQuery, setSearchQuery] = useState('');
-  const [selectedSbu, setSelectedSbu] = useState<string | null>(null);
-  const [selectedManager, setSelectedManager] = useState<string | null>(null);
-  const [showUnplanned, setShowUnplanned] = useState(false);
   
   // Get planned resources with filters applied
   const plannedResources = usePlannedResources();
@@ -147,13 +146,6 @@ export function useResourceCalendar() {
     setSelectedDate(new Date());
   };
 
-  const clearFilters = () => {
-    setSearchQuery('');
-    setSelectedSbu(null);
-    setSelectedManager(null);
-    setShowUnplanned(false);
-  };
-
   return {
     currentMonth,
     selectedDate,
@@ -167,16 +159,5 @@ export function useResourceCalendar() {
     goToPreviousMonth,
     goToNextMonth,
     goToToday,
-    
-    // Filter states and handlers
-    searchQuery,
-    setSearchQuery,
-    selectedSbu,
-    setSelectedSbu,
-    selectedManager,
-    setSelectedManager,
-    showUnplanned,
-    setShowUnplanned,
-    clearFilters,
   };
 }

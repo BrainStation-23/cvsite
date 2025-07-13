@@ -1,12 +1,26 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import DashboardLayout from '../components/Layout/DashboardLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { CalendarDays, Users, Clock, TrendingUp } from 'lucide-react';
 import ResourceCalendarView from '../components/calendar/ResourceCalendarView';
+import { ResourceCalendarFilters } from '../components/calendar/ResourceCalendarFilters';
 import { usePlannedResources } from '../hooks/use-planned-resources';
 
 const ResourceCalendar: React.FC = () => {
+  // Filter states
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedSbu, setSelectedSbu] = useState<string | null>(null);
+  const [selectedManager, setSelectedManager] = useState<string | null>(null);
+  const [showUnplanned, setShowUnplanned] = useState(false);
+
+  const clearFilters = () => {
+    setSearchQuery('');
+    setSelectedSbu(null);
+    setSelectedManager(null);
+    setShowUnplanned(false);
+  };
+
   const { data: resourceData, isLoading } = usePlannedResources();
 
   // Calculate quick stats
@@ -85,8 +99,26 @@ const ResourceCalendar: React.FC = () => {
           </Card>
         </div>
 
+        {/* Search and Filters */}
+        <ResourceCalendarFilters
+          searchQuery={searchQuery}
+          onSearchChange={setSearchQuery}
+          selectedSbu={selectedSbu}
+          onSbuChange={setSelectedSbu}
+          selectedManager={selectedManager}
+          onManagerChange={setSelectedManager}
+          showUnplanned={showUnplanned}
+          onShowUnplannedChange={setShowUnplanned}
+          onClearFilters={clearFilters}
+        />
+
         {/* Main Calendar */}
-        <ResourceCalendarView />
+        <ResourceCalendarView 
+          searchQuery={searchQuery}
+          selectedSbu={selectedSbu}
+          selectedManager={selectedManager}
+          showUnplanned={showUnplanned}
+        />
       </div>
     </DashboardLayout>
   );

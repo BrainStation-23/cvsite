@@ -8,11 +8,22 @@ import { CalendarDayView } from './CalendarDayView';
 import { CalendarWeekView } from './CalendarWeekView';
 import { CalendarQuarterView } from './CalendarQuarterView';
 import { DayDetailsPanel } from './DayDetailsPanel';
-import { ResourceCalendarFilters } from './ResourceCalendarFilters';
 import { CalendarViewSelector } from './CalendarViewSelector';
 import { isSameDay } from 'date-fns';
 
-const ResourceCalendarView: React.FC = () => {
+interface ResourceCalendarViewProps {
+  searchQuery: string;
+  selectedSbu: string | null;
+  selectedManager: string | null;
+  showUnplanned: boolean;
+}
+
+const ResourceCalendarView: React.FC<ResourceCalendarViewProps> = ({
+  searchQuery,
+  selectedSbu,
+  selectedManager,
+  showUnplanned,
+}) => {
   const {
     currentMonth,
     selectedDate,
@@ -24,16 +35,7 @@ const ResourceCalendarView: React.FC = () => {
     goToPreviousMonth,
     goToNextMonth,
     goToToday,
-    searchQuery,
-    setSearchQuery,
-    selectedSbu,
-    setSelectedSbu,
-    selectedManager,
-    setSelectedManager,
-    showUnplanned,
-    setShowUnplanned,
-    clearFilters,
-  } = useResourceCalendar();
+  } = useResourceCalendar(searchQuery, selectedSbu, selectedManager, showUnplanned);
 
   if (isLoading) {
     return (
@@ -108,19 +110,6 @@ const ResourceCalendarView: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      {/* Search and Filters */}
-      <ResourceCalendarFilters
-        searchQuery={searchQuery}
-        onSearchChange={setSearchQuery}
-        selectedSbu={selectedSbu}
-        onSbuChange={setSelectedSbu}
-        selectedManager={selectedManager}
-        onManagerChange={setSelectedManager}
-        showUnplanned={showUnplanned}
-        onShowUnplannedChange={setShowUnplanned}
-        onClearFilters={clearFilters}
-      />
-
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <CalendarHeader
           currentMonth={currentMonth}
