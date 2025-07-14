@@ -1,15 +1,166 @@
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import DashboardLayout from '../../components/Layout/DashboardLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { BarChart3, PieChart, TrendingUp, Users, ArrowLeft, Download } from 'lucide-react';
+import { PieChart as RechartsPieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
+
+interface DistributionData {
+  name: string;
+  value: number;
+}
+
+const COLORS = ['hsl(var(--primary))', 'hsl(var(--secondary))', 'hsl(var(--accent))', 'hsl(var(--muted))', '#8884d8', '#82ca9d', '#ffc658', '#ff7300', '#00ff00'];
 
 const ResourceCalendarStatistics: React.FC = () => {
   const location = useLocation();
   const isAdmin = location.pathname.includes('/admin/');
   const baseUrl = isAdmin ? '/admin/resource-calendar' : '/manager/resource-calendar';
+  const { toast } = useToast();
+
+  const [loading, setLoading] = useState(true);
+  const [distributionData, setDistributionData] = useState<{
+    billTypes: DistributionData[];
+    expertiseTypes: DistributionData[];
+    projectTypes: DistributionData[];
+    resourceTypes: DistributionData[];
+    sbuTypes: DistributionData[];
+  }>({
+    billTypes: [],
+    expertiseTypes: [],
+    projectTypes: [],
+    resourceTypes: [],
+    sbuTypes: []
+  });
+
+  useEffect(() => {
+    fetchDistributionData();
+  }, []);
+
+  const fetchDistributionData = async () => {
+    try {
+      setLoading(true);
+      
+      const [billTypesResult, expertiseTypesResult, projectTypesResult, resourceTypesResult, sbuResult] = await Promise.all([
+        supabase.rpc('get_resource_distribution_by_bill_types'),
+        supabase.rpc('get_resource_distribution_by_expertise_types'),
+        supabase.rpc('get_resource_distribution_by_project_types'),
+        supabase.rpc('get_resource_distribution_by_resource_types'),
+        supabase.rpc('get_resource_distribution_by_sbu')
+      ]);
+
+      if (billTypesResult.error) throw billTypesResult.error;
+      if (expertiseTypesResult.error) throw expertiseTypesResult.error;
+      if (projectTypesResult.error) throw projectTypesResult.error;
+      if (resourceTypesResult.error) throw resourceTypesResult.error;
+      if (sbuResult.error) throw sbuResult.error;
+
+      setDistributionData({
+        billTypes: billTypesResult.data?.map((item: any) => ({ name: item.bill_type, value: Number(item.count) })) || [],
+        expertiseTypes: expertiseTypesResult.data?.map((item: any) => ({ name: item.expertise_type, value: Number(item.count) })) || [],
+        projectTypes: projectTypesResult.data?.map((item: any) => ({ name: item.project_type, value: Number(item.count) })) || [],
+        resourceTypes: resourceTypesResult.data?.map((item: any) => ({ name: item.resource_type, value: Number(item.count) })) || [],
+        sbuTypes: sbuResult.data?.map((item: any) => ({ name: item.sbu_name, value: Number(item.count) })) || []
+      });
+    } catch (error) {
+      console.error('Error fetching distribution data:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to fetch distribution data. Please try again.',
+        variant: 'destructive'
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const renderPieChart = (data: DistributionData[], title: string) => (
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center">
+          <PieChart className="h-5 w-5 mr-2" />
+          {title}
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="h-64">
+          {loading ? (
+            <div className="flex items-center justify-center h-full">
+              <div className="text-center">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-2"></div>
+                <p className="text-sm text-muted-foreground">Loading...</p>
+              </div>
+            </div>
+          ) : data.length > 0 ? (
+            <ResponsiveContainer width="100%" height="100%">
+              <RechartsPieChart>
+                <Pie
+                  data={data}
+                  cx="50%"
+                  cy="50%"
+                  labelLine={false}
+                  label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                  outerRadius={80}
+                  fill="#8884d8"
+                  dataKey="value"
+                >
+                  {data.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                  ))}
+                </Pie>
+                <Tooltip />
+              </RechartsPieChart>
+            </ResponsiveContainer>
+          ) : (
+            <div className="flex items-center justify-center h-full text-muted-foreground">
+              <p>No data available</p>
+            </div>
+          )}
+        </div>
+      </CardContent>
+    </Card>
+  );
+
+  const renderBarChart = (data: DistributionData[], title: string) => (
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center">
+          <BarChart3 className="h-5 w-5 mr-2" />
+          {title}
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="h-64">
+          {loading ? (
+            <div className="flex items-center justify-center h-full">
+              <div className="text-center">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-2"></div>
+                <p className="text-sm text-muted-foreground">Loading...</p>
+              </div>
+            </div>
+          ) : data.length > 0 ? (
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={data}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="name" />
+                <YAxis />
+                <Tooltip />
+                <Bar dataKey="value" fill="hsl(var(--primary))" />
+              </BarChart>
+            </ResponsiveContainer>
+          ) : (
+            <div className="flex items-center justify-center h-full text-muted-foreground">
+              <p>No data available</p>
+            </div>
+          )}
+        </div>
+      </CardContent>
+    </Card>
+  );
 
   return (
     <DashboardLayout>
@@ -24,9 +175,9 @@ const ResourceCalendarStatistics: React.FC = () => {
               </Button>
             </Link>
             <div>
-              <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Statistics & Analytics</h1>
-              <p className="text-gray-600 dark:text-gray-400 mt-1">
-                Analyze resource utilization patterns and generate reports
+              <h1 className="text-2xl font-bold">Resource Distribution Analytics</h1>
+              <p className="text-muted-foreground mt-1">
+                Analyze resource distribution patterns across different categories
               </p>
             </div>
           </div>
@@ -36,159 +187,13 @@ const ResourceCalendarStatistics: React.FC = () => {
           </Button>
         </div>
 
-        {/* Overview Metrics */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total Utilization</CardTitle>
-              <TrendingUp className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">78.5%</div>
-              <p className="text-xs text-muted-foreground">
-                +2.5% from last month
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Over-allocated</CardTitle>
-              <Users className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-red-600">12</div>
-              <p className="text-xs text-muted-foreground">
-                Resources need attention
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Under-utilized</CardTitle>
-              <Users className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-green-600">24</div>
-              <p className="text-xs text-muted-foreground">
-                Available for allocation
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Efficiency Score</CardTitle>
-              <BarChart3 className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">8.2/10</div>
-              <p className="text-xs text-muted-foreground">
-                Above average performance
-              </p>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Charts and Analytics */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center">
-                <BarChart3 className="h-5 w-5 mr-2" />
-                Utilization Trends
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="h-64 flex items-center justify-center text-gray-500">
-                <div className="text-center">
-                  <BarChart3 className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                  <p>Utilization trend chart will be displayed here</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center">
-                <PieChart className="h-5 w-5 mr-2" />
-                Resource Distribution
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="h-64 flex items-center justify-center text-gray-500">
-                <div className="text-center">
-                  <PieChart className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                  <p>Resource distribution chart will be displayed here</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Detailed Tables */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Top Performing Teams</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {[
-                  { name: 'Development Team A', utilization: '92%', efficiency: '9.1' },
-                  { name: 'Design Team', utilization: '88%', efficiency: '8.8' },
-                  { name: 'QA Team', utilization: '85%', efficiency: '8.5' },
-                  { name: 'DevOps Team', utilization: '82%', efficiency: '8.2' },
-                ].map((team, index) => (
-                  <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                    <div>
-                      <p className="font-medium">{team.name}</p>
-                      <p className="text-sm text-gray-600">Utilization: {team.utilization}</p>
-                    </div>
-                    <div className="text-right">
-                      <p className="font-bold text-green-600">{team.efficiency}</p>
-                      <p className="text-xs text-gray-500">Efficiency</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Resource Alerts</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {[
-                  { type: 'warning', message: '3 resources over 100% utilization', priority: 'High' },
-                  { type: 'info', message: '5 resources ending assignments this week', priority: 'Medium' },
-                  { type: 'success', message: '8 resources available for new projects', priority: 'Low' },
-                  { type: 'warning', message: 'Project Alpha needs additional resources', priority: 'High' },
-                ].map((alert, index) => (
-                  <div key={index} className="flex items-center justify-between p-3 border rounded-lg">
-                    <div className="flex items-center space-x-3">
-                      <div className={`w-2 h-2 rounded-full ${
-                        alert.type === 'warning' ? 'bg-yellow-500' :
-                        alert.type === 'info' ? 'bg-blue-500' : 'bg-green-500'
-                      }`} />
-                      <p className="text-sm">{alert.message}</p>
-                    </div>
-                    <span className={`text-xs px-2 py-1 rounded ${
-                      alert.priority === 'High' ? 'bg-red-100 text-red-700' :
-                      alert.priority === 'Medium' ? 'bg-yellow-100 text-yellow-700' :
-                      'bg-green-100 text-green-700'
-                    }`}>
-                      {alert.priority}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
+        {/* Distribution Charts Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+          {renderPieChart(distributionData.billTypes, 'Distribution by Bill Types')}
+          {renderBarChart(distributionData.expertiseTypes, 'Distribution by Expertise Types')}
+          {renderPieChart(distributionData.projectTypes, 'Distribution by Project Types')}
+          {renderBarChart(distributionData.resourceTypes, 'Distribution by Resource Types')}
+          {renderPieChart(distributionData.sbuTypes, 'Distribution by SBU')}
         </div>
       </div>
     </DashboardLayout>

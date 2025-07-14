@@ -1296,6 +1296,41 @@ export type Database = {
         Args: { profile_uuid: string }
         Returns: Json
       }
+      get_resource_distribution_by_bill_types: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          bill_type: string
+          count: number
+        }[]
+      }
+      get_resource_distribution_by_expertise_types: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          expertise_type: string
+          count: number
+        }[]
+      }
+      get_resource_distribution_by_project_types: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          project_type: string
+          count: number
+        }[]
+      }
+      get_resource_distribution_by_resource_types: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          resource_type: string
+          count: number
+        }[]
+      }
+      get_resource_distribution_by_sbu: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          sbu_name: string
+          count: number
+        }[]
+      }
       get_resource_planning_data: {
         Args: {
           search_query?: string
