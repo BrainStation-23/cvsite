@@ -19,7 +19,8 @@ import {
   Building2,
   ChevronDown,
   ChevronRight,
-  CalendarDays
+  CalendarDays,
+  BarChart3
 } from 'lucide-react';
 
 interface DashboardLayoutProps {
@@ -33,6 +34,9 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [isPlatformSettingsOpen, setIsPlatformSettingsOpen] = useState(
     location.pathname.startsWith('/admin/platform-settings')
+  );
+  const [isResourceCalendarOpen, setIsResourceCalendarOpen] = useState(
+    location.pathname.startsWith(`/${user?.role}/resource-calendar`)
   );
   
   const getPageTitle = () => {
@@ -66,6 +70,10 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
     setIsPlatformSettingsOpen(!isPlatformSettingsOpen);
   };
 
+  const toggleResourceCalendar = () => {
+    setIsResourceCalendarOpen(!isResourceCalendarOpen);
+  };
+
   const handleSignOut = async () => {
     try {
       await signOut();
@@ -81,6 +89,12 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
     { to: '/admin/platform-settings/resources', icon: <Briefcase className="w-4 h-4" />, label: 'Resource Planning' },
     { to: '/admin/platform-settings/cv-templates', icon: <FileText className="w-4 h-4" />, label: 'CV Templates' },
     { to: '/admin/platform-settings/system', icon: <Building2 className="w-4 h-4" />, label: 'System Config' },
+  ];
+
+  // Resource calendar sub-menu items
+  const resourceCalendarItems = [
+    { to: `/${user?.role}/resource-calendar/calendar`, icon: <CalendarDays className="w-4 h-4" />, label: 'Calendar View' },
+    { to: `/${user?.role}/resource-calendar/statistics`, icon: <BarChart3 className="w-4 h-4" />, label: 'Statistics' },
   ];
 
   // Grouped sidebar navigation structure
@@ -117,7 +131,15 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
         { to: `/${user?.role}/employee-data`, icon: <Database className="w-5 h-5" />, label: 'Employee Data' },
         { to: `/${user?.role}/training-certification`, icon: <FileText className="w-5 h-5" />, label: 'Training and Certification' },
         { to: `/${user?.role}/resource-planning`, icon: <Calendar className="w-5 h-5" />, label: 'Resource Planning' },
-        { to: `/${user?.role}/resource-calendar`, icon: <CalendarDays className="w-5 h-5" />, label: 'Resource Calendar' }
+        { 
+          to: `/${user?.role}/resource-calendar`, 
+          icon: <CalendarDays className="w-5 h-5" />, 
+          label: 'Resource Calendar',
+          hasSubmenu: true,
+          submenuItems: resourceCalendarItems,
+          isExpanded: isResourceCalendarOpen,
+          onToggle: toggleResourceCalendar
+        }
       ],
     },
     // Admin only: CV Templates (not grouped)
