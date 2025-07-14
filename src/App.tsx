@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -31,6 +30,8 @@ import NotFound from '@/pages/NotFound';
 import TrainingCertification from '@/pages/TrainingCertification';
 import ResourcePlanning from '@/pages/ResourcePlanning';
 import ResourceCalendar from '@/pages/ResourceCalendar';
+import ResourceCalendarView from '@/pages/resource-calendar/ResourceCalendarView';
+import ResourceCalendarStatistics from '@/pages/resource-calendar/ResourceCalendarStatistics';
 import ProjectsManagement from '@/pages/admin/ProjectsManagement';
 import './App.css';
 
@@ -239,10 +240,42 @@ function App() {
               }
             />
             <Route
+              path="/admin/resource-calendar/calendar"
+              element={
+                <ProtectedRoute allowedRoles={['admin', 'manager']}>
+                  <ResourceCalendarView />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/resource-calendar/statistics"
+              element={
+                <ProtectedRoute allowedRoles={['admin', 'manager']}>
+                  <ResourceCalendarStatistics />
+                </ProtectedRoute>
+              }
+            />
+            <Route
               path="/manager/resource-calendar"
               element={
                 <ProtectedRoute allowedRoles={['manager', 'admin']}>
                   <ResourceCalendar />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/manager/resource-calendar/calendar"
+              element={
+                <ProtectedRoute allowedRoles={['manager', 'admin']}>
+                  <ResourceCalendarView />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/manager/resource-calendar/statistics"
+              element={
+                <ProtectedRoute allowedRoles={['manager', 'admin']}>
+                  <ResourceCalendarStatistics />
                 </ProtectedRoute>
               }
             />

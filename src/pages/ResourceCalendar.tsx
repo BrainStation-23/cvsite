@@ -1,35 +1,32 @@
 
-import React, { useState } from 'react';
+import React from 'react';
+import { Link, useLocation } from 'react-router-dom';
 import DashboardLayout from '../components/Layout/DashboardLayout';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { CalendarDays, Users, Clock, TrendingUp } from 'lucide-react';
-import ResourceCalendarView from '../components/calendar/ResourceCalendarView';
-import { ResourceCalendarFilters } from '../components/calendar/ResourceCalendarFilters';
-import { usePlannedResources } from '../hooks/use-planned-resources';
+import { Card, CardContent } from '@/components/ui/card';
+import { Calendar, BarChart3, Settings, TrendingUp } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 const ResourceCalendar: React.FC = () => {
-  // Filter states
-  const [searchQuery, setSearchQuery] = useState('');
-  const [selectedSbu, setSelectedSbu] = useState<string | null>(null);
-  const [selectedManager, setSelectedManager] = useState<string | null>(null);
-  const [showUnplanned, setShowUnplanned] = useState(false);
+  const location = useLocation();
+  const isAdmin = location.pathname.includes('/admin/');
+  const baseUrl = isAdmin ? '/admin/resource-calendar' : '/manager/resource-calendar';
 
-  const clearFilters = () => {
-    setSearchQuery('');
-    setSelectedSbu(null);
-    setSelectedManager(null);
-    setShowUnplanned(false);
-  };
-
-  const { data: resourceData, isLoading } = usePlannedResources();
-
-  // Calculate quick stats
-  const totalResources = resourceData?.length || 0;
-  const activeProjects = new Set(resourceData?.map(r => r.project?.id).filter(Boolean)).size;
-  const averageUtilization = resourceData?.length > 0 
-    ? Math.round(resourceData.reduce((sum, r) => sum + (r.engagement_percentage || 0), 0) / resourceData.length)
-    : 0;
-  const availableResources = resourceData?.filter(r => (r.engagement_percentage || 0) < 100).length || 0;
+  const menuItems = [
+    {
+      title: 'Calendar View',
+      description: 'View and manage resource allocations across projects and time periods',
+      icon: Calendar,
+      href: `${baseUrl}/calendar`,
+      color: 'text-blue-600'
+    },
+    {
+      title: 'Statistics',
+      description: 'Analyze resource utilization patterns and generate reports',
+      icon: BarChart3,
+      href: `${baseUrl}/statistics`,
+      color: 'text-green-600'
+    }
+  ];
 
   return (
     <DashboardLayout>
@@ -39,86 +36,90 @@ const ResourceCalendar: React.FC = () => {
           <div>
             <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Resource Calendar</h1>
             <p className="text-gray-600 dark:text-gray-400 mt-1">
-              View and manage resource allocations across projects and time periods
+              Manage resource planning and view analytics
             </p>
+          </div>
+          <div className="flex items-center space-x-2">
+            <Settings className="h-5 w-5 text-gray-400" />
+            <span className="text-sm text-gray-500">Management</span>
           </div>
         </div>
 
-        {/* Quick Stats */}
+        {/* Overview Stats */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total Resources</CardTitle>
-              <Users className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{totalResources}</div>
-              <p className="text-xs text-muted-foreground">
-                Currently planned
-              </p>
+            <CardContent className="p-6">
+              <div className="flex items-center">
+                <Calendar className="h-8 w-8 text-blue-500" />
+                <div className="ml-4">
+                  <p className="text-sm font-medium text-gray-600">Calendar Management</p>
+                  <p className="text-2xl font-bold">Active</p>
+                </div>
+              </div>
             </CardContent>
           </Card>
 
           <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Active Projects</CardTitle>
-              <CalendarDays className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{activeProjects}</div>
-              <p className="text-xs text-muted-foreground">
-                With allocated resources
-              </p>
+            <CardContent className="p-6">
+              <div className="flex items-center">
+                <BarChart3 className="h-8 w-8 text-green-500" />
+                <div className="ml-4">
+                  <p className="text-sm font-medium text-gray-600">Analytics</p>
+                  <p className="text-2xl font-bold">Reports</p>
+                </div>
+              </div>
             </CardContent>
           </Card>
 
           <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Avg Utilization</CardTitle>
-              <TrendingUp className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{averageUtilization}%</div>
-              <p className="text-xs text-muted-foreground">
-                Across all resources
-              </p>
+            <CardContent className="p-6">
+              <div className="flex items-center">
+                <TrendingUp className="h-8 w-8 text-purple-500" />
+                <div className="ml-4">
+                  <p className="text-sm font-medium text-gray-600">Utilization</p>
+                  <p className="text-2xl font-bold">Tracking</p>
+                </div>
+              </div>
             </CardContent>
           </Card>
 
           <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Available Resources</CardTitle>
-              <Clock className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{availableResources}</div>
-              <p className="text-xs text-muted-foreground">
-                Under 100% utilization
-              </p>
+            <CardContent className="p-6">
+              <div className="flex items-center">
+                <Settings className="h-8 w-8 text-orange-500" />
+                <div className="ml-4">
+                  <p className="text-sm font-medium text-gray-600">Configuration</p>
+                  <p className="text-2xl font-bold">Settings</p>
+                </div>
+              </div>
             </CardContent>
           </Card>
         </div>
 
-        {/* Search and Filters */}
-        <ResourceCalendarFilters
-          searchQuery={searchQuery}
-          onSearchChange={setSearchQuery}
-          selectedSbu={selectedSbu}
-          onSbuChange={setSelectedSbu}
-          selectedManager={selectedManager}
-          onManagerChange={setSelectedManager}
-          showUnplanned={showUnplanned}
-          onShowUnplannedChange={setShowUnplanned}
-          onClearFilters={clearFilters}
-        />
-
-        {/* Main Calendar */}
-        <ResourceCalendarView 
-          searchQuery={searchQuery}
-          selectedSbu={selectedSbu}
-          selectedManager={selectedManager}
-          showUnplanned={showUnplanned}
-        />
+        {/* Menu Items */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {menuItems.map((item) => (
+            <Link key={item.href} to={item.href}>
+              <Card className="h-full hover:shadow-lg transition-shadow cursor-pointer border-2 hover:border-primary/20">
+                <CardContent className="p-6">
+                  <div className="flex items-start space-x-4">
+                    <div className={cn("p-3 rounded-lg bg-gray-50", item.color)}>
+                      <item.icon className="h-6 w-6" />
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+                        {item.title}
+                      </h3>
+                      <p className="text-gray-600 dark:text-gray-400 text-sm leading-relaxed">
+                        {item.description}
+                      </p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </Link>
+          ))}
+        </div>
       </div>
     </DashboardLayout>
   );
