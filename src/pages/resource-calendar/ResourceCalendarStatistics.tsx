@@ -5,7 +5,6 @@ import DashboardLayout from '../../components/Layout/DashboardLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { BarChart3, PieChart, TrendingUp, Users, ArrowLeft, Download } from 'lucide-react';
-import { PieChart as RechartsPieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
@@ -96,25 +95,27 @@ const ResourceCalendarStatistics: React.FC = () => {
               </div>
             </div>
           ) : data.length > 0 ? (
-            <ResponsiveContainer width="100%" height="100%">
-              <RechartsPieChart>
-                <Pie
-                  data={data}
-                  cx="50%"
-                  cy="50%"
-                  labelLine={false}
-                  label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
-                  outerRadius={80}
-                  fill="#8884d8"
-                  dataKey="value"
-                >
-                  {data.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                  ))}
-                </Pie>
-                <Tooltip />
-              </RechartsPieChart>
-            </ResponsiveContainer>
+            <div className="space-y-2">
+              {data.map((item, index) => {
+                const total = data.reduce((sum, d) => sum + d.value, 0);
+                const percentage = ((item.value / total) * 100).toFixed(1);
+                return (
+                  <div key={index} className="flex items-center justify-between p-2 rounded-lg bg-muted/30">
+                    <div className="flex items-center space-x-2">
+                      <div 
+                        className="w-4 h-4 rounded" 
+                        style={{ backgroundColor: COLORS[index % COLORS.length] }}
+                      />
+                      <span className="text-sm font-medium">{item.name}</span>
+                    </div>
+                    <div className="text-right">
+                      <span className="text-sm font-bold">{item.value}</span>
+                      <span className="text-xs text-muted-foreground ml-1">({percentage}%)</span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
           ) : (
             <div className="flex items-center justify-center h-full text-muted-foreground">
               <p>No data available</p>
@@ -143,15 +144,26 @@ const ResourceCalendarStatistics: React.FC = () => {
               </div>
             </div>
           ) : data.length > 0 ? (
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={data}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="name" />
-                <YAxis />
-                <Tooltip />
-                <Bar dataKey="value" fill="hsl(var(--primary))" />
-              </BarChart>
-            </ResponsiveContainer>
+            <div className="space-y-3">
+              {data.map((item, index) => {
+                const maxValue = Math.max(...data.map(d => d.value));
+                const widthPercentage = (item.value / maxValue) * 100;
+                return (
+                  <div key={index} className="space-y-1">
+                    <div className="flex justify-between text-sm">
+                      <span className="font-medium">{item.name}</span>
+                      <span className="text-muted-foreground">{item.value}</span>
+                    </div>
+                    <div className="w-full bg-muted rounded-full h-2">
+                      <div 
+                        className="bg-primary h-2 rounded-full transition-all duration-300" 
+                        style={{ width: `${widthPercentage}%` }}
+                      />
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
           ) : (
             <div className="flex items-center justify-center h-full text-muted-foreground">
               <p>No data available</p>
