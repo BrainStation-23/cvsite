@@ -39,6 +39,11 @@ export const useSbuSettings = () => {
     queryFn: fetchSbus,
   });
   
+  const invalidateQueries = () => {
+    queryClient.invalidateQueries({ queryKey: ['sbus'] });
+    queryClient.invalidateQueries({ queryKey: ['sbu-search'] });
+  };
+  
   const addSbuMutation = useMutation({
     mutationFn: async (formData: SbuFormData) => {
       const { data, error } = await supabase
@@ -50,7 +55,7 @@ export const useSbuSettings = () => {
       return data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['sbus'] });
+      invalidateQueries();
     },
   });
   
@@ -66,7 +71,7 @@ export const useSbuSettings = () => {
       return result;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['sbus'] });
+      invalidateQueries();
     },
   });
   
@@ -81,7 +86,7 @@ export const useSbuSettings = () => {
       return data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['sbus'] });
+      invalidateQueries();
     },
   });
 
@@ -96,7 +101,7 @@ export const useSbuSettings = () => {
       return data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['sbus'] });
+      invalidateQueries();
     },
   });
   
