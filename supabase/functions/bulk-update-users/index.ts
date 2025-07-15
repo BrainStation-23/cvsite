@@ -16,7 +16,12 @@ interface UserUpdateData {
   role?: string;
   employeeId?: string;
   password?: string;
+  managerEmail?: string;
   sbuName?: string;
+  expertiseName?: string;
+  resourceTypeName?: string;
+  dateOfJoining?: string;
+  careerStartDate?: string;
 }
 
 const parseCSVData = async (file: File): Promise<UserUpdateData[]> => {
@@ -43,8 +48,18 @@ const parseCSVData = async (file: File): Promise<UserUpdateData[]> => {
           'last_name': 'lastName',
           'employeeid': 'employeeId',
           'employee_id': 'employeeId',
+          'manageremail': 'managerEmail',
+          'manager_email': 'managerEmail',
           'sbuname': 'sbuName',
-          'sbu_name': 'sbuName'
+          'sbu_name': 'sbuName',
+          'expertisename': 'expertiseName',
+          'expertise_name': 'expertiseName',
+          'resourcetypename': 'resourceTypeName',
+          'resource_type_name': 'resourceTypeName',
+          'dateofjoining': 'dateOfJoining',
+          'date_of_joining': 'dateOfJoining',
+          'careerstartdate': 'careerStartDate',
+          'career_start_date': 'careerStartDate'
         };
         return headerMap[normalized] || header;
       },
@@ -66,7 +81,12 @@ const parseCSVData = async (file: File): Promise<UserUpdateData[]> => {
             role: row.role?.trim(),
             employeeId: row.employeeId?.trim(),
             password: row.password?.trim(),
-            sbuName: row.sbuName?.trim()
+            managerEmail: row.managerEmail?.trim(),
+            sbuName: row.sbuName?.trim(),
+            expertiseName: row.expertiseName?.trim(),
+            resourceTypeName: row.resourceTypeName?.trim(),
+            dateOfJoining: row.dateOfJoining?.trim(),
+            careerStartDate: row.careerStartDate?.trim()
           }));
         
         console.log('Filtered users count:', users.length);
@@ -104,18 +124,99 @@ const getSbuIdByName = async (supabase: any, sbuName: string): Promise<string | 
   return sbuId;
 };
 
+const getExpertiseIdByName = async (supabase: any, expertiseName: string): Promise<string | null> => {
+  if (!expertiseName || expertiseName.trim() === '') return null;
+  
+  console.log('Looking up expertise:', expertiseName);
+  
+  const { data: expertise, error } = await supabase
+    .from('expertise_types')
+    .select('id')
+    .ilike('name', expertiseName.trim())
+    .limit(1);
+  
+  if (error) {
+    console.error('Error fetching expertise:', error);
+    return null;
+  }
+  
+  const expertiseId = expertise && expertise.length > 0 ? expertise[0].id : null;
+  console.log('Expertise lookup result:', { expertiseName, expertiseId });
+  
+  return expertiseId;
+};
+
+const getResourceTypeIdByName = async (supabase: any, resourceTypeName: string): Promise<string | null> => {
+  if (!resourceTypeName || resourceTypeName.trim() === '') return null;
+  
+  console.log('Looking up resource type:', resourceTypeName);
+  
+  const { data: resourceTypes, error } = await supabase
+    .from('resource_types')
+    .select('id')
+    .ilike('name', resourceTypeName.trim())
+    .limit(1);
+  
+  if (error) {
+    console.error('Error fetching resource type:', error);
+    return null;
+  }
+  
+  const resourceTypeId = resourceTypes && resourceTypes.length > 0 ? resourceTypes[0].id : null;
+  console.log('Resource type lookup result:', { resourceTypeName, resourceTypeId });
+  
+  return resourceTypeId;
+};
+
+const getManagerIdByEmail = async (supabase: any, managerEmail: string): Promise<string | null> => {
+  if (!managerEmail || managerEmail.trim() === '') return null;
+  
+  console.log('Looking up manager by email:', managerEmail);
+  
+  const { data: managers, error } = await supabase
+    .from('profiles')
+    .select('id')
+    .eq('email', managerEmail.trim())
+    .limit(1);
+  
+  if (error) {
+    console.error('Error fetching manager:', error);
+    return null;
+  }
+  
+  const managerId = managers && managers.length > 0 ? managers[0].id : null;
+  console.log('Manager lookup result:', { managerEmail, managerId });
+  
+  return managerId;
+};
+
 const updateUserInBatch = async (supabase: any, user: UserUpdateData) => {
   console.log('Updating user:', user.userId);
   
   try {
-    // Get SBU ID from name if provided
-    let sbuId = null;
-    if (user.sbuName && user.sbuName.trim()) {
-      sbuId = await getSbuIdByName(supabase, user.sbuName);
-      if (!sbuId) {
-        console.log(`Warning: SBU "${user.sbuName}" not found for user ${user.userId}`);
-      }
+    // Get foreign key IDs from names
+    const sbuId = user.sbuName ? await getSbuIdByName(supabase, user.sbuName) : undefined;
+    const expertiseId = user.expertiseName ? await getExpertiseIdByName(supabase, user.expertiseName) : undefined;
+    const resourceTypeId = user.resourceTypeName ? await getResourceTypeIdByName(supabase, user.resourceTypeName) : undefined;
+    const managerId = user.managerEmail ? await getManagerIdByEmail(supabase, user.managerEmail) : undefined;
+    
+    // Warn about missing lookups
+    if (user.sbuName && !sbuId) {
+      console.log(`Warning: SBU "${user.sbuName}" not found for user ${user.userId}`);
     }
+    if (user.expertiseName && !expertiseId) {
+      console.log(`Warning: Expertise "${user.expertiseName}" not found for user ${user.userId}`);
+    }
+    if (user.resourceTypeName && !resourceTypeId) {
+      console.log(`Warning: Resource type "${user.resourceTypeName}" not found for user ${user.userId}`);
+    }
+    if (user.managerEmail && !managerId) {
+      console.log(`Warning: Manager "${user.managerEmail}" not found for user ${user.userId}`);
+    }
+    
+    // Parse dates
+    const parsedDateOfJoining = user.dateOfJoining && user.dateOfJoining.trim() ? user.dateOfJoining.trim() : null;
+    const parsedCareerStartDate = user.careerStartDate && user.careerStartDate.trim() ? user.careerStartDate.trim() : null;
     
     // Update user auth data if needed
     if (user.email || user.firstName || user.lastName || user.employeeId || user.password) {
@@ -147,17 +248,18 @@ const updateUserInBatch = async (supabase: any, user: UserUpdateData) => {
     }
     
     // Update profile table
-    if (user.firstName || user.lastName || user.employeeId || user.sbuName !== undefined) {
-      const profileUpdates: Record<string, any> = {};
-      if (user.firstName) profileUpdates.first_name = user.firstName;
-      if (user.lastName) profileUpdates.last_name = user.lastName;
-      if (user.employeeId) profileUpdates.employee_id = user.employeeId;
-      
-      // Always update sbu_id if sbuName was provided (even if null to clear assignment)
-      if (user.sbuName !== undefined) {
-        profileUpdates.sbu_id = sbuId;
-      }
-      
+    const profileUpdates: Record<string, any> = {};
+    if (user.firstName) profileUpdates.first_name = user.firstName;
+    if (user.lastName) profileUpdates.last_name = user.lastName;
+    if (user.employeeId) profileUpdates.employee_id = user.employeeId;
+    if (sbuId !== undefined) profileUpdates.sbu_id = sbuId;
+    if (expertiseId !== undefined) profileUpdates.expertise = expertiseId;
+    if (resourceTypeId !== undefined) profileUpdates.resource_type = resourceTypeId;
+    if (managerId !== undefined) profileUpdates.manager = managerId;
+    if (parsedDateOfJoining) profileUpdates.date_of_joining = parsedDateOfJoining;
+    if (parsedCareerStartDate) profileUpdates.career_start_date = parsedCareerStartDate;
+    
+    if (Object.keys(profileUpdates).length > 0) {
       console.log('Updating profile:', user.userId, profileUpdates);
       const { error: profileError } = await supabase
         .from('profiles')
@@ -171,11 +273,12 @@ const updateUserInBatch = async (supabase: any, user: UserUpdateData) => {
     
     // Update role if provided
     if (user.role) {
-      if (!['admin', 'manager', 'employee'].includes(user.role)) {
+      if (!['admin', 'manager', 'employee'].includes(user.role.toLowerCase())) {
         throw new Error('Invalid role. Must be admin, manager, or employee');
       }
       
-      console.log('Updating role for user:', user.userId, 'to:', user.role);
+      const validRole = user.role.toLowerCase();
+      console.log('Updating role for user:', user.userId, 'to:', validRole);
       
       // Check existing roles
       const { data: existingRoles, error: fetchError } = await supabase
@@ -190,10 +293,10 @@ const updateUserInBatch = async (supabase: any, user: UserUpdateData) => {
       if (existingRoles && existingRoles.length > 0) {
         // Update existing role
         const existingRole = existingRoles[0];
-        if (existingRole.role !== user.role) {
+        if (existingRole.role !== validRole) {
           const { error: updateRoleError } = await supabase
             .from('user_roles')
-            .update({ role: user.role })
+            .update({ role: validRole })
             .eq('id', existingRole.id);
           
           if (updateRoleError) {
@@ -204,7 +307,7 @@ const updateUserInBatch = async (supabase: any, user: UserUpdateData) => {
         // Insert new role
         const { error: insertRoleError } = await supabase
           .from('user_roles')
-          .insert({ user_id: user.userId, role: user.role });
+          .insert({ user_id: user.userId, role: validRole });
         
         if (insertRoleError) {
           throw new Error(`Role insert failed: ${insertRoleError.message}`);
@@ -216,7 +319,13 @@ const updateUserInBatch = async (supabase: any, user: UserUpdateData) => {
     return {
       userId: user.userId,
       sbuAssigned: !!sbuId,
-      sbuName: sbuId ? user.sbuName : null
+      sbuName: sbuId ? user.sbuName : null,
+      managerAssigned: !!managerId,
+      managerEmail: managerId ? user.managerEmail : null,
+      expertiseAssigned: !!expertiseId,
+      expertiseName: expertiseId ? user.expertiseName : null,
+      resourceTypeAssigned: !!resourceTypeId,
+      resourceTypeName: resourceTypeId ? user.resourceTypeName : null
     };
   } catch (error) {
     console.error('Error updating user:', user.userId, error);
