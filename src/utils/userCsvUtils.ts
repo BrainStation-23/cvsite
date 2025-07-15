@@ -10,7 +10,12 @@ export interface UserCSVRow {
   role?: UserRole;
   password?: string;
   employeeId?: string;
+  managerEmail?: string;
   sbuName?: string;
+  expertiseName?: string;
+  resourceTypeName?: string;
+  dateOfJoining?: string;
+  careerStartDate?: string;
 }
 
 export interface CSVValidationResult {
@@ -53,6 +58,22 @@ const formatUserRole = (role: string): UserRole | null => {
   }
 };
 
+// Helper function to validate email format
+const isValidEmail = (email: string): boolean => {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return emailRegex.test(email);
+};
+
+// Helper function to validate date format (YYYY-MM-DD)
+const isValidDate = (dateString: string): boolean => {
+  if (!dateString) return true; // Empty dates are allowed
+  const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+  if (!dateRegex.test(dateString)) return false;
+  
+  const date = new Date(dateString);
+  return date instanceof Date && !isNaN(date.getTime());
+};
+
 export const downloadCSVTemplate = () => {
   const templateData = [
     {
@@ -62,7 +83,12 @@ export const downloadCSVTemplate = () => {
       role: 'employee',
       password: 'SecurePass123!',
       employeeId: 'EMP001',
-      sbuName: 'Technology Division'
+      managerEmail: 'manager@company.com',
+      sbuName: 'Technology Division',
+      expertiseName: 'Software Development',
+      resourceTypeName: 'Senior Developer',
+      dateOfJoining: '2024-01-15',
+      careerStartDate: '2020-06-01'
     },
     {
       email: 'jane.smith@company.com',
@@ -70,8 +96,13 @@ export const downloadCSVTemplate = () => {
       lastName: 'Smith',
       role: 'manager',
       password: '',
-      employeeId: '',
-      sbuName: 'Marketing Department'
+      employeeId: 'EMP002',
+      managerEmail: '',
+      sbuName: 'Marketing Department',
+      expertiseName: 'Digital Marketing',
+      resourceTypeName: 'Marketing Manager',
+      dateOfJoining: '2023-03-10',
+      careerStartDate: '2018-09-15'
     },
     {
       email: 'admin@company.com',
@@ -80,7 +111,12 @@ export const downloadCSVTemplate = () => {
       role: 'admin',
       password: 'AdminPass456!',
       employeeId: 'ADM001',
-      sbuName: ''
+      managerEmail: '',
+      sbuName: '',
+      expertiseName: 'System Administration',
+      resourceTypeName: 'System Administrator',
+      dateOfJoining: '2022-11-01',
+      careerStartDate: '2019-04-20'
     }
   ];
 
@@ -109,7 +145,12 @@ export const downloadUpdateCSVTemplate = () => {
       role: 'manager',
       password: '',
       employeeId: 'EMP001',
-      sbuName: 'Technology Division'
+      managerEmail: 'newmanager@company.com',
+      sbuName: 'Technology Division',
+      expertiseName: 'Full Stack Development',
+      resourceTypeName: 'Tech Lead',
+      dateOfJoining: '2024-01-15',
+      careerStartDate: '2020-06-01'
     },
     {
       userId: 'user-id-2',
@@ -119,7 +160,12 @@ export const downloadUpdateCSVTemplate = () => {
       role: 'admin',
       password: 'NewPassword123!',
       employeeId: 'EMP002',
-      sbuName: 'Marketing Department'
+      managerEmail: '',
+      sbuName: 'Marketing Department',
+      expertiseName: 'Growth Marketing',
+      resourceTypeName: 'Marketing Director',
+      dateOfJoining: '2023-03-10',
+      careerStartDate: '2018-09-15'
     }
   ];
 
@@ -192,8 +238,7 @@ export const validateCSVData = (data: any[], existingUsers: any[] = [], mode: 'c
       const lowerEmail = trimmedEmail.toLowerCase();
       
       // Basic email validation
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!emailRegex.test(trimmedEmail)) {
+      if (!isValidEmail(trimmedEmail)) {
         errors.push({
           row: rowNumber,
           field: 'email',
@@ -239,13 +284,13 @@ export const validateCSVData = (data: any[], existingUsers: any[] = [], mode: 'c
       hasErrors = true;
     }
 
-    // Validate lastName (optional but if provided, should not be empty)
-    if (row.lastName && typeof row.lastName === 'string' && row.lastName.trim() === '') {
+    // Validate lastName (required)
+    if (!row.lastName || typeof row.lastName !== 'string' || row.lastName.trim() === '') {
       errors.push({
         row: rowNumber,
         field: 'lastName',
-        value: row.lastName,
-        message: 'Last name cannot be empty if provided'
+        value: row.lastName || '',
+        message: 'Last name is required'
       });
       hasErrors = true;
     }
@@ -262,10 +307,37 @@ export const validateCSVData = (data: any[], existingUsers: any[] = [], mode: 'c
       hasErrors = true;
     }
 
-    // Validate sbuName (optional)
-    let sbuName = '';
-    if (row.sbuName && typeof row.sbuName === 'string') {
-      sbuName = row.sbuName.trim();
+    // Validate manager email format if provided
+    if (row.managerEmail && row.managerEmail.trim() && !isValidEmail(row.managerEmail.trim())) {
+      errors.push({
+        row: rowNumber,
+        field: 'managerEmail',
+        value: row.managerEmail,
+        message: 'Invalid manager email format'
+      });
+      hasErrors = true;
+    }
+
+    // Validate date of joining if provided
+    if (row.dateOfJoining && row.dateOfJoining.trim() && !isValidDate(row.dateOfJoining.trim())) {
+      errors.push({
+        row: rowNumber,
+        field: 'dateOfJoining',
+        value: row.dateOfJoining,
+        message: 'Date of joining must be in YYYY-MM-DD format'
+      });
+      hasErrors = true;
+    }
+
+    // Validate career start date if provided
+    if (row.careerStartDate && row.careerStartDate.trim() && !isValidDate(row.careerStartDate.trim())) {
+      errors.push({
+        row: rowNumber,
+        field: 'careerStartDate',
+        value: row.careerStartDate,
+        message: 'Career start date must be in YYYY-MM-DD format'
+      });
+      hasErrors = true;
     }
 
     // If no errors, add to valid array with defaults
@@ -273,10 +345,15 @@ export const validateCSVData = (data: any[], existingUsers: any[] = [], mode: 'c
       const validRow: UserCSVRow = {
         email: row.email.trim(),
         firstName: row.firstName.trim(),
-        lastName: row.lastName ? row.lastName.trim() : '',
+        lastName: row.lastName.trim(),
         role: formattedRole,
         employeeId: row.employeeId ? row.employeeId.trim() : '',
-        sbuName: sbuName
+        managerEmail: row.managerEmail ? row.managerEmail.trim() : '',
+        sbuName: row.sbuName ? row.sbuName.trim() : '',
+        expertiseName: row.expertiseName ? row.expertiseName.trim() : '',
+        resourceTypeName: row.resourceTypeName ? row.resourceTypeName.trim() : '',
+        dateOfJoining: row.dateOfJoining ? row.dateOfJoining.trim() : '',
+        careerStartDate: row.careerStartDate ? row.careerStartDate.trim() : ''
       };
 
       // Add userId for update mode
