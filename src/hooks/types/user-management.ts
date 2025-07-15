@@ -15,6 +15,11 @@ export interface UserData {
   sbuName?: string | null;
   createdAt?: string;
   lastSignIn?: string;
+  dateOfJoining?: string | null;
+  careerStartDate?: string | null;
+  managerName?: string | null;
+  expertiseName?: string | null;
+  resourceTypeName?: string | null;
 }
 
 export interface PaginationData {

@@ -61,7 +61,7 @@ export function useUserListing(state: ReturnType<typeof import('./use-user-state
       // Type assertion to handle the response structure
       const response = data as unknown as ListUsersResponse;
       
-      // Map the returned data to our UserData format with SBU information
+      // Map the returned data to our UserData format with extended information
       const formattedUsers = response.users.map(user => ({
         id: user.id,
         email: user.email,
@@ -72,7 +72,12 @@ export function useUserListing(state: ReturnType<typeof import('./use-user-state
         sbuId: user.sbu_id || null,
         sbuName: user.sbu_name || null,
         createdAt: user.created_at,
-        lastSignIn: user.last_sign_in_at || undefined
+        lastSignIn: user.last_sign_in_at || undefined,
+        dateOfJoining: user.date_of_joining || null,
+        careerStartDate: user.career_start_date || null,
+        managerName: user.manager_name || null,
+        expertiseName: user.expertise_name || null,
+        resourceTypeName: user.resource_type_name || null,
       }));
       
       setUsers(formattedUsers);
