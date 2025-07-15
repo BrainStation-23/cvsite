@@ -21,10 +21,9 @@ serve(async (req) => {
     // Create a Supabase client with the service role key
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
     
-    console.log('Fetching all users for export using list_users function...');
+    console.log('Fetching all users with complete profile information for export...');
     
-    // Use the list_users function that we know works correctly
-    // Fetch all users by setting a high items_per_page value
+    // Use the list_users function to get all users with their profile information
     const { data: usersResponse, error: usersError } = await supabase.rpc('list_users', {
       search_query: null,
       filter_role: null,
@@ -49,7 +48,32 @@ serve(async (req) => {
     const users = usersResponse.users;
     console.log(`Found ${users.length} users to export`);
     
-    // Transform the data to match the bulk update CSV format
+    // Get additional lookup data for human-friendly names
+    const { data: sbuData } = await supabase.from('sbus').select('id, name');
+    const { data: expertiseData } = await supabase.from('expertise_types').select('id, name');
+    const { data: resourceTypeData } = await supabase.from('resource_types').select('id, name');
+    
+    // Create lookup maps for faster access
+    const sbuMap = new Map(sbuData?.map(sbu => [sbu.id, sbu.name]) || []);
+    const expertiseMap = new Map(expertiseData?.map(exp => [exp.id, exp.name]) || []);
+    const resourceTypeMap = new Map(resourceTypeData?.map(rt => [rt.id, rt.name]) || []);
+    
+    // Get manager emails for all users who have managers
+    const managerIds = users
+      .filter(user => user.manager_id)
+      .map(user => user.manager_id);
+    
+    let managerMap = new Map();
+    if (managerIds.length > 0) {
+      const { data: managerData } = await supabase
+        .from('profiles')
+        .select('id, email')
+        .in('id', managerIds);
+      
+      managerMap = new Map(managerData?.map(manager => [manager.id, manager.email]) || []);
+    }
+    
+    // Transform the data to be human-friendly
     const csvData = users.map(user => ({
       userId: user.id,
       email: user.email || '',
@@ -57,12 +81,23 @@ serve(async (req) => {
       lastName: user.last_name || '',
       role: user.role || 'employee',
       employeeId: user.employee_id || '',
-      password: '', // Empty password field for security
-      sbuName: user.sbu_name || ''
+      managerEmail: user.manager_id ? (managerMap.get(user.manager_id) || '') : '',
+      sbuName: user.sbu_id ? (sbuMap.get(user.sbu_id) || '') : '',
+      expertiseName: user.expertise_id ? (expertiseMap.get(user.expertise_id) || '') : '',
+      resourceTypeName: user.resource_type_id ? (resourceTypeMap.get(user.resource_type_id) || '') : '',
+      dateOfJoining: user.date_of_joining || '',
+      careerStartDate: user.career_start_date || '',
+      createdAt: user.created_at || '',
+      updatedAt: user.updated_at || ''
     }));
     
-    // Convert to CSV format
-    const csvHeaders = ['userId', 'email', 'firstName', 'lastName', 'role', 'employeeId', 'password', 'sbuName'];
+    // Convert to CSV format with human-friendly headers
+    const csvHeaders = [
+      'userId', 'email', 'firstName', 'lastName', 'role', 'employeeId', 
+      'managerEmail', 'sbuName', 'expertiseName', 'resourceTypeName', 
+      'dateOfJoining', 'careerStartDate', 'createdAt', 'updatedAt'
+    ];
+    
     const csvRows = csvData.map(row => [
       row.userId,
       row.email,
@@ -70,20 +105,26 @@ serve(async (req) => {
       row.lastName,
       row.role,
       row.employeeId,
-      row.password,
-      row.sbuName
+      row.managerEmail,
+      row.sbuName,
+      row.expertiseName,
+      row.resourceTypeName,
+      row.dateOfJoining,
+      row.careerStartDate,
+      row.createdAt,
+      row.updatedAt
     ]);
     
     const csvContent = csv.stringify([csvHeaders, ...csvRows]);
     
-    console.log(`Successfully generated CSV with ${csvData.length} user records`);
+    console.log(`Successfully generated CSV with ${csvData.length} user records including all profile information`);
     
     return new Response(csvContent, {
       status: 200,
       headers: {
         ...corsHeaders,
         'Content-Type': 'text/csv',
-        'Content-Disposition': 'attachment; filename="users_export.csv"'
+        'Content-Disposition': 'attachment; filename="users_complete_export.csv"'
       }
     });
   } catch (error) {
