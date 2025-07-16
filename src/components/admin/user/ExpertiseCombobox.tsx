@@ -25,11 +25,19 @@ const ExpertiseCombobox: React.FC<ExpertiseComboboxProps> = ({
   const [open, setOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   
+  console.log('=== ExpertiseCombobox Debug ===');
+  console.log('Current value prop:', value);
+  console.log('Disabled:', disabled);
+  
   // Fetch selected expertise separately to ensure it's always available
-  const { data: selectedExpertise } = useQuery({
+  const { data: selectedExpertise, isLoading: selectedLoading, error: selectedError } = useQuery({
     queryKey: ['selected-expertise', value],
     queryFn: async () => {
-      if (!value) return null;
+      console.log('Fetching selected expertise for value:', value);
+      if (!value) {
+        console.log('No value provided, returning null');
+        return null;
+      }
       
       const { data, error } = await supabase
         .from('expertise_types')
@@ -37,7 +45,12 @@ const ExpertiseCombobox: React.FC<ExpertiseComboboxProps> = ({
         .eq('id', value)
         .single();
       
-      if (error) throw error;
+      console.log('Selected expertise query result:', { data, error });
+      
+      if (error) {
+        console.error('Error fetching selected expertise:', error);
+        throw error;
+      }
       return data;
     },
     enabled: !!value,
@@ -51,12 +64,18 @@ const ExpertiseCombobox: React.FC<ExpertiseComboboxProps> = ({
 
   const expertiseTypes = searchResult?.expertiseTypes || [];
   
+  console.log('Search result expertise types:', expertiseTypes);
+  console.log('Selected expertise from query:', selectedExpertise);
+  console.log('Selected expertise loading:', selectedLoading);
+  console.log('Selected expertise error:', selectedError);
+  
   // Combine search results with selected expertise to ensure it's always available
   const allExpertiseTypes = React.useMemo(() => {
     const combinedExpertise = [...expertiseTypes];
     
     // Add selected expertise if it's not already in the search results
     if (selectedExpertise && !expertiseTypes.some(e => e.id === selectedExpertise.id)) {
+      console.log('Adding selected expertise to list:', selectedExpertise);
       combinedExpertise.unshift(selectedExpertise);
     }
     
@@ -65,13 +84,17 @@ const ExpertiseCombobox: React.FC<ExpertiseComboboxProps> = ({
       index === self.findIndex(e => e.id === expertise.id)
     );
     
+    console.log('Final combined expertise types:', uniqueExpertise);
     return uniqueExpertise;
   }, [expertiseTypes, selectedExpertise]);
 
   const handleSelect = (expertiseId: string) => {
+    console.log('Selecting expertise:', expertiseId, 'current value:', value);
     if (expertiseId === value) {
+      console.log('Deselecting expertise');
       onValueChange(null);
     } else {
+      console.log('Setting new expertise:', expertiseId);
       onValueChange(expertiseId);
     }
     setOpen(false);
@@ -79,15 +102,19 @@ const ExpertiseCombobox: React.FC<ExpertiseComboboxProps> = ({
 
   const handleClear = (e: React.MouseEvent) => {
     e.stopPropagation();
+    console.log('Clearing expertise selection');
     onValueChange(null);
   };
 
   const handleOpenChange = (newOpen: boolean) => {
+    console.log('Popover open state changing to:', newOpen);
     setOpen(newOpen);
     if (!newOpen) {
       setSearchQuery('');
     }
   };
+
+  console.log('Rendering with selected expertise:', selectedExpertise);
 
   return (
     <Popover open={open} onOpenChange={handleOpenChange}>
