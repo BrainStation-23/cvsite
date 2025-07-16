@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import DashboardLayout from '@/components/Layout/DashboardLayout';
@@ -41,6 +42,9 @@ const EditUser: React.FC = () => {
     try {
       setIsLoadingUser(true);
       
+      console.log('=== EditUser Debug ===');
+      console.log('Fetching user data for ID:', id);
+      
       // Fetch user data from list_users RPC function
       const { data, error } = await supabase.rpc('list_users', {
         search_query: null,
@@ -57,10 +61,13 @@ const EditUser: React.FC = () => {
       const response = typeof data === 'string' ? JSON.parse(data) : data;
       const users = response?.users || [];
       
+      console.log('All users from RPC:', users);
+      
       const user = users.find((u: any) => u.id === id);
+      console.log('Found user:', user);
       
       if (user) {
-        setUserData({
+        const mappedUserData = {
           id: user.id,
           email: user.email || '',
           first_name: user.first_name || '',
@@ -73,7 +80,10 @@ const EditUser: React.FC = () => {
           date_of_joining: user.date_of_joining || null,
           career_start_date: user.career_start_date || null,
           manager: user.manager || null
-        });
+        };
+        
+        console.log('Mapped user data:', mappedUserData);
+        setUserData(mappedUserData);
       } else {
         toast({
           title: 'User not found',
@@ -158,6 +168,28 @@ const EditUser: React.FC = () => {
     );
   }
 
+  console.log('=== EditUser Render Debug ===');
+  console.log('Current userData:', userData);
+  console.log('Passing to UserForm - expertiseId:', userData.expertise_id);
+  console.log('Passing to UserForm - managerId:', userData.manager);
+  console.log('Passing to UserForm - resourceTypeId:', userData.resource_type);
+
+  const initialFormData = {
+    email: userData.email,
+    firstName: userData.first_name,
+    lastName: userData.last_name,
+    role: userData.role,
+    employeeId: userData.employee_id,
+    sbuId: userData.sbu_id,
+    expertiseId: userData.expertise_id,
+    resourceTypeId: userData.resource_type,
+    dateOfJoining: userData.date_of_joining || '',
+    careerStartDate: userData.career_start_date || '',
+    managerId: userData.manager
+  };
+
+  console.log('Initial form data being passed to UserForm:', initialFormData);
+
   return (
     <DashboardLayout>
       <div className="space-y-6">
@@ -178,19 +210,7 @@ const EditUser: React.FC = () => {
         </div>
 
         <UserForm
-          initialData={{
-            email: userData.email,
-            firstName: userData.first_name,
-            lastName: userData.last_name,
-            role: userData.role,
-            employeeId: userData.employee_id,
-            sbuId: userData.sbu_id,
-            expertiseId: userData.expertise_id,
-            resourceTypeId: userData.resource_type,
-            dateOfJoining: userData.date_of_joining || '',
-            careerStartDate: userData.career_start_date || '',
-            managerId: userData.manager
-          }}
+          initialData={initialFormData}
           onSubmit={handleSubmit}
           isLoading={isLoading}
           isEdit={true}
