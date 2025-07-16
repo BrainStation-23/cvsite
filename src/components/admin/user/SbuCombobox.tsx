@@ -6,6 +6,8 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Check, ChevronsUpDown, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useSbuSearch } from '@/hooks/use-sbu-search';
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
 
 interface SbuComboboxProps {
   value: string | null;
@@ -23,6 +25,24 @@ const SbuCombobox: React.FC<SbuComboboxProps> = ({
   const [open, setOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   
+  // Fetch selected SBU separately to ensure it's always available
+  const { data: selectedSbu } = useQuery({
+    queryKey: ['selected-sbu', value],
+    queryFn: async () => {
+      if (!value) return null;
+      
+      const { data, error } = await supabase
+        .from('sbus')
+        .select('id, name, sbu_head_email')
+        .eq('id', value)
+        .single();
+      
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!value,
+  });
+
   const { data: searchResult, isLoading } = useSbuSearch({
     searchQuery: searchQuery || null,
     page: 1,
@@ -30,7 +50,23 @@ const SbuCombobox: React.FC<SbuComboboxProps> = ({
   });
 
   const sbus = searchResult?.sbus || [];
-  const selectedSbu = sbus.find(sbu => sbu.id === value);
+  
+  // Combine search results with selected SBU to ensure it's always available
+  const allSbus = React.useMemo(() => {
+    const combinedSbus = [...sbus];
+    
+    // Add selected SBU if it's not already in the search results
+    if (selectedSbu && !sbus.some(s => s.id === selectedSbu.id)) {
+      combinedSbus.unshift(selectedSbu);
+    }
+    
+    // Remove duplicates based on id
+    const uniqueSbus = combinedSbus.filter((sbu, index, self) => 
+      index === self.findIndex(s => s.id === sbu.id)
+    );
+    
+    return uniqueSbus;
+  }, [sbus, selectedSbu]);
 
   const handleSelect = (sbuId: string) => {
     if (sbuId === value) {
@@ -46,8 +82,15 @@ const SbuCombobox: React.FC<SbuComboboxProps> = ({
     onValueChange(null);
   };
 
+  const handleOpenChange = (newOpen: boolean) => {
+    setOpen(newOpen);
+    if (!newOpen) {
+      setSearchQuery('');
+    }
+  };
+
   return (
-    <Popover open={open} onOpenChange={setOpen}>
+    <Popover open={open} onOpenChange={handleOpenChange}>
       <PopoverTrigger asChild>
         <Button
           variant="outline"
@@ -71,7 +114,7 @@ const SbuCombobox: React.FC<SbuComboboxProps> = ({
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-full p-0">
-        <Command>
+        <Command shouldFilter={false}>
           <CommandInput 
             placeholder="Search SBUs..." 
             value={searchQuery}
@@ -82,7 +125,7 @@ const SbuCombobox: React.FC<SbuComboboxProps> = ({
               {isLoading ? "Loading..." : "No SBU found."}
             </CommandEmpty>
             <CommandGroup>
-              {sbus.map((sbu) => (
+              {allSbus.map((sbu) => (
                 <CommandItem
                   key={sbu.id}
                   value={sbu.id}

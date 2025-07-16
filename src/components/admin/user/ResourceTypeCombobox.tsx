@@ -6,6 +6,8 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Check, ChevronsUpDown, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useResourceTypeSearch } from '@/hooks/use-resource-type-search';
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
 
 interface ResourceTypeComboboxProps {
   value: string | null;
@@ -23,6 +25,24 @@ const ResourceTypeCombobox: React.FC<ResourceTypeComboboxProps> = ({
   const [open, setOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   
+  // Fetch selected resource type separately to ensure it's always available
+  const { data: selectedResourceType } = useQuery({
+    queryKey: ['selected-resource-type', value],
+    queryFn: async () => {
+      if (!value) return null;
+      
+      const { data, error } = await supabase
+        .from('resource_types')
+        .select('id, name')
+        .eq('id', value)
+        .single();
+      
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!value,
+  });
+
   const { data: searchResult, isLoading } = useResourceTypeSearch({
     searchQuery: searchQuery || null,
     page: 1,
@@ -30,7 +50,23 @@ const ResourceTypeCombobox: React.FC<ResourceTypeComboboxProps> = ({
   });
 
   const resourceTypes = searchResult?.resourceTypes || [];
-  const selectedResourceType = resourceTypes.find(resourceType => resourceType.id === value);
+  
+  // Combine search results with selected resource type to ensure it's always available
+  const allResourceTypes = React.useMemo(() => {
+    const combinedResourceTypes = [...resourceTypes];
+    
+    // Add selected resource type if it's not already in the search results
+    if (selectedResourceType && !resourceTypes.some(rt => rt.id === selectedResourceType.id)) {
+      combinedResourceTypes.unshift(selectedResourceType);
+    }
+    
+    // Remove duplicates based on id
+    const uniqueResourceTypes = combinedResourceTypes.filter((resourceType, index, self) => 
+      index === self.findIndex(rt => rt.id === resourceType.id)
+    );
+    
+    return uniqueResourceTypes;
+  }, [resourceTypes, selectedResourceType]);
 
   const handleSelect = (resourceTypeId: string) => {
     if (resourceTypeId === value) {
@@ -46,8 +82,15 @@ const ResourceTypeCombobox: React.FC<ResourceTypeComboboxProps> = ({
     onValueChange(null);
   };
 
+  const handleOpenChange = (newOpen: boolean) => {
+    setOpen(newOpen);
+    if (!newOpen) {
+      setSearchQuery('');
+    }
+  };
+
   return (
-    <Popover open={open} onOpenChange={setOpen}>
+    <Popover open={open} onOpenChange={handleOpenChange}>
       <PopoverTrigger asChild>
         <Button
           variant="outline"
@@ -71,7 +114,7 @@ const ResourceTypeCombobox: React.FC<ResourceTypeComboboxProps> = ({
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-full p-0">
-        <Command>
+        <Command shouldFilter={false}>
           <CommandInput 
             placeholder="Search resource type..." 
             value={searchQuery}
@@ -82,7 +125,7 @@ const ResourceTypeCombobox: React.FC<ResourceTypeComboboxProps> = ({
               {isLoading ? "Loading..." : "No resource type found."}
             </CommandEmpty>
             <CommandGroup>
-              {resourceTypes.map((resourceType) => (
+              {allResourceTypes.map((resourceType) => (
                 <CommandItem
                   key={resourceType.id}
                   value={resourceType.id}

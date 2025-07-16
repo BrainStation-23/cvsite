@@ -6,6 +6,8 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Check, ChevronsUpDown, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useExpertiseSearch } from '@/hooks/use-expertise-search';
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
 
 interface ExpertiseComboboxProps {
   value: string | null;
@@ -23,6 +25,24 @@ const ExpertiseCombobox: React.FC<ExpertiseComboboxProps> = ({
   const [open, setOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   
+  // Fetch selected expertise separately to ensure it's always available
+  const { data: selectedExpertise } = useQuery({
+    queryKey: ['selected-expertise', value],
+    queryFn: async () => {
+      if (!value) return null;
+      
+      const { data, error } = await supabase
+        .from('expertise_types')
+        .select('id, name')
+        .eq('id', value)
+        .single();
+      
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!value,
+  });
+
   const { data: searchResult, isLoading } = useExpertiseSearch({
     searchQuery: searchQuery || null,
     page: 1,
@@ -30,7 +50,23 @@ const ExpertiseCombobox: React.FC<ExpertiseComboboxProps> = ({
   });
 
   const expertiseTypes = searchResult?.expertiseTypes || [];
-  const selectedExpertise = expertiseTypes.find(expertise => expertise.id === value);
+  
+  // Combine search results with selected expertise to ensure it's always available
+  const allExpertiseTypes = React.useMemo(() => {
+    const combinedExpertise = [...expertiseTypes];
+    
+    // Add selected expertise if it's not already in the search results
+    if (selectedExpertise && !expertiseTypes.some(e => e.id === selectedExpertise.id)) {
+      combinedExpertise.unshift(selectedExpertise);
+    }
+    
+    // Remove duplicates based on id
+    const uniqueExpertise = combinedExpertise.filter((expertise, index, self) => 
+      index === self.findIndex(e => e.id === expertise.id)
+    );
+    
+    return uniqueExpertise;
+  }, [expertiseTypes, selectedExpertise]);
 
   const handleSelect = (expertiseId: string) => {
     if (expertiseId === value) {
@@ -46,8 +82,15 @@ const ExpertiseCombobox: React.FC<ExpertiseComboboxProps> = ({
     onValueChange(null);
   };
 
+  const handleOpenChange = (newOpen: boolean) => {
+    setOpen(newOpen);
+    if (!newOpen) {
+      setSearchQuery('');
+    }
+  };
+
   return (
-    <Popover open={open} onOpenChange={setOpen}>
+    <Popover open={open} onOpenChange={handleOpenChange}>
       <PopoverTrigger asChild>
         <Button
           variant="outline"
@@ -71,7 +114,7 @@ const ExpertiseCombobox: React.FC<ExpertiseComboboxProps> = ({
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-full p-0">
-        <Command>
+        <Command shouldFilter={false}>
           <CommandInput 
             placeholder="Search expertise..." 
             value={searchQuery}
@@ -82,7 +125,7 @@ const ExpertiseCombobox: React.FC<ExpertiseComboboxProps> = ({
               {isLoading ? "Loading..." : "No expertise found."}
             </CommandEmpty>
             <CommandGroup>
-              {expertiseTypes.map((expertise) => (
+              {allExpertiseTypes.map((expertise) => (
                 <CommandItem
                   key={expertise.id}
                   value={expertise.id}
