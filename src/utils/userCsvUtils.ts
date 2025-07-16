@@ -361,14 +361,9 @@ export const validateCSVData = (data: any[], existingUsers: any[] = [], mode: 'c
     let normalizedDateOfJoining = null;
     if (row.dateOfJoining && row.dateOfJoining.trim()) {
       normalizedDateOfJoining = normalizeDate(row.dateOfJoining.trim());
+      // Don't fail validation for invalid dates - just set to null and warn
       if (normalizedDateOfJoining === null) {
-        errors.push({
-          row: rowNumber,
-          field: 'dateOfJoining',
-          value: row.dateOfJoining,
-          message: 'Invalid date format. Please use a recognizable date format (e.g., YYYY-MM-DD, MM/DD/YYYY, DD/MM/YYYY)'
-        });
-        hasErrors = true;
+        console.warn(`Invalid date format for dateOfJoining at row ${rowNumber}: ${row.dateOfJoining}. Will be set to null.`);
       }
     }
 
@@ -376,14 +371,9 @@ export const validateCSVData = (data: any[], existingUsers: any[] = [], mode: 'c
     let normalizedCareerStartDate = null;
     if (row.careerStartDate && row.careerStartDate.trim()) {
       normalizedCareerStartDate = normalizeDate(row.careerStartDate.trim());
+      // Don't fail validation for invalid dates - just set to null and warn
       if (normalizedCareerStartDate === null) {
-        errors.push({
-          row: rowNumber,
-          field: 'careerStartDate',
-          value: row.careerStartDate,
-          message: 'Invalid date format. Please use a recognizable date format (e.g., YYYY-MM-DD, MM/DD/YYYY, DD/MM/YYYY)'
-        });
-        hasErrors = true;
+        console.warn(`Invalid date format for careerStartDate at row ${rowNumber}: ${row.careerStartDate}. Will be set to null.`);
       }
     }
 

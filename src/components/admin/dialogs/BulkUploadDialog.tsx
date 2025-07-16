@@ -31,6 +31,7 @@ export const BulkUploadDialog: React.FC<BulkUploadDialogProps> = ({
   const [uploadFile, setUploadFile] = useState<File | null>(null);
   const [validationResult, setValidationResult] = useState<any>(null);
   const [isValidating, setIsValidating] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState<string>('');
   
   const dialogTitle = title || (mode === 'create' ? 'Bulk Create Users' : 'Bulk Update Users');
   const dialogDescription = description || (mode === 'create' 
@@ -79,7 +80,13 @@ export const BulkUploadDialog: React.FC<BulkUploadDialogProps> = ({
   const handleBulkUpload = async () => {
     if (!uploadFile || !validationResult || validationResult.errors.length > 0) return;
     
+    const userCount = validationResult.valid.length;
+    if (userCount > 50) {
+      setUploadProgress(`Processing ${userCount} users. This may take several minutes...`);
+    }
+    
     const success = await onBulkUpload(uploadFile);
+    setUploadProgress('');
     if (success) {
       onOpenChange(false);
     }
@@ -144,9 +151,22 @@ export const BulkUploadDialog: React.FC<BulkUploadDialogProps> = ({
             </div>
           )}
 
+          {uploadProgress && (
+            <div className="flex items-center gap-2 p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg">
+              <Loader2 className="h-4 w-4 animate-spin" />
+              <span className="text-sm">{uploadProgress}</span>
+            </div>
+          )}
+
           {validationResult && !isValidating && (
             <div className="border rounded-lg p-4">
               <UserCSVValidation validationResult={validationResult} mode={mode} />
+              {validationResult.valid.length > 50 && (
+                <div className="mt-2 p-2 bg-yellow-50 dark:bg-yellow-900/20 rounded text-sm text-yellow-800 dark:text-yellow-200">
+                  <strong>Large Update Notice:</strong> You're updating {validationResult.valid.length} users. 
+                  This will be processed in the background and may take several minutes to complete.
+                </div>
+              )}
             </div>
           )}
         </div>

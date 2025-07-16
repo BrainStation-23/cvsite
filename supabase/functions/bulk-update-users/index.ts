@@ -214,9 +214,26 @@ const updateUserInBatch = async (supabase: any, user: UserUpdateData) => {
       console.log(`Warning: Manager "${user.managerEmail}" not found for user ${user.userId}`);
     }
     
-    // Parse dates - now more flexible
-    const parsedDateOfJoining = user.dateOfJoining && user.dateOfJoining.trim() ? user.dateOfJoining.trim() : null;
-    const parsedCareerStartDate = user.careerStartDate && user.careerStartDate.trim() ? user.careerStartDate.trim() : null;
+    // Parse dates with error handling - set to null if invalid
+    let parsedDateOfJoining = null;
+    if (user.dateOfJoining && user.dateOfJoining.trim()) {
+      const date = new Date(user.dateOfJoining.trim());
+      if (!isNaN(date.getTime())) {
+        parsedDateOfJoining = user.dateOfJoining.trim();
+      } else {
+        console.warn(`Invalid dateOfJoining for user ${user.userId}: ${user.dateOfJoining}. Setting to null.`);
+      }
+    }
+    
+    let parsedCareerStartDate = null;
+    if (user.careerStartDate && user.careerStartDate.trim()) {
+      const date = new Date(user.careerStartDate.trim());
+      if (!isNaN(date.getTime())) {
+        parsedCareerStartDate = user.careerStartDate.trim();
+      } else {
+        console.warn(`Invalid careerStartDate for user ${user.userId}: ${user.careerStartDate}. Setting to null.`);
+      }
+    }
     
     // Update user auth data if needed
     if (user.email || user.firstName || user.lastName || user.employeeId || user.password) {
@@ -403,7 +420,81 @@ serve(async (req) => {
     
     console.log(`Starting bulk update for ${users.length} users`);
     
-    // Process users in batches of 10
+    // For large datasets, use streaming response with background processing
+    if (users.length > 50) {
+      // Send immediate response and process in background
+      const processLargeUpdate = async () => {
+        const BATCH_SIZE = 5; // Smaller batches for large updates
+        const batches = [];
+        for (let i = 0; i < users.length; i += BATCH_SIZE) {
+          batches.push(users.slice(i, i + BATCH_SIZE));
+        }
+        
+        console.log(`Processing ${batches.length} batches of ${BATCH_SIZE} users each (large update)`);
+        
+        const allResults = {
+          successful: [] as any[],
+          failed: [] as any[]
+        };
+        
+        // Process each batch with extended timeout handling
+        for (let i = 0; i < batches.length; i++) {
+          try {
+            const batchResults = await processBatch(supabase, batches[i], i + 1);
+            allResults.successful.push(...batchResults.successful);
+            allResults.failed.push(...batchResults.failed);
+            
+            // Progress logging for large updates
+            if ((i + 1) % 10 === 0 || i === batches.length - 1) {
+              console.log(`Large update progress: ${i + 1}/${batches.length} batches completed`);
+              console.log(`Current results: ${allResults.successful.length} successful, ${allResults.failed.length} failed`);
+            }
+            
+            // Longer delay for large updates to prevent timeouts
+            if (i < batches.length - 1) {
+              await new Promise(resolve => setTimeout(resolve, 200));
+            }
+          } catch (error) {
+            console.error(`Batch ${i + 1} failed entirely:`, error);
+            // Add all users in this batch to failed results
+            batches[i].forEach(user => {
+              allResults.failed.push({ 
+                userId: user.userId, 
+                error: `Batch processing failed: ${error.message}` 
+              });
+            });
+          }
+        }
+        
+        console.log('Large bulk update completed:', {
+          successful: allResults.successful.length,
+          failed: allResults.failed.length,
+          totalUsers: users.length
+        });
+      };
+      
+      // Use waitUntil for background processing
+      if (typeof EdgeRuntime !== 'undefined') {
+        EdgeRuntime.waitUntil(processLargeUpdate());
+      } else {
+        // Fallback for environments without EdgeRuntime
+        processLargeUpdate().catch(error => 
+          console.error('Background processing failed:', error)
+        );
+      }
+      
+      return new Response(
+        JSON.stringify({ 
+          message: `Processing ${users.length} users in background. This may take several minutes.`,
+          status: 'processing',
+          totalUsers: users.length,
+          estimatedTime: `${Math.ceil(users.length / 50)} minutes`
+        }),
+        { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+    
+    // For smaller datasets, process synchronously
     const BATCH_SIZE = 10;
     const batches = [];
     for (let i = 0; i < users.length; i += BATCH_SIZE) {
