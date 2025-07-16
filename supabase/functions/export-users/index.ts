@@ -48,32 +48,7 @@ serve(async (req) => {
     const users = usersResponse.users;
     console.log(`Found ${users.length} users to export`);
     
-    // Get additional lookup data for human-friendly names
-    const { data: sbuData } = await supabase.from('sbus').select('id, name');
-    const { data: expertiseData } = await supabase.from('expertise_types').select('id, name');
-    const { data: resourceTypeData } = await supabase.from('resource_types').select('id, name');
-    
-    // Create lookup maps for faster access
-    const sbuMap = new Map(sbuData?.map(sbu => [sbu.id, sbu.name]) || []);
-    const expertiseMap = new Map(expertiseData?.map(exp => [exp.id, exp.name]) || []);
-    const resourceTypeMap = new Map(resourceTypeData?.map(rt => [rt.id, rt.name]) || []);
-    
-    // Get manager emails for all users who have managers
-    const managerIds = users
-      .filter(user => user.manager_id)
-      .map(user => user.manager_id);
-    
-    let managerMap = new Map();
-    if (managerIds.length > 0) {
-      const { data: managerData } = await supabase
-        .from('profiles')
-        .select('id, email')
-        .in('id', managerIds);
-      
-      managerMap = new Map(managerData?.map(manager => [manager.id, manager.email]) || []);
-    }
-    
-    // Transform the data to be human-friendly
+    // Transform the data to be human-friendly - now we have direct access to IDs and names
     const csvData = users.map(user => ({
       userId: user.id,
       email: user.email || '',
@@ -81,21 +56,21 @@ serve(async (req) => {
       lastName: user.last_name || '',
       role: user.role || 'employee',
       employeeId: user.employee_id || '',
-      managerEmail: user.manager_id ? (managerMap.get(user.manager_id) || '') : '',
-      sbuName: user.sbu_id ? (sbuMap.get(user.sbu_id) || '') : '',
-      expertiseName: user.expertise_id ? (expertiseMap.get(user.expertise_id) || '') : '',
-      resourceTypeName: user.resource_type_id ? (resourceTypeMap.get(user.resource_type_id) || '') : '',
+      managerName: user.manager_name || '',
+      sbuName: user.sbu_name || '',
+      expertiseName: user.expertise_name || '',
+      resourceTypeName: user.resource_type_name || '',
       dateOfJoining: user.date_of_joining || '',
       careerStartDate: user.career_start_date || '',
       createdAt: user.created_at || '',
-      updatedAt: user.updated_at || ''
+      lastSignIn: user.last_sign_in_at || ''
     }));
     
     // Convert to CSV format with human-friendly headers
     const csvHeaders = [
       'userId', 'email', 'firstName', 'lastName', 'role', 'employeeId', 
-      'managerEmail', 'sbuName', 'expertiseName', 'resourceTypeName', 
-      'dateOfJoining', 'careerStartDate', 'createdAt', 'updatedAt'
+      'managerName', 'sbuName', 'expertiseName', 'resourceTypeName', 
+      'dateOfJoining', 'careerStartDate', 'createdAt', 'lastSignIn'
     ];
     
     const csvRows = csvData.map(row => [
@@ -105,14 +80,14 @@ serve(async (req) => {
       row.lastName,
       row.role,
       row.employeeId,
-      row.managerEmail,
+      row.managerName,
       row.sbuName,
       row.expertiseName,
       row.resourceTypeName,
       row.dateOfJoining,
       row.careerStartDate,
       row.createdAt,
-      row.updatedAt
+      row.lastSignIn
     ]);
     
     const csvContent = csv.stringify([csvHeaders, ...csvRows]);

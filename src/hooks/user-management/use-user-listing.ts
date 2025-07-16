@@ -75,8 +75,11 @@ export function useUserListing(state: ReturnType<typeof import('./use-user-state
         lastSignIn: user.last_sign_in_at || undefined,
         dateOfJoining: user.date_of_joining || null,
         careerStartDate: user.career_start_date || null,
+        managerId: user.manager_id || null,
         managerName: user.manager_name || null,
+        expertiseId: user.expertise_id || null,
         expertiseName: user.expertise_name || null,
+        resourceTypeId: user.resource_type_id || null,
         resourceTypeName: user.resource_type_name || null,
       }));
       

@@ -15,8 +15,11 @@ export interface ListUsersResponse {
     sbu_name?: string | null;
     date_of_joining?: string | null;
     career_start_date?: string | null;
+    manager_id?: string | null;
     manager_name?: string | null;
+    expertise_id?: string | null;
     expertise_name?: string | null;
+    resource_type_id?: string | null;
     resource_type_name?: string | null;
   }[];
   pagination: {

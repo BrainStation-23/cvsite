@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import DashboardLayout from '@/components/Layout/DashboardLayout';
@@ -7,7 +8,6 @@ import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { UserRole } from '@/types';
 import UserForm from '@/components/admin/UserForm';
-import { mapNamesToIds } from '@/utils/userMappingHelpers';
 
 interface UserData {
   id: string;
@@ -67,13 +67,6 @@ const EditUser: React.FC = () => {
       console.log('Found user:', user);
       
       if (user) {
-        // Map the names to IDs using our helper function
-        const { expertiseId, managerId, resourceTypeId } = await mapNamesToIds(
-          user.expertise_name,
-          user.manager_name,
-          user.resource_type_name
-        );
-
         const mappedUserData = {
           id: user.id,
           email: user.email || '',
@@ -82,11 +75,11 @@ const EditUser: React.FC = () => {
           role: user.role || 'employee',
           employee_id: user.employee_id || '',
           sbu_id: user.sbu_id || null,
-          expertise_id: expertiseId,
-          resource_type: resourceTypeId,
+          expertise_id: user.expertise_id || null,
+          resource_type: user.resource_type_id || null,
           date_of_joining: user.date_of_joining || null,
           career_start_date: user.career_start_date || null,
-          manager: managerId
+          manager: user.manager_id || null
         };
         
         console.log('Mapped user data with IDs:', mappedUserData);
