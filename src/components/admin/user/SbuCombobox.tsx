@@ -33,7 +33,7 @@ const SbuCombobox: React.FC<SbuComboboxProps> = ({
       
       const { data, error } = await supabase
         .from('sbus')
-        .select('id, name, sbu_head_email')
+        .select('*')
         .eq('id', value)
         .single();
       

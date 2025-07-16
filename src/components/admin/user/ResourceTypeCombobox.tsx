@@ -33,7 +33,7 @@ const ResourceTypeCombobox: React.FC<ResourceTypeComboboxProps> = ({
       
       const { data, error } = await supabase
         .from('resource_types')
-        .select('id, name')
+        .select('*')
         .eq('id', value)
         .single();
       

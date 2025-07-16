@@ -33,7 +33,7 @@ const ExpertiseCombobox: React.FC<ExpertiseComboboxProps> = ({
       
       const { data, error } = await supabase
         .from('expertise_types')
-        .select('id, name')
+        .select('*')
         .eq('id', value)
         .single();
       
