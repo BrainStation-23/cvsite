@@ -29,14 +29,12 @@ const parseCSVData = async (file: File): Promise<UserUpdateData[]> => {
   
   const text = await file.text();
   console.log('CSV text length:', text.length);
-  console.log('First 200 chars:', text.substring(0, 200));
   
   return new Promise((resolve, reject) => {
     Papa.parse(text, {
       header: true,
       skipEmptyLines: true,
       transformHeader: (header: string) => {
-        // Normalize headers to match expected field names
         const normalized = header.trim().toLowerCase();
         const headerMap: Record<string, string> = {
           'userid': 'userId',
@@ -65,7 +63,6 @@ const parseCSVData = async (file: File): Promise<UserUpdateData[]> => {
       },
       complete: (results) => {
         console.log('Parse complete. Rows:', results.data.length);
-        console.log('Parse errors:', results.errors);
         
         if (results.errors.length > 0) {
           console.error('CSV parsing errors:', results.errors);
@@ -77,7 +74,7 @@ const parseCSVData = async (file: File): Promise<UserUpdateData[]> => {
             userId: row.userId?.trim(),
             email: row.email?.trim(),
             firstName: row.firstName?.trim(),
-            lastName: row.lastName?.trim() || undefined, // Handle optional lastName
+            lastName: row.lastName?.trim() || undefined,
             role: row.role?.trim(),
             employeeId: row.employeeId?.trim(),
             password: row.password?.trim(),
@@ -90,8 +87,6 @@ const parseCSVData = async (file: File): Promise<UserUpdateData[]> => {
           }));
         
         console.log('Filtered users count:', users.length);
-        console.log('Sample user:', users[0]);
-        
         resolve(users);
       },
       error: (error) => {
@@ -105,8 +100,6 @@ const parseCSVData = async (file: File): Promise<UserUpdateData[]> => {
 const getSbuIdByName = async (supabase: any, sbuName: string): Promise<string | null> => {
   if (!sbuName || sbuName.trim() === '') return null;
   
-  console.log('Looking up SBU:', sbuName);
-  
   const { data: sbus, error } = await supabase
     .from('sbus')
     .select('id')
@@ -118,16 +111,11 @@ const getSbuIdByName = async (supabase: any, sbuName: string): Promise<string | 
     return null;
   }
   
-  const sbuId = sbus && sbus.length > 0 ? sbus[0].id : null;
-  console.log('SBU lookup result:', { sbuName, sbuId });
-  
-  return sbuId;
+  return sbus && sbus.length > 0 ? sbus[0].id : null;
 };
 
 const getExpertiseIdByName = async (supabase: any, expertiseName: string): Promise<string | null> => {
   if (!expertiseName || expertiseName.trim() === '') return null;
-  
-  console.log('Looking up expertise:', expertiseName);
   
   const { data: expertise, error } = await supabase
     .from('expertise_types')
@@ -140,16 +128,11 @@ const getExpertiseIdByName = async (supabase: any, expertiseName: string): Promi
     return null;
   }
   
-  const expertiseId = expertise && expertise.length > 0 ? expertise[0].id : null;
-  console.log('Expertise lookup result:', { expertiseName, expertiseId });
-  
-  return expertiseId;
+  return expertise && expertise.length > 0 ? expertise[0].id : null;
 };
 
 const getResourceTypeIdByName = async (supabase: any, resourceTypeName: string): Promise<string | null> => {
   if (!resourceTypeName || resourceTypeName.trim() === '') return null;
-  
-  console.log('Looking up resource type:', resourceTypeName);
   
   const { data: resourceTypes, error } = await supabase
     .from('resource_types')
@@ -162,16 +145,11 @@ const getResourceTypeIdByName = async (supabase: any, resourceTypeName: string):
     return null;
   }
   
-  const resourceTypeId = resourceTypes && resourceTypes.length > 0 ? resourceTypes[0].id : null;
-  console.log('Resource type lookup result:', { resourceTypeName, resourceTypeId });
-  
-  return resourceTypeId;
+  return resourceTypes && resourceTypes.length > 0 ? resourceTypes[0].id : null;
 };
 
 const getManagerIdByEmail = async (supabase: any, managerEmail: string): Promise<string | null> => {
   if (!managerEmail || managerEmail.trim() === '') return null;
-  
-  console.log('Looking up manager by email:', managerEmail);
   
   const { data: managers, error } = await supabase
     .from('profiles')
@@ -184,10 +162,25 @@ const getManagerIdByEmail = async (supabase: any, managerEmail: string): Promise
     return null;
   }
   
-  const managerId = managers && managers.length > 0 ? managers[0].id : null;
-  console.log('Manager lookup result:', { managerEmail, managerId });
+  return managers && managers.length > 0 ? managers[0].id : null;
+};
+
+const parseAndValidateDate = (dateString: string): string | null => {
+  if (!dateString || dateString.trim() === '') return null;
   
-  return managerId;
+  try {
+    const date = new Date(dateString.trim());
+    if (isNaN(date.getTime())) {
+      console.warn(`Invalid date format: ${dateString}. Setting to null.`);
+      return null;
+    }
+    
+    // Convert to YYYY-MM-DD format
+    return date.toISOString().split('T')[0];
+  } catch (error) {
+    console.warn(`Error parsing date ${dateString}:`, error, 'Setting to null.');
+    return null;
+  }
 };
 
 const updateUserInBatch = async (supabase: any, user: UserUpdateData) => {
@@ -200,43 +193,12 @@ const updateUserInBatch = async (supabase: any, user: UserUpdateData) => {
     const resourceTypeId = user.resourceTypeName ? await getResourceTypeIdByName(supabase, user.resourceTypeName) : undefined;
     const managerId = user.managerEmail ? await getManagerIdByEmail(supabase, user.managerEmail) : undefined;
     
-    // Warn about missing lookups
-    if (user.sbuName && !sbuId) {
-      console.log(`Warning: SBU "${user.sbuName}" not found for user ${user.userId}`);
-    }
-    if (user.expertiseName && !expertiseId) {
-      console.log(`Warning: Expertise "${user.expertiseName}" not found for user ${user.userId}`);
-    }
-    if (user.resourceTypeName && !resourceTypeId) {
-      console.log(`Warning: Resource type "${user.resourceTypeName}" not found for user ${user.userId}`);
-    }
-    if (user.managerEmail && !managerId) {
-      console.log(`Warning: Manager "${user.managerEmail}" not found for user ${user.userId}`);
-    }
-    
-    // Parse dates with error handling - set to null if invalid
-    let parsedDateOfJoining = null;
-    if (user.dateOfJoining && user.dateOfJoining.trim()) {
-      const date = new Date(user.dateOfJoining.trim());
-      if (!isNaN(date.getTime())) {
-        parsedDateOfJoining = user.dateOfJoining.trim();
-      } else {
-        console.warn(`Invalid dateOfJoining for user ${user.userId}: ${user.dateOfJoining}. Setting to null.`);
-      }
-    }
-    
-    let parsedCareerStartDate = null;
-    if (user.careerStartDate && user.careerStartDate.trim()) {
-      const date = new Date(user.careerStartDate.trim());
-      if (!isNaN(date.getTime())) {
-        parsedCareerStartDate = user.careerStartDate.trim();
-      } else {
-        console.warn(`Invalid careerStartDate for user ${user.userId}: ${user.careerStartDate}. Setting to null.`);
-      }
-    }
+    // Parse dates with validation - set to null if invalid
+    const parsedDateOfJoining = user.dateOfJoining ? parseAndValidateDate(user.dateOfJoining) : null;
+    const parsedCareerStartDate = user.careerStartDate ? parseAndValidateDate(user.careerStartDate) : null;
     
     // Update user auth data if needed
-    if (user.email || user.firstName || user.lastName || user.employeeId || user.password) {
+    if (user.email || user.firstName || user.lastName !== undefined || user.employeeId || user.password) {
       const updateData: Record<string, any> = {};
       
       if (user.email) updateData.email = user.email;
@@ -244,7 +206,7 @@ const updateUserInBatch = async (supabase: any, user: UserUpdateData) => {
       
       const userMetadata: Record<string, any> = {};
       if (user.firstName) userMetadata.first_name = user.firstName;
-      if (user.lastName) userMetadata.last_name = user.lastName; // Optional
+      if (user.lastName !== undefined) userMetadata.last_name = user.lastName;
       if (user.employeeId) userMetadata.employee_id = user.employeeId;
       
       if (Object.keys(userMetadata).length > 0) {
@@ -252,7 +214,6 @@ const updateUserInBatch = async (supabase: any, user: UserUpdateData) => {
       }
       
       if (Object.keys(updateData).length > 0) {
-        console.log('Updating auth user:', user.userId, updateData);
         const { error: updateError } = await supabase.auth.admin.updateUserById(
           user.userId,
           updateData
@@ -267,7 +228,7 @@ const updateUserInBatch = async (supabase: any, user: UserUpdateData) => {
     // Update profile table
     const profileUpdates: Record<string, any> = {};
     if (user.firstName) profileUpdates.first_name = user.firstName;
-    if (user.lastName !== undefined) profileUpdates.last_name = user.lastName; // Handle optional lastName properly
+    if (user.lastName !== undefined) profileUpdates.last_name = user.lastName;
     if (user.employeeId) profileUpdates.employee_id = user.employeeId;
     if (sbuId !== undefined) profileUpdates.sbu_id = sbuId;
     if (expertiseId !== undefined) profileUpdates.expertise = expertiseId;
@@ -277,7 +238,6 @@ const updateUserInBatch = async (supabase: any, user: UserUpdateData) => {
     if (parsedCareerStartDate) profileUpdates.career_start_date = parsedCareerStartDate;
     
     if (Object.keys(profileUpdates).length > 0) {
-      console.log('Updating profile:', user.userId, profileUpdates);
       const { error: profileError } = await supabase
         .from('profiles')
         .update(profileUpdates)
@@ -295,9 +255,7 @@ const updateUserInBatch = async (supabase: any, user: UserUpdateData) => {
       }
       
       const validRole = user.role.toLowerCase();
-      console.log('Updating role for user:', user.userId, 'to:', validRole);
       
-      // Check existing roles
       const { data: existingRoles, error: fetchError } = await supabase
         .from('user_roles')
         .select('id, role')
@@ -308,7 +266,6 @@ const updateUserInBatch = async (supabase: any, user: UserUpdateData) => {
       }
       
       if (existingRoles && existingRoles.length > 0) {
-        // Update existing role
         const existingRole = existingRoles[0];
         if (existingRole.role !== validRole) {
           const { error: updateRoleError } = await supabase
@@ -321,7 +278,6 @@ const updateUserInBatch = async (supabase: any, user: UserUpdateData) => {
           }
         }
       } else {
-        // Insert new role
         const { error: insertRoleError } = await supabase
           .from('user_roles')
           .insert({ user_id: user.userId, role: validRole });
@@ -335,14 +291,7 @@ const updateUserInBatch = async (supabase: any, user: UserUpdateData) => {
     console.log('Successfully updated user:', user.userId);
     return {
       userId: user.userId,
-      sbuAssigned: !!sbuId,
-      sbuName: sbuId ? user.sbuName : null,
-      managerAssigned: !!managerId,
-      managerEmail: managerId ? user.managerEmail : null,
-      expertiseAssigned: !!expertiseId,
-      expertiseName: expertiseId ? user.expertiseName : null,
-      resourceTypeAssigned: !!resourceTypeId,
-      resourceTypeName: resourceTypeId ? user.resourceTypeName : null
+      success: true
     };
   } catch (error) {
     console.error('Error updating user:', user.userId, error);
@@ -382,7 +331,6 @@ const processBatch = async (supabase: any, batch: UserUpdateData[], batchNumber:
 serve(async (req) => {
   console.log('Bulk update users function called');
   
-  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
@@ -395,151 +343,93 @@ serve(async (req) => {
       throw new Error('Missing Supabase configuration');
     }
     
-    // Create a Supabase client with the service role key
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
     
-    // Parse the file from the request
-    const formData = await req.formData();
-    const file = formData.get('file') as File;
+    // Check if this is a chunk processing request or initial parsing
+    const contentType = req.headers.get('content-type') || '';
     
-    if (!file) {
-      throw new Error('No file uploaded');
-    }
-    
-    console.log('Processing file:', file.name, 'Type:', file.type);
-    
-    // Parse CSV using papaparse
-    const users = await parseCSVData(file);
-    
-    if (!users.length) {
-      return new Response(
-        JSON.stringify({ error: 'No valid users found in the file' }),
-        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
-    
-    console.log(`Starting bulk update for ${users.length} users`);
-    
-    // For large datasets, use streaming response with background processing
-    if (users.length > 50) {
-      // Send immediate response and process in background
-      const processLargeUpdate = async () => {
-        const BATCH_SIZE = 5; // Smaller batches for large updates
-        const batches = [];
-        for (let i = 0; i < users.length; i += BATCH_SIZE) {
-          batches.push(users.slice(i, i + BATCH_SIZE));
-        }
-        
-        console.log(`Processing ${batches.length} batches of ${BATCH_SIZE} users each (large update)`);
-        
-        const allResults = {
-          successful: [] as any[],
-          failed: [] as any[]
-        };
-        
-        // Process each batch with extended timeout handling
-        for (let i = 0; i < batches.length; i++) {
-          try {
-            const batchResults = await processBatch(supabase, batches[i], i + 1);
-            allResults.successful.push(...batchResults.successful);
-            allResults.failed.push(...batchResults.failed);
-            
-            // Progress logging for large updates
-            if ((i + 1) % 10 === 0 || i === batches.length - 1) {
-              console.log(`Large update progress: ${i + 1}/${batches.length} batches completed`);
-              console.log(`Current results: ${allResults.successful.length} successful, ${allResults.failed.length} failed`);
-            }
-            
-            // Longer delay for large updates to prevent timeouts
-            if (i < batches.length - 1) {
-              await new Promise(resolve => setTimeout(resolve, 200));
-            }
-          } catch (error) {
-            console.error(`Batch ${i + 1} failed entirely:`, error);
-            // Add all users in this batch to failed results
-            batches[i].forEach(user => {
-              allResults.failed.push({ 
-                userId: user.userId, 
-                error: `Batch processing failed: ${error.message}` 
-              });
-            });
-          }
-        }
-        
-        console.log('Large bulk update completed:', {
-          successful: allResults.successful.length,
-          failed: allResults.failed.length,
-          totalUsers: users.length
-        });
+    if (contentType.includes('application/json')) {
+      // This is a chunk processing request
+      const { users } = await req.json();
+      
+      if (!users || !Array.isArray(users)) {
+        throw new Error('Invalid users data provided');
+      }
+      
+      console.log(`Processing chunk with ${users.length} users`);
+      
+      // Process users in smaller batches
+      const BATCH_SIZE = 10;
+      const batches = [];
+      for (let i = 0; i < users.length; i += BATCH_SIZE) {
+        batches.push(users.slice(i, i + BATCH_SIZE));
+      }
+      
+      const allResults = {
+        successful: [] as any[],
+        failed: [] as any[]
       };
       
-      // Use waitUntil for background processing
-      if (typeof EdgeRuntime !== 'undefined') {
-        EdgeRuntime.waitUntil(processLargeUpdate());
-      } else {
-        // Fallback for environments without EdgeRuntime
-        processLargeUpdate().catch(error => 
-          console.error('Background processing failed:', error)
-        );
+      for (let i = 0; i < batches.length; i++) {
+        const batchResults = await processBatch(supabase, batches[i], i + 1);
+        allResults.successful.push(...batchResults.successful);
+        allResults.failed.push(...batchResults.failed);
+        
+        // Small delay between batches
+        if (i < batches.length - 1) {
+          await new Promise(resolve => setTimeout(resolve, 100));
+        }
       }
+      
+      console.log('Chunk processing completed:', {
+        successful: allResults.successful.length,
+        failed: allResults.failed.length,
+        totalUsers: users.length
+      });
       
       return new Response(
         JSON.stringify({ 
-          message: `Processing ${users.length} users in background. This may take several minutes.`,
-          status: 'processing',
-          totalUsers: users.length,
-          estimatedTime: `${Math.ceil(users.length / 50)} minutes`
+          message: `Processed ${users.length} users. ${allResults.successful.length} updated successfully, ${allResults.failed.length} failed.`,
+          results: allResults,
+          chunkInfo: {
+            totalUsers: users.length,
+            totalBatches: batches.length,
+            batchSize: BATCH_SIZE
+          }
+        }),
+        { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    } else {
+      // This is a CSV parsing request
+      const formData = await req.formData();
+      const file = formData.get('file') as File;
+      
+      if (!file) {
+        throw new Error('No file uploaded');
+      }
+      
+      console.log('Parsing CSV file:', file.name, 'Type:', file.type);
+      
+      const users = await parseCSVData(file);
+      
+      if (!users.length) {
+        return new Response(
+          JSON.stringify({ error: 'No valid users found in the file' }),
+          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+      
+      console.log(`CSV parsed successfully: ${users.length} users found`);
+      
+      return new Response(
+        JSON.stringify({ 
+          message: `CSV parsed successfully. Found ${users.length} users ready for processing.`,
+          users: users,
+          totalUsers: users.length
         }),
         { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
-    
-    // For smaller datasets, process synchronously
-    const BATCH_SIZE = 10;
-    const batches = [];
-    for (let i = 0; i < users.length; i += BATCH_SIZE) {
-      batches.push(users.slice(i, i + BATCH_SIZE));
-    }
-    
-    console.log(`Processing ${batches.length} batches of ${BATCH_SIZE} users each`);
-    
-    const allResults = {
-      successful: [] as any[],
-      failed: [] as any[]
-    };
-    
-    // Process each batch
-    for (let i = 0; i < batches.length; i++) {
-      const batchResults = await processBatch(supabase, batches[i], i + 1);
-      allResults.successful.push(...batchResults.successful);
-      allResults.failed.push(...batchResults.failed);
-      
-      // Small delay between batches to avoid overwhelming the database
-      if (i < batches.length - 1) {
-        await new Promise(resolve => setTimeout(resolve, 100));
-      }
-    }
-    
-    const batchInfo = {
-      totalUsers: users.length,
-      totalBatches: batches.length,
-      batchSize: BATCH_SIZE
-    };
-    
-    console.log('Bulk update completed:', {
-      successful: allResults.successful.length,
-      failed: allResults.failed.length,
-      batchInfo
-    });
-    
-    return new Response(
-      JSON.stringify({ 
-        message: `Processed ${users.length} users. ${allResults.successful.length} updated successfully, ${allResults.failed.length} failed.`,
-        results: allResults,
-        batchInfo
-      }),
-      { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-    );
   } catch (error) {
     console.error('Server error:', error);
     return new Response(
