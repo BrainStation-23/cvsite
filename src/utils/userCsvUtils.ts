@@ -1,4 +1,3 @@
-
 import Papa from 'papaparse';
 import { UserRole } from '@/types';
 
@@ -6,7 +5,7 @@ export interface UserCSVRow {
   userId?: string; // For updates
   email: string;
   firstName: string;
-  lastName: string;
+  lastName?: string; // Made optional
   role?: UserRole;
   password?: string;
   employeeId?: string;
@@ -64,14 +63,63 @@ const isValidEmail = (email: string): boolean => {
   return emailRegex.test(email);
 };
 
-// Helper function to validate date format (YYYY-MM-DD)
-const isValidDate = (dateString: string): boolean => {
-  if (!dateString) return true; // Empty dates are allowed
-  const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
-  if (!dateRegex.test(dateString)) return false;
+// Helper function to validate and normalize date format - more flexible
+const normalizeDate = (dateString: string): string | null => {
+  if (!dateString || dateString.trim() === '') return null;
   
-  const date = new Date(dateString);
-  return date instanceof Date && !isNaN(date.getTime());
+  const trimmed = dateString.trim();
+  
+  // First try parsing as is
+  let date = new Date(trimmed);
+  
+  // If invalid, try common formats
+  if (isNaN(date.getTime())) {
+    // Try MM/DD/YYYY format
+    const mmddyyyy = trimmed.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+    if (mmddyyyy) {
+      const [, month, day, year] = mmddyyyy;
+      date = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+    }
+    
+    // Try DD/MM/YYYY format
+    if (isNaN(date.getTime())) {
+      const ddmmyyyy = trimmed.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+      if (ddmmyyyy) {
+        const [, day, month, year] = ddmmyyyy;
+        date = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+      }
+    }
+    
+    // Try DD-MM-YYYY format
+    if (isNaN(date.getTime())) {
+      const ddmmyyyy2 = trimmed.match(/^(\d{1,2})-(\d{1,2})-(\d{4})$/);
+      if (ddmmyyyy2) {
+        const [, day, month, year] = ddmmyyyy2;
+        date = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+      }
+    }
+    
+    // Try YYYY/MM/DD format
+    if (isNaN(date.getTime())) {
+      const yyyymmdd = trimmed.match(/^(\d{4})\/(\d{1,2})\/(\d{1,2})$/);
+      if (yyyymmdd) {
+        const [, year, month, day] = yyyymmdd;
+        date = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+      }
+    }
+  }
+  
+  // If still invalid, return null
+  if (isNaN(date.getTime())) {
+    return null;
+  }
+  
+  // Return in YYYY-MM-DD format for database
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  
+  return `${year}-${month}-${day}`;
 };
 
 export const downloadCSVTemplate = () => {
@@ -284,16 +332,7 @@ export const validateCSVData = (data: any[], existingUsers: any[] = [], mode: 'c
       hasErrors = true;
     }
 
-    // Validate lastName (required)
-    if (!row.lastName || typeof row.lastName !== 'string' || row.lastName.trim() === '') {
-      errors.push({
-        row: rowNumber,
-        field: 'lastName',
-        value: row.lastName || '',
-        message: 'Last name is required'
-      });
-      hasErrors = true;
-    }
+    // lastName is now optional - no validation needed
 
     // Validate role (optional, defaults to employee)
     const formattedRole = formatUserRole(row.role);
@@ -318,26 +357,34 @@ export const validateCSVData = (data: any[], existingUsers: any[] = [], mode: 'c
       hasErrors = true;
     }
 
-    // Validate date of joining if provided
-    if (row.dateOfJoining && row.dateOfJoining.trim() && !isValidDate(row.dateOfJoining.trim())) {
-      errors.push({
-        row: rowNumber,
-        field: 'dateOfJoining',
-        value: row.dateOfJoining,
-        message: 'Date of joining must be in YYYY-MM-DD format'
-      });
-      hasErrors = true;
+    // Validate and normalize date of joining if provided
+    let normalizedDateOfJoining = null;
+    if (row.dateOfJoining && row.dateOfJoining.trim()) {
+      normalizedDateOfJoining = normalizeDate(row.dateOfJoining.trim());
+      if (normalizedDateOfJoining === null) {
+        errors.push({
+          row: rowNumber,
+          field: 'dateOfJoining',
+          value: row.dateOfJoining,
+          message: 'Invalid date format. Please use a recognizable date format (e.g., YYYY-MM-DD, MM/DD/YYYY, DD/MM/YYYY)'
+        });
+        hasErrors = true;
+      }
     }
 
-    // Validate career start date if provided
-    if (row.careerStartDate && row.careerStartDate.trim() && !isValidDate(row.careerStartDate.trim())) {
-      errors.push({
-        row: rowNumber,
-        field: 'careerStartDate',
-        value: row.careerStartDate,
-        message: 'Career start date must be in YYYY-MM-DD format'
-      });
-      hasErrors = true;
+    // Validate and normalize career start date if provided
+    let normalizedCareerStartDate = null;
+    if (row.careerStartDate && row.careerStartDate.trim()) {
+      normalizedCareerStartDate = normalizeDate(row.careerStartDate.trim());
+      if (normalizedCareerStartDate === null) {
+        errors.push({
+          row: rowNumber,
+          field: 'careerStartDate',
+          value: row.careerStartDate,
+          message: 'Invalid date format. Please use a recognizable date format (e.g., YYYY-MM-DD, MM/DD/YYYY, DD/MM/YYYY)'
+        });
+        hasErrors = true;
+      }
     }
 
     // If no errors, add to valid array with defaults
@@ -345,15 +392,15 @@ export const validateCSVData = (data: any[], existingUsers: any[] = [], mode: 'c
       const validRow: UserCSVRow = {
         email: row.email.trim(),
         firstName: row.firstName.trim(),
-        lastName: row.lastName.trim(),
+        lastName: row.lastName && row.lastName.trim() ? row.lastName.trim() : undefined, // Make optional
         role: formattedRole,
         employeeId: row.employeeId ? row.employeeId.trim() : '',
         managerEmail: row.managerEmail ? row.managerEmail.trim() : '',
         sbuName: row.sbuName ? row.sbuName.trim() : '',
         expertiseName: row.expertiseName ? row.expertiseName.trim() : '',
         resourceTypeName: row.resourceTypeName ? row.resourceTypeName.trim() : '',
-        dateOfJoining: row.dateOfJoining ? row.dateOfJoining.trim() : '',
-        careerStartDate: row.careerStartDate ? row.careerStartDate.trim() : ''
+        dateOfJoining: normalizedDateOfJoining || '',
+        careerStartDate: normalizedCareerStartDate || ''
       };
 
       // Add userId for update mode

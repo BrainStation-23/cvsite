@@ -77,7 +77,7 @@ const parseCSVData = async (file: File): Promise<UserUpdateData[]> => {
             userId: row.userId?.trim(),
             email: row.email?.trim(),
             firstName: row.firstName?.trim(),
-            lastName: row.lastName?.trim(),
+            lastName: row.lastName?.trim() || undefined, // Handle optional lastName
             role: row.role?.trim(),
             employeeId: row.employeeId?.trim(),
             password: row.password?.trim(),
@@ -214,7 +214,7 @@ const updateUserInBatch = async (supabase: any, user: UserUpdateData) => {
       console.log(`Warning: Manager "${user.managerEmail}" not found for user ${user.userId}`);
     }
     
-    // Parse dates
+    // Parse dates - now more flexible
     const parsedDateOfJoining = user.dateOfJoining && user.dateOfJoining.trim() ? user.dateOfJoining.trim() : null;
     const parsedCareerStartDate = user.careerStartDate && user.careerStartDate.trim() ? user.careerStartDate.trim() : null;
     
@@ -227,7 +227,7 @@ const updateUserInBatch = async (supabase: any, user: UserUpdateData) => {
       
       const userMetadata: Record<string, any> = {};
       if (user.firstName) userMetadata.first_name = user.firstName;
-      if (user.lastName) userMetadata.last_name = user.lastName;
+      if (user.lastName) userMetadata.last_name = user.lastName; // Optional
       if (user.employeeId) userMetadata.employee_id = user.employeeId;
       
       if (Object.keys(userMetadata).length > 0) {
@@ -250,7 +250,7 @@ const updateUserInBatch = async (supabase: any, user: UserUpdateData) => {
     // Update profile table
     const profileUpdates: Record<string, any> = {};
     if (user.firstName) profileUpdates.first_name = user.firstName;
-    if (user.lastName) profileUpdates.last_name = user.lastName;
+    if (user.lastName !== undefined) profileUpdates.last_name = user.lastName; // Handle optional lastName properly
     if (user.employeeId) profileUpdates.employee_id = user.employeeId;
     if (sbuId !== undefined) profileUpdates.sbu_id = sbuId;
     if (expertiseId !== undefined) profileUpdates.expertise = expertiseId;

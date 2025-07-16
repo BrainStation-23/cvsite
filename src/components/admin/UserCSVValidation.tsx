@@ -105,7 +105,7 @@ const UserCSVValidation: React.FC<UserCSVValidationProps> = ({
           )}
           <li>• <strong>email</strong>: Required, must be valid email format</li>
           <li>• <strong>firstName</strong>: Required, cannot be empty</li>
-          <li>• <strong>lastName</strong>: Required, cannot be empty</li>
+          <li>• <strong>lastName</strong>: Optional, can be empty</li>
           <li>• <strong>role</strong>: Optional (admin, manager, employee), defaults to employee</li>
           <li>• <strong>password</strong>: Optional, {mode === 'create' ? 'auto-generated if empty' : 'leave empty to keep current password'}</li>
           <li>• <strong>employeeId</strong>: Optional employee identifier</li>
@@ -113,8 +113,8 @@ const UserCSVValidation: React.FC<UserCSVValidationProps> = ({
           <li>• <strong>sbuName</strong>: Optional, SBU name (human-readable)</li>
           <li>• <strong>expertiseName</strong>: Optional, expertise type name</li>
           <li>• <strong>resourceTypeName</strong>: Optional, resource type name</li>
-          <li>• <strong>dateOfJoining</strong>: Optional, format: YYYY-MM-DD</li>
-          <li>• <strong>careerStartDate</strong>: Optional, format: YYYY-MM-DD</li>
+          <li>• <strong>dateOfJoining</strong>: Optional, flexible date format (YYYY-MM-DD, MM/DD/YYYY, DD/MM/YYYY, etc.)</li>
+          <li>• <strong>careerStartDate</strong>: Optional, flexible date format (YYYY-MM-DD, MM/DD/YYYY, DD/MM/YYYY, etc.)</li>
         </ul>
       </div>
     </div>
