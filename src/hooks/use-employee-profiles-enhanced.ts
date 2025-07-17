@@ -130,10 +130,10 @@ export function useEmployeeProfilesEnhanced() {
       if (error) throw error;
 
       if (data) {
-        // Type cast the data to our expected interface
-        const responseData = data as EmployeeProfilesResponse;
+        // Type cast the data with proper unknown conversion first
+        const responseData = data as unknown as EmployeeProfilesResponse;
         const profilesData = responseData.profiles || [];
-        const paginationData = responseData.pagination || {};
+        const paginationData = responseData.pagination;
 
         // Transform the data to include general_information separately
         const transformedProfiles = profilesData.map((profile: any) => ({
@@ -149,11 +149,11 @@ export function useEmployeeProfilesEnhanced() {
 
         setProfiles(transformedProfiles);
         setPagination({
-          totalCount: paginationData.total_count || 0,
-          filteredCount: paginationData.filtered_count || 0,
-          page: paginationData.page || 1,
-          perPage: paginationData.per_page || 10,
-          pageCount: paginationData.page_count || 0
+          totalCount: paginationData?.total_count || 0,
+          filteredCount: paginationData?.filtered_count || 0,
+          page: paginationData?.page || 1,
+          perPage: paginationData?.per_page || 10,
+          pageCount: paginationData?.page_count || 0
         });
 
         // Update filter states
