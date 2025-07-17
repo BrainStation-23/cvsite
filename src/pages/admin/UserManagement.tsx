@@ -2,12 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import DashboardLayout from '../../components/Layout/DashboardLayout';
 import { Button } from '@/components/ui/button';
-import { Upload, RefreshCw, UserPlus, Download, Users } from 'lucide-react';
+import { Upload, RefreshCw, UserPlus, Download, Users, Trash2 } from 'lucide-react';
 import { useUserManagement } from '@/hooks/use-user-management';
 import UserSearchFilters from '@/components/admin/UserSearchFilters';
 import UserList from '@/components/admin/UserList';
 import UserPagination from '@/components/admin/UserPagination';
-import { ResetPasswordDialog, DeleteUserDialog, BulkUploadDialog } from '@/components/admin/UserDialogs';
+import { ResetPasswordDialog, DeleteUserDialog, BulkUploadDialog, BulkDeleteUsersDialog } from '@/components/admin/UserDialogs';
 import { UserData, SortColumn, SortOrder } from '@/hooks/types/user-management';
 import { UserRole } from '@/types';
 
@@ -17,6 +17,7 @@ const UserManagement: React.FC = () => {
   const [isDeleteUserDialogOpen, setIsDeleteUserDialogOpen] = useState(false);
   const [isBulkCreateDialogOpen, setIsBulkCreateDialogOpen] = useState(false);
   const [isBulkUpdateDialogOpen, setIsBulkUpdateDialogOpen] = useState(false);
+  const [isBulkDeleteDialogOpen, setIsBulkDeleteDialogOpen] = useState(false);
 
   const {
     users,
@@ -124,6 +125,10 @@ const UserManagement: React.FC = () => {
     return success;
   };
 
+  const handleBulkDeleteComplete = () => {
+    fetchUsers(); // Refresh the user list after bulk delete
+  };
+
   return (
     <DashboardLayout>
       <div className="flex justify-between items-center mb-6">
@@ -132,6 +137,15 @@ const UserManagement: React.FC = () => {
           <Button variant="outline" className="flex items-center gap-2" onClick={exportUsers} disabled={isLoading}>
             <Download size={16} />
             <span className="hidden md:inline">Export All</span>
+          </Button>
+          
+          <Button 
+            variant="outline" 
+            className="flex items-center gap-2 text-red-600 hover:text-red-700 hover:bg-red-50" 
+            onClick={() => setIsBulkDeleteDialogOpen(true)}
+          >
+            <Trash2 size={16} />
+            <span className="hidden md:inline">Bulk Delete</span>
           </Button>
           
           <Button variant="outline" className="flex items-center gap-2" onClick={() => setIsBulkUpdateDialogOpen(true)}>
@@ -176,6 +190,12 @@ const UserManagement: React.FC = () => {
         onPageChange={handlePageChange} 
         onPerPageChange={handlePerPageChange} 
         isLoading={isLoading} 
+      />
+      
+      <BulkDeleteUsersDialog 
+        isOpen={isBulkDeleteDialogOpen} 
+        onOpenChange={setIsBulkDeleteDialogOpen} 
+        onComplete={handleBulkDeleteComplete}
       />
       
       <ResetPasswordDialog 
