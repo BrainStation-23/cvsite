@@ -21,13 +21,16 @@ interface Skill {
 }
 
 interface CompactSkillsSummaryProps {
-  skills?: Skill[];
+  skills?: Skill[] | null;
 }
 
 const CompactSkillsSummary: React.FC<CompactSkillsSummaryProps> = ({
-  skills = []
+  skills
 }) => {
-  if (skills.length === 0) {
+  // Handle null/undefined skills by converting to empty array
+  const safeSkills = skills || [];
+
+  if (safeSkills.length === 0) {
     return (
       <div className="text-xs text-muted-foreground italic">
         No skills listed
@@ -49,8 +52,8 @@ const CompactSkillsSummary: React.FC<CompactSkillsSummaryProps> = ({
     ));
   };
 
-  const displaySkills = skills.slice(0, 3);
-  const hasMore = skills.length > 3;
+  const displaySkills = safeSkills.slice(0, 3);
+  const hasMore = safeSkills.length > 3;
 
   return (
     <TooltipProvider>
@@ -83,14 +86,14 @@ const CompactSkillsSummary: React.FC<CompactSkillsSummaryProps> = ({
                 variant="outline" 
                 className="text-xs px-2 py-0.5 cursor-pointer hover:bg-muted"
               >
-                +{skills.length - 3}
+                +{safeSkills.length - 3}
               </Badge>
             </PopoverTrigger>
             <PopoverContent className="w-64 p-3">
               <div className="space-y-2">
                 <h4 className="font-medium text-sm">All Skills</h4>
                 <div className="flex flex-wrap gap-1">
-                  {skills.map((skill) => (
+                  {safeSkills.map((skill) => (
                     <Badge 
                       key={skill.id}
                       variant="outline" 
