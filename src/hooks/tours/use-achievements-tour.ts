@@ -3,7 +3,7 @@
 import { useState, useCallback } from 'react';
 import { CallBackProps, Step, STATUS } from 'react-joyride';
 
-export interface AchievementsTourState {
+interface AchievementsTourState {
   run: boolean;
   steps: Step[];
   stepIndex: number;

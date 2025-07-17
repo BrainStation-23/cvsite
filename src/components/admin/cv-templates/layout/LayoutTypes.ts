@@ -1,5 +1,5 @@
 
-export interface LayoutZone {
+interface LayoutZone {
   id: string;
   name: string;
   description: string;
@@ -8,7 +8,7 @@ export interface LayoutZone {
   contrast?: boolean;
 }
 
-export interface LayoutColumn {
+interface LayoutColumn {
   id: string;
   zone: string;
   widthRatio: number;

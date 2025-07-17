@@ -1,7 +1,7 @@
 
 import jsPDF from 'jspdf';
 
-export interface PageMetrics {
+interface PageMetrics {
   width: number;
   height: number;
   contentWidth: number;

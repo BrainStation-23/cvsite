@@ -2,7 +2,7 @@
 import Papa from 'papaparse';
 import { SettingTableName } from '@/hooks/use-platform-settings';
 
-export interface ResourcePlanningCSVRow {
+interface ResourcePlanningCSVRow {
   name: string;
 }
 

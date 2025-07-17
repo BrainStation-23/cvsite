@@ -34,7 +34,7 @@ export interface ExportCategory {
   formats: ExportFormatInfo[];
 }
 
-export interface ExportFormatInfo {
+interface ExportFormatInfo {
   format: ExportFormat;
   name: string;
   description: string;

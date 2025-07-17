@@ -5,7 +5,7 @@ export interface DesignationFormData {
   name: string;
 }
 
-export interface DesignationItem {
+interface DesignationItem {
   id: string;
   name: string;
   created_at: string;

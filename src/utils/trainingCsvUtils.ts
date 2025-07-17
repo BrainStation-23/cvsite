@@ -1,7 +1,7 @@
 
 import Papa from 'papaparse';
 
-export interface TrainingCSVRow {
+interface TrainingCSVRow {
   employee_id: string;
   title: string;
   provider?: string;
@@ -12,7 +12,7 @@ export interface TrainingCSVRow {
   expiry_date?: string;
 }
 
-export interface TrainingFormData {
+interface TrainingFormData {
   employee_id: string;
   title: string;
   provider: string;
@@ -28,7 +28,7 @@ export interface TrainingCSVValidationResult {
   errors: TrainingCSVValidationError[];
 }
 
-export interface TrainingCSVValidationError {
+interface TrainingCSVValidationError {
   row: number;
   field: string;
   value: string;

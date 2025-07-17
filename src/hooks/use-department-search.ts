@@ -2,7 +2,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 
-export interface DepartmentItem {
+interface DepartmentItem {
   id: string;
   name: string;
   full_form: string | null;
@@ -10,7 +10,7 @@ export interface DepartmentItem {
   updated_at: string;
 }
 
-export interface DepartmentSearchParams {
+interface DepartmentSearchParams {
   searchQuery?: string | null;
   page?: number;
   perPage?: number;
@@ -18,7 +18,7 @@ export interface DepartmentSearchParams {
   sortOrder?: 'asc' | 'desc';
 }
 
-export interface DepartmentSearchResult {
+interface DepartmentSearchResult {
   departments: DepartmentItem[];
   pagination: {
     total_count: number;

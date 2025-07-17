@@ -31,14 +31,14 @@ export interface NavigationGroup {
 }
 
 // Platform settings sub-menu items
-export const platformSettingsItems = [
+const platformSettingsItems = [
   { to: '/admin/platform-settings/profile', icon: GraduationCap, label: 'Profile Management' },
   { to: '/admin/platform-settings/resources', icon: Briefcase, label: 'Resource Planning' },
   { to: '/admin/platform-settings/cv-templates', icon: FileText, label: 'CV Templates' },
   { to: '/admin/platform-settings/system', icon: Building2, label: 'System Config' },
 ];
 
-export const getResourceCalendarItems = (userRole: string): NavigationItem[] => [
+const getResourceCalendarItems = (userRole: string): NavigationItem[] => [
   { to: `/${userRole}/resource-calendar/calendar`, icon: CalendarDays, label: 'Calendar View' },
   { to: `/${userRole}/resource-calendar/statistics`, icon: BarChart3, label: 'Statistics' },
 ];

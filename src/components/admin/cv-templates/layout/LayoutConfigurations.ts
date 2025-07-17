@@ -1,7 +1,7 @@
 
 import { LayoutConfiguration } from './LayoutTypes';
 
-export const LAYOUT_CONFIGURATIONS: Record<string, LayoutConfiguration> = {
+const LAYOUT_CONFIGURATIONS: Record<string, LayoutConfiguration> = {
   'single-column': {
     id: 'single-column',
     name: 'Single Column',

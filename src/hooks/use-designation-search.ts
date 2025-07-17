@@ -2,14 +2,14 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 
-export interface DesignationItem {
+interface DesignationItem {
   id: string;
   name: string;
   created_at: string;
   updated_at: string;
 }
 
-export interface DesignationSearchParams {
+interface DesignationSearchParams {
   searchQuery?: string | null;
   page?: number;
   perPage?: number;
@@ -18,7 +18,7 @@ export interface DesignationSearchParams {
   ensureDesignations?: string[]; // Add this to ensure specific designations are included
 }
 
-export interface DesignationSearchResult {
+interface DesignationSearchResult {
   designations: DesignationItem[];
   pagination: {
     total_count: number;

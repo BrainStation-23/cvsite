@@ -1,7 +1,7 @@
 
 import { useState } from 'react';
 
-export interface ImportStats {
+interface ImportStats {
   successful: number;
   failed: number;
   sections: {

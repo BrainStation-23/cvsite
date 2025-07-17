@@ -5,7 +5,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useQuery } from '@tanstack/react-query';
 
-export interface GeneralInfo {
+interface GeneralInfo {
   firstName: string;
   lastName: string;
   biography: string | null;

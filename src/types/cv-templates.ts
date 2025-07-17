@@ -11,7 +11,7 @@ export interface CVTemplate {
   updated_at: string;
 }
 
-export interface CVTemplateSection {
+interface CVTemplateSection {
   id: string;
   template_id: string;
   section_type: 'general' | 'technical_skills' | 'specialized_skills' | 'experience' | 'education' | 'training' | 'achievements' | 'projects' | 'references' | 'page_break';
@@ -23,7 +23,7 @@ export interface CVTemplateSection {
   updated_at: string;
 }
 
-export interface CVTemplateFieldMapping {
+interface CVTemplateFieldMapping {
   id: string;
   template_id: string;
   original_field_name: string;
@@ -36,7 +36,7 @@ export interface CVTemplateFieldMapping {
   updated_at: string;
 }
 
-export interface CVExport {
+interface CVExport {
   id: string;
   template_id: string;
   profile_id: string;
@@ -47,5 +47,5 @@ export interface CVExport {
 }
 
 export type CVSectionType = CVTemplateSection['section_type'];
-export type CVOrientation = CVTemplate['orientation'];
-export type CVExportFormat = CVExport['export_format'];
+type CVOrientation = CVTemplate['orientation'];
+type CVExportFormat = CVExport['export_format'];

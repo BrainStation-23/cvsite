@@ -8,7 +8,7 @@ export interface ReferenceFormData {
   company: string;
 }
 
-export interface ReferenceItem {
+interface ReferenceItem {
   id: string;
   name: string;
   email: string;
