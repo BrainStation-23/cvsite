@@ -19,6 +19,12 @@ interface CompactEmployeeProfileProps {
     email?: string;
     profile_image?: string;
     current_designation?: string;
+    general_information?: {
+      first_name?: string;
+      last_name?: string;
+      current_designation?: string;
+      profile_image?: string;
+    };
   };
   generalInfo?: {
     first_name?: string;
@@ -32,11 +38,23 @@ const CompactEmployeeProfile: React.FC<CompactEmployeeProfileProps> = ({
   profile,
   generalInfo
 }) => {
-  const firstName = generalInfo?.first_name || profile.first_name || '';
-  const lastName = generalInfo?.last_name || profile.last_name || '';
+  // Use the general_information object from the profile if available, otherwise fallback to root level or generalInfo prop
+  const firstName = generalInfo?.first_name || 
+                   profile.general_information?.first_name || 
+                   profile.first_name || '';
+  const lastName = generalInfo?.last_name || 
+                  profile.general_information?.last_name || 
+                  profile.last_name || '';
   const fullName = `${firstName} ${lastName}`.trim() || 'N/A';
-  const profileImage = generalInfo?.profile_image || profile.profile_image;
-  const currentDesignation = generalInfo?.current_designation || 'No designation';
+  
+  const profileImage = generalInfo?.profile_image || 
+                      profile.general_information?.profile_image || 
+                      profile.profile_image;
+  
+  const currentDesignation = generalInfo?.current_designation || 
+                            profile.general_information?.current_designation || 
+                            profile.current_designation || 
+                            'No designation';
 
   return (
     <TooltipProvider>

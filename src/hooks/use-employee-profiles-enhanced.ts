@@ -1,4 +1,3 @@
-
 import { useState, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -135,19 +134,9 @@ export function useEmployeeProfilesEnhanced() {
         const profilesData = responseData.profiles || [];
         const paginationData = responseData.pagination;
 
-        // Transform the data to include general_information separately
-        const transformedProfiles = profilesData.map((profile: any) => ({
-          ...profile,
-          general_information: {
-            first_name: profile.first_name,
-            last_name: profile.last_name,
-            biography: profile.biography,
-            profile_image: profile.profile_image,
-            current_designation: profile.current_designation
-          }
-        }));
-
-        setProfiles(transformedProfiles);
+        // Keep the profiles data as-is from the RPC function
+        // The RPC function already provides the correct structure
+        setProfiles(profilesData);
         setPagination({
           totalCount: paginationData?.total_count || 0,
           filteredCount: paginationData?.filtered_count || 0,
