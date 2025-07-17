@@ -35,9 +35,17 @@ import ResourceCalendarStatistics from '@/pages/resource-calendar/ResourceCalend
 import ProjectsManagement from '@/pages/admin/ProjectsManagement';
 import './App.css';
 
-const queryClient = new QueryClient();
+// Create QueryClient instance outside component to prevent recreation
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: 1,
+      staleTime: 5 * 60 * 1000, // 5 minutes
+    },
+  },
+});
 
-function App() {
+function App(): React.ReactElement {
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
