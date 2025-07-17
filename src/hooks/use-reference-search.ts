@@ -2,7 +2,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 
-interface ReferenceItem {
+export interface ReferenceItem {
   id: string;
   name: string;
   email: string;
@@ -12,7 +12,7 @@ interface ReferenceItem {
   updated_at: string;
 }
 
-interface ReferenceSearchParams {
+export interface ReferenceSearchParams {
   searchQuery?: string | null;
   page?: number;
   perPage?: number;
@@ -20,7 +20,7 @@ interface ReferenceSearchParams {
   sortOrder?: 'asc' | 'desc';
 }
 
-interface ReferenceSearchResult {
+export interface ReferenceSearchResult {
   references: ReferenceItem[];
   pagination: {
     total_count: number;

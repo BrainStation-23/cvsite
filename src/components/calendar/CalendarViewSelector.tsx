@@ -3,7 +3,7 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Calendar, CalendarDays, CalendarRange, CalendarClock } from 'lucide-react';
 
-type CalendarViewType = 'day' | 'week' | 'month' | 'quarter';
+export type CalendarViewType = 'day' | 'week' | 'month' | 'quarter';
 
 interface CalendarViewSelectorProps {
   currentView: CalendarViewType;

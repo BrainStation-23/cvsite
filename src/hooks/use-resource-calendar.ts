@@ -2,9 +2,9 @@ import { useState, useMemo, useEffect } from 'react';
 import { usePlannedResources } from './use-planned-resources';
 import { startOfMonth, endOfMonth, eachDayOfInterval, format, isSameDay, parseISO, startOfWeek, endOfWeek, startOfQuarter, endOfQuarter } from 'date-fns';
 
-type CalendarViewType = 'day' | 'week' | 'month' | 'quarter';
+export type CalendarViewType = 'day' | 'week' | 'month' | 'quarter';
 
-interface CalendarResource {
+export interface CalendarResource {
   id: string;
   profileId: string;
   profileName: string;

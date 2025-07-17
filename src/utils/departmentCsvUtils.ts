@@ -2,17 +2,17 @@
 import Papa from 'papaparse';
 import { DepartmentFormData } from '@/hooks/use-department-settings';
 
-interface DepartmentCSVRow {
+export interface DepartmentCSVRow {
   name: string;
   full_form?: string;
 }
 
-interface DepartmentCSVValidationResult {
+export interface DepartmentCSVValidationResult {
   valid: DepartmentFormData[];
   errors: DepartmentCSVValidationError[];
 }
 
-interface DepartmentCSVValidationError {
+export interface DepartmentCSVValidationError {
   row: number;
   field: string;
   value: string;

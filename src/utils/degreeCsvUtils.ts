@@ -14,7 +14,7 @@ export interface DegreeItem {
   updated_at: string;
 }
 
-interface DegreeCSVValidationResult {
+export interface DegreeCSVValidationResult {
   valid: DegreeFormData[];
   errors: Array<{
     row: number;

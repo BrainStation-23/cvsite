@@ -1,12 +1,12 @@
 
 import Papa from 'papaparse';
 
-interface SbuFormData {
+export interface SbuFormData {
   name: string;
   sbu_head_email: string;
 }
 
-interface SbuItem {
+export interface SbuItem {
   id: string;
   name: string;
   sbu_head_email: string;

@@ -1,7 +1,7 @@
 import Papa from 'papaparse';
 import { UserRole } from '@/types';
 
-interface UserCSVRow {
+export interface UserCSVRow {
   userId?: string; // For updates
   email: string;
   firstName: string;

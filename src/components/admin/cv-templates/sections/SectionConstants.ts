@@ -76,7 +76,7 @@ export const SECTION_TYPES = [
   }
 ];
 
-const DISPLAY_STYLES = [
+export const DISPLAY_STYLES = [
   { value: 'default', label: 'Default' },
   { value: 'compact', label: 'Compact' },
   { value: 'detailed', label: 'Detailed' },

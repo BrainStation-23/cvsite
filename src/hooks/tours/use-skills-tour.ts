@@ -1,7 +1,7 @@
 import { useState, useCallback } from 'react';
 import { CallBackProps, Step, STATUS } from 'react-joyride';
 
-interface SkillsTourState {
+export interface SkillsTourState {
   run: boolean;
   steps: Step[];
   stepIndex: number;

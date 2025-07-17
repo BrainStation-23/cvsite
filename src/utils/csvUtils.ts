@@ -2,7 +2,7 @@
 import Papa from 'papaparse';
 import { UniversityFormData } from '@/hooks/use-university-settings';
 
-interface UniversityCSVRow {
+export interface UniversityCSVRow {
   name: string;
   type: 'Public' | 'Private' | 'International' | 'Special';
   acronyms?: string;

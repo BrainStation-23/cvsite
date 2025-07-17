@@ -3,12 +3,12 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
-interface SbuOption {
+export interface SbuOption {
   id: string;
   name: string;
 }
 
-interface ProviderOption {
+export interface ProviderOption {
   provider: string;
 }
 

@@ -2,14 +2,14 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 
-interface ExpertiseItem {
+export interface ExpertiseItem {
   id: string;
   name: string;
   created_at: string;
   updated_at: string;
 }
 
-interface ExpertiseSearchParams {
+export interface ExpertiseSearchParams {
   searchQuery?: string | null;
   page?: number;
   perPage?: number;
@@ -17,7 +17,7 @@ interface ExpertiseSearchParams {
   sortOrder?: 'asc' | 'desc';
 }
 
-interface ExpertiseSearchResult {
+export interface ExpertiseSearchResult {
   expertiseTypes: ExpertiseItem[];
   pagination: {
     total_count: number;

@@ -36,7 +36,7 @@ export type ValidationResult = {
   source: 'local' | 'azure';
 };
 
-interface ValidationSubtask {
+export interface ValidationSubtask {
   id: string;
   label: string;
   status: 'pending' | 'running' | 'completed' | 'failed';

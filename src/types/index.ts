@@ -75,7 +75,7 @@ export interface Project {
   responsibility?: string;
 }
 
-interface GeneralInfo {
+export interface GeneralInfo {
   firstName: string;
   lastName: string;
   biography?: string;

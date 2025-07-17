@@ -57,7 +57,7 @@ interface EmployeeProfilesResponse {
   };
 }
 
-type EmployeeProfileSortColumn = 'first_name' | 'last_name' | 'employee_id' | 'created_at' | 'updated_at';
+export type EmployeeProfileSortColumn = 'first_name' | 'last_name' | 'employee_id' | 'created_at' | 'updated_at';
 
 export function useEmployeeProfilesEnhanced() {
   const { toast } = useToast();

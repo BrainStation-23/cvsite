@@ -3,7 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { UniversityItem } from './use-university-settings';
 
-interface UniversitySearchParams {
+export interface UniversitySearchParams {
   searchQuery?: string | null;
   typeFilter?: string | null;
   page?: number;
@@ -12,7 +12,7 @@ interface UniversitySearchParams {
   sortOrder?: 'asc' | 'desc';
 }
 
-interface UniversitySearchResult {
+export interface UniversitySearchResult {
   universities: UniversityItem[];
   pagination: {
     total_count: number;

@@ -1,11 +1,11 @@
 
-interface EmployeeSkill {
+export interface EmployeeSkill {
   id: string;
   name: string;
   proficiency: number;
 }
 
-interface EmployeeTraining {
+export interface EmployeeTraining {
   id: string;
   title: string;
   provider: string;
@@ -15,7 +15,7 @@ interface EmployeeTraining {
   certificate_url?: string;
 }
 
-interface GeneralInformation {
+export interface GeneralInformation {
   first_name: string;
   last_name: string;
   biography?: string;

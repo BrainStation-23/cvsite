@@ -1,3 +1,4 @@
+
 import { SectionItem, SectionSplit } from './types';
 import { SectionSplitterConstants } from './constants';
 import { HeightEstimators } from './heightEstimators';
@@ -68,4 +69,5 @@ export class SectionSplitter {
   }
 }
 
-// Re-export types for backward compatibility;
+// Re-export types for backward compatibility
+export type { SectionItem, SectionSplit };

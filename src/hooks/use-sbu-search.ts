@@ -2,7 +2,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 
-interface SbuItem {
+export interface SbuItem {
   id: string;
   name: string;
   sbu_head_email: string;
@@ -10,7 +10,7 @@ interface SbuItem {
   updated_at: string;
 }
 
-interface SbuSearchParams {
+export interface SbuSearchParams {
   searchQuery?: string | null;
   page?: number;
   perPage?: number;
@@ -18,7 +18,7 @@ interface SbuSearchParams {
   sortOrder?: 'asc' | 'desc';
 }
 
-interface SbuSearchResult {
+export interface SbuSearchResult {
   sbus: SbuItem[];
   pagination: {
     total_count: number;

@@ -1,11 +1,11 @@
 
-interface EmployeeSkill {
+export interface EmployeeSkill {
   id: string;
   name: string;
   proficiency: number;
 }
 
-interface EmployeeExperience {
+export interface EmployeeExperience {
   id: string;
   company_name: string;
   designation: string;
@@ -15,7 +15,7 @@ interface EmployeeExperience {
   description?: string;
 }
 
-interface EmployeeEducation {
+export interface EmployeeEducation {
   id: string;
   university: string;
   degree?: string;
@@ -26,7 +26,7 @@ interface EmployeeEducation {
   gpa?: string;
 }
 
-interface EmployeeTraining {
+export interface EmployeeTraining {
   id: string;
   title: string;
   provider: string;
@@ -35,14 +35,14 @@ interface EmployeeTraining {
   certificate_url?: string;
 }
 
-interface EmployeeAchievement {
+export interface EmployeeAchievement {
   id: string;
   title: string;
   date: string;
   description: string;
 }
 
-interface EmployeeProject {
+export interface EmployeeProject {
   id: string;
   name: string;
   role: string;

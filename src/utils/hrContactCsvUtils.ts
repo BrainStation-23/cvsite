@@ -1,12 +1,12 @@
 
 import Papa from 'papaparse';
 
-interface HrContactFormData {
+export interface HrContactFormData {
   name: string;
   email: string;
 }
 
-interface HrContactItem {
+export interface HrContactItem {
   id: string;
   name: string;
   email: string;

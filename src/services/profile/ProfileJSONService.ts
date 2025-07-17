@@ -59,7 +59,7 @@ export interface ProfileJSONData {
   }>;
 }
 
-interface ProjectJSON {
+export interface ProjectJSON {
   name: string;
   role?: string;
   description: string;
