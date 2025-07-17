@@ -403,7 +403,7 @@ export type Database = {
           is_current: boolean | null
           profile_id: string
           start_date: string
-          university: string
+          university: string | null
           updated_at: string
         }
         Insert: {
@@ -416,7 +416,7 @@ export type Database = {
           is_current?: boolean | null
           profile_id: string
           start_date: string
-          university: string
+          university?: string | null
           updated_at?: string
         }
         Update: {
@@ -429,7 +429,7 @@ export type Database = {
           is_current?: boolean | null
           profile_id?: string
           start_date?: string
-          university?: string
+          university?: string | null
           updated_at?: string
         }
         Relationships: [

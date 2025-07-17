@@ -2,11 +2,11 @@
 import React, { useEffect } from 'react';
 import DashboardLayout from '../../components/Layout/DashboardLayout';
 import { Card, CardContent } from '@/components/ui/card';
-import { useEmployeeProfiles } from '@/hooks/use-employee-profiles';
+import { useEmployeeProfilesEnhanced } from '@/hooks/use-employee-profiles-enhanced';
 import { useEmployeeList } from '@/hooks/use-employee-list';
 import { useBulkSelection } from '@/hooks/use-bulk-selection';
 import EnhancedEmployeeSearchFilters from '@/components/employee/EnhancedEmployeeSearchFilters';
-import EnhancedEmployeeTable from '@/components/employee/EnhancedEmployeeTable';
+import CompactEmployeeTable from '@/components/employee/CompactEmployeeTable';
 import BulkActionsToolbar from '@/components/employee/BulkActionsToolbar';
 import EmployeePageHeader from '@/components/employee/EmployeePageHeader';
 import UserPagination from '@/components/admin/UserPagination';
@@ -48,7 +48,7 @@ const EmployeeData: React.FC = () => {
     handleSortChange,
     handleAdvancedFilters,
     resetFilters
-  } = useEmployeeProfiles();
+  } = useEmployeeProfilesEnhanced();
 
   const {
     selectedItems: selectedProfiles,
@@ -157,7 +157,7 @@ const EmployeeData: React.FC = () => {
 
         <Card>
           <CardContent className="p-0">
-            <EnhancedEmployeeTable
+            <CompactEmployeeTable
               profiles={profiles}
               isLoading={isLoading}
               onViewProfile={handleViewProfile}
