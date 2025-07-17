@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -7,9 +8,10 @@ import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { Loader2, Upload, X, Download, AlertTriangle, Users, Trash2 } from 'lucide-react';
+import { Loader2, Upload, X, Download, AlertTriangle, Users, Trash2, FileSpreadsheet } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import Papa from 'papaparse';
+import * as XLSX from 'xlsx';
 import { supabase } from '@/integrations/supabase/client';
 
 interface BulkDeleteUsersDialogProps {
@@ -171,6 +173,67 @@ export const BulkDeleteUsersDialog: React.FC<BulkDeleteUsersDialogProps> = ({
       });
     } finally {
       setIsGeneratingPreview(false);
+    }
+  };
+
+  const downloadExcelReport = () => {
+    if (!previewData) return;
+
+    try {
+      // Create workbook
+      const wb = XLSX.utils.book_new();
+
+      // Sheet 1: Users to be deleted
+      const usersToDeleteData = previewData.usersToDelete.map(user => ({
+        'Employee ID': user.employeeId,
+        'First Name': user.firstName,
+        'Last Name': user.lastName,
+        'Email': user.email,
+        'Database ID': user.id
+      }));
+
+      const usersSheet = XLSX.utils.json_to_sheet(usersToDeleteData);
+      XLSX.utils.book_append_sheet(wb, usersSheet, 'Users to Delete');
+
+      // Sheet 2: Employee IDs not found
+      const notFoundData = previewData.usersNotFound.map(empId => ({
+        'Employee ID': empId,
+        'Status': 'Not found in database'
+      }));
+
+      const notFoundSheet = XLSX.utils.json_to_sheet(notFoundData);
+      XLSX.utils.book_append_sheet(wb, notFoundSheet, 'Not Found');
+
+      // Sheet 3: Summary
+      const summaryData = [
+        { 'Metric': 'Delete Mode', 'Value': deleteMode === 'delete_listed' ? 'Delete Listed Users' : 'Keep Listed Users (Delete Others)' },
+        { 'Metric': 'Total Employee IDs in CSV', 'Value': csvData?.employeeIds.length || 0 },
+        { 'Metric': 'Users to be Deleted', 'Value': previewData.usersToDelete.length },
+        { 'Metric': 'Employee IDs Not Found', 'Value': previewData.usersNotFound.length },
+        { 'Metric': 'Report Generated', 'Value': new Date().toLocaleString() }
+      ];
+
+      const summarySheet = XLSX.utils.json_to_sheet(summaryData);
+      XLSX.utils.book_append_sheet(wb, summarySheet, 'Summary');
+
+      // Generate filename
+      const timestamp = new Date().toISOString().split('T')[0];
+      const filename = `bulk_delete_preview_${timestamp}.xlsx`;
+
+      // Download file
+      XLSX.writeFile(wb, filename);
+
+      toast({
+        title: 'Success',
+        description: 'Excel report downloaded successfully.'
+      });
+    } catch (error) {
+      console.error('Error generating Excel report:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to generate Excel report.',
+        variant: 'destructive'
+      });
     }
   };
 
@@ -404,6 +467,17 @@ export const BulkDeleteUsersDialog: React.FC<BulkDeleteUsersDialogProps> = ({
                   </div>
                 </div>
               )}
+
+              <div className="flex justify-center">
+                <Button
+                  variant="outline"
+                  onClick={downloadExcelReport}
+                  className="flex items-center gap-2"
+                >
+                  <FileSpreadsheet className="h-4 w-4" />
+                  Download Excel Report
+                </Button>
+              </div>
             </div>
           )}
         </div>
