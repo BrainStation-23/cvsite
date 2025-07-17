@@ -1,3 +1,4 @@
+
 import React, { useEffect } from 'react';
 import DashboardLayout from '../../components/Layout/DashboardLayout';
 import { Card, CardContent } from '@/components/ui/card';
@@ -5,7 +6,7 @@ import { useEmployeeProfilesEnhanced } from '@/hooks/use-employee-profiles-enhan
 import { useEmployeeList } from '@/hooks/use-employee-list';
 import { useBulkSelection } from '@/hooks/use-bulk-selection';
 import EnhancedEmployeeSearchFilters from '@/components/employee/EnhancedEmployeeSearchFilters';
-import EnhancedCompactTable from '@/components/employee/EnhancedCompactTable';
+import CompactEmployeeTable from '@/components/employee/CompactEmployeeTable';
 import BulkActionsToolbar from '@/components/employee/BulkActionsToolbar';
 import EmployeePageHeader from '@/components/employee/EmployeePageHeader';
 import UserPagination from '@/components/admin/UserPagination';
@@ -156,7 +157,7 @@ const EmployeeData: React.FC = () => {
 
         <Card>
           <CardContent className="p-0">
-            <EnhancedCompactTable
+            <CompactEmployeeTable
               profiles={profiles}
               isLoading={isLoading}
               onViewProfile={handleViewProfile}

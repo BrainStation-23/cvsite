@@ -1,3 +1,4 @@
+
 import { useState, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -112,20 +113,6 @@ export function useEmployeeProfilesEnhanced() {
     setIsLoading(true);
 
     try {
-      console.log('Fetching profiles with params:', {
-        search_query: search,
-        skill_filter: skillF,
-        experience_filter: expF,
-        education_filter: eduF,
-        training_filter: trainF,
-        achievement_filter: achF,
-        project_filter: projF,
-        page_number: page,
-        items_per_page: perPage,
-        sort_by: sortField,
-        sort_order: sortDir
-      });
-
       const { data, error } = await supabase.rpc('get_employee_profiles', {
         search_query: search,
         skill_filter: skillF,
@@ -140,46 +127,27 @@ export function useEmployeeProfilesEnhanced() {
         sort_order: sortDir
       });
 
-      if (error) {
-        console.error('RPC Error:', error);
-        throw error;
-      }
-
-      console.log('Raw RPC Response:', data);
+      if (error) throw error;
 
       if (data) {
-        // The new RPC function returns data in a specific format
+        // Type cast the data with proper unknown conversion first
         const responseData = data as unknown as EmployeeProfilesResponse;
-        console.log('Parsed response data:', responseData);
-        
-        let profilesData = responseData.profiles || [];
+        const profilesData = responseData.profiles || [];
         const paginationData = responseData.pagination;
 
-        // Ensure each profile has the expected structure
-        profilesData = profilesData.map((profile: any) => {
-          // Handle cases where profile might be wrapped in additional structure
-          const actualProfile = profile.profile_data || profile;
-          
-          return {
-            ...actualProfile,
-            // Ensure technical_skills and specialized_skills are arrays, not null
-            technical_skills: actualProfile.technical_skills || [],
-            specialized_skills: actualProfile.specialized_skills || [],
-            trainings: actualProfile.trainings || [],
-            // Ensure general_information exists
-            general_information: actualProfile.general_information || {
-              first_name: actualProfile.first_name || '',
-              last_name: actualProfile.last_name || '',
-              biography: null,
-              profile_image: null,
-              current_designation: null
-            }
-          };
-        });
+        // Transform the data to include general_information separately
+        const transformedProfiles = profilesData.map((profile: any) => ({
+          ...profile,
+          general_information: {
+            first_name: profile.first_name,
+            last_name: profile.last_name,
+            biography: profile.biography,
+            profile_image: profile.profile_image,
+            current_designation: profile.current_designation
+          }
+        }));
 
-        console.log('Processed profiles data:', profilesData);
-
-        setProfiles(profilesData);
+        setProfiles(transformedProfiles);
         setPagination({
           totalCount: paginationData?.total_count || 0,
           filteredCount: paginationData?.filtered_count || 0,

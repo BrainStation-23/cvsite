@@ -1,22 +1,29 @@
 
-import React from 'react';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import React, { useState } from 'react';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Button } from '@/components/ui/button';
-import { Eye, Mail } from 'lucide-react';
-import { Badge } from '@/components/ui/badge';
-import CompactSkillsSummary from './compact-table/CompactSkillsSummary';
+import { 
+  Table, 
+  TableBody, 
+  TableCell, 
+  TableHead, 
+  TableHeader, 
+  TableRow 
+} from '@/components/ui/table';
+import { Loader2 } from 'lucide-react';
+import CompactEmployeeProfile from './compact-table/CompactEmployeeProfile';
+import CompactSkillsDisplay from './compact-table/CompactSkillsDisplay';
 import CompactTrainingSummary from './compact-table/CompactTrainingSummary';
-import type { EnhancedEmployeeProfile } from '@/types/employee';
+import CompactEmployeeActions from './compact-table/CompactEmployeeActions';
+import NotesDialog from './NotesDialog';
 
 interface CompactEmployeeTableProps {
-  profiles: EnhancedEmployeeProfile[];
+  profiles: any[];
   isLoading: boolean;
   onViewProfile: (profileId: string) => void;
-  onSendEmail: (profile: EnhancedEmployeeProfile) => void;
+  onSendEmail: (profile: any) => void;
   selectedProfiles: string[];
   onProfileSelect: (profileId: string) => void;
-  onSelectAll: (checked: boolean) => void;
+  onSelectAll: () => void;
   onClearSelection: () => void;
   isAllSelected: boolean;
 }
@@ -29,131 +36,123 @@ const CompactEmployeeTable: React.FC<CompactEmployeeTableProps> = ({
   selectedProfiles,
   onProfileSelect,
   onSelectAll,
+  onClearSelection,
   isAllSelected
 }) => {
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-      </div>
-    );
-  }
+  const [notesDialogOpen, setNotesDialogOpen] = useState(false);
+  const [selectedProfileForNotes, setSelectedProfileForNotes] = useState<{
+    id: string;
+    name: string;
+  } | null>(null);
 
-  if (!profiles || profiles.length === 0) {
+  const handleNotesClick = (profile: any) => {
+    setSelectedProfileForNotes({
+      id: profile.id,
+      name: `${profile.first_name || 'N/A'} ${profile.last_name || ''}`.trim()
+    });
+    setNotesDialogOpen(true);
+  };
+
+  const handleCloseNotesDialog = () => {
+    setNotesDialogOpen(false);
+    setSelectedProfileForNotes(null);
+  };
+
+  if (isLoading && profiles.length === 0) {
     return (
-      <div className="flex items-center justify-center h-64 text-muted-foreground">
-        No employee profiles found.
+      <div className="p-8 flex justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-cvsite-teal" />
       </div>
     );
   }
 
   return (
-    <div className="rounded-md border">
+    <>
       <Table>
         <TableHeader>
           <TableRow>
             <TableHead className="w-12">
               <Checkbox
                 checked={isAllSelected}
-                onCheckedChange={onSelectAll}
-                aria-label="Select all"
+                onCheckedChange={(checked) => {
+                  if (checked) {
+                    onSelectAll();
+                  } else {
+                    onClearSelection();
+                  }
+                }}
               />
             </TableHead>
-            <TableHead className="min-w-[120px]">Employee ID</TableHead>
-            <TableHead className="min-w-[200px]">Name</TableHead>
-            <TableHead className="min-w-[180px]">Email</TableHead>
-            <TableHead className="min-w-[150px]">Designation</TableHead>
-            <TableHead className="min-w-[200px]">Technical Skills</TableHead>
-            <TableHead className="min-w-[200px]">Specialized Skills</TableHead>
-            <TableHead className="min-w-[180px]">Certifications</TableHead>
-            <TableHead className="w-32">Actions</TableHead>
+            <TableHead className="min-w-[280px]">Employee Profile</TableHead>
+            <TableHead className="min-w-[300px]">Skills & Expertise</TableHead>
+            <TableHead className="min-w-[220px]">Certifications</TableHead>
+            <TableHead className="w-20 text-right">Actions</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
-          {profiles.map((profile) => {
-            const displayName = profile.general_information?.first_name && profile.general_information?.last_name
-              ? `${profile.general_information.first_name} ${profile.general_information.last_name}`
-              : profile.first_name && profile.last_name
-              ? `${profile.first_name} ${profile.last_name}`
-              : 'N/A';
-
-            const currentDesignation = profile.general_information?.current_designation || 'N/A';
-            const email = profile.email || 'N/A';
-
-            return (
+          {profiles.length > 0 ? (
+            profiles.map((profile) => (
               <TableRow key={profile.id} className="hover:bg-muted/50">
                 <TableCell>
                   <Checkbox
                     checked={selectedProfiles.includes(profile.id)}
                     onCheckedChange={() => onProfileSelect(profile.id)}
-                    aria-label={`Select ${displayName}`}
                   />
                 </TableCell>
-                <TableCell className="font-medium">
-                  {profile.employee_id || 'N/A'}
+                <TableCell className="py-4">
+                  <CompactEmployeeProfile 
+                    profile={profile}
+                    generalInfo={profile.general_information}
+                  />
                 </TableCell>
-                <TableCell>
-                  <div className="flex items-center space-x-2">
-                    {profile.general_information?.profile_image && (
-                      <img
-                        src={profile.general_information.profile_image}
-                        alt={displayName}
-                        className="h-8 w-8 rounded-full object-cover"
-                      />
-                    )}
-                    <span className="font-medium">{displayName}</span>
-                  </div>
+                <TableCell className="py-4">
+                  <CompactSkillsDisplay
+                    technicalSkills={profile.technical_skills || []}
+                    specializedSkills={profile.specialized_skills || []}
+                  />
                 </TableCell>
-                <TableCell className="text-sm text-muted-foreground">
-                  {email}
+                <TableCell className="py-4">
+                  <CompactTrainingSummary
+                    trainings={profile.trainings || []}
+                  />
                 </TableCell>
-                <TableCell>
-                  {currentDesignation !== 'N/A' ? (
-                    <Badge variant="secondary" className="text-xs">
-                      {currentDesignation}
-                    </Badge>
-                  ) : (
-                    <span className="text-muted-foreground text-sm">N/A</span>
-                  )}
-                </TableCell>
-                <TableCell>
-                  <CompactSkillsSummary skills={profile.technical_skills} />
-                </TableCell>
-                <TableCell>
-                  <CompactSkillsSummary skills={profile.specialized_skills} />
-                </TableCell>
-                <TableCell>
-                  <CompactTrainingSummary trainings={profile.trainings} />
-                </TableCell>
-                <TableCell>
-                  <div className="flex items-center space-x-2">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => onViewProfile(profile.id)}
-                      className="h-8 w-8 p-0"
-                    >
-                      <Eye className="h-4 w-4" />
-                      <span className="sr-only">View profile</span>
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => onSendEmail(profile)}
-                      className="h-8 w-8 p-0"
-                      disabled={!profile.email}
-                    >
-                      <Mail className="h-4 w-4" />
-                      <span className="sr-only">Send email</span>
-                    </Button>
-                  </div>
+                <TableCell className="py-4">
+                  <CompactEmployeeActions
+                    profile={profile}
+                    onViewProfile={onViewProfile}
+                    onSendEmail={onSendEmail}
+                    onNotesClick={handleNotesClick}
+                  />
                 </TableCell>
               </TableRow>
-            );
-          })}
+            ))
+          ) : (
+            <TableRow>
+              <TableCell colSpan={5} className="text-center py-8">
+                {isLoading ? (
+                  <div className="flex items-center justify-center">
+                    <Loader2 className="h-6 w-6 animate-spin text-cvsite-teal mr-2" />
+                    Loading employee profiles...
+                  </div>
+                ) : (
+                  'No employee profiles found'
+                )}
+              </TableCell>
+            </TableRow>
+          )}
         </TableBody>
       </Table>
-    </div>
+
+      {/* Notes Dialog */}
+      {selectedProfileForNotes && (
+        <NotesDialog
+          isOpen={notesDialogOpen}
+          onClose={handleCloseNotesDialog}
+          profileId={selectedProfileForNotes.id}
+          employeeName={selectedProfileForNotes.name}
+        />
+      )}
+    </>
   );
 };
 
