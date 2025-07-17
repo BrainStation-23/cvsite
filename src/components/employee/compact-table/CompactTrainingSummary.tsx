@@ -64,43 +64,39 @@ const CompactTrainingSummary: React.FC<CompactTrainingSummaryProps> = ({
 
   return (
     <TooltipProvider>
-      <div className="space-y-2">
+      <div className="space-y-1.5">
         <div className="flex items-center gap-1 text-xs font-medium text-muted-foreground">
           <Award className="h-3 w-3" />
-          <span>Recent Certifications ({trainings.length})</span>
+          <span>Certifications ({trainings.length})</span>
         </div>
         
-        <div className="space-y-2">
+        <div className="space-y-1.5">
           {recentTrainings.map((training) => {
             const expiryStatus = getExpiryStatus(training);
             
             return (
               <Tooltip key={training.id}>
                 <TooltipTrigger asChild>
-                  <div className="flex items-start gap-2 p-2 rounded border bg-muted/20 hover:bg-muted/40 transition-colors cursor-help">
+                  <div className="flex items-start gap-1.5 p-1.5 rounded border bg-muted/20 hover:bg-muted/40 transition-colors cursor-help">
                     <Award className="h-3 w-3 mt-0.5 text-muted-foreground flex-shrink-0" />
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-1">
-                        <p className="text-xs font-medium truncate">{training.title}</p>
+                      <div className="flex items-center gap-1 mb-0.5">
+                        <p className="text-xs font-medium truncate leading-tight">{training.title}</p>
                         {expiryStatus && (
                           <Badge 
                             variant="outline" 
-                            className={`text-xs px-1.5 py-0 ${expiryStatus.color}`}
+                            className={`text-xs px-1 py-0 h-4 ${expiryStatus.color}`}
                           >
-                            {expiryStatus.status === 'expired' && <AlertTriangle className="h-2.5 w-2.5 mr-1" />}
-                            {expiryStatus.status === 'expiring' ? 'Expiring' : 
-                             expiryStatus.status === 'expired' ? 'Expired' : 'Valid'}
+                            {expiryStatus.status === 'expired' && <AlertTriangle className="h-2 w-2 mr-0.5" />}
+                            {expiryStatus.status === 'expiring' ? 'Exp' : 
+                             expiryStatus.status === 'expired' ? 'Exp' : 'OK'}
                           </Badge>
                         )}
                       </div>
-                      <p className="text-xs text-muted-foreground truncate">{training.provider}</p>
-                      <div className="flex items-center gap-1 text-xs text-muted-foreground mt-1">
-                        <Calendar className="h-2.5 w-2.5" />
-                        <span>{format(new Date(training.certification_date), 'MMM yyyy')}</span>
-                        {training.certificate_url && (
-                          <ExternalLink className="h-2.5 w-2.5 ml-1" />
-                        )}
-                      </div>
+                      <p className="text-xs text-muted-foreground truncate leading-tight">{training.provider}</p>
+                      {training.certificate_url && (
+                        <ExternalLink className="h-2.5 w-2.5 text-muted-foreground mt-0.5" />
+                      )}
                     </div>
                   </div>
                 </TooltipTrigger>
@@ -127,39 +123,39 @@ const CompactTrainingSummary: React.FC<CompactTrainingSummaryProps> = ({
                 <div className="text-center">
                   <Badge 
                     variant="outline" 
-                    className="cursor-pointer hover:bg-muted text-xs px-2 py-1"
+                    className="cursor-pointer hover:bg-muted text-xs px-2 py-0.5"
                   >
-                    View all {sortedTrainings.length} certifications
+                    +{sortedTrainings.length - 2} more
                   </Badge>
                 </div>
               </PopoverTrigger>
-              <PopoverContent className="w-96 p-4">
-                <div className="space-y-3">
-                  <h4 className="font-medium">All Certifications</h4>
-                  <div className="space-y-2 max-h-60 overflow-y-auto">
+              <PopoverContent className="w-80 p-3">
+                <div className="space-y-2">
+                  <h4 className="font-medium text-sm">All Certifications</h4>
+                  <div className="space-y-1.5 max-h-60 overflow-y-auto">
                     {sortedTrainings.map((training) => {
                       const expiryStatus = getExpiryStatus(training);
                       
                       return (
-                        <div key={training.id} className="flex items-start gap-2 p-2 rounded border">
+                        <div key={training.id} className="flex items-start gap-1.5 p-1.5 rounded border">
                           <Award className="h-3 w-3 mt-0.5 text-muted-foreground flex-shrink-0" />
                           <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-2 mb-1">
+                            <div className="flex items-center gap-1 mb-0.5">
                               <p className="text-xs font-medium">{training.title}</p>
                               {expiryStatus && (
                                 <Badge 
                                   variant="outline" 
-                                  className={`text-xs px-1.5 py-0 ${expiryStatus.color}`}
+                                  className={`text-xs px-1 py-0 h-4 ${expiryStatus.color}`}
                                 >
-                                  {expiryStatus.status === 'expired' && <AlertTriangle className="h-2.5 w-2.5 mr-1" />}
+                                  {expiryStatus.status === 'expired' && <AlertTriangle className="h-2 w-2 mr-0.5" />}
                                   {expiryStatus.status === 'expiring' ? 'Expiring' : 
                                    expiryStatus.status === 'expired' ? 'Expired' : 'Valid'}
                                 </Badge>
                               )}
                             </div>
                             <p className="text-xs text-muted-foreground">{training.provider}</p>
-                            <div className="flex items-center gap-1 text-xs text-muted-foreground mt-1">
-                              <Calendar className="h-2.5 w-2.5" />
+                            <div className="flex items-center gap-1 text-xs text-muted-foreground mt-0.5">
+                              <Calendar className="h-2 w-2" />
                               <span>{format(new Date(training.certification_date), 'MMM yyyy')}</span>
                               {training.certificate_url && (
                                 <a 
@@ -168,7 +164,7 @@ const CompactTrainingSummary: React.FC<CompactTrainingSummaryProps> = ({
                                   rel="noopener noreferrer"
                                   className="ml-1 hover:text-primary"
                                 >
-                                  <ExternalLink className="h-2.5 w-2.5" />
+                                  <ExternalLink className="h-2 w-2" />
                                 </a>
                               )}
                             </div>
