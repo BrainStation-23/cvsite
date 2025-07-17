@@ -12,7 +12,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
-import { Calendar, ExternalLink } from 'lucide-react';
+import { Award, Clock, Calendar } from 'lucide-react';
 import { format } from 'date-fns';
 
 interface Training {
@@ -38,117 +38,144 @@ const CompactTrainingSummary: React.FC<CompactTrainingSummaryProps> = ({
   if (safeTrainings.length === 0) {
     return (
       <div className="text-xs text-muted-foreground italic">
-        No certifications listed
+        No certifications
       </div>
     );
   }
 
-  const isExpiringSoon = (expiry_date?: string) => {
-    if (!expiry_date) return false;
-    const expiryDate = new Date(expiry_date);
+  // Sort by certification date, most recent first
+  const sortedTrainings = [...safeTrainings].sort((a, b) => 
+    new Date(b.certification_date).getTime() - new Date(a.certification_date).getTime()
+  );
+
+  const getExpiryStatus = (training: Training) => {
+    if (!training.is_renewable || !training.expiry_date) return 'valid';
+    
+    const expiryDate = new Date(training.expiry_date);
     const now = new Date();
-    const diffTime = expiryDate.getTime() - now.getTime();
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    return diffDays <= 90 && diffDays > 0; // Expiring within 90 days
+    const daysUntilExpiry = Math.ceil((expiryDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+    
+    if (daysUntilExpiry < 0) return 'expired';
+    if (daysUntilExpiry <= 30) return 'expiring';
+    return 'valid';
   };
 
-  const isExpired = (expiry_date?: string) => {
-    if (!expiry_date) return false;
-    const expiryDate = new Date(expiry_date);
-    const now = new Date();
-    return expiryDate < now;
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'expired': return 'bg-red-100 text-red-800 border-red-200';
+      case 'expiring': return 'bg-yellow-100 text-yellow-800 border-yellow-200';
+      default: return 'bg-green-100 text-green-800 border-green-200';
+    }
   };
 
-  const getCertificationBadgeVariant = (training: Training) => {
-    if (isExpired(training.expiry_date)) return 'destructive';
-    if (isExpiringSoon(training.expiry_date)) return 'secondary';
-    return 'outline';
-  };
-
-  const displayTrainings = safeTrainings.slice(0, 3);
-  const hasMore = safeTrainings.length > 3;
+  const recentTrainings = sortedTrainings.slice(0, 2);
+  const hasMore = sortedTrainings.length > 2;
 
   return (
     <TooltipProvider>
-      <div className="flex flex-wrap gap-1">
-        {displayTrainings.map((training) => (
-          <Tooltip key={training.id}>
-            <TooltipTrigger asChild>
-              <Badge 
-                variant={getCertificationBadgeVariant(training)}
-                className="text-xs px-2 py-0.5 cursor-help"
-              >
-                <span className="truncate max-w-20">{training.title}</span>
-                {training.certificate_url && (
-                  <ExternalLink className="h-2 w-2 ml-1" />
-                )}
-              </Badge>
-            </TooltipTrigger>
-            <TooltipContent>
-              <div className="text-center space-y-1">
-                <p className="font-medium">{training.title}</p>
-                <p className="text-xs">Provider: {training.provider}</p>
-                <p className="text-xs">
-                  <Calendar className="h-3 w-3 inline mr-1" />
-                  Certified: {format(new Date(training.certification_date), 'MMM yyyy')}
-                </p>
-                {training.expiry_date && (
-                  <p className={`text-xs ${isExpired(training.expiry_date) ? 'text-red-500' : isExpiringSoon(training.expiry_date) ? 'text-yellow-500' : 'text-gray-500'}`}>
-                    Expires: {format(new Date(training.expiry_date), 'MMM yyyy')}
-                  </p>
-                )}
-                {training.certificate_url && (
-                  <p className="text-xs text-blue-500">Click to view certificate</p>
-                )}
-              </div>
-            </TooltipContent>
-          </Tooltip>
-        ))}
-        {hasMore && (
-          <Popover>
-            <PopoverTrigger asChild>
-              <Badge 
-                variant="outline" 
-                className="text-xs px-2 py-0.5 cursor-pointer hover:bg-muted"
-              >
-                +{safeTrainings.length - 3}
-              </Badge>
-            </PopoverTrigger>
-            <PopoverContent className="w-80 p-3">
-              <div className="space-y-2">
-                <h4 className="font-medium text-sm">All Certifications</h4>
-                <div className="space-y-2">
-                  {safeTrainings.map((training) => (
-                    <div key={training.id} className="flex items-start justify-between p-2 border rounded">
-                      <div className="flex-1">
-                        <p className="font-medium text-sm">{training.title}</p>
-                        <p className="text-xs text-gray-500">{training.provider}</p>
-                        <p className="text-xs text-gray-500">
-                          Certified: {format(new Date(training.certification_date), 'MMM yyyy')}
-                        </p>
-                        {training.expiry_date && (
-                          <p className={`text-xs ${isExpired(training.expiry_date) ? 'text-red-500' : isExpiringSoon(training.expiry_date) ? 'text-yellow-500' : 'text-gray-500'}`}>
-                            Expires: {format(new Date(training.expiry_date), 'MMM yyyy')}
-                          </p>
-                        )}
-                      </div>
-                      {training.certificate_url && (
-                        <a 
-                          href={training.certificate_url} 
-                          target="_blank" 
-                          rel="noopener noreferrer"
-                          className="text-blue-500 hover:text-blue-700"
-                        >
-                          <ExternalLink className="h-4 w-4" />
-                        </a>
+      <div className="space-y-2">
+        <div className="flex items-center gap-1 text-xs font-medium text-muted-foreground">
+          <Award className="h-3 w-3" />
+          <span>Certifications ({safeTrainings.length})</span>
+        </div>
+        
+        <div className="space-y-1">
+          {recentTrainings.map((training) => {
+            const status = getExpiryStatus(training);
+            return (
+              <Tooltip key={training.id}>
+                <TooltipTrigger asChild>
+                  <div className="space-y-1">
+                    <Badge 
+                      variant="outline" 
+                      className={`text-xs px-2 py-0.5 cursor-help ${getStatusColor(status)}`}
+                    >
+                      <span className="truncate max-w-24">{training.title}</span>
+                      {training.is_renewable && (
+                        <Clock className="h-2 w-2 ml-1" />
                       )}
+                    </Badge>
+                    <div className="text-xs text-muted-foreground">
+                      {training.provider} • {format(new Date(training.certification_date), 'MMM yyyy')}
                     </div>
-                  ))}
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <div className="space-y-1">
+                    <p className="font-medium">{training.title}</p>
+                    <p className="text-xs">Provider: {training.provider}</p>
+                    <p className="text-xs">Date: {format(new Date(training.certification_date), 'MMM dd, yyyy')}</p>
+                    {training.expiry_date && (
+                      <p className="text-xs">
+                        Expires: {format(new Date(training.expiry_date), 'MMM dd, yyyy')}
+                      </p>
+                    )}
+                  </div>
+                </TooltipContent>
+              </Tooltip>
+            );
+          })}
+          
+          {hasMore && (
+            <Popover>
+              <PopoverTrigger asChild>
+                <Badge 
+                  variant="outline" 
+                  className="text-xs px-2 py-0.5 cursor-pointer hover:bg-muted"
+                >
+                  +{sortedTrainings.length - 2} more
+                </Badge>
+              </PopoverTrigger>
+              <PopoverContent className="w-80 p-3">
+                <div className="space-y-2">
+                  <h4 className="font-medium text-sm flex items-center gap-2">
+                    <Award className="h-4 w-4" />
+                    All Certifications
+                  </h4>
+                  <div className="space-y-2 max-h-48 overflow-y-auto">
+                    {sortedTrainings.map((training) => {
+                      const status = getExpiryStatus(training);
+                      return (
+                        <div key={training.id} className="border rounded p-2 space-y-1">
+                          <div className="flex items-center justify-between">
+                            <Badge 
+                              variant="outline" 
+                              className={`text-xs ${getStatusColor(status)}`}
+                            >
+                              {training.title}
+                            </Badge>
+                            {training.is_renewable && (
+                              <Tooltip>
+                                <TooltipTrigger>
+                                  <Clock className="h-3 w-3 text-muted-foreground" />
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                  <p>Renewable certification</p>
+                                </TooltipContent>
+                              </Tooltip>
+                            )}
+                          </div>
+                          <div className="text-xs text-muted-foreground">
+                            <div className="flex items-center gap-1">
+                              <Calendar className="h-3 w-3" />
+                              {training.provider} • {format(new Date(training.certification_date), 'MMM yyyy')}
+                            </div>
+                            {training.expiry_date && (
+                              <div className="flex items-center gap-1 mt-1">
+                                <Clock className="h-3 w-3" />
+                                Expires: {format(new Date(training.expiry_date), 'MMM yyyy')}
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
                 </div>
-              </div>
-            </PopoverContent>
-          </Popover>
-        )}
+              </PopoverContent>
+            </Popover>
+          )}
+        </div>
       </div>
     </TooltipProvider>
   );
