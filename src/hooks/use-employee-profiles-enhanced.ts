@@ -47,6 +47,19 @@ interface PaginationData {
   pageCount: number;
 }
 
+interface EmployeeProfilesResponse {
+  profiles: EmployeeProfile[];
+  pagination: {
+    total_count: number;
+    filtered_count: number;
+    page: number;
+    per_page: number;
+    page_count: number;
+  };
+}
+
+export type EmployeeProfileSortColumn = 'first_name' | 'last_name' | 'employee_id' | 'created_at' | 'updated_at';
+
 export function useEmployeeProfilesEnhanced() {
   const { toast } = useToast();
   const [profiles, setProfiles] = useState<EmployeeProfile[]>([]);
@@ -67,7 +80,7 @@ export function useEmployeeProfilesEnhanced() {
   const [trainingFilter, setTrainingFilter] = useState<string | null>(null);
   const [achievementFilter, setAchievementFilter] = useState<string | null>(null);
   const [projectFilter, setProjectFilter] = useState<string | null>(null);
-  const [sortBy, setSortBy] = useState<string>('last_name');
+  const [sortBy, setSortBy] = useState<EmployeeProfileSortColumn>('last_name');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
 
   const fetchProfiles = useCallback(async (options: {
@@ -80,7 +93,7 @@ export function useEmployeeProfilesEnhanced() {
     trainingFilter?: string | null;
     achievementFilter?: string | null;
     projectFilter?: string | null;
-    sortBy?: string;
+    sortBy?: EmployeeProfileSortColumn;
     sortOrder?: 'asc' | 'desc';
   } = {}) => {
     const {
@@ -117,8 +130,10 @@ export function useEmployeeProfilesEnhanced() {
       if (error) throw error;
 
       if (data) {
-        const profilesData = data.profiles || [];
-        const paginationData = data.pagination || {};
+        // Type cast the data to our expected interface
+        const responseData = data as EmployeeProfilesResponse;
+        const profilesData = responseData.profiles || [];
+        const paginationData = responseData.pagination || {};
 
         // Transform the data to include general_information separately
         const transformedProfiles = profilesData.map((profile: any) => ({
@@ -196,7 +211,7 @@ export function useEmployeeProfilesEnhanced() {
     fetchProfiles({ projectFilter: project, page: 1 });
   }, [fetchProfiles]);
 
-  const handleSortChange = useCallback((field: string, order: 'asc' | 'desc') => {
+  const handleSortChange = useCallback((field: EmployeeProfileSortColumn, order: 'asc' | 'desc') => {
     fetchProfiles({ sortBy: field, sortOrder: order });
   }, [fetchProfiles]);
 
