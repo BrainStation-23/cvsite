@@ -6,6 +6,7 @@ import { LogOut, Menu } from 'lucide-react';
 import SidebarNavigation from './navigation/SidebarNavigation';
 import DashboardHeader from './DashboardHeader';
 import { getSidebarGroups } from './navigation/navigationData';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -79,9 +80,10 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
     <div className="flex h-screen bg-gray-100 dark:bg-gray-900">
       {/* Sidebar */}
       <aside 
-        className={`${isSidebarOpen ? 'w-64' : 'w-16'} transition-width duration-300 ease-in-out fixed h-full z-10 bg-gradient-to-b from-slate-900 to-slate-800 text-slate-100`}
+        className={`${isSidebarOpen ? 'w-64' : 'w-16'} transition-width duration-300 ease-in-out fixed h-full z-10 bg-gradient-to-b from-slate-900 to-slate-800 text-slate-100 flex flex-col`}
       >
-        <div className="p-4 flex justify-between items-center bg-slate-900/90 border-b border-slate-700">
+        {/* Fixed Header */}
+        <div className="p-4 flex justify-between items-center bg-slate-900/90 border-b border-slate-700 flex-shrink-0">
           {isSidebarOpen && <h1 className="font-bold text-xl">CVSite</h1>}
           <button 
             onClick={toggleSidebar}
@@ -91,9 +93,15 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
           </button>
         </div>
         
-        <SidebarNavigation sidebarGroups={sidebarGroups} isSidebarOpen={isSidebarOpen} />
+        {/* Scrollable Navigation */}
+        <div className="flex-1 min-h-0">
+          <ScrollArea className="h-full">
+            <SidebarNavigation sidebarGroups={sidebarGroups} isSidebarOpen={isSidebarOpen} />
+          </ScrollArea>
+        </div>
         
-        <div className="absolute bottom-0 w-full p-4">
+        {/* Fixed Logout Button */}
+        <div className="p-4 border-t border-slate-700 flex-shrink-0">
           <button
             onClick={handleSignOut}
             className="flex items-center w-full px-4 py-2 text-sm hover:bg-cvsite-teal rounded transition-colors"
