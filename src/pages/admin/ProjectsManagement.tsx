@@ -8,6 +8,7 @@ import { ProjectsPagination } from '@/components/projects/ProjectsPagination';
 import { ProjectForm } from '@/components/projects/ProjectForm';
 import { ConfirmationDialog } from '@/components/ui/confirmation-dialog';
 import { useConfirmationDialog } from '@/hooks/use-confirmation-dialog';
+import { OdooSyncButton } from '@/components/projects/OdooSyncButton';
 
 interface Project {
   id: string;
@@ -36,7 +37,8 @@ const ProjectsManagement: React.FC = () => {
     createProject,
     updateProject,
     deleteProject,
-    toggleProjectStatus
+    toggleProjectStatus,
+    refetch
   } = useProjectsManagement();
 
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
@@ -88,11 +90,17 @@ const ProjectsManagement: React.FC = () => {
     setEditingProject(null);
   };
 
+  // Refetch data after sync
+  const handleSyncComplete = () => {
+    refetch();
+  };
+
   return (
     <DashboardLayout>
       <div className="space-y-6">
         <div className="flex justify-between items-center">
           <h1 className="text-2xl font-bold text-foreground">Projects Management</h1>
+          <OdooSyncButton />
         </div>
         
         <div className="bg-card rounded-lg border p-6 space-y-6">
