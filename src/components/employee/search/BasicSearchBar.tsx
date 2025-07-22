@@ -6,27 +6,25 @@ import { Search, X } from 'lucide-react';
 
 interface BasicSearchBarProps {
   searchQuery: string;
-  onChange: (query: string) => void;
-  placeholder?: string;
+  onSearch: (query: string) => void;
   isLoading: boolean;
 }
 
 const BasicSearchBar: React.FC<BasicSearchBarProps> = ({
   searchQuery,
-  onChange,
-  placeholder = "Search employees by name, ID, skills, company, or any content...",
+  onSearch,
   isLoading
 }) => {
   const [searchInput, setSearchInput] = useState(searchQuery);
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onChange(searchInput);
+    onSearch(searchInput);
   };
 
   const handleClearSearch = () => {
     setSearchInput('');
-    onChange('');
+    onSearch('');
   };
 
   return (
@@ -35,7 +33,7 @@ const BasicSearchBar: React.FC<BasicSearchBarProps> = ({
         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500" />
         <Input
           type="text"
-          placeholder={placeholder}
+          placeholder="Search employees by name, ID, skills, company, or any content..."
           value={searchInput}
           onChange={(e) => setSearchInput(e.target.value)}
           className="pl-10 h-11"

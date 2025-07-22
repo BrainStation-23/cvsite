@@ -34,8 +34,6 @@ const EmployeeData: React.FC = () => {
     trainingFilter,
     achievementFilter,
     projectFilter,
-    minExperienceYears,
-    maxExperienceYears,
     sortBy,
     sortOrder,
     fetchProfiles,
@@ -47,7 +45,6 @@ const EmployeeData: React.FC = () => {
     handleTrainingFilter,
     handleAchievementFilter,
     handleProjectFilter,
-    handleExperienceYearsFilter,
     handleSortChange,
     handleAdvancedFilters,
     resetFilters
@@ -131,7 +128,6 @@ const EmployeeData: React.FC = () => {
           onTrainingFilter={handleTrainingFilter}
           onAchievementFilter={handleAchievementFilter}
           onProjectFilter={handleProjectFilter}
-          onExperienceYearsFilter={handleExperienceYearsFilter}
           onAdvancedFilters={handleAdvancedFilters}
           onSortChange={handleSortChange}
           onReset={resetFilters}
@@ -142,8 +138,6 @@ const EmployeeData: React.FC = () => {
           trainingFilter={trainingFilter}
           achievementFilter={achievementFilter}
           projectFilter={projectFilter}
-          minExperienceYears={minExperienceYears}
-          maxExperienceYears={maxExperienceYears}
           sortBy={sortBy}
           sortOrder={sortOrder}
           isLoading={isLoading}

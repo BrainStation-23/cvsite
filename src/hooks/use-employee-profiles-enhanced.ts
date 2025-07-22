@@ -1,4 +1,3 @@
-
 import { useState, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -11,12 +10,6 @@ interface EmployeeProfile {
   email?: string;
   created_at: string;
   updated_at: string;
-  date_of_joining?: string;
-  career_start_date?: string;
-  expertise_id?: string;
-  expertise_name?: string;
-  total_experience_years?: number;
-  company_experience_years?: number;
   general_information?: {
     first_name: string;
     last_name: string;
@@ -28,7 +21,6 @@ interface EmployeeProfile {
     id: string;
     name: string;
     proficiency: number;
-    priority: number;
   }>;
   specialized_skills?: Array<{
     id: string;
@@ -40,46 +32,9 @@ interface EmployeeProfile {
     title: string;
     provider: string;
     certification_date: string;
-    description?: string;
+    is_renewable?: boolean;
+    expiry_date?: string;
     certificate_url?: string;
-  }>;
-  experiences?: Array<{
-    id: string;
-    company_name: string;
-    designation: string;
-    start_date: string;
-    end_date?: string;
-    is_current: boolean;
-    description?: string;
-  }>;
-  education?: Array<{
-    id: string;
-    university: string;
-    degree?: string;
-    department?: string;
-    start_date: string;
-    end_date?: string;
-    is_current: boolean;
-    gpa?: string;
-  }>;
-  achievements?: Array<{
-    id: string;
-    title: string;
-    date: string;
-    description: string;
-  }>;
-  projects?: Array<{
-    id: string;
-    name: string;
-    role: string;
-    start_date: string;
-    end_date?: string;
-    is_current: boolean;
-    description: string;
-    responsibility?: string;
-    technologies_used?: string[];
-    url?: string;
-    display_order?: number;
   }>;
 }
 
@@ -102,7 +57,7 @@ interface EmployeeProfilesResponse {
   };
 }
 
-export type EmployeeProfileSortColumn = 'first_name' | 'last_name' | 'employee_id' | 'created_at' | 'updated_at' | 'total_experience' | 'company_experience';
+export type EmployeeProfileSortColumn = 'first_name' | 'last_name' | 'employee_id' | 'created_at' | 'updated_at';
 
 export function useEmployeeProfilesEnhanced() {
   const { toast } = useToast();
@@ -124,8 +79,6 @@ export function useEmployeeProfilesEnhanced() {
   const [trainingFilter, setTrainingFilter] = useState<string | null>(null);
   const [achievementFilter, setAchievementFilter] = useState<string | null>(null);
   const [projectFilter, setProjectFilter] = useState<string | null>(null);
-  const [minExperienceYears, setMinExperienceYears] = useState<number | null>(null);
-  const [maxExperienceYears, setMaxExperienceYears] = useState<number | null>(null);
   const [sortBy, setSortBy] = useState<EmployeeProfileSortColumn>('last_name');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
 
@@ -139,8 +92,6 @@ export function useEmployeeProfilesEnhanced() {
     trainingFilter?: string | null;
     achievementFilter?: string | null;
     projectFilter?: string | null;
-    minExperienceYears?: number | null;
-    maxExperienceYears?: number | null;
     sortBy?: EmployeeProfileSortColumn;
     sortOrder?: 'asc' | 'desc';
   } = {}) => {
@@ -154,8 +105,6 @@ export function useEmployeeProfilesEnhanced() {
       trainingFilter: trainF = trainingFilter,
       achievementFilter: achF = achievementFilter,
       projectFilter: projF = projectFilter,
-      minExperienceYears: minExp = minExperienceYears,
-      maxExperienceYears: maxExp = maxExperienceYears,
       sortBy: sortField = sortBy,
       sortOrder: sortDir = sortOrder
     } = options;
@@ -171,8 +120,6 @@ export function useEmployeeProfilesEnhanced() {
         training_filter: trainF,
         achievement_filter: achF,
         project_filter: projF,
-        min_experience_years: minExp,
-        max_experience_years: maxExp,
         page_number: page,
         items_per_page: perPage,
         sort_by: sortField,
@@ -182,10 +129,13 @@ export function useEmployeeProfilesEnhanced() {
       if (error) throw error;
 
       if (data) {
+        // Type cast the data with proper unknown conversion first
         const responseData = data as unknown as EmployeeProfilesResponse;
         const profilesData = responseData.profiles || [];
         const paginationData = responseData.pagination;
 
+        // Keep the profiles data as-is from the RPC function
+        // The RPC function already provides the correct structure
         setProfiles(profilesData);
         setPagination({
           totalCount: paginationData?.total_count || 0,
@@ -203,8 +153,6 @@ export function useEmployeeProfilesEnhanced() {
         setTrainingFilter(trainF);
         setAchievementFilter(achF);
         setProjectFilter(projF);
-        setMinExperienceYears(minExp);
-        setMaxExperienceYears(maxExp);
         setSortBy(sortField);
         setSortOrder(sortDir);
       }
@@ -218,7 +166,7 @@ export function useEmployeeProfilesEnhanced() {
     } finally {
       setIsLoading(false);
     }
-  }, [pagination.page, pagination.perPage, searchQuery, skillFilter, experienceFilter, educationFilter, trainingFilter, achievementFilter, projectFilter, minExperienceYears, maxExperienceYears, sortBy, sortOrder, toast]);
+  }, [pagination.page, pagination.perPage, searchQuery, skillFilter, experienceFilter, educationFilter, trainingFilter, achievementFilter, projectFilter, sortBy, sortOrder, toast]);
 
   const handlePageChange = useCallback((newPage: number) => {
     fetchProfiles({ page: newPage });
@@ -252,10 +200,6 @@ export function useEmployeeProfilesEnhanced() {
     fetchProfiles({ projectFilter: project, page: 1 });
   }, [fetchProfiles]);
 
-  const handleExperienceYearsFilter = useCallback((min: number | null, max: number | null) => {
-    fetchProfiles({ minExperienceYears: min, maxExperienceYears: max, page: 1 });
-  }, [fetchProfiles]);
-
   const handleSortChange = useCallback((field: EmployeeProfileSortColumn, order: 'asc' | 'desc') => {
     fetchProfiles({ sortBy: field, sortOrder: order });
   }, [fetchProfiles]);
@@ -273,8 +217,6 @@ export function useEmployeeProfilesEnhanced() {
       trainingFilter: null,
       achievementFilter: null,
       projectFilter: null,
-      minExperienceYears: null,
-      maxExperienceYears: null,
       sortBy: 'last_name',
       sortOrder: 'asc',
       page: 1
@@ -292,8 +234,6 @@ export function useEmployeeProfilesEnhanced() {
     trainingFilter,
     achievementFilter,
     projectFilter,
-    minExperienceYears,
-    maxExperienceYears,
     sortBy,
     sortOrder,
     fetchProfiles,
@@ -305,7 +245,6 @@ export function useEmployeeProfilesEnhanced() {
     handleTrainingFilter,
     handleAchievementFilter,
     handleProjectFilter,
-    handleExperienceYearsFilter,
     handleSortChange,
     handleAdvancedFilters,
     resetFilters
