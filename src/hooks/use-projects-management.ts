@@ -85,12 +85,9 @@ export function useProjectsManagement(): UseProjectsManagementReturn {
         query = query.eq('is_active', true);
       }
 
-      // Apply search filter if provided
+      // Apply search filter if provided - FIX: Single line OR clause
       if (searchQuery) {
-        query = query.or(`
-          project_name.ilike.%${searchQuery}%,
-          client_name.ilike.%${searchQuery}%
-        `);
+        query = query.or(`project_name.ilike.%${searchQuery}%,client_name.ilike.%${searchQuery}%`);
       }
 
       // Apply sorting
@@ -119,10 +116,14 @@ export function useProjectsManagement(): UseProjectsManagementReturn {
         countQuery = countQuery.eq('is_active', true);
       }
 
+      if (searchQuery) {
+        countQuery = countQuery.or(`project_name.ilike.%${searchQuery}%,client_name.ilike.%${searchQuery}%`);
+      }
+
       const { count: totalCount } = await countQuery;
 
       const totalRecords = totalCount || 0;
-      const filteredRecords = count || 0;
+      const filteredRecords = count !== null ? count : (data?.length || 0);
 
       setProjects(data || []);
       setPagination({
