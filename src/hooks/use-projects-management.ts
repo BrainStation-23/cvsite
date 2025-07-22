@@ -107,7 +107,7 @@ export function useProjectsManagement(): UseProjectsManagementReturn {
 
       if (error) throw error;
 
-      // Get total count for pagination
+      // Get total count for pagination - separate query for accurate count
       let countQuery = supabase
         .from('projects_management')
         .select('*', { count: 'exact', head: true });
@@ -120,10 +120,29 @@ export function useProjectsManagement(): UseProjectsManagementReturn {
         countQuery = countQuery.or(`project_name.ilike.%${searchQuery}%,client_name.ilike.%${searchQuery}%`);
       }
 
-      const { count: totalCount } = await countQuery;
+      const { count: filteredCount } = await countQuery;
+
+      // Get total count without filters for reference
+      let totalCountQuery = supabase
+        .from('projects_management')
+        .select('*', { count: 'exact', head: true });
+
+      if (!showInactiveProjects) {
+        totalCountQuery = totalCountQuery.eq('is_active', true);
+      }
+
+      const { count: totalCount } = await totalCountQuery;
 
       const totalRecords = totalCount || 0;
-      const filteredRecords = count !== null ? count : (data?.length || 0);
+      const filteredRecords = filteredCount || 0;
+
+      console.log('Pagination debug:', {
+        totalRecords,
+        filteredRecords,
+        itemsPerPage,
+        calculatedPageCount: Math.ceil(filteredRecords / itemsPerPage),
+        currentPage
+      });
 
       setProjects(data || []);
       setPagination({
