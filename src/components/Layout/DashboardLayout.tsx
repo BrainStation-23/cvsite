@@ -7,6 +7,7 @@ import SidebarNavigation from './navigation/SidebarNavigation';
 import DashboardHeader from './DashboardHeader';
 import { getSidebarGroups } from './navigation/navigationData';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Toaster } from '@/components/ui/toaster';
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -123,6 +124,9 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
           </div>
         </main>
       </div>
+      
+      {/* Toast notifications */}
+      <Toaster />
     </div>
   );
 };
