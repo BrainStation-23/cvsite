@@ -1,8 +1,11 @@
 
 export interface ValidationResult {
+  id: string;
   type: string;
   passed: boolean;
   details: string;
+  label: string;
+  source: string;
 }
 
 export interface ValidationProgress {

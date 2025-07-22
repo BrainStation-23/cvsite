@@ -8,6 +8,7 @@ export const runCloseupValidation = async (file: File): Promise<ValidationResult
     const closeup = await validateImageCloseup(img);
     return {
       id: 'closeup',
+      type: 'closeup',
       label: 'Close-up shot detected',
       passed: closeup.isCloseup,
       details: closeup.details,
@@ -17,6 +18,7 @@ export const runCloseupValidation = async (file: File): Promise<ValidationResult
     console.error('Close-up validation error:', e);
     return {
       id: 'closeup',
+      type: 'closeup',
       label: 'Close-up shot detected',
       passed: false,
       details: 'Error analyzing close-up',

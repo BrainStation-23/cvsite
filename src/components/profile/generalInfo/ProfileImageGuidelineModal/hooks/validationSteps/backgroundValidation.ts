@@ -8,6 +8,7 @@ export const runBackgroundValidation = async (file: File): Promise<ValidationRes
     const bg = await validateSolidBackground(img);
     return {
       id: 'background',
+      type: 'background',
       label: 'Background is solid',
       passed: bg.isSolid,
       details: `Variance: ${Math.round(bg.score)}`,
@@ -16,6 +17,7 @@ export const runBackgroundValidation = async (file: File): Promise<ValidationRes
   } catch (e) {
     return {
       id: 'background',
+      type: 'background',
       label: 'Background is solid',
       passed: false,
       details: 'Error running background check',

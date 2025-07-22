@@ -8,6 +8,7 @@ export const runPostureValidation = async (file: File): Promise<ValidationResult
     const posture = await validateImagePosture(img);
     return {
       id: 'posture',
+      type: 'posture',
       label: 'Good posture (5-20° shoulder angle)',
       passed: posture.hasGoodPosture,
       details: posture.details,
@@ -17,6 +18,7 @@ export const runPostureValidation = async (file: File): Promise<ValidationResult
     console.error('Posture validation error:', e);
     return {
       id: 'posture',
+      type: 'posture',
       label: 'Good posture (5-20° shoulder angle)',
       passed: false,
       details: 'Error analyzing posture',
