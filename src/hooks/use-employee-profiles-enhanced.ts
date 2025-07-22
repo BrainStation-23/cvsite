@@ -1,3 +1,4 @@
+
 import { useState, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -10,6 +11,12 @@ interface EmployeeProfile {
   email?: string;
   created_at: string;
   updated_at: string;
+  date_of_joining?: string;
+  career_start_date?: string;
+  expertise_id?: string;
+  expertise_name?: string;
+  total_experience_years?: number;
+  company_experience_years?: number;
   general_information?: {
     first_name: string;
     last_name: string;
@@ -21,20 +28,58 @@ interface EmployeeProfile {
     id: string;
     name: string;
     proficiency: number;
+    priority: number;
   }>;
   specialized_skills?: Array<{
     id: string;
     name: string;
     proficiency: number;
   }>;
+  experiences?: Array<{
+    id: string;
+    company_name: string;
+    designation: string;
+    start_date: string;
+    end_date?: string;
+    is_current: boolean;
+    description?: string;
+  }>;
+  education?: Array<{
+    id: string;
+    university: string;
+    degree: string;
+    department?: string;
+    start_date: string;
+    end_date?: string;
+    is_current: boolean;
+    gpa?: string;
+  }>;
   trainings?: Array<{
     id: string;
     title: string;
     provider: string;
     certification_date: string;
-    is_renewable?: boolean;
-    expiry_date?: string;
+    description?: string;
     certificate_url?: string;
+  }>;
+  achievements?: Array<{
+    id: string;
+    title: string;
+    date: string;
+    description: string;
+  }>;
+  projects?: Array<{
+    id: string;
+    name: string;
+    role: string;
+    start_date: string;
+    end_date?: string;
+    is_current: boolean;
+    description: string;
+    responsibility?: string;
+    technologies_used?: string[];
+    url?: string;
+    display_order: number;
   }>;
 }
 
@@ -57,7 +102,7 @@ interface EmployeeProfilesResponse {
   };
 }
 
-export type EmployeeProfileSortColumn = 'first_name' | 'last_name' | 'employee_id' | 'created_at' | 'updated_at';
+export type EmployeeProfileSortColumn = 'first_name' | 'last_name' | 'employee_id' | 'created_at' | 'updated_at' | 'total_experience' | 'company_experience';
 
 export function useEmployeeProfilesEnhanced() {
   const { toast } = useToast();
@@ -92,6 +137,8 @@ export function useEmployeeProfilesEnhanced() {
     trainingFilter?: string | null;
     achievementFilter?: string | null;
     projectFilter?: string | null;
+    minExperienceYears?: number | null;
+    maxExperienceYears?: number | null;
     sortBy?: EmployeeProfileSortColumn;
     sortOrder?: 'asc' | 'desc';
   } = {}) => {
@@ -105,6 +152,8 @@ export function useEmployeeProfilesEnhanced() {
       trainingFilter: trainF = trainingFilter,
       achievementFilter: achF = achievementFilter,
       projectFilter: projF = projectFilter,
+      minExperienceYears = null,
+      maxExperienceYears = null,
       sortBy: sortField = sortBy,
       sortOrder: sortDir = sortOrder
     } = options;
@@ -120,6 +169,8 @@ export function useEmployeeProfilesEnhanced() {
         training_filter: trainF,
         achievement_filter: achF,
         project_filter: projF,
+        min_experience_years: minExperienceYears,
+        max_experience_years: maxExperienceYears,
         page_number: page,
         items_per_page: perPage,
         sort_by: sortField,
@@ -129,13 +180,10 @@ export function useEmployeeProfilesEnhanced() {
       if (error) throw error;
 
       if (data) {
-        // Type cast the data with proper unknown conversion first
         const responseData = data as unknown as EmployeeProfilesResponse;
         const profilesData = responseData.profiles || [];
         const paginationData = responseData.pagination;
 
-        // Keep the profiles data as-is from the RPC function
-        // The RPC function already provides the correct structure
         setProfiles(profilesData);
         setPagination({
           totalCount: paginationData?.total_count || 0,
@@ -204,7 +252,10 @@ export function useEmployeeProfilesEnhanced() {
     fetchProfiles({ sortBy: field, sortOrder: order });
   }, [fetchProfiles]);
 
-  const handleAdvancedFilters = useCallback((filters: any) => {
+  const handleAdvancedFilters = useCallback((filters: {
+    minExperienceYears?: number | null;
+    maxExperienceYears?: number | null;
+  }) => {
     fetchProfiles({ ...filters, page: 1 });
   }, [fetchProfiles]);
 
@@ -217,6 +268,8 @@ export function useEmployeeProfilesEnhanced() {
       trainingFilter: null,
       achievementFilter: null,
       projectFilter: null,
+      minExperienceYears: null,
+      maxExperienceYears: null,
       sortBy: 'last_name',
       sortOrder: 'asc',
       page: 1

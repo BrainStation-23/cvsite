@@ -73,7 +73,6 @@ const EmployeeData: React.FC = () => {
   };
 
   const handleBulkEmail = (profileIds: string[]) => {
-    // Find the profiles for the selected IDs
     const selectedProfilesData = profiles.filter(profile => profileIds.includes(profile.id));
     
     if (selectedProfilesData.length === 0) {
@@ -90,7 +89,6 @@ const EmployeeData: React.FC = () => {
       description: `Sending emails to ${selectedProfilesData.length} employees...`,
     });
 
-    // Here you would implement the actual bulk email functionality
     console.log('Sending bulk emails to:', selectedProfilesData);
   };
 
@@ -111,7 +109,6 @@ const EmployeeData: React.FC = () => {
       description: `Exporting ${selectedProfilesData.length} profiles as ${format.toUpperCase()}...`,
     });
 
-    // Here you would implement the actual export functionality
     console.log('Exporting profiles:', selectedProfilesData, 'Format:', format);
   };
 
