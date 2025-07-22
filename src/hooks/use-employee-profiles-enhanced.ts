@@ -18,6 +18,15 @@ interface PaginationData {
   pageCount: number;
 }
 
+// Debounce utility function
+const debounce = (func: Function, delay: number) => {
+  let timeoutId: NodeJS.Timeout;
+  return (...args: any[]) => {
+    clearTimeout(timeoutId);
+    timeoutId = setTimeout(() => func.apply(null, args), delay);
+  };
+};
+
 export function useEmployeeProfilesEnhanced() {
   const { toast } = useToast();
   const [profiles, setProfiles] = useState<EmployeeProfile[]>([]);
@@ -100,7 +109,12 @@ export function useEmployeeProfilesEnhanced() {
         sortDir
       });
 
-      const { data, error } = await supabase.rpc('get_employee_profiles', {
+      // Add timeout handling for the query
+      const timeoutPromise = new Promise((_, reject) => {
+        setTimeout(() => reject(new Error('Request timed out after 30 seconds')), 30000);
+      });
+
+      const queryPromise = supabase.rpc('get_employee_profiles', {
         search_query: search,
         skill_filter: skillF,
         experience_filter: expF,
@@ -119,6 +133,8 @@ export function useEmployeeProfilesEnhanced() {
         sort_order: sortDir
       });
 
+      const { data, error } = await Promise.race([queryPromise, timeoutPromise]) as any;
+
       if (error) {
         console.error('Error fetching employee profiles:', error);
         throw error;
@@ -127,13 +143,10 @@ export function useEmployeeProfilesEnhanced() {
       if (data) {
         console.log('Employee profiles response:', data);
         
-        // Type cast the data with proper unknown conversion first
         const responseData = data as unknown as EmployeeProfilesResponse;
         const profilesData = responseData.profiles || [];
         const paginationData = responseData.pagination;
 
-        // Keep the profiles data as-is from the RPC function
-        // The RPC function already provides the correct structure
         setProfiles(profilesData);
         setPagination({
           totalCount: paginationData?.total_count || 0,
@@ -154,49 +167,70 @@ export function useEmployeeProfilesEnhanced() {
         setSortBy(sortField);
         setSortOrder(sortDir);
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error fetching employee profiles:', error);
+      
+      // Enhanced error handling for different error types
+      let errorMessage = 'There was an error fetching employee profiles';
+      
+      if (error.message?.includes('timeout') || error.code === '57014') {
+        errorMessage = 'Database query timed out. Please try using filters to reduce the dataset size.';
+      } else if (error.message?.includes('network') || error.message?.includes('fetch')) {
+        errorMessage = 'Network error occurred. Please check your connection and try again.';
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+
       toast({
         title: 'Error fetching profiles',
-        description: error.message || 'There was an error fetching employee profiles',
+        description: errorMessage,
         variant: 'destructive',
       });
+      
+      // Re-throw the error so the component can handle it
+      throw new Error(errorMessage);
     } finally {
       setIsLoading(false);
     }
   }, [pagination.page, pagination.perPage, searchQuery, skillFilter, experienceFilter, educationFilter, trainingFilter, achievementFilter, projectFilter, sortBy, sortOrder, toast]);
+
+  // Debounced search function to reduce query frequency
+  const debouncedFetchProfiles = useCallback(
+    debounce(fetchProfiles, 500),
+    [fetchProfiles]
+  );
 
   const handlePageChange = useCallback((newPage: number) => {
     fetchProfiles({ page: newPage });
   }, [fetchProfiles]);
 
   const handleSearch = useCallback((query: string) => {
-    fetchProfiles({ search: query, page: 1 });
-  }, [fetchProfiles]);
+    debouncedFetchProfiles({ search: query, page: 1 });
+  }, [debouncedFetchProfiles]);
 
   const handleSkillFilter = useCallback((skill: string) => {
-    fetchProfiles({ skillFilter: skill, page: 1 });
-  }, [fetchProfiles]);
+    debouncedFetchProfiles({ skillFilter: skill, page: 1 });
+  }, [debouncedFetchProfiles]);
 
   const handleExperienceFilter = useCallback((experience: string) => {
-    fetchProfiles({ experienceFilter: experience, page: 1 });
-  }, [fetchProfiles]);
+    debouncedFetchProfiles({ experienceFilter: experience, page: 1 });
+  }, [debouncedFetchProfiles]);
 
   const handleEducationFilter = useCallback((education: string) => {
-    fetchProfiles({ educationFilter: education, page: 1 });
-  }, [fetchProfiles]);
+    debouncedFetchProfiles({ educationFilter: education, page: 1 });
+  }, [debouncedFetchProfiles]);
 
   const handleTrainingFilter = useCallback((training: string) => {
-    fetchProfiles({ trainingFilter: training, page: 1 });
-  }, [fetchProfiles]);
+    debouncedFetchProfiles({ trainingFilter: training, page: 1 });
+  }, [debouncedFetchProfiles]);
 
   const handleAchievementFilter = useCallback((achievement: string) => {
-    fetchProfiles({ achievementFilter: achievement, page: 1 });
-  }, [fetchProfiles]);
+    debouncedFetchProfiles({ achievementFilter: achievement, page: 1 });
+  }, [debouncedFetchProfiles]);
 
   const handleProjectFilter = useCallback((project: string) => {
-    fetchProfiles({ projectFilter: project, page: 1 });
-  }, [fetchProfiles]);
+    debouncedFetchProfiles({ projectFilter: project, page: 1 });
+  }, [debouncedFetchProfiles]);
 
   const handleSortChange = useCallback((field: EmployeeProfileSortColumn, order: EmployeeProfileSortOrder) => {
     fetchProfiles({ sortBy: field, sortOrder: order });
@@ -209,8 +243,8 @@ export function useEmployeeProfilesEnhanced() {
     maxGraduationYear?: number | null;
     completionStatus?: string | null;
   }) => {
-    fetchProfiles({ ...filters, page: 1 });
-  }, [fetchProfiles]);
+    debouncedFetchProfiles({ ...filters, page: 1 });
+  }, [debouncedFetchProfiles]);
 
   const resetFilters = useCallback(() => {
     fetchProfiles({

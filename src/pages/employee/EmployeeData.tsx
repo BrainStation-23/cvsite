@@ -1,7 +1,8 @@
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import DashboardLayout from '../../components/Layout/DashboardLayout';
 import { Card, CardContent } from '@/components/ui/card';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useEmployeeProfilesEnhanced } from '@/hooks/use-employee-profiles-enhanced';
 import { useEmployeeList } from '@/hooks/use-employee-list';
 import { useBulkSelection } from '@/hooks/use-bulk-selection';
@@ -12,9 +13,14 @@ import EmployeePageHeader from '@/components/employee/EmployeePageHeader';
 import UserPagination from '@/components/admin/UserPagination';
 import SendEmailModal from '@/components/admin/SendEmailModal';
 import { useToast } from '@/hooks/use-toast';
+import { AlertTriangle, RefreshCw } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 const EmployeeData: React.FC = () => {
   const { toast } = useToast();
+  const [lastError, setLastError] = useState<string | null>(null);
+  const [retryCount, setRetryCount] = useState(0);
+  
   const {
     selectedProfile,
     isEmailModalOpen,
@@ -60,8 +66,48 @@ const EmployeeData: React.FC = () => {
   } = useBulkSelection(profiles);
 
   useEffect(() => {
-    fetchProfiles();
+    const loadData = async () => {
+      try {
+        setLastError(null);
+        await fetchProfiles();
+      } catch (error) {
+        console.error('Error loading employee data:', error);
+        const errorMessage = error?.message || 'Unknown error occurred';
+        
+        if (errorMessage.includes('statement timeout') || errorMessage.includes('57014')) {
+          setLastError('The request timed out due to large dataset. Please try using filters to narrow down the results.');
+        } else {
+          setLastError(`Failed to load employee data: ${errorMessage}`);
+        }
+        
+        toast({
+          title: "Error loading data",
+          description: errorMessage.includes('statement timeout') 
+            ? "Database query timed out. Try applying filters to reduce the dataset size."
+            : "There was an error loading employee profiles. Please try again.",
+          variant: "destructive"
+        });
+      }
+    };
+
+    loadData();
   }, []);
+
+  const handleRetry = async () => {
+    setRetryCount(prev => prev + 1);
+    try {
+      setLastError(null);
+      await fetchProfiles();
+      toast({
+        title: "Success",
+        description: "Employee data loaded successfully!",
+      });
+    } catch (error) {
+      console.error('Retry failed:', error);
+      const errorMessage = error?.message || 'Unknown error occurred';
+      setLastError(errorMessage);
+    }
+  };
 
   const handlePerPageChange = (perPage: number) => {
     fetchProfiles({ perPage, page: 1 });
@@ -73,7 +119,6 @@ const EmployeeData: React.FC = () => {
   };
 
   const handleBulkEmail = (profileIds: string[]) => {
-    // Find the profiles for the selected IDs
     const selectedProfilesData = profiles.filter(profile => profileIds.includes(profile.id));
     
     if (selectedProfilesData.length === 0) {
@@ -90,7 +135,6 @@ const EmployeeData: React.FC = () => {
       description: `Sending emails to ${selectedProfilesData.length} employees...`,
     });
 
-    // Here you would implement the actual bulk email functionality
     console.log('Sending bulk emails to:', selectedProfilesData);
   };
 
@@ -111,7 +155,6 @@ const EmployeeData: React.FC = () => {
       description: `Exporting ${selectedProfilesData.length} profiles as ${format.toUpperCase()}...`,
     });
 
-    // Here you would implement the actual export functionality
     console.log('Exporting profiles:', selectedProfilesData, 'Format:', format);
   };
 
@@ -119,6 +162,24 @@ const EmployeeData: React.FC = () => {
     <DashboardLayout>
       <div className="space-y-6">
         <EmployeePageHeader />
+
+        {lastError && (
+          <Alert variant="destructive">
+            <AlertTriangle className="h-4 w-4" />
+            <AlertDescription className="flex items-center justify-between">
+              <span>{lastError}</span>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={handleRetry}
+                className="ml-4"
+              >
+                <RefreshCw className="h-4 w-4 mr-2" />
+                Retry
+              </Button>
+            </AlertDescription>
+          </Alert>
+        )}
 
         <EnhancedEmployeeSearchFilters
           onSearch={handleSearch}
