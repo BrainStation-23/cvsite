@@ -1,22 +1,26 @@
 import React, { useState } from 'react';
-import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Filter, Sparkles } from 'lucide-react';
 import { 
-  Select, 
-  SelectContent, 
-  SelectItem, 
-  SelectTrigger, 
-  SelectValue 
-} from '@/components/ui/select';
-import { Search, X, Filter } from 'lucide-react';
-import { 
-  EmployeeProfileSortColumn
-} from '@/hooks/use-employee-profiles-enhanced';
+  EmployeeProfileSortColumn, 
+  EmployeeProfileSortOrder 
+} from '@/hooks/types/employee-profiles';
 import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
 } from '@/components/ui/collapsible';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+
+import BasicSearchBar from './search/BasicSearchBar';
+import AISearchBar from './search/AISearchBar';
+import FilterChipsList from './search/FilterChipsList';
+import AdvancedFiltersPanel from './search/AdvancedFiltersPanel';
+import SortControls from './search/SortControls';
+import { useFilterState } from './search/FilterState';
+import { useFilterChipsManager } from './search/FilterChipsManager';
+import { useAdvancedFiltersManager } from './search/AdvancedFiltersManager';
 
 interface EnhancedEmployeeSearchFiltersProps {
   onSearch: (query: string) => void;
@@ -26,18 +30,24 @@ interface EnhancedEmployeeSearchFiltersProps {
   onTrainingFilter: (training: string) => void;
   onAchievementFilter: (achievement: string) => void;
   onProjectFilter: (project: string) => void;
-  onSortChange: (column: EmployeeProfileSortColumn, order: 'asc' | 'desc') => void;
-  onAdvancedFilters: (filters: { minExperienceYears?: number | null; maxExperienceYears?: number | null }) => void;
+  onAdvancedFilters: (filters: {
+    minExperienceYears?: number | null;
+    maxExperienceYears?: number | null;
+    minGraduationYear?: number | null;
+    maxGraduationYear?: number | null;
+    completionStatus?: string | null;
+  }) => void;
+  onSortChange: (column: EmployeeProfileSortColumn, order: EmployeeProfileSortOrder) => void;
   onReset: () => void;
-  searchQuery: string | null;
-  skillFilter: string | null;
-  experienceFilter: string | null;
-  educationFilter: string | null;
-  trainingFilter: string | null;
-  achievementFilter: string | null;
-  projectFilter: string | null;
+  searchQuery: string;
+  skillFilter: string;
+  experienceFilter: string;
+  educationFilter: string;
+  trainingFilter: string;
+  achievementFilter: string;
+  projectFilter: string;
   sortBy: EmployeeProfileSortColumn;
-  sortOrder: 'asc' | 'desc';
+  sortOrder: EmployeeProfileSortOrder;
   isLoading: boolean;
 }
 
@@ -49,8 +59,8 @@ const EnhancedEmployeeSearchFilters: React.FC<EnhancedEmployeeSearchFiltersProps
   onTrainingFilter,
   onAchievementFilter,
   onProjectFilter,
-  onSortChange,
   onAdvancedFilters,
+  onSortChange,
   onReset,
   searchQuery,
   skillFilter,
@@ -63,304 +73,304 @@ const EnhancedEmployeeSearchFilters: React.FC<EnhancedEmployeeSearchFiltersProps
   sortOrder,
   isLoading
 }) => {
-  const [searchInput, setSearchInput] = useState(searchQuery || '');
-  const [skillInput, setSkillInput] = useState(skillFilter || '');
-  const [experienceInput, setExperienceInput] = useState(experienceFilter || '');
-  const [educationInput, setEducationInput] = useState(educationFilter || '');
-  const [trainingInput, setTrainingInput] = useState(trainingFilter || '');
-  const [achievementInput, setAchievementInput] = useState(achievementFilter || '');
-  const [projectInput, setProjectInput] = useState(projectFilter || '');
-  const [minExperienceYears, setMinExperienceYears] = useState<string>('');
-  const [maxExperienceYears, setMaxExperienceYears] = useState<string>('');
   const [isFiltersOpen, setIsFiltersOpen] = useState(false);
+  const [searchMode, setSearchMode] = useState<'manual' | 'ai'>('manual');
+  
+  const [experienceYears, setExperienceYears] = useState<number[]>([0, 20]);
+  const [minGraduationYear, setMinGraduationYear] = useState<number | null>(null);
+  const [maxGraduationYear, setMaxGraduationYear] = useState<number | null>(null);
+  const [completionStatus, setCompletionStatus] = useState<string>('all');
+  
+  const [skillInput, setSkillInput] = useState('');
+  const [universityInput, setUniversityInput] = useState('');
+  const [companyInput, setCompanyInput] = useState('');
+  const [technologyInput, setTechnologyInput] = useState<string[]>([]);
+  const [projectNameInput, setProjectNameInput] = useState('');
+  const [projectDescriptionInput, setProjectDescriptionInput] = useState('');
+  const [trainingInput, setTrainingInput] = useState('');
+  const [achievementInput, setAchievementInput] = useState('');
 
-  const handleSearchSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    onSearch(searchInput);
-  };
+  const [highlightedFilters, setHighlightedFilters] = useState<string[]>([]);
 
-  const handleApplyFilters = () => {
-    onSkillFilter(skillInput);
-    onExperienceFilter(experienceInput);
-    onEducationFilter(educationInput);
-    onTrainingFilter(trainingInput);
-    onAchievementFilter(achievementInput);
-    onProjectFilter(projectInput);
-    
-    // Apply experience years filter
-    onAdvancedFilters({
-      minExperienceYears: minExperienceYears ? parseInt(minExperienceYears) : null,
-      maxExperienceYears: maxExperienceYears ? parseInt(maxExperienceYears) : null,
-    });
-  };
+  // Use custom hooks for state management
+  const { activeFilters } = useFilterState({
+    searchQuery,
+    skillFilter,
+    experienceFilter,
+    educationFilter,
+    trainingFilter,
+    achievementFilter,
+    projectFilter,
+    experienceYears,
+    minGraduationYear,
+    maxGraduationYear,
+    completionStatus,
+    skillInput,
+    universityInput,
+    companyInput,
+    technologyInput,
+    projectNameInput,
+    projectDescriptionInput,
+    trainingInput,
+    achievementInput
+  });
 
-  const handleSortChange = (value: string) => {
-    const [column, order] = value.split('-') as [EmployeeProfileSortColumn, 'asc' | 'desc'];
-    onSortChange(column, order);
-  };
+  const { removeFilter } = useFilterChipsManager({
+    activeFilters,
+    experienceYears,
+    minGraduationYear,
+    maxGraduationYear,
+    completionStatus,
+    onSearch,
+    onSkillFilter,
+    onExperienceFilter,
+    onEducationFilter,
+    onTrainingFilter,
+    onAchievementFilter,
+    onProjectFilter,
+    onAdvancedFilters,
+    setExperienceYears,
+    setMinGraduationYear,
+    setMaxGraduationYear,
+    setCompletionStatus,
+    setSkillInput,
+    setUniversityInput,
+    setCompanyInput,
+    setTechnologyInput,
+    setProjectNameInput,
+    setProjectDescriptionInput,
+    setTrainingInput,
+    setAchievementInput,
+    technologyInput
+  });
 
-  const clearInput = (inputType: string) => {
-    switch (inputType) {
-      case 'search':
-        setSearchInput('');
-        onSearch('');
-        break;
-      case 'skill':
-        setSkillInput('');
-        onSkillFilter('');
-        break;
-      case 'experience':
-        setExperienceInput('');
-        onExperienceFilter('');
-        break;
-      case 'education':
-        setEducationInput('');
-        onEducationFilter('');
-        break;
-      case 'training':
-        setTrainingInput('');
-        onTrainingFilter('');
-        break;
-      case 'achievement':
-        setAchievementInput('');
-        onAchievementFilter('');
-        break;
-      case 'project':
-        setProjectInput('');
-        onProjectFilter('');
-        break;
-      case 'minExperience':
-        setMinExperienceYears('');
-        break;
-      case 'maxExperience':
-        setMaxExperienceYears('');
-        break;
+  const { 
+    applySkillFilter,
+    applyCompanyFilter,
+    applyProjectNameFilter,
+    applyProjectDescriptionFilter,
+    applyTechnologyFilter,
+    applyTrainingFilter,
+    applyAchievementFilter,
+    applyAdvancedFilters,
+    clearAllFilters 
+  } = useAdvancedFiltersManager({
+    skillInput,
+    universityInput,
+    companyInput,
+    technologyInput,
+    projectNameInput,
+    projectDescriptionInput,
+    trainingInput,
+    achievementInput,
+    experienceYears,
+    minGraduationYear,
+    maxGraduationYear,
+    completionStatus,
+    onSkillFilter,
+    onExperienceFilter,
+    onProjectFilter,
+    onTrainingFilter,
+    onAchievementFilter,
+    onAdvancedFilters,
+    setSkillInput,
+    setUniversityInput,
+    setCompanyInput,
+    setTechnologyInput,
+    setProjectNameInput,
+    setProjectDescriptionInput,
+    setTrainingInput,
+    setAchievementInput,
+    setExperienceYears,
+    setMinGraduationYear,
+    setMaxGraduationYear,
+    setCompletionStatus,
+    onReset
+  });
+
+  const handleAISearch = (filters: any) => {
+    console.log('Applying AI search filters:', filters);
+
+    const changed: string[] = [];
+    let updates: Record<string, any> = {};
+
+    if ('search_query' in filters && filters.search_query !== searchQuery) {
+      onSearch(filters.search_query);
+      changed.push('search');
+      updates.searchQuery = filters.search_query;
     }
+    if ('skill_filter' in filters && filters.skill_filter !== skillFilter) {
+      onSkillFilter(filters.skill_filter);
+      changed.push('skill');
+      updates.skillFilter = filters.skill_filter;
+    }
+    if ('experience_filter' in filters && filters.experience_filter !== experienceFilter) {
+      onExperienceFilter(filters.experience_filter);
+      changed.push('experience');
+      updates.experienceFilter = filters.experience_filter;
+    }
+    if ('education_filter' in filters && filters.education_filter !== educationFilter) {
+      onEducationFilter(filters.education_filter);
+      changed.push('education');
+      updates.educationFilter = filters.education_filter;
+    }
+    if ('training_filter' in filters && filters.training_filter !== trainingFilter) {
+      onTrainingFilter(filters.training_filter);
+      changed.push('training');
+      updates.trainingFilter = filters.training_filter;
+    }
+    if ('achievement_filter' in filters && filters.achievement_filter !== achievementFilter) {
+      onAchievementFilter(filters.achievement_filter);
+      changed.push('achievement');
+      updates.achievementFilter = filters.achievement_filter;
+    }
+    if ('project_filter' in filters && filters.project_filter !== projectFilter) {
+      onProjectFilter(filters.project_filter);
+      changed.push('project');
+      updates.projectFilter = filters.project_filter;
+    }
+
+    // Advanced filters
+    const advancedFilters: any = {};
+    if ('min_experience_years' in filters) {
+      advancedFilters.minExperienceYears = filters.min_experience_years;
+      changed.push('experience-years');
+    }
+    if ('max_experience_years' in filters) {
+      advancedFilters.maxExperienceYears = filters.max_experience_years;
+      changed.push('experience-years');
+    }
+    if ('min_graduation_year' in filters) {
+      advancedFilters.minGraduationYear = filters.min_graduation_year;
+      changed.push('graduation-years');
+    }
+    if ('max_graduation_year' in filters) {
+      advancedFilters.maxGraduationYear = filters.max_graduation_year;
+      changed.push('graduation-years');
+    }
+    if ('completion_status' in filters && filters.completion_status !== completionStatus) {
+      advancedFilters.completionStatus = filters.completion_status;
+      changed.push('completion');
+    }
+
+    if (Object.keys(advancedFilters).length > 0) {
+      onAdvancedFilters(advancedFilters);
+    }
+
+    setHighlightedFilters(Array.from(new Set(changed)));
+    setTimeout(() => setHighlightedFilters([]), 2000);
   };
 
-  const hasActiveFilters = skillFilter || experienceFilter || educationFilter || 
-                          trainingFilter || achievementFilter || projectFilter ||
-                          minExperienceYears || maxExperienceYears;
+  const hasActiveFilters = activeFilters.length > 0;
 
   return (
-    <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow mb-4 space-y-4">
-      <form onSubmit={handleSearchSubmit} className="flex flex-wrap gap-2">
-        <div className="flex-1 min-w-[200px]">
-          <div className="relative">
-            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-500" />
-            <Input
-              type="text"
-              placeholder="Search employees by name, ID, designation, expertise..."
-              value={searchInput}
-              onChange={(e) => setSearchInput(e.target.value)}
-              className="pl-9"
-            />
-            {searchInput && (
-              <button
-                type="button"
-                onClick={() => clearInput('search')}
-                className="absolute right-2.5 top-2.5 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
-              >
-                <X className="h-4 w-4" />
-              </button>
-            )}
-          </div>
+    <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border space-y-6">
+      {/* Header with Search Controls and Sort */}
+      <div className="flex flex-col lg:flex-row gap-4 items-start lg:items-center justify-between">
+        <div className="flex-1 w-full lg:w-auto">
+          {/* Search Mode Tabs */}
+          <Tabs value={searchMode} onValueChange={(value) => setSearchMode(value as 'manual' | 'ai')} className="w-full">
+            <TabsList className="grid w-full grid-cols-2 mb-4">
+              <TabsTrigger value="manual" className="flex items-center gap-2">
+                <Filter className="h-4 w-4" />
+                Manual Search
+              </TabsTrigger>
+              <TabsTrigger value="ai" className="flex items-center gap-2">
+                <Sparkles className="h-4 w-4" />
+                AI Search
+              </TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="manual">
+              <BasicSearchBar
+                searchQuery={searchQuery}
+                onSearch={onSearch}
+                isLoading={isLoading}
+              />
+            </TabsContent>
+            
+            <TabsContent value="ai">
+              <AISearchBar
+                onAISearch={handleAISearch}
+                isLoading={isLoading}
+              />
+            </TabsContent>
+          </Tabs>
         </div>
-        <Button type="submit" disabled={isLoading}>
-          Search
-        </Button>
-      </form>
+        
+        <div className="flex-shrink-0">
+          <SortControls
+            sortBy={sortBy}
+            sortOrder={sortOrder}
+            onSortChange={onSortChange}
+          />
+        </div>
+      </div>
 
-      <div className="flex items-center justify-between">
+      {/* Active Filters */}
+      {hasActiveFilters && (
+        <FilterChipsList
+          activeFilters={activeFilters}
+          onRemoveFilter={removeFilter}
+          onClearAllFilters={clearAllFilters}
+          highlightedFilters={highlightedFilters}
+        />
+      )}
+
+      {/* Advanced Filters Toggle */}
+      <div className="flex items-center justify-start">
         <Collapsible open={isFiltersOpen} onOpenChange={setIsFiltersOpen}>
           <CollapsibleTrigger asChild>
             <Button variant="outline" className="flex items-center gap-2">
               <Filter className="h-4 w-4" />
               Advanced Filters
               {hasActiveFilters && (
-                <span className="bg-cvsite-teal text-white text-xs px-2 py-1 rounded-full ml-2">
-                  Active
-                </span>
+                <Badge variant="destructive" className="ml-2 h-5 min-w-5 text-xs">
+                  {activeFilters.length}
+                </Badge>
               )}
             </Button>
           </CollapsibleTrigger>
-          <CollapsibleContent className="mt-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              <div>
-                <label className="text-sm font-medium block mb-1 text-gray-700 dark:text-gray-300">
-                  Skills
-                </label>
-                <div className="relative">
-                  <Input
-                    placeholder="Filter by skills..."
-                    value={skillInput}
-                    onChange={(e) => setSkillInput(e.target.value)}
-                  />
-                  {skillInput && (
-                    <button
-                      type="button"
-                      onClick={() => clearInput('skill')}
-                      className="absolute right-2.5 top-2.5 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
-                    >
-                      <X className="h-4 w-4" />
-                    </button>
-                  )}
-                </div>
-              </div>
-              
-              <div>
-                <label className="text-sm font-medium block mb-1 text-gray-700 dark:text-gray-300">
-                  Company/Experience
-                </label>
-                <div className="relative">
-                  <Input
-                    placeholder="Filter by company or role..."
-                    value={experienceInput}
-                    onChange={(e) => setExperienceInput(e.target.value)}
-                  />
-                  {experienceInput && (
-                    <button
-                      type="button"
-                      onClick={() => clearInput('experience')}
-                      className="absolute right-2.5 top-2.5 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
-                    >
-                      <X className="h-4 w-4" />
-                    </button>
-                  )}
-                </div>
-              </div>
-              
-              <div>
-                <label className="text-sm font-medium block mb-1 text-gray-700 dark:text-gray-300">
-                  Education
-                </label>
-                <div className="relative">
-                  <Input
-                    placeholder="Filter by education..."
-                    value={educationInput}
-                    onChange={(e) => setEducationInput(e.target.value)}
-                  />
-                  {educationInput && (
-                    <button
-                      type="button"
-                      onClick={() => clearInput('education')}
-                      className="absolute right-2.5 top-2.5 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
-                    >
-                      <X className="h-4 w-4" />
-                    </button>
-                  )}
-                </div>
-              </div>
-
-              <div>
-                <label className="text-sm font-medium block mb-1 text-gray-700 dark:text-gray-300">
-                  Min Experience (Years)
-                </label>
-                <div className="relative">
-                  <Input
-                    type="number"
-                    min="0"
-                    placeholder="Min years of experience"
-                    value={minExperienceYears}
-                    onChange={(e) => setMinExperienceYears(e.target.value)}
-                  />
-                  {minExperienceYears && (
-                    <button
-                      type="button"
-                      onClick={() => clearInput('minExperience')}
-                      className="absolute right-2.5 top-2.5 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
-                    >
-                      <X className="h-4 w-4" />
-                    </button>
-                  )}
-                </div>
-              </div>
-
-              <div>
-                <label className="text-sm font-medium block mb-1 text-gray-700 dark:text-gray-300">
-                  Max Experience (Years)
-                </label>
-                <div className="relative">
-                  <Input
-                    type="number"
-                    min="0"
-                    placeholder="Max years of experience"
-                    value={maxExperienceYears}
-                    onChange={(e) => setMaxExperienceYears(e.target.value)}
-                  />
-                  {maxExperienceYears && (
-                    <button
-                      type="button"
-                      onClick={() => clearInput('maxExperience')}
-                      className="absolute right-2.5 top-2.5 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
-                    >
-                      <X className="h-4 w-4" />
-                    </button>
-                  )}
-                </div>
-              </div>
-              
-              <div>
-                <label className="text-sm font-medium block mb-1 text-gray-700 dark:text-gray-300">
-                  Training
-                </label>
-                <div className="relative">
-                  <Input
-                    placeholder="Filter by training..."
-                    value={trainingInput}
-                    onChange={(e) => setTrainingInput(e.target.value)}
-                  />
-                  {trainingInput && (
-                    <button
-                      type="button"
-                      onClick={() => clearInput('training')}
-                      className="absolute right-2.5 top-2.5 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
-                    >
-                      <X className="h-4 w-4" />
-                    </button>
-                  )}
-                </div>
-              </div>
-            </div>
-            
-            <div className="flex gap-2 mt-4">
-              <Button onClick={handleApplyFilters} disabled={isLoading}>
-                Apply Filters
-              </Button>
-              <Button variant="outline" onClick={onReset} disabled={isLoading}>
-                Reset All
-              </Button>
-            </div>
+          <CollapsibleContent>
+            <AdvancedFiltersPanel
+              skillInput={skillInput}
+              setSkillInput={setSkillInput}
+              universityInput={universityInput}
+              setUniversityInput={setUniversityInput}
+              companyInput={companyInput}
+              setCompanyInput={setCompanyInput}
+              technologyInput={technologyInput}
+              setTechnologyInput={setTechnologyInput}
+              projectNameInput={projectNameInput}
+              setProjectNameInput={setProjectNameInput}
+              projectDescriptionInput={projectDescriptionInput}
+              setProjectDescriptionInput={setProjectDescriptionInput}
+              trainingInput={trainingInput}
+              setTrainingInput={setTrainingInput}
+              achievementInput={achievementInput}
+              setAchievementInput={setAchievementInput}
+              experienceYears={experienceYears}
+              setExperienceYears={setExperienceYears}
+              completionStatus={completionStatus}
+              setCompletionStatus={setCompletionStatus}
+              minGraduationYear={minGraduationYear}
+              maxGraduationYear={maxGraduationYear}
+              setMinGraduationYear={setMinGraduationYear}
+              setMaxGraduationYear={setMaxGraduationYear}
+              onSkillFilter={applySkillFilter}
+              onCompanyFilter={applyCompanyFilter}
+              onProjectNameFilter={applyProjectNameFilter}
+              onProjectDescriptionFilter={applyProjectDescriptionFilter}
+              onTechnologyFilter={applyTechnologyFilter}
+              onTrainingFilter={applyTrainingFilter}
+              onAchievementFilter={applyAchievementFilter}
+              onAdvancedFilters={applyAdvancedFilters}
+              onEducationFilter={onEducationFilter}
+              onClearAllFilters={clearAllFilters}
+              isLoading={isLoading}
+            />
           </CollapsibleContent>
         </Collapsible>
-
-        <div>
-          <label className="text-sm font-medium block mb-1 text-gray-700 dark:text-gray-300">
-            Sort By
-          </label>
-          <Select
-            value={`${sortBy}-${sortOrder}`}
-            onValueChange={handleSortChange}
-          >
-            <SelectTrigger className="w-[200px]">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="last_name-asc">Last Name (A-Z)</SelectItem>
-              <SelectItem value="last_name-desc">Last Name (Z-A)</SelectItem>
-              <SelectItem value="first_name-asc">First Name (A-Z)</SelectItem>
-              <SelectItem value="first_name-desc">First Name (Z-A)</SelectItem>
-              <SelectItem value="employee_id-asc">Employee ID (A-Z)</SelectItem>
-              <SelectItem value="employee_id-desc">Employee ID (Z-A)</SelectItem>
-              <SelectItem value="total_experience-desc">Most Experience</SelectItem>
-              <SelectItem value="total_experience-asc">Least Experience</SelectItem>
-              <SelectItem value="company_experience-desc">Longest with Company</SelectItem>
-              <SelectItem value="company_experience-asc">Newest with Company</SelectItem>
-              <SelectItem value="created_at-desc">Recently Added</SelectItem>
-              <SelectItem value="created_at-asc">Oldest First</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
       </div>
     </div>
   );
