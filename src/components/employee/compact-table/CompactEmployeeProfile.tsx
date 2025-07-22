@@ -14,6 +14,7 @@ interface CompactEmployeeProfileProps {
     total_experience_years?: number;
     company_experience_years?: number;
     expertise_name?: string;
+    profile_image?: string;
     general_information?: {
       first_name?: string;
       last_name?: string;
@@ -39,14 +40,38 @@ const CompactEmployeeProfile: React.FC<CompactEmployeeProfileProps> = ({
   const displayLastName = generalInfo?.last_name || profile.general_information?.last_name || profile.last_name || '';
   const displayName = `${displayFirstName} ${displayLastName}`.trim();
   const designation = generalInfo?.current_designation || profile.general_information?.current_designation;
-  const profileImage = generalInfo?.profile_image || profile.general_information?.profile_image;
+  
+  // Fix image URL handling - check multiple sources and ensure proper URL format
+  const profileImage = generalInfo?.profile_image || 
+                      profile.general_information?.profile_image || 
+                      profile.profile_image;
   
   const initials = `${displayFirstName.charAt(0)}${displayLastName.charAt(0)}`.toUpperCase();
+
+  console.log('CompactEmployeeProfile Debug:', {
+    profileId: profile.id,
+    employeeId: profile.employee_id,
+    profileImage: profileImage,
+    displayName: displayName
+  });
 
   return (
     <div className="flex items-start space-x-3">
       <Avatar className="h-10 w-10 flex-shrink-0">
-        <AvatarImage src={profileImage} alt={displayName} />
+        {profileImage && (
+          <AvatarImage 
+            src={profileImage} 
+            alt={displayName}
+            onError={(e) => {
+              console.error('Image failed to load:', profileImage);
+              // Hide the img element on error so fallback shows
+              e.currentTarget.style.display = 'none';
+            }}
+            onLoad={() => {
+              console.log('Image loaded successfully:', profileImage);
+            }}
+          />
+        )}
         <AvatarFallback className="bg-cvsite-teal/10 text-cvsite-teal font-medium">
           {initials}
         </AvatarFallback>
