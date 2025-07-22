@@ -2,36 +2,40 @@
 import { ValidationResult } from '../../types';
 
 export const buildRecommendations = (
-  localResults: ValidationResult[],
-  azureData: any
+  validationResults: ValidationResult[]
 ): string[] => {
   const recommendations: string[] = [];
 
-  // Check local validation results
-  const bgResult = localResults.find(r => r.id === 'background');
-  if (bgResult && !bgResult.passed) {
-    recommendations.push('Use a plain, solid-color background like a wall or curtain.');
+  // Check each validation result and add specific recommendations
+  validationResults.forEach(result => {
+    if (!result.passed) {
+      switch (result.type) {
+        case 'background':
+          recommendations.push('Use a solid, neutral background for better professional appearance.');
+          break;
+        case 'posture':
+          recommendations.push('Maintain good posture with shoulders slightly angled (5-20°) and head facing the camera.');
+          break;
+        case 'closeup':
+          recommendations.push('Ensure your face occupies at least 30% of the image height for a proper close-up shot.');
+          break;
+      }
+    }
+  });
+
+  // Add general recommendations based on overall assessment
+  const allPassed = validationResults.every(r => r.passed);
+  
+  if (allPassed) {
+    recommendations.push('Great! This looks like a professional headshot.');
+  } else if (recommendations.length === 0) {
+    recommendations.push('Consider retaking the photo with better lighting and positioning.');
   }
 
-  const postureResult = localResults.find(r => r.id === 'posture');
-  if (postureResult && !postureResult.passed) {
-    recommendations.push('Stand or sit straight with shoulders at a slight angle (5-20°) to the camera.');
-  }
-
-  const closeupResult = localResults.find(r => r.id === 'closeup');
-  if (closeupResult && !closeupResult.passed) {
-    recommendations.push('Take a close-up shot where your face occupies at least 30% of the image height.');
-  }
-
-  // Check Azure validation results
-  if (!azureData.isNotGroupPhoto) {
-    recommendations.push('Make sure the photo contains only you (no group photos).');
-  }
-  if (!azureData.isFaceCentered) {
-    recommendations.push('Center your face in the frame for best results.');
-  }
-  if (!azureData.hasNoSunglassesOrHats) {
-    recommendations.push('Remove sunglasses, hats, or any accessories covering your face.');
+  // Add general professional photo tips
+  if (!allPassed) {
+    recommendations.push('Make sure you are well-lit and looking directly at the camera.');
+    recommendations.push('Remove any sunglasses, hats, or distracting accessories.');
   }
 
   return recommendations;

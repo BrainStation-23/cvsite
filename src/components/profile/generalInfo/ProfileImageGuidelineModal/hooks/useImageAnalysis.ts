@@ -5,7 +5,6 @@ import { ImageAnalysisResult, ValidationResult, ValidationProgress } from '../ty
 import { runBackgroundValidation } from './validationSteps/backgroundValidation';
 import { runPostureValidation } from './validationSteps/postureValidation';
 import { runCloseupValidation } from './validationSteps/closeupValidation';
-import { runAzureValidation } from './validationSteps/azureValidation';
 import { ProgressManager } from './validationSteps/progressManager';
 import { buildRecommendations } from './validationSteps/recommendationBuilder';
 
@@ -47,25 +46,16 @@ export const useImageAnalysis = () => {
       // Update validation results with all local results
       setValidationResults([...localResults]);
 
-      // 4. Azure validation
-      progressManager.updateProgress('azure', 'running');
-      const azureData = await runAzureValidation(file);
-      
-      // Update subtasks for facial features and composition
-      progressManager.updateProgress('azure', 'completed', azureData.isNotGroupPhoto, undefined, 'not_group');
-      progressManager.updateProgress('azure', 'completed', azureData.isFaceCentered, undefined, 'face_centered');
-      progressManager.updateProgress('azure', 'completed', azureData.hasNoSunglassesOrHats, undefined, 'no_accessories');
-      
-      // Mark main azure task as completed
-      const allAzurePassed = azureData.isNotGroupPhoto && azureData.isFaceCentered && azureData.hasNoSunglassesOrHats;
-      progressManager.updateProgress('azure', 'completed', allAzurePassed);
+      // Build recommendations based on local validations only
+      const recommendations = buildRecommendations(localResults);
 
-      // Build recommendations
-      const recommendations = buildRecommendations(localResults, azureData);
-
-      // Build final result
+      // Build final result without Azure data
       const mergedResult = {
-        ...azureData,
+        isProfessionalHeadshot: localResults.every(r => r.passed),
+        isFaceCentered: true, // Assume true since we're not doing face detection
+        hasNoSunglassesOrHats: true, // Assume true since we're not doing accessory detection
+        isNotGroupPhoto: true, // Assume true since we're not doing group detection
+        confidence: localResults.every(r => r.passed) ? 100 : 50,
         background: {
           passed: bgResult.passed,
           details: bgResult.details,
@@ -83,7 +73,10 @@ export const useImageAnalysis = () => {
           details: closeupResult.details,
         },
         details: {
-          ...azureData.details,
+          faceCount: 1, // Default to 1 since we're not detecting
+          glasses: 'unknown',
+          accessories: [],
+          facePosition: 'centered',
           recommendations,
         },
       };
@@ -103,9 +96,6 @@ export const useImageAnalysis = () => {
     } catch (error) {
       console.error('Error analyzing image:', error);
       setError('Failed to analyze image. Please try again.');
-      
-      const progressManager = new ProgressManager(setValidationProgress);
-      progressManager.updateProgress('azure', 'failed');
       
       toast({
         title: 'Analysis Failed',

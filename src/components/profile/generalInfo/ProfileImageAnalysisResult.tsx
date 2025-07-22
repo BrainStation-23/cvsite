@@ -107,31 +107,6 @@ const ProfileImageAnalysisResult: React.FC<ProfileImageAnalysisResultProps> = ({
               </span>
             </div>
           )}
-          <div className="flex items-center justify-between">
-            <span>Single person (not group photo)</span>
-            {getStatusIcon(result.isNotGroupPhoto)}
-          </div>
-          <div className="flex items-center justify-between">
-            <span>Face centered</span>
-            {getStatusIcon(result.isFaceCentered)}
-          </div>
-          <div className="flex items-center justify-between">
-            <span>No sunglasses or hats</span>
-            {getStatusIcon(result.hasNoSunglassesOrHats)}
-          </div>
-        </div>
-
-        {/* Additional Details */}
-        <div className="mt-3 pt-3 border-t border-gray-200 dark:border-gray-700">
-          <div className="text-xs text-gray-600 dark:text-gray-400 space-y-1">
-            <div>Faces detected: {result.details.faceCount}</div>
-            {result.details.glasses !== 'unknown' && (
-              <div>Glasses: {result.details.glasses}</div>
-            )}
-            {result.details.accessories.length > 0 && (
-              <div>Accessories: {result.details.accessories.join(', ')}</div>
-            )}
-          </div>
         </div>
       </div>
 

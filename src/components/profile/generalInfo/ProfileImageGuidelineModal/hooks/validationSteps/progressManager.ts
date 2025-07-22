@@ -2,57 +2,53 @@
 import { ValidationProgress } from '../../types';
 
 export class ProgressManager {
-  private progress: ValidationProgress[] = [];
-  private updateCallback: (progress: ValidationProgress[]) => void;
+  private setProgress: (progress: ValidationProgress[]) => void;
+  private progressState: ValidationProgress[] = [];
 
-  constructor(updateCallback: (progress: ValidationProgress[]) => void) {
-    this.updateCallback = updateCallback;
+  constructor(setProgress: (progress: ValidationProgress[]) => void) {
+    this.setProgress = setProgress;
     this.initializeProgress();
   }
 
   private initializeProgress() {
-    this.progress = [
-      { id: 'background', label: 'Checking background quality', status: 'pending' },
-      { id: 'posture', label: 'Analyzing posture and positioning', status: 'pending' },
-      { id: 'closeup', label: 'Checking if image is a close-up shot', status: 'pending' },
+    this.progressState = [
       {
-        id: 'azure',
-        label: 'Verifying facial features and composition',
-        status: 'pending',
-        subtasks: [
-          { id: 'not_group', label: 'Not a group photo', status: 'pending' },
-          { id: 'face_centered', label: 'Face is centered', status: 'pending' },
-          { id: 'no_accessories', label: 'No sunglasses or hat', status: 'pending' },
-        ]
+        id: 'background',
+        label: 'Analyzing background',
+        status: 'pending'
       },
+      {
+        id: 'posture',
+        label: 'Checking posture',
+        status: 'pending'
+      },
+      {
+        id: 'closeup',
+        label: 'Validating image composition',
+        status: 'pending'
+      }
     ];
-    this.updateCallback([...this.progress]);
+    this.setProgress([...this.progressState]);
   }
 
   updateProgress(
-    id: string,
-    status: ValidationProgress['status'],
+    stepId: string, 
+    status: 'pending' | 'running' | 'completed' | 'failed',
     passed?: boolean,
     details?: string,
     subtaskId?: string
   ) {
-    this.progress = this.progress.map(item => {
-      if (item.id !== id) return item;
-      
-      if (subtaskId && item.subtasks) {
-        return {
-          ...item,
-          subtasks: item.subtasks.map(sub =>
-            sub.id === subtaskId
-              ? { ...sub, status, passed, details }
-              : sub
-          )
-        };
-      }
-      
-      return { ...item, status, passed, details };
-    });
+    const stepIndex = this.progressState.findIndex(step => step.id === stepId);
     
-    this.updateCallback([...this.progress]);
+    if (stepIndex !== -1) {
+      this.progressState[stepIndex] = {
+        ...this.progressState[stepIndex],
+        status,
+        passed,
+        details
+      };
+      
+      this.setProgress([...this.progressState]);
+    }
   }
 }
