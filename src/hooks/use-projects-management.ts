@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
@@ -245,7 +244,20 @@ export function useProjectsManagement(): UseProjectsManagementReturn {
         .delete()
         .eq('id', id);
 
-      if (error) throw error;
+      if (error) {
+        // Check if it's a foreign key constraint error
+        if (error.code === '23503') {
+          toast({
+            title: 'Cannot Delete Project',
+            description: 'This project cannot be deleted because it has associated resource planning entries. Please remove all resource assignments first.',
+            variant: 'destructive'
+          });
+          return false;
+        }
+        
+        // Handle other types of errors
+        throw error;
+      }
 
       toast({
         title: 'Success',
@@ -258,7 +270,7 @@ export function useProjectsManagement(): UseProjectsManagementReturn {
       console.error('Error deleting project:', error);
       toast({
         title: 'Error',
-        description: 'Failed to delete project',
+        description: 'Failed to delete project. Please try again.',
         variant: 'destructive'
       });
       return false;
