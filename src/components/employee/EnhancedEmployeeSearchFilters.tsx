@@ -99,7 +99,7 @@ const EnhancedEmployeeSearchFilters: React.FC<EnhancedEmployeeSearchFiltersProps
           
           <TabsContent value="basic" className="space-y-4 mt-6">
             <BasicSearchBar
-              value={searchQuery || ''}
+              searchQuery={searchQuery || ''}
               onChange={onSearch}
               placeholder="Search by name, employee ID, designation, expertise..."
               isLoading={isLoading}
