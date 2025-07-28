@@ -1,36 +1,26 @@
 
 import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { useResourcePlanning } from '@/hooks/use-resource-planning';
+import { usePlannedResources } from '@/hooks/use-planned-resources';
 import { useUnplannedResources } from '@/hooks/use-unplanned-resources';
-import { ResourcePlanningSearchControls } from './ResourcePlanningSearchControls';
-import { ResourcePlanningFilters } from './ResourcePlanningFilters';
-import { ResourcePlanningForm } from './ResourcePlanningForm';
-import { ResourcePlanningTabs } from './ResourcePlanningTabs';
 import { useResourcePlanningState } from './hooks/useResourcePlanningState';
+import { useInlineEdit } from './hooks/useInlineEdit';
+import { ResourcePlanningFilters } from './ResourcePlanningFilters';
+import { ResourcePlanningTabs } from './ResourcePlanningTabs';
+import { ResourcePlanningForm } from './ResourcePlanningForm';
 
 export const ResourcePlanningTable: React.FC = () => {
-  const {
-    searchQuery,
-    setSearchQuery,
-    selectedSbu,
-    setSelectedSbu,
-    selectedManager,
-    setSelectedManager,
-    showUnplanned,
-    setShowUnplanned,
-    clearFilters,
-    data: plannedData,
-  } = useResourcePlanning();
+  const [searchQuery, setSearchQuery] = React.useState('');
+  const [selectedSbu, setSelectedSbu] = React.useState<string | null>(null);
+  const [selectedManager, setSelectedManager] = React.useState<string | null>(null);
+  const [showUnplanned, setShowUnplanned] = React.useState(false);
 
-  const { unplannedResources } = useUnplannedResources({
-    searchQuery,
-    selectedSbu,
-    selectedManager,
-  });
+  const clearFilters = () => {
+    setSearchQuery('');
+    setSelectedSbu(null);
+    setSelectedManager(null);
+  };
 
   const {
-    showCreateForm,
     preselectedProfileId,
     editingItem,
     handleCreatePlan,
@@ -40,52 +30,90 @@ export const ResourcePlanningTable: React.FC = () => {
     handleFormCancel,
   } = useResourcePlanningState();
 
+  const {
+    editingItemId,
+    editData,
+    startEdit,
+    cancelEdit,
+    saveEdit,
+    updateEditData,
+    isLoading: editLoading,
+  } = useInlineEdit();
+
+  // Centralized data fetching with current filters
+  const plannedResources = usePlannedResources();
+  const unplannedResources = useUnplannedResources({
+    searchQuery,
+    selectedSbu,
+    selectedManager,
+  });
+
+  // Sync filters to planned resources hook
+  React.useEffect(() => {
+    plannedResources.setSearchQuery(searchQuery);
+  }, [searchQuery, plannedResources.setSearchQuery]);
+
+  React.useEffect(() => {
+    plannedResources.setSelectedSbu(selectedSbu);
+  }, [selectedSbu, plannedResources.setSelectedSbu]);
+
+  React.useEffect(() => {
+    plannedResources.setSelectedManager(selectedManager);
+  }, [selectedManager, plannedResources.setSelectedManager]);
+
+  // Override the edit handler to use inline editing instead
+  const handleInlineEdit = (item: any) => {
+    startEdit(item);
+  };
+
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Resource Planning</CardTitle>
-        
-        <div className="space-y-4">
-          <ResourcePlanningFilters
-            selectedSbu={selectedSbu}
-            onSbuChange={setSelectedSbu}
-            selectedManager={selectedManager}
-            onManagerChange={setSelectedManager}
-            showUnplanned={showUnplanned}
-            onShowUnplannedChange={setShowUnplanned}
-            onClearFilters={clearFilters}
-            />
-          
-          <ResourcePlanningSearchControls 
-            searchQuery={searchQuery}
-            setSearchQuery={setSearchQuery}
-          />
-        </div>
-      </CardHeader>
-      
-      <CardContent>
-        {showCreateForm && (
+    <div className="flex gap-6 h-full">
+      {/* Main content area */}
+      <div className="flex-1 space-y-4">
+        <ResourcePlanningFilters
+          searchQuery={searchQuery}
+          setSearchQuery={setSearchQuery}
+          selectedSbu={selectedSbu}
+          setSelectedSbu={setSelectedSbu}
+          selectedManager={selectedManager}
+          setSelectedManager={setSelectedManager}
+          clearFilters={clearFilters}
+        />
+
+        <ResourcePlanningTabs
+          showUnplanned={showUnplanned}
+          setShowUnplanned={setShowUnplanned}
+          plannedCount={plannedResources.data?.length || 0}
+          unplannedCount={unplannedResources.unplannedResources?.length || 0}
+          searchQuery={searchQuery}
+          selectedSbu={selectedSbu}
+          selectedManager={selectedManager}
+          onCreateNewAssignment={handleCreateNewAssignment}
+          onEditAssignment={handleInlineEdit}
+          onCreatePlan={handleCreatePlan}
+          plannedResources={plannedResources}
+          unplannedResources={unplannedResources}
+          editingItemId={editingItemId}
+          editData={editData}
+          onStartEdit={startEdit}
+          onCancelEdit={cancelEdit}
+          onSaveEdit={saveEdit}
+          onEditDataChange={updateEditData}
+          editLoading={editLoading}
+        />
+      </div>
+
+      {/* Right sidebar for create assignment form */}
+      <div className="w-80 flex-shrink-0">
+        <div className="sticky top-4">
           <ResourcePlanningForm
             preselectedProfileId={preselectedProfileId}
             editingItem={editingItem}
             onSuccess={handleFormSuccess}
             onCancel={handleFormCancel}
           />
-        )}
-
-        <ResourcePlanningTabs
-          showUnplanned={showUnplanned}
-          setShowUnplanned={setShowUnplanned}
-          plannedCount={plannedData.length}
-          unplannedCount={unplannedResources.length}
-          searchQuery={searchQuery}
-          selectedSbu={selectedSbu}
-          selectedManager={selectedManager}
-          onCreateNewAssignment={handleCreateNewAssignment}
-          onEditAssignment={handleEditAssignment}
-          onCreatePlan={handleCreatePlan}
-        />
-      </CardContent>
-    </Card>
+        </div>
+      </div>
+    </div>
   );
 };

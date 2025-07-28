@@ -1,8 +1,8 @@
 
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { format, startOfQuarter, endOfQuarter, eachMonthOfInterval, isSameMonth, startOfMonth, endOfMonth, isWithinInterval } from 'date-fns';
-import { CalendarDays, Users, AlertTriangle } from 'lucide-react';
+import { format, startOfQuarter, endOfQuarter, eachMonthOfInterval, startOfMonth, endOfMonth, isWithinInterval } from 'date-fns';
+import { Users } from 'lucide-react';
 import type { CalendarDay } from '@/hooks/use-resource-calendar';
 
 interface Project {
@@ -16,7 +16,7 @@ interface ResourceData {
   profileId: string;
   profileName: string;
   employeeId: string;
-  projects: Map<string, Project>;
+  projects: Project[];
 }
 
 interface CalendarQuarterViewProps {
@@ -36,7 +36,7 @@ export const CalendarQuarterView: React.FC<CalendarQuarterViewProps> = ({
   const quarterEnd = endOfQuarter(currentDate);
   const months = eachMonthOfInterval({ start: quarterStart, end: quarterEnd });
 
-  // Get unique resources with their projects
+  // Get unique resources with all their projects
   const getResourceProjects = (): ResourceData[] => {
     const resourceMap = new Map<string, ResourceData>();
     
@@ -48,16 +48,18 @@ export const CalendarQuarterView: React.FC<CalendarQuarterViewProps> = ({
             profileId: resource.profileId,
             profileName: resource.profileName,
             employeeId: resource.employeeId,
-            projects: new Map<string, Project>()
+            projects: []
           });
         }
         
         const resourceData = resourceMap.get(key)!;
-        const projectKey = resource.projectName || 'Unassigned';
+        const projectName = resource.projectName || 'Unassigned';
         
-        if (!resourceData.projects.has(projectKey)) {
-          resourceData.projects.set(projectKey, {
-            name: projectKey,
+        // Check if this project already exists for this resource
+        const existingProject = resourceData.projects.find(p => p.name === projectName);
+        if (!existingProject) {
+          resourceData.projects.push({
+            name: projectName,
             startDate: resource.engagementStartDate || '',
             endDate: resource.releaseDate,
             engagementPercentage: resource.engagementPercentage || 0
@@ -106,12 +108,13 @@ export const CalendarQuarterView: React.FC<CalendarQuarterViewProps> = ({
   const getProjectColor = (projectName: string) => {
     const colors = [
       'hsl(var(--primary))',
-      'hsl(var(--secondary))', 
       'hsl(220, 70%, 50%)',
       'hsl(280, 70%, 50%)',
       'hsl(340, 70%, 50%)',
       'hsl(40, 70%, 50%)',
       'hsl(160, 70%, 50%)',
+      'hsl(200, 70%, 50%)',
+      'hsl(320, 70%, 50%)',
     ];
     
     const hash = projectName.split('').reduce((a, b) => {
@@ -126,7 +129,7 @@ export const CalendarQuarterView: React.FC<CalendarQuarterViewProps> = ({
     <div className="space-y-6">
       <div className="text-center">
         <h2 className="text-2xl font-bold">
-          Q{Math.ceil((quarterStart.getMonth() + 1) / 3)} {quarterStart.getFullYear()} - Gantt View
+          Q{Math.ceil((quarterStart.getMonth() + 1) / 3)} {quarterStart.getFullYear()} - Resource Timeline
         </h2>
         <p className="text-muted-foreground">
           {format(quarterStart, 'MMM d')} - {format(quarterEnd, 'MMM d, yyyy')}
@@ -137,7 +140,7 @@ export const CalendarQuarterView: React.FC<CalendarQuarterViewProps> = ({
         <CardHeader>
           <CardTitle className="flex items-center space-x-2">
             <Users className="h-5 w-5" />
-            <span>Resource Timeline</span>
+            <span>Resource Project Timeline</span>
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -153,7 +156,7 @@ export const CalendarQuarterView: React.FC<CalendarQuarterViewProps> = ({
             </div>
 
             {/* Resource Rows */}
-            <div className="space-y-2">
+            <div className="space-y-4">
               {resources.length === 0 ? (
                 <div className="text-center py-8 text-muted-foreground">
                   <Users className="h-8 w-8 mx-auto mb-2 opacity-50" />
@@ -161,7 +164,7 @@ export const CalendarQuarterView: React.FC<CalendarQuarterViewProps> = ({
                 </div>
               ) : (
                 resources.map((resource) => (
-                  <div key={resource.profileId} className="grid grid-cols-4 gap-0 py-2 border-b border-border/50">
+                  <div key={resource.profileId} className="grid grid-cols-4 gap-0 py-4 border-b border-border/50">
                     {/* Employee Info */}
                     <div className="col-span-1 pr-4">
                       <div className="text-sm font-medium">{resource.profileName}</div>
@@ -170,26 +173,27 @@ export const CalendarQuarterView: React.FC<CalendarQuarterViewProps> = ({
 
                     {/* Month Columns */}
                     {months.map((month) => (
-                      <div key={month.toISOString()} className="relative h-8 border-l border-border/30">
+                      <div key={month.toISOString()} className="relative border-l border-border/30" style={{ height: `${Math.max(resource.projects.length * 35, 40)}px` }}>
                         <div className="absolute inset-0 p-1">
-                          {Array.from(resource.projects.values()).map((project, idx) => {
+                          {resource.projects.map((project, idx) => {
                             const barStyle = getProjectBarStyle(project, month);
                             if (!barStyle) return null;
 
                             return (
                               <div
                                 key={idx}
-                                className="absolute h-6 rounded text-xs text-white flex items-center justify-center overflow-hidden"
+                                className="absolute rounded text-xs text-white flex items-center justify-center overflow-hidden shadow-sm"
                                 style={{
                                   ...barStyle,
                                   backgroundColor: getProjectColor(project.name),
-                                  top: `${idx * 20}%`,
-                                  height: '18px',
-                                  fontSize: '10px'
+                                  top: `${idx * 30}px`,
+                                  height: '24px',
+                                  fontSize: '10px',
+                                  fontWeight: '500'
                                 }}
                                 title={`${project.name} (${project.engagementPercentage}%)`}
                               >
-                                <span className="truncate px-1">{project.name}</span>
+                                <span className="truncate px-2">{project.name}</span>
                               </div>
                             );
                           })}
@@ -201,26 +205,6 @@ export const CalendarQuarterView: React.FC<CalendarQuarterViewProps> = ({
               )}
             </div>
           </div>
-
-          {/* Legend */}
-          {resources.length > 0 && (
-            <div className="mt-6 pt-4 border-t border-border">
-              <h4 className="text-sm font-medium mb-2">Projects Legend</h4>
-              <div className="flex flex-wrap gap-2">
-                {Array.from(new Set(
-                  resources.flatMap(r => Array.from(r.projects.values()).map(p => p.name))
-                )).map((projectName) => (
-                  <div key={projectName} className="flex items-center space-x-2 text-xs">
-                    <div 
-                      className="w-3 h-3 rounded"
-                      style={{ backgroundColor: getProjectColor(projectName) }}
-                    />
-                    <span>{projectName}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
         </CardContent>
       </Card>
     </div>

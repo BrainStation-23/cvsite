@@ -48,10 +48,10 @@ export const ResourceAssignmentForm: React.FC<ResourceAssignmentFormProps> = ({
   isLoading,
 }) => {
   return (
-    <form onSubmit={onSubmit} className="space-y-6">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <form onSubmit={onSubmit} className="space-y-4">
+      <div className="space-y-4">
         <div className="space-y-2">
-          <Label htmlFor="profile">Employee *</Label>
+          <Label htmlFor="profile" className="text-sm font-medium">Employee *</Label>
           <ProfileCombobox
             value={profileId}
             onValueChange={setProfileId}
@@ -62,7 +62,7 @@ export const ResourceAssignmentForm: React.FC<ResourceAssignmentFormProps> = ({
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="engagement">Engagement Percentage *</Label>
+          <Label htmlFor="engagement" className="text-sm font-medium">Engagement % *</Label>
           <Input
             id="engagement"
             type="number"
@@ -72,11 +72,12 @@ export const ResourceAssignmentForm: React.FC<ResourceAssignmentFormProps> = ({
             onChange={(e) => setEngagementPercentage(Number(e.target.value))}
             placeholder="100"
             required
+            className="h-9"
           />
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="billType">Bill Type</Label>
+          <Label htmlFor="billType" className="text-sm font-medium">Bill Type</Label>
           <BillTypeCombobox
             value={billTypeId}
             onValueChange={setBillTypeId}
@@ -85,7 +86,7 @@ export const ResourceAssignmentForm: React.FC<ResourceAssignmentFormProps> = ({
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="project">Project</Label>
+          <Label htmlFor="project" className="text-sm font-medium">Project</Label>
           <ProjectCombobox
             value={projectId}
             onValueChange={setProjectId}
@@ -94,7 +95,7 @@ export const ResourceAssignmentForm: React.FC<ResourceAssignmentFormProps> = ({
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="startDate">Engagement Start Date</Label>
+          <Label htmlFor="startDate" className="text-sm font-medium">Start Date</Label>
           <DatePicker
             value={engagementStartDate}
             onChange={setEngagementStartDate}
@@ -103,7 +104,7 @@ export const ResourceAssignmentForm: React.FC<ResourceAssignmentFormProps> = ({
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="releaseDate">Release Date</Label>
+          <Label htmlFor="releaseDate" className="text-sm font-medium">Release Date</Label>
           <DatePicker
             value={releaseDate}
             onChange={setReleaseDate}
@@ -112,15 +113,15 @@ export const ResourceAssignmentForm: React.FC<ResourceAssignmentFormProps> = ({
         </div>
       </div>
 
-      <div className="flex justify-end space-x-2">
-        <Button type="button" variant="outline" onClick={onCancel}>
-          Cancel
-        </Button>
-        <Button type="submit" disabled={isLoading || !profileId}>
+      <div className="flex flex-col space-y-2 pt-4">
+        <Button type="submit" disabled={isLoading || !profileId} className="w-full h-9">
           {mode === 'create' 
             ? (isLoading ? 'Creating...' : 'Create Assignment')
             : (isLoading ? 'Updating...' : 'Update Assignment')
           }
+        </Button>
+        <Button type="button" variant="outline" onClick={onCancel} className="w-full h-9">
+          {mode === 'edit' ? 'Cancel Edit' : 'Clear Form'}
         </Button>
       </div>
     </form>

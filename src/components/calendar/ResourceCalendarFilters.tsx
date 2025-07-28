@@ -1,6 +1,5 @@
 
 import React from 'react';
-import { ResourcePlanningSearchControls } from '@/components/resource-planning/ResourcePlanningSearchControls';
 import { ResourcePlanningFilters } from '@/components/resource-planning/ResourcePlanningFilters';
 
 interface ResourceCalendarFiltersProps {
@@ -28,19 +27,14 @@ export const ResourceCalendarFilters: React.FC<ResourceCalendarFiltersProps> = (
 }) => {
   return (
     <div className="space-y-4">
-      <ResourcePlanningSearchControls
+      <ResourcePlanningFilters
         searchQuery={searchQuery}
         setSearchQuery={onSearchChange}
-      />
-      
-      <ResourcePlanningFilters
         selectedSbu={selectedSbu}
-        onSbuChange={onSbuChange}
+        setSelectedSbu={onSbuChange}
         selectedManager={selectedManager}
-        onManagerChange={onManagerChange}
-        showUnplanned={showUnplanned}
-        onShowUnplannedChange={onShowUnplannedChange}
-        onClearFilters={onClearFilters}
+        setSelectedManager={onManagerChange}
+        clearFilters={onClearFilters}
       />
     </div>
   );

@@ -1,6 +1,7 @@
 
 import React from 'react';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import SbuCombobox from '@/components/admin/user/SbuCombobox';
 import { ProfileCombobox } from '@/components/admin/user/ProfileCombobox';
@@ -8,25 +9,25 @@ import { Badge } from '@/components/ui/badge';
 import { X, Filter } from 'lucide-react';
 
 interface ResourcePlanningFiltersProps {
+  searchQuery: string;
+  setSearchQuery: (query: string) => void;
   selectedSbu: string | null;
-  onSbuChange: (sbu: string | null) => void;
+  setSelectedSbu: (sbu: string | null) => void;
   selectedManager: string | null;
-  onManagerChange: (manager: string | null) => void;
-  showUnplanned: boolean;
-  onShowUnplannedChange: (show: boolean) => void;
-  onClearFilters: () => void;
+  setSelectedManager: (manager: string | null) => void;
+  clearFilters: () => void;
 }
 
 export const ResourcePlanningFilters: React.FC<ResourcePlanningFiltersProps> = ({
+  searchQuery,
+  setSearchQuery,
   selectedSbu,
-  onSbuChange,
+  setSelectedSbu,
   selectedManager,
-  onManagerChange,
-  showUnplanned,
-  onShowUnplannedChange,
-  onClearFilters,
+  setSelectedManager,
+  clearFilters,
 }) => {
-  const hasActiveFilters = selectedSbu || selectedManager || showUnplanned;
+  const hasActiveFilters = selectedSbu || selectedManager || searchQuery;
 
   return (
     <div className="space-y-4 p-4 border rounded-lg bg-muted/50">
@@ -39,7 +40,7 @@ export const ResourcePlanningFilters: React.FC<ResourcePlanningFiltersProps> = (
           <Button
             variant="ghost"
             size="sm"
-            onClick={onClearFilters}
+            onClick={clearFilters}
             className="h-7 px-2 text-xs"
           >
             Clear all
@@ -48,12 +49,22 @@ export const ResourcePlanningFilters: React.FC<ResourcePlanningFiltersProps> = (
         )}
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div className="space-y-2">
+          <Label htmlFor="search-query">Search</Label>
+          <Input
+            id="search-query"
+            placeholder="Search employees..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
+        </div>
+
         <div className="space-y-2">
           <Label htmlFor="sbu-filter">Filter by SBU</Label>
           <SbuCombobox
             value={selectedSbu}
-            onValueChange={onSbuChange}
+            onValueChange={setSelectedSbu}
             placeholder="Select SBU..."
           />
         </div>
@@ -62,34 +73,31 @@ export const ResourcePlanningFilters: React.FC<ResourcePlanningFiltersProps> = (
           <Label htmlFor="manager-filter">Filter by Manager</Label>
           <ProfileCombobox
             value={selectedManager}
-            onValueChange={onManagerChange}
+            onValueChange={setSelectedManager}
             placeholder="Select manager..."
             label="Manager"
           />
-        </div>
-
-        <div className="space-y-2">
-          <Label>Show Resources</Label>
-          <div className="flex flex-col gap-2">
-            <Button
-              variant={showUnplanned ? "default" : "outline"}
-              size="sm"
-              onClick={() => onShowUnplannedChange(!showUnplanned)}
-              className="justify-start"
-            >
-              {showUnplanned ? "Showing" : "Show"} Unplanned Resources
-            </Button>
-          </div>
         </div>
       </div>
 
       {hasActiveFilters && (
         <div className="flex flex-wrap gap-2">
+          {searchQuery && (
+            <Badge variant="secondary" className="flex items-center gap-1">
+              Search: {searchQuery}
+              <button
+                onClick={() => setSearchQuery('')}
+                className="ml-1 h-3 w-3 hover:bg-destructive hover:text-destructive-foreground rounded-full flex items-center justify-center"
+              >
+                <X className="h-2 w-2" />
+              </button>
+            </Badge>
+          )}
           {selectedSbu && (
             <Badge variant="secondary" className="flex items-center gap-1">
               SBU Filter
               <button
-                onClick={() => onSbuChange(null)}
+                onClick={() => setSelectedSbu(null)}
                 className="ml-1 h-3 w-3 hover:bg-destructive hover:text-destructive-foreground rounded-full flex items-center justify-center"
               >
                 <X className="h-2 w-2" />
@@ -100,18 +108,7 @@ export const ResourcePlanningFilters: React.FC<ResourcePlanningFiltersProps> = (
             <Badge variant="secondary" className="flex items-center gap-1">
               Manager Filter
               <button
-                onClick={() => onManagerChange(null)}
-                className="ml-1 h-3 w-3 hover:bg-destructive hover:text-destructive-foreground rounded-full flex items-center justify-center"
-              >
-                <X className="h-2 w-2" />
-              </button>
-            </Badge>
-          )}
-          {showUnplanned && (
-            <Badge variant="secondary" className="flex items-center gap-1">
-              Unplanned Only
-              <button
-                onClick={() => onShowUnplannedChange(false)}
+                onClick={() => setSelectedManager(null)}
                 className="ml-1 h-3 w-3 hover:bg-destructive hover:text-destructive-foreground rounded-full flex items-center justify-center"
               >
                 <X className="h-2 w-2" />

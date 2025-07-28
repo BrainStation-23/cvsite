@@ -1,9 +1,6 @@
 
 import React from 'react';
 import { Table, TableBody } from '@/components/ui/table';
-import { Button } from '@/components/ui/button';
-import { Plus } from 'lucide-react';
-import { usePlannedResources } from '@/hooks/use-planned-resources';
 import { ResourcePlanningTableHeader } from './ResourcePlanningTableHeader';
 import { ResourcePlanningTableRow } from './ResourcePlanningTableRow';
 import { ResourcePlanningPagination } from './ResourcePlanningPagination';
@@ -14,6 +11,16 @@ interface PlannedResourcesTabProps {
   selectedManager: string | null;
   onCreateNewAssignment: () => void;
   onEditAssignment: (item: any) => void;
+  // Centralized data props
+  plannedResources: any;
+  // Inline edit props
+  editingItemId: string | null;
+  editData: any;
+  onStartEdit: (item: any) => void;
+  onCancelEdit: () => void;
+  onSaveEdit: () => void;
+  onEditDataChange: (data: any) => void;
+  editLoading: boolean;
 }
 
 export const PlannedResourcesTab: React.FC<PlannedResourcesTabProps> = ({
@@ -22,6 +29,14 @@ export const PlannedResourcesTab: React.FC<PlannedResourcesTabProps> = ({
   selectedManager,
   onCreateNewAssignment,
   onEditAssignment,
+  plannedResources,
+  editingItemId,
+  editData,
+  onStartEdit,
+  onCancelEdit,
+  onSaveEdit,
+  onEditDataChange,
+  editLoading,
 }) => {
   const {
     data,
@@ -33,23 +48,7 @@ export const PlannedResourcesTab: React.FC<PlannedResourcesTabProps> = ({
     setSortBy,
     sortOrder,
     setSortOrder,
-    setSearchQuery,
-    setSelectedSbu,
-    setSelectedManager,
-  } = usePlannedResources();
-
-  // Sync filters when props change
-  React.useEffect(() => {
-    setSearchQuery(searchQuery);
-  }, [searchQuery, setSearchQuery]);
-
-  React.useEffect(() => {
-    setSelectedSbu(selectedSbu);
-  }, [selectedSbu, setSelectedSbu]);
-
-  React.useEffect(() => {
-    setSelectedManager(selectedManager);
-  }, [selectedManager, setSelectedManager]);
+  } = plannedResources;
 
   const handleSort = (column: string) => {
     if (sortBy === column) {
@@ -70,17 +69,9 @@ export const PlannedResourcesTab: React.FC<PlannedResourcesTabProps> = ({
 
   return (
     <div className="space-y-4">
-      <div className="flex justify-between items-center">
-        <div></div>
-        <Button onClick={onCreateNewAssignment}>
-          <Plus className="mr-2 h-4 w-4" />
-          Create Assignment
-        </Button>
-      </div>
-
       {data.length === 0 ? (
         <div className="flex items-center justify-center h-32 text-muted-foreground">
-          No resource planning entries found. Create your first assignment to get started.
+          No resource planning entries found. Use the form on the right to create your first assignment.
         </div>
       ) : (
         <>
@@ -92,11 +83,17 @@ export const PlannedResourcesTab: React.FC<PlannedResourcesTabProps> = ({
                 onSort={handleSort}
               />
               <TableBody>
-                {data.map((item) => (
+                {data.map((item: any) => (
                   <ResourcePlanningTableRow 
                     key={item.id} 
                     item={item} 
-                    onEdit={onEditAssignment}
+                    isEditing={editingItemId === item.id}
+                    editData={editData}
+                    onStartEdit={onStartEdit}
+                    onCancelEdit={onCancelEdit}
+                    onSaveEdit={onSaveEdit}
+                    onEditDataChange={onEditDataChange}
+                    editLoading={editLoading}
                   />
                 ))}
               </TableBody>

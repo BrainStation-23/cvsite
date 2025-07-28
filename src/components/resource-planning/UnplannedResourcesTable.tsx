@@ -29,6 +29,7 @@ interface UnplannedResourcesTableProps {
   pagination?: PaginationData;
   currentPage: number;
   setCurrentPage: (page: number) => void;
+  isLoading: boolean;
   onCreatePlan: (profileId: string) => void;
 }
 
@@ -37,8 +38,17 @@ export const UnplannedResourcesTable: React.FC<UnplannedResourcesTableProps> = (
   pagination,
   currentPage,
   setCurrentPage,
+  isLoading,
   onCreatePlan,
 }) => {
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-32">
+        <div className="text-muted-foreground">Loading unplanned resources...</div>
+      </div>
+    );
+  }
+
   if (resources.length === 0) {
     return (
       <div className="flex items-center justify-center h-32 text-muted-foreground">

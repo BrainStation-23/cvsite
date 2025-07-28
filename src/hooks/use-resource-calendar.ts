@@ -1,8 +1,8 @@
 import { useState, useMemo, useEffect } from 'react';
 import { usePlannedResources } from './use-planned-resources';
-import { startOfMonth, endOfMonth, eachDayOfInterval, format, isSameDay, parseISO, startOfWeek, endOfWeek, startOfQuarter, endOfQuarter } from 'date-fns';
+import { startOfMonth, endOfMonth, eachDayOfInterval, format, isSameDay, parseISO, startOfQuarter, endOfQuarter } from 'date-fns';
 
-export type CalendarViewType = 'day' | 'week' | 'month' | 'quarter';
+export type CalendarViewType = 'month' | 'quarter';
 
 export interface CalendarResource {
   id: string;
@@ -32,7 +32,7 @@ export function useResourceCalendar(
 ) {
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
-  const [currentView, setCurrentView] = useState<CalendarViewType>('month');
+  const [currentView, setCurrentView] = useState<CalendarViewType>('quarter');
   
   // Get planned resources with filters applied
   const plannedResources = usePlannedResources();
@@ -77,15 +77,6 @@ export function useResourceCalendar(
     let start: Date, end: Date;
     
     switch (currentView) {
-      case 'day':
-        start = selectedDate || currentMonth;
-        end = selectedDate || currentMonth;
-        break;
-      case 'week':
-        const targetDate = selectedDate || currentMonth;
-        start = startOfWeek(targetDate, { weekStartsOn: 0 });
-        end = endOfWeek(targetDate, { weekStartsOn: 0 });
-        break;
       case 'quarter':
         start = startOfQuarter(currentMonth);
         end = endOfQuarter(currentMonth);
@@ -131,7 +122,7 @@ export function useResourceCalendar(
         overAllocatedResources,
       };
     });
-  }, [currentMonth, calendarData, currentView, selectedDate]);
+  }, [currentMonth, calendarData, currentView]);
 
   const goToPreviousMonth = () => {
     setCurrentMonth(prev => new Date(prev.getFullYear(), prev.getMonth() - 1, 1));
