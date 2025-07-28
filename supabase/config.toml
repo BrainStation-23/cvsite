@@ -57,3 +57,6 @@ verify_jwt = true
 
 [functions.update-user]
 verify_jwt = true
+
+[functions.ai-enhance-rewrite]
+verify_jwt = true
