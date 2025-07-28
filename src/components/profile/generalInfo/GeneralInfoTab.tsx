@@ -234,10 +234,12 @@ export const GeneralInfoTab: React.FC<GeneralInfoTabProps> = ({
                                   <div className="max-w-xs">
                                     <p className="text-sm">Requirements for a good biography:</p>
                                     <ul className="text-xs mt-1 space-y-1">
-                                      <li>• Professional and engaging tone</li>
                                       <li>• Highlight key strengths</li>
-                                      <li>• Maximum 3-4 sentences</li>
-                                      <li>• ATS-friendly language</li>
+                                      <li>• Minimum 3-4 Lines</li>
+                                      <li>• Hobby</li>
+                                      <li>• Primary Focus</li>
+                                      <li>• Primary Industry</li>
+                                      <li>• Your Core Motivation</li>
                                     </ul>
                                   </div>
                                 </TooltipContent>
