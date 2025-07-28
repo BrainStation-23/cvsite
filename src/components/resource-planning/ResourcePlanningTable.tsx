@@ -75,7 +75,13 @@ export const ResourcePlanningTable: React.FC = () => {
         showUnplanned={showUnplanned}
         setShowUnplanned={setShowUnplanned}
         plannedCount={data?.length || 0}
-        unplannedCount={unplannedResources.data?.length || 0}
+        unplannedCount={unplannedResources.unplannedResources?.length || 0}
+        searchQuery={searchQuery}
+        selectedSbu={selectedSbu}
+        selectedManager={selectedManager}
+        onCreateNewAssignment={handleCreateNewAssignment}
+        onEditAssignment={handleInlineEdit}
+        onCreatePlan={handleCreatePlan}
       />
 
       {showCreateForm && (
@@ -89,7 +95,10 @@ export const ResourcePlanningTable: React.FC = () => {
 
       {showUnplanned ? (
         <UnplannedResourcesTable
-          data={unplannedResources.data || []}
+          resources={unplannedResources.unplannedResources || []}
+          pagination={unplannedResources.pagination}
+          currentPage={unplannedResources.currentPage}
+          setCurrentPage={unplannedResources.setCurrentPage}
           isLoading={unplannedResources.isLoading}
           onCreatePlan={handleCreatePlan}
         />

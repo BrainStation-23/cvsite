@@ -4,6 +4,7 @@ import { Table, TableBody } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
 import { usePlannedResources } from '@/hooks/use-planned-resources';
+import { useInlineEdit } from './hooks/useInlineEdit';
 import { ResourcePlanningTableHeader } from './ResourcePlanningTableHeader';
 import { ResourcePlanningTableRow } from './ResourcePlanningTableRow';
 import { ResourcePlanningPagination } from './ResourcePlanningPagination';
@@ -37,6 +38,16 @@ export const PlannedResourcesTab: React.FC<PlannedResourcesTabProps> = ({
     setSelectedSbu,
     setSelectedManager,
   } = usePlannedResources();
+
+  const {
+    editingItemId,
+    editData,
+    startEdit,
+    cancelEdit,
+    saveEdit,
+    updateEditData,
+    isLoading: editLoading,
+  } = useInlineEdit();
 
   // Sync filters when props change
   React.useEffect(() => {
@@ -96,7 +107,13 @@ export const PlannedResourcesTab: React.FC<PlannedResourcesTabProps> = ({
                   <ResourcePlanningTableRow 
                     key={item.id} 
                     item={item} 
-                    onEdit={onEditAssignment}
+                    isEditing={editingItemId === item.id}
+                    editData={editData}
+                    onStartEdit={startEdit}
+                    onCancelEdit={cancelEdit}
+                    onSaveEdit={saveEdit}
+                    onEditDataChange={updateEditData}
+                    editLoading={editLoading}
                   />
                 ))}
               </TableBody>
