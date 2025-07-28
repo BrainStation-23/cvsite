@@ -1,29 +1,24 @@
 
 import React from 'react';
-import { useResourcePlanning } from '@/hooks/use-resource-planning';
 import { usePlannedResources } from '@/hooks/use-planned-resources';
 import { useUnplannedResources } from '@/hooks/use-unplanned-resources';
 import { useResourcePlanningState } from './hooks/useResourcePlanningState';
 import { useInlineEdit } from './hooks/useInlineEdit';
 import { ResourcePlanningFilters } from './ResourcePlanningFilters';
 import { ResourcePlanningTabs } from './ResourcePlanningTabs';
-import { ResourcePlanningTableView } from './ResourcePlanningTableView';
 import { ResourcePlanningForm } from './ResourcePlanningForm';
-import { UnplannedResourcesTable } from './UnplannedResourcesTable';
 
 export const ResourcePlanningTable: React.FC = () => {
-  const {
-    searchQuery,
-    setSearchQuery,
-    selectedSbu,
-    setSelectedSbu,
-    selectedManager,
-    setSelectedManager,
-    showUnplanned,
-    setShowUnplanned,
-    clearFilters,
-    data,
-  } = useResourcePlanning();
+  const [searchQuery, setSearchQuery] = React.useState('');
+  const [selectedSbu, setSelectedSbu] = React.useState<string | null>(null);
+  const [selectedManager, setSelectedManager] = React.useState<string | null>(null);
+  const [showUnplanned, setShowUnplanned] = React.useState(false);
+
+  const clearFilters = () => {
+    setSearchQuery('');
+    setSelectedSbu(null);
+    setSelectedManager(null);
+  };
 
   const {
     showCreateForm,
@@ -46,12 +41,26 @@ export const ResourcePlanningTable: React.FC = () => {
     isLoading: editLoading,
   } = useInlineEdit();
 
+  // Centralized data fetching with current filters
   const plannedResources = usePlannedResources();
   const unplannedResources = useUnplannedResources({
     searchQuery,
     selectedSbu,
     selectedManager,
   });
+
+  // Sync filters to planned resources hook
+  React.useEffect(() => {
+    plannedResources.setSearchQuery(searchQuery);
+  }, [searchQuery, plannedResources.setSearchQuery]);
+
+  React.useEffect(() => {
+    plannedResources.setSelectedSbu(selectedSbu);
+  }, [selectedSbu, plannedResources.setSelectedSbu]);
+
+  React.useEffect(() => {
+    plannedResources.setSelectedManager(selectedManager);
+  }, [selectedManager, plannedResources.setSelectedManager]);
 
   // Override the edit handler to use inline editing instead
   const handleInlineEdit = (item: any) => {
@@ -74,7 +83,7 @@ export const ResourcePlanningTable: React.FC = () => {
       <ResourcePlanningTabs
         showUnplanned={showUnplanned}
         setShowUnplanned={setShowUnplanned}
-        plannedCount={data?.length || 0}
+        plannedCount={plannedResources.data?.length || 0}
         unplannedCount={unplannedResources.unplannedResources?.length || 0}
         searchQuery={searchQuery}
         selectedSbu={selectedSbu}
@@ -82,6 +91,17 @@ export const ResourcePlanningTable: React.FC = () => {
         onCreateNewAssignment={handleCreateNewAssignment}
         onEditAssignment={handleInlineEdit}
         onCreatePlan={handleCreatePlan}
+        // Pass centralized data to tabs
+        plannedResources={plannedResources}
+        unplannedResources={unplannedResources}
+        // Pass inline edit props
+        editingItemId={editingItemId}
+        editData={editData}
+        onStartEdit={startEdit}
+        onCancelEdit={cancelEdit}
+        onSaveEdit={saveEdit}
+        onEditDataChange={updateEditData}
+        editLoading={editLoading}
       />
 
       {showCreateForm && (
@@ -90,39 +110,6 @@ export const ResourcePlanningTable: React.FC = () => {
           editingItem={editingItem}
           onSuccess={handleFormSuccess}
           onCancel={handleFormCancel}
-        />
-      )}
-
-      {showUnplanned ? (
-        <UnplannedResourcesTable
-          resources={unplannedResources.unplannedResources || []}
-          pagination={unplannedResources.pagination}
-          currentPage={unplannedResources.currentPage}
-          setCurrentPage={unplannedResources.setCurrentPage}
-          isLoading={unplannedResources.isLoading}
-          onCreatePlan={handleCreatePlan}
-        />
-      ) : (
-        <ResourcePlanningTableView
-          data={plannedResources.data}
-          pagination={plannedResources.pagination}
-          isLoading={plannedResources.isLoading}
-          onEdit={handleInlineEdit} // Use inline edit instead
-          // Inline edit props
-          editingItemId={editingItemId}
-          editData={editData}
-          onStartEdit={startEdit}
-          onCancelEdit={cancelEdit}
-          onSaveEdit={saveEdit}
-          onEditDataChange={updateEditData}
-          editLoading={editLoading}
-          // Pagination props
-          currentPage={plannedResources.currentPage}
-          setCurrentPage={plannedResources.setCurrentPage}
-          sortBy={plannedResources.sortBy}
-          setSortBy={plannedResources.setSortBy}
-          sortOrder={plannedResources.sortOrder}
-          setSortOrder={plannedResources.setSortOrder}
         />
       )}
     </div>

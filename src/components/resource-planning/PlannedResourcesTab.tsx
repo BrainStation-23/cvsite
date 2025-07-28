@@ -3,8 +3,6 @@ import React from 'react';
 import { Table, TableBody } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
-import { usePlannedResources } from '@/hooks/use-planned-resources';
-import { useInlineEdit } from './hooks/useInlineEdit';
 import { ResourcePlanningTableHeader } from './ResourcePlanningTableHeader';
 import { ResourcePlanningTableRow } from './ResourcePlanningTableRow';
 import { ResourcePlanningPagination } from './ResourcePlanningPagination';
@@ -15,6 +13,16 @@ interface PlannedResourcesTabProps {
   selectedManager: string | null;
   onCreateNewAssignment: () => void;
   onEditAssignment: (item: any) => void;
+  // Centralized data props
+  plannedResources: any;
+  // Inline edit props
+  editingItemId: string | null;
+  editData: any;
+  onStartEdit: (item: any) => void;
+  onCancelEdit: () => void;
+  onSaveEdit: () => void;
+  onEditDataChange: (data: any) => void;
+  editLoading: boolean;
 }
 
 export const PlannedResourcesTab: React.FC<PlannedResourcesTabProps> = ({
@@ -23,6 +31,14 @@ export const PlannedResourcesTab: React.FC<PlannedResourcesTabProps> = ({
   selectedManager,
   onCreateNewAssignment,
   onEditAssignment,
+  plannedResources,
+  editingItemId,
+  editData,
+  onStartEdit,
+  onCancelEdit,
+  onSaveEdit,
+  onEditDataChange,
+  editLoading,
 }) => {
   const {
     data,
@@ -34,33 +50,7 @@ export const PlannedResourcesTab: React.FC<PlannedResourcesTabProps> = ({
     setSortBy,
     sortOrder,
     setSortOrder,
-    setSearchQuery,
-    setSelectedSbu,
-    setSelectedManager,
-  } = usePlannedResources();
-
-  const {
-    editingItemId,
-    editData,
-    startEdit,
-    cancelEdit,
-    saveEdit,
-    updateEditData,
-    isLoading: editLoading,
-  } = useInlineEdit();
-
-  // Sync filters when props change
-  React.useEffect(() => {
-    setSearchQuery(searchQuery);
-  }, [searchQuery, setSearchQuery]);
-
-  React.useEffect(() => {
-    setSelectedSbu(selectedSbu);
-  }, [selectedSbu, setSelectedSbu]);
-
-  React.useEffect(() => {
-    setSelectedManager(selectedManager);
-  }, [selectedManager, setSelectedManager]);
+  } = plannedResources;
 
   const handleSort = (column: string) => {
     if (sortBy === column) {
@@ -103,16 +93,16 @@ export const PlannedResourcesTab: React.FC<PlannedResourcesTabProps> = ({
                 onSort={handleSort}
               />
               <TableBody>
-                {data.map((item) => (
+                {data.map((item: any) => (
                   <ResourcePlanningTableRow 
                     key={item.id} 
                     item={item} 
                     isEditing={editingItemId === item.id}
                     editData={editData}
-                    onStartEdit={startEdit}
-                    onCancelEdit={cancelEdit}
-                    onSaveEdit={saveEdit}
-                    onEditDataChange={updateEditData}
+                    onStartEdit={onStartEdit}
+                    onCancelEdit={onCancelEdit}
+                    onSaveEdit={onSaveEdit}
+                    onEditDataChange={onEditDataChange}
                     editLoading={editLoading}
                   />
                 ))}

@@ -1,6 +1,5 @@
 
 import React from 'react';
-import { useUnplannedResources } from '@/hooks/use-unplanned-resources';
 import { UnplannedResourcesTable } from './UnplannedResourcesTable';
 
 interface UnplannedResourcesTabProps {
@@ -8,6 +7,8 @@ interface UnplannedResourcesTabProps {
   selectedSbu: string | null;
   selectedManager: string | null;
   onCreatePlan: (profileId: string) => void;
+  // Centralized data props
+  unplannedResources: any;
 }
 
 export const UnplannedResourcesTab: React.FC<UnplannedResourcesTabProps> = ({
@@ -15,18 +16,15 @@ export const UnplannedResourcesTab: React.FC<UnplannedResourcesTabProps> = ({
   selectedSbu,
   selectedManager,
   onCreatePlan,
+  unplannedResources,
 }) => {
   const {
-    unplannedResources,
+    unplannedResources: resources,
     pagination,
     isLoading,
     currentPage,
     setCurrentPage,
-  } = useUnplannedResources({
-    searchQuery,
-    selectedSbu,
-    selectedManager,
-  });
+  } = unplannedResources;
 
   if (isLoading) {
     return (
@@ -38,7 +36,7 @@ export const UnplannedResourcesTab: React.FC<UnplannedResourcesTabProps> = ({
 
   return (
     <UnplannedResourcesTable 
-      resources={unplannedResources}
+      resources={resources}
       pagination={pagination}
       currentPage={currentPage}
       setCurrentPage={setCurrentPage}

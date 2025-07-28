@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { PlannedResourcesTab } from './PlannedResourcesTab';
@@ -14,6 +15,17 @@ interface ResourcePlanningTabsProps {
   onCreateNewAssignment: () => void;
   onEditAssignment: (item: any) => void;
   onCreatePlan: (profileId: string) => void;
+  // Centralized data props
+  plannedResources: any;
+  unplannedResources: any;
+  // Inline edit props
+  editingItemId: string | null;
+  editData: any;
+  onStartEdit: (item: any) => void;
+  onCancelEdit: () => void;
+  onSaveEdit: () => void;
+  onEditDataChange: (data: any) => void;
+  editLoading: boolean;
 }
 
 export const ResourcePlanningTabs: React.FC<ResourcePlanningTabsProps> = ({
@@ -27,6 +39,15 @@ export const ResourcePlanningTabs: React.FC<ResourcePlanningTabsProps> = ({
   onCreateNewAssignment,
   onEditAssignment,
   onCreatePlan,
+  plannedResources,
+  unplannedResources,
+  editingItemId,
+  editData,
+  onStartEdit,
+  onCancelEdit,
+  onSaveEdit,
+  onEditDataChange,
+  editLoading,
 }) => {
   return (
     <Tabs value={showUnplanned ? "unplanned" : "planned"} className="w-full">
@@ -52,6 +73,16 @@ export const ResourcePlanningTabs: React.FC<ResourcePlanningTabsProps> = ({
           selectedManager={selectedManager}
           onCreateNewAssignment={onCreateNewAssignment}
           onEditAssignment={onEditAssignment}
+          // Pass centralized data
+          plannedResources={plannedResources}
+          // Pass inline edit props
+          editingItemId={editingItemId}
+          editData={editData}
+          onStartEdit={onStartEdit}
+          onCancelEdit={onCancelEdit}
+          onSaveEdit={onSaveEdit}
+          onEditDataChange={onEditDataChange}
+          editLoading={editLoading}
         />
       </TabsContent>
 
@@ -61,6 +92,8 @@ export const ResourcePlanningTabs: React.FC<ResourcePlanningTabsProps> = ({
           selectedSbu={selectedSbu}
           selectedManager={selectedManager}
           onCreatePlan={onCreatePlan}
+          // Pass centralized data
+          unplannedResources={unplannedResources}
         />
       </TabsContent>
     </Tabs>
