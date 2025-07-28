@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { ResourceAssignmentForm } from './ResourceAssignmentForm';
 import { useResourceAssignmentForm } from './hooks/useResourceAssignmentForm';
@@ -34,7 +35,7 @@ export const ResourcePlanningForm: React.FC<ResourcePlanningFormProps> = ({
   };
 
   return (
-    <div className="mb-6 p-4 border rounded-lg bg-muted/50">
+    <div className="p-4 border rounded-lg bg-muted/30 h-fit">
       <h3 className="text-lg font-semibold mb-4">
         {editingItem ? 'Edit Resource Assignment' : 'Create Resource Assignment'}
       </h3>

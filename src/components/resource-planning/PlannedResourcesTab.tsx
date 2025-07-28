@@ -1,8 +1,6 @@
 
 import React from 'react';
 import { Table, TableBody } from '@/components/ui/table';
-import { Button } from '@/components/ui/button';
-import { Plus } from 'lucide-react';
 import { ResourcePlanningTableHeader } from './ResourcePlanningTableHeader';
 import { ResourcePlanningTableRow } from './ResourcePlanningTableRow';
 import { ResourcePlanningPagination } from './ResourcePlanningPagination';
@@ -71,17 +69,9 @@ export const PlannedResourcesTab: React.FC<PlannedResourcesTabProps> = ({
 
   return (
     <div className="space-y-4">
-      <div className="flex justify-between items-center">
-        <div></div>
-        <Button onClick={onCreateNewAssignment}>
-          <Plus className="mr-2 h-4 w-4" />
-          Create Assignment
-        </Button>
-      </div>
-
       {data.length === 0 ? (
         <div className="flex items-center justify-center h-32 text-muted-foreground">
-          No resource planning entries found. Create your first assignment to get started.
+          No resource planning entries found. Use the form on the right to create your first assignment.
         </div>
       ) : (
         <>

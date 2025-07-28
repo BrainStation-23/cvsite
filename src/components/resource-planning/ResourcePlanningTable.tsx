@@ -21,7 +21,6 @@ export const ResourcePlanningTable: React.FC = () => {
   };
 
   const {
-    showCreateForm,
     preselectedProfileId,
     editingItem,
     handleCreatePlan,
@@ -68,50 +67,53 @@ export const ResourcePlanningTable: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6">
-      <ResourcePlanningFilters
-        searchQuery={searchQuery}
-        setSearchQuery={setSearchQuery}
-        selectedSbu={selectedSbu}
-        setSelectedSbu={setSelectedSbu}
-        selectedManager={selectedManager}
-        setSelectedManager={setSelectedManager}
-        clearFilters={clearFilters}
-        onCreateNew={handleCreateNewAssignment}
-      />
-
-      <ResourcePlanningTabs
-        showUnplanned={showUnplanned}
-        setShowUnplanned={setShowUnplanned}
-        plannedCount={plannedResources.data?.length || 0}
-        unplannedCount={unplannedResources.unplannedResources?.length || 0}
-        searchQuery={searchQuery}
-        selectedSbu={selectedSbu}
-        selectedManager={selectedManager}
-        onCreateNewAssignment={handleCreateNewAssignment}
-        onEditAssignment={handleInlineEdit}
-        onCreatePlan={handleCreatePlan}
-        // Pass centralized data to tabs
-        plannedResources={plannedResources}
-        unplannedResources={unplannedResources}
-        // Pass inline edit props
-        editingItemId={editingItemId}
-        editData={editData}
-        onStartEdit={startEdit}
-        onCancelEdit={cancelEdit}
-        onSaveEdit={saveEdit}
-        onEditDataChange={updateEditData}
-        editLoading={editLoading}
-      />
-
-      {showCreateForm && (
-        <ResourcePlanningForm
-          preselectedProfileId={preselectedProfileId}
-          editingItem={editingItem}
-          onSuccess={handleFormSuccess}
-          onCancel={handleFormCancel}
+    <div className="flex gap-6 h-full">
+      {/* Main content area */}
+      <div className="flex-1 space-y-4">
+        <ResourcePlanningFilters
+          searchQuery={searchQuery}
+          setSearchQuery={setSearchQuery}
+          selectedSbu={selectedSbu}
+          setSelectedSbu={setSelectedSbu}
+          selectedManager={selectedManager}
+          setSelectedManager={setSelectedManager}
+          clearFilters={clearFilters}
         />
-      )}
+
+        <ResourcePlanningTabs
+          showUnplanned={showUnplanned}
+          setShowUnplanned={setShowUnplanned}
+          plannedCount={plannedResources.data?.length || 0}
+          unplannedCount={unplannedResources.unplannedResources?.length || 0}
+          searchQuery={searchQuery}
+          selectedSbu={selectedSbu}
+          selectedManager={selectedManager}
+          onCreateNewAssignment={handleCreateNewAssignment}
+          onEditAssignment={handleInlineEdit}
+          onCreatePlan={handleCreatePlan}
+          plannedResources={plannedResources}
+          unplannedResources={unplannedResources}
+          editingItemId={editingItemId}
+          editData={editData}
+          onStartEdit={startEdit}
+          onCancelEdit={cancelEdit}
+          onSaveEdit={saveEdit}
+          onEditDataChange={updateEditData}
+          editLoading={editLoading}
+        />
+      </div>
+
+      {/* Right sidebar for create assignment form */}
+      <div className="w-80 flex-shrink-0">
+        <div className="sticky top-4">
+          <ResourcePlanningForm
+            preselectedProfileId={preselectedProfileId}
+            editingItem={editingItem}
+            onSuccess={handleFormSuccess}
+            onCancel={handleFormCancel}
+          />
+        </div>
+      </div>
     </div>
   );
 };
