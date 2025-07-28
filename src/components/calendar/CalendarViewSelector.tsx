@@ -1,9 +1,9 @@
 
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { Calendar, CalendarDays, CalendarRange, CalendarClock } from 'lucide-react';
+import { CalendarRange, CalendarClock } from 'lucide-react';
 
-export type CalendarViewType = 'day' | 'week' | 'month' | 'quarter';
+export type CalendarViewType = 'month' | 'quarter';
 
 interface CalendarViewSelectorProps {
   currentView: CalendarViewType;
@@ -15,8 +15,6 @@ export const CalendarViewSelector: React.FC<CalendarViewSelectorProps> = ({
   onViewChange,
 }) => {
   const views = [
-    { key: 'day' as CalendarViewType, label: 'Day', icon: Calendar },
-    { key: 'week' as CalendarViewType, label: 'Week', icon: CalendarDays },
     { key: 'month' as CalendarViewType, label: 'Month', icon: CalendarRange },
     { key: 'quarter' as CalendarViewType, label: 'Quarter', icon: CalendarClock },
   ];

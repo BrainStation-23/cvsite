@@ -4,8 +4,6 @@ import { Card, CardContent } from '@/components/ui/card';
 import { useResourceCalendar } from '@/hooks/use-resource-calendar';
 import { CalendarHeader } from './CalendarHeader';
 import { CalendarGrid } from './CalendarGrid';
-import { CalendarDayView } from './CalendarDayView';
-import { CalendarWeekView } from './CalendarWeekView';
 import { CalendarQuarterView } from './CalendarQuarterView';
 import { DayDetailsPanel } from './DayDetailsPanel';
 import { CalendarViewSelector } from './CalendarViewSelector';
@@ -54,22 +52,6 @@ const ResourceCalendarView: React.FC<ResourceCalendarViewProps> = ({
 
   const renderCalendarContent = () => {
     switch (currentView) {
-      case 'day':
-        return (
-          <CalendarDayView
-            selectedDate={selectedDate || currentMonth}
-            dayData={selectedDayData}
-          />
-        );
-      case 'week':
-        return (
-          <CalendarWeekView
-            currentDate={selectedDate || currentMonth}
-            calendarDays={calendarDays}
-            selectedDate={selectedDate}
-            onDateSelect={setSelectedDate}
-          />
-        );
       case 'quarter':
         return (
           <CalendarQuarterView
