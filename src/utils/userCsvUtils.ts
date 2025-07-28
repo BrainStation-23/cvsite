@@ -1,4 +1,3 @@
-
 import Papa from 'papaparse';
 import { UserRole } from '@/types';
 
@@ -6,11 +5,16 @@ export interface UserCSVRow {
   userId?: string; // For updates
   email: string;
   firstName: string;
-  lastName: string;
+  lastName?: string; // Made optional
   role?: UserRole;
   password?: string;
   employeeId?: string;
+  managerEmail?: string;
   sbuName?: string;
+  expertiseName?: string;
+  resourceTypeName?: string;
+  dateOfJoining?: string;
+  careerStartDate?: string;
 }
 
 export interface CSVValidationResult {
@@ -53,6 +57,71 @@ const formatUserRole = (role: string): UserRole | null => {
   }
 };
 
+// Helper function to validate email format
+const isValidEmail = (email: string): boolean => {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return emailRegex.test(email);
+};
+
+// Helper function to validate and normalize date format - more flexible
+const normalizeDate = (dateString: string): string | null => {
+  if (!dateString || dateString.trim() === '') return null;
+  
+  const trimmed = dateString.trim();
+  
+  // First try parsing as is
+  let date = new Date(trimmed);
+  
+  // If invalid, try common formats
+  if (isNaN(date.getTime())) {
+    // Try MM/DD/YYYY format
+    const mmddyyyy = trimmed.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+    if (mmddyyyy) {
+      const [, month, day, year] = mmddyyyy;
+      date = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+    }
+    
+    // Try DD/MM/YYYY format
+    if (isNaN(date.getTime())) {
+      const ddmmyyyy = trimmed.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+      if (ddmmyyyy) {
+        const [, day, month, year] = ddmmyyyy;
+        date = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+      }
+    }
+    
+    // Try DD-MM-YYYY format
+    if (isNaN(date.getTime())) {
+      const ddmmyyyy2 = trimmed.match(/^(\d{1,2})-(\d{1,2})-(\d{4})$/);
+      if (ddmmyyyy2) {
+        const [, day, month, year] = ddmmyyyy2;
+        date = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+      }
+    }
+    
+    // Try YYYY/MM/DD format
+    if (isNaN(date.getTime())) {
+      const yyyymmdd = trimmed.match(/^(\d{4})\/(\d{1,2})\/(\d{1,2})$/);
+      if (yyyymmdd) {
+        const [, year, month, day] = yyyymmdd;
+        date = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+      }
+    }
+  }
+  
+  // If still invalid, return null
+  if (isNaN(date.getTime())) {
+    return null;
+  }
+  
+  // Return in YYYY-MM-DD format for database
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  
+  return `${year}-${month}-${day}`;
+};
+
 export const downloadCSVTemplate = () => {
   const templateData = [
     {
@@ -62,7 +131,12 @@ export const downloadCSVTemplate = () => {
       role: 'employee',
       password: 'SecurePass123!',
       employeeId: 'EMP001',
-      sbuName: 'Technology Division'
+      managerEmail: 'manager@company.com',
+      sbuName: 'Technology Division',
+      expertiseName: 'Software Development',
+      resourceTypeName: 'Senior Developer',
+      dateOfJoining: '2024-01-15',
+      careerStartDate: '2020-06-01'
     },
     {
       email: 'jane.smith@company.com',
@@ -70,8 +144,13 @@ export const downloadCSVTemplate = () => {
       lastName: 'Smith',
       role: 'manager',
       password: '',
-      employeeId: '',
-      sbuName: 'Marketing Department'
+      employeeId: 'EMP002',
+      managerEmail: '',
+      sbuName: 'Marketing Department',
+      expertiseName: 'Digital Marketing',
+      resourceTypeName: 'Marketing Manager',
+      dateOfJoining: '2023-03-10',
+      careerStartDate: '2018-09-15'
     },
     {
       email: 'admin@company.com',
@@ -80,7 +159,12 @@ export const downloadCSVTemplate = () => {
       role: 'admin',
       password: 'AdminPass456!',
       employeeId: 'ADM001',
-      sbuName: ''
+      managerEmail: '',
+      sbuName: '',
+      expertiseName: 'System Administration',
+      resourceTypeName: 'System Administrator',
+      dateOfJoining: '2022-11-01',
+      careerStartDate: '2019-04-20'
     }
   ];
 
@@ -109,7 +193,12 @@ export const downloadUpdateCSVTemplate = () => {
       role: 'manager',
       password: '',
       employeeId: 'EMP001',
-      sbuName: 'Technology Division'
+      managerEmail: 'newmanager@company.com',
+      sbuName: 'Technology Division',
+      expertiseName: 'Full Stack Development',
+      resourceTypeName: 'Tech Lead',
+      dateOfJoining: '2024-01-15',
+      careerStartDate: '2020-06-01'
     },
     {
       userId: 'user-id-2',
@@ -119,7 +208,12 @@ export const downloadUpdateCSVTemplate = () => {
       role: 'admin',
       password: 'NewPassword123!',
       employeeId: 'EMP002',
-      sbuName: 'Marketing Department'
+      managerEmail: '',
+      sbuName: 'Marketing Department',
+      expertiseName: 'Growth Marketing',
+      resourceTypeName: 'Marketing Director',
+      dateOfJoining: '2023-03-10',
+      careerStartDate: '2018-09-15'
     }
   ];
 
@@ -192,8 +286,7 @@ export const validateCSVData = (data: any[], existingUsers: any[] = [], mode: 'c
       const lowerEmail = trimmedEmail.toLowerCase();
       
       // Basic email validation
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!emailRegex.test(trimmedEmail)) {
+      if (!isValidEmail(trimmedEmail)) {
         errors.push({
           row: rowNumber,
           field: 'email',
@@ -239,16 +332,7 @@ export const validateCSVData = (data: any[], existingUsers: any[] = [], mode: 'c
       hasErrors = true;
     }
 
-    // Validate lastName (optional but if provided, should not be empty)
-    if (row.lastName && typeof row.lastName === 'string' && row.lastName.trim() === '') {
-      errors.push({
-        row: rowNumber,
-        field: 'lastName',
-        value: row.lastName,
-        message: 'Last name cannot be empty if provided'
-      });
-      hasErrors = true;
-    }
+    // lastName is now optional - no validation needed
 
     // Validate role (optional, defaults to employee)
     const formattedRole = formatUserRole(row.role);
@@ -262,10 +346,35 @@ export const validateCSVData = (data: any[], existingUsers: any[] = [], mode: 'c
       hasErrors = true;
     }
 
-    // Validate sbuName (optional)
-    let sbuName = '';
-    if (row.sbuName && typeof row.sbuName === 'string') {
-      sbuName = row.sbuName.trim();
+    // Validate manager email format if provided
+    if (row.managerEmail && row.managerEmail.trim() && !isValidEmail(row.managerEmail.trim())) {
+      errors.push({
+        row: rowNumber,
+        field: 'managerEmail',
+        value: row.managerEmail,
+        message: 'Invalid manager email format'
+      });
+      hasErrors = true;
+    }
+
+    // Validate and normalize date of joining if provided
+    let normalizedDateOfJoining = null;
+    if (row.dateOfJoining && row.dateOfJoining.trim()) {
+      normalizedDateOfJoining = normalizeDate(row.dateOfJoining.trim());
+      // Don't fail validation for invalid dates - just set to null and warn
+      if (normalizedDateOfJoining === null) {
+        console.warn(`Invalid date format for dateOfJoining at row ${rowNumber}: ${row.dateOfJoining}. Will be set to null.`);
+      }
+    }
+
+    // Validate and normalize career start date if provided
+    let normalizedCareerStartDate = null;
+    if (row.careerStartDate && row.careerStartDate.trim()) {
+      normalizedCareerStartDate = normalizeDate(row.careerStartDate.trim());
+      // Don't fail validation for invalid dates - just set to null and warn
+      if (normalizedCareerStartDate === null) {
+        console.warn(`Invalid date format for careerStartDate at row ${rowNumber}: ${row.careerStartDate}. Will be set to null.`);
+      }
     }
 
     // If no errors, add to valid array with defaults
@@ -273,10 +382,15 @@ export const validateCSVData = (data: any[], existingUsers: any[] = [], mode: 'c
       const validRow: UserCSVRow = {
         email: row.email.trim(),
         firstName: row.firstName.trim(),
-        lastName: row.lastName ? row.lastName.trim() : '',
+        lastName: row.lastName && row.lastName.trim() ? row.lastName.trim() : undefined, // Make optional
         role: formattedRole,
         employeeId: row.employeeId ? row.employeeId.trim() : '',
-        sbuName: sbuName
+        managerEmail: row.managerEmail ? row.managerEmail.trim() : '',
+        sbuName: row.sbuName ? row.sbuName.trim() : '',
+        expertiseName: row.expertiseName ? row.expertiseName.trim() : '',
+        resourceTypeName: row.resourceTypeName ? row.resourceTypeName.trim() : '',
+        dateOfJoining: normalizedDateOfJoining || '',
+        careerStartDate: normalizedCareerStartDate || ''
       };
 
       // Add userId for update mode

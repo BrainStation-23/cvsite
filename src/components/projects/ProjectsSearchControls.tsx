@@ -3,6 +3,8 @@ import React from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Switch } from '@/components/ui/switch';
+import { Label } from '@/components/ui/label';
 import { Search, Plus } from 'lucide-react';
 
 interface ProjectsSearchControlsProps {
@@ -10,6 +12,8 @@ interface ProjectsSearchControlsProps {
   onSearchChange: (query: string) => void;
   itemsPerPage: number;
   onItemsPerPageChange: (items: number) => void;
+  showInactiveProjects: boolean;
+  onShowInactiveProjectsChange: (show: boolean) => void;
   onAddProject: () => void;
 }
 
@@ -18,6 +22,8 @@ export const ProjectsSearchControls: React.FC<ProjectsSearchControlsProps> = ({
   onSearchChange,
   itemsPerPage,
   onItemsPerPageChange,
+  showInactiveProjects,
+  onShowInactiveProjectsChange,
   onAddProject
 }) => {
   return (
@@ -35,6 +41,17 @@ export const ProjectsSearchControls: React.FC<ProjectsSearchControlsProps> = ({
       </div>
 
       <div className="flex items-center gap-4">
+        <div className="flex items-center space-x-2">
+          <Switch
+            id="show-inactive"
+            checked={showInactiveProjects}
+            onCheckedChange={onShowInactiveProjectsChange}
+          />
+          <Label htmlFor="show-inactive" className="text-sm">
+            Show inactive projects
+          </Label>
+        </div>
+
         <div className="flex items-center gap-2">
           <span className="text-sm text-muted-foreground">Show:</span>
           <Select value={itemsPerPage.toString()} onValueChange={(value) => onItemsPerPageChange(parseInt(value))}>

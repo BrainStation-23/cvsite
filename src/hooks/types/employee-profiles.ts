@@ -1,75 +1,83 @@
 
-export interface EmployeeSkill {
-  id: string;
-  name: string;
-  proficiency: number;
-}
-
-export interface EmployeeExperience {
-  id: string;
-  company_name: string;
-  designation: string;
-  start_date: string;
-  end_date?: string;
-  is_current?: boolean;
-  description?: string;
-}
-
-export interface EmployeeEducation {
-  id: string;
-  university: string;
-  degree?: string;
-  department?: string;
-  start_date: string;
-  end_date?: string;
-  is_current?: boolean;
-  gpa?: string;
-}
-
-export interface EmployeeTraining {
-  id: string;
-  title: string;
-  provider: string;
-  certification_date: string;
-  description?: string;
-  certificate_url?: string;
-}
-
-export interface EmployeeAchievement {
-  id: string;
-  title: string;
-  date: string;
-  description: string;
-}
-
-export interface EmployeeProject {
-  id: string;
-  name: string;
-  role: string;
-  start_date: string;
-  end_date?: string;
-  is_current?: boolean;
-  description: string;
-  technologies_used?: string[];
-  url?: string;
-}
-
 export interface EmployeeProfile {
   id: string;
   employee_id?: string;
   first_name?: string;
   last_name?: string;
+  email?: string;
   created_at: string;
   updated_at: string;
-  biography?: string;
-  profile_image?: string;
-  technical_skills?: EmployeeSkill[];
-  specialized_skills?: EmployeeSkill[];
-  experiences?: EmployeeExperience[];
-  education?: EmployeeEducation[];
-  trainings?: EmployeeTraining[];
-  achievements?: EmployeeAchievement[];
-  projects?: EmployeeProject[];
+  date_of_joining?: string;
+  career_start_date?: string;
+  expertise_id?: string;
+  expertise_name?: string;
+  total_experience_years?: number;
+  company_experience_years?: number;
+  general_information?: {
+    first_name?: string;
+    last_name?: string;
+    biography?: string;
+    profile_image?: string;
+    current_designation?: string;
+  };
+  technical_skills?: Array<{
+    id: string;
+    name: string;
+    proficiency: number;
+    priority?: number;
+  }>;
+  specialized_skills?: Array<{
+    id: string;
+    name: string;
+    proficiency: number;
+  }>;
+  trainings?: Array<{
+    id: string;
+    title: string;
+    provider: string;
+    certification_date: string;
+    is_renewable?: boolean;
+    expiry_date?: string;
+    certificate_url?: string;
+  }>;
+  experiences?: Array<{
+    id: string;
+    company_name: string;
+    designation: string;
+    start_date: string;
+    end_date?: string;
+    is_current: boolean;
+    description?: string;
+  }>;
+  education?: Array<{
+    id: string;
+    university: string;
+    degree: string;
+    department: string;
+    start_date: string;
+    end_date?: string;
+    is_current: boolean;
+    gpa?: string;
+  }>;
+  achievements?: Array<{
+    id: string;
+    title: string;
+    date: string;
+    description: string;
+  }>;
+  projects?: Array<{
+    id: string;
+    name: string;
+    role: string;
+    start_date: string;
+    end_date?: string;
+    is_current: boolean;
+    description: string;
+    responsibility?: string;
+    technologies_used?: string[];
+    url?: string;
+    display_order?: number;
+  }>;
 }
 
 export interface EmployeeProfilesPagination {
@@ -91,5 +99,13 @@ export interface EmployeeProfilesResponse {
   };
 }
 
-export type EmployeeProfileSortColumn = 'first_name' | 'last_name' | 'employee_id' | 'created_at' | 'updated_at';
+export type EmployeeProfileSortColumn = 
+  | 'first_name' 
+  | 'last_name' 
+  | 'employee_id' 
+  | 'created_at' 
+  | 'updated_at'
+  | 'total_experience'
+  | 'company_experience';
+
 export type EmployeeProfileSortOrder = 'asc' | 'desc';

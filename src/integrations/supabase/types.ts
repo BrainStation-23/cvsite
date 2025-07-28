@@ -7,6 +7,11 @@ export type Json =
   | Json[]
 
 export type Database = {
+  // Allows to automatically instanciate createClient with right options
+  // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
+  __InternalSupabase: {
+    PostgrestVersion: "12.2.3 (519615d)"
+  }
   public: {
     Tables: {
       achievements: {
@@ -46,6 +51,27 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      bill_types: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          updated_at?: string
+        }
+        Relationships: []
       }
       cv_exports: {
         Row: {
@@ -377,7 +403,7 @@ export type Database = {
           is_current: boolean | null
           profile_id: string
           start_date: string
-          university: string
+          university: string | null
           updated_at: string
         }
         Insert: {
@@ -390,7 +416,7 @@ export type Database = {
           is_current?: boolean | null
           profile_id: string
           start_date: string
-          university: string
+          university?: string | null
           updated_at?: string
         }
         Update: {
@@ -403,7 +429,7 @@ export type Database = {
           is_current?: boolean | null
           profile_id?: string
           start_date?: string
-          university?: string
+          university?: string | null
           updated_at?: string
         }
         Relationships: [
@@ -526,6 +552,27 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      expertise_types: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          updated_at?: string
+        }
+        Relationships: []
       }
       general_information: {
         Row: {
@@ -676,36 +723,72 @@ export type Database = {
       }
       profiles: {
         Row: {
+          career_start_date: string | null
           created_at: string
+          date_of_joining: string | null
           email: string | null
           employee_id: string | null
+          expertise: string | null
           first_name: string | null
           id: string
           last_name: string | null
+          manager: string | null
+          resource_type: string | null
           sbu_id: string | null
           updated_at: string
         }
         Insert: {
+          career_start_date?: string | null
           created_at?: string
+          date_of_joining?: string | null
           email?: string | null
           employee_id?: string | null
+          expertise?: string | null
           first_name?: string | null
           id: string
           last_name?: string | null
+          manager?: string | null
+          resource_type?: string | null
           sbu_id?: string | null
           updated_at?: string
         }
         Update: {
+          career_start_date?: string | null
           created_at?: string
+          date_of_joining?: string | null
           email?: string | null
           employee_id?: string | null
+          expertise?: string | null
           first_name?: string | null
           id?: string
           last_name?: string | null
+          manager?: string | null
+          resource_type?: string | null
           sbu_id?: string | null
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "profiles_expertise_fkey"
+            columns: ["expertise"]
+            isOneToOne: false
+            referencedRelation: "expertise_types"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "profiles_manager_fkey"
+            columns: ["manager"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "profiles_resource_type_fkey"
+            columns: ["resource_type"]
+            isOneToOne: false
+            referencedRelation: "resource_types"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "profiles_sbu_id_fkey"
             columns: ["sbu_id"]
@@ -714,6 +797,27 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      project_types: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          updated_at?: string
+        }
+        Relationships: []
       }
       projects: {
         Row: {
@@ -780,8 +884,10 @@ export type Database = {
           client_name: string | null
           created_at: string
           id: string
+          is_active: boolean
           project_manager: string | null
           project_name: string
+          project_type: string | null
           updated_at: string
         }
         Insert: {
@@ -789,8 +895,10 @@ export type Database = {
           client_name?: string | null
           created_at?: string
           id?: string
+          is_active?: boolean
           project_manager?: string | null
           project_name: string
+          project_type?: string | null
           updated_at?: string
         }
         Update: {
@@ -798,11 +906,28 @@ export type Database = {
           client_name?: string | null
           created_at?: string
           id?: string
+          is_active?: boolean
           project_manager?: string | null
           project_name?: string
+          project_type?: string | null
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "projects_management_project_manager_fkey"
+            columns: ["project_manager"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "projects_management_project_type_fkey"
+            columns: ["project_type"]
+            isOneToOne: false
+            referencedRelation: "project_types"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       references: {
         Row: {
@@ -844,33 +969,39 @@ export type Database = {
       }
       resource_planning: {
         Row: {
+          bill_type_id: string | null
           created_at: string
+          engagement_complete: boolean
           engagement_percentage: number | null
+          engagement_start_date: string | null
           id: string
           profile_id: string
           project_id: string | null
           release_date: string | null
-          resource_type_id: string | null
           updated_at: string
         }
         Insert: {
+          bill_type_id?: string | null
           created_at?: string
+          engagement_complete?: boolean
           engagement_percentage?: number | null
+          engagement_start_date?: string | null
           id?: string
           profile_id: string
           project_id?: string | null
           release_date?: string | null
-          resource_type_id?: string | null
           updated_at?: string
         }
         Update: {
+          bill_type_id?: string | null
           created_at?: string
+          engagement_complete?: boolean
           engagement_percentage?: number | null
+          engagement_start_date?: string | null
           id?: string
           profile_id?: string
           project_id?: string | null
           release_date?: string | null
-          resource_type_id?: string | null
           updated_at?: string
         }
         Relationships: [
@@ -882,10 +1013,10 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "fk_resource_planning_resource_type"
-            columns: ["resource_type_id"]
+            foreignKeyName: "resource_planning_bill_type_id_fkey"
+            columns: ["bill_type_id"]
             isOneToOne: false
-            referencedRelation: "resource_types"
+            referencedRelation: "bill_types"
             referencedColumns: ["id"]
           },
         ]
@@ -1165,6 +1296,41 @@ export type Database = {
         Args: { profile_uuid: string }
         Returns: Json
       }
+      get_resource_distribution_by_bill_types: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          bill_type: string
+          count: number
+        }[]
+      }
+      get_resource_distribution_by_expertise_types: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          expertise_type: string
+          count: number
+        }[]
+      }
+      get_resource_distribution_by_project_types: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          project_type: string
+          count: number
+        }[]
+      }
+      get_resource_distribution_by_resource_types: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          resource_type: string
+          count: number
+        }[]
+      }
+      get_resource_distribution_by_sbu: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          sbu_name: string
+          count: number
+        }[]
+      }
       get_resource_planning_data: {
         Args: {
           search_query?: string
@@ -1172,6 +1338,8 @@ export type Database = {
           items_per_page?: number
           sort_by?: string
           sort_order?: string
+          sbu_filter?: string
+          manager_filter?: string
         }
         Returns: Json
       }
@@ -1193,6 +1361,16 @@ export type Database = {
           skill: string
           count: number
         }[]
+      }
+      get_unplanned_resources: {
+        Args: {
+          search_query?: string
+          sbu_filter?: string
+          manager_filter?: string
+          page_number?: number
+          items_per_page?: number
+        }
+        Returns: Json
       }
       has_any_role: {
         Args: { roles: string[] }
@@ -1302,21 +1480,25 @@ export type Database = {
   }
 }
 
-type DefaultSchema = Database[Extract<keyof Database, "public">]
+type DatabaseWithoutInternals = Omit<Database, "__InternalSupabase">
+
+type DefaultSchema = DatabaseWithoutInternals[Extract<keyof Database, "public">]
 
 export type Tables<
   DefaultSchemaTableNameOrOptions extends
     | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
-    | { schema: keyof Database },
+    | { schema: keyof DatabaseWithoutInternals },
   TableName extends DefaultSchemaTableNameOrOptions extends {
-    schema: keyof Database
+    schema: keyof DatabaseWithoutInternals
   }
-    ? keyof (Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
-        Database[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
+    ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
+        DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
     : never = never,
-> = DefaultSchemaTableNameOrOptions extends { schema: keyof Database }
-  ? (Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
-      Database[DefaultSchemaTableNameOrOptions["schema"]]["Views"])[TableName] extends {
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
+      DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])[TableName] extends {
       Row: infer R
     }
     ? R
@@ -1334,14 +1516,16 @@ export type Tables<
 export type TablesInsert<
   DefaultSchemaTableNameOrOptions extends
     | keyof DefaultSchema["Tables"]
-    | { schema: keyof Database },
+    | { schema: keyof DatabaseWithoutInternals },
   TableName extends DefaultSchemaTableNameOrOptions extends {
-    schema: keyof Database
+    schema: keyof DatabaseWithoutInternals
   }
-    ? keyof Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
+    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
     : never = never,
-> = DefaultSchemaTableNameOrOptions extends { schema: keyof Database }
-  ? Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
       Insert: infer I
     }
     ? I
@@ -1357,14 +1541,16 @@ export type TablesInsert<
 export type TablesUpdate<
   DefaultSchemaTableNameOrOptions extends
     | keyof DefaultSchema["Tables"]
-    | { schema: keyof Database },
+    | { schema: keyof DatabaseWithoutInternals },
   TableName extends DefaultSchemaTableNameOrOptions extends {
-    schema: keyof Database
+    schema: keyof DatabaseWithoutInternals
   }
-    ? keyof Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
+    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
     : never = never,
-> = DefaultSchemaTableNameOrOptions extends { schema: keyof Database }
-  ? Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
       Update: infer U
     }
     ? U
@@ -1380,14 +1566,16 @@ export type TablesUpdate<
 export type Enums<
   DefaultSchemaEnumNameOrOptions extends
     | keyof DefaultSchema["Enums"]
-    | { schema: keyof Database },
+    | { schema: keyof DatabaseWithoutInternals },
   EnumName extends DefaultSchemaEnumNameOrOptions extends {
-    schema: keyof Database
+    schema: keyof DatabaseWithoutInternals
   }
-    ? keyof Database[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
+    ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
     : never = never,
-> = DefaultSchemaEnumNameOrOptions extends { schema: keyof Database }
-  ? Database[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"][EnumName]
+> = DefaultSchemaEnumNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"][EnumName]
   : DefaultSchemaEnumNameOrOptions extends keyof DefaultSchema["Enums"]
     ? DefaultSchema["Enums"][DefaultSchemaEnumNameOrOptions]
     : never
@@ -1395,14 +1583,16 @@ export type Enums<
 export type CompositeTypes<
   PublicCompositeTypeNameOrOptions extends
     | keyof DefaultSchema["CompositeTypes"]
-    | { schema: keyof Database },
+    | { schema: keyof DatabaseWithoutInternals },
   CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
-    schema: keyof Database
+    schema: keyof DatabaseWithoutInternals
   }
-    ? keyof Database[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
+    ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
     : never = never,
-> = PublicCompositeTypeNameOrOptions extends { schema: keyof Database }
-  ? Database[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
+> = PublicCompositeTypeNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
   : PublicCompositeTypeNameOrOptions extends keyof DefaultSchema["CompositeTypes"]
     ? DefaultSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
     : never

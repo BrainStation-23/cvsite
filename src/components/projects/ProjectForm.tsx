@@ -4,6 +4,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { ProjectManagerCombobox } from './ProjectManagerCombobox';
 
 interface Project {
   id: string;
@@ -33,7 +34,7 @@ export const ProjectForm: React.FC<ProjectFormProps> = ({
   const [formData, setFormData] = useState({
     project_name: '',
     client_name: '',
-    project_manager: '',
+    project_manager: null as string | null,
     budget: ''
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -44,7 +45,7 @@ export const ProjectForm: React.FC<ProjectFormProps> = ({
       setFormData({
         project_name: initialData?.project_name || '',
         client_name: initialData?.client_name || '',
-        project_manager: initialData?.project_manager || '',
+        project_manager: initialData?.project_manager || null,
         budget: initialData?.budget?.toString() || ''
       });
     }
@@ -62,7 +63,7 @@ export const ProjectForm: React.FC<ProjectFormProps> = ({
     const projectData = {
       project_name: formData.project_name.trim(),
       client_name: formData.client_name.trim() || null,
-      project_manager: formData.project_manager.trim() || null,
+      project_manager: formData.project_manager,
       budget: formData.budget ? parseFloat(formData.budget) : null
     };
 
@@ -72,7 +73,7 @@ export const ProjectForm: React.FC<ProjectFormProps> = ({
       setFormData({
         project_name: '',
         client_name: '',
-        project_manager: '',
+        project_manager: null,
         budget: ''
       });
       onOpenChange(false);
@@ -81,7 +82,7 @@ export const ProjectForm: React.FC<ProjectFormProps> = ({
     setIsSubmitting(false);
   };
 
-  const handleChange = (field: string, value: string) => {
+  const handleChange = (field: string, value: string | null) => {
     setFormData(prev => ({
       ...prev,
       [field]: value
@@ -118,11 +119,10 @@ export const ProjectForm: React.FC<ProjectFormProps> = ({
 
           <div className="space-y-2">
             <Label htmlFor="project_manager">Project Manager</Label>
-            <Input
-              id="project_manager"
+            <ProjectManagerCombobox
               value={formData.project_manager}
-              onChange={(e) => handleChange('project_manager', e.target.value)}
-              placeholder="Enter project manager name"
+              onValueChange={(value) => handleChange('project_manager', value)}
+              placeholder="Select project manager"
             />
           </div>
 

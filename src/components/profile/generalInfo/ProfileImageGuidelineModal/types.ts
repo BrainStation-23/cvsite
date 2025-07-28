@@ -1,4 +1,21 @@
 
+export interface ValidationResult {
+  id: string;
+  type: string;
+  passed: boolean;
+  details: string;
+  label: string;
+  source: string;
+}
+
+export interface ValidationProgress {
+  id: string;
+  label: string;
+  status: 'pending' | 'running' | 'completed' | 'failed';
+  passed?: boolean;
+  details?: string;
+}
+
 export interface ImageAnalysisResult {
   isProfessionalHeadshot: boolean;
   isFaceCentered: boolean;
@@ -21,31 +38,11 @@ export interface ImageAnalysisResult {
     shoulderAngle: number;
     details: string;
   };
-}
-
-export type ValidationResult = {
-  id: string;
-  label: string;
-  passed: boolean;
-  details?: string;
-  source: 'local' | 'azure';
-};
-
-export interface ValidationSubtask {
-  id: string;
-  label: string;
-  status: 'pending' | 'running' | 'completed' | 'failed';
-  passed?: boolean;
-  details?: string;
-}
-
-export interface ValidationProgress {
-  id: string;
-  label: string;
-  status: 'pending' | 'running' | 'completed' | 'failed';
-  passed?: boolean;
-  details?: string;
-  subtasks?: ValidationSubtask[];
+  closeup?: {
+    passed: boolean;
+    faceHeightRatio: number;
+    details: string;
+  };
 }
 
 export interface ProfileImageGuidelineModalProps {

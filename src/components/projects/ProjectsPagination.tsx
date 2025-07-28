@@ -25,7 +25,12 @@ export const ProjectsPagination: React.FC<ProjectsPaginationProps> = ({
   totalItems,
   itemsPerPage
 }) => {
-  if (totalPages <= 1) return null;
+  console.log('Pagination props:', { currentPage, totalPages, totalItems, itemsPerPage });
+  
+  if (totalPages <= 1) {
+    console.log('Not showing pagination: totalPages <= 1');
+    return null;
+  }
 
   const getVisiblePages = () => {
     const pages = [];
@@ -75,8 +80,9 @@ export const ProjectsPagination: React.FC<ProjectsPaginationProps> = ({
         <PaginationContent>
           <PaginationItem>
             <PaginationPrevious 
-              onClick={() => onPageChange(currentPage - 1)}
+              onClick={() => onPageChange(Math.max(1, currentPage - 1))}
               className={currentPage === 1 ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
+              aria-disabled={currentPage === 1}
             />
           </PaginationItem>
           
@@ -98,8 +104,9 @@ export const ProjectsPagination: React.FC<ProjectsPaginationProps> = ({
           
           <PaginationItem>
             <PaginationNext 
-              onClick={() => onPageChange(currentPage + 1)}
+              onClick={() => onPageChange(Math.min(totalPages, currentPage + 1))}
               className={currentPage === totalPages ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
+              aria-disabled={currentPage === totalPages}
             />
           </PaginationItem>
         </PaginationContent>

@@ -1,4 +1,3 @@
-
 import { supabase } from '../../integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { UserRole } from '@/types';
@@ -53,7 +52,7 @@ export function useUserCreation(state: ReturnType<typeof import('./use-user-stat
     }
   };
   
-  // Bulk upload (create) with improved progress handling
+  // Bulk upload (create) - unchanged for create mode
   const bulkUpload = async (uploadFile: File) => {
     try {
       console.log('Starting bulk upload for file:', uploadFile.name);
@@ -68,19 +67,16 @@ export function useUserCreation(state: ReturnType<typeof import('./use-user-stat
         return false;
       }
       
-      // Show initial progress toast
       toast({
         title: 'Processing bulk upload',
         description: 'Analyzing file and preparing to create users in batches...',
       });
       
-      // Create FormData and append the file
       const formData = new FormData();
       formData.append('file', uploadFile);
       
       console.log('FormData created, invoking function...');
       
-      // Use the supabase client to invoke the function with FormData
       const { data, error } = await supabase.functions.invoke('bulk-create-users', {
         body: formData
       });
@@ -92,7 +88,6 @@ export function useUserCreation(state: ReturnType<typeof import('./use-user-stat
         throw error;
       }
       
-      // Show detailed success message with batch information
       if (data?.results) {
         const { successful, failed, passwordsGenerated } = data.results;
         const batchInfo = data.batchInfo;
@@ -113,7 +108,6 @@ export function useUserCreation(state: ReturnType<typeof import('./use-user-stat
           description,
         });
         
-        // If there were failures, show them in a separate toast
         if (failed.length > 0 && failed.length < 10) {
           const failedEmails = failed.slice(0, 5).map(f => f.email || 'Unknown').join(', ');
           const moreFailures = failed.length > 5 ? ` and ${failed.length - 5} more` : '';
@@ -147,94 +141,11 @@ export function useUserCreation(state: ReturnType<typeof import('./use-user-stat
     }
   };
 
-  // Bulk update with CSV file
+  // Bulk update - simplified since we're using the new chunked approach
   const bulkUpdate = async (uploadFile: File) => {
-    try {
-      console.log('Starting bulk update for file:', uploadFile.name);
-      state.setIsBulkUploading(true);
-      
-      if (!uploadFile) {
-        toast({
-          title: 'No file selected',
-          description: 'Please select a file to upload',
-          variant: 'destructive',
-        });
-        return false;
-      }
-      
-      // Show initial progress toast
-      toast({
-        title: 'Processing bulk update',
-        description: 'Analyzing file and preparing to update users in batches...',
-      });
-      
-      // Create FormData and append the file
-      const formData = new FormData();
-      formData.append('file', uploadFile);
-      
-      console.log('FormData created, invoking bulk-update-users function...');
-      
-      // Use the supabase client to invoke the bulk update function
-      const { data, error } = await supabase.functions.invoke('bulk-update-users', {
-        body: formData
-      });
-      
-      console.log('Bulk update function response:', { data, error });
-      
-      if (error) {
-        console.error('Bulk update function error:', error);
-        throw error;
-      }
-      
-      // Show detailed success message
-      if (data?.results) {
-        const { successful, failed } = data.results;
-        const batchInfo = data.batchInfo;
-        
-        let description = `Successfully processed ${batchInfo?.totalUsers || 'unknown'} users in ${batchInfo?.totalBatches || 'multiple'} batches.\n`;
-        description += `✅ ${successful.length} users updated successfully`;
-        
-        if (failed.length > 0) {
-          description += `\n❌ ${failed.length} users failed to update`;
-        }
-        
-        toast({
-          title: "Bulk update completed",
-          description,
-        });
-        
-        // If there were failures, show them in a separate toast
-        if (failed.length > 0 && failed.length < 10) {
-          const failedIds = failed.slice(0, 5).map(f => f.userId || 'Unknown').join(', ');
-          const moreFailures = failed.length > 5 ? ` and ${failed.length - 5} more` : '';
-          
-          setTimeout(() => {
-            toast({
-              title: "Some users failed to update",
-              description: `Failed: ${failedIds}${moreFailures}. Check logs for details.`,
-              variant: 'destructive',
-            });
-          }, 2000);
-        }
-      } else {
-        toast({
-          title: "Bulk update completed",
-          description: data?.message || `Users have been updated successfully.`,
-        });
-      }
-      
-      return true;
-    } catch (error) {
-      console.error('Error in bulk update:', error);
-      toast({
-        title: 'Error in bulk update',
-        description: error.message || 'There was an error processing the bulk update',
-        variant: 'destructive',
-      });
-      return false;
-    } finally {
-      state.setIsBulkUploading(false);
-    }
+    // This is now just a placeholder that triggers the chunked update
+    // The actual processing is handled by the BulkUploadDialog component
+    return true;
   };
   
   return {

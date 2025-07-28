@@ -12,7 +12,7 @@ export interface SettingItem {
 }
 
 // Define valid table names for type safety
-export type SettingTableName = 'universities' | 'departments' | 'degrees' | 'designations' | 'references' | 'sbus' | 'hr_contacts' | 'resource_types';
+export type SettingTableName = 'universities' | 'departments' | 'degrees' | 'designations' | 'references' | 'sbus' | 'hr_contacts' | 'resource_types' | 'bill_types' | 'project_types' | 'expertise_types';
 
 export const usePlatformSettings = (table: SettingTableName) => {
   const { toast } = useToast();
@@ -65,6 +65,33 @@ export const usePlatformSettings = (table: SettingTableName) => {
     },
   });
   
+  // Update setting mutation
+  const updateSettingMutation = useMutation({
+    mutationFn: async ({ id, name }: { id: string; name: string }) => {
+      // Check if another item with the same name already exists (excluding current item)
+      const existingItems = items || [];
+      const itemExists = existingItems.some(item => 
+        item.id !== id && item.name.toLowerCase() === name.toLowerCase()
+      );
+      
+      if (itemExists) {
+        throw new Error(`"${name}" already exists`);
+      }
+      
+      const { data, error } = await supabase
+        .from(table)
+        .update({ name, updated_at: new Date().toISOString() })
+        .eq('id', id)
+        .select();
+      
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [table] });
+    },
+  });
+  
   // Delete setting mutation
   const deleteSettingMutation = useMutation({
     mutationFn: async (id: string) => {
@@ -107,6 +134,27 @@ export const usePlatformSettings = (table: SettingTableName) => {
     });
   };
   
+  const updateItem = (id: string, name: string, originalName: string) => {
+    if (!name.trim()) return;
+    
+    // Perform the mutation
+    updateSettingMutation.mutate({ id, name: name.trim() }, {
+      onSuccess: () => {
+        toast({
+          title: "Item updated",
+          description: `"${originalName}" has been updated to "${name}".`,
+        });
+      },
+      onError: (error) => {
+        toast({
+          title: "Error",
+          description: `Failed to update item: ${error instanceof Error ? error.message : 'Unknown error'}`,
+          variant: "destructive"
+        });
+      }
+    });
+  };
+  
   const removeItem = (id: string, name: string) => {
     // Perform the mutation
     deleteSettingMutation.mutate(id, {
@@ -131,8 +179,10 @@ export const usePlatformSettings = (table: SettingTableName) => {
     isLoading,
     error,
     addItem,
+    updateItem,
     removeItem,
     isAddingItem: addSettingMutation.isPending,
+    isUpdatingItem: updateSettingMutation.isPending,
     isRemovingItem: deleteSettingMutation.isPending
   };
 };

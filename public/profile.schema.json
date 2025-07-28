@@ -51,9 +51,9 @@
       "properties": {
         "firstName": { "type": "string" },
         "lastName": { "type": "string" },
-        "biography": { "type": "string" },
-        "profileImage": { "type": "string" },
-        "current_designation": { "type": "string" }
+        "biography": { "type": ["string", "null"] },
+        "profileImage": { "type": ["string", "null"] },
+        "current_designation": { "type": ["string", "null"] }
       }
     },
     "Skill": {
@@ -70,10 +70,10 @@
       "properties": {
         "companyName": { "type": "string" },
         "designation": { "type": "string" },
-        "description": { "type": "string" },
-        "startDate": { "type": "string" },
-        "endDate": { "type": "string" },
-        "isCurrent": { "type": "boolean" }
+        "description": { "type": ["string", "null"] },
+        "startDate": { "type": ["string", "null"] },
+        "endDate": { "type": ["string", "null"] },
+        "isCurrent": { "type": ["boolean", "null"] }
       }
     },
     "Education": {
@@ -81,12 +81,12 @@
       "required": ["university"],
       "properties": {
         "university": { "type": "string" },
-        "degree": { "type": "string" },
-        "department": { "type": "string" },
-        "gpa": { "type": "string" },
-        "startDate": { "type": "string" },
-        "endDate": { "type": "string" },
-        "isCurrent": { "type": "boolean" }
+        "degree": { "type": ["string", "null"] },
+        "department": { "type": ["string", "null"] },
+        "gpa": { "type": ["string", "null"] },
+        "startDate": { "type": ["string", "null"] },
+        "endDate": { "type": ["string", "null"] },
+        "isCurrent": { "type": ["boolean", "null"] }
       }
     },
     "Training": {
@@ -94,10 +94,10 @@
       "required": ["title"],
       "properties": {
         "title": { "type": "string" },
-        "provider": { "type": "string" },
-        "description": { "type": "string" },
-        "date": { "type": "string" },
-        "certificateUrl": { "type": "string" }
+        "provider": { "type": ["string", "null"] },
+        "description": { "type": ["string", "null"] },
+        "date": { "type": ["string", "null"] },
+        "certificateUrl": { "type": ["string", "null"] }
       }
     },
     "Achievement": {
@@ -106,7 +106,7 @@
       "properties": {
         "title": { "type": "string" },
         "description": { "type": "string" },
-        "date": { "type": "string" }
+        "date": { "type": ["string", "null"] }
       }
     },
     "ProjectJSON": {
@@ -114,17 +114,17 @@
       "required": ["name", "description"],
       "properties": {
         "name": { "type": "string" },
-        "role": { "type": "string" },
+        "role": { "type": ["string", "null"] },
         "description": { "type": "string" },
-        "responsibility": { "type": "string" },
-        "startDate": { "type": "string" },
-        "endDate": { "type": "string" },
-        "isCurrent": { "type": "boolean" },
+        "responsibility": { "type": ["string", "null"] },
+        "startDate": { "type": ["string", "null"] },
+        "endDate": { "type": ["string", "null"] },
+        "isCurrent": { "type": ["boolean", "null"] },
         "technologiesUsed": {
-          "type": "array",
+          "type": ["array", "null"],
           "items": { "type": "string" }
         },
-        "url": { "type": "string" }
+        "url": { "type": ["string", "null"] }
       }
     }
   }

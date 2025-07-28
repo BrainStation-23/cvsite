@@ -1,8 +1,7 @@
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.38.4";
-import * as csv from "https://deno.land/std@0.170.0/encoding/csv.ts";
-import * as xlsx from "https://esm.sh/xlsx@0.18.5";
+import Papa from "https://esm.sh/papaparse@5.4.1";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -17,35 +16,28 @@ const parseFileData = async (formData: FormData): Promise<any[]> => {
   if (!file) throw new Error('No file uploaded');
   
   const fileType = file.name.split('.').pop()?.toLowerCase();
-  const arrayBuffer = await file.arrayBuffer();
   
   if (fileType === 'csv') {
-    const text = new TextDecoder().decode(arrayBuffer);
-    const rows = await csv.parse(text, { skipFirstRow: true });
-    return rows.map(row => ({
-      email: row[0],
-      firstName: row[1],
-      lastName: row[2],
-      role: row[3] || 'employee',
-      password: row[4],
-      employeeId: row[5],
-      sbuName: row[6] // Added SBU name field
-    }));
-  } else if (fileType === 'xlsx' || fileType === 'xls') {
-    const workbook = xlsx.read(arrayBuffer);
-    const worksheet = workbook.Sheets[workbook.SheetNames[0]];
-    const data = xlsx.utils.sheet_to_json(worksheet);
-    return data.map((row: any) => ({
-      email: row.email,
-      firstName: row.firstName,
-      lastName: row.lastName,
-      role: row.role || 'employee',
-      password: row.password,
-      employeeId: row.employeeId,
-      sbuName: row.sbuName // Added SBU name field
-    }));
+    const text = new TextDecoder().decode(await file.arrayBuffer());
+    
+    return new Promise((resolve, reject) => {
+      Papa.parse(text, {
+        header: true,
+        skipEmptyLines: true,
+        complete: (result) => {
+          if (result.errors.length > 0) {
+            reject(new Error(`CSV parsing error: ${result.errors[0].message}`));
+          } else {
+            resolve(result.data);
+          }
+        },
+        error: (error) => {
+          reject(new Error(`CSV parsing failed: ${error.message}`));
+        }
+      });
+    });
   } else {
-    throw new Error('Unsupported file format. Please upload CSV or Excel file.');
+    throw new Error('Unsupported file format. Please upload CSV file.');
   }
 };
 
@@ -64,6 +56,57 @@ const getSbuIdByName = async (supabase: any, sbuName: string): Promise<string | 
   }
   
   return sbus && sbus.length > 0 ? sbus[0].id : null;
+};
+
+const getExpertiseIdByName = async (supabase: any, expertiseName: string): Promise<string | null> => {
+  if (!expertiseName || expertiseName.trim() === '') return null;
+  
+  const { data: expertise, error } = await supabase
+    .from('expertise_types')
+    .select('id')
+    .ilike('name', expertiseName.trim())
+    .limit(1);
+  
+  if (error) {
+    console.error('Error fetching expertise:', error);
+    return null;
+  }
+  
+  return expertise && expertise.length > 0 ? expertise[0].id : null;
+};
+
+const getResourceTypeIdByName = async (supabase: any, resourceTypeName: string): Promise<string | null> => {
+  if (!resourceTypeName || resourceTypeName.trim() === '') return null;
+  
+  const { data: resourceTypes, error } = await supabase
+    .from('resource_types')
+    .select('id')
+    .ilike('name', resourceTypeName.trim())
+    .limit(1);
+  
+  if (error) {
+    console.error('Error fetching resource type:', error);
+    return null;
+  }
+  
+  return resourceTypes && resourceTypes.length > 0 ? resourceTypes[0].id : null;
+};
+
+const getManagerIdByEmail = async (supabase: any, managerEmail: string): Promise<string | null> => {
+  if (!managerEmail || managerEmail.trim() === '') return null;
+  
+  const { data: managers, error } = await supabase
+    .from('profiles')
+    .select('id')
+    .eq('email', managerEmail.trim())
+    .limit(1);
+  
+  if (error) {
+    console.error('Error fetching manager:', error);
+    return null;
+  }
+  
+  return managers && managers.length > 0 ? managers[0].id : null;
 };
 
 const generateRandomPassword = (): string => {
@@ -119,7 +162,20 @@ serve(async (req) => {
       
       // Process each user in the current batch
       for (const user of batch) {
-        const { email, firstName, lastName, role, password, employeeId, sbuName } = user;
+        const { 
+          email, 
+          firstName, 
+          lastName, 
+          role, 
+          password, 
+          employeeId, 
+          managerEmail,
+          sbuName, 
+          expertiseName, 
+          resourceTypeName,
+          dateOfJoining,
+          careerStartDate
+        } = user;
         
         if (!email || !firstName || !lastName) {
           results.failed.push({ 
@@ -131,10 +187,9 @@ serve(async (req) => {
         
         try {
           // Validate role
-          if (!['admin', 'manager', 'employee'].includes(role)) {
-            results.failed.push({ email, error: 'Invalid role. Must be admin, manager, or employee' });
-            continue;
-          }
+          const validRole = role && ['admin', 'manager', 'employee'].includes(role.toLowerCase()) 
+            ? role.toLowerCase() 
+            : 'employee';
           
           // Generate password if not provided
           const userPassword = password && password.trim() ? password.trim() : generateRandomPassword();
@@ -142,16 +197,17 @@ serve(async (req) => {
             results.passwordsGenerated++;
           }
           
-          // Get SBU ID from name if provided
-          let sbuId = null;
-          if (sbuName && sbuName.trim()) {
-            sbuId = await getSbuIdByName(supabase, sbuName);
-            if (!sbuId) {
-              console.log(`Warning: SBU "${sbuName}" not found for user ${email}, proceeding without SBU assignment`);
-            }
-          }
+          // Get foreign key IDs from names
+          const sbuId = await getSbuIdByName(supabase, sbuName);
+          const expertiseId = await getExpertiseIdByName(supabase, expertiseName);
+          const resourceTypeId = await getResourceTypeIdByName(supabase, resourceTypeName);
+          const managerId = await getManagerIdByEmail(supabase, managerEmail);
           
-          console.log(`Creating user: ${email} with SBU: ${sbuName} (ID: ${sbuId})`);
+          // Parse dates
+          const parsedDateOfJoining = dateOfJoining && dateOfJoining.trim() ? dateOfJoining.trim() : null;
+          const parsedCareerStartDate = careerStartDate && careerStartDate.trim() ? careerStartDate.trim() : null;
+          
+          console.log(`Creating user: ${email} with SBU: ${sbuName} (ID: ${sbuId}), Manager: ${managerEmail} (ID: ${managerId})`);
           
           // Create user in Supabase Auth
           const { data: authData, error: authError } = await supabase.auth.admin.createUser({
@@ -161,9 +217,14 @@ serve(async (req) => {
             user_metadata: {
               first_name: firstName.trim(),
               last_name: lastName.trim(),
-              role: role,
+              role: validRole,
               employee_id: employeeId ? employeeId.trim() : '',
-              sbu_id: sbuId
+              sbu_id: sbuId,
+              expertise_id: expertiseId,
+              resource_type_id: resourceTypeId,
+              manager_id: managerId,
+              date_of_joining: parsedDateOfJoining,
+              career_start_date: parsedCareerStartDate
             }
           });
           
@@ -184,16 +245,24 @@ serve(async (req) => {
             continue;
           }
           
-          // Update the profile with SBU assignment if we found one
-          if (sbuId) {
+          // Update the profile with additional information
+          const profileUpdates: any = {};
+          if (sbuId) profileUpdates.sbu_id = sbuId;
+          if (expertiseId) profileUpdates.expertise = expertiseId;
+          if (resourceTypeId) profileUpdates.resource_type = resourceTypeId;
+          if (managerId) profileUpdates.manager = managerId;
+          if (parsedDateOfJoining) profileUpdates.date_of_joining = parsedDateOfJoining;
+          if (parsedCareerStartDate) profileUpdates.career_start_date = parsedCareerStartDate;
+          
+          if (Object.keys(profileUpdates).length > 0) {
             const { error: profileError } = await supabase
               .from('profiles')
-              .update({ sbu_id: sbuId })
+              .update(profileUpdates)
               .eq('id', authData.user.id);
             
             if (profileError) {
-              console.error(`Error updating profile with SBU for user ${email}:`, profileError);
-              // Don't fail the entire operation if SBU assignment fails
+              console.error(`Error updating profile for user ${email}:`, profileError);
+              // Don't fail the entire operation if profile update fails
             }
           }
           
@@ -201,7 +270,13 @@ serve(async (req) => {
             email, 
             userId: authData.user.id,
             sbuAssigned: !!sbuId,
-            sbuName: sbuId ? sbuName : null
+            sbuName: sbuId ? sbuName : null,
+            managerAssigned: !!managerId,
+            managerEmail: managerId ? managerEmail : null,
+            expertiseAssigned: !!expertiseId,
+            expertiseName: expertiseId ? expertiseName : null,
+            resourceTypeAssigned: !!resourceTypeId,
+            resourceTypeName: resourceTypeId ? resourceTypeName : null
           });
           
           console.log(`Successfully created user: ${email}`);

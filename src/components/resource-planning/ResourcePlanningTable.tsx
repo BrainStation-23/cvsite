@@ -1,91 +1,90 @@
 
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Table, TableBody } from '@/components/ui/table';
 import { useResourcePlanning } from '@/hooks/use-resource-planning';
-import { ResourceAssignmentDialog } from './ResourceAssignmentDialog';
+import { useUnplannedResources } from '@/hooks/use-unplanned-resources';
 import { ResourcePlanningSearchControls } from './ResourcePlanningSearchControls';
-import { ResourcePlanningTableHeader } from './ResourcePlanningTableHeader';
-import { ResourcePlanningTableRow } from './ResourcePlanningTableRow';
-import { ResourcePlanningPagination } from './ResourcePlanningPagination';
+import { ResourcePlanningFilters } from './ResourcePlanningFilters';
+import { ResourcePlanningForm } from './ResourcePlanningForm';
+import { ResourcePlanningTabs } from './ResourcePlanningTabs';
+import { useResourcePlanningState } from './hooks/useResourcePlanningState';
 
 export const ResourcePlanningTable: React.FC = () => {
   const {
-    data,
-    pagination,
-    isLoading,
     searchQuery,
     setSearchQuery,
-    currentPage,
-    setCurrentPage,
-    sortBy,
-    setSortBy,
-    sortOrder,
-    setSortOrder,
+    selectedSbu,
+    setSelectedSbu,
+    selectedManager,
+    setSelectedManager,
+    showUnplanned,
+    setShowUnplanned,
+    clearFilters,
+    data: plannedData,
   } = useResourcePlanning();
 
-  const handleSort = (column: string) => {
-    if (sortBy === column) {
-      setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
-    } else {
-      setSortBy(column);
-      setSortOrder('asc');
-    }
-  };
+  const { unplannedResources } = useUnplannedResources({
+    searchQuery,
+    selectedSbu,
+    selectedManager,
+  });
 
-  if (isLoading) {
-    return (
-      <Card>
-        <CardContent className="p-6">
-          <div className="flex items-center justify-center h-32">
-            <div className="text-muted-foreground">Loading resource planning data...</div>
-          </div>
-        </CardContent>
-      </Card>
-    );
-  }
+  const {
+    showCreateForm,
+    preselectedProfileId,
+    editingItem,
+    handleCreatePlan,
+    handleCreateNewAssignment,
+    handleEditAssignment,
+    handleFormSuccess,
+    handleFormCancel,
+  } = useResourcePlanningState();
 
   return (
     <Card>
       <CardHeader>
-        <div className="flex items-center justify-between">
-          <CardTitle>Resource Planning</CardTitle>
-          <ResourceAssignmentDialog mode="create" />
-        </div>
-        <ResourcePlanningSearchControls 
-          searchQuery={searchQuery}
-          setSearchQuery={setSearchQuery}
-        />
-      </CardHeader>
-      <CardContent>
-        {data.length === 0 ? (
-          <div className="flex items-center justify-center h-32 text-muted-foreground">
-            No resource planning entries found. Create your first assignment to get started.
-          </div>
-        ) : (
-          <>
-            <div className="rounded-md border">
-              <Table>
-                <ResourcePlanningTableHeader 
-                  sortBy={sortBy}
-                  sortOrder={sortOrder}
-                  onSort={handleSort}
-                />
-                <TableBody>
-                  {data.map((item) => (
-                    <ResourcePlanningTableRow key={item.id} item={item} />
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
-
-            <ResourcePlanningPagination 
-              pagination={pagination}
-              currentPage={currentPage}
-              setCurrentPage={setCurrentPage}
+        <CardTitle>Resource Planning</CardTitle>
+        
+        <div className="space-y-4">
+          <ResourcePlanningFilters
+            selectedSbu={selectedSbu}
+            onSbuChange={setSelectedSbu}
+            selectedManager={selectedManager}
+            onManagerChange={setSelectedManager}
+            showUnplanned={showUnplanned}
+            onShowUnplannedChange={setShowUnplanned}
+            onClearFilters={clearFilters}
             />
-          </>
+          
+          <ResourcePlanningSearchControls 
+            searchQuery={searchQuery}
+            setSearchQuery={setSearchQuery}
+          />
+        </div>
+      </CardHeader>
+      
+      <CardContent>
+        {showCreateForm && (
+          <ResourcePlanningForm
+            preselectedProfileId={preselectedProfileId}
+            editingItem={editingItem}
+            onSuccess={handleFormSuccess}
+            onCancel={handleFormCancel}
+          />
         )}
+
+        <ResourcePlanningTabs
+          showUnplanned={showUnplanned}
+          setShowUnplanned={setShowUnplanned}
+          plannedCount={plannedData.length}
+          unplannedCount={unplannedResources.length}
+          searchQuery={searchQuery}
+          selectedSbu={selectedSbu}
+          selectedManager={selectedManager}
+          onCreateNewAssignment={handleCreateNewAssignment}
+          onEditAssignment={handleEditAssignment}
+          onCreatePlan={handleCreatePlan}
+        />
       </CardContent>
     </Card>
   );

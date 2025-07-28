@@ -1,3 +1,4 @@
+
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
@@ -7,7 +8,15 @@ import { UseFormReturn } from 'react-hook-form';
 import { ProfileImageUpload } from './ProfileImageUpload';
 import { DesignationCombobox } from '@/components/admin/designation/DesignationCombobox';
 import { GeneralInfoTourButton } from './GeneralInfoTourButton';
-import { Save } from 'lucide-react';
+import { AiEnhanceDialog } from '@/components/ui/ai-enhance-dialog';
+import { Save, Info, Sparkles } from 'lucide-react';
+import { useState } from 'react';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
 
 // Define this type consistently across all files
 export interface GeneralInfoFormData {
@@ -35,15 +44,24 @@ export const GeneralInfoTab: React.FC<GeneralInfoTabProps> = ({
   onSave,
   isSaving = false
 }) => {
+  const [isEnhanceDialogOpen, setIsEnhanceDialogOpen] = useState(false);
+  
   // Use react-hook-form's built-in dirty/submitting state
   const { isDirty, isSubmitting } = form.formState;
 
   const firstName = form.watch('firstName');
   const lastName = form.watch('lastName');
   const profileImage = form.watch('profileImage');
+  const currentDesignation = form.watch('currentDesignation');
+  const biography = form.watch('biography');
   
   const userName = `${firstName} ${lastName}`.trim() || 'User';
 
+  console.log('=== GeneralInfoTab Debug ===');
+  console.log('Profile ID:', profileId);
+  console.log('Current designation from form:', currentDesignation);
+  console.log('Is editing:', isEditing);
+  console.log('Form values:', form.getValues());
 
   const handleImageUpdate = async (imageUrl: string | null) => {
     form.setValue('profileImage', imageUrl);
@@ -57,17 +75,27 @@ export const GeneralInfoTab: React.FC<GeneralInfoTabProps> = ({
     }
   };
 
-
   const handleSave = async () => {
     if (!onSave) return;
     const currentValues = form.getValues();
+    console.log('Saving general info with values:', currentValues);
     try {
       await onSave(currentValues);
-      // react-hook-form will reset isDirty after a successful submission if you use reset()
     } catch (error) {
       console.error('Error saving general info:', error);
     }
-  }; 
+  };
+
+  const handleBiographyEnhanced = (enhancedText: string) => {
+    form.setValue('biography', enhancedText, { shouldDirty: true });
+  };
+
+  const biographyRequirements = `Please rewrite this biography to be more professional and engaging for a CV/resume. Focus on:
+- Keep it in First Person
+- Making it concise but impactful
+- Highlighting key strengths and achievements
+- Using professional language
+`;
 
   return (
     <Card>
@@ -172,7 +200,10 @@ export const GeneralInfoTab: React.FC<GeneralInfoTabProps> = ({
                           <div data-tour="designation-select">
                             <DesignationCombobox
                               value={field.value || ''}
-                              onValueChange={field.onChange}
+                              onValueChange={(newValue) => {
+                                console.log('Designation changed from', field.value, 'to', newValue);
+                                field.onChange(newValue);
+                              }}
                               placeholder="Select or add designation..."
                             />
                           </div>
@@ -190,7 +221,44 @@ export const GeneralInfoTab: React.FC<GeneralInfoTabProps> = ({
                   name="biography"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="block text-sm font-medium text-gray-700 dark:text-gray-300">Biography</FormLabel>
+                      <FormLabel className="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                        Biography
+                        {isEditing && (
+                          <div className="flex items-center gap-1">
+                            <TooltipProvider>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <Info className="h-4 w-4 text-gray-400 cursor-help" />
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                  <div className="max-w-xs">
+                                    <p className="text-sm">Requirements for a good biography:</p>
+                                    <ul className="text-xs mt-1 space-y-1">
+                                      <li>• Highlight key strengths</li>
+                                      <li>• Minimum 3-4 Lines</li>
+                                      <li>• Hobby</li>
+                                      <li>• Primary Focus</li>
+                                      <li>• Primary Industry</li>
+                                      <li>• Your Core Motivation</li>
+                                    </ul>
+                                  </div>
+                                </TooltipContent>
+                              </Tooltip>
+                            </TooltipProvider>
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => setIsEnhanceDialogOpen(true)}
+                              className="h-6 px-2 text-xs"
+                              disabled={!biography?.trim()}
+                            >
+                              <Sparkles className="h-3 w-3 mr-1" />
+                              Enhance with AI
+                            </Button>
+                          </div>
+                        )}
+                      </FormLabel>
                       <FormControl>
                         {isEditing ? (
                           <Textarea
@@ -212,6 +280,17 @@ export const GeneralInfoTab: React.FC<GeneralInfoTabProps> = ({
           </form>
         </Form>
       </CardContent>
+
+      {/* AI Enhancement Dialog */}
+      <AiEnhanceDialog
+        isOpen={isEnhanceDialogOpen}
+        onClose={() => setIsEnhanceDialogOpen(false)}
+        onEnhanced={handleBiographyEnhanced}
+        originalContent={biography || ''}
+        defaultRequirements={biographyRequirements}
+        title="Enhance Biography with AI"
+        description="Review the requirements and enhance your biography with AI to make it more professional and engaging."
+      />
     </Card>
   );
 };

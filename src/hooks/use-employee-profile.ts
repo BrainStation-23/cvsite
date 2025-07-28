@@ -8,6 +8,8 @@ import { useAchievementsFetch } from './profile/use-achievements-fetch';
 import { useProjectsFetch } from './profile/use-projects-fetch';
 
 export function useEmployeeProfile(profileId: string) {
+  console.log('useEmployeeProfile called with profileId:', profileId);
+  
   const generalInfoHook = useGeneralInfoFetch(profileId);
   const skillsHook = useSkillsFetch(profileId);
   const experienceHook = useExperienceFetch(profileId);

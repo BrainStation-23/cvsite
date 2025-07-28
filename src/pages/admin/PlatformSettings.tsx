@@ -1,158 +1,148 @@
 
 import React from 'react';
 import DashboardLayout from '../../components/Layout/DashboardLayout';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import UniversitySettings from '@/components/admin/UniversitySettings';
-import DepartmentSettings from '@/components/admin/DepartmentSettings';
-import DegreeSettings from '@/components/admin/DegreeSettings';
-import DesignationSettings from '@/components/admin/DesignationSettings';
-import ReferenceSettings from '@/components/admin/reference/ReferenceSettings';
-import SbuSettings from '@/components/admin/SbuSettings';
-import HrContactSettings from '@/components/admin/HrContactSettings';
-import NoteCategorySettings from '@/components/admin/NoteCategorySettings';
-import ResourceTypeSettings from '@/components/admin/ResourceTypeSettings';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Link } from 'react-router-dom';
+import { 
+  GraduationCap, 
+  Users, 
+  FileText, 
+  Settings,
+  ChevronRight,
+  University,
+  Building2,
+  UserCheck,
+  Briefcase
+} from 'lucide-react';
 
 const PlatformSettings: React.FC = () => {
+  const settingsCategories = [
+    {
+      title: 'Profile Management',
+      description: 'Configure universities, departments, degrees, and designations used in employee profiles.',
+      icon: GraduationCap,
+      route: '/admin/platform-settings/profile',
+      items: ['Universities', 'Departments', 'Degrees', 'Designations'],
+      color: 'bg-blue-50 dark:bg-blue-950 border-blue-200 dark:border-blue-800',
+      iconColor: 'text-blue-600 dark:text-blue-400'
+    },
+    {
+      title: 'Resource Planning',
+      description: 'Manage resource types, bill types, and project types for resource planning and project management.',
+      icon: Briefcase,
+      route: '/admin/platform-settings/resources',
+      items: ['Resource Types', 'Bill Types', 'Project Types'],
+      color: 'bg-green-50 dark:bg-green-950 border-green-200 dark:border-green-800',
+      iconColor: 'text-green-600 dark:text-green-400'
+    },
+    {
+      title: 'CV Template Settings',
+      description: 'Configure references and other settings related to CV template generation.',
+      icon: FileText,
+      route: '/admin/platform-settings/cv-templates',
+      items: ['References'],
+      color: 'bg-purple-50 dark:bg-purple-950 border-purple-200 dark:border-purple-800',
+      iconColor: 'text-purple-600 dark:text-purple-400'
+    },
+    {
+      title: 'System Configuration',
+      description: 'Configure system-wide settings including SBUs, HR contacts, and note categories.',
+      icon: Settings,
+      route: '/admin/platform-settings/system',
+      items: ['SBUs', 'HR Contacts', 'Note Categories'],
+      color: 'bg-orange-50 dark:bg-orange-950 border-orange-200 dark:border-orange-800',
+      iconColor: 'text-orange-600 dark:text-orange-400'
+    }
+  ];
+
   return (
     <DashboardLayout>
       <div className="flex flex-col h-full">
-        <Tabs defaultValue="universities" className="flex flex-col h-full">
-          {/* Fixed header with tabs */}
-          <div className="flex-shrink-0 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 pb-0">
-            <TabsList className="h-12 w-full justify-start rounded-none bg-transparent p-0 border-b-0">
-              <TabsTrigger 
-                value="universities" 
-                className="h-12 rounded-none border-b-2 border-transparent data-[state=active]:border-cvsite-teal data-[state=active]:bg-transparent data-[state=active]:shadow-none px-6 font-medium"
-              >
-                Universities
-              </TabsTrigger>
-              <TabsTrigger 
-                value="departments" 
-                className="h-12 rounded-none border-b-2 border-transparent data-[state=active]:border-cvsite-teal data-[state=active]:bg-transparent data-[state=active]:shadow-none px-6 font-medium"
-              >
-                Departments
-              </TabsTrigger>
-              <TabsTrigger 
-                value="degrees" 
-                className="h-12 rounded-none border-b-2 border-transparent data-[state=active]:border-cvsite-teal data-[state=active]:bg-transparent data-[state=active]:shadow-none px-6 font-medium"
-              >
-                Degrees
-              </TabsTrigger>
-              <TabsTrigger 
-                value="designations" 
-                className="h-12 rounded-none border-b-2 border-transparent data-[state=active]:border-cvsite-teal data-[state=active]:bg-transparent data-[state=active]:shadow-none px-6 font-medium"
-              >
-                Designations
-              </TabsTrigger>
-              <TabsTrigger 
-                value="references" 
-                className="h-12 rounded-none border-b-2 border-transparent data-[state=active]:border-cvsite-teal data-[state=active]:bg-transparent data-[state=active]:shadow-none px-6 font-medium"
-              >
-                References
-              </TabsTrigger>
-              <TabsTrigger 
-                value="sbus" 
-                className="h-12 rounded-none border-b-2 border-transparent data-[state=active]:border-cvsite-teal data-[state=active]:bg-transparent data-[state=active]:shadow-none px-6 font-medium"
-              >
-                SBUs
-              </TabsTrigger>
-              <TabsTrigger 
-                value="hr-contacts" 
-                className="h-12 rounded-none border-b-2 border-transparent data-[state=active]:border-cvsite-teal data-[state=active]:bg-transparent data-[state=active]:shadow-none px-6 font-medium"
-              >
-                HR Contacts
-              </TabsTrigger>
-              <TabsTrigger 
-                value="note-categories" 
-                className="h-12 rounded-none border-b-2 border-transparent data-[state=active]:border-cvsite-teal data-[state=active]:bg-transparent data-[state=active]:shadow-none px-6 font-medium"
-              >
-                Note Categories
-              </TabsTrigger>
-              <TabsTrigger 
-                value="resource-types" 
-                className="h-12 rounded-none border-b-2 border-transparent data-[state=active]:border-cvsite-teal data-[state=active]:bg-transparent data-[state=active]:shadow-none px-6 font-medium"
-              >
-                Resource Types
-              </TabsTrigger>
-            </TabsList>
+        {/* Header */}
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+            Platform Settings
+          </h1>
+          <p className="text-gray-600 dark:text-gray-400 text-lg">
+            Configure and manage platform-wide settings organized by category.
+          </p>
+        </div>
+
+        {/* Settings Categories Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {settingsCategories.map((category) => (
+            <Card key={category.title} className={`${category.color} hover:shadow-lg transition-all duration-200`}>
+              <CardHeader className="pb-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className={`p-2 rounded-lg bg-white dark:bg-gray-800 ${category.iconColor}`}>
+                      <category.icon className="h-6 w-6" />
+                    </div>
+                    <div>
+                      <CardTitle className="text-xl font-semibold text-gray-900 dark:text-white">
+                        {category.title}
+                      </CardTitle>
+                    </div>
+                  </div>
+                  <ChevronRight className="h-5 w-5 text-gray-400" />
+                </div>
+                <CardDescription className="text-gray-600 dark:text-gray-300 mt-2">
+                  {category.description}
+                </CardDescription>
+              </CardHeader>
+              
+              <CardContent className="pt-0">
+                {/* Settings Items */}
+                <div className="mb-4">
+                  <div className="flex flex-wrap gap-2">
+                    {category.items.map((item) => (
+                      <span 
+                        key={item}
+                        className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700"
+                      >
+                        {item}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Action Button */}
+                <Button asChild className="w-full">
+                  <Link to={category.route}>
+                    Configure {category.title}
+                    <ChevronRight className="ml-2 h-4 w-4" />
+                  </Link>
+                </Button>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+
+        {/* Quick Stats Section */}
+        <div className="mt-8 p-6 bg-gray-50 dark:bg-gray-800 rounded-lg">
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+            Quick Overview
+          </h3>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+            <div>
+              <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">4</div>
+              <div className="text-sm text-gray-600 dark:text-gray-400">Profile Settings</div>
+            </div>
+            <div>
+              <div className="text-2xl font-bold text-green-600 dark:text-green-400">3</div>
+              <div className="text-sm text-gray-600 dark:text-gray-400">Resource Settings</div>
+            </div>
+            <div>
+              <div className="text-2xl font-bold text-purple-600 dark:text-purple-400">1</div>
+              <div className="text-sm text-gray-600 dark:text-gray-400">CV Settings</div>
+            </div>
+            <div>
+              <div className="text-2xl font-bold text-orange-600 dark:text-orange-400">3</div>
+              <div className="text-sm text-gray-600 dark:text-gray-400">System Settings</div>
+            </div>
           </div>
-          
-          {/* Scrollable content area */}
-          <div className="flex-1 min-h-0">
-            <TabsContent value="universities" className="mt-0 h-full">
-              <ScrollArea className="h-full">
-                <div className="p-6">
-                  <UniversitySettings />
-                </div>
-              </ScrollArea>
-            </TabsContent>
-            
-            <TabsContent value="departments" className="mt-0 h-full">
-              <ScrollArea className="h-full">
-                <div className="p-6">
-                  <DepartmentSettings />
-                </div>
-              </ScrollArea>
-            </TabsContent>
-            
-            <TabsContent value="degrees" className="mt-0 h-full">
-              <ScrollArea className="h-full">
-                <div className="p-6">
-                  <DegreeSettings />
-                </div>
-              </ScrollArea>
-            </TabsContent>
-            
-            <TabsContent value="designations" className="mt-0 h-full">
-              <ScrollArea className="h-full">
-                <div className="p-6">
-                  <DesignationSettings />
-                </div>
-              </ScrollArea>
-            </TabsContent>
-            
-            <TabsContent value="references" className="mt-0 h-full">
-              <ScrollArea className="h-full">
-                <div className="p-6">
-                  <ReferenceSettings />
-                </div>
-              </ScrollArea>
-            </TabsContent>
-            
-            <TabsContent value="sbus" className="mt-0 h-full">
-              <ScrollArea className="h-full">
-                <div className="p-6">
-                  <SbuSettings />
-                </div>
-              </ScrollArea>
-            </TabsContent>
-            
-            <TabsContent value="hr-contacts" className="mt-0 h-full">
-              <ScrollArea className="h-full">
-                <div className="p-6">
-                  <HrContactSettings />
-                </div>
-              </ScrollArea>
-            </TabsContent>
-            
-            <TabsContent value="note-categories" className="mt-0 h-full">
-              <ScrollArea className="h-full">
-                <div className="p-6">
-                  <NoteCategorySettings />
-                </div>
-              </ScrollArea>
-            </TabsContent>
-            
-            <TabsContent value="resource-types" className="mt-0 h-full">
-              <ScrollArea className="h-full">
-                <div className="p-6">
-                  <ResourceTypeSettings />
-                </div>
-              </ScrollArea>
-            </TabsContent>
-          </div>
-        </Tabs>
+        </div>
       </div>
     </DashboardLayout>
   );

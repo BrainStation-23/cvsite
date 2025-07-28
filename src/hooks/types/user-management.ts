@@ -1,20 +1,25 @@
 
 import { UserRole } from '@/types';
 
-export type SortColumn = 'email' | 'first_name' | 'last_name' | 'created_at';
-export type SortOrder = 'asc' | 'desc';
-
 export interface UserData {
   id: string;
   email: string;
   firstName: string;
   lastName: string;
   role: UserRole;
-  employeeId?: string;
-  sbuId?: string | null;
-  sbuName?: string | null;
-  createdAt?: string;
+  employeeId: string;
+  sbuId: string | null;
+  sbuName: string | null;
+  createdAt: string;
   lastSignIn?: string;
+  dateOfJoining?: string | null;
+  careerStartDate?: string | null;
+  managerId?: string | null;
+  managerName?: string | null;
+  expertiseId?: string | null;
+  expertiseName?: string | null;
+  resourceTypeId?: string | null;
+  resourceTypeName?: string | null;
 }
 
 export interface PaginationData {
@@ -25,5 +30,5 @@ export interface PaginationData {
   pageCount: number;
 }
 
-// Re-export UserRole to fix the import issues
-export type { UserRole };
+export type SortColumn = 'email' | 'first_name' | 'last_name' | 'created_at' | 'employee_id' | 'sbu_name';
+export type SortOrder = 'asc' | 'desc';

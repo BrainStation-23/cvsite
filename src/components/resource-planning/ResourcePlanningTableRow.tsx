@@ -1,18 +1,21 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { TableCell, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Edit2, Trash2 } from 'lucide-react';
+import { Edit2, Trash2, CheckCircle } from 'lucide-react';
 import { format } from 'date-fns';
-import { useResourcePlanning } from '@/hooks/use-resource-planning';
-import { ResourceAssignmentDialog } from './ResourceAssignmentDialog';
+import { usePlannedResources } from '@/hooks/use-planned-resources';
+import { useConfirmationDialog } from '@/hooks/use-confirmation-dialog';
+import { ConfirmationDialog } from '@/components/ui/confirmation-dialog';
 
 interface ResourcePlanningData {
   id: string;
   profile_id: string;
   engagement_percentage: number;
   release_date: string;
+  engagement_start_date: string;
+  engagement_complete: boolean;
   created_at: string;
   updated_at: string;
   profile: {
@@ -22,10 +25,10 @@ interface ResourcePlanningData {
     last_name: string;
     current_designation: string;
   };
-  resource_type: {
+  bill_type: {
     id: string;
     name: string;
-  };
+  } | null;
   project: {
     id: string;
     project_name: string;
@@ -37,16 +40,36 @@ interface ResourcePlanningData {
 
 interface ResourcePlanningTableRowProps {
   item: ResourcePlanningData;
+  onEdit: (item: ResourcePlanningData) => void;
 }
 
-export const ResourcePlanningTableRow: React.FC<ResourcePlanningTableRowProps> = ({ item }) => {
-  const [editDialogOpen, setEditDialogOpen] = useState(false);
-  const { deleteResourcePlanning, isDeleting } = useResourcePlanning();
+export const ResourcePlanningTableRow: React.FC<ResourcePlanningTableRowProps> = ({ item, onEdit }) => {
+  const { updateResourcePlanning, deleteResourcePlanning, isDeleting, isUpdating } = usePlannedResources();
+  const { isOpen, config, showConfirmation, hideConfirmation, handleConfirm } = useConfirmationDialog();
 
-  const handleDelete = () => {
-    if (window.confirm('Are you sure you want to delete this resource assignment?')) {
-      deleteResourcePlanning(item.id);
-    }
+  const handleDeleteClick = () => {
+    showConfirmation({
+      title: 'Delete Resource Assignment',
+      description: 'Are you sure you want to delete this resource assignment? This action cannot be undone.',
+      confirmText: 'Delete',
+      cancelText: 'Cancel',
+      variant: 'destructive',
+      onConfirm: () => deleteResourcePlanning(item.id)
+    });
+  };
+
+  const handleCompleteEngagement = () => {
+    showConfirmation({
+      title: 'Mark Engagement as Complete',
+      description: 'Are you sure you want to mark this engagement as complete? This will remove it from the planned resources view.',
+      confirmText: 'Mark Complete',
+      cancelText: 'Cancel',
+      variant: 'default',
+      onConfirm: () => updateResourcePlanning({ 
+        id: item.id, 
+        updates: { engagement_complete: true } 
+      })
+    });
   };
 
   return (
@@ -63,8 +86,8 @@ export const ResourcePlanningTableRow: React.FC<ResourcePlanningTableRowProps> =
           </div>
         </TableCell>
         <TableCell>
-          {item.resource_type ? (
-            <Badge variant="secondary">{item.resource_type.name}</Badge>
+          {item.bill_type ? (
+            <Badge variant="secondary">{item.bill_type.name}</Badge>
           ) : (
             <span className="text-muted-foreground">Not specified</span>
           )}
@@ -87,6 +110,13 @@ export const ResourcePlanningTableRow: React.FC<ResourcePlanningTableRowProps> =
           <Badge variant="outline">{item.engagement_percentage}%</Badge>
         </TableCell>
         <TableCell>
+          {item.engagement_start_date ? (
+            format(new Date(item.engagement_start_date), 'MMM dd, yyyy')
+          ) : (
+            <span className="text-muted-foreground">Not set</span>
+          )}
+        </TableCell>
+        <TableCell>
           {item.release_date ? (
             format(new Date(item.release_date), 'MMM dd, yyyy')
           ) : (
@@ -94,21 +124,28 @@ export const ResourcePlanningTableRow: React.FC<ResourcePlanningTableRowProps> =
           )}
         </TableCell>
         <TableCell>
-          {format(new Date(item.created_at), 'MMM dd, yyyy')}
-        </TableCell>
-        <TableCell>
           <div className="flex items-center gap-2">
             <Button
               variant="ghost"
               size="sm"
-              onClick={() => setEditDialogOpen(true)}
+              onClick={() => onEdit(item)}
+              disabled={isUpdating}
             >
               <Edit2 className="h-4 w-4" />
             </Button>
             <Button
               variant="ghost"
               size="sm"
-              onClick={handleDelete}
+              onClick={handleCompleteEngagement}
+              disabled={isUpdating}
+              title="Mark engagement as complete"
+            >
+              <CheckCircle className="h-4 w-4" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleDeleteClick}
               disabled={isDeleting}
             >
               <Trash2 className="h-4 w-4" />
@@ -117,11 +154,15 @@ export const ResourcePlanningTableRow: React.FC<ResourcePlanningTableRowProps> =
         </TableCell>
       </TableRow>
 
-      <ResourceAssignmentDialog
-        mode="edit"
-        item={item}
-        open={editDialogOpen}
-        onOpenChange={setEditDialogOpen}
+      <ConfirmationDialog
+        isOpen={isOpen}
+        onClose={hideConfirmation}
+        onConfirm={handleConfirm}
+        title={config?.title || ''}
+        description={config?.description || ''}
+        confirmText={config?.confirmText}
+        cancelText={config?.cancelText}
+        variant={config?.variant}
       />
     </>
   );

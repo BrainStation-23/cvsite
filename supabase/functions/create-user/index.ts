@@ -20,9 +20,32 @@ serve(async (req) => {
     // Create a Supabase client with the service role key
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
     
-    const { email, password, firstName, lastName, role, employeeId, sbuId } = await req.json();
+    const { 
+      email, 
+      password, 
+      firstName, 
+      lastName, 
+      role, 
+      employeeId, 
+      sbuId, 
+      expertiseId, 
+      resourceTypeId,
+      dateOfJoining, 
+      careerStartDate 
+    } = await req.json();
     
-    console.log('Creating user with data:', { email, firstName, lastName, role, employeeId, sbuId });
+    console.log('Creating user with data:', { 
+      email, 
+      firstName, 
+      lastName, 
+      role, 
+      employeeId, 
+      sbuId, 
+      expertiseId, 
+      resourceTypeId,
+      dateOfJoining, 
+      careerStartDate 
+    });
     
     if (!email || !password || !firstName || !lastName || !role || !employeeId) {
       return new Response(
@@ -49,7 +72,11 @@ serve(async (req) => {
         last_name: lastName,
         role: role,
         employee_id: employeeId,
-        sbu_id: sbuId
+        sbu_id: sbuId,
+        expertise_id: expertiseId,
+        resource_type_id: resourceTypeId,
+        date_of_joining: dateOfJoining,
+        career_start_date: careerStartDate
       }
     });
     
@@ -78,16 +105,23 @@ serve(async (req) => {
       );
     }
     
-    // Update the profile with SBU assignment if provided
-    if (sbuId) {
+    // Update the profile with additional fields
+    const profileUpdates: any = {};
+    if (sbuId) profileUpdates.sbu_id = sbuId;
+    if (expertiseId) profileUpdates.expertise = expertiseId;
+    if (resourceTypeId) profileUpdates.resource_type = resourceTypeId;
+    if (dateOfJoining) profileUpdates.date_of_joining = dateOfJoining;
+    if (careerStartDate) profileUpdates.career_start_date = careerStartDate;
+    
+    if (Object.keys(profileUpdates).length > 0) {
       const { error: profileError } = await supabase
         .from('profiles')
-        .update({ sbu_id: sbuId })
+        .update(profileUpdates)
         .eq('id', authData.user.id);
       
       if (profileError) {
-        console.error('Error updating profile with SBU:', profileError);
-        // Don't fail the entire operation if SBU assignment fails
+        console.error('Error updating profile with additional fields:', profileError);
+        // Don't fail the entire operation if profile update fails
       }
     }
     
@@ -103,7 +137,11 @@ serve(async (req) => {
           lastName,
           role,
           employeeId,
-          sbuId
+          sbuId,
+          expertiseId,
+          resourceTypeId,
+          dateOfJoining,
+          careerStartDate
         } 
       }),
       { status: 201, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }

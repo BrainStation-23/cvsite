@@ -6,7 +6,6 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Experience } from '@/types';
 
 // Type for database experience record format
-// Updated to remove position field which is no longer in the schema
 type ExperienceDB = {
   id: string;
   profile_id: string;
@@ -54,10 +53,14 @@ export function useExperience(profileId?: string) {
 
   // Fetch experiences
   const fetchExperiences = async () => {
-    if (!targetProfileId) return;
+    if (!targetProfileId) {
+      setIsLoading(false);
+      return;
+    }
     
     try {
       setIsLoading(true);
+      console.log('Fetching experiences for profile:', targetProfileId);
       const { data, error } = await supabase
         .from('experiences')
         .select('*')
@@ -69,6 +72,7 @@ export function useExperience(profileId?: string) {
       if (data) {
         // Map database records to application model format
         const mappedData = data.map(mapToExperience);
+        console.log('Fetched experiences:', mappedData);
         setExperiences(mappedData);
       }
     } catch (error) {
@@ -83,9 +87,19 @@ export function useExperience(profileId?: string) {
     }
   };
 
-  // Save experience
+  // Save experience - only allow if editing own profile or admin/manager
   const saveExperience = async (experience: Omit<Experience, 'id'>) => {
     if (!targetProfileId) return false;
+    
+    // Check if user can edit this profile
+    if (targetProfileId !== user?.id && user?.role !== 'admin' && user?.role !== 'manager') {
+      toast({
+        title: 'Permission Denied',
+        description: 'You do not have permission to edit this profile',
+        variant: 'destructive'
+      });
+      return false;
+    }
     
     try {
       setIsSaving(true);
@@ -125,9 +139,19 @@ export function useExperience(profileId?: string) {
     }
   };
 
-  // Update experience
+  // Update experience - only allow if editing own profile or admin/manager
   const updateExperience = async (id: string, experience: Partial<Experience>) => {
     if (!targetProfileId) return false;
+    
+    // Check if user can edit this profile
+    if (targetProfileId !== user?.id && user?.role !== 'admin' && user?.role !== 'manager') {
+      toast({
+        title: 'Permission Denied',
+        description: 'You do not have permission to edit this profile',
+        variant: 'destructive'
+      });
+      return false;
+    }
     
     try {
       setIsSaving(true);
@@ -136,7 +160,7 @@ export function useExperience(profileId?: string) {
       const dbData: Partial<ExperienceDB> = {};
       
       if (experience.companyName) dbData.company_name = experience.companyName;
-      if (experience.designation) {
+      if (experience.designation !== undefined) {
         dbData.designation = experience.designation;
       }
       if (experience.description !== undefined) dbData.description = experience.description;
@@ -144,7 +168,7 @@ export function useExperience(profileId?: string) {
       
       if (experience.endDate) {
         dbData.end_date = experience.endDate.toISOString().split('T')[0];
-      } else if (experience.endDate === null) {
+      } else if (experience.endDate === null || experience.endDate === undefined) {
         dbData.end_date = null;
       }
       
@@ -184,9 +208,19 @@ export function useExperience(profileId?: string) {
     }
   };
 
-  // Delete experience
+  // Delete experience - only allow if editing own profile or admin/manager
   const deleteExperience = async (id: string) => {
     if (!targetProfileId) return false;
+    
+    // Check if user can edit this profile
+    if (targetProfileId !== user?.id && user?.role !== 'admin' && user?.role !== 'manager') {
+      toast({
+        title: 'Permission Denied',
+        description: 'You do not have permission to edit this profile',
+        variant: 'destructive'
+      });
+      return false;
+    }
     
     try {
       const { error } = await supabase

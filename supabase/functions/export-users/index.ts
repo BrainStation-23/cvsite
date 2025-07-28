@@ -21,10 +21,9 @@ serve(async (req) => {
     // Create a Supabase client with the service role key
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
     
-    console.log('Fetching all users for export using list_users function...');
+    console.log('Fetching all users with complete profile information for export...');
     
-    // Use the list_users function that we know works correctly
-    // Fetch all users by setting a high items_per_page value
+    // Use the list_users function to get all users with their profile information
     const { data: usersResponse, error: usersError } = await supabase.rpc('list_users', {
       search_query: null,
       filter_role: null,
@@ -49,7 +48,7 @@ serve(async (req) => {
     const users = usersResponse.users;
     console.log(`Found ${users.length} users to export`);
     
-    // Transform the data to match the bulk update CSV format
+    // Transform the data to be human-friendly - now we have direct access to IDs and names
     const csvData = users.map(user => ({
       userId: user.id,
       email: user.email || '',
@@ -57,12 +56,23 @@ serve(async (req) => {
       lastName: user.last_name || '',
       role: user.role || 'employee',
       employeeId: user.employee_id || '',
-      password: '', // Empty password field for security
-      sbuName: user.sbu_name || ''
+      managerName: user.manager_name || '',
+      sbuName: user.sbu_name || '',
+      expertiseName: user.expertise_name || '',
+      resourceTypeName: user.resource_type_name || '',
+      dateOfJoining: user.date_of_joining || '',
+      careerStartDate: user.career_start_date || '',
+      createdAt: user.created_at || '',
+      lastSignIn: user.last_sign_in_at || ''
     }));
     
-    // Convert to CSV format
-    const csvHeaders = ['userId', 'email', 'firstName', 'lastName', 'role', 'employeeId', 'password', 'sbuName'];
+    // Convert to CSV format with human-friendly headers
+    const csvHeaders = [
+      'userId', 'email', 'firstName', 'lastName', 'role', 'employeeId', 
+      'managerName', 'sbuName', 'expertiseName', 'resourceTypeName', 
+      'dateOfJoining', 'careerStartDate', 'createdAt', 'lastSignIn'
+    ];
+    
     const csvRows = csvData.map(row => [
       row.userId,
       row.email,
@@ -70,20 +80,26 @@ serve(async (req) => {
       row.lastName,
       row.role,
       row.employeeId,
-      row.password,
-      row.sbuName
+      row.managerName,
+      row.sbuName,
+      row.expertiseName,
+      row.resourceTypeName,
+      row.dateOfJoining,
+      row.careerStartDate,
+      row.createdAt,
+      row.lastSignIn
     ]);
     
     const csvContent = csv.stringify([csvHeaders, ...csvRows]);
     
-    console.log(`Successfully generated CSV with ${csvData.length} user records`);
+    console.log(`Successfully generated CSV with ${csvData.length} user records including all profile information`);
     
     return new Response(csvContent, {
       status: 200,
       headers: {
         ...corsHeaders,
         'Content-Type': 'text/csv',
-        'Content-Disposition': 'attachment; filename="users_export.csv"'
+        'Content-Disposition': 'attachment; filename="users_complete_export.csv"'
       }
     });
   } catch (error) {

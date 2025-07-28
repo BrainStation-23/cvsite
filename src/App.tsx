@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -16,7 +15,13 @@ import AdminDashboard from '@/pages/dashboard/AdminDashboard';
 import EmployeeDashboard from '@/pages/dashboard/EmployeeDashboard';
 import ManagerDashboard from '@/pages/dashboard/ManagerDashboard';
 import UserManagement from '@/pages/admin/UserManagement';
+import AddUser from '@/pages/admin/AddUser';
+import EditUser from '@/pages/admin/EditUser';
 import PlatformSettings from '@/pages/admin/PlatformSettings';
+import ProfileManagementSettings from '@/pages/admin/platform-settings/ProfileManagementSettings';
+import ResourcePlanningSettings from '@/pages/admin/platform-settings/ResourcePlanningSettings';
+import CVTemplateSettings from '@/pages/admin/platform-settings/CVTemplateSettings';
+import SystemConfigurationSettings from '@/pages/admin/platform-settings/SystemConfigurationSettings';
 import CVTemplates from '@/pages/admin/CVTemplates';
 import CVTemplateEdit from '@/pages/admin/CVTemplateEdit';
 import CVTemplatesConfigurationPage from '@/pages/cv-templates/configuration';
@@ -24,13 +29,23 @@ import SecurityPage from '@/pages/security/SecurityPage';
 import NotFound from '@/pages/NotFound';
 import TrainingCertification from '@/pages/TrainingCertification';
 import ResourcePlanning from '@/pages/ResourcePlanning';
+import ResourceCalendar from '@/pages/ResourceCalendar';
+import ResourceCalendarView from '@/pages/resource-calendar/ResourceCalendarView';
+import ResourceCalendarStatistics from '@/pages/resource-calendar/ResourceCalendarStatistics';
 import ProjectsManagement from '@/pages/admin/ProjectsManagement';
 import './App.css';
 
+// Create QueryClient instance outside component to prevent recreation
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: 1,
+      staleTime: 5 * 60 * 1000, // 5 minutes
+    },
+  },
+});
 
-const queryClient = new QueryClient();
-
-function App() {
+function App(): React.ReactElement {
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
@@ -153,6 +168,22 @@ function App() {
               }
             />
             <Route
+              path="/admin/users/add"
+              element={
+                <ProtectedRoute allowedRoles={['admin']}>
+                  <AddUser />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/users/edit/:userId"
+              element={
+                <ProtectedRoute allowedRoles={['admin']}>
+                  <EditUser />
+                </ProtectedRoute>
+              }
+            />
+            <Route
               path="/admin/user-management"
               element={
                 <ProtectedRoute allowedRoles={['admin']}>
@@ -176,7 +207,6 @@ function App() {
                 </ProtectedRoute>
               }
             />
-            {/* Training and Certification Route (admin/manager) */}
             <Route
               path="/admin/training-certification"
               element={
@@ -193,7 +223,6 @@ function App() {
                 </ProtectedRoute>
               }
             />
-            {/* Resource Planning Routes (admin/manager) */}
             <Route
               path="/admin/resource-planning"
               element={
@@ -211,10 +240,90 @@ function App() {
               }
             />
             <Route
+              path="/admin/resource-calendar"
+              element={
+                <ProtectedRoute allowedRoles={['admin', 'manager']}>
+                  <ResourceCalendar />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/resource-calendar/calendar"
+              element={
+                <ProtectedRoute allowedRoles={['admin', 'manager']}>
+                  <ResourceCalendarView />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/resource-calendar/statistics"
+              element={
+                <ProtectedRoute allowedRoles={['admin', 'manager']}>
+                  <ResourceCalendarStatistics />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/manager/resource-calendar"
+              element={
+                <ProtectedRoute allowedRoles={['manager', 'admin']}>
+                  <ResourceCalendar />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/manager/resource-calendar/calendar"
+              element={
+                <ProtectedRoute allowedRoles={['manager', 'admin']}>
+                  <ResourceCalendarView />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/manager/resource-calendar/statistics"
+              element={
+                <ProtectedRoute allowedRoles={['manager', 'admin']}>
+                  <ResourceCalendarStatistics />
+                </ProtectedRoute>
+              }
+            />
+            <Route
               path="/admin/platform-settings"
               element={
                 <ProtectedRoute allowedRoles={['admin']}>
                   <PlatformSettings />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/platform-settings/profile"
+              element={
+                <ProtectedRoute allowedRoles={['admin']}>
+                  <ProfileManagementSettings />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/platform-settings/resources"
+              element={
+                <ProtectedRoute allowedRoles={['admin']}>
+                  <ResourcePlanningSettings />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/platform-settings/cv-templates"
+              element={
+                <ProtectedRoute allowedRoles={['admin']}>
+                  <CVTemplateSettings />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/platform-settings/system"
+              element={
+                <ProtectedRoute allowedRoles={['admin']}>
+                  <SystemConfigurationSettings />
                 </ProtectedRoute>
               }
             />

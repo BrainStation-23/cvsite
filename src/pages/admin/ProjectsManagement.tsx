@@ -8,6 +8,7 @@ import { ProjectsPagination } from '@/components/projects/ProjectsPagination';
 import { ProjectForm } from '@/components/projects/ProjectForm';
 import { ConfirmationDialog } from '@/components/ui/confirmation-dialog';
 import { useConfirmationDialog } from '@/hooks/use-confirmation-dialog';
+import { OdooSyncButton } from '@/components/projects/OdooSyncButton';
 
 interface Project {
   id: string;
@@ -15,6 +16,7 @@ interface Project {
   client_name: string | null;
   project_manager: string | null;
   budget: number | null;
+  is_active: boolean;
   created_at: string;
   updated_at: string;
 }
@@ -30,9 +32,13 @@ const ProjectsManagement: React.FC = () => {
     setCurrentPage,
     itemsPerPage,
     setItemsPerPage,
+    showInactiveProjects,
+    setShowInactiveProjects,
     createProject,
     updateProject,
-    deleteProject
+    deleteProject,
+    toggleProjectStatus,
+    refetch
   } = useProjectsManagement();
 
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
@@ -63,8 +69,15 @@ const ProjectsManagement: React.FC = () => {
     });
   };
 
+  const handleToggleProjectStatus = (id: string, isActive: boolean) => {
+    toggleProjectStatus(id, isActive);
+  };
+
   const handleCreateProject = async (projectData: Omit<Project, 'id' | 'created_at' | 'updated_at'>) => {
-    return await createProject(projectData);
+    return await createProject({
+      ...projectData,
+      is_active: true // New projects are active by default
+    });
   };
 
   const handleUpdateProject = async (projectData: Omit<Project, 'id' | 'created_at' | 'updated_at'>) => {
@@ -77,11 +90,17 @@ const ProjectsManagement: React.FC = () => {
     setEditingProject(null);
   };
 
+  // Refetch data after sync
+  const handleSyncComplete = () => {
+    refetch();
+  };
+
   return (
     <DashboardLayout>
       <div className="space-y-6">
         <div className="flex justify-between items-center">
           <h1 className="text-2xl font-bold text-foreground">Projects Management</h1>
+          <OdooSyncButton />
         </div>
         
         <div className="bg-card rounded-lg border p-6 space-y-6">
@@ -90,6 +109,8 @@ const ProjectsManagement: React.FC = () => {
             onSearchChange={setSearchQuery}
             itemsPerPage={itemsPerPage}
             onItemsPerPageChange={setItemsPerPage}
+            showInactiveProjects={showInactiveProjects}
+            onShowInactiveProjectsChange={setShowInactiveProjects}
             onAddProject={handleAddProject}
           />
 
@@ -97,6 +118,7 @@ const ProjectsManagement: React.FC = () => {
             projects={projects}
             onEdit={handleEditProject}
             onDelete={handleDeleteProject}
+            onToggleStatus={handleToggleProjectStatus}
             isLoading={isLoading}
           />
 

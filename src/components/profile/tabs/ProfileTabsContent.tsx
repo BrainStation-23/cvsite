@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { TabsContent } from '@/components/ui/tabs';
 import { GeneralInfoTab } from '../generalInfo/GeneralInfoTab';
@@ -143,6 +142,7 @@ export const ProfileTabsContent: React.FC<ProfileTabsContentProps> = ({
           experiences={experiences}
           isEditing={isEditing}
           isSaving={isSaving}
+          profileId={profileId}
           onSave={saveExperience}
           onUpdate={updateExperience}
           onDelete={deleteExperience}

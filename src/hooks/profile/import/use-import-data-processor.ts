@@ -93,7 +93,7 @@ export const useImportDataProcessor = () => {
       try {
         const success = await handlers.saveExperience({
           companyName: exp.companyName,
-          designation: exp.designation,
+          designation: exp.designation || null, // Let RPC function handle validation
           description: exp.description || '',
           startDate: ensureDate(exp.startDate) || new Date(),
           endDate: ensureDate(exp.endDate),

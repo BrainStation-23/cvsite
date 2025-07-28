@@ -1,7 +1,7 @@
 
 import React from 'react';
-import { Button } from '@/components/ui/button';
 import { TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Button } from '@/components/ui/button';
 import { ArrowUpDown } from 'lucide-react';
 
 interface ResourcePlanningTableHeaderProps {
@@ -28,16 +28,7 @@ export const ResourcePlanningTableHeader: React.FC<ResourcePlanningTableHeaderPr
             <ArrowUpDown className="ml-2 h-4 w-4" />
           </Button>
         </TableHead>
-        <TableHead>
-          <Button
-            variant="ghost"
-            onClick={() => onSort('resource_type')}
-            className="h-auto p-0 font-semibold"
-          >
-            Resource Type
-            <ArrowUpDown className="ml-2 h-4 w-4" />
-          </Button>
-        </TableHead>
+        <TableHead>Bill Type</TableHead>
         <TableHead>
           <Button
             variant="ghost"
@@ -58,6 +49,7 @@ export const ResourcePlanningTableHeader: React.FC<ResourcePlanningTableHeaderPr
             <ArrowUpDown className="ml-2 h-4 w-4" />
           </Button>
         </TableHead>
+        <TableHead>Engagement Start</TableHead>
         <TableHead>
           <Button
             variant="ghost"

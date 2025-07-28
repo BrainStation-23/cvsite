@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { ResourceTypeTable } from './resource-type/ResourceTypeTable';
+import { GenericSettingsTable } from './common/GenericSettingsTable';
 
 const ResourceTypeSettings: React.FC = () => {
   return (
@@ -14,7 +14,11 @@ const ResourceTypeSettings: React.FC = () => {
         </p>
       </div>
       
-      <ResourceTypeTable />
+      <GenericSettingsTable 
+        tableName="resource_types"
+        entityName="Resource Type"
+        placeholder="Enter new resource type..."
+      />
     </div>
   );
 };
