@@ -91,12 +91,11 @@ export const GeneralInfoTab: React.FC<GeneralInfoTabProps> = ({
   };
 
   const biographyRequirements = `Please rewrite this biography to be more professional and engaging for a CV/resume. Focus on:
+- Keep it in First Person
 - Making it concise but impactful
 - Highlighting key strengths and achievements
 - Using professional language
-- Ensuring it's ATS-friendly
-- Keeping it in third person if applicable
-- Maximum 3-4 sentences`;
+`;
 
   return (
     <Card>
