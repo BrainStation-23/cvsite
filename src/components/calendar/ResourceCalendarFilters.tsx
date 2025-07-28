@@ -1,6 +1,5 @@
 
 import React from 'react';
-import { ResourcePlanningSearchControls } from '@/components/resource-planning/ResourcePlanningSearchControls';
 import { ResourcePlanningFilters } from '@/components/resource-planning/ResourcePlanningFilters';
 
 interface ResourceCalendarFiltersProps {
@@ -26,10 +25,6 @@ export const ResourceCalendarFilters: React.FC<ResourceCalendarFiltersProps> = (
   onShowUnplannedChange,
   onClearFilters,
 }) => {
-  const handleCreateNew = () => {
-    // Not needed in calendar context, but required by the interface
-  };
-
   return (
     <div className="space-y-4">
       <ResourcePlanningFilters
@@ -40,7 +35,6 @@ export const ResourceCalendarFilters: React.FC<ResourceCalendarFiltersProps> = (
         selectedManager={selectedManager}
         setSelectedManager={onManagerChange}
         clearFilters={onClearFilters}
-        onCreateNew={handleCreateNew}
       />
     </div>
   );
