@@ -6,7 +6,7 @@ import { Label } from '@/components/ui/label';
 import SbuCombobox from '@/components/admin/user/SbuCombobox';
 import { ProfileCombobox } from '@/components/admin/user/ProfileCombobox';
 import { Badge } from '@/components/ui/badge';
-import { X, Filter, Plus } from 'lucide-react';
+import { X, Filter } from 'lucide-react';
 
 interface ResourcePlanningFiltersProps {
   searchQuery: string;
@@ -16,7 +16,6 @@ interface ResourcePlanningFiltersProps {
   selectedManager: string | null;
   setSelectedManager: (manager: string | null) => void;
   clearFilters: () => void;
-  onCreateNew: () => void;
 }
 
 export const ResourcePlanningFilters: React.FC<ResourcePlanningFiltersProps> = ({
@@ -27,7 +26,6 @@ export const ResourcePlanningFilters: React.FC<ResourcePlanningFiltersProps> = (
   selectedManager,
   setSelectedManager,
   clearFilters,
-  onCreateNew,
 }) => {
   const hasActiveFilters = selectedSbu || selectedManager || searchQuery;
 
@@ -38,23 +36,17 @@ export const ResourcePlanningFilters: React.FC<ResourcePlanningFiltersProps> = (
           <Filter className="h-4 w-4" />
           <Label className="text-sm font-medium">Filters</Label>
         </div>
-        <div className="flex items-center gap-2">
-          {hasActiveFilters && (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={clearFilters}
-              className="h-7 px-2 text-xs"
-            >
-              Clear all
-              <X className="ml-1 h-3 w-3" />
-            </Button>
-          )}
-          <Button onClick={onCreateNew} size="sm">
-            <Plus className="mr-2 h-4 w-4" />
-            Create Assignment
+        {hasActiveFilters && (
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={clearFilters}
+            className="h-7 px-2 text-xs"
+          >
+            Clear all
+            <X className="ml-1 h-3 w-3" />
           </Button>
-        </div>
+        )}
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
