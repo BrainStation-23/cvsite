@@ -26,21 +26,21 @@ export const ResourceCalendarFilters: React.FC<ResourceCalendarFiltersProps> = (
   onShowUnplannedChange,
   onClearFilters,
 }) => {
+  const handleCreateNew = () => {
+    // Not needed in calendar context, but required by the interface
+  };
+
   return (
     <div className="space-y-4">
-      <ResourcePlanningSearchControls
+      <ResourcePlanningFilters
         searchQuery={searchQuery}
         setSearchQuery={onSearchChange}
-      />
-      
-      <ResourcePlanningFilters
         selectedSbu={selectedSbu}
-        onSbuChange={onSbuChange}
+        setSelectedSbu={onSbuChange}
         selectedManager={selectedManager}
-        onManagerChange={onManagerChange}
-        showUnplanned={showUnplanned}
-        onShowUnplannedChange={onShowUnplannedChange}
-        onClearFilters={onClearFilters}
+        setSelectedManager={onManagerChange}
+        clearFilters={onClearFilters}
+        onCreateNew={handleCreateNew}
       />
     </div>
   );

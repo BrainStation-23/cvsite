@@ -42,6 +42,7 @@ export const UnplannedResourcesTab: React.FC<UnplannedResourcesTabProps> = ({
       pagination={pagination}
       currentPage={currentPage}
       setCurrentPage={setCurrentPage}
+      isLoading={isLoading}
       onCreatePlan={onCreatePlan}
     />
   );
