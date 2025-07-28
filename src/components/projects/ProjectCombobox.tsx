@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Check, ChevronsUpDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -41,26 +41,71 @@ export const ProjectCombobox: React.FC<ProjectComboboxProps> = ({
   const [open, setOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
 
-  const { data: projects = [], isLoading } = useQuery({
-    queryKey: ['projects-combobox', searchQuery],
+  // Fetch selected project separately to ensure it's always available
+  const { data: selectedProject } = useQuery({
+    queryKey: ['selected-project', value],
+    queryFn: async () => {
+      if (!value) return null;
+      
+      const { data, error } = await supabase
+        .from('projects_management')
+        .select('id, project_name, client_name')
+        .eq('id', value)
+        .single();
+      
+      if (error) throw error;
+      return data as Project;
+    },
+    enabled: !!value,
+  });
+
+  // Smart search query that fetches based on search input
+  const { data: searchProjects, isLoading } = useQuery({
+    queryKey: ['projects-search', searchQuery],
     queryFn: async () => {
       let query = supabase
         .from('projects_management')
         .select('id, project_name, client_name')
-        .order('project_name');
+        .order('project_name', { ascending: true })
+        .limit(50);
       
-      if (searchQuery) {
+      if (searchQuery.trim()) {
         query = query.or(`project_name.ilike.%${searchQuery}%,client_name.ilike.%${searchQuery}%`);
       }
       
-      const { data, error } = await query.limit(50);
+      const { data, error } = await query;
       
       if (error) throw error;
       return data as Project[];
     },
   });
 
-  const selectedProject = projects.find(project => project.id === value);
+  const projects = searchProjects || [];
+
+  // Combine search results with selected project to ensure it's always available
+  const allProjects = React.useMemo(() => {
+    const combinedProjects = [...projects];
+    
+    // Add selected project if it's not already in the search results
+    if (selectedProject && !projects.some(p => p.id === selectedProject.id)) {
+      combinedProjects.unshift(selectedProject);
+    }
+    
+    // Remove duplicates based on id
+    const uniqueProjects = combinedProjects.filter((project, index, self) => 
+      index === self.findIndex(p => p.id === project.id)
+    );
+    
+    return uniqueProjects;
+  }, [projects, selectedProject]);
+
+  // Fetch initial projects when component mounts
+  useEffect(() => {
+    if (!searchQuery.trim()) {
+      // This will trigger the query to fetch initial projects
+      setSearchQuery('');
+    }
+  }, []);
 
   const handleSelect = (projectId: string) => {
     onValueChange(projectId === value ? '' : projectId);
@@ -68,8 +113,19 @@ export const ProjectCombobox: React.FC<ProjectComboboxProps> = ({
     setSearchQuery('');
   };
 
+  const handleOpenChange = (newOpen: boolean) => {
+    setOpen(newOpen);
+    if (!newOpen) {
+      setSearchQuery('');
+    }
+  };
+
+  const handleSearchChange = (search: string) => {
+    setSearchQuery(search);
+  };
+
   return (
-    <Popover open={open} onOpenChange={setOpen}>
+    <Popover open={open} onOpenChange={handleOpenChange}>
       <PopoverTrigger asChild>
         <Button
           variant="outline"
@@ -94,18 +150,18 @@ export const ProjectCombobox: React.FC<ProjectComboboxProps> = ({
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-full p-0" align="start">
-        <Command>
+        <Command shouldFilter={false}>
           <CommandInput
             placeholder="Search projects..."
             value={searchQuery}
-            onValueChange={setSearchQuery}
+            onValueChange={handleSearchChange}
           />
           <CommandList>
             <CommandEmpty>
-              {isLoading ? 'Loading...' : 'No projects found.'}
+              {isLoading ? 'Loading projects...' : 'No projects found.'}
             </CommandEmpty>
             <CommandGroup>
-              {projects.map((project) => (
+              {allProjects.map((project) => (
                 <CommandItem
                   key={project.id}
                   value={project.id}
