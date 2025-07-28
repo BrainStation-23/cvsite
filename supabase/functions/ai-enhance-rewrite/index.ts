@@ -40,8 +40,6 @@ serve(async (req) => {
 
     const prompt = `Please rewrite the following text according to these requirements:
 
-Do not change perspective.
-
 Requirements: ${requirements}
 
 Original text: "${originalContent}"
