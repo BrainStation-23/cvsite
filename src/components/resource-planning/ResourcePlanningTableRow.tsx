@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { TableCell, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
@@ -8,6 +7,7 @@ import { format } from 'date-fns';
 import { usePlannedResources } from '@/hooks/use-planned-resources';
 import { useConfirmationDialog } from '@/hooks/use-confirmation-dialog';
 import { ConfirmationDialog } from '@/components/ui/confirmation-dialog';
+import { ResourcePlanningTableEditRow } from './ResourcePlanningTableEditRow';
 
 interface ResourcePlanningData {
   id: string;
@@ -38,12 +38,36 @@ interface ResourcePlanningData {
   };
 }
 
-interface ResourcePlanningTableRowProps {
-  item: ResourcePlanningData;
-  onEdit: (item: ResourcePlanningData) => void;
+interface EditFormData {
+  profileId: string;
+  billTypeId: string | null;
+  projectId: string | null;
+  engagementPercentage: number;
+  releaseDate: string;
+  engagementStartDate: string;
 }
 
-export const ResourcePlanningTableRow: React.FC<ResourcePlanningTableRowProps> = ({ item, onEdit }) => {
+interface ResourcePlanningTableRowProps {
+  item: ResourcePlanningData;
+  isEditing: boolean;
+  editData: EditFormData | null;
+  onStartEdit: (item: ResourcePlanningData) => void;
+  onCancelEdit: () => void;
+  onSaveEdit: () => void;
+  onEditDataChange: (data: Partial<EditFormData>) => void;
+  editLoading: boolean;
+}
+
+export const ResourcePlanningTableRow: React.FC<ResourcePlanningTableRowProps> = ({ 
+  item, 
+  isEditing,
+  editData,
+  onStartEdit,
+  onCancelEdit,
+  onSaveEdit,
+  onEditDataChange,
+  editLoading,
+}) => {
   const { updateResourcePlanning, deleteResourcePlanning, isDeleting, isUpdating } = usePlannedResources();
   const { isOpen, config, showConfirmation, hideConfirmation, handleConfirm } = useConfirmationDialog();
 
@@ -72,6 +96,21 @@ export const ResourcePlanningTableRow: React.FC<ResourcePlanningTableRowProps> =
     });
   };
 
+  // If this row is being edited, show the edit row
+  if (isEditing && editData) {
+    return (
+      <ResourcePlanningTableEditRow
+        item={item}
+        editData={editData}
+        onEditDataChange={onEditDataChange}
+        onSave={onSaveEdit}
+        onCancel={onCancelEdit}
+        isLoading={editLoading}
+      />
+    );
+  }
+
+  // Otherwise show the normal read-only row
   return (
     <>
       <TableRow>
@@ -128,8 +167,8 @@ export const ResourcePlanningTableRow: React.FC<ResourcePlanningTableRowProps> =
             <Button
               variant="ghost"
               size="sm"
-              onClick={() => onEdit(item)}
-              disabled={isUpdating}
+              onClick={() => onStartEdit(item)}
+              disabled={isUpdating || editLoading}
             >
               <Edit2 className="h-4 w-4" />
             </Button>
@@ -137,7 +176,7 @@ export const ResourcePlanningTableRow: React.FC<ResourcePlanningTableRowProps> =
               variant="ghost"
               size="sm"
               onClick={handleCompleteEngagement}
-              disabled={isUpdating}
+              disabled={isUpdating || editLoading}
               title="Mark engagement as complete"
             >
               <CheckCircle className="h-4 w-4" />
@@ -146,7 +185,7 @@ export const ResourcePlanningTableRow: React.FC<ResourcePlanningTableRowProps> =
               variant="ghost"
               size="sm"
               onClick={handleDeleteClick}
-              disabled={isDeleting}
+              disabled={isDeleting || editLoading}
             >
               <Trash2 className="h-4 w-4" />
             </Button>
