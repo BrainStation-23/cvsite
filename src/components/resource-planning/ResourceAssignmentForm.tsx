@@ -18,6 +18,8 @@ interface ResourceAssignmentFormProps {
   setProjectId: (value: string | null) => void;
   engagementPercentage: number;
   setEngagementPercentage: (value: number) => void;
+  billingPercentage: number;
+  setBillingPercentage: (value: number) => void;
   releaseDate: string;
   setReleaseDate: (value: string) => void;
   engagementStartDate: string;
@@ -38,6 +40,8 @@ export const ResourceAssignmentForm: React.FC<ResourceAssignmentFormProps> = ({
   setProjectId,
   engagementPercentage,
   setEngagementPercentage,
+  billingPercentage,
+  setBillingPercentage,
   releaseDate,
   setReleaseDate,
   engagementStartDate,
@@ -72,6 +76,20 @@ export const ResourceAssignmentForm: React.FC<ResourceAssignmentFormProps> = ({
             onChange={(e) => setEngagementPercentage(Number(e.target.value))}
             placeholder="100"
             required
+            className="h-9"
+          />
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="billing" className="text-sm font-medium">Billing %</Label>
+          <Input
+            id="billing"
+            type="number"
+            min="0"
+            max="100"
+            value={billingPercentage}
+            onChange={(e) => setBillingPercentage(Number(e.target.value))}
+            placeholder="0"
             className="h-9"
           />
         </div>

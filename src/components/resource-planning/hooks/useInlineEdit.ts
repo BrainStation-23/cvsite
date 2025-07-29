@@ -7,6 +7,7 @@ interface ResourcePlanningData {
   id: string;
   profile_id: string;
   engagement_percentage: number;
+  billing_percentage: number;
   release_date: string;
   engagement_start_date: string;
   bill_type: {
@@ -24,6 +25,7 @@ interface EditFormData {
   billTypeId: string | null;
   projectId: string | null;
   engagementPercentage: number;
+  billingPercentage: number;
   releaseDate: string;
   engagementStartDate: string;
 }
@@ -41,6 +43,7 @@ export const useInlineEdit = () => {
       billTypeId: item.bill_type?.id || null,
       projectId: item.project?.id || null,
       engagementPercentage: item.engagement_percentage,
+      billingPercentage: item.billing_percentage || 0,
       releaseDate: item.release_date || '',
       engagementStartDate: item.engagement_start_date || '',
     });
@@ -58,6 +61,7 @@ export const useInlineEdit = () => {
       bill_type_id: editData.billTypeId || undefined,
       project_id: editData.projectId || undefined,
       engagement_percentage: editData.engagementPercentage,
+      billing_percentage: editData.billingPercentage,
       release_date: editData.releaseDate || undefined,
       engagement_start_date: editData.engagementStartDate || undefined,
     };

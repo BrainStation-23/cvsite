@@ -9,6 +9,7 @@ interface ResourcePlanningData {
   id: string;
   profile_id: string;
   engagement_percentage: number;
+  billing_percentage: number;
   release_date: string;
   engagement_start_date: string;
   engagement_complete: boolean;
@@ -39,6 +40,7 @@ interface EditFormData {
   billTypeId: string | null;
   projectId: string | null;
   engagementPercentage: number;
+  billingPercentage: number;
   releaseDate: string;
   engagementStartDate: string;
 }

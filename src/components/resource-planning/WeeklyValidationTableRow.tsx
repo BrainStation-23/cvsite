@@ -3,14 +3,12 @@ import React from 'react';
 import { TableCell, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Edit2, Trash2, CheckCircle } from 'lucide-react';
+import { CheckCircle2 } from 'lucide-react';
 import { format } from 'date-fns';
-import { usePlannedResources } from '@/hooks/use-planned-resources';
 import { useConfirmationDialog } from '@/hooks/use-confirmation-dialog';
 import { ConfirmationDialog } from '@/components/ui/confirmation-dialog';
-import { ResourcePlanningTableEditRow } from './ResourcePlanningTableEditRow';
 
-interface ResourcePlanningData {
+interface WeeklyValidationData {
   id: string;
   profile_id: string;
   engagement_percentage: number;
@@ -18,6 +16,7 @@ interface ResourcePlanningData {
   release_date: string;
   engagement_start_date: string;
   engagement_complete: boolean;
+  weekly_validation: boolean;
   created_at: string;
   updated_at: string;
   profile: {
@@ -37,83 +36,33 @@ interface ResourcePlanningData {
     project_manager: string;
     client_name: string;
     budget: number;
-  };
+  } | null;
 }
 
-interface EditFormData {
-  profileId: string;
-  billTypeId: string | null;
-  projectId: string | null;
-  engagementPercentage: number;
-  billingPercentage: number;
-  releaseDate: string;
-  engagementStartDate: string;
+interface WeeklyValidationTableRowProps {
+  item: WeeklyValidationData;
+  onValidate: (id: string) => void;
+  isValidating: boolean;
 }
 
-interface ResourcePlanningTableRowProps {
-  item: ResourcePlanningData;
-  isEditing: boolean;
-  editData: EditFormData | null;
-  onStartEdit: (item: ResourcePlanningData) => void;
-  onCancelEdit: () => void;
-  onSaveEdit: () => void;
-  onEditDataChange: (data: Partial<EditFormData>) => void;
-  editLoading: boolean;
-}
-
-export const ResourcePlanningTableRow: React.FC<ResourcePlanningTableRowProps> = ({ 
+export const WeeklyValidationTableRow: React.FC<WeeklyValidationTableRowProps> = ({ 
   item, 
-  isEditing,
-  editData,
-  onStartEdit,
-  onCancelEdit,
-  onSaveEdit,
-  onEditDataChange,
-  editLoading,
+  onValidate,
+  isValidating,
 }) => {
-  const { updateResourcePlanning, deleteResourcePlanning, isDeleting, isUpdating } = usePlannedResources();
   const { isOpen, config, showConfirmation, hideConfirmation, handleConfirm } = useConfirmationDialog();
 
-  const handleDeleteClick = () => {
+  const handleValidateClick = () => {
     showConfirmation({
-      title: 'Delete Resource Assignment',
-      description: 'Are you sure you want to delete this resource assignment? This action cannot be undone.',
-      confirmText: 'Delete',
-      cancelText: 'Cancel',
-      variant: 'destructive',
-      onConfirm: () => deleteResourcePlanning(item.id)
-    });
-  };
-
-  const handleCompleteEngagement = () => {
-    showConfirmation({
-      title: 'Mark Engagement as Complete',
-      description: 'Are you sure you want to mark this engagement as complete? This will remove it from the planned resources view.',
-      confirmText: 'Mark Complete',
+      title: 'Validate Weekly Data',
+      description: 'Are you sure you want to mark this resource assignment as validated for this week? This action cannot be undone.',
+      confirmText: 'Validate',
       cancelText: 'Cancel',
       variant: 'default',
-      onConfirm: () => updateResourcePlanning({ 
-        id: item.id, 
-        updates: { engagement_complete: true } 
-      })
+      onConfirm: () => onValidate(item.id)
     });
   };
 
-  // If this row is being edited, show the edit row
-  if (isEditing && editData) {
-    return (
-      <ResourcePlanningTableEditRow
-        item={item}
-        editData={editData}
-        onEditDataChange={onEditDataChange}
-        onSave={onSaveEdit}
-        onCancel={onCancelEdit}
-        isLoading={editLoading}
-      />
-    );
-  }
-
-  // Otherwise show the normal read-only row
   return (
     <>
       <TableRow className="h-10">
@@ -169,36 +118,16 @@ export const ResourcePlanningTableRow: React.FC<ResourcePlanningTableRowProps> =
           )}
         </TableCell>
         <TableCell className="py-1 px-2">
-          <div className="flex items-center gap-1">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => onStartEdit(item)}
-              disabled={isUpdating || editLoading}
-              className="h-6 w-6 p-0"
-            >
-              <Edit2 className="h-3 w-3" />
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={handleCompleteEngagement}
-              disabled={isUpdating || editLoading}
-              title="Mark engagement as complete"
-              className="h-6 w-6 p-0"
-            >
-              <CheckCircle className="h-3 w-3" />
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={handleDeleteClick}
-              disabled={isDeleting || editLoading}
-              className="h-6 w-6 p-0"
-            >
-              <Trash2 className="h-3 w-3" />
-            </Button>
-          </div>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleValidateClick}
+            disabled={isValidating}
+            className="h-7 px-2 text-xs"
+          >
+            <CheckCircle2 className="h-3 w-3 mr-1" />
+            Validate
+          </Button>
         </TableCell>
       </TableRow>
 

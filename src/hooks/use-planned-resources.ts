@@ -8,6 +8,7 @@ interface ResourcePlanningData {
   id: string;
   profile_id: string;
   engagement_percentage: number;
+  billing_percentage: number;
   release_date: string;
   engagement_start_date: string;
   engagement_complete: boolean;
@@ -128,6 +129,7 @@ export function usePlannedResources() {
       bill_type_id?: string;
       project_id?: string;
       engagement_percentage: number;
+      billing_percentage?: number;
       release_date?: string;
       engagement_start_date?: string;
       engagement_complete?: boolean;
@@ -165,6 +167,7 @@ export function usePlannedResources() {
         bill_type_id: string;
         project_id: string;
         engagement_percentage: number;
+        billing_percentage: number;
         release_date: string;
         engagement_start_date: string;
         engagement_complete: boolean;
