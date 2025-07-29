@@ -84,6 +84,14 @@ export const ResourcePlanningTable: React.FC = () => {
     weeklyValidationData.refetch();
   };
 
+  // Helper function to safely get array length
+  const getArrayLength = (data: any): number => {
+    if (Array.isArray(data)) {
+      return data.length;
+    }
+    return 0;
+  };
+
   return (
     <div className="flex gap-6 h-full">
       {/* Main content area */}
@@ -116,9 +124,9 @@ export const ResourcePlanningTable: React.FC = () => {
           setShowUnplanned={setShowUnplanned}
           activeTab={activeTab}
           setActiveTab={setActiveTab}
-          plannedCount={plannedResources.data?.length || 0}
-          unplannedCount={unplannedResources.unplannedResources?.length || 0}
-          weeklyValidationCount={weeklyValidationData.data?.length || 0}
+          plannedCount={getArrayLength(plannedResources.data)}
+          unplannedCount={getArrayLength(unplannedResources.unplannedResources)}
+          weeklyValidationCount={getArrayLength(weeklyValidationData.data)}
           searchQuery={searchQuery}
           selectedSbu={selectedSbu}
           selectedManager={selectedManager}
