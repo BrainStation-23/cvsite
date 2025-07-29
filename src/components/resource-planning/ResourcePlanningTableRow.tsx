@@ -14,6 +14,7 @@ interface ResourcePlanningData {
   id: string;
   profile_id: string;
   engagement_percentage: number;
+  billing_percentage: number;
   release_date: string;
   engagement_start_date: string;
   engagement_complete: boolean;
@@ -44,6 +45,7 @@ interface EditFormData {
   billTypeId: string | null;
   projectId: string | null;
   engagementPercentage: number;
+  billingPercentage: number;
   releaseDate: string;
   engagementStartDate: string;
 }
@@ -114,10 +116,10 @@ export const ResourcePlanningTableRow: React.FC<ResourcePlanningTableRowProps> =
   // Otherwise show the normal read-only row
   return (
     <>
-      <TableRow className="h-12">
-        <TableCell className="py-2 px-3">
+      <TableRow className="h-10">
+        <TableCell className="py-1 px-2">
           <div className="flex flex-col">
-            <span className="font-medium text-sm">
+            <span className="font-medium text-xs">
               {item.profile.first_name} {item.profile.last_name}
             </span>
             <span className="text-xs text-muted-foreground">
@@ -125,17 +127,17 @@ export const ResourcePlanningTableRow: React.FC<ResourcePlanningTableRowProps> =
             </span>
           </div>
         </TableCell>
-        <TableCell className="py-2 px-3">
+        <TableCell className="py-1 px-2">
           {item.bill_type ? (
             <Badge variant="secondary" className="text-xs">{item.bill_type.name}</Badge>
           ) : (
-            <span className="text-muted-foreground text-sm">Not specified</span>
+            <span className="text-muted-foreground text-xs">Not specified</span>
           )}
         </TableCell>
-        <TableCell className="py-2 px-3">
+        <TableCell className="py-1 px-2">
           {item.project ? (
             <div className="flex flex-col">
-              <span className="font-medium text-sm">{item.project.project_name}</span>
+              <span className="font-medium text-xs">{item.project.project_name}</span>
               {item.project.client_name && (
                 <span className="text-xs text-muted-foreground">
                   Client: {item.project.client_name}
@@ -143,34 +145,37 @@ export const ResourcePlanningTableRow: React.FC<ResourcePlanningTableRowProps> =
               )}
             </div>
           ) : (
-            <span className="text-muted-foreground text-sm">Not assigned</span>
+            <span className="text-muted-foreground text-xs">Not assigned</span>
           )}
         </TableCell>
-        <TableCell className="py-2 px-3">
+        <TableCell className="py-1 px-2">
           <Badge variant="outline" className="text-xs">{item.engagement_percentage}%</Badge>
         </TableCell>
-        <TableCell className="py-2 px-3 text-sm">
+        <TableCell className="py-1 px-2">
+          <Badge variant="outline" className="text-xs">{item.billing_percentage || 0}%</Badge>
+        </TableCell>
+        <TableCell className="py-1 px-2 text-xs">
           {item.engagement_start_date ? (
             format(new Date(item.engagement_start_date), 'MMM dd, yyyy')
           ) : (
             <span className="text-muted-foreground">Not set</span>
           )}
         </TableCell>
-        <TableCell className="py-2 px-3 text-sm">
+        <TableCell className="py-1 px-2 text-xs">
           {item.release_date ? (
             format(new Date(item.release_date), 'MMM dd, yyyy')
           ) : (
             <span className="text-muted-foreground">Not set</span>
           )}
         </TableCell>
-        <TableCell className="py-2 px-3">
+        <TableCell className="py-1 px-2">
           <div className="flex items-center gap-1">
             <Button
               variant="ghost"
               size="sm"
               onClick={() => onStartEdit(item)}
               disabled={isUpdating || editLoading}
-              className="h-8 w-8 p-0"
+              className="h-6 w-6 p-0"
             >
               <Edit2 className="h-3 w-3" />
             </Button>
@@ -180,7 +185,7 @@ export const ResourcePlanningTableRow: React.FC<ResourcePlanningTableRowProps> =
               onClick={handleCompleteEngagement}
               disabled={isUpdating || editLoading}
               title="Mark engagement as complete"
-              className="h-8 w-8 p-0"
+              className="h-6 w-6 p-0"
             >
               <CheckCircle className="h-3 w-3" />
             </Button>
@@ -189,7 +194,7 @@ export const ResourcePlanningTableRow: React.FC<ResourcePlanningTableRowProps> =
               size="sm"
               onClick={handleDeleteClick}
               disabled={isDeleting || editLoading}
-              className="h-8 w-8 p-0"
+              className="h-6 w-6 p-0"
             >
               <Trash2 className="h-3 w-3" />
             </Button>

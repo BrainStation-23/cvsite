@@ -14,6 +14,7 @@ interface ResourcePlanningData {
   id: string;
   profile_id: string;
   engagement_percentage: number;
+  billing_percentage: number;
   release_date: string;
   engagement_start_date: string;
   engagement_complete: boolean;
@@ -44,6 +45,7 @@ interface EditFormData {
   billTypeId: string | null;
   projectId: string | null;
   engagementPercentage: number;
+  billingPercentage: number;
   releaseDate: string;
   engagementStartDate: string;
 }
@@ -97,6 +99,16 @@ export const ResourcePlanningTableEditRow: React.FC<ResourcePlanningTableEditRow
           max="100"
           value={editData.engagementPercentage}
           onChange={(e) => onEditDataChange({ engagementPercentage: Number(e.target.value) })}
+          className="w-20"
+        />
+      </TableCell>
+      <TableCell>
+        <Input
+          type="number"
+          min="0"
+          max="100"
+          value={editData.billingPercentage}
+          onChange={(e) => onEditDataChange({ billingPercentage: Number(e.target.value) })}
           className="w-20"
         />
       </TableCell>

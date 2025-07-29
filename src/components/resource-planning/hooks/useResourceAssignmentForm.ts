@@ -5,6 +5,7 @@ interface ResourcePlanningData {
   id: string;
   profile_id: string;
   engagement_percentage: number;
+  billing_percentage: number;
   release_date: string;
   engagement_start_date: string;
   bill_type: {
@@ -22,6 +23,7 @@ interface FormState {
   billTypeId: string | null;
   projectId: string | null;
   engagementPercentage: number;
+  billingPercentage: number;
   releaseDate: string;
   engagementStartDate: string;
 }
@@ -31,6 +33,7 @@ type FormAction =
   | { type: 'SET_BILL_TYPE_ID'; payload: string | null }
   | { type: 'SET_PROJECT_ID'; payload: string | null }
   | { type: 'SET_ENGAGEMENT_PERCENTAGE'; payload: number }
+  | { type: 'SET_BILLING_PERCENTAGE'; payload: number }
   | { type: 'SET_RELEASE_DATE'; payload: string }
   | { type: 'SET_ENGAGEMENT_START_DATE'; payload: string }
   | { type: 'RESET_FORM'; payload: Partial<FormState> }
@@ -41,6 +44,7 @@ const initialState: FormState = {
   billTypeId: null,
   projectId: null,
   engagementPercentage: 100,
+  billingPercentage: 0,
   releaseDate: '',
   engagementStartDate: '',
 };
@@ -55,6 +59,8 @@ function formReducer(state: FormState, action: FormAction): FormState {
       return { ...state, projectId: action.payload };
     case 'SET_ENGAGEMENT_PERCENTAGE':
       return { ...state, engagementPercentage: action.payload };
+    case 'SET_BILLING_PERCENTAGE':
+      return { ...state, billingPercentage: action.payload };
     case 'SET_RELEASE_DATE':
       return { ...state, releaseDate: action.payload };
     case 'SET_ENGAGEMENT_START_DATE':
@@ -91,6 +97,7 @@ export const useResourceAssignmentForm = ({
           billTypeId: item.bill_type?.id || null,
           projectId: item.project?.id || null,
           engagementPercentage: item.engagement_percentage,
+          billingPercentage: item.billing_percentage || 0,
           releaseDate: item.release_date || '',
           engagementStartDate: item.engagement_start_date || '',
         },
@@ -122,6 +129,10 @@ export const useResourceAssignmentForm = ({
     dispatch({ type: 'SET_ENGAGEMENT_PERCENTAGE', payload: value });
   }, []);
 
+  const setBillingPercentage = useCallback((value: number) => {
+    dispatch({ type: 'SET_BILLING_PERCENTAGE', payload: value });
+  }, []);
+
   const setReleaseDate = useCallback((value: string) => {
     dispatch({ type: 'SET_RELEASE_DATE', payload: value });
   }, []);
@@ -146,6 +157,7 @@ export const useResourceAssignmentForm = ({
     bill_type_id: state.billTypeId || undefined,
     project_id: state.projectId || undefined,
     engagement_percentage: state.engagementPercentage,
+    billing_percentage: state.billingPercentage,
     release_date: state.releaseDate || undefined,
     engagement_start_date: state.engagementStartDate || undefined,
   }), [state]);
@@ -159,6 +171,8 @@ export const useResourceAssignmentForm = ({
     setProjectId,
     engagementPercentage: state.engagementPercentage,
     setEngagementPercentage,
+    billingPercentage: state.billingPercentage,
+    setBillingPercentage,
     releaseDate: state.releaseDate,
     setReleaseDate,
     engagementStartDate: state.engagementStartDate,

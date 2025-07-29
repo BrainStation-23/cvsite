@@ -43,6 +43,15 @@ export const ResourcePlanningTableHeader: React.FC<ResourcePlanningTableHeaderPr
             Engagement % {getSortIcon('engagement_percentage')}
           </Button>
         </TableHead>
+        <TableHead>
+          <Button
+            variant="ghost"
+            onClick={() => onSort('billing_percentage')}
+            className="flex items-center gap-2 p-0 h-auto font-medium"
+          >
+            Billing % {getSortIcon('billing_percentage')}
+          </Button>
+        </TableHead>
         <TableHead>Start Date</TableHead>
         <TableHead>Release Date</TableHead>
         <TableHead>Actions</TableHead>
