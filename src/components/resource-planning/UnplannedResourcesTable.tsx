@@ -49,10 +49,7 @@ export const UnplannedResourcesTable: React.FC<UnplannedResourcesTableProps> = (
     );
   }
 
-  // Ensure resources is always an array before checking length or mapping
-  const safeResources = Array.isArray(resources) ? resources : [];
-
-  if (safeResources.length === 0) {
+  if (resources.length === 0) {
     return (
       <div className="flex items-center justify-center h-32 text-muted-foreground">
         No unplanned resources found with the current filters.
@@ -74,7 +71,7 @@ export const UnplannedResourcesTable: React.FC<UnplannedResourcesTableProps> = (
             </TableRow>
           </TableHeader>
           <TableBody>
-            {safeResources.map((resource) => (
+            {resources.map((resource) => (
               <TableRow key={resource.id}>
                 <TableCell>
                   <div className="flex flex-col">

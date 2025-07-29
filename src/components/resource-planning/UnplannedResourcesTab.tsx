@@ -18,10 +18,12 @@ export const UnplannedResourcesTab: React.FC<UnplannedResourcesTabProps> = ({
   onCreatePlan,
   unplannedResources,
 }) => {
-  // Extract the actual array data from the hook response
   const {
-    unplannedResources: resources = [],
-    isLoading = false,
+    unplannedResources: resources,
+    pagination,
+    isLoading,
+    currentPage,
+    setCurrentPage,
   } = unplannedResources;
 
   if (isLoading) {
@@ -32,15 +34,12 @@ export const UnplannedResourcesTab: React.FC<UnplannedResourcesTabProps> = ({
     );
   }
 
-  // Ensure resources is always an array
-  const safeResources = Array.isArray(resources) ? resources : [];
-
   return (
     <UnplannedResourcesTable 
-      resources={safeResources}
-      pagination={undefined}
-      currentPage={1}
-      setCurrentPage={() => {}}
+      resources={resources}
+      pagination={pagination}
+      currentPage={currentPage}
+      setCurrentPage={setCurrentPage}
       isLoading={isLoading}
       onCreatePlan={onCreatePlan}
     />
