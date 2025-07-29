@@ -1,5 +1,7 @@
 
 import React from 'react';
+import { Button } from '@/components/ui/button';
+import { Upload } from 'lucide-react';
 import { usePlannedResources } from '@/hooks/use-planned-resources';
 import { useUnplannedResources } from '@/hooks/use-unplanned-resources';
 import { useWeeklyValidation } from '@/hooks/use-weekly-validation';
@@ -8,6 +10,7 @@ import { useInlineEdit } from './hooks/useInlineEdit';
 import { ResourcePlanningFilters } from './ResourcePlanningFilters';
 import { ResourcePlanningTabs } from './ResourcePlanningTabs';
 import { ResourcePlanningForm } from './ResourcePlanningForm';
+import { BulkResourcePlanningImport } from './BulkResourcePlanningImport';
 
 export const ResourcePlanningTable: React.FC = () => {
   const [searchQuery, setSearchQuery] = React.useState('');
@@ -15,6 +18,7 @@ export const ResourcePlanningTable: React.FC = () => {
   const [selectedManager, setSelectedManager] = React.useState<string | null>(null);
   const [showUnplanned, setShowUnplanned] = React.useState(false);
   const [activeTab, setActiveTab] = React.useState('planned');
+  const [showBulkImport, setShowBulkImport] = React.useState(false);
 
   const clearFilters = () => {
     setSearchQuery('');
@@ -73,10 +77,30 @@ export const ResourcePlanningTable: React.FC = () => {
     startEdit(item);
   };
 
+  const handleBulkImportSuccess = () => {
+    // Refresh all data after successful import
+    plannedResources.setSearchQuery(''); // This will trigger a refetch
+    unplannedResources.refetch();
+    weeklyValidationData.refetch();
+  };
+
   return (
     <div className="flex gap-6 h-full">
       {/* Main content area */}
       <div className="flex-1 space-y-4">
+        {/* Header with Bulk Import Button */}
+        <div className="flex justify-between items-center">
+          <h2 className="text-xl font-semibold">Resource Planning</h2>
+          <Button
+            variant="outline"
+            onClick={() => setShowBulkImport(true)}
+            className="flex items-center gap-2"
+          >
+            <Upload className="h-4 w-4" />
+            Bulk Import
+          </Button>
+        </div>
+
         <ResourcePlanningFilters
           searchQuery={searchQuery}
           setSearchQuery={setSearchQuery}
@@ -125,6 +149,13 @@ export const ResourcePlanningTable: React.FC = () => {
           />
         </div>
       </div>
+
+      {/* Bulk Import Dialog */}
+      <BulkResourcePlanningImport
+        isOpen={showBulkImport}
+        onClose={() => setShowBulkImport(false)}
+        onSuccess={handleBulkImportSuccess}
+      />
     </div>
   );
 };
