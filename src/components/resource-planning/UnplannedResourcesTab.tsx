@@ -26,8 +26,9 @@ export const UnplannedResourcesTab: React.FC<UnplannedResourcesTabProps> = ({
   console.log('UnplannedResourcesTab data:', data);
   console.log('UnplannedResourcesTab isLoading:', isLoading);
 
-  // The RPC function returns an array directly, so we use data instead of data.unplannedResources
-  const resources = Array.isArray(data) ? data : [];
+  // The RPC function returns an object with unplanned_resources and pagination
+  const resources = data?.unplanned_resources || [];
+  const pagination = data?.pagination;
 
   if (isLoading) {
     return (
@@ -40,8 +41,8 @@ export const UnplannedResourcesTab: React.FC<UnplannedResourcesTabProps> = ({
   return (
     <UnplannedResourcesTable 
       resources={resources}
-      pagination={undefined}
-      currentPage={1}
+      pagination={pagination}
+      currentPage={pagination?.page || 1}
       setCurrentPage={() => {}}
       isLoading={isLoading}
       onCreatePlan={onCreatePlan}
