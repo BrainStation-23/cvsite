@@ -10,9 +10,6 @@ interface ResourcePlanningTabsProps {
   setShowUnplanned: (show: boolean) => void;
   activeTab: string;
   setActiveTab: (tab: string) => void;
-  plannedCount: number;
-  unplannedCount: number;
-  weeklyValidationCount: number;
   searchQuery: string;
   selectedSbu: string | null;
   selectedManager: string | null;
@@ -38,9 +35,6 @@ export const ResourcePlanningTabs: React.FC<ResourcePlanningTabsProps> = ({
   setShowUnplanned,
   activeTab,
   setActiveTab,
-  plannedCount,
-  unplannedCount,
-  weeklyValidationCount,
   searchQuery,
   selectedSbu,
   selectedManager,
@@ -67,13 +61,13 @@ export const ResourcePlanningTabs: React.FC<ResourcePlanningTabsProps> = ({
     <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
       <TabsList className="grid w-full grid-cols-3">
         <TabsTrigger value="planned">
-          Planned Resources ({plannedCount})
+          Planned Resources
         </TabsTrigger>
         <TabsTrigger value="unplanned">
-          Unplanned Resources ({unplannedCount})
+          Unplanned Resources
         </TabsTrigger>
         <TabsTrigger value="weekly-validation">
-          Weekly Validation ({weeklyValidationCount})
+          Weekly Validation
         </TabsTrigger>
       </TabsList>
 
