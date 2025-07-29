@@ -2,6 +2,7 @@
 import React from 'react';
 import { usePlannedResources } from '@/hooks/use-planned-resources';
 import { useUnplannedResources } from '@/hooks/use-unplanned-resources';
+import { useWeeklyValidation } from '@/hooks/use-weekly-validation';
 import { useResourcePlanningState } from './hooks/useResourcePlanningState';
 import { useInlineEdit } from './hooks/useInlineEdit';
 import { ResourcePlanningFilters } from './ResourcePlanningFilters';
@@ -13,6 +14,7 @@ export const ResourcePlanningTable: React.FC = () => {
   const [selectedSbu, setSelectedSbu] = React.useState<string | null>(null);
   const [selectedManager, setSelectedManager] = React.useState<string | null>(null);
   const [showUnplanned, setShowUnplanned] = React.useState(false);
+  const [activeTab, setActiveTab] = React.useState('planned');
 
   const clearFilters = () => {
     setSearchQuery('');
@@ -43,6 +45,11 @@ export const ResourcePlanningTable: React.FC = () => {
   // Centralized data fetching with current filters
   const plannedResources = usePlannedResources();
   const unplannedResources = useUnplannedResources({
+    searchQuery,
+    selectedSbu,
+    selectedManager,
+  });
+  const weeklyValidationData = useWeeklyValidation({
     searchQuery,
     selectedSbu,
     selectedManager,
@@ -83,8 +90,11 @@ export const ResourcePlanningTable: React.FC = () => {
         <ResourcePlanningTabs
           showUnplanned={showUnplanned}
           setShowUnplanned={setShowUnplanned}
+          activeTab={activeTab}
+          setActiveTab={setActiveTab}
           plannedCount={plannedResources.data?.length || 0}
           unplannedCount={unplannedResources.unplannedResources?.length || 0}
+          weeklyValidationCount={weeklyValidationData.data?.length || 0}
           searchQuery={searchQuery}
           selectedSbu={selectedSbu}
           selectedManager={selectedManager}
@@ -93,6 +103,7 @@ export const ResourcePlanningTable: React.FC = () => {
           onCreatePlan={handleCreatePlan}
           plannedResources={plannedResources}
           unplannedResources={unplannedResources}
+          weeklyValidationData={weeklyValidationData}
           editingItemId={editingItemId}
           editData={editData}
           onStartEdit={startEdit}

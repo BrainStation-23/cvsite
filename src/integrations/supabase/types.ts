@@ -970,6 +970,7 @@ export type Database = {
       resource_planning: {
         Row: {
           bill_type_id: string | null
+          billing_percentage: number | null
           created_at: string
           engagement_complete: boolean
           engagement_percentage: number | null
@@ -979,9 +980,11 @@ export type Database = {
           project_id: string | null
           release_date: string | null
           updated_at: string
+          weekly_validation: boolean | null
         }
         Insert: {
           bill_type_id?: string | null
+          billing_percentage?: number | null
           created_at?: string
           engagement_complete?: boolean
           engagement_percentage?: number | null
@@ -991,9 +994,11 @@ export type Database = {
           project_id?: string | null
           release_date?: string | null
           updated_at?: string
+          weekly_validation?: boolean | null
         }
         Update: {
           bill_type_id?: string | null
+          billing_percentage?: number | null
           created_at?: string
           engagement_complete?: boolean
           engagement_percentage?: number | null
@@ -1003,6 +1008,7 @@ export type Database = {
           project_id?: string | null
           release_date?: string | null
           updated_at?: string
+          weekly_validation?: boolean | null
         }
         Relationships: [
           {
@@ -1369,6 +1375,18 @@ export type Database = {
           manager_filter?: string
           page_number?: number
           items_per_page?: number
+        }
+        Returns: Json
+      }
+      get_weekly_validation_data: {
+        Args: {
+          search_query?: string
+          page_number?: number
+          items_per_page?: number
+          sort_by?: string
+          sort_order?: string
+          sbu_filter?: string
+          manager_filter?: string
         }
         Returns: Json
       }

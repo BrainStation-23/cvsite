@@ -3,12 +3,16 @@ import React from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { PlannedResourcesTab } from './PlannedResourcesTab';
 import { UnplannedResourcesTab } from './UnplannedResourcesTab';
+import { WeeklyValidationTab } from './WeeklyValidationTab';
 
 interface ResourcePlanningTabsProps {
   showUnplanned: boolean;
   setShowUnplanned: (show: boolean) => void;
+  activeTab: string;
+  setActiveTab: (tab: string) => void;
   plannedCount: number;
   unplannedCount: number;
+  weeklyValidationCount: number;
   searchQuery: string;
   selectedSbu: string | null;
   selectedManager: string | null;
@@ -18,6 +22,7 @@ interface ResourcePlanningTabsProps {
   // Centralized data props
   plannedResources: any;
   unplannedResources: any;
+  weeklyValidationData: any;
   // Inline edit props
   editingItemId: string | null;
   editData: any;
@@ -31,8 +36,11 @@ interface ResourcePlanningTabsProps {
 export const ResourcePlanningTabs: React.FC<ResourcePlanningTabsProps> = ({
   showUnplanned,
   setShowUnplanned,
+  activeTab,
+  setActiveTab,
   plannedCount,
   unplannedCount,
+  weeklyValidationCount,
   searchQuery,
   selectedSbu,
   selectedManager,
@@ -41,6 +49,7 @@ export const ResourcePlanningTabs: React.FC<ResourcePlanningTabsProps> = ({
   onCreatePlan,
   plannedResources,
   unplannedResources,
+  weeklyValidationData,
   editingItemId,
   editData,
   onStartEdit,
@@ -49,20 +58,22 @@ export const ResourcePlanningTabs: React.FC<ResourcePlanningTabsProps> = ({
   onEditDataChange,
   editLoading,
 }) => {
+  const handleTabChange = (value: string) => {
+    setActiveTab(value);
+    setShowUnplanned(value === "unplanned");
+  };
+
   return (
-    <Tabs value={showUnplanned ? "unplanned" : "planned"} className="w-full">
-      <TabsList className="grid w-full grid-cols-2">
-        <TabsTrigger 
-          value="planned" 
-          onClick={() => setShowUnplanned(false)}
-        >
+    <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
+      <TabsList className="grid w-full grid-cols-3">
+        <TabsTrigger value="planned">
           Planned Resources ({plannedCount})
         </TabsTrigger>
-        <TabsTrigger 
-          value="unplanned" 
-          onClick={() => setShowUnplanned(true)}
-        >
+        <TabsTrigger value="unplanned">
           Unplanned Resources ({unplannedCount})
+        </TabsTrigger>
+        <TabsTrigger value="weekly-validation">
+          Weekly Validation ({weeklyValidationCount})
         </TabsTrigger>
       </TabsList>
 
@@ -73,9 +84,7 @@ export const ResourcePlanningTabs: React.FC<ResourcePlanningTabsProps> = ({
           selectedManager={selectedManager}
           onCreateNewAssignment={onCreateNewAssignment}
           onEditAssignment={onEditAssignment}
-          // Pass centralized data
           plannedResources={plannedResources}
-          // Pass inline edit props
           editingItemId={editingItemId}
           editData={editData}
           onStartEdit={onStartEdit}
@@ -92,8 +101,16 @@ export const ResourcePlanningTabs: React.FC<ResourcePlanningTabsProps> = ({
           selectedSbu={selectedSbu}
           selectedManager={selectedManager}
           onCreatePlan={onCreatePlan}
-          // Pass centralized data
           unplannedResources={unplannedResources}
+        />
+      </TabsContent>
+
+      <TabsContent value="weekly-validation" className="mt-4">
+        <WeeklyValidationTab
+          searchQuery={searchQuery}
+          selectedSbu={selectedSbu}
+          selectedManager={selectedManager}
+          weeklyValidationData={weeklyValidationData}
         />
       </TabsContent>
     </Tabs>
