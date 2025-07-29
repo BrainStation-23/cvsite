@@ -32,6 +32,9 @@ export function useUnplannedResources(params: UnplannedResourcesParams) {
       }
 
       console.log('Unplanned Resources RPC response:', rpcData);
+      console.log('RPC response type:', typeof rpcData);
+      console.log('Is RPC response array?', Array.isArray(rpcData));
+      
       return rpcData || [];
     }
   });
