@@ -15,7 +15,7 @@ import {
   Treemap,
   Rectangle
 } from 'recharts';
-import { ChartView } from './ChartViewSelector';
+import { EnhancedChartView } from './EnhancedChartViewSelector';
 
 interface BillTypeData {
   name: string;
@@ -25,7 +25,7 @@ interface BillTypeData {
 
 interface EnhancedBillTypeChartProps {
   data: BillTypeData[];
-  view: ChartView;
+  view: EnhancedChartView;
   colors: string[];
   totalResources: number;
 }
@@ -222,7 +222,7 @@ export const EnhancedBillTypeChart: React.FC<EnhancedBillTypeChartProps> = ({
     );
   }
 
-  // Enhanced donut chart view
+  // Enhanced donut chart view (pie)
   return (
     <div className="h-96 flex flex-col">
       <ChartContainer
