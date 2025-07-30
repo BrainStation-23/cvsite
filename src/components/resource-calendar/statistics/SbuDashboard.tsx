@@ -35,20 +35,12 @@ export const SbuDashboard: React.FC<SbuDashboardProps> = ({ sbuData, loading = f
 
   if (loading) {
     return (
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="space-y-6">
         <Card>
           <CardContent className="p-6">
             <div className="animate-pulse space-y-4">
               <div className="h-4 bg-muted rounded w-1/3"></div>
-              <div className="h-32 bg-muted rounded"></div>
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-6">
-            <div className="animate-pulse space-y-4">
-              <div className="h-4 bg-muted rounded w-1/3"></div>
-              <div className="h-32 bg-muted rounded"></div>
+              <div className="h-80 bg-muted rounded"></div>
             </div>
           </CardContent>
         </Card>
@@ -63,38 +55,45 @@ export const SbuDashboard: React.FC<SbuDashboardProps> = ({ sbuData, loading = f
         {sbuData.name} Dashboard
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Resource Summary */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
+      {/* Merged Resource Overview Card */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
               <Users className="h-5 w-5" />
-              Resource Summary
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
+              Resource Overview
+            </div>
+            <ChartViewSelector 
+              currentView={chartView}
+              onViewChange={setChartView}
+            />
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Total Resources Summary */}
             <div className="space-y-4">
-              <div className="text-center">
-                <div className="text-3xl font-bold text-primary">{sbuData.totalResources}</div>
+              <div className="text-center p-4 bg-muted/50 rounded-lg">
+                <div className="text-4xl font-bold text-primary mb-2">{sbuData.totalResources}</div>
                 <div className="text-sm text-muted-foreground">Total Resources</div>
               </div>
 
               {sbuData.billTypeDistribution.length > 0 && (
-                <div className="space-y-2">
-                  <h4 className="font-medium text-sm">Bill Type Breakdown:</h4>
-                  <div className="max-h-40 overflow-y-auto space-y-2">
+                <div className="space-y-3">
+                  <h4 className="font-medium text-sm text-center">Bill Type Breakdown</h4>
+                  <div className="max-h-48 overflow-y-auto space-y-2">
                     {sbuData.billTypeDistribution.map((item, index) => (
-                      <div key={item.name} className="flex justify-between items-center text-sm">
+                      <div key={item.name} className="flex justify-between items-center text-sm p-2 bg-muted/30 rounded">
                         <div className="flex items-center gap-2 flex-1 min-w-0">
                           <div 
                             className="w-3 h-3 rounded-full flex-shrink-0"
                             style={{ backgroundColor: COLORS[index % COLORS.length] }}
                           />
-                          <span className="truncate" title={item.name}>{item.name}</span>
+                          <span className="truncate font-medium" title={item.name}>{item.name}</span>
                         </div>
                         <div className="text-right flex-shrink-0 ml-2">
-                          <span className="font-medium">{item.value}</span>
-                          <span className="text-muted-foreground ml-1">({item.percentage.toFixed(1)}%)</span>
+                          <span className="font-bold text-primary">{item.value}</span>
+                          <span className="text-muted-foreground ml-1 text-xs">({item.percentage.toFixed(1)}%)</span>
                         </div>
                       </div>
                     ))}
@@ -102,41 +101,27 @@ export const SbuDashboard: React.FC<SbuDashboardProps> = ({ sbuData, loading = f
                 </div>
               )}
             </div>
-          </CardContent>
-        </Card>
 
-        {/* Bill Type Distribution Chart */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <BarChart3 className="h-5 w-5" />
-                Bill Type Distribution
-              </div>
-              <ChartViewSelector 
-                currentView={chartView}
-                onViewChange={setChartView}
-              />
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            {sbuData.billTypeDistribution.length > 0 ? (
-              <BillTypeChartView
-                data={sbuData.billTypeDistribution}
-                view={chartView}
-                colors={COLORS}
-              />
-            ) : (
-              <div className="h-80 flex items-center justify-center text-muted-foreground">
-                <div className="text-center">
-                  <BarChart3 className="h-12 w-12 mx-auto mb-2 opacity-50" />
-                  <p>No bill type data available</p>
+            {/* Chart Visualization */}
+            <div className="lg:col-span-2">
+              {sbuData.billTypeDistribution.length > 0 ? (
+                <BillTypeChartView
+                  data={sbuData.billTypeDistribution}
+                  view={chartView}
+                  colors={COLORS}
+                />
+              ) : (
+                <div className="h-80 flex items-center justify-center text-muted-foreground">
+                  <div className="text-center">
+                    <BarChart3 className="h-12 w-12 mx-auto mb-2 opacity-50" />
+                    <p>No bill type data available</p>
+                  </div>
                 </div>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-      </div>
+              )}
+            </div>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 };
