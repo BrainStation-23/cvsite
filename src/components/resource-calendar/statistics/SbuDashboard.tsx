@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Users, BarChart3 } from 'lucide-react';
@@ -77,29 +76,6 @@ export const SbuDashboard: React.FC<SbuDashboardProps> = ({ sbuData, loading = f
                 <div className="text-4xl font-bold text-primary mb-2">{sbuData.totalResources}</div>
                 <div className="text-sm text-muted-foreground">Total Resources</div>
               </div>
-
-              {sbuData.billTypeDistribution.length > 0 && (
-                <div className="space-y-3">
-                  <h4 className="font-medium text-sm text-center">Bill Type Breakdown</h4>
-                  <div className="max-h-48 overflow-y-auto space-y-2">
-                    {sbuData.billTypeDistribution.map((item, index) => (
-                      <div key={item.name} className="flex justify-between items-center text-sm p-2 bg-muted/30 rounded">
-                        <div className="flex items-center gap-2 flex-1 min-w-0">
-                          <div 
-                            className="w-3 h-3 rounded-full flex-shrink-0"
-                            style={{ backgroundColor: COLORS[index % COLORS.length] }}
-                          />
-                          <span className="truncate font-medium" title={item.name}>{item.name}</span>
-                        </div>
-                        <div className="text-right flex-shrink-0 ml-2">
-                          <span className="font-bold text-primary">{item.value}</span>
-                          <span className="text-muted-foreground ml-1 text-xs">({item.percentage.toFixed(1)}%)</span>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
             </div>
 
             {/* Chart Visualization */}
