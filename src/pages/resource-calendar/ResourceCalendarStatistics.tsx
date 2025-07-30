@@ -4,17 +4,18 @@ import { Link, useLocation } from 'react-router-dom';
 import DashboardLayout from '../../components/Layout/DashboardLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { BarChart3, PieChart, Users, Building, Award, ArrowLeft, Download, RefreshCw } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { ArrowLeft, Download, RefreshCw, Users, TrendingUp } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { StatisticsCard } from '@/components/resource-calendar/statistics/StatisticsCard';
-import { DistributionChart } from '@/components/resource-calendar/statistics/DistributionChart';
-import { SummaryStats } from '@/components/resource-calendar/statistics/SummaryStats';
+import { SbuDashboard } from '@/components/resource-calendar/statistics/SbuDashboard';
+import { SbuComparison } from '@/components/resource-calendar/statistics/SbuComparison';
 
-interface DistributionData {
+interface SbuData {
+  id: string;
   name: string;
-  value: number;
+  totalResources: number;
+  billTypeDistribution: Array<{ name: string; value: number; percentage: number }>;
 }
 
 const ResourceCalendarStatistics: React.FC = () => {
@@ -25,52 +26,87 @@ const ResourceCalendarStatistics: React.FC = () => {
 
   const [loading, setLoading] = useState(true);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
-  const [distributionData, setDistributionData] = useState<{
-    billTypes: DistributionData[];
-    expertiseTypes: DistributionData[];
-    projectTypes: DistributionData[];
-    resourceTypes: DistributionData[];
-    sbuTypes: DistributionData[];
-  }>({
-    billTypes: [],
-    expertiseTypes: [],
-    projectTypes: [],
-    resourceTypes: [],
-    sbuTypes: []
-  });
+  const [sbuData, setSbuData] = useState<SbuData[]>([]);
+  const [selectedSbu, setSelectedSbu] = useState<string>('');
+  const [comparisonSbu, setComparisonSbu] = useState<string>('');
 
-  const fetchDistributionData = async () => {
+  const fetchSbuAnalytics = async () => {
     try {
       setLoading(true);
       
-      const [billTypesResult, expertiseTypesResult, projectTypesResult, resourceTypesResult, sbuResult] = await Promise.all([
-        supabase.rpc('get_resource_distribution_by_bill_types'),
-        supabase.rpc('get_resource_distribution_by_expertise_types'),
-        supabase.rpc('get_resource_distribution_by_project_types'),
-        supabase.rpc('get_resource_distribution_by_resource_types'),
-        supabase.rpc('get_resource_distribution_by_sbu')
-      ]);
+      // Get all SBUs with their resource counts and bill type distributions
+      const { data: sbus, error: sbuError } = await supabase
+        .from('sbus')
+        .select('id, name')
+        .order('name');
 
-      if (billTypesResult.error) throw billTypesResult.error;
-      if (expertiseTypesResult.error) throw expertiseTypesResult.error;
-      if (projectTypesResult.error) throw projectTypesResult.error;
-      if (resourceTypesResult.error) throw resourceTypesResult.error;
-      if (sbuResult.error) throw sbuResult.error;
+      if (sbuError) throw sbuError;
 
-      setDistributionData({
-        billTypes: billTypesResult.data?.map((item: any) => ({ name: item.bill_type, value: Number(item.count) })) || [],
-        expertiseTypes: expertiseTypesResult.data?.map((item: any) => ({ name: item.expertise_type, value: Number(item.count) })) || [],
-        projectTypes: projectTypesResult.data?.map((item: any) => ({ name: item.project_type, value: Number(item.count) })) || [],
-        resourceTypes: resourceTypesResult.data?.map((item: any) => ({ name: item.resource_type, value: Number(item.count) })) || [],
-        sbuTypes: sbuResult.data?.map((item: any) => ({ name: item.sbu_name, value: Number(item.count) })) || []
-      });
+      const sbuAnalytics: SbuData[] = [];
+
+      for (const sbu of sbus) {
+        // Get total resources for this SBU
+        const { data: profiles, error: profilesError } = await supabase
+          .from('profiles')
+          .select('id')
+          .eq('sbu_id', sbu.id);
+
+        if (profilesError) throw profilesError;
+
+        const totalResources = profiles?.length || 0;
+
+        // Get bill type distribution for this SBU
+        const { data: resourcePlanning, error: rpError } = await supabase
+          .from('resource_planning')
+          .select(`
+            bill_type_id,
+            bill_types (
+              name
+            ),
+            profile_id
+          `)
+          .in('profile_id', profiles?.map(p => p.id) || [])
+          .eq('engagement_complete', false);
+
+        if (rpError) throw rpError;
+
+        // Process bill type distribution
+        const billTypeMap = new Map<string, number>();
+        resourcePlanning?.forEach(rp => {
+          const billTypeName = rp.bill_types?.name || 'Unassigned';
+          billTypeMap.set(billTypeName, (billTypeMap.get(billTypeName) || 0) + 1);
+        });
+
+        const billTypeDistribution = Array.from(billTypeMap.entries()).map(([name, value]) => ({
+          name,
+          value,
+          percentage: totalResources > 0 ? (value / totalResources) * 100 : 0
+        }));
+
+        sbuAnalytics.push({
+          id: sbu.id,
+          name: sbu.name,
+          totalResources,
+          billTypeDistribution
+        });
+      }
+
+      setSbuData(sbuAnalytics);
       
+      // Set default selected SBU to the first one with resources
+      if (!selectedSbu && sbuAnalytics.length > 0) {
+        const sbuWithResources = sbuAnalytics.find(sbu => sbu.totalResources > 0);
+        if (sbuWithResources) {
+          setSelectedSbu(sbuWithResources.id);
+        }
+      }
+
       setLastUpdated(new Date());
     } catch (error) {
-      console.error('Error fetching distribution data:', error);
+      console.error('Error fetching SBU analytics:', error);
       toast({
         title: 'Error',
-        description: 'Failed to fetch distribution data. Please try again.',
+        description: 'Failed to fetch SBU analytics. Please try again.',
         variant: 'destructive'
       });
     } finally {
@@ -79,18 +115,22 @@ const ResourceCalendarStatistics: React.FC = () => {
   };
 
   useEffect(() => {
-    fetchDistributionData();
+    fetchSbuAnalytics();
   }, []);
 
   const handleExport = () => {
-    // Create CSV content
+    // Create CSV content for SBU analytics
     const csvContent = [
-      ['Category', 'Type', 'Count'],
-      ...distributionData.billTypes.map(item => ['Bill Types', item.name, item.value]),
-      ...distributionData.expertiseTypes.map(item => ['Expertise Types', item.name, item.value]),
-      ...distributionData.projectTypes.map(item => ['Project Types', item.name, item.value]),
-      ...distributionData.resourceTypes.map(item => ['Resource Types', item.name, item.value]),
-      ...distributionData.sbuTypes.map(item => ['SBU', item.name, item.value])
+      ['SBU', 'Total Resources', 'Bill Type', 'Count', 'Percentage'],
+      ...sbuData.flatMap(sbu =>
+        sbu.billTypeDistribution.map(bt => [
+          sbu.name,
+          sbu.totalResources,
+          bt.name,
+          bt.value,
+          `${bt.percentage.toFixed(1)}%`
+        ])
+      )
     ]
       .map(row => row.join(','))
       .join('\n');
@@ -99,15 +139,19 @@ const ResourceCalendarStatistics: React.FC = () => {
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.download = `resource-distribution-${new Date().toISOString().split('T')[0]}.csv`;
+    link.download = `sbu-analytics-${new Date().toISOString().split('T')[0]}.csv`;
     link.click();
     URL.revokeObjectURL(url);
 
     toast({
       title: 'Success',
-      description: 'Report exported successfully.',
+      description: 'SBU analytics exported successfully.',
     });
   };
+
+  const selectedSbuData = sbuData.find(sbu => sbu.id === selectedSbu);
+  const comparisonSbuData = sbuData.find(sbu => sbu.id === comparisonSbu);
+  const totalResources = sbuData.reduce((sum, sbu) => sum + sbu.totalResources, 0);
 
   return (
     <DashboardLayout>
@@ -122,9 +166,9 @@ const ResourceCalendarStatistics: React.FC = () => {
               </Button>
             </Link>
             <div>
-              <h1 className="text-2xl font-bold">Resource Distribution Analytics</h1>
+              <h1 className="text-2xl font-bold">SBU Resource Analytics</h1>
               <div className="flex items-center gap-2 text-sm text-muted-foreground mt-1">
-                <span>Analyze resource distribution patterns across different categories</span>
+                <span>Compare and analyze resource distribution across Strategic Business Units</span>
                 {lastUpdated && (
                   <span>• Last updated: {lastUpdated.toLocaleTimeString()}</span>
                 )}
@@ -132,7 +176,7 @@ const ResourceCalendarStatistics: React.FC = () => {
             </div>
           </div>
           <div className="flex gap-2">
-            <Button variant="outline" onClick={fetchDistributionData} disabled={loading}>
+            <Button variant="outline" onClick={fetchSbuAnalytics} disabled={loading}>
               <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
               Refresh
             </Button>
@@ -143,106 +187,103 @@ const ResourceCalendarStatistics: React.FC = () => {
           </div>
         </div>
 
-        {/* Summary Statistics */}
-        <SummaryStats distributionData={distributionData} />
+        {/* Overview Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <Card>
+            <CardContent className="p-6">
+              <div className="flex items-center">
+                <Users className="h-8 w-8 text-blue-500" />
+                <div className="ml-4">
+                  <p className="text-sm font-medium text-muted-foreground">Total Resources</p>
+                  <p className="text-2xl font-bold">{totalResources}</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
 
-        {/* Distribution Charts in Tabs */}
-        <Tabs defaultValue="overview" className="w-full">
-          <TabsList className="grid w-full grid-cols-2 md:grid-cols-6">
-            <TabsTrigger value="overview">Overview</TabsTrigger>
-            <TabsTrigger value="bill-types">Bill Types</TabsTrigger>
-            <TabsTrigger value="expertise">Expertise</TabsTrigger>
-            <TabsTrigger value="projects">Projects</TabsTrigger>
-            <TabsTrigger value="resources">Resources</TabsTrigger>
-            <TabsTrigger value="sbu">SBU</TabsTrigger>
-          </TabsList>
+          <Card>
+            <CardContent className="p-6">
+              <div className="flex items-center">
+                <TrendingUp className="h-8 w-8 text-green-500" />
+                <div className="ml-4">
+                  <p className="text-sm font-medium text-muted-foreground">Active SBUs</p>
+                  <p className="text-2xl font-bold">{sbuData.filter(sbu => sbu.totalResources > 0).length}</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
 
-          <TabsContent value="overview" className="space-y-6">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <StatisticsCard title="Bill Types Distribution" icon={BarChart3}>
-                <DistributionChart 
-                  data={distributionData.billTypes} 
-                  loading={loading}
-                  emptyMessage="No bill type data available"
-                />
-              </StatisticsCard>
+          <Card>
+            <CardContent className="p-6">
+              <div className="flex items-center">
+                <div className="h-8 w-8 bg-purple-500 rounded-full flex items-center justify-center text-white font-bold">
+                  AVG
+                </div>
+                <div className="ml-4">
+                  <p className="text-sm font-medium text-muted-foreground">Avg Resources/SBU</p>
+                  <p className="text-2xl font-bold">
+                    {sbuData.length > 0 ? Math.round(totalResources / sbuData.length) : 0}
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
 
-              <StatisticsCard title="Resource Types Distribution" icon={Users}>
-                <DistributionChart 
-                  data={distributionData.resourceTypes} 
-                  loading={loading}
-                  emptyMessage="No resource type data available"
-                />
-              </StatisticsCard>
+        {/* SBU Selection */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <label className="text-sm font-medium">Primary SBU</label>
+            <Select value={selectedSbu} onValueChange={setSelectedSbu}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select an SBU to analyze" />
+              </SelectTrigger>
+              <SelectContent>
+                {sbuData.map(sbu => (
+                  <SelectItem key={sbu.id} value={sbu.id}>
+                    {sbu.name} ({sbu.totalResources} resources)
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
 
-              <StatisticsCard title="SBU Distribution" icon={Building}>
-                <DistributionChart 
-                  data={distributionData.sbuTypes} 
-                  loading={loading}
-                  emptyMessage="No SBU data available"
-                />
-              </StatisticsCard>
+          <div className="space-y-2">
+            <label className="text-sm font-medium">Compare with (Optional)</label>
+            <Select value={comparisonSbu} onValueChange={setComparisonSbu}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select an SBU to compare" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="">No comparison</SelectItem>
+                {sbuData
+                  .filter(sbu => sbu.id !== selectedSbu)
+                  .map(sbu => (
+                    <SelectItem key={sbu.id} value={sbu.id}>
+                      {sbu.name} ({sbu.totalResources} resources)
+                    </SelectItem>
+                  ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
 
-              <StatisticsCard title="Project Types Distribution" icon={PieChart}>
-                <DistributionChart 
-                  data={distributionData.projectTypes} 
-                  loading={loading}
-                  emptyMessage="No project type data available"
-                />
-              </StatisticsCard>
-            </div>
-          </TabsContent>
+        {/* SBU Dashboard */}
+        {selectedSbuData && (
+          <SbuDashboard 
+            sbuData={selectedSbuData} 
+            loading={loading}
+          />
+        )}
 
-          <TabsContent value="bill-types">
-            <StatisticsCard title="Bill Types Distribution" icon={BarChart3} className="w-full">
-              <DistributionChart 
-                data={distributionData.billTypes} 
-                loading={loading}
-                emptyMessage="No bill type data available"
-              />
-            </StatisticsCard>
-          </TabsContent>
-
-          <TabsContent value="expertise">
-            <StatisticsCard title="Expertise Types Distribution" icon={Award} className="w-full">
-              <DistributionChart 
-                data={distributionData.expertiseTypes} 
-                loading={loading}
-                emptyMessage="No expertise type data available"
-              />
-            </StatisticsCard>
-          </TabsContent>
-
-          <TabsContent value="projects">
-            <StatisticsCard title="Project Types Distribution" icon={PieChart} className="w-full">
-              <DistributionChart 
-                data={distributionData.projectTypes} 
-                loading={loading}
-                emptyMessage="No project type data available"
-              />
-            </StatisticsCard>
-          </TabsContent>
-
-          <TabsContent value="resources">
-            <StatisticsCard title="Resource Types Distribution" icon={Users} className="w-full">
-              <DistributionChart 
-                data={distributionData.resourceTypes} 
-                loading={loading}
-                emptyMessage="No resource type data available"
-              />
-            </StatisticsCard>
-          </TabsContent>
-
-          <TabsContent value="sbu">
-            <StatisticsCard title="SBU Distribution" icon={Building} className="w-full">
-              <DistributionChart 
-                data={distributionData.sbuTypes} 
-                loading={loading}
-                emptyMessage="No SBU data available"
-              />
-            </StatisticsCard>
-          </TabsContent>
-        </Tabs>
+        {/* SBU Comparison */}
+        {selectedSbuData && comparisonSbuData && (
+          <SbuComparison 
+            primarySbu={selectedSbuData}
+            comparisonSbu={comparisonSbuData}
+            loading={loading}
+          />
+        )}
       </div>
     </DashboardLayout>
   );
