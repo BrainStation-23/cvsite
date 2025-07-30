@@ -1,8 +1,9 @@
 
-import React from 'react';
+import React, { useState, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import { format, startOfQuarter, endOfQuarter, eachMonthOfInterval, startOfMonth, endOfMonth, isWithinInterval } from 'date-fns';
-import { Users } from 'lucide-react';
+import { Users, ChevronLeft, ChevronRight } from 'lucide-react';
 import type { CalendarDay } from '@/hooks/use-resource-calendar';
 
 interface Project {
@@ -26,18 +27,22 @@ interface CalendarQuarterViewProps {
   onDateSelect: (date: Date) => void;
 }
 
+const RESOURCES_PER_PAGE = 10;
+
 export const CalendarQuarterView: React.FC<CalendarQuarterViewProps> = ({
   currentDate,
   calendarDays,
   selectedDate,
   onDateSelect,
 }) => {
+  const [currentPage, setCurrentPage] = useState(1);
+  
   const quarterStart = startOfQuarter(currentDate);
   const quarterEnd = endOfQuarter(currentDate);
   const months = eachMonthOfInterval({ start: quarterStart, end: quarterEnd });
 
   // Get unique resources with all their projects
-  const getResourceProjects = (): ResourceData[] => {
+  const allResources = useMemo((): ResourceData[] => {
     const resourceMap = new Map<string, ResourceData>();
     
     calendarDays.forEach(day => {
@@ -68,10 +73,19 @@ export const CalendarQuarterView: React.FC<CalendarQuarterViewProps> = ({
       });
     });
     
-    return Array.from(resourceMap.values());
-  };
+    return Array.from(resourceMap.values()).sort((a, b) => a.profileName.localeCompare(b.profileName));
+  }, [calendarDays]);
 
-  const resources = getResourceProjects();
+  // Pagination calculations
+  const totalPages = Math.ceil(allResources.length / RESOURCES_PER_PAGE);
+  const startIndex = (currentPage - 1) * RESOURCES_PER_PAGE;
+  const endIndex = startIndex + RESOURCES_PER_PAGE;
+  const paginatedResources = allResources.slice(startIndex, endIndex);
+
+  // Reset to first page when resources change
+  React.useEffect(() => {
+    setCurrentPage(1);
+  }, [allResources.length]);
 
   // Helper function to calculate project bar position and width for a month
   const getProjectBarStyle = (project: Project, month: Date) => {
@@ -138,9 +152,14 @@ export const CalendarQuarterView: React.FC<CalendarQuarterViewProps> = ({
 
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center space-x-2">
-            <Users className="h-5 w-5" />
-            <span>Resource Project Timeline</span>
+          <CardTitle className="flex items-center justify-between">
+            <div className="flex items-center space-x-2">
+              <Users className="h-5 w-5" />
+              <span>Resource Project Timeline</span>
+            </div>
+            <div className="text-sm text-muted-foreground">
+              Showing {startIndex + 1} to {Math.min(endIndex, allResources.length)} of {allResources.length} resources
+            </div>
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -157,13 +176,13 @@ export const CalendarQuarterView: React.FC<CalendarQuarterViewProps> = ({
 
             {/* Resource Rows */}
             <div className="space-y-4">
-              {resources.length === 0 ? (
+              {paginatedResources.length === 0 ? (
                 <div className="text-center py-8 text-muted-foreground">
                   <Users className="h-8 w-8 mx-auto mb-2 opacity-50" />
                   <p>No resources found for this quarter</p>
                 </div>
               ) : (
-                resources.map((resource) => (
+                paginatedResources.map((resource) => (
                   <div key={resource.profileId} className="grid grid-cols-4 gap-0 py-4 border-b border-border/50">
                     {/* Employee Info */}
                     <div className="col-span-1 pr-4">
@@ -205,6 +224,35 @@ export const CalendarQuarterView: React.FC<CalendarQuarterViewProps> = ({
               )}
             </div>
           </div>
+
+          {/* Pagination Controls */}
+          {totalPages > 1 && (
+            <div className="flex items-center justify-between mt-6 pt-4 border-t">
+              <div className="text-sm text-muted-foreground">
+                Page {currentPage} of {totalPages}
+              </div>
+              <div className="flex items-center space-x-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                  disabled={currentPage === 1}
+                >
+                  <ChevronLeft className="h-4 w-4 mr-1" />
+                  Previous
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                  disabled={currentPage === totalPages}
+                >
+                  Next
+                  <ChevronRight className="h-4 w-4 ml-1" />
+                </Button>
+              </div>
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>
