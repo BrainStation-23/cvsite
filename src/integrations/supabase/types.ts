@@ -1349,6 +1349,42 @@ export type Database = {
         }
         Returns: Json
       }
+      get_sbu_resource_distribution_by_bill_types: {
+        Args: { sbu_filter?: string }
+        Returns: {
+          bill_type: string
+          count: number
+        }[]
+      }
+      get_sbu_resource_distribution_by_expertise_types: {
+        Args: { sbu_filter?: string }
+        Returns: {
+          expertise_type: string
+          count: number
+        }[]
+      }
+      get_sbu_resource_distribution_by_project_types: {
+        Args: { sbu_filter?: string }
+        Returns: {
+          project_type: string
+          count: number
+        }[]
+      }
+      get_sbu_resource_distribution_by_resource_types: {
+        Args: { sbu_filter?: string }
+        Returns: {
+          resource_type: string
+          count: number
+        }[]
+      }
+      get_sbu_summary_stats: {
+        Args: { sbu_filter?: string }
+        Returns: {
+          total_resources: number
+          active_projects: number
+          avg_engagement_percentage: number
+        }[]
+      }
       get_section_fields: {
         Args: { section_type_param: string }
         Returns: {
