@@ -35,7 +35,7 @@ export const SbuDashboard: React.FC<SbuDashboardProps> = ({ sbuData, loading = f
 
   if (loading) {
     return (
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <Card>
           <CardContent className="p-6">
             <div className="animate-pulse space-y-4">
@@ -44,7 +44,7 @@ export const SbuDashboard: React.FC<SbuDashboardProps> = ({ sbuData, loading = f
             </div>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="lg:col-span-2">
           <CardContent className="p-6">
             <div className="animate-pulse space-y-4">
               <div className="h-4 bg-muted rounded w-1/3"></div>
@@ -63,7 +63,7 @@ export const SbuDashboard: React.FC<SbuDashboardProps> = ({ sbuData, loading = f
         {sbuData.name} Dashboard
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Resource Summary */}
         <Card>
           <CardHeader>
@@ -105,8 +105,8 @@ export const SbuDashboard: React.FC<SbuDashboardProps> = ({ sbuData, loading = f
           </CardContent>
         </Card>
 
-        {/* Bill Type Distribution Chart */}
-        <Card>
+        {/* Bill Type Distribution Chart - Takes 2 columns */}
+        <Card className="lg:col-span-2">
           <CardHeader>
             <CardTitle className="flex items-center justify-between">
               <div className="flex items-center gap-2">
@@ -121,11 +121,37 @@ export const SbuDashboard: React.FC<SbuDashboardProps> = ({ sbuData, loading = f
           </CardHeader>
           <CardContent>
             {sbuData.billTypeDistribution.length > 0 ? (
-              <BillTypeChartView
-                data={sbuData.billTypeDistribution}
-                view={chartView}
-                colors={COLORS}
-              />
+              <div className="flex items-start gap-6">
+                {/* Chart takes main space */}
+                <div className="flex-1">
+                  <BillTypeChartView
+                    data={sbuData.billTypeDistribution}
+                    view={chartView}
+                    colors={COLORS}
+                  />
+                </div>
+                
+                {/* Legend on the right */}
+                <div className="w-48 flex-shrink-0">
+                  <h4 className="font-medium text-sm mb-3">Legend</h4>
+                  <div className="space-y-2">
+                    {sbuData.billTypeDistribution.map((item, index) => (
+                      <div key={item.name} className="flex items-center gap-2 text-sm">
+                        <div 
+                          className="w-3 h-3 rounded-full flex-shrink-0"
+                          style={{ backgroundColor: COLORS[index % COLORS.length] }}
+                        />
+                        <div className="flex-1 min-w-0">
+                          <div className="truncate font-medium" title={item.name}>{item.name}</div>
+                          <div className="text-muted-foreground">
+                            {item.value} ({item.percentage.toFixed(1)}%)
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
             ) : (
               <div className="h-80 flex items-center justify-center text-muted-foreground">
                 <div className="text-center">
