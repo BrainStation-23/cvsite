@@ -3,7 +3,7 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { TrendingUp, Users, BarChart3 } from 'lucide-react';
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
-import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Legend } from 'recharts';
 
 interface SbuData {
   id: string;
@@ -17,6 +17,9 @@ interface SbuComparisonProps {
   comparisonSbu: SbuData;
   loading?: boolean;
 }
+
+const PRIMARY_COLOR = '#8b5cf6'; // purple
+const COMPARISON_COLOR = '#06b6d4'; // cyan
 
 export const SbuComparison: React.FC<SbuComparisonProps> = ({ 
   primarySbu, 
@@ -79,11 +82,23 @@ export const SbuComparison: React.FC<SbuComparisonProps> = ({
           <CardContent className="space-y-4">
             <div className="space-y-2">
               <div className="flex justify-between items-center">
-                <span className="text-sm font-medium">{primarySbu.name}</span>
+                <div className="flex items-center gap-2">
+                  <div 
+                    className="w-3 h-3 rounded-full"
+                    style={{ backgroundColor: PRIMARY_COLOR }}
+                  />
+                  <span className="text-sm font-medium">{primarySbu.name}</span>
+                </div>
                 <span className="text-lg font-bold">{primarySbu.totalResources}</span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-sm font-medium">{comparisonSbu.name}</span>
+                <div className="flex items-center gap-2">
+                  <div 
+                    className="w-3 h-3 rounded-full"
+                    style={{ backgroundColor: COMPARISON_COLOR }}
+                  />
+                  <span className="text-sm font-medium">{comparisonSbu.name}</span>
+                </div>
                 <span className="text-lg font-bold">{comparisonSbu.totalResources}</span>
               </div>
             </div>
@@ -107,7 +122,13 @@ export const SbuComparison: React.FC<SbuComparisonProps> = ({
         {/* Primary SBU Summary */}
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">{primarySbu.name}</CardTitle>
+            <CardTitle className="flex items-center gap-2 text-base">
+              <div 
+                className="w-3 h-3 rounded-full"
+                style={{ backgroundColor: PRIMARY_COLOR }}
+              />
+              {primarySbu.name}
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-2">
@@ -127,7 +148,13 @@ export const SbuComparison: React.FC<SbuComparisonProps> = ({
         {/* Comparison SBU Summary */}
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">{comparisonSbu.name}</CardTitle>
+            <CardTitle className="flex items-center gap-2 text-base">
+              <div 
+                className="w-3 h-3 rounded-full"
+                style={{ backgroundColor: COMPARISON_COLOR }}
+              />
+              {comparisonSbu.name}
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-2">
@@ -158,17 +185,17 @@ export const SbuComparison: React.FC<SbuComparisonProps> = ({
             config={{
               [primarySbu.name]: {
                 label: primarySbu.name,
-                color: "hsl(var(--chart-1))",
+                color: PRIMARY_COLOR,
               },
               [comparisonSbu.name]: {
                 label: comparisonSbu.name,
-                color: "hsl(var(--chart-2))",
+                color: COMPARISON_COLOR,
               },
             }}
-            className="h-64"
+            className="h-80"
           >
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={comparisonData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+              <BarChart data={comparisonData} margin={{ top: 20, right: 30, left: 20, bottom: 80 }}>
                 <XAxis 
                   dataKey="billType" 
                   tick={{ fontSize: 12 }}
@@ -179,8 +206,19 @@ export const SbuComparison: React.FC<SbuComparisonProps> = ({
                 />
                 <YAxis />
                 <ChartTooltip content={<ChartTooltipContent />} />
-                <Bar dataKey={primarySbu.name} fill="hsl(var(--chart-1))" />
-                <Bar dataKey={comparisonSbu.name} fill="hsl(var(--chart-2))" />
+                <Legend 
+                  verticalAlign="top" 
+                  height={36}
+                  formatter={(value) => (
+                    <span style={{ 
+                      color: value === primarySbu.name ? PRIMARY_COLOR : COMPARISON_COLOR 
+                    }}>
+                      {value}
+                    </span>
+                  )}
+                />
+                <Bar dataKey={primarySbu.name} fill={PRIMARY_COLOR} />
+                <Bar dataKey={comparisonSbu.name} fill={COMPARISON_COLOR} />
               </BarChart>
             </ResponsiveContainer>
           </ChartContainer>

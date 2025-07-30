@@ -3,7 +3,7 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Users, BarChart3 } from 'lucide-react';
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
-import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
+import { PieChart, Pie, Cell, ResponsiveContainer, Legend } from 'recharts';
 
 interface SbuData {
   id: string;
@@ -18,11 +18,16 @@ interface SbuDashboardProps {
 }
 
 const COLORS = [
-  'hsl(var(--chart-1))',
-  'hsl(var(--chart-2))',
-  'hsl(var(--chart-3))',
-  'hsl(var(--chart-4))',
-  'hsl(var(--chart-5))',
+  '#8b5cf6', // purple
+  '#06b6d4', // cyan
+  '#10b981', // emerald
+  '#f59e0b', // amber
+  '#ef4444', // red
+  '#3b82f6', // blue
+  '#84cc16', // lime
+  '#ec4899', // pink
+  '#6366f1', // indigo
+  '#14b8a6', // teal
 ];
 
 export const SbuDashboard: React.FC<SbuDashboardProps> = ({ sbuData, loading = false }) => {
@@ -48,6 +53,11 @@ export const SbuDashboard: React.FC<SbuDashboardProps> = ({ sbuData, loading = f
       </div>
     );
   }
+
+  const chartData = sbuData.billTypeDistribution.map((item, index) => ({
+    ...item,
+    fill: COLORS[index % COLORS.length]
+  }));
 
   return (
     <div className="space-y-6">
@@ -112,21 +122,21 @@ export const SbuDashboard: React.FC<SbuDashboardProps> = ({ sbuData, loading = f
                     label: "Resources",
                   },
                 }}
-                className="h-64"
+                className="h-80"
               >
                 <ResponsiveContainer width="100%" height="100%">
                   <PieChart>
                     <Pie
-                      data={sbuData.billTypeDistribution}
+                      data={chartData}
                       cx="50%"
                       cy="50%"
                       innerRadius={60}
-                      outerRadius={100}
+                      outerRadius={120}
                       paddingAngle={2}
                       dataKey="value"
                     >
-                      {sbuData.billTypeDistribution.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                      {chartData.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={entry.fill} />
                       ))}
                     </Pie>
                     <ChartTooltip
@@ -136,11 +146,18 @@ export const SbuDashboard: React.FC<SbuDashboardProps> = ({ sbuData, loading = f
                         props.payload.name
                       ]}
                     />
+                    <Legend 
+                      verticalAlign="bottom" 
+                      height={36}
+                      formatter={(value, entry) => (
+                        <span style={{ color: entry.color }}>{value}</span>
+                      )}
+                    />
                   </PieChart>
                 </ResponsiveContainer>
               </ChartContainer>
             ) : (
-              <div className="h-64 flex items-center justify-center text-muted-foreground">
+              <div className="h-80 flex items-center justify-center text-muted-foreground">
                 <div className="text-center">
                   <BarChart3 className="h-12 w-12 mx-auto mb-2 opacity-50" />
                   <p>No bill type data available</p>
