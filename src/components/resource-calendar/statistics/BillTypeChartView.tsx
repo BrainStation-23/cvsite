@@ -15,14 +15,12 @@ interface BillTypeChartViewProps {
   data: BillTypeData[];
   view: ChartView;
   colors: string[];
-  showLegend?: boolean;
 }
 
 export const BillTypeChartView: React.FC<BillTypeChartViewProps> = ({
   data,
   view,
   colors,
-  showLegend = true,
 }) => {
   const chartData = data.map((item, index) => ({
     ...item,
@@ -114,8 +112,8 @@ export const BillTypeChartView: React.FC<BillTypeChartViewProps> = ({
               data={chartData}
               cx="50%"
               cy="50%"
-              innerRadius={60}
-              outerRadius={120}
+              innerRadius={40}
+              outerRadius={80}
               paddingAngle={2}
               dataKey="value"
             >
@@ -134,22 +132,20 @@ export const BillTypeChartView: React.FC<BillTypeChartViewProps> = ({
         </ResponsiveContainer>
       </ChartContainer>
       
-      {/* Show built-in legend only if showLegend is true */}
-      {showLegend && (
-        <div className="mt-2 px-2">
-          <div className="grid grid-cols-2 gap-2 text-xs">
-            {data.map((item, index) => (
-              <div key={item.name} className="flex items-center gap-2 truncate">
-                <div 
-                  className="w-3 h-3 rounded-full flex-shrink-0"
-                  style={{ backgroundColor: colors[index % colors.length] }}
-                />
-                <span className="truncate" title={item.name}>{item.name}</span>
-              </div>
-            ))}
-          </div>
+      {/* Custom legend to prevent overflow */}
+      <div className="mt-2 px-2">
+        <div className="grid grid-cols-2 gap-2 text-xs">
+          {data.map((item, index) => (
+            <div key={item.name} className="flex items-center gap-2 truncate">
+              <div 
+                className="w-3 h-3 rounded-full flex-shrink-0"
+                style={{ backgroundColor: colors[index % colors.length] }}
+              />
+              <span className="truncate" title={item.name}>{item.name}</span>
+            </div>
+          ))}
         </div>
-      )}
+      </div>
     </div>
   );
 };
