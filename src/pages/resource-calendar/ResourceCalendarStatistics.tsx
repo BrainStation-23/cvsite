@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import DashboardLayout from '../../components/Layout/DashboardLayout';
@@ -28,7 +27,7 @@ const ResourceCalendarStatistics: React.FC = () => {
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
   const [sbuData, setSbuData] = useState<SbuData[]>([]);
   const [selectedSbu, setSelectedSbu] = useState<string>('');
-  const [comparisonSbu, setComparisonSbu] = useState<string>('');
+  const [comparisonSbu, setComparisonSbu] = useState<string>('none');
 
   const fetchSbuAnalytics = async () => {
     try {
@@ -150,7 +149,7 @@ const ResourceCalendarStatistics: React.FC = () => {
   };
 
   const selectedSbuData = sbuData.find(sbu => sbu.id === selectedSbu);
-  const comparisonSbuData = sbuData.find(sbu => sbu.id === comparisonSbu);
+  const comparisonSbuData = comparisonSbu !== 'none' ? sbuData.find(sbu => sbu.id === comparisonSbu) : undefined;
   const totalResources = sbuData.reduce((sum, sbu) => sum + sbu.totalResources, 0);
 
   return (
@@ -255,7 +254,7 @@ const ResourceCalendarStatistics: React.FC = () => {
                 <SelectValue placeholder="Select an SBU to compare" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">No comparison</SelectItem>
+                <SelectItem value="none">No comparison</SelectItem>
                 {sbuData
                   .filter(sbu => sbu.id !== selectedSbu)
                   .map(sbu => (
