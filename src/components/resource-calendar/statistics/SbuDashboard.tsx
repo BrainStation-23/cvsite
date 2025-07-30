@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Users, BarChart3 } from 'lucide-react';
@@ -54,13 +55,20 @@ export const SbuDashboard: React.FC<SbuDashboardProps> = ({ sbuData, loading = f
         {sbuData.name} Dashboard
       </div>
 
-      {/* Merged Resource Overview Card */}
+      {/* Resource Overview Card */}
       <Card>
-        <CardHeader>
+        <CardHeader className="pb-4">
           <CardTitle className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Users className="h-5 w-5" />
-              Resource Overview
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2">
+                <Users className="h-5 w-5" />
+                Resource Overview
+              </div>
+              <div className="flex items-center gap-2 text-sm font-normal text-muted-foreground">
+                <span>•</span>
+                <span className="font-semibold text-primary">{sbuData.totalResources}</span>
+                <span>Total Resources</span>
+              </div>
             </div>
             <ChartViewSelector 
               currentView={chartView}
@@ -68,34 +76,49 @@ export const SbuDashboard: React.FC<SbuDashboardProps> = ({ sbuData, loading = f
             />
           </CardTitle>
         </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Total Resources Summary */}
-            <div className="space-y-4">
-              <div className="text-center p-4 bg-muted/50 rounded-lg">
-                <div className="text-4xl font-bold text-primary mb-2">{sbuData.totalResources}</div>
-                <div className="text-sm text-muted-foreground">Total Resources</div>
+        <CardContent className="pt-0">
+          {sbuData.billTypeDistribution.length > 0 ? (
+            <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+              {/* Legend */}
+              <div className="space-y-3">
+                <h4 className="font-medium text-sm text-muted-foreground">Bill Types</h4>
+                <div className="space-y-2">
+                  {sbuData.billTypeDistribution.map((item, index) => (
+                    <div key={item.name} className="flex items-center justify-between text-sm">
+                      <div className="flex items-center gap-2 flex-1 min-w-0">
+                        <div 
+                          className="w-3 h-3 rounded-full flex-shrink-0"
+                          style={{ backgroundColor: COLORS[index % COLORS.length] }}
+                        />
+                        <span className="truncate" title={item.name}>{item.name}</span>
+                      </div>
+                      <div className="flex flex-col items-end ml-2 flex-shrink-0">
+                        <span className="font-semibold text-primary">{item.value}</span>
+                        <span className="text-xs text-muted-foreground">{item.percentage.toFixed(1)}%</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </div>
-            </div>
 
-            {/* Chart Visualization */}
-            <div className="lg:col-span-2">
-              {sbuData.billTypeDistribution.length > 0 ? (
+              {/* Chart Visualization */}
+              <div className="lg:col-span-3">
                 <BillTypeChartView
                   data={sbuData.billTypeDistribution}
                   view={chartView}
                   colors={COLORS}
+                  showLegend={false}
                 />
-              ) : (
-                <div className="h-80 flex items-center justify-center text-muted-foreground">
-                  <div className="text-center">
-                    <BarChart3 className="h-12 w-12 mx-auto mb-2 opacity-50" />
-                    <p>No bill type data available</p>
-                  </div>
-                </div>
-              )}
+              </div>
             </div>
-          </div>
+          ) : (
+            <div className="h-80 flex items-center justify-center text-muted-foreground">
+              <div className="text-center">
+                <BarChart3 className="h-12 w-12 mx-auto mb-2 opacity-50" />
+                <p>No bill type data available</p>
+              </div>
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>
