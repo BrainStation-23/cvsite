@@ -2,8 +2,8 @@
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Users, BarChart3 } from 'lucide-react';
-import { ChartViewSelector, ChartView } from './ChartViewSelector';
-import { BillTypeChartView } from './BillTypeChartView';
+import { EnhancedChartViewSelector, EnhancedChartView } from './EnhancedChartViewSelector';
+import { EnhancedBillTypeChart } from './EnhancedBillTypeChart';
 
 interface SbuData {
   id: string;
@@ -31,7 +31,7 @@ const COLORS = [
 ];
 
 export const SbuDashboard: React.FC<SbuDashboardProps> = ({ sbuData, loading = false }) => {
-  const [chartView, setChartView] = useState<ChartView>('pie');
+  const [chartView, setChartView] = useState<EnhancedChartView>('pie');
 
   if (loading) {
     return (
@@ -40,7 +40,7 @@ export const SbuDashboard: React.FC<SbuDashboardProps> = ({ sbuData, loading = f
           <CardContent className="p-6">
             <div className="animate-pulse space-y-4">
               <div className="h-4 bg-muted rounded w-1/3"></div>
-              <div className="h-80 bg-muted rounded"></div>
+              <div className="h-96 bg-muted rounded"></div>
             </div>
           </CardContent>
         </Card>
@@ -55,7 +55,7 @@ export const SbuDashboard: React.FC<SbuDashboardProps> = ({ sbuData, loading = f
         {sbuData.name} Dashboard
       </div>
 
-      {/* Resource Overview Card */}
+      {/* Enhanced Resource Overview Card */}
       <Card>
         <CardHeader className="pb-4">
           <CardTitle className="flex items-center justify-between">
@@ -64,13 +64,13 @@ export const SbuDashboard: React.FC<SbuDashboardProps> = ({ sbuData, loading = f
                 <Users className="h-5 w-5" />
                 Resource Overview
               </div>
-              <div className="flex items-center gap-2 text-sm font-normal text-muted-foreground">
-                <span>•</span>
-                <span className="font-semibold text-primary">{sbuData.totalResources}</span>
-                <span>Total Resources</span>
+              <div className="flex items-center gap-2 text-sm font-normal">
+                <span className="text-muted-foreground">•</span>
+                <span className="font-bold text-2xl text-primary">{sbuData.totalResources}</span>
+                <span className="text-muted-foreground">Total Resources</span>
               </div>
             </div>
-            <ChartViewSelector 
+            <EnhancedChartViewSelector 
               currentView={chartView}
               onViewChange={setChartView}
             />
@@ -78,41 +78,14 @@ export const SbuDashboard: React.FC<SbuDashboardProps> = ({ sbuData, loading = f
         </CardHeader>
         <CardContent className="pt-0">
           {sbuData.billTypeDistribution.length > 0 ? (
-            <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-              {/* Legend */}
-              <div className="space-y-3">
-                <h4 className="font-medium text-sm text-muted-foreground">Bill Types</h4>
-                <div className="space-y-2">
-                  {sbuData.billTypeDistribution.map((item, index) => (
-                    <div key={item.name} className="flex items-center justify-between text-sm">
-                      <div className="flex items-center gap-2 flex-1 min-w-0">
-                        <div 
-                          className="w-3 h-3 rounded-full flex-shrink-0"
-                          style={{ backgroundColor: COLORS[index % COLORS.length] }}
-                        />
-                        <span className="truncate" title={item.name}>{item.name}</span>
-                      </div>
-                      <div className="flex flex-col items-end ml-2 flex-shrink-0">
-                        <span className="font-semibold text-primary">{item.value}</span>
-                        <span className="text-xs text-muted-foreground">{item.percentage.toFixed(1)}%</span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Chart Visualization */}
-              <div className="lg:col-span-3">
-                <BillTypeChartView
-                  data={sbuData.billTypeDistribution}
-                  view={chartView}
-                  colors={COLORS}
-                  showLegend={false}
-                />
-              </div>
-            </div>
+            <EnhancedBillTypeChart
+              data={sbuData.billTypeDistribution}
+              view={chartView}
+              colors={COLORS}
+              totalResources={sbuData.totalResources}
+            />
           ) : (
-            <div className="h-80 flex items-center justify-center text-muted-foreground">
+            <div className="h-96 flex items-center justify-center text-muted-foreground">
               <div className="text-center">
                 <BarChart3 className="h-12 w-12 mx-auto mb-2 opacity-50" />
                 <p>No bill type data available</p>
