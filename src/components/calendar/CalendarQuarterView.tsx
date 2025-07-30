@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { format, startOfQuarter, endOfQuarter, eachMonthOfInterval, startOfMonth, endOfMonth, isWithinInterval } from 'date-fns';
 import { Users, ChevronLeft, ChevronRight } from 'lucide-react';
-import type { CalendarDay } from '@/hooks/use-resource-calendar';
+import type { CalendarResource } from '@/hooks/use-resource-calendar';
 
 interface Project {
   name: string;
@@ -22,7 +22,7 @@ interface ResourceData {
 
 interface CalendarQuarterViewProps {
   currentDate: Date;
-  calendarDays: CalendarDay[];
+  calendarData: CalendarResource[]; // Use the full calendar data directly
   selectedDate: Date | null;
   onDateSelect: (date: Date) => void;
 }
@@ -31,7 +31,7 @@ const RESOURCES_PER_PAGE = 10;
 
 export const CalendarQuarterView: React.FC<CalendarQuarterViewProps> = ({
   currentDate,
-  calendarDays,
+  calendarData, // This now contains all the filtered data
   selectedDate,
   onDateSelect,
 }) => {
@@ -41,40 +41,54 @@ export const CalendarQuarterView: React.FC<CalendarQuarterViewProps> = ({
   const quarterEnd = endOfQuarter(currentDate);
   const months = eachMonthOfInterval({ start: quarterStart, end: quarterEnd });
 
-  // Get unique resources with all their projects
+  // Process the calendar data into resources with projects
   const allResources = useMemo((): ResourceData[] => {
+    console.log('Processing quarter view data:', {
+      totalCalendarData: calendarData.length,
+      quarterStart: quarterStart.toISOString(),
+      quarterEnd: quarterEnd.toISOString()
+    });
+
     const resourceMap = new Map<string, ResourceData>();
     
-    calendarDays.forEach(day => {
-      day.resources.forEach(resource => {
-        const key = resource.profileId;
-        if (!resourceMap.has(key)) {
-          resourceMap.set(key, {
-            profileId: resource.profileId,
-            profileName: resource.profileName,
-            employeeId: resource.employeeId,
-            projects: []
-          });
-        }
-        
-        const resourceData = resourceMap.get(key)!;
-        const projectName = resource.projectName || 'Unassigned';
-        
-        // Check if this project already exists for this resource
-        const existingProject = resourceData.projects.find(p => p.name === projectName);
-        if (!existingProject) {
-          resourceData.projects.push({
-            name: projectName,
-            startDate: resource.engagementStartDate || '',
-            endDate: resource.releaseDate,
-            engagementPercentage: resource.engagementPercentage || 0
-          });
-        }
-      });
+    calendarData.forEach(resource => {
+      const key = resource.profileId;
+      if (!resourceMap.has(key)) {
+        resourceMap.set(key, {
+          profileId: resource.profileId,
+          profileName: resource.profileName,
+          employeeId: resource.employeeId,
+          projects: []
+        });
+      }
+      
+      const resourceData = resourceMap.get(key)!;
+      const projectName = resource.projectName || 'Unassigned';
+      
+      // Check if this project already exists for this resource
+      const existingProject = resourceData.projects.find(p => p.name === projectName);
+      if (!existingProject) {
+        resourceData.projects.push({
+          name: projectName,
+          startDate: resource.engagementStartDate || '',
+          endDate: resource.releaseDate,
+          engagementPercentage: resource.engagementPercentage || 0
+        });
+      }
     });
     
-    return Array.from(resourceMap.values()).sort((a, b) => a.profileName.localeCompare(b.profileName));
-  }, [calendarDays]);
+    const result = Array.from(resourceMap.values()).sort((a, b) => a.profileName.localeCompare(b.profileName));
+    
+    console.log('Processed resources for quarter view:', {
+      uniqueResources: result.length,
+      sampleResource: result[0] ? {
+        name: result[0].profileName,
+        projectCount: result[0].projects.length
+      } : null
+    });
+
+    return result;
+  }, [calendarData, quarterStart, quarterEnd]);
 
   // Pagination calculations
   const totalPages = Math.ceil(allResources.length / RESOURCES_PER_PAGE);

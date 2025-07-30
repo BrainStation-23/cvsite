@@ -1,5 +1,6 @@
-import { useState, useMemo, useEffect } from 'react';
-import { usePlannedResources } from './use-planned-resources';
+
+import { useState, useMemo } from 'react';
+import { useResourceCalendarData } from './use-resource-calendar-data';
 import { startOfMonth, endOfMonth, eachDayOfInterval, format, isSameDay, parseISO, startOfQuarter, endOfQuarter } from 'date-fns';
 
 export type CalendarViewType = 'month' | 'quarter';
@@ -34,23 +35,25 @@ export function useResourceCalendar(
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [currentView, setCurrentView] = useState<CalendarViewType>('quarter');
   
-  // Get planned resources with filters applied
-  const plannedResources = usePlannedResources();
-  
-  // Apply filters to the search query and other filters
-  useEffect(() => {
-    plannedResources.setSearchQuery(searchQuery);
-    plannedResources.setSelectedSbu(selectedSbu);
-    plannedResources.setSelectedManager(selectedManager);
-  }, [searchQuery, selectedSbu, selectedManager]);
-
-  const { data: resourceData, isLoading, error } = plannedResources;
+  // Get calendar data using the new dedicated hook
+  const { data: resourceData, isLoading, error } = useResourceCalendarData(
+    searchQuery,
+    selectedSbu,
+    selectedManager,
+    currentMonth,
+    currentView
+  );
 
   // Convert resource planning data to calendar format
   const calendarData = useMemo(() => {
     if (!resourceData?.length) return [];
 
-    return resourceData
+    console.log('Processing calendar data:', {
+      totalResources: resourceData.length,
+      showUnplanned
+    });
+
+    const processedData = resourceData
       .filter(resource => {
         // Apply showUnplanned filter
         if (showUnplanned) {
@@ -70,23 +73,26 @@ export function useResourceCalendar(
         projectName: resource.project?.project_name || null,
         billTypeName: resource.bill_type?.name || null,
       }));
+
+    console.log('Processed calendar data:', {
+      filtered: processedData.length,
+      original: resourceData.length
+    });
+
+    return processedData;
   }, [resourceData, showUnplanned]);
 
-  // Generate calendar days based on current view
+  // Generate calendar days based on current view (for month view)
   const calendarDays = useMemo(() => {
+    if (currentView === 'quarter') {
+      // For quarter view, we don't need daily breakdown
+      return [];
+    }
+
     let start: Date, end: Date;
     
-    switch (currentView) {
-      case 'quarter':
-        start = startOfQuarter(currentMonth);
-        end = endOfQuarter(currentMonth);
-        break;
-      case 'month':
-      default:
-        start = startOfMonth(currentMonth);
-        end = endOfMonth(currentMonth);
-        break;
-    }
+    start = startOfMonth(currentMonth);
+    end = endOfMonth(currentMonth);
     
     const days = eachDayOfInterval({ start, end });
 
