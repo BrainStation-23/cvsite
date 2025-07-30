@@ -60,76 +60,80 @@ export const BillTypeChartView: React.FC<BillTypeChartViewProps> = ({
 
   if (view === 'bar') {
     return (
+      <div className="h-80">
+        <ChartContainer
+          config={{
+            value: {
+              label: "Resources",
+            },
+          }}
+          className="h-full"
+        >
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart data={chartData} margin={{ top: 20, right: 30, left: 20, bottom: 60 }}>
+              <XAxis 
+                dataKey="name" 
+                tick={{ fontSize: 12 }}
+                interval={0}
+                angle={-45}
+                textAnchor="end"
+                height={80}
+              />
+              <YAxis />
+              <ChartTooltip
+                content={<ChartTooltipContent />}
+                formatter={(value, name, props) => [
+                  `${value} resources (${props.payload.percentage.toFixed(1)}%)`,
+                  'Resources'
+                ]}
+              />
+              <Bar dataKey="value" />
+            </BarChart>
+          </ResponsiveContainer>
+        </ChartContainer>
+      </div>
+    );
+  }
+
+  // Pie chart view
+  return (
+    <div className="h-80 flex flex-col">
       <ChartContainer
         config={{
           value: {
             label: "Resources",
           },
         }}
-        className="h-80"
+        className="flex-1"
       >
         <ResponsiveContainer width="100%" height="100%">
-          <BarChart data={chartData} margin={{ top: 20, right: 30, left: 20, bottom: 60 }}>
-            <XAxis 
-              dataKey="name" 
-              tick={{ fontSize: 12 }}
-              interval={0}
-              angle={-45}
-              textAnchor="end"
-              height={80}
-            />
-            <YAxis />
+          <PieChart>
+            <Pie
+              data={chartData}
+              cx="50%"
+              cy="50%"
+              innerRadius={40}
+              outerRadius={80}
+              paddingAngle={2}
+              dataKey="value"
+            >
+              {chartData.map((entry, index) => (
+                <Cell key={`cell-${index}`} fill={entry.fill} />
+              ))}
+            </Pie>
             <ChartTooltip
               content={<ChartTooltipContent />}
               formatter={(value, name, props) => [
                 `${value} resources (${props.payload.percentage.toFixed(1)}%)`,
-                'Resources'
+                props.payload.name
               ]}
             />
-            <Bar dataKey="value" />
-          </BarChart>
+          </PieChart>
         </ResponsiveContainer>
       </ChartContainer>
-    );
-  }
-
-  // Pie chart view
-  return (
-    <ChartContainer
-      config={{
-        value: {
-          label: "Resources",
-        },
-      }}
-      className="h-80"
-    >
-      <ResponsiveContainer width="100%" height="100%">
-        <PieChart>
-          <Pie
-            data={chartData}
-            cx="50%"
-            cy="45%"
-            innerRadius={50}
-            outerRadius={100}
-            paddingAngle={2}
-            dataKey="value"
-          >
-            {chartData.map((entry, index) => (
-              <Cell key={`cell-${index}`} fill={entry.fill} />
-            ))}
-          </Pie>
-          <ChartTooltip
-            content={<ChartTooltipContent />}
-            formatter={(value, name, props) => [
-              `${value} resources (${props.payload.percentage.toFixed(1)}%)`,
-              props.payload.name
-            ]}
-          />
-        </PieChart>
-      </ResponsiveContainer>
       
       {/* Custom legend to prevent overflow */}
-      <div className="mt-4 px-2">
+      <div className="mt-2 px-2">
         <div className="grid grid-cols-2 gap-2 text-xs">
           {data.map((item, index) => (
             <div key={item.name} className="flex items-center gap-2 truncate">
@@ -142,6 +146,6 @@ export const BillTypeChartView: React.FC<BillTypeChartViewProps> = ({
           ))}
         </div>
       </div>
-    </ChartContainer>
+    </div>
   );
 };
