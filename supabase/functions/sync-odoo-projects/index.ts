@@ -79,7 +79,7 @@ Deno.serve(async (req) => {
     // Get existing projects from our database to avoid duplicates
     const { data: existingProjects, error: fetchError } = await supabase
       .from('projects_management')
-      .select('project_name, project_manager, client_name');
+      .select('project_name, project_manager, project_type, client_name');
 
     if (fetchError) {
       throw new Error(`Failed to fetch existing projects: ${fetchError.message}`);
@@ -106,10 +106,27 @@ Deno.serve(async (req) => {
           projectManagerId = managerProfile?.id || null;
         }
 
+        // Find project type UUID by name if available
+        let projectTypeId = null;
+        if (odooProject.projectType) {
+          const { data: projectType } = await supabase
+            .from('project_types')
+            .select('id')
+            .eq('name', odooProject.projectType)
+            .single();
+          
+          projectTypeId = projectType?.id || null;
+          
+          if (!projectTypeId) {
+            console.log(`Project type "${odooProject.projectType}" not found for project: ${odooProject.name}`);
+          }
+        }
+
         const projectData = {
           project_name: odooProject.name,
           client_name: null, // Odoo doesn't provide client info in this query
           project_manager: projectManagerId,
+          project_type: projectTypeId,
           budget: odooProject.projectValue || null,
           is_active: odooProject.active
         };
@@ -120,6 +137,7 @@ Deno.serve(async (req) => {
             .from('projects_management')
             .update({
               project_manager: projectManagerId,
+              project_type: projectTypeId,
               budget: odooProject.projectValue || null,
               is_active: odooProject.active,
               updated_at: new Date().toISOString()
@@ -130,7 +148,7 @@ Deno.serve(async (req) => {
             console.error(`Failed to update project ${odooProject.name}:`, updateError);
           } else {
             updatedCount++;
-            console.log(`Updated project: ${odooProject.name}`);
+            console.log(`Updated project: ${odooProject.name} with project type: ${odooProject.projectType}`);
           }
         } else {
           // Insert new project
@@ -142,7 +160,7 @@ Deno.serve(async (req) => {
             console.error(`Failed to insert project ${odooProject.name}:`, insertError);
           } else {
             syncedCount++;
-            console.log(`Synced new project: ${odooProject.name}`);
+            console.log(`Synced new project: ${odooProject.name} with project type: ${odooProject.projectType}`);
           }
         }
       } catch (projectError) {
