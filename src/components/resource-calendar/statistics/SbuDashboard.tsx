@@ -1,9 +1,9 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Users, BarChart3 } from 'lucide-react';
-import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
-import { PieChart, Pie, Cell, ResponsiveContainer, Legend } from 'recharts';
+import { ChartViewSelector, ChartView } from './ChartViewSelector';
+import { BillTypeChartView } from './BillTypeChartView';
 
 interface SbuData {
   id: string;
@@ -31,6 +31,8 @@ const COLORS = [
 ];
 
 export const SbuDashboard: React.FC<SbuDashboardProps> = ({ sbuData, loading = false }) => {
+  const [chartView, setChartView] = useState<ChartView>('pie');
+
   if (loading) {
     return (
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -53,11 +55,6 @@ export const SbuDashboard: React.FC<SbuDashboardProps> = ({ sbuData, loading = f
       </div>
     );
   }
-
-  const chartData = sbuData.billTypeDistribution.map((item, index) => ({
-    ...item,
-    fill: COLORS[index % COLORS.length]
-  }));
 
   return (
     <div className="space-y-6">
@@ -85,21 +82,23 @@ export const SbuDashboard: React.FC<SbuDashboardProps> = ({ sbuData, loading = f
               {sbuData.billTypeDistribution.length > 0 && (
                 <div className="space-y-2">
                   <h4 className="font-medium text-sm">Bill Type Breakdown:</h4>
-                  {sbuData.billTypeDistribution.map((item, index) => (
-                    <div key={item.name} className="flex justify-between items-center text-sm">
-                      <div className="flex items-center gap-2">
-                        <div 
-                          className="w-3 h-3 rounded-full"
-                          style={{ backgroundColor: COLORS[index % COLORS.length] }}
-                        />
-                        <span>{item.name}</span>
+                  <div className="max-h-40 overflow-y-auto space-y-2">
+                    {sbuData.billTypeDistribution.map((item, index) => (
+                      <div key={item.name} className="flex justify-between items-center text-sm">
+                        <div className="flex items-center gap-2 flex-1 min-w-0">
+                          <div 
+                            className="w-3 h-3 rounded-full flex-shrink-0"
+                            style={{ backgroundColor: COLORS[index % COLORS.length] }}
+                          />
+                          <span className="truncate" title={item.name}>{item.name}</span>
+                        </div>
+                        <div className="text-right flex-shrink-0 ml-2">
+                          <span className="font-medium">{item.value}</span>
+                          <span className="text-muted-foreground ml-1">({item.percentage.toFixed(1)}%)</span>
+                        </div>
                       </div>
-                      <div className="text-right">
-                        <span className="font-medium">{item.value}</span>
-                        <span className="text-muted-foreground ml-1">({item.percentage.toFixed(1)}%)</span>
-                      </div>
-                    </div>
-                  ))}
+                    ))}
+                  </div>
                 </div>
               )}
             </div>
@@ -109,53 +108,24 @@ export const SbuDashboard: React.FC<SbuDashboardProps> = ({ sbuData, loading = f
         {/* Bill Type Distribution Chart */}
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <BarChart3 className="h-5 w-5" />
-              Bill Type Distribution
+            <CardTitle className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <BarChart3 className="h-5 w-5" />
+                Bill Type Distribution
+              </div>
+              <ChartViewSelector 
+                currentView={chartView}
+                onViewChange={setChartView}
+              />
             </CardTitle>
           </CardHeader>
           <CardContent>
             {sbuData.billTypeDistribution.length > 0 ? (
-              <ChartContainer
-                config={{
-                  value: {
-                    label: "Resources",
-                  },
-                }}
-                className="h-80"
-              >
-                <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Pie
-                      data={chartData}
-                      cx="50%"
-                      cy="50%"
-                      innerRadius={60}
-                      outerRadius={120}
-                      paddingAngle={2}
-                      dataKey="value"
-                    >
-                      {chartData.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={entry.fill} />
-                      ))}
-                    </Pie>
-                    <ChartTooltip
-                      content={<ChartTooltipContent />}
-                      formatter={(value, name, props) => [
-                        `${value} resources (${props.payload.percentage.toFixed(1)}%)`,
-                        props.payload.name
-                      ]}
-                    />
-                    <Legend 
-                      verticalAlign="bottom" 
-                      height={36}
-                      formatter={(value, entry) => (
-                        <span style={{ color: entry.color }}>{value}</span>
-                      )}
-                    />
-                  </PieChart>
-                </ResponsiveContainer>
-              </ChartContainer>
+              <BillTypeChartView
+                data={sbuData.billTypeDistribution}
+                view={chartView}
+                colors={COLORS}
+              />
             ) : (
               <div className="h-80 flex items-center justify-center text-muted-foreground">
                 <div className="text-center">
