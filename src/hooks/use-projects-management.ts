@@ -16,6 +16,9 @@ interface Project {
     last_name: string | null;
     employee_id: string | null;
   } | null;
+  project_type_data?: {
+    name: string;
+  } | null;
 }
 
 interface ProjectsResponse {
@@ -68,7 +71,7 @@ export function useProjectsManagement(): UseProjectsManagementReturn {
     try {
       setIsLoading(true);
       
-      // Build the query with joins for project manager profile
+      // Build the query with joins for project manager profile and project type
       let query = supabase
         .from('projects_management')
         .select(`
@@ -77,6 +80,9 @@ export function useProjectsManagement(): UseProjectsManagementReturn {
             first_name,
             last_name,
             employee_id
+          ),
+          project_type_data:project_types!projects_management_project_type_fkey(
+            name
           )
         `);
 

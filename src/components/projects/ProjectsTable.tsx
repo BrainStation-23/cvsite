@@ -21,6 +21,10 @@ interface Project {
     last_name: string | null;
     employee_id: string | null;
   } | null;
+  // Added to handle project type data
+  project_type_data?: {
+    name: string;
+  } | null;
 }
 
 interface ProjectsTableProps {
@@ -39,15 +43,13 @@ export const ProjectsTable: React.FC<ProjectsTableProps> = ({
   isLoading
 }) => {
   const formatCurrency = (amount: number | null) => {
-    if (!amount) return 'N/A';
+    if (!amount) return '';
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
       currency: 'USD',
+      notation: 'compact',
+      maximumFractionDigits: 1
     }).format(amount);
-  };
-
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString();
   };
 
   const getProjectManagerName = (project: Project) => {
@@ -94,9 +96,8 @@ export const ProjectsTable: React.FC<ProjectsTableProps> = ({
             <TableHead>Project Name</TableHead>
             <TableHead>Client</TableHead>
             <TableHead>Project Manager</TableHead>
-            <TableHead>Budget</TableHead>
+            <TableHead>Project Type</TableHead>
             <TableHead>Status</TableHead>
-            <TableHead>Created</TableHead>
             <TableHead className="w-[120px]">Actions</TableHead>
           </TableRow>
         </TableHeader>
@@ -104,7 +105,14 @@ export const ProjectsTable: React.FC<ProjectsTableProps> = ({
           {projects.map((project) => (
             <TableRow key={project.id}>
               <TableCell>
-                <div className="font-medium">{project.project_name}</div>
+                <div className="flex flex-col">
+                  <div className="font-medium">{project.project_name}</div>
+                  {project.budget && (
+                    <div className="text-sm text-muted-foreground">
+                      {formatCurrency(project.budget)}
+                    </div>
+                  )}
+                </div>
               </TableCell>
               <TableCell>
                 {project.client_name ? (
@@ -117,23 +125,17 @@ export const ProjectsTable: React.FC<ProjectsTableProps> = ({
                 {getProjectManagerName(project)}
               </TableCell>
               <TableCell>
-                <span className="font-mono">
-                  {formatCurrency(project.budget)}
-                </span>
+                {project.project_type_data?.name ? (
+                  <Badge variant="outline">{project.project_type_data.name}</Badge>
+                ) : (
+                  <span className="text-muted-foreground">Not specified</span>
+                )}
               </TableCell>
               <TableCell>
-                <div className="flex items-center space-x-2">
-                  <Switch
-                    checked={project.is_active}
-                    onCheckedChange={(checked) => onToggleStatus(project.id, checked)}
-                  />
-                  <Badge variant={project.is_active ? "default" : "secondary"}>
-                    {project.is_active ? "Active" : "Inactive"}
-                  </Badge>
-                </div>
-              </TableCell>
-              <TableCell className="text-muted-foreground">
-                {formatDate(project.created_at)}
+                <Switch
+                  checked={project.is_active}
+                  onCheckedChange={(checked) => onToggleStatus(project.id, checked)}
+                />
               </TableCell>
               <TableCell>
                 <div className="flex items-center space-x-2">
