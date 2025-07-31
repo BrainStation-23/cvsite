@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -151,6 +151,17 @@ export function usePlannedResources(params: PlannedResourcesParams) {
     }
   });
 
+  useEffect(() => {
+    if (error) {
+      console.error('Query error:', error);
+      toast({
+        title: 'Error Loading Resource Planning Data',
+        description: error instanceof Error ? error.message : 'An unexpected error occurred',
+        variant: 'destructive',
+      });
+    }
+  }, [error, toast]);
+
   const invalidateResourcePlanningQueries = () => {
     queryClient.invalidateQueries({ queryKey: ['planned-resources'] });
     queryClient.invalidateQueries({ queryKey: ['unplanned-resources'] });
@@ -257,15 +268,6 @@ export function usePlannedResources(params: PlannedResourcesParams) {
       });
     },
   });
-
-  if (error) {
-    console.error('Query error:', error);
-    toast({
-      title: 'Error Loading Resource Planning Data',
-      description: error instanceof Error ? error.message : 'An unexpected error occurred',
-      variant: 'destructive',
-    });
-  }
 
   const createResourcePlanning = (
     data: Parameters<typeof createResourcePlanningMutation.mutate>[0],

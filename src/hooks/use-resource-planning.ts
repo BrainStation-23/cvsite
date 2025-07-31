@@ -34,7 +34,6 @@ export function useResourcePlanning() {
   const [selectedManager, setSelectedManager] = useState<string | null>(null);
   const [advancedFilters, setAdvancedFilters] = useState<AdvancedFilters>(initialAdvancedFilters);
 
-  // Memoize the clear functions to prevent re-renders
   const clearFilters = useCallback(() => {
     setSelectedSbu(null);
     setSelectedManager(null);
@@ -46,13 +45,38 @@ export function useResourcePlanning() {
     setAdvancedFilters(initialAdvancedFilters);
   }, []);
 
-  // Memoize filter parameters to prevent object recreation
+  // Create a stable reference for filter parameters with explicit dependencies
   const filterParams = useMemo(() => ({
     searchQuery,
     selectedSbu,
     selectedManager,
-    advancedFilters,
-  }), [searchQuery, selectedSbu, selectedManager, advancedFilters]);
+    advancedFilters: {
+      billTypeFilter: advancedFilters.billTypeFilter,
+      projectSearch: advancedFilters.projectSearch,
+      minEngagementPercentage: advancedFilters.minEngagementPercentage,
+      maxEngagementPercentage: advancedFilters.maxEngagementPercentage,
+      minBillingPercentage: advancedFilters.minBillingPercentage,
+      maxBillingPercentage: advancedFilters.maxBillingPercentage,
+      startDateFrom: advancedFilters.startDateFrom,
+      startDateTo: advancedFilters.startDateTo,
+      endDateFrom: advancedFilters.endDateFrom,
+      endDateTo: advancedFilters.endDateTo,
+    },
+  }), [
+    searchQuery,
+    selectedSbu,
+    selectedManager,
+    advancedFilters.billTypeFilter,
+    advancedFilters.projectSearch,
+    advancedFilters.minEngagementPercentage,
+    advancedFilters.maxEngagementPercentage,
+    advancedFilters.minBillingPercentage,
+    advancedFilters.maxBillingPercentage,
+    advancedFilters.startDateFrom,
+    advancedFilters.startDateTo,
+    advancedFilters.endDateFrom,
+    advancedFilters.endDateTo,
+  ]);
 
   return {
     // Filter states
@@ -69,7 +93,7 @@ export function useResourcePlanning() {
     clearFilters,
     clearAdvancedFilters,
     
-    // Memoized parameters for data hooks
+    // Stable memoized parameters for data hooks
     filterParams,
   };
 }

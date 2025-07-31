@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { Upload } from 'lucide-react';
 import { useResourcePlanning } from '@/hooks/use-resource-planning';
@@ -19,6 +19,7 @@ export const ResourcePlanningTable: React.FC = () => {
 
   console.log('ResourcePlanningTable render');
 
+  const resourcePlanningHook = useResourcePlanning();
   const {
     searchQuery,
     setSearchQuery,
@@ -33,17 +34,19 @@ export const ResourcePlanningTable: React.FC = () => {
     clearFilters,
     clearAdvancedFilters,
     filterParams,
-  } = useResourcePlanning();
+  } = resourcePlanningHook;
 
-  // Get centralized data
+  // Get centralized data with stable filterParams
+  const resourceData = useResourceData(filterParams);
   const {
     plannedResources,
     unplannedResources,
     weeklyValidationData,
-  } = useResourceData(filterParams);
+  } = resourceData;
 
-  // Get mutation functions from planned resources hook
-  const { updateResourcePlanning } = usePlannedResources(filterParams);
+  // Get mutation functions with stable params
+  const plannedResourcesHook = usePlannedResources(filterParams);
+  const { updateResourcePlanning } = plannedResourcesHook;
 
   const {
     preselectedProfileId,
@@ -63,8 +66,8 @@ export const ResourcePlanningTable: React.FC = () => {
     updateEditData,
   } = useInlineEdit();
 
-  // Handle save edit with the mutation function
-  const handleSaveEdit = React.useCallback(() => {
+  // Memoize the save edit handler to prevent recreations
+  const handleSaveEdit = useCallback(() => {
     if (!editingItemId || !editData) return;
 
     console.log('Saving edit for item:', editingItemId);
@@ -88,18 +91,18 @@ export const ResourcePlanningTable: React.FC = () => {
     );
   }, [editingItemId, editData, updateResourcePlanning, cancelEdit]);
 
-  const handleTabChange = React.useCallback((value: string) => {
+  const handleTabChange = useCallback((value: string) => {
     console.log('Tab change to:', value);
     setActiveTab(value);
     setShowUnplanned(value === "unplanned");
   }, [setShowUnplanned]);
 
-  const handleInlineEdit = React.useCallback((item: any) => {
+  const handleInlineEdit = useCallback((item: any) => {
     console.log('Inline edit for item:', item.id);
     startEdit(item);
   }, [startEdit]);
 
-  const handleBulkImportSuccess = React.useCallback(() => {
+  const handleBulkImportSuccess = useCallback(() => {
     setSearchQuery('');
   }, [setSearchQuery]);
 

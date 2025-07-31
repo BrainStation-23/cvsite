@@ -23,12 +23,23 @@ interface UseResourceDataParams {
 }
 
 export function useResourceData(params: UseResourceDataParams) {
-  // Memoize the parameters to prevent unnecessary re-renders
+  console.log('useResourceData called with params:', params);
+  
+  // Create stable parameter objects to prevent unnecessary re-renders
   const plannedParams = useMemo(() => ({
     searchQuery: params.searchQuery,
     selectedSbu: params.selectedSbu,
     selectedManager: params.selectedManager,
-    ...params.advancedFilters
+    billTypeFilter: params.advancedFilters.billTypeFilter,
+    projectSearch: params.advancedFilters.projectSearch,
+    minEngagementPercentage: params.advancedFilters.minEngagementPercentage,
+    maxEngagementPercentage: params.advancedFilters.maxEngagementPercentage,
+    minBillingPercentage: params.advancedFilters.minBillingPercentage,
+    maxBillingPercentage: params.advancedFilters.maxBillingPercentage,
+    startDateFrom: params.advancedFilters.startDateFrom,
+    startDateTo: params.advancedFilters.startDateTo,
+    endDateFrom: params.advancedFilters.endDateFrom,
+    endDateTo: params.advancedFilters.endDateTo,
   }), [
     params.searchQuery,
     params.selectedSbu,
@@ -42,22 +53,22 @@ export function useResourceData(params: UseResourceDataParams) {
     params.advancedFilters.startDateFrom,
     params.advancedFilters.startDateTo,
     params.advancedFilters.endDateFrom,
-    params.advancedFilters.endDateTo
+    params.advancedFilters.endDateTo,
   ]);
 
   const unplannedParams = useMemo(() => ({
     searchQuery: params.searchQuery,
     selectedSbu: params.selectedSbu,
-    selectedManager: params.selectedManager
+    selectedManager: params.selectedManager,
   }), [params.searchQuery, params.selectedSbu, params.selectedManager]);
 
   const plannedResources = usePlannedResources(plannedParams);
   const unplannedResources = useUnplannedResources(unplannedParams);
   const weeklyValidationData = useWeeklyValidation(plannedParams);
 
-  return {
+  return useMemo(() => ({
     plannedResources,
     unplannedResources,
     weeklyValidationData,
-  };
+  }), [plannedResources, unplannedResources, weeklyValidationData]);
 }
