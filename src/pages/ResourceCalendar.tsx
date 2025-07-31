@@ -16,7 +16,7 @@ const ResourceCalendar: React.FC = () => {
       title: 'Planning',
       description: 'Manage and plan resource allocations across projects',
       icon: Calendar,
-      href: `${baseUrl}/resource-planning`,
+      href: `${baseUrl}/resource-calendar/planning`,
       color: 'text-purple-600'
     },
     {

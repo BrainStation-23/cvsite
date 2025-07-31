@@ -39,7 +39,7 @@ export const platformSettingsItems = [
 ];
 
 export const getResourceCalendarItems = (userRole: string): NavigationItem[] => [
-  { to: `/${userRole}/resource-planning`, icon: Calendar, label: 'Planning' },
+  { to: `/${userRole}/resource-calendar/planning`, icon: Calendar, label: 'Planning' },
   { to: `/${userRole}/resource-calendar/calendar`, icon: CalendarDays, label: 'Calendar View' },
   { to: `/${userRole}/resource-calendar/statistics`, icon: BarChart3, label: 'Statistics' },
 ];
