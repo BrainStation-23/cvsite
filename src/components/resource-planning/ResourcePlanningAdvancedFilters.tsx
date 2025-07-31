@@ -51,14 +51,14 @@ export const ResourcePlanningAdvancedFilters: React.FC<ResourcePlanningAdvancedF
           <div className="space-y-2">
             <Label>Bill Type</Label>
             <Select
-              value={advancedFilters.billTypeFilter || ''}
-              onValueChange={(value) => updateFilter('billTypeFilter', value || null)}
+              value={advancedFilters.billTypeFilter || 'all'}
+              onValueChange={(value) => updateFilter('billTypeFilter', value === 'all' ? null : value)}
             >
               <SelectTrigger>
                 <SelectValue placeholder="Select bill type" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All Bill Types</SelectItem>
+                <SelectItem value="all">All Bill Types</SelectItem>
                 <SelectItem value="billable">Billable</SelectItem>
                 <SelectItem value="non-billable">Non-Billable</SelectItem>
               </SelectContent>

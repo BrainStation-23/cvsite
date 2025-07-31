@@ -1,12 +1,13 @@
 
 import React from 'react';
+import { ResourcePlanningFilters } from './ResourcePlanningFilters';
 import { UnplannedResourcesTable } from './UnplannedResourcesTable';
 import { useUnplannedResources } from '@/hooks/use-unplanned-resources';
 
 interface UnplannedResourcesTabProps {
   searchQuery: string;
-  selectedSbu: string | null;
-  selectedManager: string | null;
+  selectedSbu: string;
+  selectedManager: string;
   onCreatePlan: (profileId: string) => void;
 }
 
@@ -17,45 +18,49 @@ export const UnplannedResourcesTab: React.FC<UnplannedResourcesTabProps> = ({
   onCreatePlan,
 }) => {
   const {
-    unplannedResources,
-    currentPage,
-    setCurrentPage,
+    data: unplannedResources = [],
     isLoading,
     error,
-    refetch
-  } = useUnplannedResources({
-    searchQuery,
-    selectedSbu,
-    selectedManager
-  });
-
-  console.log('UnplannedResourcesTab data:', unplannedResources);
-  console.log('UnplannedResourcesTab isLoading:', isLoading);
-
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center h-32">
-        <div className="text-muted-foreground">Loading unplanned resources...</div>
-      </div>
-    );
-  }
+    currentPage,
+    setCurrentPage,
+    totalPages,
+    totalItems,
+    setSearchQuery,
+    setSelectedSbu: setSbu,
+    setSelectedManager: setManager,
+    clearFilters,
+  } = useUnplannedResources(searchQuery, selectedSbu, selectedManager);
 
   if (error) {
     return (
-      <div className="flex items-center justify-center h-32">
-        <div className="text-red-500">Error loading unplanned resources: {error.message}</div>
+      <div className="text-center py-8">
+        <p className="text-red-500">Error loading unplanned resources: {error.message}</p>
       </div>
     );
   }
 
   return (
-    <UnplannedResourcesTable 
-      resources={unplannedResources.unplanned_resources}
-      pagination={unplannedResources.pagination}
-      currentPage={currentPage}
-      setCurrentPage={setCurrentPage}
-      isLoading={isLoading}
-      onCreatePlan={onCreatePlan}
-    />
+    <div className="space-y-4">
+      <ResourcePlanningFilters
+        searchQuery={searchQuery}
+        setSearchQuery={setSearchQuery}
+        selectedSbu={selectedSbu || null}
+        setSelectedSbu={(sbu) => setSbu(sbu || '')}
+        selectedManager={selectedManager || null}
+        setSelectedManager={(manager) => setManager(manager || '')}
+        clearFilters={clearFilters}
+        hideAdvancedFilters={true} // Hide advanced filters for unplanned resources
+      />
+      
+      <UnplannedResourcesTable
+        data={unplannedResources}
+        isLoading={isLoading}
+        onCreatePlan={onCreatePlan}
+        currentPage={currentPage}
+        setCurrentPage={setCurrentPage}
+        totalPages={totalPages}
+        totalItems={totalItems}
+      />
+    </div>
   );
 };

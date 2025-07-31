@@ -21,6 +21,7 @@ interface ResourcePlanningFiltersProps {
   advancedFilters?: any;
   setAdvancedFilters?: (filters: any) => void;
   onClearAdvancedFilters?: () => void;
+  hideAdvancedFilters?: boolean;
 }
 
 export const ResourcePlanningFilters: React.FC<ResourcePlanningFiltersProps> = ({
@@ -36,6 +37,7 @@ export const ResourcePlanningFilters: React.FC<ResourcePlanningFiltersProps> = (
   advancedFilters,
   setAdvancedFilters,
   onClearAdvancedFilters,
+  hideAdvancedFilters = false,
 }) => {
   const { sbus, isLoading: sbusLoading } = useSBUs();
   const { managers, isLoading: managersLoading } = useManagers();
@@ -56,12 +58,12 @@ export const ResourcePlanningFilters: React.FC<ResourcePlanningFiltersProps> = (
         </div>
 
         {/* SBU Filter */}
-        <Select value={selectedSbu || ''} onValueChange={(value) => setSelectedSbu(value || null)}>
+        <Select value={selectedSbu || 'all'} onValueChange={(value) => setSelectedSbu(value === 'all' ? null : value)}>
           <SelectTrigger className="w-48">
             <SelectValue placeholder="All SBUs" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">All SBUs</SelectItem>
+            <SelectItem value="all">All SBUs</SelectItem>
             {!sbusLoading && sbus.map((sbu) => (
               <SelectItem key={sbu.id} value={sbu.name}>
                 {sbu.name}
@@ -71,12 +73,12 @@ export const ResourcePlanningFilters: React.FC<ResourcePlanningFiltersProps> = (
         </Select>
 
         {/* Manager Filter */}
-        <Select value={selectedManager || ''} onValueChange={(value) => setSelectedManager(value || null)}>
+        <Select value={selectedManager || 'all'} onValueChange={(value) => setSelectedManager(value === 'all' ? null : value)}>
           <SelectTrigger className="w-48">
             <SelectValue placeholder="All Managers" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">All Managers</SelectItem>
+            <SelectItem value="all">All Managers</SelectItem>
             {!managersLoading && managers.map((manager) => (
               <SelectItem key={manager.id} value={manager.full_name}>
                 {manager.full_name}
@@ -87,8 +89,8 @@ export const ResourcePlanningFilters: React.FC<ResourcePlanningFiltersProps> = (
 
         {/* Action Buttons */}
         <div className="flex gap-2">
-          {/* Advanced Filters Toggle - only show if onToggleAdvancedFilters is provided */}
-          {onToggleAdvancedFilters && (
+          {/* Advanced Filters Toggle - only show if onToggleAdvancedFilters is provided and not hidden */}
+          {onToggleAdvancedFilters && !hideAdvancedFilters && (
             <Button
               variant="outline"
               onClick={onToggleAdvancedFilters}
@@ -117,7 +119,7 @@ export const ResourcePlanningFilters: React.FC<ResourcePlanningFiltersProps> = (
       </div>
 
       {/* Advanced Filters Section */}
-      {showAdvancedFilters && onToggleAdvancedFilters && advancedFilters && setAdvancedFilters && onClearAdvancedFilters && (
+      {showAdvancedFilters && onToggleAdvancedFilters && advancedFilters && setAdvancedFilters && onClearAdvancedFilters && !hideAdvancedFilters && (
         <ResourcePlanningAdvancedFilters
           advancedFilters={advancedFilters}
           setAdvancedFilters={setAdvancedFilters}
