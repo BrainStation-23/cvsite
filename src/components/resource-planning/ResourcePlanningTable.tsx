@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Upload } from 'lucide-react';
 import { useCentralizedResourcePlanning } from '@/hooks/use-centralized-resource-planning';
 import { useResourcePlanningState } from './hooks/useResourcePlanningState';
-import { useInlineEditStable } from './hooks/useInlineEditStable';
+import { useInlineEdit } from './hooks/useInlineEdit';
 import { ResourcePlanningFilters } from './ResourcePlanningFilters';
 import { AdvancedResourceFilters } from './AdvancedResourceFilters';
 import { ResourcePlanningTabs } from './ResourcePlanningTabs';
@@ -35,7 +35,7 @@ export const ResourcePlanningTable: React.FC = () => {
     saveEdit,
     updateEditData,
     isLoading: editLoading,
-  } = useInlineEditStable();
+  } = useInlineEdit();
 
   const handleBulkImportSuccess = () => {
     resourcePlanningState.setSearchQuery('');

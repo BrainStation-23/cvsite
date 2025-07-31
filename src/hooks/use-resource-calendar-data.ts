@@ -84,6 +84,7 @@ export function useResourceCalendarData(
         start_date_to: dateRange.end.toISOString().split('T')[0],
         end_date_from: null,
         end_date_to: null,
+        include_unplanned: false,
         include_weekly_validation: false,
       });
 
