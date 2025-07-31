@@ -34,7 +34,7 @@ export const useWeeklyValidationCron = () => {
       }
       
       console.log('Cron config response:', data);
-      return data as CronResponse;
+      return data as unknown as CronResponse;
     },
   });
 
@@ -53,7 +53,7 @@ export const useWeeklyValidationCron = () => {
       }
 
       console.log('Cron management response:', data);
-      return data as CronResponse;
+      return data as unknown as CronResponse;
     },
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['weekly-validation-cron-config'] });
