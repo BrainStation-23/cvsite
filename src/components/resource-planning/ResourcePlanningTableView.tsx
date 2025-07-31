@@ -109,13 +109,6 @@ export const ResourcePlanningTableView: React.FC<ResourcePlanningTableViewProps>
           sortOrder={sortOrder}
           setSortOrder={setSortOrder}
         />
-        
-        {/* Show current page info */}
-        {pagination && (
-          <div className="text-sm text-muted-foreground">
-            Showing {((currentPage - 1) * pagination.per_page) + 1} to {Math.min(currentPage * pagination.per_page, pagination.filtered_count)} of {pagination.filtered_count} entries
-          </div>
-        )}
       </div>
 
       <div className="border rounded-lg overflow-hidden">
@@ -157,7 +150,6 @@ export const ResourcePlanningTableView: React.FC<ResourcePlanningTableViewProps>
         </Table>
       </div>
 
-      {/* Add pagination */}
       {pagination && (
         <ResourcePlanningPagination
           pagination={pagination}
