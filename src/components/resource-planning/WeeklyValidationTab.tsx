@@ -11,6 +11,14 @@ interface WeeklyValidationTabProps {
   selectedManager: string | null;
   // Centralized data props
   weeklyValidationData: any;
+  // Inline edit props
+  editingItemId: string | null;
+  editData: any;
+  onStartEdit: (item: any) => void;
+  onCancelEdit: () => void;
+  onSaveEdit: () => void;
+  onEditDataChange: (data: any) => void;
+  editLoading: boolean;
 }
 
 export const WeeklyValidationTab: React.FC<WeeklyValidationTabProps> = ({
@@ -18,6 +26,13 @@ export const WeeklyValidationTab: React.FC<WeeklyValidationTabProps> = ({
   selectedSbu,
   selectedManager,
   weeklyValidationData,
+  editingItemId,
+  editData,
+  onStartEdit,
+  onCancelEdit,
+  onSaveEdit,
+  onEditDataChange,
+  editLoading,
 }) => {
   const {
     data,
@@ -72,6 +87,13 @@ export const WeeklyValidationTab: React.FC<WeeklyValidationTabProps> = ({
                     item={item} 
                     onValidate={validateWeekly}
                     isValidating={isValidating}
+                    isEditing={editingItemId === item.id}
+                    editData={editData}
+                    onStartEdit={onStartEdit}
+                    onCancelEdit={onCancelEdit}
+                    onSaveEdit={onSaveEdit}
+                    onEditDataChange={onEditDataChange}
+                    editLoading={editLoading}
                   />
                 ))}
               </TableBody>

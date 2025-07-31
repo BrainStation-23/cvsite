@@ -74,6 +74,45 @@ export function useWeeklyValidation(params: WeeklyValidationParams) {
     },
   });
 
+  const updateMutation = useMutation({
+    mutationFn: async ({ id, updates }: { 
+      id: string; 
+      updates: Partial<{
+        bill_type_id: string;
+        project_id: string;
+        engagement_percentage: number;
+        billing_percentage: number;
+        release_date: string;
+        engagement_start_date: string;
+      }> 
+    }) => {
+      const { data, error } = await supabase
+        .from('resource_planning')
+        .update(updates)
+        .eq('id', id)
+        .select()
+        .single();
+
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['weekly-validation'] });
+      toast({
+        title: 'Success',
+        description: 'Resource planning updated successfully.',
+      });
+    },
+    onError: (error: any) => {
+      console.error('Update error:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to update resource planning.',
+        variant: 'destructive',
+      });
+    },
+  });
+
   return {
     data: data || [],
     isLoading,
@@ -81,5 +120,7 @@ export function useWeeklyValidation(params: WeeklyValidationParams) {
     refetch,
     validateResourcePlanning: validateMutation.mutate,
     isValidating: validateMutation.isPending,
+    updateResourcePlanning: updateMutation.mutate,
+    isUpdating: updateMutation.isPending,
   };
 }

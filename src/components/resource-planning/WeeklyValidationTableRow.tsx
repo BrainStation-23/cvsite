@@ -3,10 +3,11 @@ import React from 'react';
 import { TableCell, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { CheckCircle2 } from 'lucide-react';
+import { CheckCircle2, Edit2 } from 'lucide-react';
 import { format } from 'date-fns';
 import { useConfirmationDialog } from '@/hooks/use-confirmation-dialog';
 import { ConfirmationDialog } from '@/components/ui/confirmation-dialog';
+import { WeeklyValidationTableEditRow } from './WeeklyValidationTableEditRow';
 
 interface WeeklyValidationData {
   id: string;
@@ -39,16 +40,40 @@ interface WeeklyValidationData {
   } | null;
 }
 
+interface EditFormData {
+  profileId: string;
+  billTypeId: string | null;
+  projectId: string | null;
+  engagementPercentage: number;
+  billingPercentage: number;
+  releaseDate: string;
+  engagementStartDate: string;
+}
+
 interface WeeklyValidationTableRowProps {
   item: WeeklyValidationData;
   onValidate: (id: string) => void;
   isValidating: boolean;
+  isEditing: boolean;
+  editData: EditFormData | null;
+  onStartEdit: (item: WeeklyValidationData) => void;
+  onCancelEdit: () => void;
+  onSaveEdit: () => void;
+  onEditDataChange: (data: Partial<EditFormData>) => void;
+  editLoading: boolean;
 }
 
 export const WeeklyValidationTableRow: React.FC<WeeklyValidationTableRowProps> = ({ 
   item, 
   onValidate,
   isValidating,
+  isEditing,
+  editData,
+  onStartEdit,
+  onCancelEdit,
+  onSaveEdit,
+  onEditDataChange,
+  editLoading,
 }) => {
   const { isOpen, config, showConfirmation, hideConfirmation, handleConfirm } = useConfirmationDialog();
 
@@ -62,6 +87,20 @@ export const WeeklyValidationTableRow: React.FC<WeeklyValidationTableRowProps> =
       onConfirm: () => onValidate(item.id)
     });
   };
+
+  // If this row is being edited, show the edit row
+  if (isEditing && editData) {
+    return (
+      <WeeklyValidationTableEditRow
+        item={item}
+        editData={editData}
+        onEditDataChange={onEditDataChange}
+        onSave={onSaveEdit}
+        onCancel={onCancelEdit}
+        isLoading={editLoading}
+      />
+    );
+  }
 
   return (
     <>
@@ -118,16 +157,27 @@ export const WeeklyValidationTableRow: React.FC<WeeklyValidationTableRowProps> =
           )}
         </TableCell>
         <TableCell className="py-1 px-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleValidateClick}
-            disabled={isValidating}
-            className="h-7 px-2 text-xs"
-          >
-            <CheckCircle2 className="h-3 w-3 mr-1" />
-            Validate
-          </Button>
+          <div className="flex items-center gap-1">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => onStartEdit(item)}
+              disabled={editLoading}
+              className="h-6 w-6 p-0"
+            >
+              <Edit2 className="h-3 w-3" />
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleValidateClick}
+              disabled={isValidating}
+              className="h-7 px-2 text-xs"
+            >
+              <CheckCircle2 className="h-3 w-3 mr-1" />
+              Validate
+            </Button>
+          </div>
         </TableCell>
       </TableRow>
 
