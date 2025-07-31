@@ -1,12 +1,12 @@
 
-import React, { useCallback, useMemo } from 'react';
+import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Upload } from 'lucide-react';
-import { useResourcePlanning } from '@/hooks/use-resource-planning';
-import { useResourceData } from './hooks/useResourceData';
+import { usePlannedResources } from '@/hooks/use-planned-resources';
+import { useUnplannedResources } from '@/hooks/use-unplanned-resources';
+import { useWeeklyValidation } from '@/hooks/use-weekly-validation';
 import { useResourcePlanningState } from './hooks/useResourcePlanningState';
 import { useInlineEdit } from './hooks/useInlineEdit';
-import { usePlannedResources } from '@/hooks/use-planned-resources';
 import { ResourcePlanningFilters } from './ResourcePlanningFilters';
 import { AdvancedResourceFilters } from './AdvancedResourceFilters';
 import { ResourcePlanningTabs } from './ResourcePlanningTabs';
@@ -14,39 +14,18 @@ import { ResourcePlanningForm } from './ResourcePlanningForm';
 import { BulkResourcePlanningImport } from './BulkResourcePlanningImport';
 
 export const ResourcePlanningTable: React.FC = () => {
+  const [searchQuery, setSearchQuery] = React.useState('');
+  const [selectedSbu, setSelectedSbu] = React.useState<string | null>(null);
+  const [selectedManager, setSelectedManager] = React.useState<string | null>(null);
+  const [showUnplanned, setShowUnplanned] = React.useState(false);
   const [activeTab, setActiveTab] = React.useState('planned');
   const [showBulkImport, setShowBulkImport] = React.useState(false);
 
-  console.log('ResourcePlanningTable render');
-
-  const resourcePlanningHook = useResourcePlanning();
-  const {
-    searchQuery,
-    setSearchQuery,
-    selectedSbu,
-    setSelectedSbu,
-    selectedManager,
-    setSelectedManager,
-    showUnplanned,
-    setShowUnplanned,
-    advancedFilters,
-    setAdvancedFilters,
-    clearFilters,
-    clearAdvancedFilters,
-    filterParams,
-  } = resourcePlanningHook;
-
-  // Get centralized data with stable filterParams
-  const resourceData = useResourceData(filterParams);
-  const {
-    plannedResources,
-    unplannedResources,
-    weeklyValidationData,
-  } = resourceData;
-
-  // Get mutation functions with stable params
-  const plannedResourcesHook = usePlannedResources(filterParams);
-  const { updateResourcePlanning } = plannedResourcesHook;
+  const clearBasicFilters = () => {
+    setSearchQuery('');
+    setSelectedSbu(null);
+    setSelectedManager(null);
+  };
 
   const {
     preselectedProfileId,
@@ -63,48 +42,80 @@ export const ResourcePlanningTable: React.FC = () => {
     editData,
     startEdit,
     cancelEdit,
+    saveEdit,
     updateEditData,
+    isLoading: editLoading,
   } = useInlineEdit();
 
-  // Memoize the save edit handler to prevent recreations
-  const handleSaveEdit = useCallback(() => {
-    if (!editingItemId || !editData) return;
+  // Get planned resources hook with advanced filters
+  const plannedResources = usePlannedResources();
+  
+  // Create advanced filter props for other hooks
+  const advancedFilterProps = {
+    billTypeFilter: plannedResources.advancedFilters.billTypeFilter,
+    projectSearch: plannedResources.advancedFilters.projectSearch,
+    minEngagementPercentage: plannedResources.advancedFilters.minEngagementPercentage,
+    maxEngagementPercentage: plannedResources.advancedFilters.maxEngagementPercentage,
+    minBillingPercentage: plannedResources.advancedFilters.minBillingPercentage,
+    maxBillingPercentage: plannedResources.advancedFilters.maxBillingPercentage,
+    startDateFrom: plannedResources.advancedFilters.startDateFrom,
+    startDateTo: plannedResources.advancedFilters.startDateTo,
+    endDateFrom: plannedResources.advancedFilters.endDateFrom,
+    endDateTo: plannedResources.advancedFilters.endDateTo,
+  };
 
-    console.log('Saving edit for item:', editingItemId);
-    updateResourcePlanning(
-      {
-        id: editingItemId,
-        updates: {
-          bill_type_id: editData.billTypeId,
-          project_id: editData.projectId,
-          engagement_percentage: editData.engagementPercentage,
-          billing_percentage: editData.billingPercentage,
-          release_date: editData.releaseDate,
-          engagement_start_date: editData.engagementStartDate,
-        },
-      },
-      {
-        onSuccess: () => {
-          cancelEdit();
-        },
-      }
-    );
-  }, [editingItemId, editData, updateResourcePlanning, cancelEdit]);
+  // Initialize other hooks with filters
+  const unplannedResources = useUnplannedResources({
+    searchQuery,
+    selectedSbu,
+    selectedManager,
+    ...advancedFilterProps,
+  });
+  
+  const weeklyValidationData = useWeeklyValidation({
+    searchQuery,
+    selectedSbu,
+    selectedManager,
+    ...advancedFilterProps,
+  });
 
-  const handleTabChange = useCallback((value: string) => {
-    console.log('Tab change to:', value);
-    setActiveTab(value);
-    setShowUnplanned(value === "unplanned");
-  }, [setShowUnplanned]);
+  // Sync filters to planned resources hook
+  React.useEffect(() => {
+    plannedResources.setSearchQuery(searchQuery);
+  }, [searchQuery, plannedResources.setSearchQuery]);
 
-  const handleInlineEdit = useCallback((item: any) => {
-    console.log('Inline edit for item:', item.id);
+  React.useEffect(() => {
+    plannedResources.setSelectedSbu(selectedSbu);
+  }, [selectedSbu, plannedResources.setSelectedSbu]);
+
+  React.useEffect(() => {
+    plannedResources.setSelectedManager(selectedManager);
+  }, [selectedManager, plannedResources.setSelectedManager]);
+
+  const handleInlineEdit = (item: any) => {
     startEdit(item);
-  }, [startEdit]);
+  };
 
-  const handleBulkImportSuccess = useCallback(() => {
-    setSearchQuery('');
-  }, [setSearchQuery]);
+  const handleBulkImportSuccess = () => {
+    plannedResources.setSearchQuery('');
+    unplannedResources.refetch();
+    weeklyValidationData.refetch();
+  };
+
+  const clearAdvancedFilters = () => {
+    plannedResources.setAdvancedFilters({
+      billTypeFilter: null,
+      projectSearch: '',
+      minEngagementPercentage: null,
+      maxEngagementPercentage: null,
+      minBillingPercentage: null,
+      maxBillingPercentage: null,
+      startDateFrom: '',
+      startDateTo: '',
+      endDateFrom: '',
+      endDateTo: '',
+    });
+  };
 
   return (
     <div className="flex gap-6 h-full">
@@ -128,11 +139,11 @@ export const ResourcePlanningTable: React.FC = () => {
           setSelectedSbu={setSelectedSbu}
           selectedManager={selectedManager}
           setSelectedManager={setSelectedManager}
-          clearFilters={clearFilters}
+          clearFilters={clearBasicFilters}
         >
           <AdvancedResourceFilters
-            filters={advancedFilters}
-            onFiltersChange={setAdvancedFilters}
+            filters={plannedResources.advancedFilters}
+            onFiltersChange={plannedResources.setAdvancedFilters}
             onClearFilters={clearAdvancedFilters}
           />
         </ResourcePlanningFilters>
@@ -141,7 +152,7 @@ export const ResourcePlanningTable: React.FC = () => {
           showUnplanned={showUnplanned}
           setShowUnplanned={setShowUnplanned}
           activeTab={activeTab}
-          setActiveTab={handleTabChange}
+          setActiveTab={setActiveTab}
           searchQuery={searchQuery}
           selectedSbu={selectedSbu}
           selectedManager={selectedManager}
@@ -155,9 +166,9 @@ export const ResourcePlanningTable: React.FC = () => {
           editData={editData}
           onStartEdit={startEdit}
           onCancelEdit={cancelEdit}
-          onSaveEdit={handleSaveEdit}
+          onSaveEdit={saveEdit}
           onEditDataChange={updateEditData}
-          editLoading={false}
+          editLoading={editLoading}
         />
       </div>
 

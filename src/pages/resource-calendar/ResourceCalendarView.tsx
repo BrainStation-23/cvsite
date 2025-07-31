@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import DashboardLayout from '../../components/Layout/DashboardLayout';
@@ -26,11 +27,7 @@ const ResourceCalendarView: React.FC = () => {
     setShowUnplanned(false);
   };
 
-  const { data: resourceData, isLoading } = usePlannedResources({
-    searchQuery,
-    selectedSbu,
-    selectedManager
-  });
+  const { data: resourceData, isLoading } = usePlannedResources();
 
   // Calculate quick stats
   const totalResources = resourceData?.length || 0;

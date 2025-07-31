@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -49,72 +49,87 @@ interface MutationCallbacks {
   onError?: (error: any) => void;
 }
 
-interface PlannedResourcesParams {
-  searchQuery: string;
-  selectedSbu: string | null;
-  selectedManager: string | null;
-  billTypeFilter?: string | null;
-  projectSearch?: string;
-  minEngagementPercentage?: number | null;
-  maxEngagementPercentage?: number | null;
-  minBillingPercentage?: number | null;
-  maxBillingPercentage?: number | null;
-  startDateFrom?: string;
-  startDateTo?: string;
-  endDateFrom?: string;
-  endDateTo?: string;
+interface AdvancedFilters {
+  billTypeFilter: string | null;
+  projectSearch: string;
+  minEngagementPercentage: number | null;
+  maxEngagementPercentage: number | null;
+  minBillingPercentage: number | null;
+  maxBillingPercentage: number | null;
+  startDateFrom: string;
+  startDateTo: string;
+  endDateFrom: string;
+  endDateTo: string;
 }
 
-export function usePlannedResources(params: PlannedResourcesParams) {
+export function usePlannedResources() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const [searchQuery, setSearchQuery] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [sortBy, setSortBy] = useState('created_at');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
+  const [selectedSbu, setSelectedSbu] = useState<string | null>(null);
+  const [selectedManager, setSelectedManager] = useState<string | null>(null);
+  
+  // Advanced filters
+  const [advancedFilters, setAdvancedFilters] = useState<AdvancedFilters>({
+    billTypeFilter: null,
+    projectSearch: '',
+    minEngagementPercentage: null,
+    maxEngagementPercentage: null,
+    minBillingPercentage: null,
+    maxBillingPercentage: null,
+    startDateFrom: '',
+    startDateTo: '',
+    endDateFrom: '',
+    endDateTo: '',
+  });
   
   const itemsPerPage = 10;
 
   const { data: plannedData, isLoading, error } = useQuery({
     queryKey: [
-      'planned-resources', 
-      params.searchQuery, 
+      'resource-planning-planned', 
+      searchQuery, 
       currentPage, 
       sortBy, 
       sortOrder, 
-      params.selectedSbu, 
-      params.selectedManager,
-      params.billTypeFilter,
-      params.projectSearch,
-      params.minEngagementPercentage,
-      params.maxEngagementPercentage,
-      params.minBillingPercentage,
-      params.maxBillingPercentage,
-      params.startDateFrom,
-      params.startDateTo,
-      params.endDateFrom,
-      params.endDateTo
+      selectedSbu, 
+      selectedManager,
+      advancedFilters
     ],
     queryFn: async () => {
-      console.log('Planned Resources Query:', params);
+      console.log('Planned Resource Planning Query:', {
+        searchQuery,
+        currentPage,
+        sortBy,
+        sortOrder,
+        selectedSbu,
+        selectedManager,
+        advancedFilters
+      });
 
-      const { data: rpcData, error } = await supabase.rpc('get_planned_resources', {
-        search_query: params.searchQuery || null,
+      const { data: rpcData, error } = await supabase.rpc('get_comprehensive_resource_planning_data', {
+        search_query: searchQuery || null,
         page_number: currentPage,
         items_per_page: itemsPerPage,
         sort_by: sortBy,
         sort_order: sortOrder,
-        sbu_filter: params.selectedSbu,
-        manager_filter: params.selectedManager,
-        bill_type_filter: params.billTypeFilter,
-        project_search: params.projectSearch || null,
-        min_engagement_percentage: params.minEngagementPercentage,
-        max_engagement_percentage: params.maxEngagementPercentage,
-        min_billing_percentage: params.minBillingPercentage,
-        max_billing_percentage: params.maxBillingPercentage,
-        start_date_from: params.startDateFrom || null,
-        start_date_to: params.startDateTo || null,
-        end_date_from: params.endDateFrom || null,
-        end_date_to: params.endDateTo || null
+        sbu_filter: selectedSbu,
+        manager_filter: selectedManager,
+        bill_type_filter: advancedFilters.billTypeFilter,
+        project_search: advancedFilters.projectSearch || null,
+        min_engagement_percentage: advancedFilters.minEngagementPercentage,
+        max_engagement_percentage: advancedFilters.maxEngagementPercentage,
+        min_billing_percentage: advancedFilters.minBillingPercentage,
+        max_billing_percentage: advancedFilters.maxBillingPercentage,
+        start_date_from: advancedFilters.startDateFrom || null,
+        start_date_to: advancedFilters.startDateTo || null,
+        end_date_from: advancedFilters.endDateFrom || null,
+        end_date_to: advancedFilters.endDateTo || null,
+        include_unplanned: false,
+        include_weekly_validation: false
       });
 
       if (error) {
@@ -151,20 +166,9 @@ export function usePlannedResources(params: PlannedResourcesParams) {
     }
   });
 
-  useEffect(() => {
-    if (error) {
-      console.error('Query error:', error);
-      toast({
-        title: 'Error Loading Resource Planning Data',
-        description: error instanceof Error ? error.message : 'An unexpected error occurred',
-        variant: 'destructive',
-      });
-    }
-  }, [error, toast]);
-
   const invalidateResourcePlanningQueries = () => {
-    queryClient.invalidateQueries({ queryKey: ['planned-resources'] });
-    queryClient.invalidateQueries({ queryKey: ['unplanned-resources'] });
+    queryClient.invalidateQueries({ queryKey: ['resource-planning-planned'] });
+    queryClient.invalidateQueries({ queryKey: ['resource-planning-unplanned'] });
     queryClient.invalidateQueries({ queryKey: ['weekly-validation'] });
   };
 
@@ -269,6 +273,15 @@ export function usePlannedResources(params: PlannedResourcesParams) {
     },
   });
 
+  if (error) {
+    console.error('Query error:', error);
+    toast({
+      title: 'Error Loading Resource Planning Data',
+      description: error instanceof Error ? error.message : 'An unexpected error occurred',
+      variant: 'destructive',
+    });
+  }
+
   const createResourcePlanning = (
     data: Parameters<typeof createResourcePlanningMutation.mutate>[0],
     callbacks?: MutationCallbacks
@@ -304,12 +317,20 @@ export function usePlannedResources(params: PlannedResourcesParams) {
     pagination: plannedData?.pagination,
     isLoading,
     error,
+    searchQuery,
+    setSearchQuery,
     currentPage,
     setCurrentPage,
     sortBy,
     setSortBy,
     sortOrder,
     setSortOrder,
+    selectedSbu,
+    setSelectedSbu,
+    selectedManager,
+    setSelectedManager,
+    advancedFilters,
+    setAdvancedFilters,
     createResourcePlanning,
     updateResourcePlanning,
     deleteResourcePlanning: deleteResourcePlanningMutation.mutate,
