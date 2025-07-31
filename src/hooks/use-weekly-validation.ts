@@ -1,4 +1,5 @@
 
+import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -35,8 +36,13 @@ export function useWeeklyValidation(params: WeeklyValidationParams) {
     endDateFrom,
     endDateTo
   } = params;
+  
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const [currentPage, setCurrentPage] = useState(1);
+  const [sortBy, setSortBy] = useState('created_at');
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
+  const itemsPerPage = 10;
 
   const { data, isLoading, error, refetch } = useQuery({
     queryKey: [
@@ -53,7 +59,10 @@ export function useWeeklyValidation(params: WeeklyValidationParams) {
       startDateFrom,
       startDateTo,
       endDateFrom,
-      endDateTo
+      endDateTo,
+      currentPage,
+      sortBy,
+      sortOrder
     ],
     queryFn: async () => {
       console.log('Weekly Validation Query:', {
@@ -69,15 +78,18 @@ export function useWeeklyValidation(params: WeeklyValidationParams) {
         startDateFrom,
         startDateTo,
         endDateFrom,
-        endDateTo
+        endDateTo,
+        currentPage,
+        sortBy,
+        sortOrder
       });
 
       const { data: rpcData, error } = await supabase.rpc('get_comprehensive_resource_planning_data', {
         search_query: searchQuery || null,
-        page_number: 1,
-        items_per_page: 100,
-        sort_by: 'created_at',
-        sort_order: 'desc',
+        page_number: currentPage,
+        items_per_page: itemsPerPage,
+        sort_by: sortBy,
+        sort_order: sortOrder,
         sbu_filter: selectedSbu,
         manager_filter: selectedManager,
         bill_type_filter: billTypeFilter,
@@ -111,9 +123,9 @@ export function useWeeklyValidation(params: WeeklyValidationParams) {
           pagination: (rpcData as any).pagination || {
             total_count: 0,
             filtered_count: needsValidation.length,
-            page: 1,
-            per_page: 100,
-            page_count: Math.ceil(needsValidation.length / 100)
+            page: currentPage,
+            per_page: itemsPerPage,
+            page_count: Math.ceil(needsValidation.length / itemsPerPage)
           }
         };
       }
@@ -123,8 +135,8 @@ export function useWeeklyValidation(params: WeeklyValidationParams) {
         pagination: {
           total_count: 0,
           filtered_count: 0,
-          page: 1,
-          per_page: 100,
+          page: currentPage,
+          per_page: itemsPerPage,
           page_count: 0
         }
       };
@@ -206,12 +218,12 @@ export function useWeeklyValidation(params: WeeklyValidationParams) {
     isValidating: validateMutation.isPending,
     updateResourcePlanning: updateMutation.mutate,
     isUpdating: updateMutation.isPending,
-    currentPage: 1,
-    setCurrentPage: () => {},
-    sortBy: 'created_at',
-    setSortBy: () => {},
-    sortOrder: 'desc' as const,
-    setSortOrder: () => {},
+    currentPage,
+    setCurrentPage,
+    sortBy,
+    setSortBy,
+    sortOrder,
+    setSortOrder,
     validateWeekly: validateMutation.mutate,
   };
 }

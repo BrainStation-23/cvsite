@@ -21,6 +21,8 @@ export const UnplannedResourcesTab: React.FC<UnplannedResourcesTabProps> = ({
   const {
     unplannedResources: data,
     isLoading,
+    currentPage,
+    setCurrentPage,
   } = unplannedResources;
 
   console.log('UnplannedResourcesTab data:', data);
@@ -42,8 +44,8 @@ export const UnplannedResourcesTab: React.FC<UnplannedResourcesTabProps> = ({
     <UnplannedResourcesTable 
       resources={resources}
       pagination={pagination}
-      currentPage={pagination?.page || 1}
-      setCurrentPage={() => {}}
+      currentPage={currentPage}
+      setCurrentPage={setCurrentPage}
       isLoading={isLoading}
       onCreatePlan={onCreatePlan}
     />

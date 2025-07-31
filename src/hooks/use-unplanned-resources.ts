@@ -1,4 +1,5 @@
 
+import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -35,6 +36,9 @@ export function useUnplannedResources(params: UnplannedResourcesParams) {
     endDateTo
   } = params;
 
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
+
   const { data, isLoading, error, refetch } = useQuery({
     queryKey: [
       'unplanned-resources', 
@@ -50,7 +54,8 @@ export function useUnplannedResources(params: UnplannedResourcesParams) {
       startDateFrom,
       startDateTo,
       endDateFrom,
-      endDateTo
+      endDateTo,
+      currentPage
     ],
     queryFn: async () => {
       console.log('Unplanned Resources Query:', {
@@ -66,13 +71,14 @@ export function useUnplannedResources(params: UnplannedResourcesParams) {
         startDateFrom,
         startDateTo,
         endDateFrom,
-        endDateTo
+        endDateTo,
+        currentPage
       });
 
       const { data: rpcData, error } = await supabase.rpc('get_comprehensive_resource_planning_data', {
         search_query: searchQuery || null,
-        page_number: 1,
-        items_per_page: 100,
+        page_number: currentPage,
+        items_per_page: itemsPerPage,
         sort_by: 'created_at',
         sort_order: 'desc',
         sbu_filter: selectedSbu,
@@ -104,8 +110,8 @@ export function useUnplannedResources(params: UnplannedResourcesParams) {
           pagination: (rpcData as any).pagination || {
             total_count: 0,
             filtered_count: 0,
-            page: 1,
-            per_page: 100,
+            page: currentPage,
+            per_page: itemsPerPage,
             page_count: 0
           }
         };
@@ -116,8 +122,8 @@ export function useUnplannedResources(params: UnplannedResourcesParams) {
         pagination: {
           total_count: 0,
           filtered_count: 0,
-          page: 1,
-          per_page: 100,
+          page: currentPage,
+          per_page: itemsPerPage,
           page_count: 0
         }
       };
@@ -130,11 +136,13 @@ export function useUnplannedResources(params: UnplannedResourcesParams) {
       pagination: {
         total_count: 0,
         filtered_count: 0,
-        page: 1,
-        per_page: 100,
+        page: currentPage,
+        per_page: itemsPerPage,
         page_count: 0
       }
     },
+    currentPage,
+    setCurrentPage,
     isLoading,
     error,
     refetch
