@@ -7,8 +7,8 @@ interface UnplannedResourcesTabProps {
   selectedSbu: string | null;
   selectedManager: string | null;
   onCreatePlan: (profileId: string) => void;
-  // Centralized data props
-  unplannedResources: any;
+  // Centralized resource planning state
+  resourcePlanningState: any;
 }
 
 export const UnplannedResourcesTab: React.FC<UnplannedResourcesTabProps> = ({
@@ -16,21 +16,18 @@ export const UnplannedResourcesTab: React.FC<UnplannedResourcesTabProps> = ({
   selectedSbu,
   selectedManager,
   onCreatePlan,
-  unplannedResources,
+  resourcePlanningState,
 }) => {
   const {
-    unplannedResources: data,
+    data,
+    pagination,
     isLoading,
     currentPage,
     setCurrentPage,
-  } = unplannedResources;
+  } = resourcePlanningState;
 
   console.log('UnplannedResourcesTab data:', data);
   console.log('UnplannedResourcesTab isLoading:', isLoading);
-
-  // The RPC function returns an object with unplanned_resources and pagination
-  const resources = data?.unplanned_resources || [];
-  const pagination = data?.pagination;
 
   if (isLoading) {
     return (
@@ -42,7 +39,7 @@ export const UnplannedResourcesTab: React.FC<UnplannedResourcesTabProps> = ({
 
   return (
     <UnplannedResourcesTable 
-      resources={resources}
+      resources={data}
       pagination={pagination}
       currentPage={currentPage}
       setCurrentPage={setCurrentPage}

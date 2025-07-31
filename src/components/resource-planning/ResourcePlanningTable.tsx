@@ -2,9 +2,7 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Upload } from 'lucide-react';
-import { usePlannedResources } from '@/hooks/use-planned-resources';
-import { useUnplannedResources } from '@/hooks/use-unplanned-resources';
-import { useWeeklyValidation } from '@/hooks/use-weekly-validation';
+import { useCentralizedResourcePlanning } from '@/hooks/use-centralized-resource-planning';
 import { useResourcePlanningState } from './hooks/useResourcePlanningState';
 import { useInlineEdit } from './hooks/useInlineEdit';
 import { ResourcePlanningFilters } from './ResourcePlanningFilters';
@@ -14,18 +12,10 @@ import { ResourcePlanningForm } from './ResourcePlanningForm';
 import { BulkResourcePlanningImport } from './BulkResourcePlanningImport';
 
 export const ResourcePlanningTable: React.FC = () => {
-  const [searchQuery, setSearchQuery] = React.useState('');
-  const [selectedSbu, setSelectedSbu] = React.useState<string | null>(null);
-  const [selectedManager, setSelectedManager] = React.useState<string | null>(null);
-  const [showUnplanned, setShowUnplanned] = React.useState(false);
-  const [activeTab, setActiveTab] = React.useState('planned');
   const [showBulkImport, setShowBulkImport] = React.useState(false);
 
-  const clearBasicFilters = () => {
-    setSearchQuery('');
-    setSelectedSbu(null);
-    setSelectedManager(null);
-  };
+  // Use centralized resource planning hook
+  const resourcePlanningState = useCentralizedResourcePlanning();
 
   const {
     preselectedProfileId,
@@ -47,74 +37,9 @@ export const ResourcePlanningTable: React.FC = () => {
     isLoading: editLoading,
   } = useInlineEdit();
 
-  // Get planned resources hook with advanced filters
-  const plannedResources = usePlannedResources();
-  
-  // Create advanced filter props for other hooks
-  const advancedFilterProps = {
-    billTypeFilter: plannedResources.advancedFilters.billTypeFilter,
-    projectSearch: plannedResources.advancedFilters.projectSearch,
-    minEngagementPercentage: plannedResources.advancedFilters.minEngagementPercentage,
-    maxEngagementPercentage: plannedResources.advancedFilters.maxEngagementPercentage,
-    minBillingPercentage: plannedResources.advancedFilters.minBillingPercentage,
-    maxBillingPercentage: plannedResources.advancedFilters.maxBillingPercentage,
-    startDateFrom: plannedResources.advancedFilters.startDateFrom,
-    startDateTo: plannedResources.advancedFilters.startDateTo,
-    endDateFrom: plannedResources.advancedFilters.endDateFrom,
-    endDateTo: plannedResources.advancedFilters.endDateTo,
-  };
-
-  // Initialize other hooks with filters
-  const unplannedResources = useUnplannedResources({
-    searchQuery,
-    selectedSbu,
-    selectedManager,
-    ...advancedFilterProps,
-  });
-  
-  const weeklyValidationData = useWeeklyValidation({
-    searchQuery,
-    selectedSbu,
-    selectedManager,
-    ...advancedFilterProps,
-  });
-
-  // Sync filters to planned resources hook
-  React.useEffect(() => {
-    plannedResources.setSearchQuery(searchQuery);
-  }, [searchQuery, plannedResources.setSearchQuery]);
-
-  React.useEffect(() => {
-    plannedResources.setSelectedSbu(selectedSbu);
-  }, [selectedSbu, plannedResources.setSelectedSbu]);
-
-  React.useEffect(() => {
-    plannedResources.setSelectedManager(selectedManager);
-  }, [selectedManager, plannedResources.setSelectedManager]);
-
-  const handleInlineEdit = (item: any) => {
-    startEdit(item);
-  };
-
   const handleBulkImportSuccess = () => {
-    plannedResources.setSearchQuery('');
-    unplannedResources.refetch();
-    weeklyValidationData.refetch();
-  };
-
-  const clearAdvancedFilters = () => {
-    plannedResources.setAdvancedFilters({
-      billTypeFilter: null,
-      projectSearch: '',
-      minEngagementPercentage: null,
-      maxEngagementPercentage: null,
-      minBillingPercentage: null,
-      maxBillingPercentage: null,
-      startDateFrom: '',
-      startDateTo: '',
-      endDateFrom: '',
-      endDateTo: '',
-    });
+    resourcePlanningState.setSearchQuery('');
+    resourcePlanningState.refetch();
   };
 
   return (
@@ -133,35 +58,31 @@ export const ResourcePlanningTable: React.FC = () => {
         </div>
 
         <ResourcePlanningFilters
-          searchQuery={searchQuery}
-          setSearchQuery={setSearchQuery}
-          selectedSbu={selectedSbu}
-          setSelectedSbu={setSelectedSbu}
-          selectedManager={selectedManager}
-          setSelectedManager={setSelectedManager}
-          clearFilters={clearBasicFilters}
+          searchQuery={resourcePlanningState.searchQuery}
+          setSearchQuery={resourcePlanningState.setSearchQuery}
+          selectedSbu={resourcePlanningState.selectedSbu}
+          setSelectedSbu={resourcePlanningState.setSelectedSbu}
+          selectedManager={resourcePlanningState.selectedManager}
+          setSelectedManager={resourcePlanningState.setSelectedManager}
+          clearFilters={resourcePlanningState.clearBasicFilters}
         >
           <AdvancedResourceFilters
-            filters={plannedResources.advancedFilters}
-            onFiltersChange={plannedResources.setAdvancedFilters}
-            onClearFilters={clearAdvancedFilters}
+            filters={resourcePlanningState.advancedFilters}
+            onFiltersChange={resourcePlanningState.setAdvancedFilters}
+            onClearFilters={resourcePlanningState.clearAdvancedFilters}
           />
         </ResourcePlanningFilters>
 
         <ResourcePlanningTabs
-          showUnplanned={showUnplanned}
-          setShowUnplanned={setShowUnplanned}
-          activeTab={activeTab}
-          setActiveTab={setActiveTab}
-          searchQuery={searchQuery}
-          selectedSbu={selectedSbu}
-          selectedManager={selectedManager}
+          activeTab={resourcePlanningState.activeTab}
+          setActiveTab={resourcePlanningState.setActiveTab}
+          searchQuery={resourcePlanningState.searchQuery}
+          selectedSbu={resourcePlanningState.selectedSbu}
+          selectedManager={resourcePlanningState.selectedManager}
           onCreateNewAssignment={handleCreateNewAssignment}
-          onEditAssignment={handleInlineEdit}
+          onEditAssignment={startEdit}
           onCreatePlan={handleCreatePlan}
-          plannedResources={plannedResources}
-          unplannedResources={unplannedResources}
-          weeklyValidationData={weeklyValidationData}
+          resourcePlanningState={resourcePlanningState}
           editingItemId={editingItemId}
           editData={editData}
           onStartEdit={startEdit}

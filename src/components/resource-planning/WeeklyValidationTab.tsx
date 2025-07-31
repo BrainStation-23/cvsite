@@ -9,8 +9,8 @@ interface WeeklyValidationTabProps {
   searchQuery: string;
   selectedSbu: string | null;
   selectedManager: string | null;
-  // Centralized data props
-  weeklyValidationData: any;
+  // Centralized resource planning state
+  resourcePlanningState: any;
   // Inline edit props
   editingItemId: string | null;
   editData: any;
@@ -25,7 +25,7 @@ export const WeeklyValidationTab: React.FC<WeeklyValidationTabProps> = ({
   searchQuery,
   selectedSbu,
   selectedManager,
-  weeklyValidationData,
+  resourcePlanningState,
   editingItemId,
   editData,
   onStartEdit,
@@ -46,7 +46,7 @@ export const WeeklyValidationTab: React.FC<WeeklyValidationTabProps> = ({
     setSortOrder,
     validateWeekly,
     isValidating,
-  } = weeklyValidationData;
+  } = resourcePlanningState;
 
   const handleSort = (column: string) => {
     if (sortBy === column) {

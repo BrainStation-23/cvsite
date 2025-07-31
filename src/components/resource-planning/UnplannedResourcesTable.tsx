@@ -15,8 +15,12 @@ interface Profile {
 
 interface UnplannedResource {
   id: string;
-  profile_id: string;
-  profile: Profile;
+  profile_id?: string;
+  employee_id: string;
+  first_name: string;
+  last_name: string;
+  current_designation: string;
+  profile?: Profile;
 }
 
 interface UnplannedResourcesTableProps {
@@ -70,25 +74,31 @@ export const UnplannedResourcesTable: React.FC<UnplannedResourcesTableProps> = (
                 </TableCell>
               </TableRow>
             ) : (
-              resources.map((resource) => (
-                <TableRow key={resource.id}>
-                  <TableCell>{resource.profile.employee_id}</TableCell>
-                  <TableCell>
-                    {resource.profile.first_name} {resource.profile.last_name}
-                  </TableCell>
-                  <TableCell>{resource.profile.current_designation || 'N/A'}</TableCell>
-                  <TableCell>
-                    <Button
-                      size="sm"
-                      onClick={() => onCreatePlan(resource.profile_id)}
-                      className="flex items-center gap-2"
-                    >
-                      <Plus className="h-4 w-4" />
-                      Create Plan
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              ))
+              resources.map((resource) => {
+                // Handle both direct profile data and nested profile data
+                const profileData = resource.profile || resource;
+                const profileId = resource.profile_id || resource.id;
+                
+                return (
+                  <TableRow key={resource.id}>
+                    <TableCell>{resource.employee_id || profileData.employee_id}</TableCell>
+                    <TableCell>
+                      {(resource.first_name || profileData.first_name)} {(resource.last_name || profileData.last_name)}
+                    </TableCell>
+                    <TableCell>{resource.current_designation || profileData.current_designation || 'N/A'}</TableCell>
+                    <TableCell>
+                      <Button
+                        size="sm"
+                        onClick={() => onCreatePlan(profileId)}
+                        className="flex items-center gap-2"
+                      >
+                        <Plus className="h-4 w-4" />
+                        Create Plan
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                );
+              })
             )}
           </TableBody>
         </Table>
