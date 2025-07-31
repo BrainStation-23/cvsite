@@ -39,6 +39,7 @@ export const platformSettingsItems = [
 ];
 
 export const getResourceCalendarItems = (userRole: string): NavigationItem[] => [
+  { to: `/${userRole}/resource-planning`, icon: Calendar, label: 'Planning' },
   { to: `/${userRole}/resource-calendar/calendar`, icon: CalendarDays, label: 'Calendar View' },
   { to: `/${userRole}/resource-calendar/statistics`, icon: BarChart3, label: 'Statistics' },
 ];
@@ -82,7 +83,6 @@ export const getSidebarGroups = (
       items: [
         { to: `/${userRole}/employee-data`, icon: Database, label: 'Employee Data' },
         { to: `/${userRole}/training-certification`, icon: FileText, label: 'Training and Certification' },
-        { to: `/${userRole}/resource-planning`, icon: Calendar, label: 'Resource Planning' },
         { 
           to: `/${userRole}/resource-calendar`, 
           icon: CalendarDays, 
