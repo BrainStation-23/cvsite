@@ -65,25 +65,19 @@ export function useResourcePlanningData({
       case 'planned':
         return {
           ...baseParams,
-          include_unplanned: false,
           include_weekly_validation: false,
         };
       case 'unplanned':
-        return {
-          ...baseParams,
-          include_unplanned: true,
-          include_weekly_validation: false,
-        };
+        // For unplanned resources, we'll return empty data until we create a separate function
+        return null;
       case 'weekly-validation':
         return {
           ...baseParams,
-          include_unplanned: false,
           include_weekly_validation: true,
         };
       default:
         return {
           ...baseParams,
-          include_unplanned: false,
           include_weekly_validation: false,
         };
     }
@@ -111,6 +105,20 @@ export function useResourcePlanningData({
       advancedFilters,
     ],
     queryFn: async () => {
+      // Return empty data for unplanned tab until we create a separate function
+      if (activeTab === 'unplanned' || !rpcParams) {
+        return {
+          resource_planning: [],
+          pagination: {
+            total_count: 0,
+            filtered_count: 0,
+            page: currentPage,
+            per_page: itemsPerPage,
+            page_count: 0
+          }
+        };
+      }
+
       console.log('Resource Planning Query:', { activeTab, ...rpcParams });
 
       const { data: rpcData, error } = await supabase.rpc('get_comprehensive_resource_planning_data', rpcParams);

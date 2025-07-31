@@ -128,7 +128,6 @@ export function usePlannedResources() {
         start_date_to: advancedFilters.startDateTo || null,
         end_date_from: advancedFilters.endDateFrom || null,
         end_date_to: advancedFilters.endDateTo || null,
-        include_unplanned: false,
         include_weekly_validation: false
       });
 
