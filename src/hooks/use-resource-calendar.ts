@@ -1,5 +1,5 @@
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useResourceCalendarData } from './use-resource-calendar-data';
 import { startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, parseISO } from 'date-fns';
 
@@ -48,16 +48,24 @@ export function useResourceCalendar(
     setSelectedManager
   } = useResourceCalendarData();
 
-  // Sync filters with the data hook
-  if (currentSearchQuery !== searchQuery) {
-    setSearchQuery(searchQuery);
-  }
-  if (currentSelectedSbu !== selectedSbu) {
-    setSelectedSbu(selectedSbu);
-  }
-  if (currentSelectedManager !== selectedManager) {
-    setSelectedManager(selectedManager);
-  }
+  // Sync filters with the data hook using useEffect to avoid infinite re-renders
+  useEffect(() => {
+    if (currentSearchQuery !== searchQuery) {
+      setSearchQuery(searchQuery);
+    }
+  }, [searchQuery, currentSearchQuery, setSearchQuery]);
+
+  useEffect(() => {
+    if (currentSelectedSbu !== selectedSbu) {
+      setSelectedSbu(selectedSbu);
+    }
+  }, [selectedSbu, currentSelectedSbu, setSelectedSbu]);
+
+  useEffect(() => {
+    if (currentSelectedManager !== selectedManager) {
+      setSelectedManager(selectedManager);
+    }
+  }, [selectedManager, currentSelectedManager, setSelectedManager]);
 
   // Convert resource planning data to calendar format
   const calendarData = useMemo(() => {
