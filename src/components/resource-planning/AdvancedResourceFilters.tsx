@@ -71,14 +71,14 @@ export const AdvancedResourceFilters: React.FC<AdvancedResourceFiltersProps> = (
               <div className="space-y-2">
                 <Label htmlFor="bill-type-filter">Bill Type</Label>
                 <Select 
-                  value={filters.billTypeFilter || ''} 
-                  onValueChange={(value) => updateFilter('billTypeFilter', value || null)}
+                  value={filters.billTypeFilter || 'all-types'} 
+                  onValueChange={(value) => updateFilter('billTypeFilter', value === 'all-types' ? null : value)}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Select bill type..." />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">All Bill Types</SelectItem>
+                    <SelectItem value="all-types">All Bill Types</SelectItem>
                     {/* Bill types will be populated from API */}
                   </SelectContent>
                 </Select>
