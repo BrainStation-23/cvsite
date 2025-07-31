@@ -1,10 +1,57 @@
 
-import { useState } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
-interface WeeklyValidationParams {
+interface WeeklyValidationData {
+  id: string;
+  profile_id: string;
+  project_id: string | null;
+  bill_type_id: string | null;
+  engagement_percentage: number;
+  billing_percentage: number;
+  engagement_start_date: string;
+  release_date: string;
+  engagement_complete: boolean;
+  weekly_validation: boolean;
+  created_at: string;
+  updated_at: string;
+  profile: {
+    id: string;
+    employee_id: string;
+    first_name: string;
+    last_name: string;
+    current_designation: string;
+  };
+  bill_type: {
+    id: string;
+    name: string;
+  } | null;
+  project: {
+    id: string;
+    project_name: string;
+    project_manager: string;
+    client_name: string;
+    budget: number;
+  } | null;
+  sbu: {
+    id: string;
+    name: string;
+  } | null;
+}
+
+interface WeeklyValidationResponse {
+  resource_planning: WeeklyValidationData[];
+  pagination: {
+    total_count: number;
+    filtered_count: number;
+    page: number;
+    per_page: number;
+    page_count: number;
+  };
+}
+
+interface UseWeeklyValidationProps {
   searchQuery: string;
   selectedSbu: string | null;
   selectedManager: string | null;
@@ -20,207 +67,98 @@ interface WeeklyValidationParams {
   endDateTo?: string;
 }
 
-export function useWeeklyValidation(params: WeeklyValidationParams) {
-  const { 
-    searchQuery, 
-    selectedSbu, 
-    selectedManager,
-    billTypeFilter,
-    projectSearch,
-    minEngagementPercentage,
-    maxEngagementPercentage,
-    minBillingPercentage,
-    maxBillingPercentage,
-    startDateFrom,
-    startDateTo,
-    endDateFrom,
-    endDateTo
-  } = params;
-  
+export function useWeeklyValidation(filters: UseWeeklyValidationProps) {
   const { toast } = useToast();
-  const queryClient = useQueryClient();
-  const [currentPage, setCurrentPage] = useState(1);
-  const [sortBy, setSortBy] = useState('created_at');
-  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
-  const itemsPerPage = 10;
 
-  const { data, isLoading, error, refetch } = useQuery({
+  const queryResult = useQuery({
     queryKey: [
-      'weekly-validation', 
-      searchQuery, 
-      selectedSbu, 
-      selectedManager,
-      billTypeFilter,
-      projectSearch,
-      minEngagementPercentage,
-      maxEngagementPercentage,
-      minBillingPercentage,
-      maxBillingPercentage,
-      startDateFrom,
-      startDateTo,
-      endDateFrom,
-      endDateTo,
-      currentPage,
-      sortBy,
-      sortOrder
+      'weekly-validation',
+      filters.searchQuery,
+      filters.selectedSbu,
+      filters.selectedManager,
+      filters.billTypeFilter,
+      filters.projectSearch,
+      filters.minEngagementPercentage,
+      filters.maxEngagementPercentage,
+      filters.minBillingPercentage,
+      filters.maxBillingPercentage,
+      filters.startDateFrom,
+      filters.startDateTo,
+      filters.endDateFrom,
+      filters.endDateTo
     ],
     queryFn: async () => {
-      console.log('Weekly Validation Query:', {
-        searchQuery,
-        selectedSbu,
-        selectedManager,
-        billTypeFilter,
-        projectSearch,
-        minEngagementPercentage,
-        maxEngagementPercentage,
-        minBillingPercentage,
-        maxBillingPercentage,
-        startDateFrom,
-        startDateTo,
-        endDateFrom,
-        endDateTo,
-        currentPage,
-        sortBy,
-        sortOrder
-      });
+      console.log('Weekly Validation Query:', filters);
 
-      const { data: rpcData, error } = await supabase.rpc('get_comprehensive_resource_planning_data', {
-        search_query: searchQuery || null,
-        page_number: currentPage,
-        items_per_page: itemsPerPage,
-        sort_by: sortBy,
-        sort_order: sortOrder,
-        sbu_filter: selectedSbu,
-        manager_filter: selectedManager,
-        bill_type_filter: billTypeFilter,
-        project_search: projectSearch || null,
-        min_engagement_percentage: minEngagementPercentage,
-        max_engagement_percentage: maxEngagementPercentage,
-        min_billing_percentage: minBillingPercentage,
-        max_billing_percentage: maxBillingPercentage,
-        start_date_from: startDateFrom || null,
-        start_date_to: startDateTo || null,
-        end_date_from: endDateFrom || null,
-        end_date_to: endDateTo || null,
-        include_unplanned: false,
-        include_weekly_validation: true,
-        weekly_validation_filter: false // Only get records that need validation
+      const { data: rpcData, error } = await supabase.rpc('get_weekly_validation_resources', {
+        search_query: filters.searchQuery || null,
+        page_number: 1,
+        items_per_page: 10,
+        sort_by: 'created_at',
+        sort_order: 'desc',
+        sbu_filter: filters.selectedSbu,
+        manager_filter: filters.selectedManager,
+        bill_type_filter: filters.billTypeFilter || null,
+        project_search: filters.projectSearch || null,
+        min_engagement_percentage: filters.minEngagementPercentage,
+        max_engagement_percentage: filters.maxEngagementPercentage,
+        min_billing_percentage: filters.minBillingPercentage,
+        max_billing_percentage: filters.maxBillingPercentage,
+        start_date_from: filters.startDateFrom || null,
+        start_date_to: filters.startDateTo || null,
+        end_date_from: filters.endDateFrom || null,
+        end_date_to: filters.endDateTo || null
       });
 
       if (error) {
-        console.error('Weekly validation RPC call error:', error);
+        console.error('RPC call error:', error);
         throw error;
       }
 
-      console.log('Weekly validation RPC response:', rpcData);
-      
-      if (rpcData && typeof rpcData === 'object' && 'resource_planning' in rpcData) {
+      console.log('Weekly Validation RPC response:', rpcData);
+
+      if (rpcData && typeof rpcData === 'object' && 'resource_planning' in rpcData && 'pagination' in rpcData) {
         return {
           resource_planning: (rpcData as any).resource_planning || [],
           pagination: (rpcData as any).pagination || {
             total_count: 0,
             filtered_count: 0,
-            page: currentPage,
-            per_page: itemsPerPage,
+            page: 1,
+            per_page: 10,
+            page_count: 0
+          }
+        };
+      } else {
+        console.warn('Unexpected RPC response structure:', rpcData);
+        return {
+          resource_planning: [],
+          pagination: {
+            total_count: 0,
+            filtered_count: 0,
+            page: 1,
+            per_page: 10,
             page_count: 0
           }
         };
       }
-      
-      return {
-        resource_planning: [],
-        pagination: {
-          total_count: 0,
-          filtered_count: 0,
-          page: currentPage,
-          per_page: itemsPerPage,
-          page_count: 0
-        }
-      };
+    },
+    meta: {
+      onError: (error: Error) => {
+        console.error('Query error:', error);
+        toast({
+          title: 'Error Loading Weekly Validation Data',
+          description: error.message || 'An unexpected error occurred',
+          variant: 'destructive',
+        });
+      }
     }
   });
 
-  const validateMutation = useMutation({
-    mutationFn: async (resourcePlanningId: string) => {
-      const { error } = await supabase
-        .from('resource_planning')
-        .update({ weekly_validation: true })
-        .eq('id', resourcePlanningId);
-
-      if (error) throw error;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['weekly-validation'] });
-      toast({
-        title: 'Success',
-        description: 'Resource planning validated successfully.',
-      });
-    },
-    onError: (error: any) => {
-      console.error('Validation error:', error);
-      toast({
-        title: 'Error',
-        description: 'Failed to validate resource planning.',
-        variant: 'destructive',
-      });
-    },
-  });
-
-  const updateMutation = useMutation({
-    mutationFn: async ({ id, updates }: { 
-      id: string; 
-      updates: Partial<{
-        bill_type_id: string;
-        project_id: string;
-        engagement_percentage: number;
-        billing_percentage: number;
-        release_date: string;
-        engagement_start_date: string;
-      }> 
-    }) => {
-      const { data, error } = await supabase
-        .from('resource_planning')
-        .update(updates)
-        .eq('id', id)
-        .select()
-        .single();
-
-      if (error) throw error;
-      return data;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['weekly-validation'] });
-      toast({
-        title: 'Success',
-        description: 'Resource planning updated successfully.',
-      });
-    },
-    onError: (error: any) => {
-      console.error('Update error:', error);
-      toast({
-        title: 'Error',
-        description: 'Failed to update resource planning.',
-        variant: 'destructive',
-      });
-    },
-  });
-
   return {
-    data: data?.resource_planning || [],
-    pagination: data?.pagination,
-    isLoading,
-    error,
-    refetch,
-    validateResourcePlanning: validateMutation.mutate,
-    isValidating: validateMutation.isPending,
-    updateResourcePlanning: updateMutation.mutate,
-    isUpdating: updateMutation.isPending,
-    currentPage,
-    setCurrentPage,
-    sortBy,
-    setSortBy,
-    sortOrder,
-    setSortOrder,
-    validateWeekly: validateMutation.mutate,
+    data: queryResult.data?.resource_planning || [],
+    pagination: queryResult.data?.pagination,
+    isLoading: queryResult.isLoading,
+    error: queryResult.error,
+    refetch: queryResult.refetch
   };
 }
