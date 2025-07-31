@@ -6,33 +6,13 @@ interface UnplannedResourcesParams {
   searchQuery: string;
   selectedSbu: string | null;
   selectedManager: string | null;
-  billTypeFilter?: string | null;
-  projectSearch?: string;
-  minEngagementPercentage?: number | null;
-  maxEngagementPercentage?: number | null;
-  minBillingPercentage?: number | null;
-  maxBillingPercentage?: number | null;
-  startDateFrom?: string;
-  startDateTo?: string;
-  endDateFrom?: string;
-  endDateTo?: string;
 }
 
 export function useUnplannedResources(params: UnplannedResourcesParams) {
   const { 
     searchQuery, 
     selectedSbu, 
-    selectedManager,
-    billTypeFilter,
-    projectSearch,
-    minEngagementPercentage,
-    maxEngagementPercentage,
-    minBillingPercentage,
-    maxBillingPercentage,
-    startDateFrom,
-    startDateTo,
-    endDateFrom,
-    endDateTo
+    selectedManager
   } = params;
 
   const { data, isLoading, error, refetch } = useQuery({
@@ -40,55 +20,23 @@ export function useUnplannedResources(params: UnplannedResourcesParams) {
       'unplanned-resources', 
       searchQuery, 
       selectedSbu, 
-      selectedManager,
-      billTypeFilter,
-      projectSearch,
-      minEngagementPercentage,
-      maxEngagementPercentage,
-      minBillingPercentage,
-      maxBillingPercentage,
-      startDateFrom,
-      startDateTo,
-      endDateFrom,
-      endDateTo
+      selectedManager
     ],
     queryFn: async () => {
       console.log('Unplanned Resources Query:', {
         searchQuery,
         selectedSbu,
-        selectedManager,
-        billTypeFilter,
-        projectSearch,
-        minEngagementPercentage,
-        maxEngagementPercentage,
-        minBillingPercentage,
-        maxBillingPercentage,
-        startDateFrom,
-        startDateTo,
-        endDateFrom,
-        endDateTo
+        selectedManager
       });
 
-      const { data: rpcData, error } = await supabase.rpc('get_comprehensive_resource_planning_data', {
+      const { data: rpcData, error } = await supabase.rpc('get_unplanned_resources', {
         search_query: searchQuery || null,
         page_number: 1,
         items_per_page: 100,
-        sort_by: 'created_at',
-        sort_order: 'desc',
+        sort_by: 'first_name',
+        sort_order: 'asc',
         sbu_filter: selectedSbu,
-        manager_filter: selectedManager,
-        bill_type_filter: billTypeFilter,
-        project_search: projectSearch || null,
-        min_engagement_percentage: minEngagementPercentage,
-        max_engagement_percentage: maxEngagementPercentage,
-        min_billing_percentage: minBillingPercentage,
-        max_billing_percentage: maxBillingPercentage,
-        start_date_from: startDateFrom || null,
-        start_date_to: startDateTo || null,
-        end_date_from: endDateFrom || null,
-        end_date_to: endDateTo || null,
-        include_unplanned: true,
-        include_weekly_validation: false
+        manager_filter: selectedManager
       });
 
       if (error) {

@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -90,7 +91,7 @@ export function usePlannedResources() {
 
   const { data: plannedData, isLoading, error } = useQuery({
     queryKey: [
-      'resource-planning-planned', 
+      'planned-resources', 
       searchQuery, 
       currentPage, 
       sortBy, 
@@ -100,7 +101,7 @@ export function usePlannedResources() {
       advancedFilters
     ],
     queryFn: async () => {
-      console.log('Planned Resource Planning Query:', {
+      console.log('Planned Resources Query:', {
         searchQuery,
         currentPage,
         sortBy,
@@ -110,7 +111,7 @@ export function usePlannedResources() {
         advancedFilters
       });
 
-      const { data: rpcData, error } = await supabase.rpc('get_comprehensive_resource_planning_data', {
+      const { data: rpcData, error } = await supabase.rpc('get_planned_resources', {
         search_query: searchQuery || null,
         page_number: currentPage,
         items_per_page: itemsPerPage,
@@ -127,9 +128,7 @@ export function usePlannedResources() {
         start_date_from: advancedFilters.startDateFrom || null,
         start_date_to: advancedFilters.startDateTo || null,
         end_date_from: advancedFilters.endDateFrom || null,
-        end_date_to: advancedFilters.endDateTo || null,
-        include_unplanned: false,
-        include_weekly_validation: false
+        end_date_to: advancedFilters.endDateTo || null
       });
 
       if (error) {
@@ -167,8 +166,8 @@ export function usePlannedResources() {
   });
 
   const invalidateResourcePlanningQueries = () => {
-    queryClient.invalidateQueries({ queryKey: ['resource-planning-planned'] });
-    queryClient.invalidateQueries({ queryKey: ['resource-planning-unplanned'] });
+    queryClient.invalidateQueries({ queryKey: ['planned-resources'] });
+    queryClient.invalidateQueries({ queryKey: ['unplanned-resources'] });
     queryClient.invalidateQueries({ queryKey: ['weekly-validation'] });
   };
 

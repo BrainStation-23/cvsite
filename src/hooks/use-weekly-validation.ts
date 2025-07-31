@@ -72,7 +72,7 @@ export function useWeeklyValidation(params: WeeklyValidationParams) {
         endDateTo
       });
 
-      const { data: rpcData, error } = await supabase.rpc('get_comprehensive_resource_planning_data', {
+      const { data: rpcData, error } = await supabase.rpc('get_weekly_validation_resources', {
         search_query: searchQuery || null,
         page_number: 1,
         items_per_page: 100,
@@ -89,9 +89,7 @@ export function useWeeklyValidation(params: WeeklyValidationParams) {
         start_date_from: startDateFrom || null,
         start_date_to: startDateTo || null,
         end_date_from: endDateFrom || null,
-        end_date_to: endDateTo || null,
-        include_unplanned: false,
-        include_weekly_validation: true
+        end_date_to: endDateTo || null
       });
 
       if (error) {
@@ -102,18 +100,14 @@ export function useWeeklyValidation(params: WeeklyValidationParams) {
       console.log('Weekly validation RPC response:', rpcData);
       
       if (rpcData && typeof rpcData === 'object' && 'resource_planning' in rpcData) {
-        // Filter only records that need weekly validation (weekly_validation = false)
-        const allRecords = (rpcData as any).resource_planning || [];
-        const needsValidation = allRecords.filter((record: any) => !record.weekly_validation);
-        
         return {
-          resource_planning: needsValidation,
+          resource_planning: (rpcData as any).resource_planning || [],
           pagination: (rpcData as any).pagination || {
             total_count: 0,
-            filtered_count: needsValidation.length,
+            filtered_count: 0,
             page: 1,
             per_page: 100,
-            page_count: Math.ceil(needsValidation.length / 100)
+            page_count: 0
           }
         };
       }
