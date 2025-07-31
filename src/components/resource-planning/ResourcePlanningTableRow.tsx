@@ -71,7 +71,11 @@ export const ResourcePlanningTableRow: React.FC<ResourcePlanningTableRowProps> =
   onEditDataChange,
   editLoading,
 }) => {
-  const { updateResourcePlanning, deleteResourcePlanning, isDeleting, isUpdating } = usePlannedResources();
+  const { updateResourcePlanning, deleteResourcePlanning, isDeleting, isUpdating } = usePlannedResources({
+    searchQuery: '',
+    selectedSbu: null,
+    selectedManager: null
+  });
   const { isOpen, config, showConfirmation, hideConfirmation, handleConfirm } = useConfirmationDialog();
 
   const handleDeleteClick = () => {
