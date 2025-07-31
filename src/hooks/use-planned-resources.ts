@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -128,7 +129,6 @@ export function usePlannedResources() {
         start_date_to: advancedFilters.startDateTo || null,
         end_date_from: advancedFilters.endDateFrom || null,
         end_date_to: advancedFilters.endDateTo || null,
-        include_unplanned: false,
         include_weekly_validation: false
       });
 
@@ -167,9 +167,14 @@ export function usePlannedResources() {
   });
 
   const invalidateResourcePlanningQueries = () => {
+    // Invalidate all resource planning related queries
     queryClient.invalidateQueries({ queryKey: ['resource-planning-planned'] });
     queryClient.invalidateQueries({ queryKey: ['resource-planning-unplanned'] });
+    queryClient.invalidateQueries({ queryKey: ['resource-planning-data'] });
     queryClient.invalidateQueries({ queryKey: ['weekly-validation'] });
+    
+    // Also refetch the current data immediately
+    queryClient.refetchQueries({ queryKey: ['resource-planning-planned'] });
   };
 
   const createResourcePlanningMutation = useMutation({
@@ -193,6 +198,7 @@ export function usePlannedResources() {
       return data;
     },
     onSuccess: () => {
+      invalidateResourcePlanningQueries();
       toast({
         title: 'Success',
         description: 'Resource planning entry created successfully.',
@@ -232,6 +238,7 @@ export function usePlannedResources() {
       return data;
     },
     onSuccess: () => {
+      invalidateResourcePlanningQueries();
       toast({
         title: 'Success',
         description: 'Resource planning entry updated successfully.',
@@ -249,14 +256,20 @@ export function usePlannedResources() {
 
   const deleteResourcePlanningMutation = useMutation({
     mutationFn: async (id: string) => {
+      console.log('Deleting resource planning with ID:', id);
       const { error } = await supabase
         .from('resource_planning')
         .delete()
         .eq('id', id);
 
-      if (error) throw error;
+      if (error) {
+        console.error('Delete error:', error);
+        throw error;
+      }
+      console.log('Successfully deleted resource planning:', id);
     },
-    onSuccess: () => {
+    onSuccess: (_, deletedId) => {
+      console.log('Delete mutation onSuccess called for ID:', deletedId);
       invalidateResourcePlanningQueries();
       toast({
         title: 'Success',
