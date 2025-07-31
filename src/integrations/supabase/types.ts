@@ -73,6 +73,36 @@ export type Database = {
         }
         Relationships: []
       }
+      cron_job_configs: {
+        Row: {
+          created_at: string | null
+          function_name: string
+          id: string
+          is_enabled: boolean | null
+          job_name: string
+          schedule: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          function_name: string
+          id?: string
+          is_enabled?: boolean | null
+          job_name: string
+          schedule: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          function_name?: string
+          id?: string
+          is_enabled?: boolean | null
+          job_name?: string
+          schedule?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       cv_exports: {
         Row: {
           export_format: string
@@ -1353,6 +1383,10 @@ export type Database = {
           count: number
         }[]
       }
+      get_weekly_validation_cron_config: {
+        Args: Record<PropertyKey, never>
+        Returns: Json
+      }
       has_any_role: {
         Args: { roles: string[] }
         Returns: boolean
@@ -1388,17 +1422,13 @@ export type Database = {
         }
         Returns: Json
       }
-      reset_weekly_validation: {
-        Args: Record<PropertyKey, never>
+      manage_weekly_validation_cron: {
+        Args: { p_schedule?: string; p_enabled?: boolean }
         Returns: Json
       }
-      reset_weekly_validation_conditional: {
-        Args: {
-          reset_only_true?: boolean
-          profile_ids?: string[]
-          project_ids?: string[]
-        }
-        Returns: Json
+      reset_weekly_validation: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
       }
       search_certifications: {
         Args: {
