@@ -1,16 +1,22 @@
 
-import React, { useState } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import React from 'react';
 import { Button } from '@/components/ui/button';
-import { Plus } from 'lucide-react';
+import { Upload } from 'lucide-react';
+import { useCentralizedResourcePlanning } from '@/hooks/use-centralized-resource-planning';
+import { useResourcePlanningState } from './hooks/useResourcePlanningState';
+import { useInlineEdit } from './hooks/useInlineEdit';
 import { ResourcePlanningFilters } from './ResourcePlanningFilters';
+import { AdvancedResourceFilters } from './AdvancedResourceFilters';
 import { ResourcePlanningTabs } from './ResourcePlanningTabs';
 import { ResourcePlanningForm } from './ResourcePlanningForm';
-import { useResourcePlanningState } from './hooks/useResourcePlanningState';
-import { useCentralizedResourcePlanning } from '@/hooks/use-centralized-resource-planning';
-import { useResourcePlanningEdit } from './hooks/useResourcePlanningEdit';
+import { BulkResourcePlanningImport } from './BulkResourcePlanningImport';
 
 export const ResourcePlanningTable: React.FC = () => {
+  const [showBulkImport, setShowBulkImport] = React.useState(false);
+
+  // Use centralized resource planning hook
+  const resourcePlanningState = useCentralizedResourcePlanning();
+
   const {
     preselectedProfileId,
     editingItem,
@@ -21,102 +27,88 @@ export const ResourcePlanningTable: React.FC = () => {
     handleFormCancel,
   } = useResourcePlanningState();
 
-  const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
+  const {
+    editingItemId,
+    editData,
+    startEdit,
+    cancelEdit,
+    saveEdit,
+    updateEditData,
+    isLoading: editLoading,
+  } = useInlineEdit();
 
-  // Use centralized resource planning hook
-  const centralizedState = useCentralizedResourcePlanning();
-
-  // Inline editing hook
-  const editingState = useResourcePlanningEdit();
-
-  const handleToggleAdvancedFilters = () => {
-    setShowAdvancedFilters(!showAdvancedFilters);
+  const handleBulkImportSuccess = () => {
+    resourcePlanningState.setSearchQuery('');
+    resourcePlanningState.refetch();
   };
 
-  // Don't show advanced filters for unplanned tab since they don't support advanced filtering
-  const shouldShowAdvancedFilters = centralizedState.activeTab !== 'unplanned';
-
   return (
-    <div className="space-y-6">
-      {/* Resource Planning Form */}
-      {(preselectedProfileId || editingItem) && (
-        <Card>
-          <CardHeader>
-            <CardTitle>
-              {editingItem ? 'Edit Resource Planning' : 'Create Resource Planning'}
-            </CardTitle>
-            <CardDescription>
-              {editingItem 
-                ? 'Update the resource planning assignment'
-                : 'Assign a resource to a project'
-              }
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <ResourcePlanningForm
-              key={editingItem?.id || preselectedProfileId}
-              preselectedProfileId={preselectedProfileId}
-              editingItem={editingItem}
-              onSuccess={handleFormSuccess}
-              onCancel={handleFormCancel}
-            />
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Main Resource Planning Table */}
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between">
-          <div>
-            <CardTitle>Resource Planning</CardTitle>
-            <CardDescription>
-              Manage resource assignments, track project allocations, and plan resource utilization
-            </CardDescription>
-          </div>
-          <Button onClick={handleCreateNewAssignment}>
-            <Plus className="mr-2 h-4 w-4" />
-            New Assignment
+    <div className="flex gap-6 h-full">
+      <div className="flex-1 space-y-4">
+        <div className="flex justify-between items-center">
+          <h2 className="text-xl font-semibold">Resource Planning</h2>
+          <Button
+            variant="outline"
+            onClick={() => setShowBulkImport(true)}
+            className="flex items-center gap-2"
+          >
+            <Upload className="h-4 w-4" />
+            Bulk Import
           </Button>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          {/* Basic Filters */}
-          <ResourcePlanningFilters
-            searchQuery={centralizedState.searchQuery}
-            setSearchQuery={centralizedState.setSearchQuery}
-            selectedSbu={centralizedState.selectedSbu}
-            setSelectedSbu={centralizedState.setSelectedSbu}
-            selectedManager={centralizedState.selectedManager}
-            setSelectedManager={centralizedState.setSelectedManager}
-            clearFilters={centralizedState.clearBasicFilters}
-            showAdvancedFilters={shouldShowAdvancedFilters && showAdvancedFilters}
-            onToggleAdvancedFilters={shouldShowAdvancedFilters ? handleToggleAdvancedFilters : undefined}
-            advancedFilters={centralizedState.advancedFilters}
-            setAdvancedFilters={centralizedState.setAdvancedFilters}
-            onClearAdvancedFilters={centralizedState.clearAdvancedFilters}
-            hideAdvancedFilters={!shouldShowAdvancedFilters}
-          />
+        </div>
 
-          {/* Tabs with Data */}
-          <ResourcePlanningTabs
-            activeTab={centralizedState.activeTab}
-            setActiveTab={centralizedState.setActiveTab}
-            searchQuery={centralizedState.searchQuery}
-            selectedSbu={centralizedState.selectedSbu}
-            selectedManager={centralizedState.selectedManager}
-            onCreateNewAssignment={handleCreateNewAssignment}
-            onEditAssignment={handleEditAssignment}
-            onCreatePlan={handleCreatePlan}
-            resourcePlanningState={centralizedState}
-            editingItemId={editingState.editingItemId}
-            editData={editingState.editData}
-            onStartEdit={editingState.handleStartEdit}
-            onCancelEdit={editingState.handleCancelEdit}
-            onSaveEdit={editingState.handleSaveEdit}
-            onEditDataChange={editingState.handleEditDataChange}
-            editLoading={editingState.isLoading}
+        <ResourcePlanningFilters
+          searchQuery={resourcePlanningState.searchQuery}
+          setSearchQuery={resourcePlanningState.setSearchQuery}
+          selectedSbu={resourcePlanningState.selectedSbu}
+          setSelectedSbu={resourcePlanningState.setSelectedSbu}
+          selectedManager={resourcePlanningState.selectedManager}
+          setSelectedManager={resourcePlanningState.setSelectedManager}
+          clearFilters={resourcePlanningState.clearBasicFilters}
+        >
+          <AdvancedResourceFilters
+            filters={resourcePlanningState.advancedFilters}
+            onFiltersChange={resourcePlanningState.setAdvancedFilters}
+            onClearFilters={resourcePlanningState.clearAdvancedFilters}
           />
-        </CardContent>
-      </Card>
+        </ResourcePlanningFilters>
+
+        <ResourcePlanningTabs
+          activeTab={resourcePlanningState.activeTab}
+          setActiveTab={resourcePlanningState.setActiveTab}
+          searchQuery={resourcePlanningState.searchQuery}
+          selectedSbu={resourcePlanningState.selectedSbu}
+          selectedManager={resourcePlanningState.selectedManager}
+          onCreateNewAssignment={handleCreateNewAssignment}
+          onEditAssignment={startEdit}
+          onCreatePlan={handleCreatePlan}
+          resourcePlanningState={resourcePlanningState}
+          editingItemId={editingItemId}
+          editData={editData}
+          onStartEdit={startEdit}
+          onCancelEdit={cancelEdit}
+          onSaveEdit={saveEdit}
+          onEditDataChange={updateEditData}
+          editLoading={editLoading}
+        />
+      </div>
+
+      <div className="w-80 flex-shrink-0">
+        <div className="sticky top-4">
+          <ResourcePlanningForm
+            preselectedProfileId={preselectedProfileId}
+            editingItem={editingItem}
+            onSuccess={handleFormSuccess}
+            onCancel={handleFormCancel}
+          />
+        </div>
+      </div>
+
+      <BulkResourcePlanningImport
+        isOpen={showBulkImport}
+        onClose={() => setShowBulkImport(false)}
+        onSuccess={handleBulkImportSuccess}
+      />
     </div>
   );
 };

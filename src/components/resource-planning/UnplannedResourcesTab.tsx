@@ -1,13 +1,14 @@
 
 import React from 'react';
 import { UnplannedResourcesTable } from './UnplannedResourcesTable';
-import { useUnplannedResources } from '@/hooks/use-unplanned-resources';
 
 interface UnplannedResourcesTabProps {
   searchQuery: string;
   selectedSbu: string | null;
   selectedManager: string | null;
   onCreatePlan: (profileId: string) => void;
+  // Centralized resource planning state
+  resourcePlanningState: any;
 }
 
 export const UnplannedResourcesTab: React.FC<UnplannedResourcesTabProps> = ({
@@ -15,37 +16,35 @@ export const UnplannedResourcesTab: React.FC<UnplannedResourcesTabProps> = ({
   selectedSbu,
   selectedManager,
   onCreatePlan,
+  resourcePlanningState,
 }) => {
   const {
-    unplannedResources,
+    data,
+    pagination,
+    isLoading,
     currentPage,
     setCurrentPage,
-    isLoading,
-    error,
-  } = useUnplannedResources({
-    searchQuery,
-    selectedSbu,
-    selectedManager,
-  });
+  } = resourcePlanningState;
 
-  if (error) {
+  console.log('UnplannedResourcesTab data:', data);
+  console.log('UnplannedResourcesTab isLoading:', isLoading);
+
+  if (isLoading) {
     return (
-      <div className="text-center py-8">
-        <p className="text-red-500">Error loading unplanned resources: {error.message}</p>
+      <div className="flex items-center justify-center h-32">
+        <div className="text-muted-foreground">Loading unplanned resources...</div>
       </div>
     );
   }
 
   return (
-    <div className="space-y-4">
-      <UnplannedResourcesTable
-        resources={unplannedResources.unplanned_resources || []}
-        pagination={unplannedResources.pagination}
-        currentPage={currentPage}
-        setCurrentPage={setCurrentPage}
-        isLoading={isLoading}
-        onCreatePlan={onCreatePlan}
-      />
-    </div>
+    <UnplannedResourcesTable 
+      resources={data}
+      pagination={pagination}
+      currentPage={currentPage}
+      setCurrentPage={setCurrentPage}
+      isLoading={isLoading}
+      onCreatePlan={onCreatePlan}
+    />
   );
 };
