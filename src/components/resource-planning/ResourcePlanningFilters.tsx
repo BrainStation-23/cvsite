@@ -17,6 +17,7 @@ interface ResourcePlanningFiltersProps {
   setSelectedManager: (manager: string | null) => void;
   clearFilters: () => void;
   showAdvancedFilters?: boolean;
+  activeTab?: string;
   children?: React.ReactNode;
 }
 
@@ -29,9 +30,11 @@ export const ResourcePlanningFilters: React.FC<ResourcePlanningFiltersProps> = (
   setSelectedManager,
   clearFilters,
   showAdvancedFilters = false,
+  activeTab,
   children,
 }) => {
   const hasActiveFilters = selectedSbu || selectedManager || searchQuery;
+  const isUnplannedTab = activeTab === 'unplanned';
 
   return (
     <div className="space-y-4">
@@ -124,7 +127,17 @@ export const ResourcePlanningFilters: React.FC<ResourcePlanningFiltersProps> = (
         )}
       </div>
       
-      {children}
+      {/* Conditionally render advanced filters with disabled state for unplanned resources */}
+      {children && (
+        <div className={isUnplannedTab ? 'opacity-50 pointer-events-none' : ''}>
+          {isUnplannedTab && (
+            <div className="mb-2 text-sm text-muted-foreground">
+              Advanced filters are not available for unplanned resources
+            </div>
+          )}
+          {children}
+        </div>
+      )}
     </div>
   );
 };
