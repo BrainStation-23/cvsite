@@ -65,15 +65,28 @@ export function useResourceCalendarData(
         viewType
       });
 
-      // Use a high limit to get all records for calendar view
-      const { data: rpcData, error } = await supabase.rpc('get_resource_planning_data', {
+      // Use the correct RPC function with comprehensive parameters
+      const { data: rpcData, error } = await supabase.rpc('get_comprehensive_resource_planning_data', {
         search_query: searchQuery || null,
         page_number: 1,
-        items_per_page: 1000, // High limit to get all records
+        items_per_page: 1000, // High limit to get all records for calendar view
         sort_by: 'created_at',
         sort_order: 'desc',
         sbu_filter: selectedSbu,
-        manager_filter: selectedManager
+        manager_filter: selectedManager,
+        bill_type_filter: null,
+        project_search: null,
+        min_engagement_percentage: null,
+        max_engagement_percentage: null,
+        min_billing_percentage: null,
+        max_billing_percentage: null,
+        start_date_from: null,
+        start_date_to: null,
+        end_date_from: null,
+        end_date_to: null,
+        include_unplanned: false, // Get planned resources for calendar
+        include_weekly_validation: false,
+        weekly_validation_filter: null
       });
 
       if (error) {
