@@ -1,12 +1,12 @@
 
 import React from 'react';
-import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import SbuCombobox from '@/components/admin/user/SbuCombobox';
-import { ProfileCombobox } from '@/components/admin/user/ProfileCombobox';
-import { Badge } from '@/components/ui/badge';
-import { X, Filter } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Search, X, ChevronDown, ChevronUp } from 'lucide-react';
+import { useSBUs } from '@/hooks/use-sbus';
+import { useManagers } from '@/hooks/use-managers';
+import { ResourcePlanningAdvancedFilters } from './ResourcePlanningAdvancedFilters';
 
 interface ResourcePlanningFiltersProps {
   searchQuery: string;
@@ -17,7 +17,10 @@ interface ResourcePlanningFiltersProps {
   setSelectedManager: (manager: string | null) => void;
   clearFilters: () => void;
   showAdvancedFilters?: boolean;
-  children?: React.ReactNode;
+  onToggleAdvancedFilters?: () => void;
+  advancedFilters?: any;
+  setAdvancedFilters?: (filters: any) => void;
+  onClearAdvancedFilters?: () => void;
 }
 
 export const ResourcePlanningFilters: React.FC<ResourcePlanningFiltersProps> = ({
@@ -29,102 +32,98 @@ export const ResourcePlanningFilters: React.FC<ResourcePlanningFiltersProps> = (
   setSelectedManager,
   clearFilters,
   showAdvancedFilters = false,
-  children,
+  onToggleAdvancedFilters,
+  advancedFilters,
+  setAdvancedFilters,
+  onClearAdvancedFilters,
 }) => {
-  const hasActiveFilters = selectedSbu || selectedManager || searchQuery;
+  const { sbus, isLoading: sbusLoading } = useSBUs();
+  const { managers, isLoading: managersLoading } = useManagers();
 
   return (
     <div className="space-y-4">
-      <div className="p-4 border rounded-lg bg-muted/50">
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-2">
-            <Filter className="h-4 w-4" />
-            <Label className="text-sm font-medium">Basic Filters</Label>
-          </div>
-          {hasActiveFilters && (
+      {/* Basic Filters Row */}
+      <div className="flex flex-col sm:flex-row gap-4">
+        {/* Search Input */}
+        <div className="relative flex-1">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+          <Input
+            placeholder="Search by name, employee ID, project, or designation..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="pl-10"
+          />
+        </div>
+
+        {/* SBU Filter */}
+        <Select value={selectedSbu || ''} onValueChange={(value) => setSelectedSbu(value || null)}>
+          <SelectTrigger className="w-48">
+            <SelectValue placeholder="All SBUs" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="">All SBUs</SelectItem>
+            {!sbusLoading && sbus.map((sbu) => (
+              <SelectItem key={sbu.id} value={sbu.name}>
+                {sbu.name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+
+        {/* Manager Filter */}
+        <Select value={selectedManager || ''} onValueChange={(value) => setSelectedManager(value || null)}>
+          <SelectTrigger className="w-48">
+            <SelectValue placeholder="All Managers" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="">All Managers</SelectItem>
+            {!managersLoading && managers.map((manager) => (
+              <SelectItem key={manager.id} value={manager.full_name}>
+                {manager.full_name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+
+        {/* Action Buttons */}
+        <div className="flex gap-2">
+          {/* Advanced Filters Toggle - only show if onToggleAdvancedFilters is provided */}
+          {onToggleAdvancedFilters && (
             <Button
-              variant="ghost"
-              size="sm"
-              onClick={clearFilters}
-              className="h-7 px-2 text-xs"
+              variant="outline"
+              onClick={onToggleAdvancedFilters}
+              className="whitespace-nowrap"
             >
-              Clear all
-              <X className="ml-1 h-3 w-3" />
+              {showAdvancedFilters ? (
+                <>
+                  <ChevronUp className="h-4 w-4 mr-2" />
+                  Hide Filters
+                </>
+              ) : (
+                <>
+                  <ChevronDown className="h-4 w-4 mr-2" />
+                  More Filters
+                </>
+              )}
             </Button>
           )}
+
+          {/* Clear Filters */}
+          <Button variant="outline" onClick={clearFilters}>
+            <X className="h-4 w-4 mr-2" />
+            Clear
+          </Button>
         </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="space-y-2">
-            <Label htmlFor="search-query">Search</Label>
-            <Input
-              id="search-query"
-              placeholder="Search employees..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="sbu-filter">Filter by SBU</Label>
-            <SbuCombobox
-              value={selectedSbu}
-              onValueChange={setSelectedSbu}
-              placeholder="Select SBU..."
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="manager-filter">Filter by Manager</Label>
-            <ProfileCombobox
-              value={selectedManager}
-              onValueChange={setSelectedManager}
-              placeholder="Select manager..."
-              label="Manager"
-            />
-          </div>
-        </div>
-
-        {hasActiveFilters && (
-          <div className="flex flex-wrap gap-2 mt-4">
-            {searchQuery && (
-              <Badge variant="secondary" className="flex items-center gap-1">
-                Search: {searchQuery}
-                <button
-                  onClick={() => setSearchQuery('')}
-                  className="ml-1 h-3 w-3 hover:bg-destructive hover:text-destructive-foreground rounded-full flex items-center justify-center"
-                >
-                  <X className="h-2 w-2" />
-                </button>
-              </Badge>
-            )}
-            {selectedSbu && (
-              <Badge variant="secondary" className="flex items-center gap-1">
-                SBU Filter
-                <button
-                  onClick={() => setSelectedSbu(null)}
-                  className="ml-1 h-3 w-3 hover:bg-destructive hover:text-destructive-foreground rounded-full flex items-center justify-center"
-                >
-                  <X className="h-2 w-2" />
-                </button>
-              </Badge>
-            )}
-            {selectedManager && (
-              <Badge variant="secondary" className="flex items-center gap-1">
-                Manager Filter
-                <button
-                  onClick={() => setSelectedManager(null)}
-                  className="ml-1 h-3 w-3 hover:bg-destructive hover:text-destructive-foreground rounded-full flex items-center justify-center"
-                >
-                  <X className="h-2 w-2" />
-                </button>
-              </Badge>
-            )}
-          </div>
-        )}
       </div>
-      
-      {children}
+
+      {/* Advanced Filters Section */}
+      {showAdvancedFilters && onToggleAdvancedFilters && advancedFilters && setAdvancedFilters && onClearAdvancedFilters && (
+        <ResourcePlanningAdvancedFilters
+          advancedFilters={advancedFilters}
+          setAdvancedFilters={setAdvancedFilters}
+          onClearAdvancedFilters={onClearAdvancedFilters}
+        />
+      )}
     </div>
   );
 };
