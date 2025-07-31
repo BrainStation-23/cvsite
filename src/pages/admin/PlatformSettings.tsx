@@ -29,10 +29,10 @@ const PlatformSettings: React.FC = () => {
     },
     {
       title: 'Resource Planning',
-      description: 'Manage resource types, bill types, and project types for resource planning and project management.',
+      description: 'Manage resource types, bill types, project types, and automated scheduling for resource planning.',
       icon: Briefcase,
       route: '/admin/platform-settings/resources',
-      items: ['Resource Types', 'Bill Types', 'Project Types'],
+      items: ['Resource Types', 'Bill Types', 'Project Types', 'Weekly Validation Scheduling'],
       color: 'bg-green-50 dark:bg-green-950 border-green-200 dark:border-green-800',
       iconColor: 'text-green-600 dark:text-green-400'
     },
@@ -130,7 +130,7 @@ const PlatformSettings: React.FC = () => {
               <div className="text-sm text-gray-600 dark:text-gray-400">Profile Settings</div>
             </div>
             <div>
-              <div className="text-2xl font-bold text-green-600 dark:text-green-400">3</div>
+              <div className="text-2xl font-bold text-green-600 dark:text-green-400">4</div>
               <div className="text-sm text-gray-600 dark:text-gray-400">Resource Settings</div>
             </div>
             <div>

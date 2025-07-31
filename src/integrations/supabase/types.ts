@@ -1326,18 +1326,6 @@ export type Database = {
         Args: { profile_uuid: string }
         Returns: Json
       }
-      get_resource_planning_data: {
-        Args: {
-          search_query?: string
-          page_number?: number
-          items_per_page?: number
-          sort_by?: string
-          sort_order?: string
-          sbu_filter?: string
-          manager_filter?: string
-        }
-        Returns: Json
-      }
       get_sbu_summary_stats: {
         Args: { sbu_filter?: string }
         Returns: {
@@ -1364,28 +1352,6 @@ export type Database = {
           skill: string
           count: number
         }[]
-      }
-      get_unplanned_resources: {
-        Args: {
-          search_query?: string
-          sbu_filter?: string
-          manager_filter?: string
-          page_number?: number
-          items_per_page?: number
-        }
-        Returns: Json
-      }
-      get_weekly_validation_data: {
-        Args: {
-          search_query?: string
-          page_number?: number
-          items_per_page?: number
-          sort_by?: string
-          sort_order?: string
-          sbu_filter?: string
-          manager_filter?: string
-        }
-        Returns: Json
       }
       has_any_role: {
         Args: { roles: string[] }
@@ -1419,6 +1385,18 @@ export type Database = {
           items_per_page?: number
           sort_by?: string
           sort_order?: string
+        }
+        Returns: Json
+      }
+      reset_weekly_validation: {
+        Args: Record<PropertyKey, never>
+        Returns: Json
+      }
+      reset_weekly_validation_conditional: {
+        Args: {
+          reset_only_true?: boolean
+          profile_ids?: string[]
+          project_ids?: string[]
         }
         Returns: Json
       }
