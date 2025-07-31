@@ -65,8 +65,8 @@ export function useResourceCalendarData(
         viewType
       });
 
-      // Use a high limit to get all records for calendar view
-      const { data: rpcData, error } = await supabase.rpc('get_resource_planning_data', {
+      // Use the new get_planned_resources RPC function with a high limit to get all records
+      const { data: rpcData, error } = await supabase.rpc('get_planned_resources', {
         search_query: searchQuery || null,
         page_number: 1,
         items_per_page: 1000, // High limit to get all records
