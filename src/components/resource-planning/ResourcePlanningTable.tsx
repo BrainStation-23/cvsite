@@ -8,6 +8,7 @@ import { useWeeklyValidation } from '@/hooks/use-weekly-validation';
 import { useResourcePlanningState } from './hooks/useResourcePlanningState';
 import { useInlineEdit } from './hooks/useInlineEdit';
 import { ResourcePlanningFilters } from './ResourcePlanningFilters';
+import { AdvancedResourceFilters } from './AdvancedResourceFilters';
 import { ResourcePlanningTabs } from './ResourcePlanningTabs';
 import { ResourcePlanningForm } from './ResourcePlanningForm';
 import { BulkResourcePlanningImport } from './BulkResourcePlanningImport';
@@ -20,7 +21,7 @@ export const ResourcePlanningTable: React.FC = () => {
   const [activeTab, setActiveTab] = React.useState('planned');
   const [showBulkImport, setShowBulkImport] = React.useState(false);
 
-  const clearFilters = () => {
+  const clearBasicFilters = () => {
     setSearchQuery('');
     setSelectedSbu(null);
     setSelectedManager(null);
@@ -46,17 +47,36 @@ export const ResourcePlanningTable: React.FC = () => {
     isLoading: editLoading,
   } = useInlineEdit();
 
-  // Centralized data fetching with current filters
+  // Get planned resources hook with advanced filters
   const plannedResources = usePlannedResources();
+  
+  // Create advanced filter props for other hooks
+  const advancedFilterProps = {
+    billTypeFilter: plannedResources.advancedFilters.billTypeFilter,
+    projectSearch: plannedResources.advancedFilters.projectSearch,
+    minEngagementPercentage: plannedResources.advancedFilters.minEngagementPercentage,
+    maxEngagementPercentage: plannedResources.advancedFilters.maxEngagementPercentage,
+    minBillingPercentage: plannedResources.advancedFilters.minBillingPercentage,
+    maxBillingPercentage: plannedResources.advancedFilters.maxBillingPercentage,
+    startDateFrom: plannedResources.advancedFilters.startDateFrom,
+    startDateTo: plannedResources.advancedFilters.startDateTo,
+    endDateFrom: plannedResources.advancedFilters.endDateFrom,
+    endDateTo: plannedResources.advancedFilters.endDateTo,
+  };
+
+  // Initialize other hooks with filters
   const unplannedResources = useUnplannedResources({
     searchQuery,
     selectedSbu,
     selectedManager,
+    ...advancedFilterProps,
   });
+  
   const weeklyValidationData = useWeeklyValidation({
     searchQuery,
     selectedSbu,
     selectedManager,
+    ...advancedFilterProps,
   });
 
   // Sync filters to planned resources hook
@@ -72,23 +92,34 @@ export const ResourcePlanningTable: React.FC = () => {
     plannedResources.setSelectedManager(selectedManager);
   }, [selectedManager, plannedResources.setSelectedManager]);
 
-  // Override the edit handler to use inline editing instead
   const handleInlineEdit = (item: any) => {
     startEdit(item);
   };
 
   const handleBulkImportSuccess = () => {
-    // Refresh all data after successful import
-    plannedResources.setSearchQuery(''); // This will trigger a refetch
+    plannedResources.setSearchQuery('');
     unplannedResources.refetch();
     weeklyValidationData.refetch();
   };
 
+  const clearAdvancedFilters = () => {
+    plannedResources.setAdvancedFilters({
+      billTypeFilter: null,
+      projectSearch: '',
+      minEngagementPercentage: null,
+      maxEngagementPercentage: null,
+      minBillingPercentage: null,
+      maxBillingPercentage: null,
+      startDateFrom: '',
+      startDateTo: '',
+      endDateFrom: '',
+      endDateTo: '',
+    });
+  };
+
   return (
     <div className="flex gap-6 h-full">
-      {/* Main content area */}
       <div className="flex-1 space-y-4">
-        {/* Header with Bulk Import Button */}
         <div className="flex justify-between items-center">
           <h2 className="text-xl font-semibold">Resource Planning</h2>
           <Button
@@ -108,8 +139,14 @@ export const ResourcePlanningTable: React.FC = () => {
           setSelectedSbu={setSelectedSbu}
           selectedManager={selectedManager}
           setSelectedManager={setSelectedManager}
-          clearFilters={clearFilters}
-        />
+          clearFilters={clearBasicFilters}
+        >
+          <AdvancedResourceFilters
+            filters={plannedResources.advancedFilters}
+            onFiltersChange={plannedResources.setAdvancedFilters}
+            onClearFilters={clearAdvancedFilters}
+          />
+        </ResourcePlanningFilters>
 
         <ResourcePlanningTabs
           showUnplanned={showUnplanned}
@@ -135,7 +172,6 @@ export const ResourcePlanningTable: React.FC = () => {
         />
       </div>
 
-      {/* Right sidebar for create assignment form */}
       <div className="w-80 flex-shrink-0">
         <div className="sticky top-4">
           <ResourcePlanningForm
@@ -147,7 +183,6 @@ export const ResourcePlanningTable: React.FC = () => {
         </div>
       </div>
 
-      {/* Bulk Import Dialog */}
       <BulkResourcePlanningImport
         isOpen={showBulkImport}
         onClose={() => setShowBulkImport(false)}

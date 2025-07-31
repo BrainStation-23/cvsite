@@ -1262,6 +1262,30 @@ export type Database = {
         Args: { target_user_id?: string }
         Returns: Json
       }
+      get_comprehensive_resource_planning_data: {
+        Args: {
+          search_query?: string
+          page_number?: number
+          items_per_page?: number
+          sort_by?: string
+          sort_order?: string
+          sbu_filter?: string
+          manager_filter?: string
+          bill_type_filter?: string
+          project_search?: string
+          min_engagement_percentage?: number
+          max_engagement_percentage?: number
+          min_billing_percentage?: number
+          max_billing_percentage?: number
+          start_date_from?: string
+          start_date_to?: string
+          end_date_from?: string
+          end_date_to?: string
+          include_unplanned?: boolean
+          include_weekly_validation?: boolean
+        }
+        Returns: Json
+      }
       get_dashboard_analytics: {
         Args: Record<PropertyKey, never>
         Returns: Json
@@ -1302,41 +1326,6 @@ export type Database = {
         Args: { profile_uuid: string }
         Returns: Json
       }
-      get_resource_distribution_by_bill_types: {
-        Args: Record<PropertyKey, never>
-        Returns: {
-          bill_type: string
-          count: number
-        }[]
-      }
-      get_resource_distribution_by_expertise_types: {
-        Args: Record<PropertyKey, never>
-        Returns: {
-          expertise_type: string
-          count: number
-        }[]
-      }
-      get_resource_distribution_by_project_types: {
-        Args: Record<PropertyKey, never>
-        Returns: {
-          project_type: string
-          count: number
-        }[]
-      }
-      get_resource_distribution_by_resource_types: {
-        Args: Record<PropertyKey, never>
-        Returns: {
-          resource_type: string
-          count: number
-        }[]
-      }
-      get_resource_distribution_by_sbu: {
-        Args: Record<PropertyKey, never>
-        Returns: {
-          sbu_name: string
-          count: number
-        }[]
-      }
       get_resource_planning_data: {
         Args: {
           search_query?: string
@@ -1348,6 +1337,14 @@ export type Database = {
           manager_filter?: string
         }
         Returns: Json
+      }
+      get_sbu_summary_stats: {
+        Args: { sbu_filter?: string }
+        Returns: {
+          total_resources: number
+          active_projects: number
+          avg_engagement_percentage: number
+        }[]
       }
       get_section_fields: {
         Args: { section_type_param: string }

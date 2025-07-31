@@ -7,30 +7,91 @@ interface WeeklyValidationParams {
   searchQuery: string;
   selectedSbu: string | null;
   selectedManager: string | null;
+  billTypeFilter?: string | null;
+  projectSearch?: string;
+  minEngagementPercentage?: number | null;
+  maxEngagementPercentage?: number | null;
+  minBillingPercentage?: number | null;
+  maxBillingPercentage?: number | null;
+  startDateFrom?: string;
+  startDateTo?: string;
+  endDateFrom?: string;
+  endDateTo?: string;
 }
 
 export function useWeeklyValidation(params: WeeklyValidationParams) {
-  const { searchQuery, selectedSbu, selectedManager } = params;
+  const { 
+    searchQuery, 
+    selectedSbu, 
+    selectedManager,
+    billTypeFilter,
+    projectSearch,
+    minEngagementPercentage,
+    maxEngagementPercentage,
+    minBillingPercentage,
+    maxBillingPercentage,
+    startDateFrom,
+    startDateTo,
+    endDateFrom,
+    endDateTo
+  } = params;
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
   const { data, isLoading, error, refetch } = useQuery({
-    queryKey: ['weekly-validation', searchQuery, selectedSbu, selectedManager],
+    queryKey: [
+      'weekly-validation', 
+      searchQuery, 
+      selectedSbu, 
+      selectedManager,
+      billTypeFilter,
+      projectSearch,
+      minEngagementPercentage,
+      maxEngagementPercentage,
+      minBillingPercentage,
+      maxBillingPercentage,
+      startDateFrom,
+      startDateTo,
+      endDateFrom,
+      endDateTo
+    ],
     queryFn: async () => {
       console.log('Weekly Validation Query:', {
         searchQuery,
         selectedSbu,
-        selectedManager
+        selectedManager,
+        billTypeFilter,
+        projectSearch,
+        minEngagementPercentage,
+        maxEngagementPercentage,
+        minBillingPercentage,
+        maxBillingPercentage,
+        startDateFrom,
+        startDateTo,
+        endDateFrom,
+        endDateTo
       });
 
-      const { data: rpcData, error } = await supabase.rpc('get_weekly_validation_data', {
+      const { data: rpcData, error } = await supabase.rpc('get_comprehensive_resource_planning_data', {
         search_query: searchQuery || null,
         page_number: 1,
-        items_per_page: 100, // Get all records for now
+        items_per_page: 100,
         sort_by: 'created_at',
         sort_order: 'desc',
         sbu_filter: selectedSbu,
-        manager_filter: selectedManager
+        manager_filter: selectedManager,
+        bill_type_filter: billTypeFilter,
+        project_search: projectSearch || null,
+        min_engagement_percentage: minEngagementPercentage,
+        max_engagement_percentage: maxEngagementPercentage,
+        min_billing_percentage: minBillingPercentage,
+        max_billing_percentage: maxBillingPercentage,
+        start_date_from: startDateFrom || null,
+        start_date_to: startDateTo || null,
+        end_date_from: endDateFrom || null,
+        end_date_to: endDateTo || null,
+        include_unplanned: false,
+        include_weekly_validation: true
       });
 
       if (error) {
@@ -41,10 +102,32 @@ export function useWeeklyValidation(params: WeeklyValidationParams) {
       console.log('Weekly validation RPC response:', rpcData);
       
       if (rpcData && typeof rpcData === 'object' && 'resource_planning' in rpcData) {
-        return (rpcData as any).resource_planning || [];
+        // Filter only records that need weekly validation (weekly_validation = false)
+        const allRecords = (rpcData as any).resource_planning || [];
+        const needsValidation = allRecords.filter((record: any) => !record.weekly_validation);
+        
+        return {
+          resource_planning: needsValidation,
+          pagination: (rpcData as any).pagination || {
+            total_count: 0,
+            filtered_count: needsValidation.length,
+            page: 1,
+            per_page: 100,
+            page_count: Math.ceil(needsValidation.length / 100)
+          }
+        };
       }
       
-      return [];
+      return {
+        resource_planning: [],
+        pagination: {
+          total_count: 0,
+          filtered_count: 0,
+          page: 1,
+          per_page: 100,
+          page_count: 0
+        }
+      };
     }
   });
 
@@ -114,7 +197,8 @@ export function useWeeklyValidation(params: WeeklyValidationParams) {
   });
 
   return {
-    data: data || [],
+    data: data?.resource_planning || [],
+    pagination: data?.pagination,
     isLoading,
     error,
     refetch,
@@ -122,5 +206,12 @@ export function useWeeklyValidation(params: WeeklyValidationParams) {
     isValidating: validateMutation.isPending,
     updateResourcePlanning: updateMutation.mutate,
     isUpdating: updateMutation.isPending,
+    currentPage: 1,
+    setCurrentPage: () => {},
+    sortBy: 'created_at',
+    setSortBy: () => {},
+    sortOrder: 'desc' as const,
+    setSortOrder: () => {},
+    validateWeekly: validateMutation.mutate,
   };
 }
