@@ -105,6 +105,13 @@ export const ResourcePlanningTabs: React.FC<ResourcePlanningTabsProps> = ({
           selectedSbu={selectedSbu}
           selectedManager={selectedManager}
           weeklyValidationData={weeklyValidationData}
+          editingItemId={editingItemId}
+          editData={editData}
+          onStartEdit={onStartEdit}
+          onCancelEdit={onCancelEdit}
+          onSaveEdit={onSaveEdit}
+          onEditDataChange={onEditDataChange}
+          editLoading={editLoading}
         />
       </TabsContent>
     </Tabs>
