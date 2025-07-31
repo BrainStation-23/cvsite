@@ -35,7 +35,7 @@ export function useResourceCalendar(
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [currentView, setCurrentView] = useState<CalendarViewType>('quarter');
   
-  // Get calendar data using the updated hook
+  // Get calendar data using the new dedicated hook
   const { data: resourceData, isLoading, error } = useResourceCalendarData(
     searchQuery,
     selectedSbu,

@@ -57,7 +57,7 @@ const ResourceCalendarView: React.FC<ResourceCalendarViewProps> = ({
         return (
           <CalendarQuarterView
             currentDate={currentMonth}
-            calendarData={calendarData}
+            calendarData={calendarData} // Pass the full calendar data
             selectedDate={selectedDate}
             onDateSelect={setSelectedDate}
           />

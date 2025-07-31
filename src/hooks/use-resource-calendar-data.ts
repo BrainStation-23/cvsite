@@ -95,7 +95,6 @@ export function useResourceCalendarData(
       
       console.log('Raw RPC response:', rpcData);
 
-      // Handle the response structure from get_comprehensive_resource_planning_data
       if (rpcData && typeof rpcData === 'object' && 'resource_planning' in rpcData) {
         const allResources = (rpcData as any).resource_planning || [];
         
