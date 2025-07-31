@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -58,7 +58,7 @@ export function useResourceCalendarData() {
   const { data: calendarData, isLoading, error, refetch } = useQuery({
     queryKey: [
       'resource-calendar',
-      currentDate,
+      currentDate.toISOString(),
       viewType,
       searchQuery,
       selectedSbu,
@@ -117,7 +117,7 @@ export function useResourceCalendarData() {
     }
   });
 
-  const getCalendarPeriods = () => {
+  const getCalendarPeriods = useCallback(() => {
     if (viewType === 'weekly') {
       const start = startOfWeek(currentDate);
       const end = endOfWeek(currentDate);
@@ -127,9 +127,9 @@ export function useResourceCalendarData() {
       const end = endOfMonth(currentDate);
       return eachWeekOfInterval({ start, end });
     }
-  };
+  }, [currentDate, viewType]);
 
-  const getResourcesForPeriod = (periodDate: Date): CalendarResourceData[] => {
+  const getResourcesForPeriod = useCallback((periodDate: Date): CalendarResourceData[] => {
     if (!calendarData) return [];
 
     return calendarData.filter((resource: CalendarResourceData) => {
@@ -152,25 +152,27 @@ export function useResourceCalendarData() {
         return startDate <= weekEnd && endDate >= weekStart;
       }
     });
-  };
+  }, [calendarData, viewType]);
 
-  const navigatePeriod = (direction: 'prev' | 'next') => {
-    if (viewType === 'weekly') {
-      const newDate = new Date(currentDate);
-      newDate.setDate(newDate.getDate() + (direction === 'next' ? 7 : -7));
-      setCurrentDate(newDate);
-    } else {
-      const newDate = new Date(currentDate);
-      newDate.setMonth(newDate.getMonth() + (direction === 'next' ? 1 : -1));
-      setCurrentDate(newDate);
-    }
-  };
+  const navigatePeriod = useCallback((direction: 'prev' | 'next') => {
+    setCurrentDate(prevDate => {
+      if (viewType === 'weekly') {
+        const newDate = new Date(prevDate);
+        newDate.setDate(newDate.getDate() + (direction === 'next' ? 7 : -7));
+        return newDate;
+      } else {
+        const newDate = new Date(prevDate);
+        newDate.setMonth(newDate.getMonth() + (direction === 'next' ? 1 : -1));
+        return newDate;
+      }
+    });
+  }, [viewType]);
 
-  const goToToday = () => {
+  const goToToday = useCallback(() => {
     setCurrentDate(new Date());
-  };
+  }, []);
 
-  const getFormattedPeriod = () => {
+  const getFormattedPeriod = useMemo(() => {
     if (viewType === 'weekly') {
       const start = startOfWeek(currentDate);
       const end = endOfWeek(currentDate);
@@ -178,7 +180,7 @@ export function useResourceCalendarData() {
     } else {
       return format(currentDate, 'MMMM yyyy');
     }
-  };
+  }, [currentDate, viewType]);
 
   return {
     // Data
@@ -206,6 +208,6 @@ export function useResourceCalendarData() {
     getResourcesForPeriod,
     navigatePeriod,
     goToToday,
-    getFormattedPeriod
+    getFormattedPeriod,
   };
 }

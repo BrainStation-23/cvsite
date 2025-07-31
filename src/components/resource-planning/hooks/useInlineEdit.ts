@@ -1,24 +1,7 @@
 
-import { useState, useCallback } from 'react';
+import { useState } from 'react';
 import { usePlannedResources } from '@/hooks/use-planned-resources';
 import { useToast } from '@/hooks/use-toast';
-
-interface ResourcePlanningData {
-  id: string;
-  profile_id: string;
-  engagement_percentage: number;
-  billing_percentage: number;
-  release_date: string;
-  engagement_start_date: string;
-  bill_type: {
-    id: string;
-    name: string;
-  } | null;
-  project: {
-    id: string;
-    project_name: string;
-  } | null;
-}
 
 interface EditFormData {
   profileId: string;
@@ -33,64 +16,80 @@ interface EditFormData {
 export const useInlineEdit = () => {
   const [editingItemId, setEditingItemId] = useState<string | null>(null);
   const [editData, setEditData] = useState<EditFormData | null>(null);
-  const { updateResourcePlanning, isUpdating } = usePlannedResources();
+  const [isLoading, setIsLoading] = useState(false);
+  const { updateResourcePlanning } = usePlannedResources();
   const { toast } = useToast();
 
-  const startEdit = useCallback((item: ResourcePlanningData) => {
+  const startEdit = (item: any) => {
+    console.log('Starting edit for item:', item);
     setEditingItemId(item.id);
     setEditData({
       profileId: item.profile_id,
-      billTypeId: item.bill_type?.id || null,
-      projectId: item.project?.id || null,
+      billTypeId: item.bill_type_id,
+      projectId: item.project_id,
       engagementPercentage: item.engagement_percentage,
-      billingPercentage: item.billing_percentage || 0,
+      billingPercentage: item.billing_percentage,
       releaseDate: item.release_date || '',
       engagementStartDate: item.engagement_start_date || '',
     });
-  }, []);
+  };
 
-  const cancelEdit = useCallback(() => {
+  const cancelEdit = () => {
     setEditingItemId(null);
     setEditData(null);
-  }, []);
+  };
 
-  const saveEdit = useCallback(async () => {
+  const updateEditData = (updates: Partial<EditFormData>) => {
+    if (editData) {
+      setEditData({ ...editData, ...updates });
+    }
+  };
+
+  const saveEdit = async () => {
     if (!editingItemId || !editData) return;
 
-    const updateData = {
-      bill_type_id: editData.billTypeId || undefined,
-      project_id: editData.projectId || undefined,
-      engagement_percentage: editData.engagementPercentage,
-      billing_percentage: editData.billingPercentage,
-      release_date: editData.releaseDate || undefined,
-      engagement_start_date: editData.engagementStartDate || undefined,
-    };
-
-    updateResourcePlanning(
-      { id: editingItemId, updates: updateData },
-      {
-        onSuccess: () => {
-          toast({
-            title: "Success",
-            description: "Resource assignment updated successfully",
-          });
-          setEditingItemId(null);
-          setEditData(null);
-        },
-        onError: () => {
-          toast({
-            title: "Error",
-            description: "Failed to update resource assignment",
-            variant: "destructive",
-          });
-        },
-      }
-    );
-  }, [editingItemId, editData, updateResourcePlanning, toast]);
-
-  const updateEditData = useCallback((updates: Partial<EditFormData>) => {
-    setEditData(prev => prev ? { ...prev, ...updates } : null);
-  }, []);
+    setIsLoading(true);
+    try {
+      await new Promise<void>((resolve, reject) => {
+        updateResourcePlanning(
+          {
+            id: editingItemId,
+            updates: {
+              bill_type_id: editData.billTypeId,
+              project_id: editData.projectId,
+              engagement_percentage: editData.engagementPercentage,
+              billing_percentage: editData.billingPercentage,
+              release_date: editData.releaseDate,
+              engagement_start_date: editData.engagementStartDate,
+            },
+          },
+          {
+            onSuccess: () => {
+              toast({
+                title: 'Success',
+                description: 'Resource assignment updated successfully',
+              });
+              setEditingItemId(null);
+              setEditData(null);
+              resolve();
+            },
+            onError: (error) => {
+              toast({
+                title: 'Error',
+                description: 'Failed to update resource assignment',
+                variant: 'destructive',
+              });
+              reject(error);
+            },
+          }
+        );
+      });
+    } catch (error) {
+      console.error('Error updating resource:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return {
     editingItemId,
@@ -99,6 +98,6 @@ export const useInlineEdit = () => {
     cancelEdit,
     saveEdit,
     updateEditData,
-    isLoading: isUpdating,
+    isLoading,
   };
 };
