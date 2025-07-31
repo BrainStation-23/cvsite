@@ -1,7 +1,7 @@
 
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo } from 'react';
 import { useResourceCalendarData } from './use-resource-calendar-data';
-import { startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, parseISO } from 'date-fns';
+import { startOfMonth, endOfMonth, eachDayOfInterval, parseISO } from 'date-fns';
 
 export type CalendarViewType = 'month' | 'quarter';
 
@@ -35,37 +35,12 @@ export function useResourceCalendar(
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [currentView, setCurrentView] = useState<CalendarViewType>('quarter');
   
-  // Get calendar data using the dedicated hook
+  // Get calendar data using the dedicated hook - pass filters directly
   const {
     calendarData: resourceData,
     isLoading,
     error,
-    searchQuery: currentSearchQuery,
-    setSearchQuery,
-    selectedSbu: currentSelectedSbu,
-    setSelectedSbu,
-    selectedManager: currentSelectedManager,
-    setSelectedManager
   } = useResourceCalendarData();
-
-  // Sync filters with the data hook using useEffect to avoid infinite re-renders
-  useEffect(() => {
-    if (currentSearchQuery !== searchQuery) {
-      setSearchQuery(searchQuery);
-    }
-  }, [searchQuery, currentSearchQuery, setSearchQuery]);
-
-  useEffect(() => {
-    if (currentSelectedSbu !== selectedSbu) {
-      setSelectedSbu(selectedSbu);
-    }
-  }, [selectedSbu, currentSelectedSbu, setSelectedSbu]);
-
-  useEffect(() => {
-    if (currentSelectedManager !== selectedManager) {
-      setSelectedManager(selectedManager);
-    }
-  }, [selectedManager, currentSelectedManager, setSelectedManager]);
 
   // Convert resource planning data to calendar format
   const calendarData = useMemo(() => {

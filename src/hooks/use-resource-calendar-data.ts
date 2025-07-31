@@ -1,5 +1,5 @@
 
-import { useState, useCallback, useMemo } from 'react';
+import { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -49,36 +49,21 @@ interface CalendarResourceData {
 
 export function useResourceCalendarData() {
   const { toast } = useToast();
-  const [currentDate, setCurrentDate] = useState(new Date());
-  const [viewType, setViewType] = useState<CalendarViewType>('monthly');
-  const [searchQuery, setSearchQuery] = useState('');
-  const [selectedSbu, setSelectedSbu] = useState<string | null>(null);
-  const [selectedManager, setSelectedManager] = useState<string | null>(null);
 
   const { data: calendarData, isLoading, error, refetch } = useQuery({
-    queryKey: [
-      'resource-calendar',
-      currentDate.toISOString(),
-      viewType,
-      searchQuery,
-      selectedSbu,
-      selectedManager
-    ],
+    queryKey: ['resource-calendar'],
     queryFn: async () => {
-      console.log('Resource Calendar Query:', {
-        currentDate,
-        viewType
-      });
+      console.log('Resource Calendar Query - fetching data');
 
       // Use the planned resources function since calendar typically shows planned resources
       const { data: rpcData, error } = await supabase.rpc('get_planned_resources', {
-        search_query: searchQuery || null,
+        search_query: null,
         page_number: 1,
         items_per_page: 1000, // High limit to get all records for calendar view
         sort_by: 'engagement_start_date',
         sort_order: 'asc',
-        sbu_filter: selectedSbu,
-        manager_filter: selectedManager,
+        sbu_filter: null,
+        manager_filter: null,
         bill_type_filter: null,
         project_search: null,
         min_engagement_percentage: null,
@@ -117,97 +102,10 @@ export function useResourceCalendarData() {
     }
   });
 
-  const getCalendarPeriods = useCallback(() => {
-    if (viewType === 'weekly') {
-      const start = startOfWeek(currentDate);
-      const end = endOfWeek(currentDate);
-      return eachDayOfInterval({ start, end });
-    } else {
-      const start = startOfMonth(currentDate);
-      const end = endOfMonth(currentDate);
-      return eachWeekOfInterval({ start, end });
-    }
-  }, [currentDate, viewType]);
-
-  const getResourcesForPeriod = useCallback((periodDate: Date): CalendarResourceData[] => {
-    if (!calendarData) return [];
-
-    return calendarData.filter((resource: CalendarResourceData) => {
-      const startDate = new Date(resource.engagement_start_date);
-      const endDate = resource.release_date ? new Date(resource.release_date) : new Date();
-
-      if (viewType === 'weekly') {
-        // For daily view in weekly calendar
-        const dayStart = new Date(periodDate);
-        dayStart.setHours(0, 0, 0, 0);
-        const dayEnd = new Date(periodDate);
-        dayEnd.setHours(23, 59, 59, 999);
-        
-        return startDate <= dayEnd && endDate >= dayStart;
-      } else {
-        // For weekly view in monthly calendar
-        const weekStart = startOfWeek(periodDate);
-        const weekEnd = endOfWeek(periodDate);
-        
-        return startDate <= weekEnd && endDate >= weekStart;
-      }
-    });
-  }, [calendarData, viewType]);
-
-  const navigatePeriod = useCallback((direction: 'prev' | 'next') => {
-    setCurrentDate(prevDate => {
-      if (viewType === 'weekly') {
-        const newDate = new Date(prevDate);
-        newDate.setDate(newDate.getDate() + (direction === 'next' ? 7 : -7));
-        return newDate;
-      } else {
-        const newDate = new Date(prevDate);
-        newDate.setMonth(newDate.getMonth() + (direction === 'next' ? 1 : -1));
-        return newDate;
-      }
-    });
-  }, [viewType]);
-
-  const goToToday = useCallback(() => {
-    setCurrentDate(new Date());
-  }, []);
-
-  const getFormattedPeriod = useMemo(() => {
-    if (viewType === 'weekly') {
-      const start = startOfWeek(currentDate);
-      const end = endOfWeek(currentDate);
-      return `${format(start, 'MMM d')} - ${format(end, 'MMM d, yyyy')}`;
-    } else {
-      return format(currentDate, 'MMMM yyyy');
-    }
-  }, [currentDate, viewType]);
-
   return {
-    // Data
     calendarData: calendarData || [],
     isLoading,
     error,
     refetch,
-    
-    // View state
-    currentDate,
-    setCurrentDate,
-    viewType,
-    setViewType,
-    
-    // Filters
-    searchQuery,
-    setSearchQuery,
-    selectedSbu,
-    setSelectedSbu,
-    selectedManager,
-    setSelectedManager,
-    
-    // Utility functions
-    getCalendarPeriods,
-    getResourcesForPeriod,
-    navigatePeriod,
-    goToToday,
-    getFormattedPeriod,
   };
 }
