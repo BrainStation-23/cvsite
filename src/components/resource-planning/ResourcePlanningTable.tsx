@@ -65,6 +65,7 @@ export const ResourcePlanningTable: React.FC = () => {
           selectedManager={resourcePlanningState.selectedManager}
           setSelectedManager={resourcePlanningState.setSelectedManager}
           clearFilters={resourcePlanningState.clearBasicFilters}
+          activeTab={resourcePlanningState.activeTab}
         >
           <AdvancedResourceFilters
             filters={resourcePlanningState.advancedFilters}

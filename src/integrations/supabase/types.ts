@@ -1383,6 +1383,18 @@ export type Database = {
           count: number
         }[]
       }
+      get_unplanned_resources: {
+        Args: {
+          search_query?: string
+          page_number?: number
+          items_per_page?: number
+          sort_by?: string
+          sort_order?: string
+          sbu_filter?: string
+          manager_filter?: string
+        }
+        Returns: Json
+      }
       get_weekly_validation_cron_config: {
         Args: Record<PropertyKey, never>
         Returns: Json

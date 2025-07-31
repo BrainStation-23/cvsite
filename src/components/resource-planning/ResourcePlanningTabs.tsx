@@ -82,7 +82,6 @@ export const ResourcePlanningTabs: React.FC<ResourcePlanningTabsProps> = ({
           selectedSbu={selectedSbu}
           selectedManager={selectedManager}
           onCreatePlan={onCreatePlan}
-          resourcePlanningState={resourcePlanningState}
         />
       </TabsContent>
 

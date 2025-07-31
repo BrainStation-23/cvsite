@@ -1,5 +1,6 @@
 
 import React from 'react';
+import { useUnplannedResources } from '@/hooks/use-unplanned-resources';
 import { UnplannedResourcesTable } from './UnplannedResourcesTable';
 
 interface UnplannedResourcesTabProps {
@@ -7,8 +8,6 @@ interface UnplannedResourcesTabProps {
   selectedSbu: string | null;
   selectedManager: string | null;
   onCreatePlan: (profileId: string) => void;
-  // Centralized resource planning state
-  resourcePlanningState: any;
 }
 
 export const UnplannedResourcesTab: React.FC<UnplannedResourcesTabProps> = ({
@@ -16,17 +15,20 @@ export const UnplannedResourcesTab: React.FC<UnplannedResourcesTabProps> = ({
   selectedSbu,
   selectedManager,
   onCreatePlan,
-  resourcePlanningState,
 }) => {
   const {
-    data,
-    pagination,
-    isLoading,
+    unplannedResources,
     currentPage,
     setCurrentPage,
-  } = resourcePlanningState;
+    isLoading,
+    error,
+  } = useUnplannedResources({
+    searchQuery,
+    selectedSbu,
+    selectedManager,
+  });
 
-  console.log('UnplannedResourcesTab data:', data);
+  console.log('UnplannedResourcesTab data:', unplannedResources);
   console.log('UnplannedResourcesTab isLoading:', isLoading);
 
   if (isLoading) {
@@ -37,10 +39,18 @@ export const UnplannedResourcesTab: React.FC<UnplannedResourcesTabProps> = ({
     );
   }
 
+  if (error) {
+    return (
+      <div className="flex items-center justify-center h-32">
+        <div className="text-destructive">Error loading unplanned resources: {error.message}</div>
+      </div>
+    );
+  }
+
   return (
     <UnplannedResourcesTable 
-      resources={data}
-      pagination={pagination}
+      resources={unplannedResources.unplanned_resources}
+      pagination={unplannedResources.pagination}
       currentPage={currentPage}
       setCurrentPage={setCurrentPage}
       isLoading={isLoading}
