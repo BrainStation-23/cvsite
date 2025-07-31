@@ -6,8 +6,6 @@ import { UnplannedResourcesTab } from './UnplannedResourcesTab';
 import { WeeklyValidationTab } from './WeeklyValidationTab';
 
 interface ResourcePlanningTabsProps {
-  showUnplanned: boolean;
-  setShowUnplanned: (show: boolean) => void;
   activeTab: string;
   setActiveTab: (tab: string) => void;
   searchQuery: string;
@@ -16,10 +14,8 @@ interface ResourcePlanningTabsProps {
   onCreateNewAssignment: () => void;
   onEditAssignment: (item: any) => void;
   onCreatePlan: (profileId: string) => void;
-  // Centralized data props
-  plannedResources: any;
-  unplannedResources: any;
-  weeklyValidationData: any;
+  // Centralized resource planning state
+  resourcePlanningState: any;
   // Inline edit props
   editingItemId: string | null;
   editData: any;
@@ -31,8 +27,6 @@ interface ResourcePlanningTabsProps {
 }
 
 export const ResourcePlanningTabs: React.FC<ResourcePlanningTabsProps> = ({
-  showUnplanned,
-  setShowUnplanned,
   activeTab,
   setActiveTab,
   searchQuery,
@@ -41,9 +35,7 @@ export const ResourcePlanningTabs: React.FC<ResourcePlanningTabsProps> = ({
   onCreateNewAssignment,
   onEditAssignment,
   onCreatePlan,
-  plannedResources,
-  unplannedResources,
-  weeklyValidationData,
+  resourcePlanningState,
   editingItemId,
   editData,
   onStartEdit,
@@ -52,13 +44,8 @@ export const ResourcePlanningTabs: React.FC<ResourcePlanningTabsProps> = ({
   onEditDataChange,
   editLoading,
 }) => {
-  const handleTabChange = (value: string) => {
-    setActiveTab(value);
-    setShowUnplanned(value === "unplanned");
-  };
-
   return (
-    <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
+    <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
       <TabsList className="grid w-full grid-cols-3">
         <TabsTrigger value="planned">
           Planned Resources
@@ -78,7 +65,7 @@ export const ResourcePlanningTabs: React.FC<ResourcePlanningTabsProps> = ({
           selectedManager={selectedManager}
           onCreateNewAssignment={onCreateNewAssignment}
           onEditAssignment={onEditAssignment}
-          plannedResources={plannedResources}
+          resourcePlanningState={resourcePlanningState}
           editingItemId={editingItemId}
           editData={editData}
           onStartEdit={onStartEdit}
@@ -95,7 +82,7 @@ export const ResourcePlanningTabs: React.FC<ResourcePlanningTabsProps> = ({
           selectedSbu={selectedSbu}
           selectedManager={selectedManager}
           onCreatePlan={onCreatePlan}
-          unplannedResources={unplannedResources}
+          resourcePlanningState={resourcePlanningState}
         />
       </TabsContent>
 
@@ -104,7 +91,14 @@ export const ResourcePlanningTabs: React.FC<ResourcePlanningTabsProps> = ({
           searchQuery={searchQuery}
           selectedSbu={selectedSbu}
           selectedManager={selectedManager}
-          weeklyValidationData={weeklyValidationData}
+          resourcePlanningState={resourcePlanningState}
+          editingItemId={editingItemId}
+          editData={editData}
+          onStartEdit={onStartEdit}
+          onCancelEdit={onCancelEdit}
+          onSaveEdit={onSaveEdit}
+          onEditDataChange={onEditDataChange}
+          editLoading={editLoading}
         />
       </TabsContent>
     </Tabs>

@@ -25,10 +25,13 @@ export const ResourcePlanningPagination: React.FC<ResourcePlanningPaginationProp
     return null;
   }
 
+  const startIndex = (currentPage - 1) * pagination.per_page + 1;
+  const endIndex = Math.min(currentPage * pagination.per_page, pagination.filtered_count);
+
   return (
     <div className="flex items-center justify-between mt-4">
       <div className="text-sm text-muted-foreground">
-        Showing {((currentPage - 1) * 10) + 1} to {Math.min(currentPage * 10, pagination.filtered_count)} of {pagination.filtered_count} entries
+        Showing {startIndex} to {endIndex} of {pagination.filtered_count} entries
       </div>
       <div className="flex items-center space-x-2">
         <Button

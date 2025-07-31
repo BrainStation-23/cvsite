@@ -2,29 +2,20 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Upload } from 'lucide-react';
-import { usePlannedResources } from '@/hooks/use-planned-resources';
-import { useUnplannedResources } from '@/hooks/use-unplanned-resources';
-import { useWeeklyValidation } from '@/hooks/use-weekly-validation';
+import { useCentralizedResourcePlanning } from '@/hooks/use-centralized-resource-planning';
 import { useResourcePlanningState } from './hooks/useResourcePlanningState';
 import { useInlineEdit } from './hooks/useInlineEdit';
 import { ResourcePlanningFilters } from './ResourcePlanningFilters';
+import { AdvancedResourceFilters } from './AdvancedResourceFilters';
 import { ResourcePlanningTabs } from './ResourcePlanningTabs';
 import { ResourcePlanningForm } from './ResourcePlanningForm';
 import { BulkResourcePlanningImport } from './BulkResourcePlanningImport';
 
 export const ResourcePlanningTable: React.FC = () => {
-  const [searchQuery, setSearchQuery] = React.useState('');
-  const [selectedSbu, setSelectedSbu] = React.useState<string | null>(null);
-  const [selectedManager, setSelectedManager] = React.useState<string | null>(null);
-  const [showUnplanned, setShowUnplanned] = React.useState(false);
-  const [activeTab, setActiveTab] = React.useState('planned');
   const [showBulkImport, setShowBulkImport] = React.useState(false);
 
-  const clearFilters = () => {
-    setSearchQuery('');
-    setSelectedSbu(null);
-    setSelectedManager(null);
-  };
+  // Use centralized resource planning hook
+  const resourcePlanningState = useCentralizedResourcePlanning();
 
   const {
     preselectedProfileId,
@@ -46,49 +37,14 @@ export const ResourcePlanningTable: React.FC = () => {
     isLoading: editLoading,
   } = useInlineEdit();
 
-  // Centralized data fetching with current filters
-  const plannedResources = usePlannedResources();
-  const unplannedResources = useUnplannedResources({
-    searchQuery,
-    selectedSbu,
-    selectedManager,
-  });
-  const weeklyValidationData = useWeeklyValidation({
-    searchQuery,
-    selectedSbu,
-    selectedManager,
-  });
-
-  // Sync filters to planned resources hook
-  React.useEffect(() => {
-    plannedResources.setSearchQuery(searchQuery);
-  }, [searchQuery, plannedResources.setSearchQuery]);
-
-  React.useEffect(() => {
-    plannedResources.setSelectedSbu(selectedSbu);
-  }, [selectedSbu, plannedResources.setSelectedSbu]);
-
-  React.useEffect(() => {
-    plannedResources.setSelectedManager(selectedManager);
-  }, [selectedManager, plannedResources.setSelectedManager]);
-
-  // Override the edit handler to use inline editing instead
-  const handleInlineEdit = (item: any) => {
-    startEdit(item);
-  };
-
   const handleBulkImportSuccess = () => {
-    // Refresh all data after successful import
-    plannedResources.setSearchQuery(''); // This will trigger a refetch
-    unplannedResources.refetch();
-    weeklyValidationData.refetch();
+    resourcePlanningState.setSearchQuery('');
+    resourcePlanningState.refetch();
   };
 
   return (
     <div className="flex gap-6 h-full">
-      {/* Main content area */}
       <div className="flex-1 space-y-4">
-        {/* Header with Bulk Import Button */}
         <div className="flex justify-between items-center">
           <h2 className="text-xl font-semibold">Resource Planning</h2>
           <Button
@@ -102,29 +58,31 @@ export const ResourcePlanningTable: React.FC = () => {
         </div>
 
         <ResourcePlanningFilters
-          searchQuery={searchQuery}
-          setSearchQuery={setSearchQuery}
-          selectedSbu={selectedSbu}
-          setSelectedSbu={setSelectedSbu}
-          selectedManager={selectedManager}
-          setSelectedManager={setSelectedManager}
-          clearFilters={clearFilters}
-        />
+          searchQuery={resourcePlanningState.searchQuery}
+          setSearchQuery={resourcePlanningState.setSearchQuery}
+          selectedSbu={resourcePlanningState.selectedSbu}
+          setSelectedSbu={resourcePlanningState.setSelectedSbu}
+          selectedManager={resourcePlanningState.selectedManager}
+          setSelectedManager={resourcePlanningState.setSelectedManager}
+          clearFilters={resourcePlanningState.clearBasicFilters}
+        >
+          <AdvancedResourceFilters
+            filters={resourcePlanningState.advancedFilters}
+            onFiltersChange={resourcePlanningState.setAdvancedFilters}
+            onClearFilters={resourcePlanningState.clearAdvancedFilters}
+          />
+        </ResourcePlanningFilters>
 
         <ResourcePlanningTabs
-          showUnplanned={showUnplanned}
-          setShowUnplanned={setShowUnplanned}
-          activeTab={activeTab}
-          setActiveTab={setActiveTab}
-          searchQuery={searchQuery}
-          selectedSbu={selectedSbu}
-          selectedManager={selectedManager}
+          activeTab={resourcePlanningState.activeTab}
+          setActiveTab={resourcePlanningState.setActiveTab}
+          searchQuery={resourcePlanningState.searchQuery}
+          selectedSbu={resourcePlanningState.selectedSbu}
+          selectedManager={resourcePlanningState.selectedManager}
           onCreateNewAssignment={handleCreateNewAssignment}
-          onEditAssignment={handleInlineEdit}
+          onEditAssignment={startEdit}
           onCreatePlan={handleCreatePlan}
-          plannedResources={plannedResources}
-          unplannedResources={unplannedResources}
-          weeklyValidationData={weeklyValidationData}
+          resourcePlanningState={resourcePlanningState}
           editingItemId={editingItemId}
           editData={editData}
           onStartEdit={startEdit}
@@ -135,7 +93,6 @@ export const ResourcePlanningTable: React.FC = () => {
         />
       </div>
 
-      {/* Right sidebar for create assignment form */}
       <div className="w-80 flex-shrink-0">
         <div className="sticky top-4">
           <ResourcePlanningForm
@@ -147,7 +104,6 @@ export const ResourcePlanningTable: React.FC = () => {
         </div>
       </div>
 
-      {/* Bulk Import Dialog */}
       <BulkResourcePlanningImport
         isOpen={showBulkImport}
         onClose={() => setShowBulkImport(false)}

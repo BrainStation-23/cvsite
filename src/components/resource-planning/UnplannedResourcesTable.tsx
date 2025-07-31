@@ -2,31 +2,36 @@
 import React from 'react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { Plus } from 'lucide-react';
 import { ResourcePlanningPagination } from './ResourcePlanningPagination';
 
-interface UnplannedResource {
+interface Profile {
   id: string;
   employee_id: string;
   first_name: string;
   last_name: string;
   current_designation: string;
-  sbu_name: string;
-  manager_name: string;
 }
 
-interface PaginationData {
-  total_count: number;
-  filtered_count: number;
-  page: number;
-  per_page: number;
-  page_count: number;
+interface UnplannedResource {
+  id: string;
+  profile_id?: string;
+  employee_id: string;
+  first_name: string;
+  last_name: string;
+  current_designation: string;
+  profile?: Profile;
 }
 
 interface UnplannedResourcesTableProps {
   resources: UnplannedResource[];
-  pagination?: PaginationData;
+  pagination?: {
+    total_count: number;
+    filtered_count: number;
+    page: number;
+    per_page: number;
+    page_count: number;
+  };
   currentPage: number;
   setCurrentPage: (page: number) => void;
   isLoading: boolean;
@@ -41,84 +46,66 @@ export const UnplannedResourcesTable: React.FC<UnplannedResourcesTableProps> = (
   isLoading,
   onCreatePlan,
 }) => {
-  // Ensure resources is always an array
-  const safeResources = Array.isArray(resources) ? resources : [];
-
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-32">
-        <div className="text-muted-foreground">Loading unplanned resources...</div>
-      </div>
-    );
-  }
-
-  if (safeResources.length === 0) {
-    return (
-      <div className="flex items-center justify-center h-32 text-muted-foreground">
-        No unplanned resources found with the current filters.
+      <div className="flex justify-center items-center py-12">
+        <div className="text-lg text-muted-foreground">Loading unplanned resources...</div>
       </div>
     );
   }
 
   return (
     <div className="space-y-4">
-      <div className="rounded-md border">
+      <div className="border rounded-lg overflow-hidden">
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Employee</TableHead>
+              <TableHead>Employee ID</TableHead>
+              <TableHead>Name</TableHead>
               <TableHead>Designation</TableHead>
-              <TableHead>SBU</TableHead>
-              <TableHead>Manager</TableHead>
-              <TableHead className="w-[100px]">Actions</TableHead>
+              <TableHead>Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {safeResources.map((resource) => (
-              <TableRow key={resource.id}>
-                <TableCell>
-                  <div className="flex flex-col">
-                    <span className="font-medium">
-                      {resource.first_name} {resource.last_name}
-                    </span>
-                    <span className="text-sm text-muted-foreground">
-                      ID: {resource.employee_id}
-                    </span>
-                  </div>
-                </TableCell>
-                <TableCell>
-                  <Badge variant="outline">
-                    {resource.current_designation}
-                  </Badge>
-                </TableCell>
-                <TableCell>
-                  <Badge variant="secondary">
-                    {resource.sbu_name}
-                  </Badge>
-                </TableCell>
-                <TableCell>
-                  <span className="text-sm">
-                    {resource.manager_name}
-                  </span>
-                </TableCell>
-                <TableCell>
-                  <Button
-                    size="sm"
-                    onClick={() => onCreatePlan(resource.id)}
-                    className="flex items-center gap-1"
-                  >
-                    <Plus className="h-3 w-3" />
-                    Plan
-                  </Button>
+            {resources.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={4} className="text-center py-12 text-muted-foreground">
+                  No unplanned resources found.
                 </TableCell>
               </TableRow>
-            ))}
+            ) : (
+              resources.map((resource) => {
+                // Handle both direct profile data and nested profile data
+                const profileData = resource.profile || resource;
+                const profileId = resource.profile_id || resource.id;
+                
+                return (
+                  <TableRow key={resource.id}>
+                    <TableCell>{resource.employee_id || profileData.employee_id}</TableCell>
+                    <TableCell>
+                      {(resource.first_name || profileData.first_name)} {(resource.last_name || profileData.last_name)}
+                    </TableCell>
+                    <TableCell>{resource.current_designation || profileData.current_designation || 'N/A'}</TableCell>
+                    <TableCell>
+                      <Button
+                        size="sm"
+                        onClick={() => onCreatePlan(profileId)}
+                        className="flex items-center gap-2"
+                      >
+                        <Plus className="h-4 w-4" />
+                        Create Plan
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                );
+              })
+            )}
           </TableBody>
         </Table>
       </div>
 
       {pagination && (
-        <ResourcePlanningPagination 
+        <ResourcePlanningPagination
           pagination={pagination}
           currentPage={currentPage}
           setCurrentPage={setCurrentPage}

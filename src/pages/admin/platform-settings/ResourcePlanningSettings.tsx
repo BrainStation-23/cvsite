@@ -10,6 +10,7 @@ import ResourceTypeSettings from '@/components/admin/ResourceTypeSettings';
 import BillTypeSettings from '@/components/admin/BillTypeSettings';
 import ProjectTypeSettings from '@/components/admin/ProjectTypeSettings';
 import ExpertiseTypeSettings from '@/components/admin/ExpertiseTypeSettings';
+import WeeklyValidationScheduling from '@/components/admin/WeeklyValidationScheduling';
 
 const ResourcePlanningSettings: React.FC = () => {
   return (
@@ -28,7 +29,7 @@ const ResourcePlanningSettings: React.FC = () => {
               Resource Planning
             </h1>
             <p className="text-gray-600 dark:text-gray-400">
-              Manage resource types, bill types, project types, and expertise types for resource planning and project management.
+              Manage resource types, bill types, project types, expertise types, and scheduling for resource planning and project management.
             </p>
           </div>
         </div>
@@ -60,6 +61,12 @@ const ResourcePlanningSettings: React.FC = () => {
                 className="h-12 rounded-none border-b-2 border-transparent data-[state=active]:border-cvsite-teal data-[state=active]:bg-transparent data-[state=active]:shadow-none px-6 font-medium"
               >
                 Expertise Types
+              </TabsTrigger>
+              <TabsTrigger 
+                value="weekly-validation-scheduling" 
+                className="h-12 rounded-none border-b-2 border-transparent data-[state=active]:border-cvsite-teal data-[state=active]:bg-transparent data-[state=active]:shadow-none px-6 font-medium"
+              >
+                Weekly Validation Scheduling
               </TabsTrigger>
             </TabsList>
           </div>
@@ -94,6 +101,14 @@ const ResourcePlanningSettings: React.FC = () => {
               <ScrollArea className="h-full">
                 <div className="p-6">
                   <ExpertiseTypeSettings />
+                </div>
+              </ScrollArea>
+            </TabsContent>
+            
+            <TabsContent value="weekly-validation-scheduling" className="mt-0 h-full">
+              <ScrollArea className="h-full">
+                <div className="p-6">
+                  <WeeklyValidationScheduling />
                 </div>
               </ScrollArea>
             </TabsContent>

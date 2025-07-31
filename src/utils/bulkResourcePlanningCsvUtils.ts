@@ -1,4 +1,3 @@
-
 import Papa from 'papaparse';
 
 export interface BulkResourcePlanningCSVRow {
@@ -23,6 +22,47 @@ export interface BulkResourcePlanningValidationError {
   message: string;
 }
 
+// Utility function to sanitize percentage values
+const sanitizePercentage = (value: any): number | null => {
+  if (!value) return null;
+  
+  let stringValue = String(value).trim();
+  
+  // Remove % symbol if present
+  stringValue = stringValue.replace('%', '');
+  
+  const numValue = parseFloat(stringValue);
+  if (isNaN(numValue)) return null;
+  
+  // If value is between 0 and 1 (like 0.25), convert to percentage
+  if (numValue > 0 && numValue <= 1) {
+    return numValue * 100;
+  }
+  
+  // If value is already a percentage (like 25), keep as is
+  return numValue;
+};
+
+// Utility function to sanitize text fields
+const sanitizeText = (value: any): string => {
+  if (!value) return '';
+  return String(value).trim().replace(/\s+/g, ' '); // Replace multiple spaces with single space
+};
+
+// Utility function to sanitize date fields
+const sanitizeDate = (value: any): string => {
+  if (!value) return '';
+  const trimmed = String(value).trim();
+  
+  // Try to parse and reformat the date to ensure consistency
+  const date = new Date(trimmed);
+  if (!isNaN(date.getTime())) {
+    return date.toISOString().split('T')[0]; // Return YYYY-MM-DD format
+  }
+  
+  return trimmed; // Return original if can't parse
+};
+
 export const downloadBulkResourcePlanningTemplate = () => {
   const templateData = [
     {
@@ -44,11 +84,11 @@ export const downloadBulkResourcePlanningTemplate = () => {
       release_date: '2024-06-30'
     },
     {
-      employee_id: 'EMP003',
+      employee_id: 'EMP001',
       bill_type: 'Billable',
       project_name: 'Project Gamma',
-      engagement_percentage: 75,
-      billing_percentage: 75,
+      engagement_percentage: '75%',
+      billing_percentage: '0.75',
       start_date: '2024-03-01',
       release_date: '2024-09-30'
     }
@@ -72,14 +112,16 @@ export const downloadBulkResourcePlanningTemplate = () => {
 export const validateBulkResourcePlanningCSVData = (data: any[]): BulkResourcePlanningValidationResult => {
   const valid: BulkResourcePlanningCSVRow[] = [];
   const errors: BulkResourcePlanningValidationError[] = [];
-  const seenEmployeeIds = new Set();
+  const seenEmployeeProjectCombinations = new Set<string>();
 
   data.forEach((row: any, index: number) => {
     const rowNumber = index + 2; // +2 because index starts at 0 and CSV has header row
     let hasErrors = false;
+    const sanitizedRow: any = {};
 
-    // Validate employee_id
-    if (!row.employee_id || typeof row.employee_id !== 'string' || row.employee_id.trim() === '') {
+    // Sanitize and validate employee_id
+    const sanitizedEmployeeId = sanitizeText(row.employee_id);
+    if (!sanitizedEmployeeId) {
       errors.push({
         row: rowNumber,
         field: 'employee_id',
@@ -88,22 +130,12 @@ export const validateBulkResourcePlanningCSVData = (data: any[]): BulkResourcePl
       });
       hasErrors = true;
     } else {
-      const trimmedEmployeeId = row.employee_id.trim();
-      if (seenEmployeeIds.has(trimmedEmployeeId)) {
-        errors.push({
-          row: rowNumber,
-          field: 'employee_id',
-          value: trimmedEmployeeId,
-          message: 'Duplicate employee ID in CSV'
-        });
-        hasErrors = true;
-      } else {
-        seenEmployeeIds.add(trimmedEmployeeId);
-      }
+      sanitizedRow.employee_id = sanitizedEmployeeId;
     }
 
-    // Validate bill_type
-    if (!row.bill_type || typeof row.bill_type !== 'string' || row.bill_type.trim() === '') {
+    // Sanitize and validate bill_type
+    const sanitizedBillType = sanitizeText(row.bill_type);
+    if (!sanitizedBillType) {
       errors.push({
         row: rowNumber,
         field: 'bill_type',
@@ -111,10 +143,13 @@ export const validateBulkResourcePlanningCSVData = (data: any[]): BulkResourcePl
         message: 'Bill type is required'
       });
       hasErrors = true;
+    } else {
+      sanitizedRow.bill_type = sanitizedBillType;
     }
 
-    // Validate project_name
-    if (!row.project_name || typeof row.project_name !== 'string' || row.project_name.trim() === '') {
+    // Sanitize and validate project_name
+    const sanitizedProjectName = sanitizeText(row.project_name);
+    if (!sanitizedProjectName) {
       errors.push({
         row: rowNumber,
         field: 'project_name',
@@ -122,77 +157,106 @@ export const validateBulkResourcePlanningCSVData = (data: any[]): BulkResourcePl
         message: 'Project name is required'
       });
       hasErrors = true;
+    } else {
+      sanitizedRow.project_name = sanitizedProjectName;
     }
 
-    // Validate engagement_percentage
-    const engagementPercentage = Number(row.engagement_percentage);
-    if (isNaN(engagementPercentage) || engagementPercentage < 0 || engagementPercentage > 100) {
+    // Check for duplicate employee_id + project_name combination
+    if (sanitizedEmployeeId && sanitizedProjectName) {
+      const combination = `${sanitizedEmployeeId.toLowerCase()}|${sanitizedProjectName.toLowerCase()}`;
+      if (seenEmployeeProjectCombinations.has(combination)) {
+        errors.push({
+          row: rowNumber,
+          field: 'employee_id',
+          value: sanitizedEmployeeId,
+          message: 'Duplicate combination of employee ID and project name found in CSV'
+        });
+        hasErrors = true;
+      } else {
+        seenEmployeeProjectCombinations.add(combination);
+      }
+    }
+
+    // Sanitize and validate engagement_percentage
+    const sanitizedEngagementPercentage = sanitizePercentage(row.engagement_percentage);
+    if (sanitizedEngagementPercentage === null || sanitizedEngagementPercentage < 0 || sanitizedEngagementPercentage > 100) {
       errors.push({
         row: rowNumber,
         field: 'engagement_percentage',
         value: row.engagement_percentage || '',
-        message: 'Engagement percentage must be a number between 0 and 100'
+        message: 'Engagement percentage must be a valid number between 0 and 100 (can include % symbol or decimal format like 0.25)'
       });
       hasErrors = true;
+    } else {
+      sanitizedRow.engagement_percentage = sanitizedEngagementPercentage;
     }
 
-    // Validate billing_percentage
-    const billingPercentage = Number(row.billing_percentage);
-    if (isNaN(billingPercentage) || billingPercentage < 0 || billingPercentage > 100) {
+    // Sanitize and validate billing_percentage
+    const sanitizedBillingPercentage = sanitizePercentage(row.billing_percentage);
+    if (sanitizedBillingPercentage === null || sanitizedBillingPercentage < 0 || sanitizedBillingPercentage > 100) {
       errors.push({
         row: rowNumber,
         field: 'billing_percentage',
         value: row.billing_percentage || '',
-        message: 'Billing percentage must be a number between 0 and 100'
+        message: 'Billing percentage must be a valid number between 0 and 100 (can include % symbol or decimal format like 0.25)'
       });
       hasErrors = true;
+    } else {
+      sanitizedRow.billing_percentage = sanitizedBillingPercentage;
     }
 
-    // Validate start_date
-    if (!row.start_date || isNaN(Date.parse(row.start_date))) {
+    // Sanitize and validate start_date
+    const sanitizedStartDate = sanitizeDate(row.start_date);
+    if (!sanitizedStartDate || isNaN(Date.parse(sanitizedStartDate))) {
       errors.push({
         row: rowNumber,
         field: 'start_date',
         value: row.start_date || '',
-        message: 'Start date must be a valid date (YYYY-MM-DD format)'
+        message: 'Start date must be a valid date (YYYY-MM-DD format preferred)'
       });
       hasErrors = true;
+    } else {
+      sanitizedRow.start_date = sanitizedStartDate;
     }
 
-    // Validate release_date
-    if (!row.release_date || isNaN(Date.parse(row.release_date))) {
+    // Sanitize and validate release_date
+    const sanitizedReleaseDate = sanitizeDate(row.release_date);
+    if (!sanitizedReleaseDate || isNaN(Date.parse(sanitizedReleaseDate))) {
       errors.push({
         row: rowNumber,
         field: 'release_date',
         value: row.release_date || '',
-        message: 'Release date must be a valid date (YYYY-MM-DD format)'
+        message: 'Release date must be a valid date (YYYY-MM-DD format preferred)'
       });
       hasErrors = true;
+    } else {
+      sanitizedRow.release_date = sanitizedReleaseDate;
     }
 
     // Validate date order
-    if (row.start_date && row.release_date && !isNaN(Date.parse(row.start_date)) && !isNaN(Date.parse(row.release_date))) {
-      if (new Date(row.start_date) > new Date(row.release_date)) {
+    if (sanitizedStartDate && sanitizedReleaseDate && 
+        !isNaN(Date.parse(sanitizedStartDate)) && !isNaN(Date.parse(sanitizedReleaseDate))) {
+      if (new Date(sanitizedStartDate) > new Date(sanitizedReleaseDate)) {
         errors.push({
           row: rowNumber,
           field: 'start_date',
-          value: row.start_date,
+          value: sanitizedStartDate,
           message: 'Start date must be before release date'
         });
         hasErrors = true;
       }
     }
 
-    // If no errors, add to valid array
+    // If no errors, add to valid array with sanitized data
     if (!hasErrors) {
       valid.push({
-        employee_id: row.employee_id.trim(),
-        bill_type: row.bill_type.trim(),
-        project_name: row.project_name.trim(),
-        engagement_percentage: engagementPercentage,
-        billing_percentage: billingPercentage,
-        start_date: row.start_date.trim(),
-        release_date: row.release_date.trim()
+        employee_id: sanitizedRow.employee_id,
+        bill_type: sanitizedRow.bill_type,
+        project_name: sanitizedRow.project_name,
+        engagement_percentage: sanitizedRow.engagement_percentage,
+        billing_percentage: sanitizedRow.billing_percentage,
+        start_date: sanitizedRow.start_date,
+        release_date: sanitizedRow.release_date
       });
     }
   });

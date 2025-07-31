@@ -11,8 +11,8 @@ interface PlannedResourcesTabProps {
   selectedManager: string | null;
   onCreateNewAssignment: () => void;
   onEditAssignment: (item: any) => void;
-  // Centralized data props
-  plannedResources: any;
+  // Centralized resource planning state
+  resourcePlanningState: any;
   // Inline edit props
   editingItemId: string | null;
   editData: any;
@@ -29,7 +29,7 @@ export const PlannedResourcesTab: React.FC<PlannedResourcesTabProps> = ({
   selectedManager,
   onCreateNewAssignment,
   onEditAssignment,
-  plannedResources,
+  resourcePlanningState,
   editingItemId,
   editData,
   onStartEdit,
@@ -48,7 +48,7 @@ export const PlannedResourcesTab: React.FC<PlannedResourcesTabProps> = ({
     setSortBy,
     sortOrder,
     setSortOrder,
-  } = plannedResources;
+  } = resourcePlanningState;
 
   const handleSort = (column: string) => {
     if (sortBy === column) {

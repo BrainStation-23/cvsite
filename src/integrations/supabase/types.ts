@@ -73,6 +73,36 @@ export type Database = {
         }
         Relationships: []
       }
+      cron_job_configs: {
+        Row: {
+          created_at: string | null
+          function_name: string
+          id: string
+          is_enabled: boolean | null
+          job_name: string
+          schedule: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          function_name: string
+          id?: string
+          is_enabled?: boolean | null
+          job_name: string
+          schedule: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          function_name?: string
+          id?: string
+          is_enabled?: boolean | null
+          job_name?: string
+          schedule?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       cv_exports: {
         Row: {
           export_format: string
@@ -1262,6 +1292,30 @@ export type Database = {
         Args: { target_user_id?: string }
         Returns: Json
       }
+      get_comprehensive_resource_planning_data: {
+        Args: {
+          search_query?: string
+          page_number?: number
+          items_per_page?: number
+          sort_by?: string
+          sort_order?: string
+          sbu_filter?: string
+          manager_filter?: string
+          bill_type_filter?: string
+          project_search?: string
+          min_engagement_percentage?: number
+          max_engagement_percentage?: number
+          min_billing_percentage?: number
+          max_billing_percentage?: number
+          start_date_from?: string
+          start_date_to?: string
+          end_date_from?: string
+          end_date_to?: string
+          include_unplanned?: boolean
+          include_weekly_validation?: boolean
+        }
+        Returns: Json
+      }
       get_dashboard_analytics: {
         Args: Record<PropertyKey, never>
         Returns: Json
@@ -1302,52 +1356,13 @@ export type Database = {
         Args: { profile_uuid: string }
         Returns: Json
       }
-      get_resource_distribution_by_bill_types: {
-        Args: Record<PropertyKey, never>
+      get_sbu_summary_stats: {
+        Args: { sbu_filter?: string }
         Returns: {
-          bill_type: string
-          count: number
+          total_resources: number
+          active_projects: number
+          avg_engagement_percentage: number
         }[]
-      }
-      get_resource_distribution_by_expertise_types: {
-        Args: Record<PropertyKey, never>
-        Returns: {
-          expertise_type: string
-          count: number
-        }[]
-      }
-      get_resource_distribution_by_project_types: {
-        Args: Record<PropertyKey, never>
-        Returns: {
-          project_type: string
-          count: number
-        }[]
-      }
-      get_resource_distribution_by_resource_types: {
-        Args: Record<PropertyKey, never>
-        Returns: {
-          resource_type: string
-          count: number
-        }[]
-      }
-      get_resource_distribution_by_sbu: {
-        Args: Record<PropertyKey, never>
-        Returns: {
-          sbu_name: string
-          count: number
-        }[]
-      }
-      get_resource_planning_data: {
-        Args: {
-          search_query?: string
-          page_number?: number
-          items_per_page?: number
-          sort_by?: string
-          sort_order?: string
-          sbu_filter?: string
-          manager_filter?: string
-        }
-        Returns: Json
       }
       get_section_fields: {
         Args: { section_type_param: string }
@@ -1368,26 +1383,8 @@ export type Database = {
           count: number
         }[]
       }
-      get_unplanned_resources: {
-        Args: {
-          search_query?: string
-          sbu_filter?: string
-          manager_filter?: string
-          page_number?: number
-          items_per_page?: number
-        }
-        Returns: Json
-      }
-      get_weekly_validation_data: {
-        Args: {
-          search_query?: string
-          page_number?: number
-          items_per_page?: number
-          sort_by?: string
-          sort_order?: string
-          sbu_filter?: string
-          manager_filter?: string
-        }
+      get_weekly_validation_cron_config: {
+        Args: Record<PropertyKey, never>
         Returns: Json
       }
       has_any_role: {
@@ -1424,6 +1421,14 @@ export type Database = {
           sort_order?: string
         }
         Returns: Json
+      }
+      manage_weekly_validation_cron: {
+        Args: { p_schedule?: string; p_enabled?: boolean }
+        Returns: Json
+      }
+      reset_weekly_validation: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
       }
       search_certifications: {
         Args: {

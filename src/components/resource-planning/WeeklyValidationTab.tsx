@@ -9,15 +9,30 @@ interface WeeklyValidationTabProps {
   searchQuery: string;
   selectedSbu: string | null;
   selectedManager: string | null;
-  // Centralized data props
-  weeklyValidationData: any;
+  // Centralized resource planning state
+  resourcePlanningState: any;
+  // Inline edit props
+  editingItemId: string | null;
+  editData: any;
+  onStartEdit: (item: any) => void;
+  onCancelEdit: () => void;
+  onSaveEdit: () => void;
+  onEditDataChange: (data: any) => void;
+  editLoading: boolean;
 }
 
 export const WeeklyValidationTab: React.FC<WeeklyValidationTabProps> = ({
   searchQuery,
   selectedSbu,
   selectedManager,
-  weeklyValidationData,
+  resourcePlanningState,
+  editingItemId,
+  editData,
+  onStartEdit,
+  onCancelEdit,
+  onSaveEdit,
+  onEditDataChange,
+  editLoading,
 }) => {
   const {
     data,
@@ -31,7 +46,7 @@ export const WeeklyValidationTab: React.FC<WeeklyValidationTabProps> = ({
     setSortOrder,
     validateWeekly,
     isValidating,
-  } = weeklyValidationData;
+  } = resourcePlanningState;
 
   const handleSort = (column: string) => {
     if (sortBy === column) {
@@ -72,6 +87,13 @@ export const WeeklyValidationTab: React.FC<WeeklyValidationTabProps> = ({
                     item={item} 
                     onValidate={validateWeekly}
                     isValidating={isValidating}
+                    isEditing={editingItemId === item.id}
+                    editData={editData}
+                    onStartEdit={onStartEdit}
+                    onCancelEdit={onCancelEdit}
+                    onSaveEdit={onSaveEdit}
+                    onEditDataChange={onEditDataChange}
+                    editLoading={editLoading}
                   />
                 ))}
               </TableBody>

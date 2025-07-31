@@ -6,7 +6,6 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Upload, Download, Plus } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { supabase } from '@/integrations/supabase/client';
 import { 
   parseBulkResourcePlanningCSV, 
   validateBulkResourcePlanningCSVData, 
@@ -14,6 +13,8 @@ import {
   BulkResourcePlanningValidationResult 
 } from '@/utils/bulkResourcePlanningCsvUtils';
 import { BulkResourcePlanningCSVValidation } from './BulkResourcePlanningCSVValidation';
+import { BulkImportProgress } from './BulkImportProgress';
+import { useBulkResourcePlanningImport } from '@/hooks/use-bulk-resource-planning-import';
 
 interface BulkResourcePlanningImportProps {
   isOpen: boolean;
@@ -29,7 +30,14 @@ export const BulkResourcePlanningImport: React.FC<BulkResourcePlanningImportProp
   const { toast } = useToast();
   const [file, setFile] = useState<File | null>(null);
   const [validationResult, setValidationResult] = useState<BulkResourcePlanningValidationResult | null>(null);
-  const [isProcessing, setIsProcessing] = useState(false);
+  
+  const {
+    processImport,
+    downloadErrorsAsCSV,
+    isProcessing,
+    progress,
+    importErrors
+  } = useBulkResourcePlanningImport();
 
   const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = event.target.files?.[0];
@@ -63,106 +71,25 @@ export const BulkResourcePlanningImport: React.FC<BulkResourcePlanningImportProp
   const handleBulkImport = async () => {
     if (!validationResult?.valid.length) return;
 
-    setIsProcessing(true);
     try {
-      const importData = [];
+      const result = await processImport(validationResult.valid);
       
-      // Process each valid row
-      for (const row of validationResult.valid) {
-        // Find profile by employee_id
-        const { data: profile, error: profileError } = await supabase
-          .from('profiles')
-          .select('id')
-          .eq('employee_id', row.employee_id)
-          .single();
-
-        if (profileError || !profile) {
-          toast({
-            title: 'Employee not found',
-            description: `Employee with ID ${row.employee_id} not found in the system.`,
-            variant: 'destructive'
-          });
-          continue;
+      if (result && result.successful > 0) {
+        onSuccess();
+        
+        // If all records were successful, close the dialog
+        if (result.failed === 0) {
+          setTimeout(() => {
+            handleClose();
+          }, 2000);
         }
-
-        // Find bill type by name
-        const { data: billType, error: billTypeError } = await supabase
-          .from('bill_types')
-          .select('id')
-          .ilike('name', row.bill_type)
-          .single();
-
-        if (billTypeError || !billType) {
-          toast({
-            title: 'Bill type not found',
-            description: `Bill type "${row.bill_type}" not found in the system.`,
-            variant: 'destructive'
-          });
-          continue;
-        }
-
-        // Find project by name
-        const { data: project, error: projectError } = await supabase
-          .from('projects_management')
-          .select('id')
-          .ilike('project_name', row.project_name)
-          .single();
-
-        if (projectError || !project) {
-          toast({
-            title: 'Project not found',
-            description: `Project "${row.project_name}" not found in the system.`,
-            variant: 'destructive'
-          });
-          continue;
-        }
-
-        importData.push({
-          profile_id: profile.id,
-          bill_type_id: billType.id,
-          project_id: project.id,
-          engagement_percentage: row.engagement_percentage,
-          billing_percentage: row.billing_percentage,
-          engagement_start_date: row.start_date,
-          release_date: row.release_date,
-          engagement_complete: false,
-          weekly_validation: false
-        });
       }
-
-      if (importData.length === 0) {
-        toast({
-          title: 'No valid data to import',
-          description: 'All records failed validation or reference checking.',
-          variant: 'destructive'
-        });
-        return;
-      }
-
-      // Insert all valid records
-      const { error: insertError } = await supabase
-        .from('resource_planning')
-        .insert(importData);
-
-      if (insertError) {
-        throw insertError;
-      }
-
-      toast({
-        title: 'Import successful',
-        description: `${importData.length} resource planning records imported successfully.`
-      });
-
-      onSuccess();
-      handleClose();
     } catch (error) {
       toast({
         title: 'Import failed',
-        description: 'Failed to import resource planning data. Please try again.',
+        description: 'Failed to start the import process. Please try again.',
         variant: 'destructive'
       });
-    } finally {
-      setIsProcessing(false);
     }
   };
 
@@ -175,9 +102,17 @@ export const BulkResourcePlanningImport: React.FC<BulkResourcePlanningImportProp
   };
 
   const handleClose = () => {
+    if (isProcessing) {
+      toast({
+        title: 'Import in progress',
+        description: 'Please wait for the import to complete before closing.',
+        variant: 'destructive'
+      });
+      return;
+    }
+
     setFile(null);
     setValidationResult(null);
-    setIsProcessing(false);
     onClose();
   };
 
@@ -189,6 +124,14 @@ export const BulkResourcePlanningImport: React.FC<BulkResourcePlanningImportProp
         </DialogHeader>
 
         <div className="space-y-6">
+          {/* Progress Display */}
+          <BulkImportProgress
+            progress={progress}
+            isProcessing={isProcessing}
+            errorCount={importErrors.length}
+            onDownloadErrors={downloadErrorsAsCSV}
+          />
+
           {/* Download Template */}
           <div className="flex items-center gap-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
             <Download className="h-5 w-5 text-blue-600" />
@@ -198,7 +141,7 @@ export const BulkResourcePlanningImport: React.FC<BulkResourcePlanningImportProp
                 Get the CSV template with the correct format for bulk resource planning import.
               </p>
             </div>
-            <Button variant="outline" onClick={handleDownloadTemplate}>
+            <Button variant="outline" onClick={handleDownloadTemplate} disabled={isProcessing}>
               <Download className="h-4 w-4 mr-2" />
               Download Template
             </Button>
@@ -213,6 +156,7 @@ export const BulkResourcePlanningImport: React.FC<BulkResourcePlanningImportProp
               accept=".csv"
               onChange={handleFileChange}
               className="cursor-pointer"
+              disabled={isProcessing}
             />
             <p className="text-sm text-gray-600">
               Select a CSV file containing resource planning data to import.
@@ -228,11 +172,12 @@ export const BulkResourcePlanningImport: React.FC<BulkResourcePlanningImportProp
           )}
 
           {/* Import Actions */}
-          {validationResult?.valid.length > 0 && (
+          {validationResult?.valid.length > 0 && !progress.isComplete && (
             <div className="p-4 bg-green-50 rounded-lg border border-green-200">
               <h3 className="font-medium text-green-900 mb-2">Ready to Import</h3>
               <p className="text-sm text-green-700 mb-4">
                 This will create {validationResult.valid.length} new resource planning assignments.
+                Progress will be shown above during import.
               </p>
               <Button 
                 onClick={handleBulkImport} 

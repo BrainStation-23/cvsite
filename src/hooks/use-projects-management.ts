@@ -1,33 +1,8 @@
+
 import { useState, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
-import { supabase } from '@/integrations/supabase/client';
-
-interface Project {
-  id: string;
-  project_name: string;
-  client_name: string | null;
-  project_manager: string | null;
-  budget: number | null;
-  is_active: boolean;
-  created_at: string;
-  updated_at: string;
-  project_manager_profile?: {
-    first_name: string | null;
-    last_name: string | null;
-    employee_id: string | null;
-  } | null;
-}
-
-interface ProjectsResponse {
-  projects: Project[];
-  pagination: {
-    total_count: number;
-    filtered_count: number;
-    page: number;
-    per_page: number;
-    page_count: number;
-  };
-}
+import { ProjectsApiService } from '@/services/projects-api';
+import { Project, ProjectsResponse, ProjectFormData, ProjectFilters } from '@/types/projects';
 
 interface UseProjectsManagementReturn {
   projects: Project[];
@@ -68,90 +43,27 @@ export function useProjectsManagement(): UseProjectsManagementReturn {
     try {
       setIsLoading(true);
       
-      // Build the query with joins for project manager profile
-      let query = supabase
-        .from('projects_management')
-        .select(`
-          *,
-          project_manager_profile:profiles!projects_management_project_manager_fkey(
-            first_name,
-            last_name,
-            employee_id
-          )
-        `);
-
-      // Apply active/inactive filter
-      if (!showInactiveProjects) {
-        query = query.eq('is_active', true);
-      }
-
-      // Apply search filter if provided - FIX: Single line OR clause
-      if (searchQuery) {
-        query = query.or(`project_name.ilike.%${searchQuery}%,client_name.ilike.%${searchQuery}%`);
-      }
-
-      // Apply sorting
-      if (sortBy === 'project_manager') {
-        // For project manager sorting, we'll sort by the profile name
-        query = query.order('project_manager_profile(first_name)', { ascending: sortOrder === 'asc' });
-      } else {
-        query = query.order(sortBy, { ascending: sortOrder === 'asc' });
-      }
-
-      // Apply pagination
-      const from = (currentPage - 1) * itemsPerPage;
-      const to = from + itemsPerPage - 1;
-      query = query.range(from, to);
-
-      const { data, error, count } = await query;
-
-      if (error) throw error;
-
-      // Get total count for pagination - separate query for accurate count
-      let countQuery = supabase
-        .from('projects_management')
-        .select('*', { count: 'exact', head: true });
-      
-      if (!showInactiveProjects) {
-        countQuery = countQuery.eq('is_active', true);
-      }
-
-      if (searchQuery) {
-        countQuery = countQuery.or(`project_name.ilike.%${searchQuery}%,client_name.ilike.%${searchQuery}%`);
-      }
-
-      const { count: filteredCount } = await countQuery;
-
-      // Get total count without filters for reference
-      let totalCountQuery = supabase
-        .from('projects_management')
-        .select('*', { count: 'exact', head: true });
-
-      if (!showInactiveProjects) {
-        totalCountQuery = totalCountQuery.eq('is_active', true);
-      }
-
-      const { count: totalCount } = await totalCountQuery;
-
-      const totalRecords = totalCount || 0;
-      const filteredRecords = filteredCount || 0;
-
-      console.log('Pagination debug:', {
-        totalRecords,
-        filteredRecords,
+      const filters: ProjectFilters = {
+        searchQuery,
+        currentPage,
         itemsPerPage,
-        calculatedPageCount: Math.ceil(filteredRecords / itemsPerPage),
+        sortBy,
+        sortOrder,
+        showInactiveProjects
+      };
+
+      const response = await ProjectsApiService.fetchProjects(filters);
+      
+      console.log('Pagination debug:', {
+        totalRecords: response.pagination.total_count,
+        filteredRecords: response.pagination.filtered_count,
+        itemsPerPage,
+        calculatedPageCount: response.pagination.page_count,
         currentPage
       });
 
-      setProjects(data || []);
-      setPagination({
-        total_count: totalRecords,
-        filtered_count: filteredRecords,
-        page: currentPage,
-        per_page: itemsPerPage,
-        page_count: Math.ceil(filteredRecords / itemsPerPage)
-      });
+      setProjects(response.projects);
+      setPagination(response.pagination);
     } catch (error) {
       console.error('Error fetching projects:', error);
       toast({
@@ -166,17 +78,15 @@ export function useProjectsManagement(): UseProjectsManagementReturn {
 
   const createProject = async (project: Omit<Project, 'id' | 'created_at' | 'updated_at'>): Promise<boolean> => {
     try {
-      const { error } = await supabase
-        .from('projects_management')
-        .insert({
-          project_name: project.project_name,
-          client_name: project.client_name,
-          project_manager: project.project_manager,
-          budget: project.budget,
-          is_active: project.is_active
-        });
+      const projectData: ProjectFormData = {
+        project_name: project.project_name,
+        client_name: project.client_name,
+        project_manager: project.project_manager,
+        budget: project.budget,
+        is_active: project.is_active
+      };
 
-      if (error) throw error;
+      await ProjectsApiService.createProject(projectData);
 
       toast({
         title: 'Success',
@@ -198,19 +108,7 @@ export function useProjectsManagement(): UseProjectsManagementReturn {
 
   const updateProject = async (id: string, project: Partial<Omit<Project, 'id' | 'created_at' | 'updated_at'>>): Promise<boolean> => {
     try {
-      const updateData: any = {};
-      if (project.project_name !== undefined) updateData.project_name = project.project_name;
-      if (project.client_name !== undefined) updateData.client_name = project.client_name;
-      if (project.project_manager !== undefined) updateData.project_manager = project.project_manager;
-      if (project.budget !== undefined) updateData.budget = project.budget;
-      if (project.is_active !== undefined) updateData.is_active = project.is_active;
-
-      const { error } = await supabase
-        .from('projects_management')
-        .update(updateData)
-        .eq('id', id);
-
-      if (error) throw error;
+      await ProjectsApiService.updateProject(id, project);
 
       toast({
         title: 'Success',
@@ -232,12 +130,7 @@ export function useProjectsManagement(): UseProjectsManagementReturn {
 
   const toggleProjectStatus = async (id: string, isActive: boolean): Promise<boolean> => {
     try {
-      const { error } = await supabase
-        .from('projects_management')
-        .update({ is_active: isActive })
-        .eq('id', id);
-
-      if (error) throw error;
+      await ProjectsApiService.toggleProjectStatus(id, isActive);
 
       toast({
         title: 'Success',
@@ -259,25 +152,7 @@ export function useProjectsManagement(): UseProjectsManagementReturn {
 
   const deleteProject = async (id: string): Promise<boolean> => {
     try {
-      const { error } = await supabase
-        .from('projects_management')
-        .delete()
-        .eq('id', id);
-
-      if (error) {
-        // Check if it's a foreign key constraint error
-        if (error.code === '23503') {
-          toast({
-            title: 'Cannot Delete Project',
-            description: 'This project cannot be deleted because it has associated resource planning entries. Please remove all resource assignments first.',
-            variant: 'destructive'
-          });
-          return false;
-        }
-        
-        // Handle other types of errors
-        throw error;
-      }
+      await ProjectsApiService.deleteProject(id);
 
       toast({
         title: 'Success',
@@ -288,9 +163,13 @@ export function useProjectsManagement(): UseProjectsManagementReturn {
       return true;
     } catch (error) {
       console.error('Error deleting project:', error);
+      
+      const message = error instanceof Error ? error.message : 'Failed to delete project. Please try again.';
+      const title = message.includes('Cannot delete project') ? 'Cannot Delete Project' : 'Error';
+      
       toast({
-        title: 'Error',
-        description: 'Failed to delete project. Please try again.',
+        title,
+        description: message,
         variant: 'destructive'
       });
       return false;

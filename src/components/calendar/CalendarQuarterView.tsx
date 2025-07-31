@@ -1,9 +1,13 @@
 
-import React from 'react';
+import React, { useState, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { format, startOfQuarter, endOfQuarter, eachMonthOfInterval, startOfMonth, endOfMonth, isWithinInterval } from 'date-fns';
 import { Users } from 'lucide-react';
-import type { CalendarDay } from '@/hooks/use-resource-calendar';
+import type { CalendarResource } from '@/hooks/use-resource-calendar';
+import { QuarterHeader } from './quarter-view/QuarterHeader';
+import { ResourceRow } from './quarter-view/ResourceRow';
+import { PaginationControls } from './quarter-view/PaginationControls';
+import { EmptyResourcesState } from './quarter-view/EmptyResourcesState';
 
 interface Project {
   name: string;
@@ -21,190 +25,128 @@ interface ResourceData {
 
 interface CalendarQuarterViewProps {
   currentDate: Date;
-  calendarDays: CalendarDay[];
+  calendarData: CalendarResource[];
   selectedDate: Date | null;
   onDateSelect: (date: Date) => void;
 }
 
+const RESOURCES_PER_PAGE = 10;
+
 export const CalendarQuarterView: React.FC<CalendarQuarterViewProps> = ({
   currentDate,
-  calendarDays,
+  calendarData,
   selectedDate,
   onDateSelect,
 }) => {
+  const [currentPage, setCurrentPage] = useState(1);
+  
   const quarterStart = startOfQuarter(currentDate);
   const quarterEnd = endOfQuarter(currentDate);
   const months = eachMonthOfInterval({ start: quarterStart, end: quarterEnd });
 
-  // Get unique resources with all their projects
-  const getResourceProjects = (): ResourceData[] => {
+  // Process the calendar data into resources with projects
+  const allResources = useMemo((): ResourceData[] => {
+    console.log('Processing quarter view data:', {
+      totalCalendarData: calendarData.length,
+      quarterStart: quarterStart.toISOString(),
+      quarterEnd: quarterEnd.toISOString()
+    });
+
     const resourceMap = new Map<string, ResourceData>();
     
-    calendarDays.forEach(day => {
-      day.resources.forEach(resource => {
-        const key = resource.profileId;
-        if (!resourceMap.has(key)) {
-          resourceMap.set(key, {
-            profileId: resource.profileId,
-            profileName: resource.profileName,
-            employeeId: resource.employeeId,
-            projects: []
-          });
-        }
-        
-        const resourceData = resourceMap.get(key)!;
-        const projectName = resource.projectName || 'Unassigned';
-        
-        // Check if this project already exists for this resource
-        const existingProject = resourceData.projects.find(p => p.name === projectName);
-        if (!existingProject) {
-          resourceData.projects.push({
-            name: projectName,
-            startDate: resource.engagementStartDate || '',
-            endDate: resource.releaseDate,
-            engagementPercentage: resource.engagementPercentage || 0
-          });
-        }
-      });
+    calendarData.forEach(resource => {
+      const key = resource.profileId;
+      if (!resourceMap.has(key)) {
+        resourceMap.set(key, {
+          profileId: resource.profileId,
+          profileName: resource.profileName,
+          employeeId: resource.employeeId,
+          projects: []
+        });
+      }
+      
+      const resourceData = resourceMap.get(key)!;
+      const projectName = resource.projectName || 'Unassigned';
+      
+      // Check if this project already exists for this resource
+      const existingProject = resourceData.projects.find(p => p.name === projectName);
+      if (!existingProject) {
+        resourceData.projects.push({
+          name: projectName,
+          startDate: resource.engagementStartDate || '',
+          endDate: resource.releaseDate,
+          engagementPercentage: resource.engagementPercentage || 0
+        });
+      }
     });
     
-    return Array.from(resourceMap.values());
-  };
+    const result = Array.from(resourceMap.values()).sort((a, b) => a.profileName.localeCompare(b.profileName));
+    
+    console.log('Processed resources for quarter view:', {
+      uniqueResources: result.length,
+      sampleResource: result[0] ? {
+        name: result[0].profileName,
+        projectCount: result[0].projects.length
+      } : null
+    });
 
-  const resources = getResourceProjects();
+    return result;
+  }, [calendarData, quarterStart, quarterEnd]);
 
-  // Helper function to calculate project bar position and width for a month
-  const getProjectBarStyle = (project: Project, month: Date) => {
-    if (!project.startDate) return null;
-    
-    const monthStart = startOfMonth(month);
-    const monthEnd = endOfMonth(month);
-    const projectStart = new Date(project.startDate);
-    const projectEnd = project.endDate ? new Date(project.endDate) : new Date('2099-12-31');
-    
-    // Check if project overlaps with this month
-    const overlaps = isWithinInterval(monthStart, { start: projectStart, end: projectEnd }) ||
-                    isWithinInterval(monthEnd, { start: projectStart, end: projectEnd }) ||
-                    isWithinInterval(projectStart, { start: monthStart, end: monthEnd }) ||
-                    isWithinInterval(projectEnd, { start: monthStart, end: monthEnd });
-    
-    if (!overlaps) return null;
-    
-    // Calculate start and end positions within the month (0-100%)
-    const startPos = projectStart <= monthStart ? 0 : 
-      ((projectStart.getTime() - monthStart.getTime()) / (monthEnd.getTime() - monthStart.getTime())) * 100;
-    
-    const endPos = projectEnd >= monthEnd ? 100 :
-      ((projectEnd.getTime() - monthStart.getTime()) / (monthEnd.getTime() - monthStart.getTime())) * 100;
-    
-    const width = endPos - startPos;
-    
-    return {
-      left: `${startPos}%`,
-      width: `${width}%`,
-    };
-  };
+  // Pagination calculations
+  const totalPages = Math.ceil(allResources.length / RESOURCES_PER_PAGE);
+  const startIndex = (currentPage - 1) * RESOURCES_PER_PAGE;
+  const endIndex = startIndex + RESOURCES_PER_PAGE;
+  const paginatedResources = allResources.slice(startIndex, endIndex);
 
-  const getProjectColor = (projectName: string) => {
-    const colors = [
-      'hsl(var(--primary))',
-      'hsl(220, 70%, 50%)',
-      'hsl(280, 70%, 50%)',
-      'hsl(340, 70%, 50%)',
-      'hsl(40, 70%, 50%)',
-      'hsl(160, 70%, 50%)',
-      'hsl(200, 70%, 50%)',
-      'hsl(320, 70%, 50%)',
-    ];
-    
-    const hash = projectName.split('').reduce((a, b) => {
-      a = ((a << 5) - a) + b.charCodeAt(0);
-      return a & a;
-    }, 0);
-    
-    return colors[Math.abs(hash) % colors.length];
-  };
+  // Reset to first page when resources change
+  React.useEffect(() => {
+    setCurrentPage(1);
+  }, [allResources.length]);
 
   return (
     <div className="space-y-6">
-      <div className="text-center">
-        <h2 className="text-2xl font-bold">
-          Q{Math.ceil((quarterStart.getMonth() + 1) / 3)} {quarterStart.getFullYear()} - Resource Timeline
-        </h2>
-        <p className="text-muted-foreground">
-          {format(quarterStart, 'MMM d')} - {format(quarterEnd, 'MMM d, yyyy')}
-        </p>
-      </div>
+      <QuarterHeader 
+        quarterStart={quarterStart}
+        quarterEnd={quarterEnd}
+        months={months}
+      />
 
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center space-x-2">
-            <Users className="h-5 w-5" />
-            <span>Resource Project Timeline</span>
+          <CardTitle className="flex items-center justify-between">
+            <div className="flex items-center space-x-2">
+              <Users className="h-5 w-5" />
+              <span>Resource Project Timeline</span>
+            </div>
           </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="overflow-x-auto">
-            {/* Header Row */}
-            <div className="grid grid-cols-4 gap-0 border-b border-border mb-4 pb-2">
-              <div className="col-span-1 font-semibold text-sm">Employee</div>
-              {months.map((month) => (
-                <div key={month.toISOString()} className="text-center font-semibold text-sm">
-                  {format(month, 'MMM yyyy')}
-                </div>
-              ))}
-            </div>
-
             {/* Resource Rows */}
             <div className="space-y-4">
-              {resources.length === 0 ? (
-                <div className="text-center py-8 text-muted-foreground">
-                  <Users className="h-8 w-8 mx-auto mb-2 opacity-50" />
-                  <p>No resources found for this quarter</p>
-                </div>
+              {paginatedResources.length === 0 ? (
+                <EmptyResourcesState />
               ) : (
-                resources.map((resource) => (
-                  <div key={resource.profileId} className="grid grid-cols-4 gap-0 py-4 border-b border-border/50">
-                    {/* Employee Info */}
-                    <div className="col-span-1 pr-4">
-                      <div className="text-sm font-medium">{resource.profileName}</div>
-                      <div className="text-xs text-muted-foreground">{resource.employeeId}</div>
-                    </div>
-
-                    {/* Month Columns */}
-                    {months.map((month) => (
-                      <div key={month.toISOString()} className="relative border-l border-border/30" style={{ height: `${Math.max(resource.projects.length * 35, 40)}px` }}>
-                        <div className="absolute inset-0 p-1">
-                          {resource.projects.map((project, idx) => {
-                            const barStyle = getProjectBarStyle(project, month);
-                            if (!barStyle) return null;
-
-                            return (
-                              <div
-                                key={idx}
-                                className="absolute rounded text-xs text-white flex items-center justify-center overflow-hidden shadow-sm"
-                                style={{
-                                  ...barStyle,
-                                  backgroundColor: getProjectColor(project.name),
-                                  top: `${idx * 30}px`,
-                                  height: '24px',
-                                  fontSize: '10px',
-                                  fontWeight: '500'
-                                }}
-                                title={`${project.name} (${project.engagementPercentage}%)`}
-                              >
-                                <span className="truncate px-2">{project.name}</span>
-                              </div>
-                            );
-                          })}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
+                paginatedResources.map((resource) => (
+                  <ResourceRow
+                    key={resource.profileId}
+                    resource={resource}
+                    months={months}
+                  />
                 ))
               )}
             </div>
           </div>
+
+          <PaginationControls
+            currentPage={currentPage}
+            totalPages={totalPages}
+            startIndex={startIndex}
+            endIndex={endIndex}
+            totalResources={allResources.length}
+            onPageChange={setCurrentPage}
+          />
         </CardContent>
       </Card>
     </div>
