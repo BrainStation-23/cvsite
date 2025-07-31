@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -50,85 +49,72 @@ interface MutationCallbacks {
   onError?: (error: any) => void;
 }
 
-interface AdvancedFilters {
-  billTypeFilter: string | null;
-  projectSearch: string;
-  minEngagementPercentage: number | null;
-  maxEngagementPercentage: number | null;
-  minBillingPercentage: number | null;
-  maxBillingPercentage: number | null;
-  startDateFrom: string;
-  startDateTo: string;
-  endDateFrom: string;
-  endDateTo: string;
+interface PlannedResourcesParams {
+  searchQuery: string;
+  selectedSbu: string | null;
+  selectedManager: string | null;
+  billTypeFilter?: string | null;
+  projectSearch?: string;
+  minEngagementPercentage?: number | null;
+  maxEngagementPercentage?: number | null;
+  minBillingPercentage?: number | null;
+  maxBillingPercentage?: number | null;
+  startDateFrom?: string;
+  startDateTo?: string;
+  endDateFrom?: string;
+  endDateTo?: string;
 }
 
-export function usePlannedResources() {
+export function usePlannedResources(params: PlannedResourcesParams) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const [searchQuery, setSearchQuery] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [sortBy, setSortBy] = useState('created_at');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
-  const [selectedSbu, setSelectedSbu] = useState<string | null>(null);
-  const [selectedManager, setSelectedManager] = useState<string | null>(null);
-  
-  // Advanced filters
-  const [advancedFilters, setAdvancedFilters] = useState<AdvancedFilters>({
-    billTypeFilter: null,
-    projectSearch: '',
-    minEngagementPercentage: null,
-    maxEngagementPercentage: null,
-    minBillingPercentage: null,
-    maxBillingPercentage: null,
-    startDateFrom: '',
-    startDateTo: '',
-    endDateFrom: '',
-    endDateTo: '',
-  });
   
   const itemsPerPage = 10;
 
   const { data: plannedData, isLoading, error } = useQuery({
     queryKey: [
       'planned-resources', 
-      searchQuery, 
+      params.searchQuery, 
       currentPage, 
       sortBy, 
       sortOrder, 
-      selectedSbu, 
-      selectedManager,
-      advancedFilters
+      params.selectedSbu, 
+      params.selectedManager,
+      params.billTypeFilter,
+      params.projectSearch,
+      params.minEngagementPercentage,
+      params.maxEngagementPercentage,
+      params.minBillingPercentage,
+      params.maxBillingPercentage,
+      params.startDateFrom,
+      params.startDateTo,
+      params.endDateFrom,
+      params.endDateTo
     ],
     queryFn: async () => {
-      console.log('Planned Resources Query:', {
-        searchQuery,
-        currentPage,
-        sortBy,
-        sortOrder,
-        selectedSbu,
-        selectedManager,
-        advancedFilters
-      });
+      console.log('Planned Resources Query:', params);
 
       const { data: rpcData, error } = await supabase.rpc('get_planned_resources', {
-        search_query: searchQuery || null,
+        search_query: params.searchQuery || null,
         page_number: currentPage,
         items_per_page: itemsPerPage,
         sort_by: sortBy,
         sort_order: sortOrder,
-        sbu_filter: selectedSbu,
-        manager_filter: selectedManager,
-        bill_type_filter: advancedFilters.billTypeFilter,
-        project_search: advancedFilters.projectSearch || null,
-        min_engagement_percentage: advancedFilters.minEngagementPercentage,
-        max_engagement_percentage: advancedFilters.maxEngagementPercentage,
-        min_billing_percentage: advancedFilters.minBillingPercentage,
-        max_billing_percentage: advancedFilters.maxBillingPercentage,
-        start_date_from: advancedFilters.startDateFrom || null,
-        start_date_to: advancedFilters.startDateTo || null,
-        end_date_from: advancedFilters.endDateFrom || null,
-        end_date_to: advancedFilters.endDateTo || null
+        sbu_filter: params.selectedSbu,
+        manager_filter: params.selectedManager,
+        bill_type_filter: params.billTypeFilter,
+        project_search: params.projectSearch || null,
+        min_engagement_percentage: params.minEngagementPercentage,
+        max_engagement_percentage: params.maxEngagementPercentage,
+        min_billing_percentage: params.minBillingPercentage,
+        max_billing_percentage: params.maxBillingPercentage,
+        start_date_from: params.startDateFrom || null,
+        start_date_to: params.startDateTo || null,
+        end_date_from: params.endDateFrom || null,
+        end_date_to: params.endDateTo || null
       });
 
       if (error) {
@@ -316,20 +302,12 @@ export function usePlannedResources() {
     pagination: plannedData?.pagination,
     isLoading,
     error,
-    searchQuery,
-    setSearchQuery,
     currentPage,
     setCurrentPage,
     sortBy,
     setSortBy,
     sortOrder,
     setSortOrder,
-    selectedSbu,
-    setSelectedSbu,
-    selectedManager,
-    setSelectedManager,
-    advancedFilters,
-    setAdvancedFilters,
     createResourcePlanning,
     updateResourcePlanning,
     deleteResourcePlanning: deleteResourcePlanningMutation.mutate,
