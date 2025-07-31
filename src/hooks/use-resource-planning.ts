@@ -1,8 +1,5 @@
 
-import { useState } from 'react';
-import { usePlannedResources } from './use-planned-resources';
-import { useUnplannedResources } from './use-unplanned-resources';
-import { useWeeklyValidation } from './use-weekly-validation';
+import { useState, useCallback, useMemo } from 'react';
 
 interface AdvancedFilters {
   billTypeFilter: string | null;
@@ -17,68 +14,45 @@ interface AdvancedFilters {
   endDateTo: string;
 }
 
+const initialAdvancedFilters: AdvancedFilters = {
+  billTypeFilter: null,
+  projectSearch: '',
+  minEngagementPercentage: null,
+  maxEngagementPercentage: null,
+  minBillingPercentage: null,
+  maxBillingPercentage: null,
+  startDateFrom: '',
+  startDateTo: '',
+  endDateFrom: '',
+  endDateTo: '',
+};
+
 export function useResourcePlanning() {
   const [showUnplanned, setShowUnplanned] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedSbu, setSelectedSbu] = useState<string | null>(null);
   const [selectedManager, setSelectedManager] = useState<string | null>(null);
-  
-  // Advanced filters state
-  const [advancedFilters, setAdvancedFilters] = useState<AdvancedFilters>({
-    billTypeFilter: null,
-    projectSearch: '',
-    minEngagementPercentage: null,
-    maxEngagementPercentage: null,
-    minBillingPercentage: null,
-    maxBillingPercentage: null,
-    startDateFrom: '',
-    startDateTo: '',
-    endDateFrom: '',
-    endDateTo: '',
-  });
+  const [advancedFilters, setAdvancedFilters] = useState<AdvancedFilters>(initialAdvancedFilters);
 
-  // Get data from all hooks with current filter state
-  const plannedResources = usePlannedResources({
-    searchQuery,
-    selectedSbu,
-    selectedManager,
-    ...advancedFilters
-  });
-
-  const unplannedResources = useUnplannedResources({
-    searchQuery,
-    selectedSbu,
-    selectedManager
-  });
-
-  const weeklyValidationData = useWeeklyValidation({
-    searchQuery,
-    selectedSbu,
-    selectedManager,
-    ...advancedFilters
-  });
-
-  const clearFilters = () => {
+  // Memoize the clear functions to prevent re-renders
+  const clearFilters = useCallback(() => {
     setSelectedSbu(null);
     setSelectedManager(null);
     setShowUnplanned(false);
     setSearchQuery('');
-  };
+  }, []);
 
-  const clearAdvancedFilters = () => {
-    setAdvancedFilters({
-      billTypeFilter: null,
-      projectSearch: '',
-      minEngagementPercentage: null,
-      maxEngagementPercentage: null,
-      minBillingPercentage: null,
-      maxBillingPercentage: null,
-      startDateFrom: '',
-      startDateTo: '',
-      endDateFrom: '',
-      endDateTo: '',
-    });
-  };
+  const clearAdvancedFilters = useCallback(() => {
+    setAdvancedFilters(initialAdvancedFilters);
+  }, []);
+
+  // Memoize filter parameters to prevent object recreation
+  const filterParams = useMemo(() => ({
+    searchQuery,
+    selectedSbu,
+    selectedManager,
+    advancedFilters,
+  }), [searchQuery, selectedSbu, selectedManager, advancedFilters]);
 
   return {
     // Filter states
@@ -95,9 +69,7 @@ export function useResourcePlanning() {
     clearFilters,
     clearAdvancedFilters,
     
-    // Data from hooks
-    plannedResources,
-    unplannedResources,
-    weeklyValidationData,
+    // Memoized parameters for data hooks
+    filterParams,
   };
 }

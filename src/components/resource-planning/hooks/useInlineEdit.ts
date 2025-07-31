@@ -1,19 +1,22 @@
 
-import { useState } from 'react';
-import { usePlannedResources } from '@/hooks/use-planned-resources';
+import { useState, useCallback } from 'react';
+
+interface EditData {
+  profileId: string;
+  billTypeId: string | null;
+  projectId: string | null;
+  engagementPercentage: number;
+  billingPercentage: number;
+  releaseDate: string;
+  engagementStartDate: string;
+}
 
 export const useInlineEdit = () => {
   const [editingItemId, setEditingItemId] = useState<string | null>(null);
-  const [editData, setEditData] = useState<any>(null);
+  const [editData, setEditData] = useState<EditData | null>(null);
 
-  // Create a dummy params object for the hook since we're not using the data here
-  const { updateResourcePlanning, isUpdating } = usePlannedResources({
-    searchQuery: '',
-    selectedSbu: null,
-    selectedManager: null
-  });
-
-  const startEdit = (item: any) => {
+  const startEdit = useCallback((item: any) => {
+    console.log('Starting edit for item:', item.id);
     setEditingItemId(item.id);
     setEditData({
       profileId: item.profile_id,
@@ -24,47 +27,24 @@ export const useInlineEdit = () => {
       releaseDate: item.release_date || '',
       engagementStartDate: item.engagement_start_date || '',
     });
-  };
+  }, []);
 
-  const cancelEdit = () => {
+  const cancelEdit = useCallback(() => {
+    console.log('Canceling edit');
     setEditingItemId(null);
     setEditData(null);
-  };
+  }, []);
 
-  const saveEdit = () => {
-    if (!editingItemId || !editData) return;
-
-    updateResourcePlanning(
-      {
-        id: editingItemId,
-        updates: {
-          bill_type_id: editData.billTypeId,
-          project_id: editData.projectId,
-          engagement_percentage: editData.engagementPercentage,
-          billing_percentage: editData.billingPercentage,
-          release_date: editData.releaseDate,
-          engagement_start_date: editData.engagementStartDate,
-        },
-      },
-      {
-        onSuccess: () => {
-          cancelEdit();
-        },
-      }
-    );
-  };
-
-  const updateEditData = (newData: any) => {
-    setEditData({ ...editData, ...newData });
-  };
+  const updateEditData = useCallback((newData: Partial<EditData>) => {
+    setEditData(prev => prev ? { ...prev, ...newData } : null);
+  }, []);
 
   return {
     editingItemId,
     editData,
     startEdit,
     cancelEdit,
-    saveEdit,
     updateEditData,
-    isLoading: isUpdating,
+    // Remove the saveEdit function - it will be handled by the parent component
   };
 };

@@ -5,7 +5,6 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Edit2, Trash2, CheckCircle } from 'lucide-react';
 import { format } from 'date-fns';
-import { usePlannedResources } from '@/hooks/use-planned-resources';
 import { useConfirmationDialog } from '@/hooks/use-confirmation-dialog';
 import { ConfirmationDialog } from '@/components/ui/confirmation-dialog';
 import { ResourcePlanningTableEditRow } from './ResourcePlanningTableEditRow';
@@ -59,6 +58,9 @@ interface ResourcePlanningTableRowProps {
   onSaveEdit: () => void;
   onEditDataChange: (data: Partial<EditFormData>) => void;
   editLoading: boolean;
+  onUpdateResourcePlanning?: (params: { id: string; updates: any }) => void;
+  onDeleteResourcePlanning?: (id: string) => void;
+  onCompleteEngagement?: (params: { id: string; updates: any }) => void;
 }
 
 export const ResourcePlanningTableRow: React.FC<ResourcePlanningTableRowProps> = ({ 
@@ -70,12 +72,10 @@ export const ResourcePlanningTableRow: React.FC<ResourcePlanningTableRowProps> =
   onSaveEdit,
   onEditDataChange,
   editLoading,
+  onUpdateResourcePlanning,
+  onDeleteResourcePlanning,
+  onCompleteEngagement,
 }) => {
-  const { updateResourcePlanning, deleteResourcePlanning, isDeleting, isUpdating } = usePlannedResources({
-    searchQuery: '',
-    selectedSbu: null,
-    selectedManager: null
-  });
   const { isOpen, config, showConfirmation, hideConfirmation, handleConfirm } = useConfirmationDialog();
 
   const handleDeleteClick = () => {
@@ -85,7 +85,7 @@ export const ResourcePlanningTableRow: React.FC<ResourcePlanningTableRowProps> =
       confirmText: 'Delete',
       cancelText: 'Cancel',
       variant: 'destructive',
-      onConfirm: () => deleteResourcePlanning(item.id)
+      onConfirm: () => onDeleteResourcePlanning?.(item.id)
     });
   };
 
@@ -96,7 +96,7 @@ export const ResourcePlanningTableRow: React.FC<ResourcePlanningTableRowProps> =
       confirmText: 'Mark Complete',
       cancelText: 'Cancel',
       variant: 'default',
-      onConfirm: () => updateResourcePlanning({ 
+      onConfirm: () => onCompleteEngagement?.({ 
         id: item.id, 
         updates: { engagement_complete: true } 
       })
@@ -178,7 +178,7 @@ export const ResourcePlanningTableRow: React.FC<ResourcePlanningTableRowProps> =
               variant="ghost"
               size="sm"
               onClick={() => onStartEdit(item)}
-              disabled={isUpdating || editLoading}
+              disabled={editLoading}
               className="h-6 w-6 p-0"
             >
               <Edit2 className="h-3 w-3" />
@@ -187,7 +187,7 @@ export const ResourcePlanningTableRow: React.FC<ResourcePlanningTableRowProps> =
               variant="ghost"
               size="sm"
               onClick={handleCompleteEngagement}
-              disabled={isUpdating || editLoading}
+              disabled={editLoading}
               title="Mark engagement as complete"
               className="h-6 w-6 p-0"
             >
@@ -197,7 +197,7 @@ export const ResourcePlanningTableRow: React.FC<ResourcePlanningTableRowProps> =
               variant="ghost"
               size="sm"
               onClick={handleDeleteClick}
-              disabled={isDeleting || editLoading}
+              disabled={editLoading}
               className="h-6 w-6 p-0"
             >
               <Trash2 className="h-3 w-3" />

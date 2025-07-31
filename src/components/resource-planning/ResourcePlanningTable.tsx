@@ -3,8 +3,10 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Upload } from 'lucide-react';
 import { useResourcePlanning } from '@/hooks/use-resource-planning';
+import { useResourceData } from './hooks/useResourceData';
 import { useResourcePlanningState } from './hooks/useResourcePlanningState';
 import { useInlineEdit } from './hooks/useInlineEdit';
+import { usePlannedResources } from '@/hooks/use-planned-resources';
 import { ResourcePlanningFilters } from './ResourcePlanningFilters';
 import { AdvancedResourceFilters } from './AdvancedResourceFilters';
 import { ResourcePlanningTabs } from './ResourcePlanningTabs';
@@ -15,8 +17,9 @@ export const ResourcePlanningTable: React.FC = () => {
   const [activeTab, setActiveTab] = React.useState('planned');
   const [showBulkImport, setShowBulkImport] = React.useState(false);
 
+  console.log('ResourcePlanningTable render');
+
   const {
-    // Filter states
     searchQuery,
     setSearchQuery,
     selectedSbu,
@@ -29,11 +32,18 @@ export const ResourcePlanningTable: React.FC = () => {
     setAdvancedFilters,
     clearFilters,
     clearAdvancedFilters,
-    // Data
+    filterParams,
+  } = useResourcePlanning();
+
+  // Get centralized data
+  const {
     plannedResources,
     unplannedResources,
     weeklyValidationData,
-  } = useResourcePlanning();
+  } = useResourceData(filterParams);
+
+  // Get mutation functions from planned resources hook
+  const { updateResourcePlanning } = usePlannedResources(filterParams);
 
   const {
     preselectedProfileId,
@@ -50,25 +60,48 @@ export const ResourcePlanningTable: React.FC = () => {
     editData,
     startEdit,
     cancelEdit,
-    saveEdit,
     updateEditData,
-    isLoading: editLoading,
   } = useInlineEdit();
 
-  const handleTabChange = (value: string) => {
+  // Handle save edit with the mutation function
+  const handleSaveEdit = React.useCallback(() => {
+    if (!editingItemId || !editData) return;
+
+    console.log('Saving edit for item:', editingItemId);
+    updateResourcePlanning(
+      {
+        id: editingItemId,
+        updates: {
+          bill_type_id: editData.billTypeId,
+          project_id: editData.projectId,
+          engagement_percentage: editData.engagementPercentage,
+          billing_percentage: editData.billingPercentage,
+          release_date: editData.releaseDate,
+          engagement_start_date: editData.engagementStartDate,
+        },
+      },
+      {
+        onSuccess: () => {
+          cancelEdit();
+        },
+      }
+    );
+  }, [editingItemId, editData, updateResourcePlanning, cancelEdit]);
+
+  const handleTabChange = React.useCallback((value: string) => {
+    console.log('Tab change to:', value);
     setActiveTab(value);
     setShowUnplanned(value === "unplanned");
-  };
+  }, [setShowUnplanned]);
 
-  const handleInlineEdit = (item: any) => {
+  const handleInlineEdit = React.useCallback((item: any) => {
+    console.log('Inline edit for item:', item.id);
     startEdit(item);
-  };
+  }, [startEdit]);
 
-  const handleBulkImportSuccess = () => {
+  const handleBulkImportSuccess = React.useCallback(() => {
     setSearchQuery('');
-    // Trigger refetch by clearing and resetting search
-    setSearchQuery('');
-  };
+  }, [setSearchQuery]);
 
   return (
     <div className="flex gap-6 h-full">
@@ -119,9 +152,9 @@ export const ResourcePlanningTable: React.FC = () => {
           editData={editData}
           onStartEdit={startEdit}
           onCancelEdit={cancelEdit}
-          onSaveEdit={saveEdit}
+          onSaveEdit={handleSaveEdit}
           onEditDataChange={updateEditData}
-          editLoading={editLoading}
+          editLoading={false}
         />
       </div>
 
