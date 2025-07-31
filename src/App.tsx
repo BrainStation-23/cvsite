@@ -32,6 +32,7 @@ import ResourcePlanning from '@/pages/ResourcePlanning';
 import ResourceCalendar from '@/pages/ResourceCalendar';
 import ResourceCalendarView from '@/pages/resource-calendar/ResourceCalendarView';
 import ResourceCalendarStatistics from '@/pages/resource-calendar/ResourceCalendarStatistics';
+import ResourceCalendarPlanning from '@/pages/resource-calendar/ResourceCalendarPlanning';
 import ProjectsManagement from '@/pages/admin/ProjectsManagement';
 import './App.css';
 
@@ -248,6 +249,14 @@ function App(): React.ReactElement {
               }
             />
             <Route
+              path="/admin/resource-calendar/planning"
+              element={
+                <ProtectedRoute allowedRoles={['admin', 'manager']}>
+                  <ResourceCalendarPlanning />
+                </ProtectedRoute>
+              }
+            />
+            <Route
               path="/admin/resource-calendar/calendar"
               element={
                 <ProtectedRoute allowedRoles={['admin', 'manager']}>
@@ -268,6 +277,14 @@ function App(): React.ReactElement {
               element={
                 <ProtectedRoute allowedRoles={['manager', 'admin']}>
                   <ResourceCalendar />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/manager/resource-calendar/planning"
+              element={
+                <ProtectedRoute allowedRoles={['manager', 'admin']}>
+                  <ResourceCalendarPlanning />
                 </ProtectedRoute>
               }
             />
