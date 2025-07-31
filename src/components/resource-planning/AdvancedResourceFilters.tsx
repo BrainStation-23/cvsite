@@ -6,7 +6,8 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { ChevronDown, Filter } from 'lucide-react';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import BillTypeCombobox from './BillTypeCombobox';
+import ProjectSearchCombobox from './ProjectSearchCombobox';
 
 interface AdvancedFilters {
   billTypeFilter: string | null;
@@ -70,27 +71,19 @@ export const AdvancedResourceFilters: React.FC<AdvancedResourceFiltersProps> = (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="bill-type-filter">Bill Type</Label>
-                <Select 
-                  value={filters.billTypeFilter || 'all-types'} 
-                  onValueChange={(value) => updateFilter('billTypeFilter', value === 'all-types' ? null : value)}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select bill type..." />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all-types">All Bill Types</SelectItem>
-                    {/* Bill types will be populated from API */}
-                  </SelectContent>
-                </Select>
+                <BillTypeCombobox
+                  value={filters.billTypeFilter}
+                  onValueChange={(value) => updateFilter('billTypeFilter', value)}
+                  placeholder="Select bill type..."
+                />
               </div>
 
               <div className="space-y-2">
                 <Label htmlFor="project-search">Project Search</Label>
-                <Input
-                  id="project-search"
-                  placeholder="Search projects..."
+                <ProjectSearchCombobox
                   value={filters.projectSearch}
-                  onChange={(e) => updateFilter('projectSearch', e.target.value)}
+                  onValueChange={(value) => updateFilter('projectSearch', value || '')}
+                  placeholder="Search projects..."
                 />
               </div>
 
