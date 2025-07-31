@@ -1,13 +1,12 @@
 
 import React from 'react';
-import { ResourcePlanningFilters } from './ResourcePlanningFilters';
 import { UnplannedResourcesTable } from './UnplannedResourcesTable';
 import { useUnplannedResources } from '@/hooks/use-unplanned-resources';
 
 interface UnplannedResourcesTabProps {
   searchQuery: string;
-  selectedSbu: string;
-  selectedManager: string;
+  selectedSbu: string | null;
+  selectedManager: string | null;
   onCreatePlan: (profileId: string) => void;
 }
 
@@ -18,18 +17,16 @@ export const UnplannedResourcesTab: React.FC<UnplannedResourcesTabProps> = ({
   onCreatePlan,
 }) => {
   const {
-    data: unplannedResources = [],
-    isLoading,
-    error,
+    unplannedResources,
     currentPage,
     setCurrentPage,
-    totalPages,
-    totalItems,
-    setSearchQuery,
-    setSelectedSbu: setSbu,
-    setSelectedManager: setManager,
-    clearFilters,
-  } = useUnplannedResources(searchQuery, selectedSbu, selectedManager);
+    isLoading,
+    error,
+  } = useUnplannedResources({
+    searchQuery,
+    selectedSbu,
+    selectedManager,
+  });
 
   if (error) {
     return (
@@ -41,25 +38,13 @@ export const UnplannedResourcesTab: React.FC<UnplannedResourcesTabProps> = ({
 
   return (
     <div className="space-y-4">
-      <ResourcePlanningFilters
-        searchQuery={searchQuery}
-        setSearchQuery={setSearchQuery}
-        selectedSbu={selectedSbu || null}
-        setSelectedSbu={(sbu) => setSbu(sbu || '')}
-        selectedManager={selectedManager || null}
-        setSelectedManager={(manager) => setManager(manager || '')}
-        clearFilters={clearFilters}
-        hideAdvancedFilters={true} // Hide advanced filters for unplanned resources
-      />
-      
       <UnplannedResourcesTable
-        data={unplannedResources}
-        isLoading={isLoading}
-        onCreatePlan={onCreatePlan}
+        resources={unplannedResources.unplanned_resources || []}
+        pagination={unplannedResources.pagination}
         currentPage={currentPage}
         setCurrentPage={setCurrentPage}
-        totalPages={totalPages}
-        totalItems={totalItems}
+        isLoading={isLoading}
+        onCreatePlan={onCreatePlan}
       />
     </div>
   );

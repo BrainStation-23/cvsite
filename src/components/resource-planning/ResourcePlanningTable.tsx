@@ -93,6 +93,7 @@ export const ResourcePlanningTable: React.FC = () => {
             advancedFilters={centralizedState.advancedFilters}
             setAdvancedFilters={centralizedState.setAdvancedFilters}
             onClearAdvancedFilters={centralizedState.clearAdvancedFilters}
+            hideAdvancedFilters={!shouldShowAdvancedFilters}
           />
 
           {/* Tabs with Data */}
