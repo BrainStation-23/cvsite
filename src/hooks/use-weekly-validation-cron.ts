@@ -1,5 +1,4 @@
 
-import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -26,6 +25,7 @@ export const useWeeklyValidationCron = () => {
   const { data, isLoading, error } = useQuery({
     queryKey: ['weekly-validation-cron-config'],
     queryFn: async () => {
+      console.log('Fetching cron config...');
       const { data, error } = await supabase.rpc('get_weekly_validation_cron_config');
       
       if (error) {
@@ -33,6 +33,7 @@ export const useWeeklyValidationCron = () => {
         throw error;
       }
       
+      console.log('Cron config response:', data);
       return data as CronResponse;
     },
   });
@@ -40,6 +41,7 @@ export const useWeeklyValidationCron = () => {
   // Mutation to manage cron job
   const manageCronMutation = useMutation({
     mutationFn: async ({ schedule, enabled }: { schedule: string; enabled: boolean }) => {
+      console.log('Managing cron job with:', { schedule, enabled });
       const { data, error } = await supabase.rpc('manage_weekly_validation_cron', {
         p_schedule: schedule,
         p_enabled: enabled
@@ -50,6 +52,7 @@ export const useWeeklyValidationCron = () => {
         throw error;
       }
 
+      console.log('Cron management response:', data);
       return data as CronResponse;
     },
     onSuccess: (data) => {
