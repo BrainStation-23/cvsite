@@ -1,5 +1,5 @@
 
-import React, { useMemo } from 'react';
+import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Upload } from 'lucide-react';
 import { usePlannedResources } from '@/hooks/use-planned-resources';
@@ -50,8 +50,8 @@ export const ResourcePlanningTable: React.FC = () => {
   // Get planned resources hook with advanced filters
   const plannedResources = usePlannedResources();
   
-  // Create advanced filter props for other hooks - use useMemo to prevent recreation
-  const advancedFilterProps = useMemo(() => ({
+  // Create advanced filter props for other hooks
+  const advancedFilterProps = {
     billTypeFilter: plannedResources.advancedFilters.billTypeFilter,
     projectSearch: plannedResources.advancedFilters.projectSearch,
     minEngagementPercentage: plannedResources.advancedFilters.minEngagementPercentage,
@@ -62,38 +62,35 @@ export const ResourcePlanningTable: React.FC = () => {
     startDateTo: plannedResources.advancedFilters.startDateTo,
     endDateFrom: plannedResources.advancedFilters.endDateFrom,
     endDateTo: plannedResources.advancedFilters.endDateTo,
-  }), [plannedResources.advancedFilters]);
+  };
 
-  // Initialize other hooks with filters - use static filter props
-  const unplannedResourcesFilters = useMemo(() => ({
+  // Initialize other hooks with filters
+  const unplannedResources = useUnplannedResources({
     searchQuery,
     selectedSbu,
     selectedManager,
     ...advancedFilterProps,
-  }), [searchQuery, selectedSbu, selectedManager, advancedFilterProps]);
-
-  const weeklyValidationFilters = useMemo(() => ({
+  });
+  
+  const weeklyValidationData = useWeeklyValidation({
     searchQuery,
     selectedSbu,
     selectedManager,
     ...advancedFilterProps,
-  }), [searchQuery, selectedSbu, selectedManager, advancedFilterProps]);
+  });
 
-  const unplannedResources = useUnplannedResources(unplannedResourcesFilters);
-  const weeklyValidationData = useWeeklyValidation(weeklyValidationFilters);
-
-  // Sync filters to planned resources hook using refs to prevent infinite loops
+  // Sync filters to planned resources hook
   React.useEffect(() => {
     plannedResources.setSearchQuery(searchQuery);
-  }, [searchQuery]);
+  }, [searchQuery, plannedResources.setSearchQuery]);
 
   React.useEffect(() => {
     plannedResources.setSelectedSbu(selectedSbu);
-  }, [selectedSbu]);
+  }, [selectedSbu, plannedResources.setSelectedSbu]);
 
   React.useEffect(() => {
     plannedResources.setSelectedManager(selectedManager);
-  }, [selectedManager]);
+  }, [selectedManager, plannedResources.setSelectedManager]);
 
   const handleInlineEdit = (item: any) => {
     startEdit(item);

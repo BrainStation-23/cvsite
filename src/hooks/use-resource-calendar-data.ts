@@ -1,21 +1,10 @@
 
-import { useMemo } from 'react';
+import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/hooks/use-toast';
-import { 
-  startOfWeek, 
-  endOfWeek, 
-  startOfMonth, 
-  endOfMonth,
-  format,
-  eachWeekOfInterval,
-  eachDayOfInterval
-} from 'date-fns';
+import { startOfQuarter, endOfQuarter, startOfMonth, endOfMonth } from 'date-fns';
 
-export type CalendarViewType = 'monthly' | 'weekly';
-
-interface CalendarResourceData {
+interface ResourceCalendarData {
   id: string;
   profile_id: string;
   engagement_percentage: number;
@@ -23,6 +12,8 @@ interface CalendarResourceData {
   release_date: string;
   engagement_start_date: string;
   engagement_complete: boolean;
+  created_at: string;
+  updated_at: string;
   profile: {
     id: string;
     employee_id: string;
@@ -41,71 +32,90 @@ interface CalendarResourceData {
     client_name: string;
     budget: number;
   } | null;
-  sbu: {
-    id: string;
-    name: string;
-  } | null;
 }
 
-export function useResourceCalendarData() {
-  const { toast } = useToast();
+export function useResourceCalendarData(
+  searchQuery: string,
+  selectedSbu: string | null,
+  selectedManager: string | null,
+  currentDate: Date,
+  viewType: 'month' | 'quarter' = 'quarter'
+) {
+  // Calculate date range based on view type
+  const dateRange = viewType === 'quarter' 
+    ? { start: startOfQuarter(currentDate), end: endOfQuarter(currentDate) }
+    : { start: startOfMonth(currentDate), end: endOfMonth(currentDate) };
 
-  const { data: calendarData, isLoading, error, refetch } = useQuery({
-    queryKey: ['resource-calendar'],
+  const { data: resourceData, isLoading, error } = useQuery({
+    queryKey: [
+      'resource-calendar-data', 
+      searchQuery, 
+      selectedSbu, 
+      selectedManager, 
+      dateRange.start.toISOString(), 
+      dateRange.end.toISOString(),
+      viewType
+    ],
     queryFn: async () => {
-      console.log('Resource Calendar Query - fetching data');
+      console.log('Fetching calendar data:', {
+        searchQuery,
+        selectedSbu,
+        selectedManager,
+        dateRange,
+        viewType
+      });
 
-      // Use the planned resources function since calendar typically shows planned resources
-      const { data: rpcData, error } = await supabase.rpc('get_planned_resources', {
-        search_query: null,
+      // Use a high limit to get all records for calendar view
+      const { data: rpcData, error } = await supabase.rpc('get_resource_planning_data', {
+        search_query: searchQuery || null,
         page_number: 1,
-        items_per_page: 1000, // High limit to get all records for calendar view
-        sort_by: 'engagement_start_date',
-        sort_order: 'asc',
-        sbu_filter: null,
-        manager_filter: null,
-        bill_type_filter: null,
-        project_search: null,
-        min_engagement_percentage: null,
-        max_engagement_percentage: null,
-        min_billing_percentage: null,
-        max_billing_percentage: null,
-        start_date_from: null,
-        start_date_to: null,
-        end_date_from: null,
-        end_date_to: null
+        items_per_page: 1000, // High limit to get all records
+        sort_by: 'created_at',
+        sort_order: 'desc',
+        sbu_filter: selectedSbu,
+        manager_filter: selectedManager
       });
 
       if (error) {
-        console.error('Calendar RPC call error:', error);
+        console.error('RPC call error:', error);
         throw error;
       }
-
-      console.log('Calendar RPC response:', rpcData);
+      
+      console.log('Raw RPC response:', rpcData);
 
       if (rpcData && typeof rpcData === 'object' && 'resource_planning' in rpcData) {
-        return (rpcData as any).resource_planning || [];
-      } else {
-        console.warn('Unexpected calendar RPC response structure:', rpcData);
-        return [];
-      }
-    },
-    meta: {
-      onError: (error: Error) => {
-        console.error('Calendar query error:', error);
-        toast({
-          title: 'Error Loading Calendar Data',
-          description: error.message || 'An unexpected error occurred',
-          variant: 'destructive',
+        const allResources = (rpcData as any).resource_planning || [];
+        
+        // Filter resources that overlap with the date range
+        const filteredResources = allResources.filter((resource: ResourceCalendarData) => {
+          if (!resource.engagement_start_date) return false;
+          
+          const startDate = new Date(resource.engagement_start_date);
+          const endDate = resource.release_date ? new Date(resource.release_date) : new Date('2099-12-31');
+          
+          // Check if resource engagement overlaps with the viewing period
+          const overlaps = startDate <= dateRange.end && endDate >= dateRange.start;
+          
+          return overlaps;
         });
+
+        console.log(`Filtered ${filteredResources.length} resources from ${allResources.length} total for date range:`, {
+          start: dateRange.start.toISOString(),
+          end: dateRange.end.toISOString()
+        });
+
+        return filteredResources;
+      } else {
+        console.warn('Unexpected RPC response structure:', rpcData);
+        return [];
       }
     }
   });
 
   return {
-    calendarData: calendarData || [],
+    data: resourceData || [],
     isLoading,
     error,
-    refetch,
+    dateRange
   };
 }

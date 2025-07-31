@@ -1,7 +1,7 @@
 
 import { useState, useMemo } from 'react';
 import { useResourceCalendarData } from './use-resource-calendar-data';
-import { startOfMonth, endOfMonth, eachDayOfInterval, parseISO } from 'date-fns';
+import { startOfMonth, endOfMonth, eachDayOfInterval, format, isSameDay, parseISO, startOfQuarter, endOfQuarter } from 'date-fns';
 
 export type CalendarViewType = 'month' | 'quarter';
 
@@ -35,12 +35,14 @@ export function useResourceCalendar(
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [currentView, setCurrentView] = useState<CalendarViewType>('quarter');
   
-  // Get calendar data using the dedicated hook - pass filters directly
-  const {
-    calendarData: resourceData,
-    isLoading,
-    error,
-  } = useResourceCalendarData();
+  // Get calendar data using the new dedicated hook
+  const { data: resourceData, isLoading, error } = useResourceCalendarData(
+    searchQuery,
+    selectedSbu,
+    selectedManager,
+    currentMonth,
+    currentView
+  );
 
   // Convert resource planning data to calendar format
   const calendarData = useMemo(() => {

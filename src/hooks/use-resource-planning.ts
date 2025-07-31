@@ -8,8 +8,8 @@ export function useResourcePlanning() {
   const [selectedSbu, setSelectedSbu] = useState<string | null>(null);
   const [selectedManager, setSelectedManager] = useState<string | null>(null);
 
-  // Get planned resources data for count display only - remove dependency on external state
-  const plannedResourcesResult = usePlannedResources();
+  // Get planned resources data for count display only
+  const plannedResources = usePlannedResources();
 
   const clearFilters = () => {
     setSelectedSbu(null);
@@ -30,7 +30,7 @@ export function useResourcePlanning() {
     setShowUnplanned,
     clearFilters,
     
-    // Data for count display in tabs - use static reference
-    data: plannedResourcesResult.data || [],
+    // Data for count display in tabs
+    data: plannedResources.data,
   };
 }
