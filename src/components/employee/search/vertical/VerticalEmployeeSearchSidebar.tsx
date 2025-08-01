@@ -1,5 +1,26 @@
-
 import React, { useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { 
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Slider } from '@/components/ui/slider';
+import { Calendar } from '@/components/ui/calendar';
+import { 
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover';
+import { 
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from '@/components/ui/collapsible';
 import { 
   EmployeeProfileSortColumn, 
   EmployeeProfileSortOrder 
@@ -7,6 +28,15 @@ import {
 import CompactSearchHeader from './CompactSearchHeader';
 import VerticalFilterChips from './VerticalFilterChips';
 import CollapsibleFilterSection from './CollapsibleFilterSection';
+import { 
+  Calendar as CalendarIcon, 
+  ChevronDown, 
+  Filter,
+  TrendingUp,
+  Building2
+} from 'lucide-react';
+import { cn } from '@/lib/utils';
+import { format } from 'date-fns';
 import { useFilterState } from '../FilterState';
 import { useFilterChipsManager } from '../FilterChipsManager';
 import { useAdvancedFiltersManager } from '../AdvancedFiltersManager';
@@ -25,6 +55,16 @@ interface VerticalEmployeeSearchSidebarProps {
     minGraduationYear?: number | null;
     maxGraduationYear?: number | null;
     completionStatus?: string | null;
+  }) => void;
+  onResourcePlanningFilters: (filters: {
+    minEngagementPercentage?: number | null;
+    maxEngagementPercentage?: number | null;
+    minBillingPercentage?: number | null;
+    maxBillingPercentage?: number | null;
+    releaseDateFrom?: Date | null;
+    releaseDateTo?: Date | null;
+    availabilityStatus?: string | null;
+    currentProjectSearch?: string | null;
   }) => void;
   onSortChange: (column: EmployeeProfileSortColumn, order: EmployeeProfileSortOrder) => void;
   onReset: () => void;
@@ -49,6 +89,7 @@ const VerticalEmployeeSearchSidebar: React.FC<VerticalEmployeeSearchSidebarProps
   onAchievementFilter,
   onProjectFilter,
   onAdvancedFilters,
+  onResourcePlanningFilters,
   onSortChange,
   onReset,
   searchQuery,
@@ -67,6 +108,15 @@ const VerticalEmployeeSearchSidebar: React.FC<VerticalEmployeeSearchSidebarProps
   const [minGraduationYear, setMinGraduationYear] = useState<number | null>(null);
   const [maxGraduationYear, setMaxGraduationYear] = useState<number | null>(null);
   const [completionStatus, setCompletionStatus] = useState<string>('all');
+  
+  // Resource planning filter states
+  const [engagementRange, setEngagementRange] = useState<number[]>([0, 100]);
+  const [billingRange, setBillingRange] = useState<number[]>([0, 100]);
+  const [releaseDateFrom, setReleaseDateFrom] = useState<Date | null>(null);
+  const [releaseDateTo, setReleaseDateTo] = useState<Date | null>(null);
+  const [availabilityStatus, setAvailabilityStatus] = useState<string>('all');
+  const [currentProjectSearch, setCurrentProjectSearch] = useState<string>('');
+  const [isResourcePlanningOpen, setIsResourcePlanningOpen] = useState(false);
   
   const [skillInput, setSkillInput] = useState('');
   const [universityInput, setUniversityInput] = useState('');
@@ -228,6 +278,19 @@ const VerticalEmployeeSearchSidebar: React.FC<VerticalEmployeeSearchSidebarProps
     setTimeout(() => setHighlightedFilters([]), 2000);
   };
 
+  const handleResourcePlanningFilter = () => {
+    onResourcePlanningFilters({
+      minEngagementPercentage: engagementRange[0] > 0 ? engagementRange[0] : null,
+      maxEngagementPercentage: engagementRange[1] < 100 ? engagementRange[1] : null,
+      minBillingPercentage: billingRange[0] > 0 ? billingRange[0] : null,
+      maxBillingPercentage: billingRange[1] < 100 ? billingRange[1] : null,
+      releaseDateFrom,
+      releaseDateTo,
+      availabilityStatus: availabilityStatus !== 'all' ? availabilityStatus : null,
+      currentProjectSearch: currentProjectSearch || null,
+    });
+  };
+
   return (
     <div className="w-96 h-full flex flex-col">
       {/* Sticky Search Header */}
@@ -257,25 +320,165 @@ const VerticalEmployeeSearchSidebar: React.FC<VerticalEmployeeSearchSidebarProps
             />
           )}
 
-            <CollapsibleFilterSection
-              title="Projects & Tech"
-              icon="code"
-              defaultOpen={true}
-              type="projects"
-              projectNameInput={projectNameInput}
-              setProjectNameInput={setProjectNameInput}
-              projectDescriptionInput={projectDescriptionInput}
-              setProjectDescriptionInput={setProjectDescriptionInput}
-              technologyInput={technologyInput}
-              setTechnologyInput={setTechnologyInput}
-              achievementInput={achievementInput}
-              setAchievementInput={setAchievementInput}
-              onProjectFilter={onProjectFilter}
-              onAchievementFilter={onAchievementFilter}
-              isLoading={isLoading}
-            />
+          {/* Resource Planning Filters */}
+          <Collapsible open={isResourcePlanningOpen} onOpenChange={setIsResourcePlanningOpen}>
+            <CollapsibleTrigger asChild>
+              <Button variant="outline" className="w-full justify-between">
+                <div className="flex items-center gap-2">
+                  <TrendingUp className="h-4 w-4" />
+                  Resource Planning
+                </div>
+                <ChevronDown className={cn("h-4 w-4 transition-transform", isResourcePlanningOpen && "rotate-180")} />
+              </Button>
+            </CollapsibleTrigger>
+            <CollapsibleContent className="mt-3 space-y-4">
+              {/* Availability Status */}
+              <div className="space-y-2">
+                <Label className="text-sm font-medium">Availability Status</Label>
+                <Select value={availabilityStatus} onValueChange={setAvailabilityStatus}>
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Select availability" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All</SelectItem>
+                    <SelectItem value="available">Available</SelectItem>
+                    <SelectItem value="engaged">Engaged</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
 
-          {/* Collapsible Filter Sections */}
+              {/* Current Project Search */}
+              <div className="space-y-2">
+                <Label className="text-sm font-medium">Current Project</Label>
+                <div className="relative">
+                  <Building2 className="absolute left-2 top-2.5 h-4 w-4 text-gray-400" />
+                  <Input
+                    placeholder="Search current project..."
+                    value={currentProjectSearch}
+                    onChange={(e) => setCurrentProjectSearch(e.target.value)}
+                    className="pl-8"
+                  />
+                </div>
+              </div>
+
+              {/* Engagement Percentage Range */}
+              <div className="space-y-3">
+                <Label className="text-sm font-medium">Engagement Percentage</Label>
+                <div className="px-2">
+                  <Slider
+                    value={engagementRange}
+                    onValueChange={setEngagementRange}
+                    max={100}
+                    min={0}
+                    step={5}
+                    className="w-full"
+                  />
+                  <div className="flex justify-between text-xs text-gray-500 mt-1">
+                    <span>{engagementRange[0]}%</span>
+                    <span>{engagementRange[1]}%</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Billing Percentage Range */}
+              <div className="space-y-3">
+                <Label className="text-sm font-medium">Billing Percentage</Label>
+                <div className="px-2">
+                  <Slider
+                    value={billingRange}
+                    onValueChange={setBillingRange}
+                    max={100}
+                    min={0}
+                    step={5}
+                    className="w-full"
+                  />
+                  <div className="flex justify-between text-xs text-gray-500 mt-1">
+                    <span>{billingRange[0]}%</span>
+                    <span>{billingRange[1]}%</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Release Date Range */}
+              <div className="space-y-2">
+                <Label className="text-sm font-medium">Release Date Range</Label>
+                <div className="grid grid-cols-2 gap-2">
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className={cn(
+                          "w-full justify-start text-left font-normal",
+                          !releaseDateFrom && "text-muted-foreground"
+                        )}
+                      >
+                        <CalendarIcon className="mr-2 h-4 w-4" />
+                        {releaseDateFrom ? format(releaseDateFrom, "PPP") : "From"}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <Calendar
+                        mode="single"
+                        selected={releaseDateFrom}
+                        onSelect={setReleaseDateFrom}
+                        initialFocus
+                      />
+                    </PopoverContent>
+                  </Popover>
+                  
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className={cn(
+                          "w-full justify-start text-left font-normal",
+                          !releaseDateTo && "text-muted-foreground"
+                        )}
+                      >
+                        <CalendarIcon className="mr-2 h-4 w-4" />
+                        {releaseDateTo ? format(releaseDateTo, "PPP") : "To"}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <Calendar
+                        mode="single"
+                        selected={releaseDateTo}
+                        onSelect={setReleaseDateTo}
+                        initialFocus
+                      />
+                    </PopoverContent>
+                  </Popover>
+                </div>
+              </div>
+
+              <Button 
+                onClick={handleResourcePlanningFilter}
+                className="w-full mt-3"
+                disabled={isLoading}
+              >
+                Apply Resource Planning Filters
+              </Button>
+            </CollapsibleContent>
+          </Collapsible>
+
+          <CollapsibleFilterSection
+            title="Projects & Tech"
+            icon="code"
+            defaultOpen={true}
+            type="projects"
+            projectNameInput={projectNameInput}
+            setProjectNameInput={setProjectNameInput}
+            projectDescriptionInput={projectDescriptionInput}
+            setProjectDescriptionInput={setProjectDescriptionInput}
+            technologyInput={technologyInput}
+            setTechnologyInput={setTechnologyInput}
+            achievementInput={achievementInput}
+            setAchievementInput={setAchievementInput}
+            onProjectFilter={onProjectFilter}
+            onAchievementFilter={onAchievementFilter}
+            isLoading={isLoading}
+          />
+
           <div className="space-y-3">
             <CollapsibleFilterSection
               title="Professional"
@@ -311,8 +514,6 @@ const VerticalEmployeeSearchSidebar: React.FC<VerticalEmployeeSearchSidebarProps
               onAdvancedFilters={onAdvancedFilters}
               isLoading={isLoading}
             />
-
-          
 
             <CollapsibleFilterSection
               title="Profile Status"

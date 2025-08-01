@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import DashboardLayout from '../../components/Layout/DashboardLayout';
 import { Card, CardContent } from '@/components/ui/card';
@@ -41,6 +42,15 @@ const EmployeeData: React.FC = () => {
     projectFilter,
     sortBy,
     sortOrder,
+    // New resource planning states
+    minEngagementPercentage,
+    maxEngagementPercentage,
+    minBillingPercentage,
+    maxBillingPercentage,
+    releaseDateFrom,
+    releaseDateTo,
+    availabilityStatus,
+    currentProjectSearch,
     fetchProfiles,
     handlePageChange,
     handleSearch,
@@ -52,6 +62,7 @@ const EmployeeData: React.FC = () => {
     handleProjectFilter,
     handleSortChange,
     handleAdvancedFilters,
+    handleResourcePlanningFilters,
     resetFilters
   } = useEmployeeProfilesEnhanced();
 
@@ -231,6 +242,7 @@ const EmployeeData: React.FC = () => {
             onAchievementFilter={handleAchievementFilter}
             onProjectFilter={handleProjectFilter}
             onAdvancedFilters={handleAdvancedFilters}
+            onResourcePlanningFilters={handleResourcePlanningFilters}
             onSortChange={handleSortChange}
             onReset={resetFilters}
             searchQuery={searchQuery}
