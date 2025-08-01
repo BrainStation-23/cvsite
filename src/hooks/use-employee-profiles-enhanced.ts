@@ -142,7 +142,6 @@ export function useEmployeeProfilesEnhanced() {
         min_graduation_year: minGraduationYear,
         max_graduation_year: maxGraduationYear,
         completion_status: completionStatus,
-        // New resource planning parameters
         min_engagement_percentage: minEngPerc,
         max_engagement_percentage: maxEngPerc,
         min_billing_percentage: minBillPerc,
