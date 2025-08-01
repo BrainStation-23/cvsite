@@ -161,13 +161,13 @@ const EmployeeData: React.FC = () => {
 
   return (
     <DashboardLayout>
-      <div className="h-full">
-        <div className="mb-6">
+      <div className="h-full flex flex-col min-w-0 overflow-hidden">
+        <div className="mb-6 flex-shrink-0">
           <EmployeePageHeader />
         </div>
 
         {lastError && (
-          <div className="mb-6">
+          <div className="mb-6 flex-shrink-0">
             <Alert variant="destructive">
               <AlertTriangle className="h-4 w-4" />
               <AlertDescription className="flex items-center justify-between">
@@ -187,7 +187,7 @@ const EmployeeData: React.FC = () => {
         )}
 
         {hasSelection && (
-          <div className="mb-6">
+          <div className="mb-6 flex-shrink-0">
             <BulkActionsToolbar
               selectedProfiles={selectedProfiles}
               totalProfiles={profiles.length}
@@ -200,67 +200,73 @@ const EmployeeData: React.FC = () => {
           </div>
         )}
 
-        <ResizablePanelGroup direction="horizontal" className="h-[calc(100vh-200px)] rounded-lg border">
-          {/* Main Content Panel - 75% default, expandable to 100% */}
-          <ResizablePanel defaultSize={75} minSize={50}>
-            <div className="flex flex-col h-full">
-              <Card className="flex-1">
-                <CardContent className="p-0 h-full">
-                  <CompactEmployeeTable
-                    profiles={profiles}
-                    isLoading={isLoading}
-                    onViewProfile={handleViewProfile}
-                    onSendEmail={handleSendEmail}
-                    selectedProfiles={selectedProfiles}
-                    onProfileSelect={handleProfileSelect}
-                    onSelectAll={selectAll}
-                    onClearSelection={clearSelection}
-                    isAllSelected={isAllSelected}
-                  />
-                </CardContent>
-              </Card>
+        <div className="flex-1 min-h-0 overflow-hidden">
+          <ResizablePanelGroup direction="horizontal" className="h-full w-full rounded-lg border">
+            {/* Main Content Panel - 75% default, expandable to 100% */}
+            <ResizablePanel defaultSize={75} minSize={50} className="min-w-0">
+              <div className="flex flex-col h-full min-w-0">
+                <Card className="flex-1 min-h-0">
+                  <CardContent className="p-0 h-full overflow-hidden">
+                    <div className="h-full overflow-auto">
+                      <CompactEmployeeTable
+                        profiles={profiles}
+                        isLoading={isLoading}
+                        onViewProfile={handleViewProfile}
+                        onSendEmail={handleSendEmail}
+                        selectedProfiles={selectedProfiles}
+                        onProfileSelect={handleProfileSelect}
+                        onSelectAll={selectAll}
+                        onClearSelection={clearSelection}
+                        isAllSelected={isAllSelected}
+                      />
+                    </div>
+                  </CardContent>
+                </Card>
 
-              {pagination.pageCount > 1 && (
-                <div className="mt-4">
-                  <UserPagination
-                    pagination={pagination}
-                    onPageChange={handlePageChange}
-                    onPerPageChange={handlePerPageChange}
-                    isLoading={isLoading}
-                  />
-                </div>
-              )}
-            </div>
-          </ResizablePanel>
+                {pagination.pageCount > 1 && (
+                  <div className="mt-4 flex-shrink-0">
+                    <UserPagination
+                      pagination={pagination}
+                      onPageChange={handlePageChange}
+                      onPerPageChange={handlePerPageChange}
+                      isLoading={isLoading}
+                    />
+                  </div>
+                )}
+              </div>
+            </ResizablePanel>
 
-          <ResizableHandle withHandle />
+            <ResizableHandle withHandle />
 
-          {/* Search Sidebar Panel - 25% default, collapsible */}
-          <ResizablePanel defaultSize={25} minSize={20} maxSize={40} collapsible>
-            <VerticalEmployeeSearchSidebar
-              onSearch={handleSearch}
-              onSkillFilter={handleSkillFilter}
-              onExperienceFilter={handleExperienceFilter}
-              onEducationFilter={handleEducationFilter}
-              onTrainingFilter={handleTrainingFilter}
-              onAchievementFilter={handleAchievementFilter}
-              onProjectFilter={handleProjectFilter}
-              onAdvancedFilters={handleAdvancedFilters}
-              onSortChange={handleSortChange}
-              onReset={resetFilters}
-              searchQuery={searchQuery}
-              skillFilter={skillFilter}
-              experienceFilter={experienceFilter}
-              educationFilter={educationFilter}
-              trainingFilter={trainingFilter}
-              achievementFilter={achievementFilter}
-              projectFilter={projectFilter}
-              sortBy={sortBy}
-              sortOrder={sortOrder}
-              isLoading={isLoading}
-            />
-          </ResizablePanel>
-        </ResizablePanelGroup>
+            {/* Search Sidebar Panel - 25% default, collapsible */}
+            <ResizablePanel defaultSize={25} minSize={20} maxSize={40} collapsible className="min-w-0">
+              <div className="h-full overflow-hidden">
+                <VerticalEmployeeSearchSidebar
+                  onSearch={handleSearch}
+                  onSkillFilter={handleSkillFilter}
+                  onExperienceFilter={handleExperienceFilter}
+                  onEducationFilter={handleEducationFilter}
+                  onTrainingFilter={handleTrainingFilter}
+                  onAchievementFilter={handleAchievementFilter}
+                  onProjectFilter={handleProjectFilter}
+                  onAdvancedFilters={handleAdvancedFilters}
+                  onSortChange={handleSortChange}
+                  onReset={resetFilters}
+                  searchQuery={searchQuery}
+                  skillFilter={skillFilter}
+                  experienceFilter={experienceFilter}
+                  educationFilter={educationFilter}
+                  trainingFilter={trainingFilter}
+                  achievementFilter={achievementFilter}
+                  projectFilter={projectFilter}
+                  sortBy={sortBy}
+                  sortOrder={sortOrder}
+                  isLoading={isLoading}
+                />
+              </div>
+            </ResizablePanel>
+          </ResizablePanelGroup>
+        </div>
 
         {selectedProfile && (
           <SendEmailModal

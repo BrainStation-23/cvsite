@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { 
@@ -232,9 +231,9 @@ const VerticalEmployeeSearchSidebar: React.FC<VerticalEmployeeSearchSidebarProps
   };
 
   return (
-    <div className="w-96 h-full flex flex-col">
+    <div className="w-full h-full flex flex-col min-w-0 overflow-hidden">
       {/* Sticky Search Header */}
-      <div className="sticky top-0 z-10 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
+      <div className="sticky top-0 z-10 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 flex-shrink-0">
         <div className="p-4 pb-3">
           <CompactSearchHeader
             searchQuery={searchQuery}
@@ -248,7 +247,7 @@ const VerticalEmployeeSearchSidebar: React.FC<VerticalEmployeeSearchSidebarProps
       </div>
 
       {/* Scrollable Content */}
-      <div className="flex-1 overflow-y-auto">
+      <div className="flex-1 overflow-y-auto min-h-0">
         <div className="p-4 space-y-4">
           {/* Sort Controls */}
           <VerticalSortControls
