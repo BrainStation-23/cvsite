@@ -1,11 +1,17 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
-import { Search, RefreshCw } from 'lucide-react';
+import { 
+  Select, 
+  SelectContent, 
+  SelectItem, 
+  SelectTrigger, 
+  SelectValue 
+} from '@/components/ui/select';
+import { Search, X } from 'lucide-react';
 import { UserRole } from '@/types';
-import { SortColumn, SortOrder } from '@/hooks/types/user-management';
+import { SortColumn, SortOrder } from '@/hooks/use-user-management';
 
 interface UserSearchFiltersProps {
   onSearch: (query: string | null) => void;
@@ -30,68 +36,105 @@ const UserSearchFilters: React.FC<UserSearchFiltersProps> = ({
   sortOrder,
   isLoading
 }) => {
+  const [searchInput, setSearchInput] = useState(searchQuery || '');
+
+  const handleSearchSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    onSearch(searchInput || null);
+  };
+
+  const handleSortChange = (value: string) => {
+    const [column, order] = value.split('-') as [SortColumn, SortOrder];
+    onSortChange(column, order);
+  };
+
   return (
-    <div className="bg-white dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-700 mb-6">
-      <div className="flex flex-col md:flex-row gap-4">
-        <div className="flex-1">
+    <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow mb-4 space-y-4">
+      <form onSubmit={handleSearchSubmit} className="flex flex-wrap gap-2">
+        <div className="flex-1 min-w-[200px]">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-500" />
             <Input
-              placeholder="Search users..."
-              value={searchQuery || ''}
-              onChange={(e) => onSearch(e.target.value || null)}
-              className="pl-10"
-              disabled={isLoading}
+              type="text"
+              placeholder="Search by name or email..."
+              value={searchInput}
+              onChange={(e) => setSearchInput(e.target.value)}
+              className="pl-9"
             />
+            {searchInput && (
+              <button
+                type="button"
+                onClick={() => {
+                  setSearchInput('');
+                  if (searchQuery) onSearch(null);
+                }}
+                className="absolute right-2.5 top-2.5 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            )}
           </div>
         </div>
-        
-        <Select
-          value={currentRole || 'all'}
-          onValueChange={(value) => onFilterRole(value === 'all' ? null : value as UserRole)}
-          disabled={isLoading}
-        >
-          <SelectTrigger className="w-full md:w-48">
-            <SelectValue placeholder="Filter by role" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Roles</SelectItem>
-            <SelectItem value="admin">Admin</SelectItem>
-            <SelectItem value="user">User</SelectItem>
-            <SelectItem value="hr">HR</SelectItem>
-          </SelectContent>
-        </Select>
-        
-        <Select
-          value={`${sortBy}_${sortOrder}`}
-          onValueChange={(value) => {
-            const [column, order] = value.split('_') as [SortColumn, SortOrder];
-            onSortChange(column, order);
-          }}
-          disabled={isLoading}
-        >
-          <SelectTrigger className="w-full md:w-48">
-            <SelectValue placeholder="Sort by" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="created_at_desc">Newest First</SelectItem>
-            <SelectItem value="created_at_asc">Oldest First</SelectItem>
-            <SelectItem value="firstName_asc">Name A-Z</SelectItem>
-            <SelectItem value="firstName_desc">Name Z-A</SelectItem>
-            <SelectItem value="email_asc">Email A-Z</SelectItem>
-            <SelectItem value="email_desc">Email Z-A</SelectItem>
-          </SelectContent>
-        </Select>
-        
-        <Button
-          variant="outline"
-          onClick={onReset}
-          disabled={isLoading}
-          className="flex items-center gap-2"
-        >
-          <RefreshCw className="h-4 w-4" />
-          Reset
+        <Button type="submit" disabled={isLoading}>
+          Search
         </Button>
+      </form>
+
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div>
+          <label className="text-sm font-medium block mb-1 text-gray-700 dark:text-gray-300">
+            Filter by Role
+          </label>
+          <Select
+            value={currentRole || "all-roles"}
+            onValueChange={(value) => onFilterRole(value === "all-roles" ? null : value as UserRole)}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="All Roles" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all-roles">All Roles</SelectItem>
+              <SelectItem value="admin">Admin</SelectItem>
+              <SelectItem value="manager">Manager</SelectItem>
+              <SelectItem value="employee">Employee</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        
+        <div>
+          <label className="text-sm font-medium block mb-1 text-gray-700 dark:text-gray-300">
+            Sort By
+          </label>
+          <Select
+            value={`${sortBy}-${sortOrder}`}
+            onValueChange={handleSortChange}
+          >
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="created_at-desc">Created Date (Newest)</SelectItem>
+              <SelectItem value="created_at-asc">Created Date (Oldest)</SelectItem>
+              <SelectItem value="email-asc">Email (A-Z)</SelectItem>
+              <SelectItem value="email-desc">Email (Z-A)</SelectItem>
+              <SelectItem value="first_name-asc">First Name (A-Z)</SelectItem>
+              <SelectItem value="first_name-desc">First Name (Z-A)</SelectItem>
+              <SelectItem value="last_name-asc">Last Name (A-Z)</SelectItem>
+              <SelectItem value="last_name-desc">Last Name (Z-A)</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        
+        <div className="flex items-end">
+          <Button 
+            variant="outline" 
+            onClick={onReset}
+            className="w-full"
+            disabled={!searchQuery && !currentRole && sortBy === 'created_at' && sortOrder === 'desc'}
+          >
+            Reset Filters
+          </Button>
+        </div>
       </div>
     </div>
   );
