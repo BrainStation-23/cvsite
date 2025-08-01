@@ -41,7 +41,7 @@ const CompactSkillsDisplay: React.FC<CompactSkillsDisplayProps> = ({
       className={`text-xs px-2 py-1 ${getProficiencyColor(skill.proficiency)}`}
     >
       <span className="truncate max-w-20">{skill.name}</span>
-      <span className="ml-1 font-medium">{skill.proficiency}</span>
+      <span className="ml-1 font-medium">({skill.proficiency})</span>
     </Badge>
   );
 
