@@ -221,7 +221,7 @@ const EmployeeData: React.FC = () => {
         </div>
 
         {/* Vertical Search Sidebar - Right Side */}
-        <div className="flex-shrink-0 w-80 border-l border-gray-200 dark:border-gray-700">
+        <div className="flex-shrink-0 border-l border-gray-200 dark:border-gray-700">
           <VerticalEmployeeSearchSidebar
             onSearch={handleSearch}
             onSkillFilter={handleSkillFilter}
