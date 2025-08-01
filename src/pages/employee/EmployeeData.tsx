@@ -159,9 +159,9 @@ const EmployeeData: React.FC = () => {
 
   return (
     <DashboardLayout>
-      <div className="flex h-full min-h-screen">
+      <div className="flex h-full w-full min-h-screen overflow-x-hidden">
         {/* Main Content Area - Left Side */}
-        <div className="flex-1 flex flex-col space-y-6 pr-6">
+        <div className="flex-1 w-0 flex flex-col space-y-3 pr-6">
           <EmployeePageHeader />
 
           {lastError && (
@@ -221,7 +221,7 @@ const EmployeeData: React.FC = () => {
         </div>
 
         {/* Vertical Search Sidebar - Right Side */}
-        <div className="flex-shrink-0 border-l border-gray-200 dark:border-gray-700">
+        <div className="flex-shrink-0 w-80 border-l border-gray-200 dark:border-gray-700">
           <VerticalEmployeeSearchSidebar
             onSearch={handleSearch}
             onSkillFilter={handleSkillFilter}
