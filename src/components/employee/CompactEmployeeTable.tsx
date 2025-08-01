@@ -85,7 +85,7 @@ const CompactEmployeeTable: React.FC<CompactEmployeeTableProps> = ({
             </TableHead>
             <TableHead className="min-w-[280px]">Employee Profile</TableHead>
             <TableHead className="min-w-[300px]">Skills & Expertise</TableHead>
-            <TableHead className="min-w-[220px]">Certifications</TableHead>
+            <TableHead className="min-w-[150px]">Certifications</TableHead>
             <TableHead className="w-20 text-right">Actions</TableHead>
           </TableRow>
         </TableHeader>
@@ -111,7 +111,7 @@ const CompactEmployeeTable: React.FC<CompactEmployeeTableProps> = ({
                     specializedSkills={profile.specialized_skills || []}
                   />
                 </TableCell>
-                <TableCell className="py-4">
+                <TableCell className="py-4 max-w-[420px] ">
                   <CompactTrainingSummary
                     trainings={profile.trainings || []}
                   />
