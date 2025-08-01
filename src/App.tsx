@@ -22,9 +22,6 @@ import ProfileManagementSettings from '@/pages/admin/platform-settings/ProfileMa
 import ResourcePlanningSettings from '@/pages/admin/platform-settings/ResourcePlanningSettings';
 import CVTemplateSettings from '@/pages/admin/platform-settings/CVTemplateSettings';
 import SystemConfigurationSettings from '@/pages/admin/platform-settings/SystemConfigurationSettings';
-import CVTemplates from '@/pages/admin/CVTemplates';
-import CVTemplateEdit from '@/pages/admin/CVTemplateEdit';
-import CVTemplatesConfigurationPage from '@/pages/cv-templates/configuration';
 import SecurityPage from '@/pages/security/SecurityPage';
 import NotFound from '@/pages/NotFound';
 import TrainingCertification from '@/pages/TrainingCertification';
@@ -356,7 +353,7 @@ function App(): React.ReactElement {
               path="/admin/cv-templates"
               element={
                 <ProtectedRoute allowedRoles={['admin']}>
-                  <CVTemplates />
+                  Placeholder
                 </ProtectedRoute>
               }
             />
@@ -364,7 +361,7 @@ function App(): React.ReactElement {
               path="/admin/cv-templates/:id/edit"
               element={
                 <ProtectedRoute allowedRoles={['admin']}>
-                  <CVTemplateEdit />
+                  Placeholder
                 </ProtectedRoute>
               }
             />
@@ -404,7 +401,7 @@ function App(): React.ReactElement {
               path="/cv-templates/configuration"
               element={
                 <ProtectedRoute allowedRoles={['admin']}>
-                  <CVTemplatesConfigurationPage />
+                  Placeholder
                 </ProtectedRoute>
               }
             />
