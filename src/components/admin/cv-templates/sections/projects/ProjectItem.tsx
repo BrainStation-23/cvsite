@@ -9,6 +9,8 @@ interface FieldMapping {
   is_masked: boolean;
   mask_value?: string;
   field_order: number;
+  visibility_rules?: Record<string, any>;
+  section_type?: string;
 }
 
 interface ProjectItemProps {
