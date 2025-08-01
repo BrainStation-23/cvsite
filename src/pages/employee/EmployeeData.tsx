@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import DashboardLayout from '../../components/Layout/DashboardLayout';
 import { Card, CardContent } from '@/components/ui/card';
@@ -160,86 +159,94 @@ const EmployeeData: React.FC = () => {
 
   return (
     <DashboardLayout>
-      <div className="space-y-6">
-        <EmployeePageHeader />
+      <div className="flex h-full min-h-screen">
+        {/* Main Content Area - Left Side */}
+        <div className="flex-1 flex flex-col space-y-6 pr-6">
+          <EmployeePageHeader />
 
-        {lastError && (
-          <Alert variant="destructive">
-            <AlertTriangle className="h-4 w-4" />
-            <AlertDescription className="flex items-center justify-between">
-              <span>{lastError}</span>
-              <Button 
-                variant="outline" 
-                size="sm" 
-                onClick={handleRetry}
-                className="ml-4"
-              >
-                <RefreshCw className="h-4 w-4 mr-2" />
-                Retry
-              </Button>
-            </AlertDescription>
-          </Alert>
-        )}
+          {lastError && (
+            <Alert variant="destructive">
+              <AlertTriangle className="h-4 w-4" />
+              <AlertDescription className="flex items-center justify-between">
+                <span>{lastError}</span>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={handleRetry}
+                  className="ml-4"
+                >
+                  <RefreshCw className="h-4 w-4 mr-2" />
+                  Retry
+                </Button>
+              </AlertDescription>
+            </Alert>
+          )}
 
-        <EnhancedEmployeeSearchFilters
-          onSearch={handleSearch}
-          onSkillFilter={handleSkillFilter}
-          onExperienceFilter={handleExperienceFilter}
-          onEducationFilter={handleEducationFilter}
-          onTrainingFilter={handleTrainingFilter}
-          onAchievementFilter={handleAchievementFilter}
-          onProjectFilter={handleProjectFilter}
-          onAdvancedFilters={handleAdvancedFilters}
-          onSortChange={handleSortChange}
-          onReset={resetFilters}
-          searchQuery={searchQuery}
-          skillFilter={skillFilter}
-          experienceFilter={experienceFilter}
-          educationFilter={educationFilter}
-          trainingFilter={trainingFilter}
-          achievementFilter={achievementFilter}
-          projectFilter={projectFilter}
-          sortBy={sortBy}
-          sortOrder={sortOrder}
-          isLoading={isLoading}
-        />
-
-        {hasSelection && (
-          <BulkActionsToolbar
-            selectedProfiles={selectedProfiles}
-            totalProfiles={profiles.length}
-            onSelectAll={selectAll}
-            onClearSelection={clearSelection}
-            onBulkEmail={handleBulkEmail}
-            onBulkExport={handleBulkExport}
-            isAllSelected={isAllSelected}
-          />
-        )}
-
-        <Card>
-          <CardContent className="p-0">
-            <CompactEmployeeTable
-              profiles={profiles}
-              isLoading={isLoading}
-              onViewProfile={handleViewProfile}
-              onSendEmail={handleSendEmail}
+          {hasSelection && (
+            <BulkActionsToolbar
               selectedProfiles={selectedProfiles}
-              onProfileSelect={handleProfileSelect}
+              totalProfiles={profiles.length}
               onSelectAll={selectAll}
               onClearSelection={clearSelection}
+              onBulkEmail={handleBulkEmail}
+              onBulkExport={handleBulkExport}
               isAllSelected={isAllSelected}
             />
-          </CardContent>
-        </Card>
+          )}
 
-        {pagination.pageCount > 1 && (
-          <UserPagination
-            pagination={pagination}
-            onPageChange={handlePageChange}
-            onPerPageChange={handlePerPageChange}
-            isLoading={isLoading}
-          />
-        )}
+          <Card className="flex-1">
+            <CardContent className="p-0">
+              <CompactEmployeeTable
+                profiles={profiles}
+                isLoading={isLoading}
+                onViewProfile={handleViewProfile}
+                onSendEmail={handleSendEmail}
+                selectedProfiles={selectedProfiles}
+                onProfileSelect={handleProfileSelect}
+                onSelectAll={selectAll}
+                onClearSelection={clearSelection}
+                isAllSelected={isAllSelected}
+              />
+            </CardContent>
+          </Card>
+
+          {pagination.pageCount > 1 && (
+            <UserPagination
+              pagination={pagination}
+              onPageChange={handlePageChange}
+              onPerPageChange={handlePerPageChange}
+              isLoading={isLoading}
+            />
+          )}
+        </div>
+
+        {/* Search Filters - Right Side */}
+        <div className="w-96 flex-shrink-0">
+          <div className="sticky top-6">
+            <EnhancedEmployeeSearchFilters
+              onSearch={handleSearch}
+              onSkillFilter={handleSkillFilter}
+              onExperienceFilter={handleExperienceFilter}
+              onEducationFilter={handleEducationFilter}
+              onTrainingFilter={handleTrainingFilter}
+              onAchievementFilter={handleAchievementFilter}
+              onProjectFilter={handleProjectFilter}
+              onAdvancedFilters={handleAdvancedFilters}
+              onSortChange={handleSortChange}
+              onReset={resetFilters}
+              searchQuery={searchQuery}
+              skillFilter={skillFilter}
+              experienceFilter={experienceFilter}
+              educationFilter={educationFilter}
+              trainingFilter={trainingFilter}
+              achievementFilter={achievementFilter}
+              projectFilter={projectFilter}
+              sortBy={sortBy}
+              sortOrder={sortOrder}
+              isLoading={isLoading}
+            />
+          </div>
+        </div>
 
         {selectedProfile && (
           <SendEmailModal
