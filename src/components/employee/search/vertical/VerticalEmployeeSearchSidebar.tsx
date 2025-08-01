@@ -7,7 +7,9 @@ import {
 import CompactSearchHeader from './CompactSearchHeader';
 import VerticalFilterChips from './VerticalFilterChips';
 import CollapsibleFilterSection from './CollapsibleFilterSection';
-import { ResourcePlanningFilters } from './ResourcePlanningFilters';
+import { useFilterState } from '../FilterState';
+import { useFilterChipsManager } from '../FilterChipsManager';
+import { useAdvancedFiltersManager } from '../AdvancedFiltersManager';
 
 interface VerticalEmployeeSearchSidebarProps {
   onSearch: (query: string) => void;
@@ -24,28 +26,18 @@ interface VerticalEmployeeSearchSidebarProps {
     maxGraduationYear?: number | null;
     completionStatus?: string | null;
   }) => void;
-  onResourcePlanningFilters: (filters: {
-    minEngagementPercentage?: number | null;
-    maxEngagementPercentage?: number | null;
-    minBillingPercentage?: number | null;
-    maxBillingPercentage?: number | null;
-    releaseDateFrom?: string | null;
-    releaseDateTo?: string | null;
-    availabilityStatus?: string | null;
-    currentProjectSearch?: string | null;
-  }) => void;
   onSortChange: (column: EmployeeProfileSortColumn, order: EmployeeProfileSortOrder) => void;
   onReset: () => void;
-  searchQuery: string | null;
-  skillFilter: string | null;
-  experienceFilter: string | null;
-  educationFilter: string | null;
-  trainingFilter: string | null;
-  achievementFilter: string | null;
-  projectFilter: string | null;
+  searchQuery: string;
+  skillFilter: string;
+  experienceFilter: string;
+  educationFilter: string;
+  trainingFilter: string;
+  achievementFilter: string;
+  projectFilter: string;
   sortBy: EmployeeProfileSortColumn;
   sortOrder: EmployeeProfileSortOrder;
-  isLoading?: boolean;
+  isLoading: boolean;
 }
 
 const VerticalEmployeeSearchSidebar: React.FC<VerticalEmployeeSearchSidebarProps> = ({
@@ -57,7 +49,6 @@ const VerticalEmployeeSearchSidebar: React.FC<VerticalEmployeeSearchSidebarProps
   onAchievementFilter,
   onProjectFilter,
   onAdvancedFilters,
-  onResourcePlanningFilters,
   onSortChange,
   onReset,
   searchQuery,
@@ -69,87 +60,188 @@ const VerticalEmployeeSearchSidebar: React.FC<VerticalEmployeeSearchSidebarProps
   projectFilter,
   sortBy,
   sortOrder,
-  isLoading = false
+  isLoading
 }) => {
-  // Local state for form inputs
+  const [searchMode, setSearchMode] = useState<'manual' | 'ai'>('manual');
+  const [experienceYears, setExperienceYears] = useState<number[]>([0, 20]);
+  const [minGraduationYear, setMinGraduationYear] = useState<number | null>(null);
+  const [maxGraduationYear, setMaxGraduationYear] = useState<number | null>(null);
+  const [completionStatus, setCompletionStatus] = useState<string>('all');
+  
   const [skillInput, setSkillInput] = useState('');
-  const [experienceInput, setExperienceInput] = useState('');
-  const [educationInput, setEducationInput] = useState('');
-  const [trainingInput, setTrainingInput] = useState('');
+  const [universityInput, setUniversityInput] = useState('');
+  const [companyInput, setCompanyInput] = useState('');
+  const [technologyInput, setTechnologyInput] = useState<string[]>([]);
   const [projectNameInput, setProjectNameInput] = useState('');
   const [projectDescriptionInput, setProjectDescriptionInput] = useState('');
-  const [technologyInput, setTechnologyInput] = useState('');
+  const [trainingInput, setTrainingInput] = useState('');
   const [achievementInput, setAchievementInput] = useState('');
 
-  // Advanced filters state
-  const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
-  const [advancedFilters, setAdvancedFilters] = useState<{
-    minExperienceYears?: number | null;
-    maxExperienceYears?: number | null;
-    minGraduationYear?: number | null;
-    maxGraduationYear?: number | null;
-    completionStatus?: string | null;
-  }>({});
+  const [highlightedFilters, setHighlightedFilters] = useState<string[]>([]);
 
-  const handleAdvancedFilterChange = (field: string, value: any) => {
-    setAdvancedFilters(prev => ({ ...prev, [field]: value }));
-  };
+  const { activeFilters } = useFilterState({
+    searchQuery,
+    skillFilter,
+    experienceFilter,
+    educationFilter,
+    trainingFilter,
+    achievementFilter,
+    projectFilter,
+    experienceYears,
+    minGraduationYear,
+    maxGraduationYear,
+    completionStatus,
+    skillInput,
+    universityInput,
+    companyInput,
+    technologyInput,
+    projectNameInput,
+    projectDescriptionInput,
+    trainingInput,
+    achievementInput
+  });
 
-  const applyAdvancedFilters = () => {
-    onAdvancedFilters(advancedFilters);
-  };
+  const { removeFilter } = useFilterChipsManager({
+    activeFilters,
+    experienceYears,
+    minGraduationYear,
+    maxGraduationYear,
+    completionStatus,
+    onSearch,
+    onSkillFilter,
+    onExperienceFilter,
+    onEducationFilter,
+    onTrainingFilter,
+    onAchievementFilter,
+    onProjectFilter,
+    onAdvancedFilters,
+    setExperienceYears,
+    setMinGraduationYear,
+    setMaxGraduationYear,
+    setCompletionStatus,
+    setSkillInput,
+    setUniversityInput,
+    setCompanyInput,
+    setTechnologyInput,
+    setProjectNameInput,
+    setProjectDescriptionInput,
+    setTrainingInput,
+    setAchievementInput,
+    technologyInput
+  });
 
-  const clearAdvancedFilters = () => {
-    setAdvancedFilters({});
-    onAdvancedFilters({});
-  };
+  const { clearAllFilters } = useAdvancedFiltersManager({
+    skillInput,
+    universityInput,
+    companyInput,
+    technologyInput,
+    projectNameInput,
+    projectDescriptionInput,
+    trainingInput,
+    achievementInput,
+    experienceYears,
+    minGraduationYear,
+    maxGraduationYear,
+    completionStatus,
+    onSkillFilter,
+    onExperienceFilter,
+    onProjectFilter,
+    onTrainingFilter,
+    onAchievementFilter,
+    onAdvancedFilters,
+    setSkillInput,
+    setUniversityInput,
+    setCompanyInput,
+    setTechnologyInput,
+    setProjectNameInput,
+    setProjectDescriptionInput,
+    setTrainingInput,
+    setAchievementInput,
+    setExperienceYears,
+    setMinGraduationYear,
+    setMaxGraduationYear,
+    setCompletionStatus,
+    onReset
+  });
 
-  // Create active filters array
-  const activeFilters = [];
-  if (searchQuery) activeFilters.push({ id: 'search', label: `Search: ${searchQuery}`, type: 'search' });
-  if (skillFilter) activeFilters.push({ id: 'skill', label: `Skill: ${skillFilter}`, type: 'skill' });
-  if (experienceFilter) activeFilters.push({ id: 'experience', label: `Experience: ${experienceFilter}`, type: 'experience' });
-  if (educationFilter) activeFilters.push({ id: 'education', label: `Education: ${educationFilter}`, type: 'education' });
-  if (trainingFilter) activeFilters.push({ id: 'training', label: `Training: ${trainingFilter}`, type: 'training' });
-  if (achievementFilter) activeFilters.push({ id: 'achievement', label: `Achievement: ${achievementFilter}`, type: 'achievement' });
-  if (projectFilter) activeFilters.push({ id: 'project', label: `Project: ${projectFilter}`, type: 'project' });
+  const handleAISearch = (filters: any) => {
+    console.log('Applying AI search filters:', filters);
 
-  const removeFilter = (filterId: string) => {
-    switch (filterId) {
-      case 'search':
-        onSearch('');
-        break;
-      case 'skill':
-        onSkillFilter('');
-        break;
-      case 'experience':
-        onExperienceFilter('');
-        break;
-      case 'education':
-        onEducationFilter('');
-        break;
-      case 'training':
-        onTrainingFilter('');
-        break;
-      case 'achievement':
-        onAchievementFilter('');
-        break;
-      case 'project':
-        onProjectFilter('');
-        break;
+    const changed: string[] = [];
+
+    if ('search_query' in filters && filters.search_query !== searchQuery) {
+      onSearch(filters.search_query);
+      changed.push('search');
     }
+    if ('skill_filter' in filters && filters.skill_filter !== skillFilter) {
+      onSkillFilter(filters.skill_filter);
+      changed.push('skill');
+    }
+    if ('experience_filter' in filters && filters.experience_filter !== experienceFilter) {
+      onExperienceFilter(filters.experience_filter);
+      changed.push('experience');
+    }
+    if ('education_filter' in filters && filters.education_filter !== educationFilter) {
+      onEducationFilter(filters.education_filter);
+      changed.push('education');
+    }
+    if ('training_filter' in filters && filters.training_filter !== trainingFilter) {
+      onTrainingFilter(filters.training_filter);
+      changed.push('training');
+    }
+    if ('achievement_filter' in filters && filters.achievement_filter !== achievementFilter) {
+      onAchievementFilter(filters.achievement_filter);
+      changed.push('achievement');
+    }
+    if ('project_filter' in filters && filters.project_filter !== projectFilter) {
+      onProjectFilter(filters.project_filter);
+      changed.push('project');
+    }
+
+    const advancedFilters: any = {};
+    if ('min_experience_years' in filters) {
+      advancedFilters.minExperienceYears = filters.min_experience_years;
+      changed.push('experience-years');
+    }
+    if ('max_experience_years' in filters) {
+      advancedFilters.maxExperienceYears = filters.max_experience_years;
+      changed.push('experience-years');
+    }
+    if ('min_graduation_year' in filters) {
+      advancedFilters.minGraduationYear = filters.min_graduation_year;
+      changed.push('graduation-years');
+    }
+    if ('max_graduation_year' in filters) {
+      advancedFilters.maxGraduationYear = filters.max_graduation_year;
+      changed.push('graduation-years');
+    }
+    if ('completion_status' in filters && filters.completion_status !== completionStatus) {
+      advancedFilters.completionStatus = filters.completion_status;
+      changed.push('completion');
+    }
+
+    if (Object.keys(advancedFilters).length > 0) {
+      onAdvancedFilters(advancedFilters);
+    }
+
+    setHighlightedFilters(Array.from(new Set(changed)));
+    setTimeout(() => setHighlightedFilters([]), 2000);
   };
 
   return (
-    <div className="w-80 h-full bg-white dark:bg-gray-900 border-l border-gray-200 dark:border-gray-700 flex flex-col">
-      {/* Fixed Header */}
-      <div className="border-b border-gray-200 dark:border-gray-700">
-        <CompactSearchHeader
-          searchQuery={searchQuery || ''}
-          onSearchChange={onSearch}
-          onReset={onReset}
-          isLoading={isLoading}
-        />
+    <div className="w-96 h-full flex flex-col">
+      {/* Sticky Search Header */}
+      <div className="sticky top-0 z-10 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
+        <div className="p-4 pb-3">
+          <CompactSearchHeader
+            searchQuery={searchQuery}
+            searchMode={searchMode}
+            onSearchModeChange={setSearchMode}
+            onSearch={onSearch}
+            onAISearch={handleAISearch}
+            isLoading={isLoading}
+          />
+        </div>
       </div>
 
       {/* Scrollable Content */}
@@ -160,55 +252,43 @@ const VerticalEmployeeSearchSidebar: React.FC<VerticalEmployeeSearchSidebarProps
             <VerticalFilterChips
               activeFilters={activeFilters}
               onRemoveFilter={removeFilter}
-              isLoading={isLoading}
-              highlightedFilters={[]}
+              onClearAllFilters={clearAllFilters}
+              highlightedFilters={highlightedFilters}
             />
           )}
 
-          {/* Resource Planning Filters - New */}
-          <ResourcePlanningFilters
-            onResourcePlanningFilters={onResourcePlanningFilters}
-            isLoading={isLoading}
-          />
-
-          <CollapsibleFilterSection
-            title="Projects & Tech"
-            icon="code"
-            defaultOpen={true}
-            type="projects"
-            projectNameInput={projectNameInput}
-            setProjectNameInput={setProjectNameInput}
-            projectDescriptionInput={projectDescriptionInput}
-            setProjectDescriptionInput={setProjectDescriptionInput}
-            technologyInput={technologyInput}
-            setTechnologyInput={setTechnologyInput}
-            achievementInput={achievementInput}
-            setAchievementInput={setAchievementInput}
-            onProjectFilter={onProjectFilter}
-            onAchievementFilter={onAchievementFilter}
-            isLoading={isLoading}
-          />
+            <CollapsibleFilterSection
+              title="Projects & Tech"
+              icon="code"
+              defaultOpen={true}
+              type="projects"
+              projectNameInput={projectNameInput}
+              setProjectNameInput={setProjectNameInput}
+              projectDescriptionInput={projectDescriptionInput}
+              setProjectDescriptionInput={setProjectDescriptionInput}
+              technologyInput={technologyInput}
+              setTechnologyInput={setTechnologyInput}
+              achievementInput={achievementInput}
+              setAchievementInput={setAchievementInput}
+              onProjectFilter={onProjectFilter}
+              onAchievementFilter={onAchievementFilter}
+              isLoading={isLoading}
+            />
 
           {/* Collapsible Filter Sections */}
           <div className="space-y-3">
             <CollapsibleFilterSection
-              title="Skills & Expertise"
-              icon="target"
-              defaultOpen={false}
-              type="skills"
+              title="Professional"
+              icon="briefcase"
+              defaultOpen={true}
+              type="professional"
               skillInput={skillInput}
               setSkillInput={setSkillInput}
+              companyInput={companyInput}
+              setCompanyInput={setCompanyInput}
+              experienceYears={experienceYears}
+              setExperienceYears={setExperienceYears}
               onSkillFilter={onSkillFilter}
-              isLoading={isLoading}
-            />
-
-            <CollapsibleFilterSection
-              title="Experience & Career"
-              icon="briefcase"
-              defaultOpen={false}
-              type="experience"
-              experienceInput={experienceInput}
-              setExperienceInput={setExperienceInput}
               onExperienceFilter={onExperienceFilter}
               isLoading={isLoading}
             />
@@ -218,26 +298,30 @@ const VerticalEmployeeSearchSidebar: React.FC<VerticalEmployeeSearchSidebarProps
               icon="graduation-cap"
               defaultOpen={false}
               type="education"
-              educationInput={educationInput}
-              setEducationInput={setEducationInput}
+              universityInput={universityInput}
+              setUniversityInput={setUniversityInput}
               trainingInput={trainingInput}
               setTrainingInput={setTrainingInput}
+              minGraduationYear={minGraduationYear}
+              maxGraduationYear={maxGraduationYear}
+              setMinGraduationYear={setMinGraduationYear}
+              setMaxGraduationYear={setMaxGraduationYear}
               onEducationFilter={onEducationFilter}
               onTrainingFilter={onTrainingFilter}
+              onAdvancedFilters={onAdvancedFilters}
               isLoading={isLoading}
             />
+
+          
 
             <CollapsibleFilterSection
               title="Profile Status"
               icon="user-check"
               defaultOpen={false}
-              type="advanced"
-              showAdvancedFilters={showAdvancedFilters}
-              setShowAdvancedFilters={setShowAdvancedFilters}
-              advancedFilters={advancedFilters}
-              onAdvancedFilterChange={handleAdvancedFilterChange}
-              onApplyAdvancedFilters={applyAdvancedFilters}
-              onClearAdvancedFilters={clearAdvancedFilters}
+              type="status"
+              completionStatus={completionStatus}
+              setCompletionStatus={setCompletionStatus}
+              onAdvancedFilters={onAdvancedFilters}
               isLoading={isLoading}
             />
           </div>

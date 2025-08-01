@@ -9,8 +9,8 @@ interface FieldMapping {
   is_masked: boolean;
   mask_value?: string;
   field_order: number;
-  visibility_rules?: Record<string, any>;
-  section_type?: string;
+  visibility_rules: Record<string, any>;
+  section_type: string;
 }
 
 interface FieldConfig {
@@ -93,16 +93,18 @@ export const ProjectsSection: React.FC<ProjectsSectionProps> = ({
         <div 
           key={index}
           style={{
-            pageBreakInside: 'auto',
-            breakInside: 'auto',
+            pageBreakInside: 'auto', // Allow breaking inside items if needed
+            breakInside: 'auto', // CSS Grid/Flexbox version
             marginBottom: '16px'
           }}
         >
           <ProjectItem
             project={project}
             index={index}
+            orderedFields={orderedFields}
             fieldMappings={fieldMappings}
             styles={styles}
+            isFieldEnabled={isFieldEnabled}
             applyMasking={applyMasking}
           />
         </div>

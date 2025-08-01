@@ -20,27 +20,6 @@ export interface EmployeeProfile {
     profile_image?: string;
     current_designation?: string;
   };
-  resource_planning?: {
-    id?: string;
-    engagement_percentage?: number;
-    billing_percentage?: number;
-    engagement_start_date?: string;
-    release_date?: string;
-    engagement_complete?: boolean;
-    weekly_validation?: boolean;
-    availability_status: 'available' | 'engaged';
-    days_until_available?: number;
-    current_project?: {
-      id: string;
-      project_name: string;
-      client_name?: string;
-      project_manager?: string;
-    };
-    bill_type?: {
-      id: string;
-      name: string;
-    };
-  };
   technical_skills?: Array<{
     id: string;
     name: string;
@@ -127,10 +106,6 @@ export type EmployeeProfileSortColumn =
   | 'created_at' 
   | 'updated_at'
   | 'total_experience'
-  | 'company_experience'
-  | 'engagement_percentage'
-  | 'billing_percentage' 
-  | 'release_date'
-  | 'availability_status';
+  | 'company_experience';
 
 export type EmployeeProfileSortOrder = 'asc' | 'desc';
