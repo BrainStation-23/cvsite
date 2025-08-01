@@ -116,7 +116,7 @@ const CompactEmployeeTable: React.FC<CompactEmployeeTableProps> = ({
               />
             </TableHead>
             <TableHead className="min-w-[280px]">Employee Profile</TableHead>
-            <TableHead className="min-w-[300px]">Skills & Expertise</TableHead>
+            <TableHead className="min-w-[120px]">Skills & Expertise</TableHead>
             <TableHead className="min-w-[150px]">Certifications</TableHead>
             <TableHead className="min-w-[200px]">Resource Planning</TableHead>
             <TableHead className="w-20 text-right">Actions</TableHead>
