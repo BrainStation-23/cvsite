@@ -1,7 +1,6 @@
 
 import React, { useState } from 'react';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Badge } from '@/components/ui/badge';
 import { 
   Table, 
   TableBody, 
@@ -11,22 +10,16 @@ import {
   TableRow 
 } from '@/components/ui/table';
 import { 
-  Loader2, 
-  Calendar, 
-  TrendingUp, 
-  Building2,
-  Clock
+  Loader2
 } from 'lucide-react';
 import CompactEmployeeProfile from './compact-table/CompactEmployeeProfile';
 import CompactSkillsDisplay from './compact-table/CompactSkillsDisplay';
 import CompactTrainingSummary from './compact-table/CompactTrainingSummary';
+import CompactResourcePlanning from './compact-table/CompactResourcePlanning';
 import CompactEmployeeActions from './compact-table/CompactEmployeeActions';
 import NotesDialog from './NotesDialog';
 import { 
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
+  TooltipProvider
 } from '@/components/ui/tooltip';
 
 interface CompactEmployeeTableProps {
@@ -69,25 +62,6 @@ const CompactEmployeeTable: React.FC<CompactEmployeeTableProps> = ({
   const handleCloseNotesDialog = () => {
     setNotesDialogOpen(false);
     setSelectedProfileForNotes(null);
-  };
-
-  const getAvailabilityBadge = (resourcePlanning?: any) => {
-    const status = resourcePlanning?.availability_status || 'available';
-    const variant = status === 'available' ? 'default' : status === 'engaged' ? 'secondary' : 'outline';
-    const color = status === 'available' ? 'text-green-700 bg-green-50 border-green-200' : 
-                  status === 'engaged' ? 'text-orange-700 bg-orange-50 border-orange-200' : 
-                  'text-gray-700 bg-gray-50 border-gray-200';
-    
-    return (
-      <Badge variant={variant} className={`${color} text-xs`}>
-        {status === 'available' ? 'Available' : status === 'engaged' ? 'Engaged' : 'Unknown'}
-      </Badge>
-    );
-  };
-
-  const formatReleaseDate = (date?: string) => {
-    if (!date) return 'N/A';
-    return new Date(date).toLocaleDateString();
   };
 
   if (isLoading && profiles.length === 0) {
@@ -150,63 +124,9 @@ const CompactEmployeeTable: React.FC<CompactEmployeeTableProps> = ({
                   />
                 </TableCell>
                 <TableCell className="py-4">
-                  <div className="space-y-2">
-                    {/* Availability Status */}
-                    <div className="flex items-center gap-2">
-                      {getAvailabilityBadge(profile.resource_planning)}
-                    </div>
-                    
-                    {/* Current Project */}
-                    {profile.resource_planning?.current_project && (
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <div className="flex items-center gap-1 text-sm">
-                            <Building2 className="h-3 w-3 text-blue-600" />
-                            <span className="truncate max-w-[150px]">
-                              {profile.resource_planning.current_project.project_name}
-                            </span>
-                          </div>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          <div>
-                            <div className="font-medium">{profile.resource_planning.current_project.project_name}</div>
-                            {profile.resource_planning.current_project.client_name && (
-                              <div className="text-xs text-gray-600">Client: {profile.resource_planning.current_project.client_name}</div>
-                            )}
-                          </div>
-                        </TooltipContent>
-                      </Tooltip>
-                    )}
-                    
-                    {/* Engagement & Billing Percentages */}
-                    {profile.resource_planning?.engagement_percentage && (
-                      <div className="flex items-center gap-1 text-xs text-gray-600">
-                        <TrendingUp className="h-3 w-3" />
-                        <span>
-                          Eng: {profile.resource_planning.engagement_percentage}%
-                          {profile.resource_planning.billing_percentage && (
-                            ` | Bill: ${profile.resource_planning.billing_percentage}%`
-                          )}
-                        </span>
-                      </div>
-                    )}
-                    
-                    {/* Release Date */}
-                    {profile.resource_planning?.release_date && (
-                      <div className="flex items-center gap-1 text-xs text-gray-600">
-                        <Calendar className="h-3 w-3" />
-                        <span>Release: {formatReleaseDate(profile.resource_planning.release_date)}</span>
-                      </div>
-                    )}
-                    
-                    {/* Days Until Available */}
-                    {profile.resource_planning?.days_until_available > 0 && (
-                      <div className="flex items-center gap-1 text-xs text-orange-600">
-                        <Clock className="h-3 w-3" />
-                        <span>{profile.resource_planning.days_until_available} days until available</span>
-                      </div>
-                    )}
-                  </div>
+                  <CompactResourcePlanning
+                    resourcePlanning={profile.resource_planning}
+                  />
                 </TableCell>
                 <TableCell className="py-4">
                   <CompactEmployeeActions
