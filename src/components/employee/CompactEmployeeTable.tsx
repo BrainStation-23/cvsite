@@ -68,7 +68,7 @@ const CompactEmployeeTable: React.FC<CompactEmployeeTableProps> = ({
 
   return (
     <>
-      <div className="w-full overflow-x-auto">
+      <div className="w-full">
         <Table className="w-full min-w-[800px]">
           <TableHeader>
             <TableRow>
