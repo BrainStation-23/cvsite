@@ -111,7 +111,7 @@ const CompactEmployeeTable: React.FC<CompactEmployeeTableProps> = ({
                     specializedSkills={profile.specialized_skills || []}
                   />
                 </TableCell>
-                <TableCell className="py-4 max-w-[400px] ">
+                <TableCell className="py-4 max-w-[380px] ">
                   <CompactTrainingSummary
                     trainings={profile.trainings || []}
                   />

@@ -1,15 +1,12 @@
 
 import React, { useState } from 'react';
-import { Card } from '@/components/ui/card';
 import { 
   EmployeeProfileSortColumn, 
   EmployeeProfileSortOrder 
 } from '@/hooks/types/employee-profiles';
 import CompactSearchHeader from './CompactSearchHeader';
-import VerticalSortControls from './VerticalSortControls';
 import VerticalFilterChips from './VerticalFilterChips';
 import CollapsibleFilterSection from './CollapsibleFilterSection';
-import FilterPresets from './FilterPresets';
 import { useFilterState } from '../FilterState';
 import { useFilterChipsManager } from '../FilterChipsManager';
 import { useAdvancedFiltersManager } from '../AdvancedFiltersManager';
@@ -250,19 +247,6 @@ const VerticalEmployeeSearchSidebar: React.FC<VerticalEmployeeSearchSidebarProps
       {/* Scrollable Content */}
       <div className="flex-1 overflow-y-auto">
         <div className="p-4 space-y-4">
-          {/* Sort Controls */}
-          <VerticalSortControls
-            sortBy={sortBy}
-            sortOrder={sortOrder}
-            onSortChange={onSortChange}
-          />
-
-          {/* Filter Presets */}
-          <FilterPresets
-            onLoadPreset={() => {}}
-            onSavePreset={() => {}}
-          />
-
           {/* Active Filters */}
           {activeFilters.length > 0 && (
             <VerticalFilterChips
@@ -272,6 +256,24 @@ const VerticalEmployeeSearchSidebar: React.FC<VerticalEmployeeSearchSidebarProps
               highlightedFilters={highlightedFilters}
             />
           )}
+
+            <CollapsibleFilterSection
+              title="Projects & Tech"
+              icon="code"
+              defaultOpen={true}
+              type="projects"
+              projectNameInput={projectNameInput}
+              setProjectNameInput={setProjectNameInput}
+              projectDescriptionInput={projectDescriptionInput}
+              setProjectDescriptionInput={setProjectDescriptionInput}
+              technologyInput={technologyInput}
+              setTechnologyInput={setTechnologyInput}
+              achievementInput={achievementInput}
+              setAchievementInput={setAchievementInput}
+              onProjectFilter={onProjectFilter}
+              onAchievementFilter={onAchievementFilter}
+              isLoading={isLoading}
+            />
 
           {/* Collapsible Filter Sections */}
           <div className="space-y-3">
@@ -310,23 +312,7 @@ const VerticalEmployeeSearchSidebar: React.FC<VerticalEmployeeSearchSidebarProps
               isLoading={isLoading}
             />
 
-            <CollapsibleFilterSection
-              title="Projects & Tech"
-              icon="code"
-              defaultOpen={false}
-              type="projects"
-              projectNameInput={projectNameInput}
-              setProjectNameInput={setProjectNameInput}
-              projectDescriptionInput={projectDescriptionInput}
-              setProjectDescriptionInput={setProjectDescriptionInput}
-              technologyInput={technologyInput}
-              setTechnologyInput={setTechnologyInput}
-              achievementInput={achievementInput}
-              setAchievementInput={setAchievementInput}
-              onProjectFilter={onProjectFilter}
-              onAchievementFilter={onAchievementFilter}
-              isLoading={isLoading}
-            />
+          
 
             <CollapsibleFilterSection
               title="Profile Status"

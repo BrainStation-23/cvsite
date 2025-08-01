@@ -1,5 +1,3 @@
-
-import React from 'react';
 import { FieldProcessor } from '../../../FieldProcessor';
 
 interface FieldMapping {
@@ -14,7 +12,6 @@ interface FieldMapping {
 
 export const ProjectTechnologiesRenderer = (
   project: any, 
-  index: number, 
   fieldMappings: FieldMapping[], 
   styles: any, 
   applyMasking: (value: any, fieldName: string) => any
@@ -32,7 +29,7 @@ export const ProjectTechnologiesRenderer = (
       fieldMappings={fieldMappings}
       sectionType="projects"
     >
-      {(processedValue, displayName, shouldShow) => (
+      {(processedValue, _displayName, shouldShow) => (
         shouldShow && processedValue && processedValue.length > 0 && (
           <div style={{ marginTop: '5pt' }}>
             <div style={styles.skillsContainerStyles}>
