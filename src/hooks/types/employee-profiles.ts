@@ -1,3 +1,24 @@
+export interface ResourcePlanningInfo {
+  id?: string;
+  engagement_percentage?: number;
+  billing_percentage?: number;
+  engagement_start_date?: string;
+  release_date?: string;
+  engagement_complete?: boolean;
+  weekly_validation?: boolean;
+  availability_status: string;
+  days_until_available: number;
+  current_project?: {
+    id: string;
+    project_name: string;
+    client_name?: string;
+    project_manager?: string;
+  };
+  bill_type?: {
+    id: string;
+    name: string;
+  };
+}
 
 export interface EmployeeProfile {
   id: string;
@@ -13,6 +34,7 @@ export interface EmployeeProfile {
   expertise_name?: string;
   total_experience_years?: number;
   company_experience_years?: number;
+  resource_planning?: ResourcePlanningInfo;
   general_information?: {
     first_name?: string;
     last_name?: string;
@@ -106,6 +128,10 @@ export type EmployeeProfileSortColumn =
   | 'created_at' 
   | 'updated_at'
   | 'total_experience'
-  | 'company_experience';
+  | 'company_experience'
+  | 'engagement_percentage'
+  | 'billing_percentage'
+  | 'release_date'
+  | 'availability_status';
 
 export type EmployeeProfileSortOrder = 'asc' | 'desc';

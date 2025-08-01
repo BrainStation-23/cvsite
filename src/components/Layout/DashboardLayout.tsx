@@ -118,8 +118,8 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
         <DashboardHeader pageTitle={getPageTitle()} user={user} />
 
         {/* Content */}
-        <main className="flex-1 px-6 py-6 bg-slate-50 dark:bg-slate-900">
-          <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm p-6">
+        <main className="flex-1 p-2 bg-slate-50 dark:bg-slate-900">
+          <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm p-4">
             {children}
           </div>
         </main>

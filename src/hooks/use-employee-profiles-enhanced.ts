@@ -1,4 +1,3 @@
-
 import { useState, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -50,6 +49,16 @@ export function useEmployeeProfilesEnhanced() {
   const [sortBy, setSortBy] = useState<EmployeeProfileSortColumn>('last_name');
   const [sortOrder, setSortOrder] = useState<EmployeeProfileSortOrder>('asc');
 
+  // New resource planning filter states
+  const [minEngagementPercentage, setMinEngagementPercentage] = useState<number | null>(null);
+  const [maxEngagementPercentage, setMaxEngagementPercentage] = useState<number | null>(null);
+  const [minBillingPercentage, setMinBillingPercentage] = useState<number | null>(null);
+  const [maxBillingPercentage, setMaxBillingPercentage] = useState<number | null>(null);
+  const [releaseDateFrom, setReleaseDateFrom] = useState<Date | null>(null);
+  const [releaseDateTo, setReleaseDateTo] = useState<Date | null>(null);
+  const [availabilityStatus, setAvailabilityStatus] = useState<string | null>(null);
+  const [currentProjectSearch, setCurrentProjectSearch] = useState<string | null>(null);
+
   const fetchProfiles = useCallback(async (options: {
     page?: number;
     perPage?: number;
@@ -65,6 +74,15 @@ export function useEmployeeProfilesEnhanced() {
     minGraduationYear?: number | null;
     maxGraduationYear?: number | null;
     completionStatus?: string | null;
+    // New resource planning parameters
+    minEngagementPercentage?: number | null;
+    maxEngagementPercentage?: number | null;
+    minBillingPercentage?: number | null;
+    maxBillingPercentage?: number | null;
+    releaseDateFrom?: Date | null;
+    releaseDateTo?: Date | null;
+    availabilityStatus?: string | null;
+    currentProjectSearch?: string | null;
     sortBy?: EmployeeProfileSortColumn;
     sortOrder?: EmployeeProfileSortOrder;
   } = {}) => {
@@ -83,6 +101,15 @@ export function useEmployeeProfilesEnhanced() {
       minGraduationYear = null,
       maxGraduationYear = null,
       completionStatus = null,
+      // New parameters
+      minEngagementPercentage: minEngPerc = minEngagementPercentage,
+      maxEngagementPercentage: maxEngPerc = maxEngagementPercentage,
+      minBillingPercentage: minBillPerc = minBillingPercentage,
+      maxBillingPercentage: maxBillPerc = maxBillingPercentage,
+      releaseDateFrom: relFrom = releaseDateFrom,
+      releaseDateTo: relTo = releaseDateTo,
+      availabilityStatus: avStatus = availabilityStatus,
+      currentProjectSearch: projSearch = currentProjectSearch,
       sortBy: sortField = sortBy,
       sortOrder: sortDir = sortOrder
     } = options;
@@ -91,22 +118,10 @@ export function useEmployeeProfilesEnhanced() {
 
     try {
       console.log('Fetching employee profiles with options:', {
-        search,
-        skillF,
-        expF,
-        eduF,
-        trainF,
-        achF,
-        projF,
-        minExperienceYears,
-        maxExperienceYears,
-        minGraduationYear,
-        maxGraduationYear,
-        completionStatus,
-        page,
-        perPage,
-        sortField,
-        sortDir
+        search, skillF, expF, eduF, trainF, achF, projF,
+        minExperienceYears, maxExperienceYears, minGraduationYear, maxGraduationYear, completionStatus,
+        minEngPerc, maxEngPerc, minBillPerc, maxBillPerc, relFrom, relTo, avStatus, projSearch,
+        page, perPage, sortField, sortDir
       });
 
       // Add timeout handling for the query
@@ -127,6 +142,14 @@ export function useEmployeeProfilesEnhanced() {
         min_graduation_year: minGraduationYear,
         max_graduation_year: maxGraduationYear,
         completion_status: completionStatus,
+        min_engagement_percentage: minEngPerc,
+        max_engagement_percentage: maxEngPerc,
+        min_billing_percentage: minBillPerc,
+        max_billing_percentage: maxBillPerc,
+        release_date_from: relFrom ? relFrom.toISOString().split('T')[0] : null,
+        release_date_to: relTo ? relTo.toISOString().split('T')[0] : null,
+        availability_status: avStatus,
+        current_project_search: projSearch,
         page_number: page,
         items_per_page: perPage,
         sort_by: sortField,
@@ -164,6 +187,14 @@ export function useEmployeeProfilesEnhanced() {
         setTrainingFilter(trainF);
         setAchievementFilter(achF);
         setProjectFilter(projF);
+        setMinEngagementPercentage(minEngPerc);
+        setMaxEngagementPercentage(maxEngPerc);
+        setMinBillingPercentage(minBillPerc);
+        setMaxBillingPercentage(maxBillPerc);
+        setReleaseDateFrom(relFrom);
+        setReleaseDateTo(relTo);
+        setAvailabilityStatus(avStatus);
+        setCurrentProjectSearch(projSearch);
         setSortBy(sortField);
         setSortOrder(sortDir);
       }
@@ -192,7 +223,7 @@ export function useEmployeeProfilesEnhanced() {
     } finally {
       setIsLoading(false);
     }
-  }, [pagination.page, pagination.perPage, searchQuery, skillFilter, experienceFilter, educationFilter, trainingFilter, achievementFilter, projectFilter, sortBy, sortOrder, toast]);
+  }, [pagination.page, pagination.perPage, searchQuery, skillFilter, experienceFilter, educationFilter, trainingFilter, achievementFilter, projectFilter, minEngagementPercentage, maxEngagementPercentage, minBillingPercentage, maxBillingPercentage, releaseDateFrom, releaseDateTo, availabilityStatus, currentProjectSearch, sortBy, sortOrder, toast]);
 
   // Debounced search function to reduce query frequency
   const debouncedFetchProfiles = useCallback(
@@ -246,6 +277,19 @@ export function useEmployeeProfilesEnhanced() {
     debouncedFetchProfiles({ ...filters, page: 1 });
   }, [debouncedFetchProfiles]);
 
+  const handleResourcePlanningFilters = useCallback((filters: {
+    minEngagementPercentage?: number | null;
+    maxEngagementPercentage?: number | null;
+    minBillingPercentage?: number | null;
+    maxBillingPercentage?: number | null;
+    releaseDateFrom?: Date | null;
+    releaseDateTo?: Date | null;
+    availabilityStatus?: string | null;
+    currentProjectSearch?: string | null;
+  }) => {
+    debouncedFetchProfiles({ ...filters, page: 1 });
+  }, [debouncedFetchProfiles]);
+
   const resetFilters = useCallback(() => {
     fetchProfiles({
       search: null,
@@ -260,6 +304,14 @@ export function useEmployeeProfilesEnhanced() {
       minGraduationYear: null,
       maxGraduationYear: null,
       completionStatus: null,
+      minEngagementPercentage: null,
+      maxEngagementPercentage: null,
+      minBillingPercentage: null,
+      maxBillingPercentage: null,
+      releaseDateFrom: null,
+      releaseDateTo: null,
+      availabilityStatus: null,
+      currentProjectSearch: null,
       sortBy: 'last_name',
       sortOrder: 'asc',
       page: 1
@@ -279,6 +331,14 @@ export function useEmployeeProfilesEnhanced() {
     projectFilter,
     sortBy,
     sortOrder,
+    minEngagementPercentage,
+    maxEngagementPercentage,
+    minBillingPercentage,
+    maxBillingPercentage,
+    releaseDateFrom,
+    releaseDateTo,
+    availabilityStatus,
+    currentProjectSearch,
     fetchProfiles,
     handlePageChange,
     handleSearch,
@@ -290,6 +350,7 @@ export function useEmployeeProfilesEnhanced() {
     handleProjectFilter,
     handleSortChange,
     handleAdvancedFilters,
+    handleResourcePlanningFilters,
     resetFilters
   };
 }

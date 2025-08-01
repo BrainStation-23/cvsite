@@ -9,12 +9,18 @@ import {
   TableHeader, 
   TableRow 
 } from '@/components/ui/table';
-import { Loader2 } from 'lucide-react';
+import { 
+  Loader2
+} from 'lucide-react';
 import CompactEmployeeProfile from './compact-table/CompactEmployeeProfile';
 import CompactSkillsDisplay from './compact-table/CompactSkillsDisplay';
 import CompactTrainingSummary from './compact-table/CompactTrainingSummary';
+import CompactResourcePlanning from './compact-table/CompactResourcePlanning';
 import CompactEmployeeActions from './compact-table/CompactEmployeeActions';
 import NotesDialog from './NotesDialog';
+import { 
+  TooltipProvider
+} from '@/components/ui/tooltip';
 
 interface CompactEmployeeTableProps {
   profiles: any[];
@@ -67,7 +73,7 @@ const CompactEmployeeTable: React.FC<CompactEmployeeTableProps> = ({
   }
 
   return (
-    <>
+    <TooltipProvider>
       <Table>
         <TableHeader>
           <TableRow>
@@ -84,8 +90,9 @@ const CompactEmployeeTable: React.FC<CompactEmployeeTableProps> = ({
               />
             </TableHead>
             <TableHead className="min-w-[280px]">Employee Profile</TableHead>
-            <TableHead className="min-w-[300px]">Skills & Expertise</TableHead>
-            <TableHead className="min-w-[220px]">Certifications</TableHead>
+            <TableHead className="min-w-[120px]">Skills & Expertise</TableHead>
+            <TableHead className="min-w-[150px]">Certifications</TableHead>
+            <TableHead className="min-w-[200px]">Resource Planning</TableHead>
             <TableHead className="w-20 text-right">Actions</TableHead>
           </TableRow>
         </TableHeader>
@@ -111,9 +118,14 @@ const CompactEmployeeTable: React.FC<CompactEmployeeTableProps> = ({
                     specializedSkills={profile.specialized_skills || []}
                   />
                 </TableCell>
-                <TableCell className="py-4">
+                <TableCell className="py-4 max-w-[300px]">
                   <CompactTrainingSummary
                     trainings={profile.trainings || []}
+                  />
+                </TableCell>
+                <TableCell className="py-4">
+                  <CompactResourcePlanning
+                    resourcePlanning={profile.resource_planning}
                   />
                 </TableCell>
                 <TableCell className="py-4">
@@ -128,7 +140,7 @@ const CompactEmployeeTable: React.FC<CompactEmployeeTableProps> = ({
             ))
           ) : (
             <TableRow>
-              <TableCell colSpan={5} className="text-center py-8">
+              <TableCell colSpan={6} className="text-center py-8">
                 {isLoading ? (
                   <div className="flex items-center justify-center">
                     <Loader2 className="h-6 w-6 animate-spin text-cvsite-teal mr-2" />
@@ -152,7 +164,7 @@ const CompactEmployeeTable: React.FC<CompactEmployeeTableProps> = ({
           employeeName={selectedProfileForNotes.name}
         />
       )}
-    </>
+    </TooltipProvider>
   );
 };
 

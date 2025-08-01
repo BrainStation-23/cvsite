@@ -30,7 +30,7 @@ const CompactEmployeeActions: React.FC<CompactEmployeeActionsProps> = ({
 }) => {
   return (
     <TooltipProvider>
-      <div className="flex items-center justify-end gap-1">
+      <div className="items-center justify-end gap-1">
         {/* Primary Actions - Always Visible */}
         <Tooltip>
           <TooltipTrigger asChild>

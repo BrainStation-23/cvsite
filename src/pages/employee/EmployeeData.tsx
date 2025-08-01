@@ -6,7 +6,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useEmployeeProfilesEnhanced } from '@/hooks/use-employee-profiles-enhanced';
 import { useEmployeeList } from '@/hooks/use-employee-list';
 import { useBulkSelection } from '@/hooks/use-bulk-selection';
-import EnhancedEmployeeSearchFilters from '@/components/employee/EnhancedEmployeeSearchFilters';
+import VerticalEmployeeSearchSidebar from '@/components/employee/search/vertical/VerticalEmployeeSearchSidebar';
 import CompactEmployeeTable from '@/components/employee/CompactEmployeeTable';
 import BulkActionsToolbar from '@/components/employee/BulkActionsToolbar';
 import EmployeePageHeader from '@/components/employee/EmployeePageHeader';
@@ -42,6 +42,15 @@ const EmployeeData: React.FC = () => {
     projectFilter,
     sortBy,
     sortOrder,
+    // New resource planning states
+    minEngagementPercentage,
+    maxEngagementPercentage,
+    minBillingPercentage,
+    maxBillingPercentage,
+    releaseDateFrom,
+    releaseDateTo,
+    availabilityStatus,
+    currentProjectSearch,
     fetchProfiles,
     handlePageChange,
     handleSearch,
@@ -53,6 +62,7 @@ const EmployeeData: React.FC = () => {
     handleProjectFilter,
     handleSortChange,
     handleAdvancedFilters,
+    handleResourcePlanningFilters,
     resetFilters
   } = useEmployeeProfilesEnhanced();
 
@@ -160,86 +170,93 @@ const EmployeeData: React.FC = () => {
 
   return (
     <DashboardLayout>
-      <div className="space-y-6">
-        <EmployeePageHeader />
+      <div className="flex h-full w-full min-h-screen overflow-x-hidden">
+        {/* Main Content Area - Left Side */}
+        <div className="flex-1 w-0 flex flex-col space-y-3 pr-6">
+          <EmployeePageHeader />
 
-        {lastError && (
-          <Alert variant="destructive">
-            <AlertTriangle className="h-4 w-4" />
-            <AlertDescription className="flex items-center justify-between">
-              <span>{lastError}</span>
-              <Button 
-                variant="outline" 
-                size="sm" 
-                onClick={handleRetry}
-                className="ml-4"
-              >
-                <RefreshCw className="h-4 w-4 mr-2" />
-                Retry
-              </Button>
-            </AlertDescription>
-          </Alert>
-        )}
+          {lastError && (
+            <Alert variant="destructive">
+              <AlertTriangle className="h-4 w-4" />
+              <AlertDescription className="flex items-center justify-between">
+                <span>{lastError}</span>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={handleRetry}
+                  className="ml-4"
+                >
+                  <RefreshCw className="h-4 w-4 mr-2" />
+                  Retry
+                </Button>
+              </AlertDescription>
+            </Alert>
+          )}
 
-        <EnhancedEmployeeSearchFilters
-          onSearch={handleSearch}
-          onSkillFilter={handleSkillFilter}
-          onExperienceFilter={handleExperienceFilter}
-          onEducationFilter={handleEducationFilter}
-          onTrainingFilter={handleTrainingFilter}
-          onAchievementFilter={handleAchievementFilter}
-          onProjectFilter={handleProjectFilter}
-          onAdvancedFilters={handleAdvancedFilters}
-          onSortChange={handleSortChange}
-          onReset={resetFilters}
-          searchQuery={searchQuery}
-          skillFilter={skillFilter}
-          experienceFilter={experienceFilter}
-          educationFilter={educationFilter}
-          trainingFilter={trainingFilter}
-          achievementFilter={achievementFilter}
-          projectFilter={projectFilter}
-          sortBy={sortBy}
-          sortOrder={sortOrder}
-          isLoading={isLoading}
-        />
-
-        {hasSelection && (
-          <BulkActionsToolbar
-            selectedProfiles={selectedProfiles}
-            totalProfiles={profiles.length}
-            onSelectAll={selectAll}
-            onClearSelection={clearSelection}
-            onBulkEmail={handleBulkEmail}
-            onBulkExport={handleBulkExport}
-            isAllSelected={isAllSelected}
-          />
-        )}
-
-        <Card>
-          <CardContent className="p-0">
-            <CompactEmployeeTable
-              profiles={profiles}
-              isLoading={isLoading}
-              onViewProfile={handleViewProfile}
-              onSendEmail={handleSendEmail}
+          {hasSelection && (
+            <BulkActionsToolbar
               selectedProfiles={selectedProfiles}
-              onProfileSelect={handleProfileSelect}
+              totalProfiles={profiles.length}
               onSelectAll={selectAll}
               onClearSelection={clearSelection}
+              onBulkEmail={handleBulkEmail}
+              onBulkExport={handleBulkExport}
               isAllSelected={isAllSelected}
             />
-          </CardContent>
-        </Card>
+          )}
 
-        {pagination.pageCount > 1 && (
-          <UserPagination
-            pagination={pagination}
-            onPageChange={handlePageChange}
-            onPerPageChange={handlePerPageChange}
+          <Card className="flex-1">
+            <CardContent className="p-0">
+              <CompactEmployeeTable
+                profiles={profiles}
+                isLoading={isLoading}
+                onViewProfile={handleViewProfile}
+                onSendEmail={handleSendEmail}
+                selectedProfiles={selectedProfiles}
+                onProfileSelect={handleProfileSelect}
+                onSelectAll={selectAll}
+                onClearSelection={clearSelection}
+                isAllSelected={isAllSelected}
+              />
+            </CardContent>
+          </Card>
+
+          {pagination.pageCount > 1 && (
+            <UserPagination
+              pagination={pagination}
+              onPageChange={handlePageChange}
+              onPerPageChange={handlePerPageChange}
+              isLoading={isLoading}
+            />
+          )}
+        </div>
+
+        {/* Vertical Search Sidebar - Right Side */}
+        <div className="flex-shrink-0 border-l border-gray-200 dark:border-gray-700">
+          <VerticalEmployeeSearchSidebar
+            onSearch={handleSearch}
+            onSkillFilter={handleSkillFilter}
+            onExperienceFilter={handleExperienceFilter}
+            onEducationFilter={handleEducationFilter}
+            onTrainingFilter={handleTrainingFilter}
+            onAchievementFilter={handleAchievementFilter}
+            onProjectFilter={handleProjectFilter}
+            onAdvancedFilters={handleAdvancedFilters}
+            onResourcePlanningFilters={handleResourcePlanningFilters}
+            onSortChange={handleSortChange}
+            onReset={resetFilters}
+            searchQuery={searchQuery}
+            skillFilter={skillFilter}
+            experienceFilter={experienceFilter}
+            educationFilter={educationFilter}
+            trainingFilter={trainingFilter}
+            achievementFilter={achievementFilter}
+            projectFilter={projectFilter}
+            sortBy={sortBy}
+            sortOrder={sortOrder}
             isLoading={isLoading}
           />
-        )}
+        </div>
 
         {selectedProfile && (
           <SendEmailModal
