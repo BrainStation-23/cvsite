@@ -3,12 +3,6 @@ import React, { useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from '@/components/ui/tooltip';
-import {
   Popover,
   PopoverContent,
   PopoverTrigger,
@@ -40,33 +34,15 @@ const CompactSkillsDisplay: React.FC<CompactSkillsDisplayProps> = ({
     return 'bg-gray-100 text-gray-800 border-gray-200';
   };
 
-  const getProficiencyStars = (proficiency: number) => {
-    const stars = Math.min(5, Math.max(1, Math.ceil(proficiency / 2)));
-    return Array.from({ length: stars }, (_, i) => (
-      <Star key={i} className="h-2.5 w-2.5 fill-current" />
-    ));
-  };
-
   const renderSkillBadge = (skill: Skill) => (
-    <Tooltip key={skill.id}>
-      <TooltipTrigger asChild>
-        <Badge 
-          variant="outline" 
-          className={`text-xs px-2 py-1 cursor-help ${getProficiencyColor(skill.proficiency)}`}
-        >
-          <span className="truncate max-w-20">{skill.name}</span>
-          <div className="flex ml-1">
-            {getProficiencyStars(skill.proficiency)}
-          </div>
-        </Badge>
-      </TooltipTrigger>
-      <TooltipContent>
-        <div className="text-center">
-          <p className="font-medium">{skill.name}</p>
-          <p className="text-xs">Proficiency: {skill.proficiency}/10</p>
-        </div>
-      </TooltipContent>
-    </Tooltip>
+    <Badge 
+      key={skill.id}
+      variant="outline" 
+      className={`text-xs px-2 py-1 ${getProficiencyColor(skill.proficiency)}`}
+    >
+      <span className="truncate max-w-20">{skill.name}</span>
+      <span className="ml-1 font-medium">{skill.proficiency}</span>
+    </Badge>
   );
 
   const renderSkillSection = (
@@ -126,24 +102,22 @@ const CompactSkillsDisplay: React.FC<CompactSkillsDisplayProps> = ({
   }
 
   return (
-    <TooltipProvider>
-      <div className="space-y-3">
-        {renderSkillSection(
-          technicalSkills,
-          'Technical',
-          <Code className="h-3 w-3" />,
-          showAllTechnical,
-          setShowAllTechnical
-        )}
-        {renderSkillSection(
-          specializedSkills,
-          'Specialized',
-          <Star className="h-3 w-3" />,
-          showAllSpecialized,
-          setShowAllSpecialized
-        )}
-      </div>
-    </TooltipProvider>
+    <div className="space-y-3">
+      {renderSkillSection(
+        technicalSkills,
+        'Technical',
+        <Code className="h-3 w-3" />,
+        showAllTechnical,
+        setShowAllTechnical
+      )}
+      {renderSkillSection(
+        specializedSkills,
+        'Specialized',
+        <Star className="h-3 w-3" />,
+        showAllSpecialized,
+        setShowAllSpecialized
+      )}
+    </div>
   );
 };
 
