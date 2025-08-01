@@ -5,7 +5,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useEmployeeProfilesEnhanced } from '@/hooks/use-employee-profiles-enhanced';
 import { useEmployeeList } from '@/hooks/use-employee-list';
 import { useBulkSelection } from '@/hooks/use-bulk-selection';
-import EnhancedEmployeeSearchFilters from '@/components/employee/EnhancedEmployeeSearchFilters';
+import VerticalEmployeeSearchSidebar from '@/components/employee/search/vertical/VerticalEmployeeSearchSidebar';
 import CompactEmployeeTable from '@/components/employee/CompactEmployeeTable';
 import BulkActionsToolbar from '@/components/employee/BulkActionsToolbar';
 import EmployeePageHeader from '@/components/employee/EmployeePageHeader';
@@ -220,32 +220,30 @@ const EmployeeData: React.FC = () => {
           )}
         </div>
 
-        {/* Search Filters - Right Side */}
-        <div className="w-96 flex-shrink-0">
-          <div className="sticky top-6">
-            <EnhancedEmployeeSearchFilters
-              onSearch={handleSearch}
-              onSkillFilter={handleSkillFilter}
-              onExperienceFilter={handleExperienceFilter}
-              onEducationFilter={handleEducationFilter}
-              onTrainingFilter={handleTrainingFilter}
-              onAchievementFilter={handleAchievementFilter}
-              onProjectFilter={handleProjectFilter}
-              onAdvancedFilters={handleAdvancedFilters}
-              onSortChange={handleSortChange}
-              onReset={resetFilters}
-              searchQuery={searchQuery}
-              skillFilter={skillFilter}
-              experienceFilter={experienceFilter}
-              educationFilter={educationFilter}
-              trainingFilter={trainingFilter}
-              achievementFilter={achievementFilter}
-              projectFilter={projectFilter}
-              sortBy={sortBy}
-              sortOrder={sortOrder}
-              isLoading={isLoading}
-            />
-          </div>
+        {/* Vertical Search Sidebar - Right Side */}
+        <div className="flex-shrink-0 border-l border-gray-200 dark:border-gray-700">
+          <VerticalEmployeeSearchSidebar
+            onSearch={handleSearch}
+            onSkillFilter={handleSkillFilter}
+            onExperienceFilter={handleExperienceFilter}
+            onEducationFilter={handleEducationFilter}
+            onTrainingFilter={handleTrainingFilter}
+            onAchievementFilter={handleAchievementFilter}
+            onProjectFilter={handleProjectFilter}
+            onAdvancedFilters={handleAdvancedFilters}
+            onSortChange={handleSortChange}
+            onReset={resetFilters}
+            searchQuery={searchQuery}
+            skillFilter={skillFilter}
+            experienceFilter={experienceFilter}
+            educationFilter={educationFilter}
+            trainingFilter={trainingFilter}
+            achievementFilter={achievementFilter}
+            projectFilter={projectFilter}
+            sortBy={sortBy}
+            sortOrder={sortOrder}
+            isLoading={isLoading}
+          />
         </div>
 
         {selectedProfile && (
