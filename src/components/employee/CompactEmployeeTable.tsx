@@ -68,88 +68,80 @@ const CompactEmployeeTable: React.FC<CompactEmployeeTableProps> = ({
 
   return (
     <>
-      <div className="w-full">
-        <Table className="w-full min-w-[800px]">
-          <TableHeader>
-            <TableRow>
-              <TableHead className="w-12">
-                <Checkbox
-                  checked={isAllSelected}
-                  onCheckedChange={(checked) => {
-                    if (checked) {
-                      onSelectAll();
-                    } else {
-                      onClearSelection();
-                    }
-                  }}
-                />
-              </TableHead>
-              <TableHead className="w-[25%]">Employee Profile</TableHead>
-              <TableHead className="w-[35%]">Skills & Expertise</TableHead>
-              <TableHead className="w-[25%]">Certifications</TableHead>
-              <TableHead className="w-[15%] text-right">Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {profiles.length > 0 ? (
-              profiles.map((profile) => (
-                <TableRow key={profile.id} className="hover:bg-muted/50">
-                  <TableCell>
-                    <Checkbox
-                      checked={selectedProfiles.includes(profile.id)}
-                      onCheckedChange={() => onProfileSelect(profile.id)}
-                    />
-                  </TableCell>
-                  <TableCell className="py-4">
-                    <div className="min-w-0">
-                      <CompactEmployeeProfile 
-                        profile={profile}
-                        generalInfo={profile.general_information}
-                      />
-                    </div>
-                  </TableCell>
-                  <TableCell className="py-4">
-                    <div className="min-w-0">
-                      <CompactSkillsDisplay
-                        technicalSkills={profile.technical_skills || []}
-                        specializedSkills={profile.specialized_skills || []}
-                      />
-                    </div>
-                  </TableCell>
-                  <TableCell className="py-4">
-                    <div className="min-w-0">
-                      <CompactTrainingSummary
-                        trainings={profile.trainings || []}
-                      />
-                    </div>
-                  </TableCell>
-                  <TableCell className="py-4">
-                    <CompactEmployeeActions
-                      profile={profile}
-                      onViewProfile={onViewProfile}
-                      onSendEmail={onSendEmail}
-                      onNotesClick={handleNotesClick}
-                    />
-                  </TableCell>
-                </TableRow>
-              ))
-            ) : (
-              <TableRow>
-                <TableCell colSpan={5} className="text-center py-8">
-                  {isLoading ? (
-                    <div className="flex items-center justify-center">
-                      <Loader2 className="h-6 w-6 animate-spin text-cvsite-teal mr-2" />
-                      Loading employee profiles...
-                    </div>
-                  ) : (
-                    'No employee profiles found'
-                  )}
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead className="w-12">
+              <Checkbox
+                checked={isAllSelected}
+                onCheckedChange={(checked) => {
+                  if (checked) {
+                    onSelectAll();
+                  } else {
+                    onClearSelection();
+                  }
+                }}
+              />
+            </TableHead>
+            <TableHead className="min-w-[280px]">Employee Profile</TableHead>
+            <TableHead className="min-w-[300px]">Skills & Expertise</TableHead>
+            <TableHead className="min-w-[220px]">Certifications</TableHead>
+            <TableHead className="w-20 text-right">Actions</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {profiles.length > 0 ? (
+            profiles.map((profile) => (
+              <TableRow key={profile.id} className="hover:bg-muted/50">
+                <TableCell>
+                  <Checkbox
+                    checked={selectedProfiles.includes(profile.id)}
+                    onCheckedChange={() => onProfileSelect(profile.id)}
+                  />
+                </TableCell>
+                <TableCell className="py-4">
+                  <CompactEmployeeProfile 
+                    profile={profile}
+                    generalInfo={profile.general_information}
+                  />
+                </TableCell>
+                <TableCell className="py-4">
+                  <CompactSkillsDisplay
+                    technicalSkills={profile.technical_skills || []}
+                    specializedSkills={profile.specialized_skills || []}
+                  />
+                </TableCell>
+                <TableCell className="py-4">
+                  <CompactTrainingSummary
+                    trainings={profile.trainings || []}
+                  />
+                </TableCell>
+                <TableCell className="py-4">
+                  <CompactEmployeeActions
+                    profile={profile}
+                    onViewProfile={onViewProfile}
+                    onSendEmail={onSendEmail}
+                    onNotesClick={handleNotesClick}
+                  />
                 </TableCell>
               </TableRow>
-            )}
-          </TableBody>
-        </Table>
-      </div>
+            ))
+          ) : (
+            <TableRow>
+              <TableCell colSpan={5} className="text-center py-8">
+                {isLoading ? (
+                  <div className="flex items-center justify-center">
+                    <Loader2 className="h-6 w-6 animate-spin text-cvsite-teal mr-2" />
+                    Loading employee profiles...
+                  </div>
+                ) : (
+                  'No employee profiles found'
+                )}
+              </TableCell>
+            </TableRow>
+          )}
+        </TableBody>
+      </Table>
 
       {/* Notes Dialog */}
       {selectedProfileForNotes && (
