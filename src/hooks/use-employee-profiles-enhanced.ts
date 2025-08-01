@@ -1,4 +1,3 @@
-
 import { useState, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -130,7 +129,6 @@ export function useEmployeeProfilesEnhanced() {
         setTimeout(() => reject(new Error('Request timed out after 30 seconds')), 30000);
       });
 
-      // Call the RPC function with the correct parameter names
       const queryPromise = supabase.rpc('get_employee_profiles', {
         search_query: search,
         skill_filter: skillF,
@@ -144,7 +142,7 @@ export function useEmployeeProfilesEnhanced() {
         min_graduation_year: minGraduationYear,
         max_graduation_year: maxGraduationYear,
         completion_status: completionStatus,
-        // Use correct parameter names for resource planning
+        // New resource planning parameters
         min_engagement_percentage: minEngPerc,
         max_engagement_percentage: maxEngPerc,
         min_billing_percentage: minBillPerc,
