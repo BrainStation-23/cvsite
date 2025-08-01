@@ -1325,24 +1325,51 @@ export type Database = {
         Returns: Json
       }
       get_employee_profiles: {
-        Args: {
-          search_query?: string
-          skill_filter?: string
-          experience_filter?: string
-          education_filter?: string
-          training_filter?: string
-          achievement_filter?: string
-          project_filter?: string
-          min_experience_years?: number
-          max_experience_years?: number
-          min_graduation_year?: number
-          max_graduation_year?: number
-          completion_status?: string
-          page_number?: number
-          items_per_page?: number
-          sort_by?: string
-          sort_order?: string
-        }
+        Args:
+          | {
+              search_query?: string
+              skill_filter?: string
+              experience_filter?: string
+              education_filter?: string
+              training_filter?: string
+              achievement_filter?: string
+              project_filter?: string
+              min_experience_years?: number
+              max_experience_years?: number
+              min_graduation_year?: number
+              max_graduation_year?: number
+              completion_status?: string
+              min_engagement_percentage?: number
+              max_engagement_percentage?: number
+              min_billing_percentage?: number
+              max_billing_percentage?: number
+              release_date_from?: string
+              release_date_to?: string
+              availability_status?: string
+              current_project_search?: string
+              page_number?: number
+              items_per_page?: number
+              sort_by?: string
+              sort_order?: string
+            }
+          | {
+              search_query?: string
+              skill_filter?: string
+              experience_filter?: string
+              education_filter?: string
+              training_filter?: string
+              achievement_filter?: string
+              project_filter?: string
+              min_experience_years?: number
+              max_experience_years?: number
+              min_graduation_year?: number
+              max_graduation_year?: number
+              completion_status?: string
+              page_number?: number
+              items_per_page?: number
+              sort_by?: string
+              sort_order?: string
+            }
         Returns: Json
       }
       get_experience_distribution: {
