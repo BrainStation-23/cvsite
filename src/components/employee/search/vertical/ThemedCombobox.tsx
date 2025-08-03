@@ -83,6 +83,7 @@ const ThemedCombobox: React.FC<ThemedComboboxProps> = ({
             placeholder={hasValue ? placeholder : label}
             disabled={disabled}
             className="border-0 bg-transparent focus:ring-0 shadow-none p-0 w-full"
+            compact={true}
           />
         </div>
       </div>
