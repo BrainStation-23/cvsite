@@ -1,11 +1,7 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Slider } from '@/components/ui/slider';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { SelectContent, SelectItem } from '@/components/ui/select';
 import { 
   ChevronDown, 
   ChevronUp, 
@@ -16,13 +12,21 @@ import {
   Building,
   Calendar,
   Award,
-  Target
+  Target,
+  TrendingUp,
+  BookOpen,
+  Wrench
 } from 'lucide-react';
 import { UniversityCombobox } from '@/components/admin/university/UniversityCombobox';
 import { TrainingProviderCombobox } from '@/components/admin/training/TrainingProviderCombobox';
 import SkillTagsInput from '../SkillTagsInput';
 import TechnologyTagsInput from '../TechnologyTagsInput';
 import GraduationYearRangeControl from '../GraduationYearRangeControl';
+import FloatingLabelInput from './FloatingLabelInput';
+import ThemedSelect from './ThemedSelect';
+import ThemedSlider from './ThemedSlider';
+import ThemedTagsInput from './ThemedTagsInput';
+import ThemedCombobox from './ThemedCombobox';
 
 interface CollapsibleFilterSectionProps {
   title: string;
@@ -125,11 +129,21 @@ const CollapsibleFilterSection: React.FC<CollapsibleFilterSectionProps> = ({
 
   const getColorClasses = () => {
     switch (type) {
-      case 'professional': return 'border-blue-200 bg-blue-50/30 dark:bg-blue-900/10 text-blue-700 dark:text-blue-300';
-      case 'education': return 'border-green-200 bg-green-50/30 dark:bg-green-900/10 text-green-700 dark:text-green-300';
-      case 'projects': return 'border-purple-200 bg-purple-50/30 dark:bg-purple-900/10 text-purple-700 dark:text-purple-300';
-      case 'status': return 'border-orange-200 bg-orange-50/30 dark:bg-orange-900/10 text-orange-700 dark:text-orange-300';
-      default: return 'border-gray-200 bg-gray-50/30 dark:bg-gray-900/10 text-gray-700 dark:text-gray-300';
+      case 'professional': return 'border-blue-200 bg-blue-50/20 dark:bg-blue-900/10 text-blue-700 dark:text-blue-300';
+      case 'education': return 'border-green-200 bg-green-50/20 dark:bg-green-900/10 text-green-700 dark:text-green-300';
+      case 'projects': return 'border-purple-200 bg-purple-50/20 dark:bg-purple-900/10 text-purple-700 dark:text-purple-300';
+      case 'status': return 'border-orange-200 bg-orange-50/20 dark:bg-orange-900/10 text-orange-700 dark:text-orange-300';
+      default: return 'border-gray-200 bg-gray-50/20 dark:bg-gray-900/10 text-gray-700 dark:text-gray-300';
+    }
+  };
+
+  const getTheme = () => {
+    switch (type) {
+      case 'professional': return 'blue';
+      case 'education': return 'green';
+      case 'projects': return 'purple';
+      case 'status': return 'orange';
+      default: return 'gray';
     }
   };
 
@@ -164,44 +178,48 @@ const CollapsibleFilterSection: React.FC<CollapsibleFilterSectionProps> = ({
   };
 
   const renderContent = () => {
+    const theme = getTheme();
+
     switch (type) {
       case 'professional':
         return (
-          <div className="space-y-3">
-            <div>
-              <Label className="text-xs font-medium">Skills</Label>
-              <SkillTagsInput
-                value={skillInput ? skillInput.split(',').map(s => s.trim()).filter(Boolean) : []}
-                onChange={(skills) => setSkillInput?.(skills.join(', '))}
-                placeholder="Add skills..."
-                disabled={isLoading}
-              />
-            </div>
-            <div>
-              <Label className="text-xs font-medium">Company</Label>
-              <Input
-                placeholder="Company name..."
-                value={companyInput || ''}
-                onChange={(e) => setCompanyInput?.(e.target.value)}
-                className="text-sm"
-              />
-            </div>
+          <div className="space-y-4">
+            <ThemedTagsInput
+              label="Search skills"
+              theme={theme}
+              icon={<Wrench className="h-4 w-4" />}
+              value={skillInput ? skillInput.split(',').map(s => s.trim()).filter(Boolean) : []}
+              onChange={(skills) => setSkillInput?.(skills.join(', '))}
+              placeholder="e.g., React, Python, AWS..."
+              disabled={isLoading}
+              component={SkillTagsInput}
+            />
+            
+            <FloatingLabelInput
+              label="Company experience"
+              theme={theme}
+              icon={<Building className="h-4 w-4" />}
+              value={companyInput || ''}
+              onChange={(e) => setCompanyInput?.(e.target.value)}
+              placeholder="e.g., Google, Microsoft, Accenture..."
+              showClear={!!companyInput}
+              onClear={() => setCompanyInput?.('')}
+            />
+            
             {experienceYears && setExperienceYears && (
-              <div>
-                <Label className="text-xs font-medium">
-                  Experience: {experienceYears[0]}-{experienceYears[1]} years
-                </Label>
-                <Slider
-                  value={experienceYears}
-                  onValueChange={setExperienceYears}
-                  max={20}
-                  min={0}
-                  step={1}
-                  className="w-full mt-2"
-                />
-              </div>
+              <ThemedSlider
+                label="Years of experience"
+                theme={theme}
+                icon={<TrendingUp className="h-4 w-4" />}
+                value={experienceYears}
+                onValueChange={setExperienceYears}
+                max={20}
+                min={0}
+                step={1}
+              />
             )}
-            <Button onClick={applyFilters} disabled={isLoading} className="w-full text-sm">
+            
+            <Button onClick={applyFilters} disabled={isLoading} className="w-full">
               Apply Professional Filters
             </Button>
           </div>
@@ -209,27 +227,36 @@ const CollapsibleFilterSection: React.FC<CollapsibleFilterSectionProps> = ({
 
       case 'education':
         return (
-          <div className="space-y-3">
-            <div>
-              <Label className="text-xs font-medium">University</Label>
-              <UniversityCombobox
-                value={universityInput || ''}
-                onValueChange={setUniversityInput || (() => {})}
-                placeholder="Search university..."
-              />
-            </div>
-            <div>
-              <Label className="text-xs font-medium">Training Provider</Label>
-              <TrainingProviderCombobox
-                value={trainingInput || ''}
-                onValueChange={setTrainingInput || (() => {})}
-                placeholder="Search training..."
-                disabled={isLoading}
-              />
-            </div>
+          <div className="space-y-4">
+            <ThemedCombobox
+              label="University or institution"
+              theme={theme}
+              icon={<GraduationCap className="h-4 w-4" />}
+              value={universityInput || ''}
+              onValueChange={setUniversityInput || (() => {})}
+              placeholder="Search universities..."
+              component={UniversityCombobox}
+            />
+            
+            <ThemedCombobox
+              label="Training provider"
+              theme={theme}
+              icon={<BookOpen className="h-4 w-4" />}
+              value={trainingInput || ''}
+              onValueChange={setTrainingInput || (() => {})}
+              placeholder="Search training providers..."
+              component={TrainingProviderCombobox}
+              disabled={isLoading}
+            />
+            
             {setMinGraduationYear && setMaxGraduationYear && (
-              <div>
-                <Label className="text-xs font-medium">Graduation Years</Label>
+              <div className={`border rounded-md px-3 py-3 transition-all duration-200 bg-${theme}-50/30 border-${theme}-200`}>
+                <div className="flex items-center gap-2 mb-3">
+                  <Calendar className={`h-4 w-4 text-${theme}-500`} />
+                  <label className={`text-xs font-medium text-${theme}-600`}>
+                    Graduation period
+                  </label>
+                </div>
                 <GraduationYearRangeControl
                   minYear={minGraduationYear}
                   maxYear={maxGraduationYear}
@@ -238,7 +265,8 @@ const CollapsibleFilterSection: React.FC<CollapsibleFilterSectionProps> = ({
                 />
               </div>
             )}
-            <Button onClick={applyFilters} disabled={isLoading} className="w-full text-sm">
+            
+            <Button onClick={applyFilters} disabled={isLoading} className="w-full">
               Apply Education Filters
             </Button>
           </div>
@@ -246,44 +274,52 @@ const CollapsibleFilterSection: React.FC<CollapsibleFilterSectionProps> = ({
 
       case 'projects':
         return (
-          <div className="space-y-3">
-            <div>
-              <Label className="text-xs font-medium">Project Name</Label>
-              <Input
-                placeholder="Project name..."
-                value={projectNameInput || ''}
-                onChange={(e) => setProjectNameInput?.(e.target.value)}
-                className="text-sm"
-              />
-            </div>
-            <div>
-              <Label className="text-xs font-medium">Project Description</Label>
-              <Input
-                placeholder="Project description..."
-                value={projectDescriptionInput || ''}
-                onChange={(e) => setProjectDescriptionInput?.(e.target.value)}
-                className="text-sm"
-              />
-            </div>
-            <div>
-              <Label className="text-xs font-medium">Technologies</Label>
-              <TechnologyTagsInput
-                value={technologyInput || []}
-                onChange={setTechnologyInput || (() => {})}
-                placeholder="Add technologies..."
-                disabled={isLoading}
-              />
-            </div>
-            <div>
-              <Label className="text-xs font-medium">Achievements</Label>
-              <Input
-                placeholder="Achievement..."
-                value={achievementInput || ''}
-                onChange={(e) => setAchievementInput?.(e.target.value)}
-                className="text-sm"
-              />
-            </div>
-            <Button onClick={applyFilters} disabled={isLoading} className="w-full text-sm">
+          <div className="space-y-4">
+            <FloatingLabelInput
+              label="Project name"
+              theme={theme}
+              icon={<Target className="h-4 w-4" />}
+              value={projectNameInput || ''}
+              onChange={(e) => setProjectNameInput?.(e.target.value)}
+              placeholder="e.g., E-commerce Platform, Mobile App..."
+              showClear={!!projectNameInput}
+              onClear={() => setProjectNameInput?.('')}
+            />
+            
+            <FloatingLabelInput
+              label="Project description"
+              theme={theme}
+              icon={<Code className="h-4 w-4" />}
+              value={projectDescriptionInput || ''}
+              onChange={(e) => setProjectDescriptionInput?.(e.target.value)}
+              placeholder="Key words from project details..."
+              showClear={!!projectDescriptionInput}
+              onClear={() => setProjectDescriptionInput?.('')}
+            />
+            
+            <ThemedTagsInput
+              label="Technologies used"
+              theme={theme}
+              icon={<Wrench className="h-4 w-4" />}
+              value={technologyInput || []}
+              onChange={setTechnologyInput || (() => {})}
+              placeholder="e.g., React, Node.js, MongoDB..."
+              disabled={isLoading}
+              component={TechnologyTagsInput}
+            />
+            
+            <FloatingLabelInput
+              label="Achievements & awards"
+              theme={theme}
+              icon={<Award className="h-4 w-4" />}
+              value={achievementInput || ''}
+              onChange={(e) => setAchievementInput?.(e.target.value)}
+              placeholder="e.g., Best Innovation Award, Patent..."
+              showClear={!!achievementInput}
+              onClear={() => setAchievementInput?.('')}
+            />
+            
+            <Button onClick={applyFilters} disabled={isLoading} className="w-full">
               Apply Project Filters
             </Button>
           </div>
@@ -291,24 +327,24 @@ const CollapsibleFilterSection: React.FC<CollapsibleFilterSectionProps> = ({
 
       case 'status':
         return (
-          <div className="space-y-3">
-            <div>
-              <Label className="text-xs font-medium">Profile Completion</Label>
-              <Select value={completionStatus} onValueChange={setCompletionStatus}>
-                <SelectTrigger className="text-sm">
-                  <SelectValue placeholder="Select status" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Profiles</SelectItem>
-                  <SelectItem value="complete">Complete Profiles</SelectItem>
-                  <SelectItem value="incomplete">Incomplete Profiles</SelectItem>
-                  <SelectItem value="no-skills">Missing Skills</SelectItem>
-                  <SelectItem value="no-experience">Missing Experience</SelectItem>
-                  <SelectItem value="no-education">Missing Education</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <Button onClick={applyFilters} disabled={isLoading} className="w-full text-sm">
+          <div className="space-y-4">
+            <ThemedSelect
+              label="Profile completion status"
+              theme={theme}
+              icon={<UserCheck className="h-4 w-4" />}
+              value={completionStatus}
+              onValueChange={setCompletionStatus}
+              placeholder="Select completion level..."
+            >
+              <SelectItem value="all">All Profiles</SelectItem>
+              <SelectItem value="complete">Complete Profiles</SelectItem>
+              <SelectItem value="incomplete">Incomplete Profiles</SelectItem>
+              <SelectItem value="no-skills">Missing Skills</SelectItem>
+              <SelectItem value="no-experience">Missing Experience</SelectItem>
+              <SelectItem value="no-education">Missing Education</SelectItem>
+            </ThemedSelect>
+            
+            <Button onClick={applyFilters} disabled={isLoading} className="w-full">
               Apply Status Filters
             </Button>
           </div>
@@ -321,7 +357,7 @@ const CollapsibleFilterSection: React.FC<CollapsibleFilterSectionProps> = ({
 
   return (
     <Card className={getColorClasses()}>
-      <CardHeader className="pb-2 cursor-pointer" onClick={() => setIsOpen(!isOpen)}>
+      <CardHeader className="pb-3 cursor-pointer" onClick={() => setIsOpen(!isOpen)}>
         <CardTitle className="text-sm font-semibold flex items-center justify-between">
           <div className="flex items-center gap-2">
             {getIcon()}
@@ -331,7 +367,7 @@ const CollapsibleFilterSection: React.FC<CollapsibleFilterSectionProps> = ({
         </CardTitle>
       </CardHeader>
       {isOpen && (
-        <CardContent>
+        <CardContent className="pt-0">
           {renderContent()}
         </CardContent>
       )}
