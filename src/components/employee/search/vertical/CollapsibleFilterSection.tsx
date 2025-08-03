@@ -1,6 +1,6 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { SelectContent, SelectItem } from '@/components/ui/select';
 import { 
   ChevronDown, 
@@ -147,33 +147,80 @@ const CollapsibleFilterSection: React.FC<CollapsibleFilterSectionProps> = ({
     }
   };
 
-  const applyFilters = () => {
-    if (type === 'professional') {
-      if (skillInput && onSkillFilter) onSkillFilter(skillInput);
-      if (companyInput && onExperienceFilter) onExperienceFilter(companyInput);
-      if (experienceYears && onAdvancedFilters) {
-        onAdvancedFilters({
-          minExperienceYears: experienceYears[0],
-          maxExperienceYears: experienceYears[1]
-        });
-      }
-    } else if (type === 'education') {
-      if (universityInput && onEducationFilter) onEducationFilter(universityInput);
-      if (trainingInput && onTrainingFilter) onTrainingFilter(trainingInput);
-      if ((minGraduationYear || maxGraduationYear) && onAdvancedFilters) {
-        onAdvancedFilters({
-          minGraduationYear,
-          maxGraduationYear
-        });
-      }
-    } else if (type === 'projects') {
-      if (projectNameInput && onProjectFilter) onProjectFilter(projectNameInput);
-      if (projectDescriptionInput && onProjectFilter) onProjectFilter(projectDescriptionInput);
-      if (achievementInput && onAchievementFilter) onAchievementFilter(achievementInput);
-    } else if (type === 'status') {
-      if (completionStatus && onAdvancedFilters) {
-        onAdvancedFilters({ completionStatus });
-      }
+  // Auto-apply handlers - these will be called immediately when values change
+  const handleSkillChange = (skills: string[]) => {
+    const skillString = skills.join(', ');
+    setSkillInput?.(skillString);
+    onSkillFilter?.(skillString);
+  };
+
+  const handleCompanyChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setCompanyInput?.(value);
+    onExperienceFilter?.(value);
+  };
+
+  const handleExperienceYearsChange = (years: number[]) => {
+    setExperienceYears?.(years);
+    onAdvancedFilters?.({
+      minExperienceYears: years[0],
+      maxExperienceYears: years[1]
+    });
+  };
+
+  const handleUniversityChange = (value: string) => {
+    setUniversityInput?.(value);
+    onEducationFilter?.(value);
+  };
+
+  const handleTrainingChange = (value: string) => {
+    setTrainingInput?.(value);
+    onTrainingFilter?.(value);
+  };
+
+  const handleGraduationYearChange = (minYear?: number | null, maxYear?: number | null) => {
+    if (minYear !== undefined) setMinGraduationYear?.(minYear);
+    if (maxYear !== undefined) setMaxGraduationYear?.(maxYear);
+    
+    onAdvancedFilters?.({
+      minGraduationYear: minYear !== undefined ? minYear : minGraduationYear,
+      maxGraduationYear: maxYear !== undefined ? maxYear : maxGraduationYear
+    });
+  };
+
+  const handleProjectNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setProjectNameInput?.(value);
+    onProjectFilter?.(value);
+  };
+
+  const handleProjectDescriptionChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setProjectDescriptionInput?.(value);
+    onProjectFilter?.(value);
+  };
+
+  const handleTechnologyChange = (technologies: string[]) => {
+    setTechnologyInput?.(technologies);
+    if (technologies.length > 0) {
+      onProjectFilter?.(technologies[0]); // Use first technology for search
+    } else {
+      onProjectFilter?.('');
+    }
+  };
+
+  const handleAchievementChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setAchievementInput?.(value);
+    onAchievementFilter?.(value);
+  };
+
+  const handleCompletionStatusChange = (status: string | undefined) => {
+    if (status) {
+      setCompletionStatus?.(status);
+      onAdvancedFilters?.({ 
+        completionStatus: status !== 'all' ? status : null 
+      });
     }
   };
 
@@ -189,7 +236,7 @@ const CollapsibleFilterSection: React.FC<CollapsibleFilterSectionProps> = ({
               theme={theme}
               icon={<Wrench className="h-4 w-4" />}
               value={skillInput ? skillInput.split(',').map(s => s.trim()).filter(Boolean) : []}
-              onChange={(skills) => setSkillInput?.(skills.join(', '))}
+              onChange={handleSkillChange}
               placeholder="e.g., React, Python, AWS..."
               disabled={isLoading}
               component={SkillTagsInput}
@@ -200,10 +247,13 @@ const CollapsibleFilterSection: React.FC<CollapsibleFilterSectionProps> = ({
               theme={theme}
               icon={<Building className="h-4 w-4" />}
               value={companyInput || ''}
-              onChange={(e) => setCompanyInput?.(e.target.value)}
+              onChange={handleCompanyChange}
               placeholder="e.g., Google, Microsoft, Accenture..."
               showClear={!!companyInput}
-              onClear={() => setCompanyInput?.('')}
+              onClear={() => {
+                setCompanyInput?.('');
+                onExperienceFilter?.('');
+              }}
             />
             
             {experienceYears && setExperienceYears && (
@@ -212,16 +262,12 @@ const CollapsibleFilterSection: React.FC<CollapsibleFilterSectionProps> = ({
                 theme={theme}
                 icon={<TrendingUp className="h-4 w-4" />}
                 value={experienceYears}
-                onValueChange={setExperienceYears}
+                onValueChange={handleExperienceYearsChange}
                 max={20}
                 min={0}
                 step={1}
               />
             )}
-            
-            <Button onClick={applyFilters} disabled={isLoading} className="w-full">
-              Apply Professional Filters
-            </Button>
           </div>
         );
 
@@ -233,7 +279,7 @@ const CollapsibleFilterSection: React.FC<CollapsibleFilterSectionProps> = ({
               theme={theme}
               icon={<GraduationCap className="h-4 w-4" />}
               value={universityInput || ''}
-              onValueChange={setUniversityInput || (() => {})}
+              onValueChange={handleUniversityChange}
               placeholder="Search universities..."
               component={UniversityCombobox}
             />
@@ -243,7 +289,7 @@ const CollapsibleFilterSection: React.FC<CollapsibleFilterSectionProps> = ({
               theme={theme}
               icon={<BookOpen className="h-4 w-4" />}
               value={trainingInput || ''}
-              onValueChange={setTrainingInput || (() => {})}
+              onValueChange={handleTrainingChange}
               placeholder="Search training providers..."
               component={TrainingProviderCombobox}
               disabled={isLoading}
@@ -260,15 +306,11 @@ const CollapsibleFilterSection: React.FC<CollapsibleFilterSectionProps> = ({
                 <GraduationYearRangeControl
                   minYear={minGraduationYear}
                   maxYear={maxGraduationYear}
-                  onMinYearChange={setMinGraduationYear}
-                  onMaxYearChange={setMaxGraduationYear}
+                  onMinYearChange={(year) => handleGraduationYearChange(year, undefined)}
+                  onMaxYearChange={(year) => handleGraduationYearChange(undefined, year)}
                 />
               </div>
             )}
-            
-            <Button onClick={applyFilters} disabled={isLoading} className="w-full">
-              Apply Education Filters
-            </Button>
           </div>
         );
 
@@ -280,10 +322,13 @@ const CollapsibleFilterSection: React.FC<CollapsibleFilterSectionProps> = ({
               theme={theme}
               icon={<Target className="h-4 w-4" />}
               value={projectNameInput || ''}
-              onChange={(e) => setProjectNameInput?.(e.target.value)}
+              onChange={handleProjectNameChange}
               placeholder="e.g., E-commerce Platform, Mobile App..."
               showClear={!!projectNameInput}
-              onClear={() => setProjectNameInput?.('')}
+              onClear={() => {
+                setProjectNameInput?.('');
+                onProjectFilter?.('');
+              }}
             />
             
             <FloatingLabelInput
@@ -291,10 +336,13 @@ const CollapsibleFilterSection: React.FC<CollapsibleFilterSectionProps> = ({
               theme={theme}
               icon={<Code className="h-4 w-4" />}
               value={projectDescriptionInput || ''}
-              onChange={(e) => setProjectDescriptionInput?.(e.target.value)}
+              onChange={handleProjectDescriptionChange}
               placeholder="Key words from project details..."
               showClear={!!projectDescriptionInput}
-              onClear={() => setProjectDescriptionInput?.('')}
+              onClear={() => {
+                setProjectDescriptionInput?.('');
+                onProjectFilter?.('');
+              }}
             />
             
             <ThemedTagsInput
@@ -302,7 +350,7 @@ const CollapsibleFilterSection: React.FC<CollapsibleFilterSectionProps> = ({
               theme={theme}
               icon={<Wrench className="h-4 w-4" />}
               value={technologyInput || []}
-              onChange={setTechnologyInput || (() => {})}
+              onChange={handleTechnologyChange}
               placeholder="e.g., React, Node.js, MongoDB..."
               disabled={isLoading}
               component={TechnologyTagsInput}
@@ -313,15 +361,14 @@ const CollapsibleFilterSection: React.FC<CollapsibleFilterSectionProps> = ({
               theme={theme}
               icon={<Award className="h-4 w-4" />}
               value={achievementInput || ''}
-              onChange={(e) => setAchievementInput?.(e.target.value)}
+              onChange={handleAchievementChange}
               placeholder="e.g., Best Innovation Award, Patent..."
               showClear={!!achievementInput}
-              onClear={() => setAchievementInput?.('')}
+              onClear={() => {
+                setAchievementInput?.('');
+                onAchievementFilter?.('');
+              }}
             />
-            
-            <Button onClick={applyFilters} disabled={isLoading} className="w-full">
-              Apply Project Filters
-            </Button>
           </div>
         );
 
@@ -333,7 +380,7 @@ const CollapsibleFilterSection: React.FC<CollapsibleFilterSectionProps> = ({
               theme={theme}
               icon={<UserCheck className="h-4 w-4" />}
               value={completionStatus}
-              onValueChange={setCompletionStatus}
+              onValueChange={handleCompletionStatusChange}
               placeholder="Select completion level..."
             >
               <SelectItem value="all">All Profiles</SelectItem>
@@ -343,10 +390,6 @@ const CollapsibleFilterSection: React.FC<CollapsibleFilterSectionProps> = ({
               <SelectItem value="no-experience">Missing Experience</SelectItem>
               <SelectItem value="no-education">Missing Education</SelectItem>
             </ThemedSelect>
-            
-            <Button onClick={applyFilters} disabled={isLoading} className="w-full">
-              Apply Status Filters
-            </Button>
           </div>
         );
 
