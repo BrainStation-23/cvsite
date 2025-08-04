@@ -115,7 +115,7 @@ const VerticalEmployeeSearchSidebar: React.FC<VerticalEmployeeSearchSidebarProps
   const [maxBillingPercentage, setMaxBillingPercentage] = useState<string>('');
   const [releaseDateFrom, setReleaseDateFrom] = useState<Date | null>(null);
   const [releaseDateTo, setReleaseDateTo] = useState<Date | null>(null);
-  const [availabilityStatus, setAvailabilityStatus] = useState<string>('available'); // Default to 'available'
+  const [availabilityStatus, setAvailabilityStatus] = useState<string>('all');
   const [currentProjectSearch, setCurrentProjectSearch] = useState<string>('');
   const [isResourcePlanningOpen, setIsResourcePlanningOpen] = useState(false);
   
