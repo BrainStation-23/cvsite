@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -9,7 +9,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Slider } from '@/components/ui/slider';
 import { Calendar } from '@/components/ui/calendar';
 import { 
   Popover,
@@ -109,12 +108,14 @@ const VerticalEmployeeSearchSidebar: React.FC<VerticalEmployeeSearchSidebarProps
   const [maxGraduationYear, setMaxGraduationYear] = useState<number | null>(null);
   const [completionStatus, setCompletionStatus] = useState<string>('all');
   
-  // Resource planning filter states
-  const [engagementRange, setEngagementRange] = useState<number[]>([0, 100]);
-  const [billingRange, setBillingRange] = useState<number[]>([0, 100]);
+  // Resource planning filter states - updated to use text inputs
+  const [minEngagementPercentage, setMinEngagementPercentage] = useState<string>('');
+  const [maxEngagementPercentage, setMaxEngagementPercentage] = useState<string>('');
+  const [minBillingPercentage, setMinBillingPercentage] = useState<string>('');
+  const [maxBillingPercentage, setMaxBillingPercentage] = useState<string>('');
   const [releaseDateFrom, setReleaseDateFrom] = useState<Date | null>(null);
   const [releaseDateTo, setReleaseDateTo] = useState<Date | null>(null);
-  const [availabilityStatus, setAvailabilityStatus] = useState<string>('all');
+  const [availabilityStatus, setAvailabilityStatus] = useState<string>('available'); // Default to 'available'
   const [currentProjectSearch, setCurrentProjectSearch] = useState<string>('');
   const [isResourcePlanningOpen, setIsResourcePlanningOpen] = useState(false);
   
@@ -128,6 +129,34 @@ const VerticalEmployeeSearchSidebar: React.FC<VerticalEmployeeSearchSidebarProps
   const [achievementInput, setAchievementInput] = useState('');
 
   const [highlightedFilters, setHighlightedFilters] = useState<string[]>([]);
+
+  // Auto-trigger resource planning filters when any state changes
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      onResourcePlanningFilters({
+        minEngagementPercentage: minEngagementPercentage ? parseInt(minEngagementPercentage) : null,
+        maxEngagementPercentage: maxEngagementPercentage ? parseInt(maxEngagementPercentage) : null,
+        minBillingPercentage: minBillingPercentage ? parseInt(minBillingPercentage) : null,
+        maxBillingPercentage: maxBillingPercentage ? parseInt(maxBillingPercentage) : null,
+        releaseDateFrom,
+        releaseDateTo,
+        availabilityStatus: availabilityStatus !== 'all' ? availabilityStatus : null,
+        currentProjectSearch: currentProjectSearch || null,
+      });
+    }, 300); // 300ms debounce
+
+    return () => clearTimeout(timeoutId);
+  }, [
+    minEngagementPercentage,
+    maxEngagementPercentage,
+    minBillingPercentage,
+    maxBillingPercentage,
+    releaseDateFrom,
+    releaseDateTo,
+    availabilityStatus,
+    currentProjectSearch,
+    onResourcePlanningFilters
+  ]);
 
   const { activeFilters } = useFilterState({
     searchQuery,
@@ -278,19 +307,6 @@ const VerticalEmployeeSearchSidebar: React.FC<VerticalEmployeeSearchSidebarProps
     setTimeout(() => setHighlightedFilters([]), 2000);
   };
 
-  const handleResourcePlanningFilter = () => {
-    onResourcePlanningFilters({
-      minEngagementPercentage: engagementRange[0] > 0 ? engagementRange[0] : null,
-      maxEngagementPercentage: engagementRange[1] < 100 ? engagementRange[1] : null,
-      minBillingPercentage: billingRange[0] > 0 ? billingRange[0] : null,
-      maxBillingPercentage: billingRange[1] < 100 ? billingRange[1] : null,
-      releaseDateFrom,
-      releaseDateTo,
-      availabilityStatus: availabilityStatus !== 'all' ? availabilityStatus : null,
-      currentProjectSearch: currentProjectSearch || null,
-    });
-  };
-
   return (
     <div className="w-96 h-full flex flex-col">
       {/* Sticky Search Header */}
@@ -361,40 +377,60 @@ const VerticalEmployeeSearchSidebar: React.FC<VerticalEmployeeSearchSidebarProps
                 </div>
               </div>
 
-              {/* Engagement Percentage Range */}
+              {/* Engagement Percentage Range - Text Inputs */}
               <div className="space-y-3">
                 <Label className="text-sm font-medium">Engagement Percentage</Label>
-                <div className="px-2">
-                  <Slider
-                    value={engagementRange}
-                    onValueChange={setEngagementRange}
-                    max={100}
-                    min={0}
-                    step={5}
-                    className="w-full"
-                  />
-                  <div className="flex justify-between text-xs text-gray-500 mt-1">
-                    <span>{engagementRange[0]}%</span>
-                    <span>{engagementRange[1]}%</span>
+                <div className="grid grid-cols-2 gap-2">
+                  <div className="space-y-1">
+                    <Label className="text-xs text-gray-500">Min %</Label>
+                    <Input
+                      type="number"
+                      placeholder="0"
+                      min="0"
+                      max="100"
+                      value={minEngagementPercentage}
+                      onChange={(e) => setMinEngagementPercentage(e.target.value)}
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <Label className="text-xs text-gray-500">Max %</Label>
+                    <Input
+                      type="number"
+                      placeholder="100"
+                      min="0"
+                      max="100"
+                      value={maxEngagementPercentage}
+                      onChange={(e) => setMaxEngagementPercentage(e.target.value)}
+                    />
                   </div>
                 </div>
               </div>
 
-              {/* Billing Percentage Range */}
+              {/* Billing Percentage Range - Text Inputs */}
               <div className="space-y-3">
                 <Label className="text-sm font-medium">Billing Percentage</Label>
-                <div className="px-2">
-                  <Slider
-                    value={billingRange}
-                    onValueChange={setBillingRange}
-                    max={100}
-                    min={0}
-                    step={5}
-                    className="w-full"
-                  />
-                  <div className="flex justify-between text-xs text-gray-500 mt-1">
-                    <span>{billingRange[0]}%</span>
-                    <span>{billingRange[1]}%</span>
+                <div className="grid grid-cols-2 gap-2">
+                  <div className="space-y-1">
+                    <Label className="text-xs text-gray-500">Min %</Label>
+                    <Input
+                      type="number"
+                      placeholder="0"
+                      min="0"
+                      max="100"
+                      value={minBillingPercentage}
+                      onChange={(e) => setMinBillingPercentage(e.target.value)}
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <Label className="text-xs text-gray-500">Max %</Label>
+                    <Input
+                      type="number"
+                      placeholder="100"
+                      min="0"
+                      max="100"
+                      value={maxBillingPercentage}
+                      onChange={(e) => setMaxBillingPercentage(e.target.value)}
+                    />
                   </div>
                 </div>
               </div>
@@ -450,14 +486,6 @@ const VerticalEmployeeSearchSidebar: React.FC<VerticalEmployeeSearchSidebarProps
                   </Popover>
                 </div>
               </div>
-
-              <Button 
-                onClick={handleResourcePlanningFilter}
-                className="w-full mt-3"
-                disabled={isLoading}
-              >
-                Apply Resource Planning Filters
-              </Button>
             </CollapsibleContent>
           </Collapsible>
 
