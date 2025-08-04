@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -152,7 +153,6 @@ const EnhancedEmployeeSearchFilters: React.FC<EnhancedEmployeeSearchFiltersProps
     applyTechnologyFilter,
     applyTrainingFilter,
     applyAchievementFilter,
-    applyAdvancedFilters,
     clearAllFilters 
   } = useAdvancedFiltersManager({
     skillInput,
@@ -364,7 +364,7 @@ const EnhancedEmployeeSearchFilters: React.FC<EnhancedEmployeeSearchFiltersProps
               onTechnologyFilter={applyTechnologyFilter}
               onTrainingFilter={applyTrainingFilter}
               onAchievementFilter={applyAchievementFilter}
-              onAdvancedFilters={applyAdvancedFilters}
+              onAdvancedFilters={onAdvancedFilters}
               onEducationFilter={onEducationFilter}
               onClearAllFilters={clearAllFilters}
               isLoading={isLoading}

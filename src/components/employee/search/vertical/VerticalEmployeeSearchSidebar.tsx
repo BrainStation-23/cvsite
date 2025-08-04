@@ -1,26 +1,4 @@
-import React, { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { 
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import { Slider } from '@/components/ui/slider';
-import { Calendar } from '@/components/ui/calendar';
-import { 
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/components/ui/popover';
-import { 
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from '@/components/ui/collapsible';
+import React from 'react';
 import { 
   EmployeeProfileSortColumn, 
   EmployeeProfileSortOrder 
@@ -28,18 +6,12 @@ import {
 import CompactSearchHeader from './CompactSearchHeader';
 import VerticalFilterChips from './VerticalFilterChips';
 import CollapsibleFilterSection from './CollapsibleFilterSection';
-import { 
-  Calendar as CalendarIcon, 
-  ChevronDown, 
-  Filter,
-  TrendingUp,
-  Building2
-} from 'lucide-react';
-import { cn } from '@/lib/utils';
-import { format } from 'date-fns';
+import ResourcePlanningFilters from './ResourcePlanningFilters';
 import { useFilterState } from '../FilterState';
 import { useFilterChipsManager } from '../FilterChipsManager';
 import { useAdvancedFiltersManager } from '../AdvancedFiltersManager';
+import { useVerticalSidebarState } from './hooks/useVerticalSidebarState';
+import { useResourcePlanningState } from './hooks/useResourcePlanningState';
 
 interface VerticalEmployeeSearchSidebarProps {
   onSearch: (query: string) => void;
@@ -103,31 +75,38 @@ const VerticalEmployeeSearchSidebar: React.FC<VerticalEmployeeSearchSidebarProps
   sortOrder,
   isLoading
 }) => {
-  const [searchMode, setSearchMode] = useState<'manual' | 'ai'>('manual');
-  const [experienceYears, setExperienceYears] = useState<number[]>([0, 20]);
-  const [minGraduationYear, setMinGraduationYear] = useState<number | null>(null);
-  const [maxGraduationYear, setMaxGraduationYear] = useState<number | null>(null);
-  const [completionStatus, setCompletionStatus] = useState<string>('all');
-  
-  // Resource planning filter states
-  const [engagementRange, setEngagementRange] = useState<number[]>([0, 100]);
-  const [billingRange, setBillingRange] = useState<number[]>([0, 100]);
-  const [releaseDateFrom, setReleaseDateFrom] = useState<Date | null>(null);
-  const [releaseDateTo, setReleaseDateTo] = useState<Date | null>(null);
-  const [availabilityStatus, setAvailabilityStatus] = useState<string>('all');
-  const [currentProjectSearch, setCurrentProjectSearch] = useState<string>('');
-  const [isResourcePlanningOpen, setIsResourcePlanningOpen] = useState(false);
-  
-  const [skillInput, setSkillInput] = useState('');
-  const [universityInput, setUniversityInput] = useState('');
-  const [companyInput, setCompanyInput] = useState('');
-  const [technologyInput, setTechnologyInput] = useState<string[]>([]);
-  const [projectNameInput, setProjectNameInput] = useState('');
-  const [projectDescriptionInput, setProjectDescriptionInput] = useState('');
-  const [trainingInput, setTrainingInput] = useState('');
-  const [achievementInput, setAchievementInput] = useState('');
+  const {
+    searchMode,
+    setSearchMode,
+    experienceYears,
+    setExperienceYears,
+    minGraduationYear,
+    setMinGraduationYear,
+    maxGraduationYear,
+    setMaxGraduationYear,
+    completionStatus,
+    setCompletionStatus,
+    skillInput,
+    setSkillInput,
+    universityInput,
+    setUniversityInput,
+    companyInput,
+    setCompanyInput,
+    technologyInput,
+    setTechnologyInput,
+    projectNameInput,
+    setProjectNameInput,
+    projectDescriptionInput,
+    setProjectDescriptionInput,
+    trainingInput,
+    setTrainingInput,
+    achievementInput,
+    setAchievementInput,
+    highlightedFilters,
+    setHighlightedFilters,
+  } = useVerticalSidebarState();
 
-  const [highlightedFilters, setHighlightedFilters] = useState<string[]>([]);
+  const resourcePlanningState = useResourcePlanningState({ onResourcePlanningFilters });
 
   const { activeFilters } = useFilterState({
     searchQuery,
@@ -219,6 +198,7 @@ const VerticalEmployeeSearchSidebar: React.FC<VerticalEmployeeSearchSidebarProps
 
     const changed: string[] = [];
 
+    // Basic filters
     if ('search_query' in filters && filters.search_query !== searchQuery) {
       onSearch(filters.search_query);
       changed.push('search');
@@ -243,52 +223,133 @@ const VerticalEmployeeSearchSidebar: React.FC<VerticalEmployeeSearchSidebarProps
       onAchievementFilter(filters.achievement_filter);
       changed.push('achievement');
     }
+
+    // Project filters - handle both legacy and specific filters
     if ('project_filter' in filters && filters.project_filter !== projectFilter) {
       onProjectFilter(filters.project_filter);
       changed.push('project');
     }
+    if ('project_name_filter' in filters || 'project_description_filter' in filters) {
+      // For AI search, combine project name and description filters into general project filter
+      const projectQuery = [
+        filters.project_name_filter,
+        filters.project_description_filter
+      ].filter(Boolean).join(' ');
+      
+      if (projectQuery && projectQuery !== projectFilter) {
+        onProjectFilter(projectQuery);
+        changed.push('project');
+      }
+    }
 
+    // Technology filters - convert to project filter for now
+    if ('technology_filter' in filters && Array.isArray(filters.technology_filter) && filters.technology_filter.length > 0) {
+      const techQuery = filters.technology_filter.join(' ');
+      if (techQuery !== projectFilter) {
+        onProjectFilter(techQuery);
+        changed.push('project');
+      }
+    }
+
+    // Advanced filters
     const advancedFilters: any = {};
+    let hasAdvancedFilters = false;
+
     if ('min_experience_years' in filters) {
       advancedFilters.minExperienceYears = filters.min_experience_years;
+      setExperienceYears(prev => [filters.min_experience_years || prev[0], prev[1]]);
+      hasAdvancedFilters = true;
       changed.push('experience-years');
     }
     if ('max_experience_years' in filters) {
       advancedFilters.maxExperienceYears = filters.max_experience_years;
+      setExperienceYears(prev => [prev[0], filters.max_experience_years || prev[1]]);
+      hasAdvancedFilters = true;
       changed.push('experience-years');
     }
     if ('min_graduation_year' in filters) {
       advancedFilters.minGraduationYear = filters.min_graduation_year;
+      setMinGraduationYear(filters.min_graduation_year);
+      hasAdvancedFilters = true;
       changed.push('graduation-years');
     }
     if ('max_graduation_year' in filters) {
       advancedFilters.maxGraduationYear = filters.max_graduation_year;
+      setMaxGraduationYear(filters.max_graduation_year);
+      hasAdvancedFilters = true;
       changed.push('graduation-years');
     }
     if ('completion_status' in filters && filters.completion_status !== completionStatus) {
       advancedFilters.completionStatus = filters.completion_status;
+      setCompletionStatus(filters.completion_status);
+      hasAdvancedFilters = true;
       changed.push('completion');
     }
 
-    if (Object.keys(advancedFilters).length > 0) {
+    if (hasAdvancedFilters) {
       onAdvancedFilters(advancedFilters);
     }
 
-    setHighlightedFilters(Array.from(new Set(changed)));
-    setTimeout(() => setHighlightedFilters([]), 2000);
-  };
+    // Resource planning filters
+    const resourceFilters: any = {};
+    let hasResourceFilters = false;
 
-  const handleResourcePlanningFilter = () => {
-    onResourcePlanningFilters({
-      minEngagementPercentage: engagementRange[0] > 0 ? engagementRange[0] : null,
-      maxEngagementPercentage: engagementRange[1] < 100 ? engagementRange[1] : null,
-      minBillingPercentage: billingRange[0] > 0 ? billingRange[0] : null,
-      maxBillingPercentage: billingRange[1] < 100 ? billingRange[1] : null,
-      releaseDateFrom,
-      releaseDateTo,
-      availabilityStatus: availabilityStatus !== 'all' ? availabilityStatus : null,
-      currentProjectSearch: currentProjectSearch || null,
-    });
+    if ('min_engagement_percentage' in filters) {
+      resourceFilters.minEngagementPercentage = filters.min_engagement_percentage;
+      resourcePlanningState.setMinEngagementPercentage(String(filters.min_engagement_percentage));
+      hasResourceFilters = true;
+      changed.push('engagement');
+    }
+    if ('max_engagement_percentage' in filters) {
+      resourceFilters.maxEngagementPercentage = filters.max_engagement_percentage;
+      resourcePlanningState.setMaxEngagementPercentage(String(filters.max_engagement_percentage));
+      hasResourceFilters = true;
+      changed.push('engagement');
+    }
+    if ('min_billing_percentage' in filters) {
+      resourceFilters.minBillingPercentage = filters.min_billing_percentage;
+      resourcePlanningState.setMinBillingPercentage(String(filters.min_billing_percentage));
+      hasResourceFilters = true;
+      changed.push('billing');
+    }
+    if ('max_billing_percentage' in filters) {
+      resourceFilters.maxBillingPercentage = filters.max_billing_percentage;
+      resourcePlanningState.setMaxBillingPercentage(String(filters.max_billing_percentage));
+      hasResourceFilters = true;
+      changed.push('billing');
+    }
+    if ('release_date_from' in filters) {
+      resourceFilters.releaseDateFrom = new Date(filters.release_date_from);
+      resourcePlanningState.setReleaseDateFrom(new Date(filters.release_date_from));
+      hasResourceFilters = true;
+      changed.push('release-date');
+    }
+    if ('release_date_to' in filters) {
+      resourceFilters.releaseDateTo = new Date(filters.release_date_to);
+      resourcePlanningState.setReleaseDateTo(new Date(filters.release_date_to));
+      hasResourceFilters = true;
+      changed.push('release-date');
+    }
+    if ('availability_status' in filters) {
+      resourceFilters.availabilityStatus = filters.availability_status;
+      resourcePlanningState.setAvailabilityStatus(filters.availability_status);
+      hasResourceFilters = true;
+      changed.push('availability');
+    }
+    if ('current_project_search' in filters) {
+      resourceFilters.currentProjectSearch = filters.current_project_search;
+      resourcePlanningState.setCurrentProjectSearch(filters.current_project_search);
+      hasResourceFilters = true;
+      changed.push('current-project');
+    }
+
+    if (hasResourceFilters) {
+      onResourcePlanningFilters(resourceFilters);
+    }
+
+    // Highlight applied filters
+    setHighlightedFilters(Array.from(new Set(changed)));
+    setTimeout(() => setHighlightedFilters([]), 3000); // Show highlights for 3 seconds
   };
 
   return (
@@ -321,145 +382,7 @@ const VerticalEmployeeSearchSidebar: React.FC<VerticalEmployeeSearchSidebarProps
           )}
 
           {/* Resource Planning Filters */}
-          <Collapsible open={isResourcePlanningOpen} onOpenChange={setIsResourcePlanningOpen}>
-            <CollapsibleTrigger asChild>
-              <Button variant="outline" className="w-full justify-between">
-                <div className="flex items-center gap-2">
-                  <TrendingUp className="h-4 w-4" />
-                  Resource Planning
-                </div>
-                <ChevronDown className={cn("h-4 w-4 transition-transform", isResourcePlanningOpen && "rotate-180")} />
-              </Button>
-            </CollapsibleTrigger>
-            <CollapsibleContent className="mt-3 space-y-4">
-              {/* Availability Status */}
-              <div className="space-y-2">
-                <Label className="text-sm font-medium">Availability Status</Label>
-                <Select value={availabilityStatus} onValueChange={setAvailabilityStatus}>
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Select availability" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All</SelectItem>
-                    <SelectItem value="available">Available</SelectItem>
-                    <SelectItem value="engaged">Engaged</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              {/* Current Project Search */}
-              <div className="space-y-2">
-                <Label className="text-sm font-medium">Current Project</Label>
-                <div className="relative">
-                  <Building2 className="absolute left-2 top-2.5 h-4 w-4 text-gray-400" />
-                  <Input
-                    placeholder="Search current project..."
-                    value={currentProjectSearch}
-                    onChange={(e) => setCurrentProjectSearch(e.target.value)}
-                    className="pl-8"
-                  />
-                </div>
-              </div>
-
-              {/* Engagement Percentage Range */}
-              <div className="space-y-3">
-                <Label className="text-sm font-medium">Engagement Percentage</Label>
-                <div className="px-2">
-                  <Slider
-                    value={engagementRange}
-                    onValueChange={setEngagementRange}
-                    max={100}
-                    min={0}
-                    step={5}
-                    className="w-full"
-                  />
-                  <div className="flex justify-between text-xs text-gray-500 mt-1">
-                    <span>{engagementRange[0]}%</span>
-                    <span>{engagementRange[1]}%</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Billing Percentage Range */}
-              <div className="space-y-3">
-                <Label className="text-sm font-medium">Billing Percentage</Label>
-                <div className="px-2">
-                  <Slider
-                    value={billingRange}
-                    onValueChange={setBillingRange}
-                    max={100}
-                    min={0}
-                    step={5}
-                    className="w-full"
-                  />
-                  <div className="flex justify-between text-xs text-gray-500 mt-1">
-                    <span>{billingRange[0]}%</span>
-                    <span>{billingRange[1]}%</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Release Date Range */}
-              <div className="space-y-2">
-                <Label className="text-sm font-medium">Release Date Range</Label>
-                <div className="grid grid-cols-2 gap-2">
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <Button
-                        variant="outline"
-                        className={cn(
-                          "w-full justify-start text-left font-normal",
-                          !releaseDateFrom && "text-muted-foreground"
-                        )}
-                      >
-                        <CalendarIcon className="mr-2 h-4 w-4" />
-                        {releaseDateFrom ? format(releaseDateFrom, "PPP") : "From"}
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="start">
-                      <Calendar
-                        mode="single"
-                        selected={releaseDateFrom}
-                        onSelect={setReleaseDateFrom}
-                        initialFocus
-                      />
-                    </PopoverContent>
-                  </Popover>
-                  
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <Button
-                        variant="outline"
-                        className={cn(
-                          "w-full justify-start text-left font-normal",
-                          !releaseDateTo && "text-muted-foreground"
-                        )}
-                      >
-                        <CalendarIcon className="mr-2 h-4 w-4" />
-                        {releaseDateTo ? format(releaseDateTo, "PPP") : "To"}
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="start">
-                      <Calendar
-                        mode="single"
-                        selected={releaseDateTo}
-                        onSelect={setReleaseDateTo}
-                        initialFocus
-                      />
-                    </PopoverContent>
-                  </Popover>
-                </div>
-              </div>
-
-              <Button 
-                onClick={handleResourcePlanningFilter}
-                className="w-full mt-3"
-                disabled={isLoading}
-              >
-                Apply Resource Planning Filters
-              </Button>
-            </CollapsibleContent>
-          </Collapsible>
+          <ResourcePlanningFilters {...resourcePlanningState} />
 
           <CollapsibleFilterSection
             title="Projects & Tech"
@@ -493,6 +416,7 @@ const VerticalEmployeeSearchSidebar: React.FC<VerticalEmployeeSearchSidebarProps
               setExperienceYears={setExperienceYears}
               onSkillFilter={onSkillFilter}
               onExperienceFilter={onExperienceFilter}
+              onAdvancedFilters={onAdvancedFilters}
               isLoading={isLoading}
             />
 

@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import ProfessionalFiltersSection from './sections/ProfessionalFiltersSection';
@@ -122,34 +121,45 @@ const AdvancedFiltersPanel: React.FC<AdvancedFiltersPanelProps> = ({
     onAchievementFilter(value);
   };
 
+  // Simplified experience years handler - directly call onAdvancedFilters
   const handleExperienceYearsChange = (years: number[]) => {
+    console.log('AdvancedFiltersPanel - Experience years changed:', years);
+    console.log('Current state - minGraduationYear:', minGraduationYear, 'maxGraduationYear:', maxGraduationYear, 'completionStatus:', completionStatus);
+    
     setExperienceYears(years);
-    onAdvancedFilters({
-      experienceYears: years,
+    
+    const filters = {
+      minExperienceYears: years[0] || null,
+      maxExperienceYears: years[1] || null,
       minGraduationYear,
       maxGraduationYear,
-      completionStatus
-    });
+      completionStatus: completionStatus === 'all' ? null : completionStatus
+    };
+    
+    console.log('AdvancedFiltersPanel - Calling onAdvancedFilters with:', filters);
+    onAdvancedFilters(filters);
   };
 
   const handleGraduationYearChange = (minYear: number | null, maxYear: number | null) => {
     setMinGraduationYear(minYear);
     setMaxGraduationYear(maxYear);
     onAdvancedFilters({
-      experienceYears,
+      minExperienceYears: experienceYears[0] || null,
+      maxExperienceYears: experienceYears[1] || null,
       minGraduationYear: minYear,
       maxGraduationYear: maxYear,
-      completionStatus
+      completionStatus: completionStatus === 'all' ? null : completionStatus
     });
   };
 
   const handleCompletionStatusChange = (status: string) => {
     setCompletionStatus(status);
     onAdvancedFilters({
-      experienceYears,
+      minExperienceYears: experienceYears[0] || null,
+      maxExperienceYears: experienceYears[1] || null,
       minGraduationYear,
       maxGraduationYear,
-      completionStatus: status
+      completionStatus: status === 'all' ? null : status
     });
   };
 

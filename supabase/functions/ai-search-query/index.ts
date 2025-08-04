@@ -7,21 +7,29 @@ const corsHeaders = {
 };
 
 interface SearchFilters {
-  search_query?: string;
-  skill_filter?: string;
-  experience_filter?: string;
-  education_filter?: string;
-  training_filter?: string;
-  achievement_filter?: string;
-  project_filter?: string;
-  project_name_filter?: string;
-  project_description_filter?: string;
-  technology_filter?: string[];
-  min_experience_years?: number;
-  max_experience_years?: number;
-  min_graduation_year?: number;
-  max_graduation_year?: number;
-  completion_status?: string;
+  search_query?: string | null;
+  skill_filter?: string | null;
+  experience_filter?: string | null;
+  education_filter?: string | null;
+  training_filter?: string | null;
+  achievement_filter?: string | null;
+  project_filter?: string | null;
+  project_name_filter?: string | null;
+  project_description_filter?: string | null;
+  technology_filter?: string[] | null;
+  min_experience_years?: number | null;
+  max_experience_years?: number | null;
+  min_graduation_year?: number | null;
+  max_graduation_year?: number | null;
+  completion_status?: string | null;
+  min_engagement_percentage?: number | null;
+  max_engagement_percentage?: number | null;
+  min_billing_percentage?: number | null;
+  max_billing_percentage?: number | null;
+  release_date_from?: string | null;
+  release_date_to?: string | null;
+  availability_status?: string | null;
+  current_project_search?: string | null;
 }
 
 interface AISearchResponse {
@@ -32,7 +40,6 @@ interface AISearchResponse {
 }
 
 serve(async (req) => {
-  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
@@ -53,108 +60,188 @@ serve(async (req) => {
 
     console.log(`Processing AI search query: "${query}"`);
 
-    const prompt = `
-You are an expert at parsing employee search queries and converting them into structured database filters for an employee profile management system.
+    // Define the structured schema for Gemini
+    const functionDeclaration = {
+      name: "parse_employee_search",
+      description: "Parse natural language query into structured employee search parameters",
+      parameters: {
+        type: "object",
+        properties: {
+          search_query: {
+            type: "string",
+            description: "General text search across employee names, IDs, and biography"
+          },
+          skill_filter: {
+            type: "string", 
+            description: "Technical or specialized skills (e.g., React, Python, Machine Learning)"
+          },
+          experience_filter: {
+            type: "string",
+            description: "Company names, job titles, or work experience descriptions"
+          },
+          education_filter: {
+            type: "string",
+            description: "University names, degree names, academic departments"
+          },
+          training_filter: {
+            type: "string",
+            description: "Certifications, courses, training programs"
+          },
+          achievement_filter: {
+            type: "string",
+            description: "Awards, recognitions, accomplishments"
+          },
+          project_name_filter: {
+            type: "string",
+            description: "Specific project names"
+          },
+          project_description_filter: {
+            type: "string", 
+            description: "Project details, domains, what the project does"
+          },
+          technology_filter: {
+            type: "array",
+            items: { type: "string" },
+            description: "Technologies, frameworks, tools used IN PROJECTS"
+          },
+          min_experience_years: {
+            type: "integer",
+            minimum: 0,
+            maximum: 50,
+            description: "Minimum years of work experience"
+          },
+          max_experience_years: {
+            type: "integer", 
+            minimum: 0,
+            maximum: 50,
+            description: "Maximum years of work experience"
+          },
+          min_graduation_year: {
+            type: "integer",
+            minimum: 1950,
+            maximum: 2030,
+            description: "Minimum university graduation year"
+          },
+          max_graduation_year: {
+            type: "integer",
+            minimum: 1950, 
+            maximum: 2030,
+            description: "Maximum university graduation year"
+          },
+          completion_status: {
+            type: "string",
+            enum: ["complete", "incomplete", "no-skills", "no-experience", "no-education"],
+            description: "Profile completeness status"
+          },
+          min_engagement_percentage: {
+            type: "number",
+            minimum: 0,
+            maximum: 100,
+            description: "Minimum engagement percentage for resource planning"
+          },
+          max_engagement_percentage: {
+            type: "number",
+            minimum: 0,
+            maximum: 100, 
+            description: "Maximum engagement percentage for resource planning"
+          },
+          min_billing_percentage: {
+            type: "number",
+            minimum: 0,
+            maximum: 100,
+            description: "Minimum billing percentage for resource planning"
+          },
+          max_billing_percentage: {
+            type: "number",
+            minimum: 0,
+            maximum: 100,
+            description: "Maximum billing percentage for resource planning"
+          },
+          release_date_from: {
+            type: "string",
+            format: "date",
+            description: "Start date for availability/release date range (YYYY-MM-DD)"
+          },
+          release_date_to: {
+            type: "string", 
+            format: "date",
+            description: "End date for availability/release date range (YYYY-MM-DD)"
+          },
+          availability_status: {
+            type: "string",
+            enum: ["available", "engaged", "all"],
+            description: "Employee availability status"
+          },
+          current_project_search: {
+            type: "string",
+            description: "Search within current project names or descriptions"
+          },
+          confidence: {
+            type: "number",
+            minimum: 0,
+            maximum: 1,
+            description: "Confidence level in the interpretation (0-1)"
+          },
+          explanation: {
+            type: "string",
+            description: "Brief explanation of how the query was interpreted"
+          }
+        },
+        required: ["confidence", "explanation"]
+      }
+    };
 
-Given this natural language query: "${query}"
+    const systemPrompt = `You are an expert at parsing employee search queries for a comprehensive employee profile database.
 
-Extract relevant search parameters and map them to these available filters based on our database structure:
+IMPORTANT DISAMBIGUATION RULES:
 
-## FILTER DEFINITIONS & DATABASE CONTEXT:
+1. **Skills vs Project Technologies**:
+   - "React developers" → skill_filter: "React" (they have React as a skill)
+   - "Projects using React" → technology_filter: ["React"] (React was used in their projects)
+   - When unclear, prefer skill_filter
 
-**search_query**: General text search across employee names, employee IDs, and biography text
-- Use for: names, employee IDs, general profile information
+2. **Companies (Experience vs Current Projects)**:
+   - "worked at Google" → experience_filter: "Google" (employment history)
+   - "Google project" → current_project_search: "Google" (current project client/name)
 
-**skill_filter**: Search in technical_skills and specialized_skills tables
-- Use for: Programming languages, frameworks, software tools, technical abilities
-- Examples: "React", "Python", "Machine Learning", "Data Analysis"
-- NOT for: technologies used in specific projects (use technology_filter instead)
+3. **Experience Years Parsing**:
+   - "5 years experience" → min_experience_years: 5
+   - "5+ years" → min_experience_years: 5
+   - "3-7 years" → min_experience_years: 3, max_experience_years: 7
+   - "junior" → max_experience_years: 2
+   - "senior" → min_experience_years: 5
 
-**experience_filter**: Search in experiences table (company_name, designation, description)
-- Use for: Company names where someone worked, job titles, work experience descriptions
-- Examples: "Google", "Senior Developer", "Microsoft", "Team Lead"
-- NOT for: companies mentioned as project clients (use project filters instead)
+4. **Availability & Resource Planning**:
+   - "available" → availability_status: "available"
+   - "free" → availability_status: "available" 
+   - "engaged" → availability_status: "engaged"
+   - "80% billable" → min_billing_percentage: 80
+   - "less than 50% engaged" → max_engagement_percentage: 50
+   - "available next month" → release_date_from: [next month's start date]
 
-**education_filter**: Search in education and universities tables
-- Use for: University names, degree names, academic departments
-- Examples: "MIT", "Computer Science", "Stanford University", "Bachelor's"
+5. **Education**:
+   - "MIT graduates" → education_filter: "MIT"
+   - "Computer Science degree" → education_filter: "Computer Science"
+   - "class of 2020" → min_graduation_year: 2020, max_graduation_year: 2020
 
-**training_filter**: Search in trainings table (title, provider, description)
-- Use for: Certifications, courses, training programs, professional development
-- Examples: "AWS Certified", "Scrum Master", "Google Analytics", "PMP"
+6. **Profile Completion**:
+   - "complete profiles" → completion_status: "complete"
+   - "incomplete profiles" → completion_status: "incomplete"
+   - "missing skills" → completion_status: "no-skills"
 
-**achievement_filter**: Search in achievements table (title, description)
-- Use for: Awards, recognitions, accomplishments, honors
-- Examples: "Employee of the Year", "Best Innovation Award", "Dean's List"
+7. **Date Parsing**:
+   - Always use YYYY-MM-DD format for dates
+   - "next month" = first day of next month
+   - "Q1" = January 1st of relevant year
+   - "end of year" = December 31st of current year
 
-**project_filter**: General project search (legacy - avoid using, prefer specific project filters below)
+CONFIDENCE SCORING:
+- 0.9+: Very clear queries with specific terms
+- 0.7-0.9: Clear intent with minor ambiguity  
+- 0.5-0.7: Multiple possible interpretations
+- <0.5: Very ambiguous queries
 
-**project_name_filter**: Search specifically in projects.name field
-- Use for: Specific project names or when user mentions "project called X"
-- Examples: "E-commerce Platform", "Mobile Banking App", "CRM System"
-
-**project_description_filter**: Search in projects.description field
-- Use for: Project details, what the project does, project domain
-- Examples: "payment processing", "inventory management", "social media"
-
-**technology_filter**: Search in projects.technologies_used array field
-- Use for: Technologies, frameworks, tools used IN PROJECTS
-- Examples: ["React", "Node.js"], ["Python", "TensorFlow"], ["Unity", "C#"]
-- This is DIFFERENT from skill_filter - this is about what was used in projects
-
-**Numeric Filters:**
-- min_experience_years/max_experience_years: Years of work experience (0-20+ range)
-- min_graduation_year/max_graduation_year: University graduation years (1980-2030 range)
-
-**completion_status**: Profile completeness analysis
-- Values: "complete", "incomplete", "no-skills", "no-experience", "no-education"
-
-## DISAMBIGUATION EXAMPLES:
-
-"React developers" → skill_filter: "React" (they have React as a skill)
-"Projects using React" → technology_filter: ["React"] (React was used in their projects)
-
-"worked at Google" → experience_filter: "Google" (employment history)
-"Google project" → project_name_filter: "Google" OR project_description_filter: "Google" (project client/name)
-
-"Unity developer" → skill_filter: "Unity" (has Unity as a skill)
-"Unity game project" → technology_filter: ["Unity"] (used Unity in a project)
-
-"5 years experience" → min_experience_years: 5
-"5+ years experience" → min_experience_years: 5
-"3-7 years experience" → min_experience_years: 3, max_experience_years: 7
-
-"MIT graduates" → education_filter: "MIT"
-"Computer Science degree" → education_filter: "Computer Science"
-
-"AWS certified" → training_filter: "AWS"
-"Machine Learning skills" → skill_filter: "Machine Learning"
-
-Return a JSON response with this exact structure:
-{
-  "filters": {
-    // Only include filters that are clearly indicated by the query
-  },
-  "confidence": 0.95, // 0-1 confidence score
-  "explanation": "Brief explanation of how the query was interpreted"
-}
-
-## IMPORTANT RULES:
-1. Only include filters that are CLEARLY indicated by the query
-2. Be conservative - better to miss a filter than include incorrect ones
-3. For technologies, distinguish between personal skills vs project usage
-4. For companies, distinguish between employment vs project clients
-5. Use arrays for technology_filter: ["React", "Node.js"] not just "React"
-6. Confidence should reflect certainty about the interpretation
-7. If unclear whether something is a skill or project technology, prefer skill_filter
-8. Always explain your reasoning in the explanation field
-
-Examples of good confidence scores:
-- 0.9+: Very clear queries like "React developers with 5+ years"
-- 0.7-0.9: Clear intent but some ambiguity "frontend developers"
-- 0.5-0.7: Multiple possible interpretations "Google engineers"
-- <0.5: Very ambiguous or unclear queries
-`;
+Only include fields that are clearly indicated by the query. Be conservative - better to miss a filter than include an incorrect one.`;
 
     const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${geminiModel}:generateContent?key=${geminiApiKey}`, {
       method: 'POST',
@@ -164,9 +251,21 @@ Examples of good confidence scores:
       body: JSON.stringify({
         contents: [{
           parts: [{
-            text: prompt
+            text: `Parse this employee search query: "${query}"`
           }]
         }],
+        systemInstruction: {
+          parts: [{ text: systemPrompt }]
+        },
+        tools: [{
+          functionDeclarations: [functionDeclaration]
+        }],
+        toolConfig: {
+          functionCallingConfig: {
+            mode: "ANY",
+            allowedFunctionNames: ["parse_employee_search"]
+          }
+        },
         generationConfig: {
           temperature: 0.1,
           topK: 1,
@@ -189,87 +288,100 @@ Examples of good confidence scores:
       throw new Error('Invalid response from Gemini API');
     }
 
-    const aiResponse = data.candidates[0].content.parts[0].text;
-    console.log('AI response text:', aiResponse);
-
-    // Parse the JSON response from Gemini
-    let parsedResponse: { filters: SearchFilters; confidence: number; explanation: string };
-    try {
-      // Clean the response - remove any markdown formatting
-      const cleanResponse = aiResponse.replace(/```json\n?|\n?```/g, '').trim();
-      parsedResponse = JSON.parse(cleanResponse);
-    } catch (parseError) {
-      console.error('Failed to parse AI response:', parseError, 'Response:', aiResponse);
-      // Fallback: treat the query as a general search
-      parsedResponse = {
-        filters: { search_query: query },
-        confidence: 0.5,
-        explanation: "Could not parse query with AI, using general search"
-      };
+    const candidate = data.candidates[0];
+    
+    // Check if function was called
+    if (!candidate.content.parts || !candidate.content.parts[0].functionCall) {
+      throw new Error('No function call in Gemini response');
     }
 
-    // Validate and sanitize the filters
+    const functionCall = candidate.content.parts[0].functionCall;
+    const parsedArgs = functionCall.args;
+
+    console.log('Parsed function arguments:', JSON.stringify(parsedArgs, null, 2));
+
+    // Build validated filters
     const validatedFilters: SearchFilters = {};
     
-    if (parsedResponse.filters.search_query) {
-      validatedFilters.search_query = String(parsedResponse.filters.search_query).trim();
-    }
-    if (parsedResponse.filters.skill_filter) {
-      validatedFilters.skill_filter = String(parsedResponse.filters.skill_filter).trim();
-    }
-    if (parsedResponse.filters.experience_filter) {
-      validatedFilters.experience_filter = String(parsedResponse.filters.experience_filter).trim();
-    }
-    if (parsedResponse.filters.education_filter) {
-      validatedFilters.education_filter = String(parsedResponse.filters.education_filter).trim();
-    }
-    if (parsedResponse.filters.training_filter) {
-      validatedFilters.training_filter = String(parsedResponse.filters.training_filter).trim();
-    }
-    if (parsedResponse.filters.achievement_filter) {
-      validatedFilters.achievement_filter = String(parsedResponse.filters.achievement_filter).trim();
-    }
-    if (parsedResponse.filters.project_filter) {
-      validatedFilters.project_filter = String(parsedResponse.filters.project_filter).trim();
-    }
-    if (parsedResponse.filters.project_name_filter) {
-      validatedFilters.project_name_filter = String(parsedResponse.filters.project_name_filter).trim();
-    }
-    if (parsedResponse.filters.project_description_filter) {
-      validatedFilters.project_description_filter = String(parsedResponse.filters.project_description_filter).trim();
+    // Text filters
+    if (parsedArgs.search_query) validatedFilters.search_query = String(parsedArgs.search_query).trim();
+    if (parsedArgs.skill_filter) validatedFilters.skill_filter = String(parsedArgs.skill_filter).trim();
+    if (parsedArgs.experience_filter) validatedFilters.experience_filter = String(parsedArgs.experience_filter).trim();
+    if (parsedArgs.education_filter) validatedFilters.education_filter = String(parsedArgs.education_filter).trim();
+    if (parsedArgs.training_filter) validatedFilters.training_filter = String(parsedArgs.training_filter).trim();
+    if (parsedArgs.achievement_filter) validatedFilters.achievement_filter = String(parsedArgs.achievement_filter).trim();
+    if (parsedArgs.project_name_filter) validatedFilters.project_name_filter = String(parsedArgs.project_name_filter).trim();
+    if (parsedArgs.project_description_filter) validatedFilters.project_description_filter = String(parsedArgs.project_description_filter).trim();
+    if (parsedArgs.current_project_search) validatedFilters.current_project_search = String(parsedArgs.current_project_search).trim();
+    
+    // Array filters
+    if (parsedArgs.technology_filter && Array.isArray(parsedArgs.technology_filter)) {
+      validatedFilters.technology_filter = parsedArgs.technology_filter
+        .map((tech: any) => String(tech).trim())
+        .filter((tech: string) => tech.length > 0);
     }
     
-    // Handle technology filter (array of strings)
-    if (parsedResponse.filters.technology_filter && Array.isArray(parsedResponse.filters.technology_filter)) {
-      validatedFilters.technology_filter = parsedResponse.filters.technology_filter
-        .map(tech => String(tech).trim())
-        .filter(tech => tech.length > 0);
+    // Numeric filters with validation
+    if (parsedArgs.min_experience_years !== undefined) {
+      const val = Number(parsedArgs.min_experience_years);
+      if (!isNaN(val) && val >= 0 && val <= 50) validatedFilters.min_experience_years = val;
+    }
+    if (parsedArgs.max_experience_years !== undefined) {
+      const val = Number(parsedArgs.max_experience_years);
+      if (!isNaN(val) && val >= 0 && val <= 50) validatedFilters.max_experience_years = val;
+    }
+    if (parsedArgs.min_graduation_year !== undefined) {
+      const val = Number(parsedArgs.min_graduation_year);
+      if (!isNaN(val) && val >= 1950 && val <= 2030) validatedFilters.min_graduation_year = val;
+    }
+    if (parsedArgs.max_graduation_year !== undefined) {
+      const val = Number(parsedArgs.max_graduation_year);
+      if (!isNaN(val) && val >= 1950 && val <= 2030) validatedFilters.max_graduation_year = val;
     }
     
-    // Handle numeric filters
-    if (parsedResponse.filters.min_experience_years && !isNaN(Number(parsedResponse.filters.min_experience_years))) {
-      validatedFilters.min_experience_years = Number(parsedResponse.filters.min_experience_years);
+    // Resource planning filters
+    if (parsedArgs.min_engagement_percentage !== undefined) {
+      const val = Number(parsedArgs.min_engagement_percentage);
+      if (!isNaN(val) && val >= 0 && val <= 100) validatedFilters.min_engagement_percentage = val;
     }
-    if (parsedResponse.filters.max_experience_years && !isNaN(Number(parsedResponse.filters.max_experience_years))) {
-      validatedFilters.max_experience_years = Number(parsedResponse.filters.max_experience_years);
+    if (parsedArgs.max_engagement_percentage !== undefined) {
+      const val = Number(parsedArgs.max_engagement_percentage);
+      if (!isNaN(val) && val >= 0 && val <= 100) validatedFilters.max_engagement_percentage = val;
     }
-    if (parsedResponse.filters.min_graduation_year && !isNaN(Number(parsedResponse.filters.min_graduation_year))) {
-      validatedFilters.min_graduation_year = Number(parsedResponse.filters.min_graduation_year);
+    if (parsedArgs.min_billing_percentage !== undefined) {
+      const val = Number(parsedArgs.min_billing_percentage);
+      if (!isNaN(val) && val >= 0 && val <= 100) validatedFilters.min_billing_percentage = val;
     }
-    if (parsedResponse.filters.max_graduation_year && !isNaN(Number(parsedResponse.filters.max_graduation_year))) {
-      validatedFilters.max_graduation_year = Number(parsedResponse.filters.max_graduation_year);
+    if (parsedArgs.max_billing_percentage !== undefined) {
+      const val = Number(parsedArgs.max_billing_percentage);
+      if (!isNaN(val) && val >= 0 && val <= 100) validatedFilters.max_billing_percentage = val;
     }
     
-    // Handle completion status
-    const validStatuses = ['complete', 'incomplete', 'no-skills', 'no-experience', 'no-education'];
-    if (parsedResponse.filters.completion_status && validStatuses.includes(parsedResponse.filters.completion_status)) {
-      validatedFilters.completion_status = parsedResponse.filters.completion_status;
+    // Date filters
+    if (parsedArgs.release_date_from) {
+      const dateStr = String(parsedArgs.release_date_from);
+      if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) validatedFilters.release_date_from = dateStr;
+    }
+    if (parsedArgs.release_date_to) {
+      const dateStr = String(parsedArgs.release_date_to);
+      if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) validatedFilters.release_date_to = dateStr;
+    }
+    
+    // Enum filters
+    const validAvailabilityStatuses = ['available', 'engaged', 'all'];
+    if (parsedArgs.availability_status && validAvailabilityStatuses.includes(parsedArgs.availability_status)) {
+      validatedFilters.availability_status = parsedArgs.availability_status;
+    }
+    
+    const validCompletionStatuses = ['complete', 'incomplete', 'no-skills', 'no-experience', 'no-education'];
+    if (parsedArgs.completion_status && validCompletionStatuses.includes(parsedArgs.completion_status)) {
+      validatedFilters.completion_status = parsedArgs.completion_status;
     }
 
     const result: AISearchResponse = {
       filters: validatedFilters,
-      confidence: Math.max(0, Math.min(1, Number(parsedResponse.confidence) || 0.5)),
-      explanation: String(parsedResponse.explanation || 'AI interpreted your search query'),
+      confidence: Math.max(0, Math.min(1, Number(parsedArgs.confidence) || 0.5)),
+      explanation: String(parsedArgs.explanation || 'AI interpreted your search query'),
       originalQuery: query
     };
 
@@ -282,16 +394,16 @@ Examples of good confidence scores:
   } catch (error) {
     console.error('Error in ai-search-query function:', error);
     
-    // Return a fallback response
+    // Return fallback response
     const fallbackResponse: AISearchResponse = {
-      filters: { search_query: (await req.json()).query || '' },
+      filters: { search_query: (await req.json().catch(() => ({}))).query || '' },
       confidence: 0.3,
       explanation: `Error processing AI query: ${error.message}. Using fallback search.`,
-      originalQuery: (await req.json()).query || ''
+      originalQuery: (await req.json().catch(() => ({}))).query || ''
     };
 
     return new Response(JSON.stringify(fallbackResponse), {
-      status: 200, // Return 200 to allow graceful degradation
+      status: 200, 
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   }

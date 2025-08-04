@@ -23,13 +23,15 @@ interface UniversityComboboxProps {
   onValueChange: (value: string) => void;
   placeholder?: string;
   disabled?: boolean;
+  compact?: boolean; // New prop for consistent sizing
 }
 
 export const UniversityCombobox: React.FC<UniversityComboboxProps> = ({
   value,
   onValueChange,
   placeholder = "Select university...",
-  disabled = false
+  disabled = false,
+  compact = false
 }) => {
   const [open, setOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState<string | null>(null);
@@ -49,6 +51,18 @@ export const UniversityCombobox: React.FC<UniversityComboboxProps> = ({
     (university) => university.name === value
   );
 
+  const buttonClasses = compact 
+    ? "w-full justify-between text-xs h-7"
+    : "w-full justify-between";
+
+  const iconClasses = compact 
+    ? "ml-2 h-3 w-3 shrink-0 opacity-50"
+    : "ml-2 h-4 w-4 shrink-0 opacity-50";
+
+  const inputClasses = compact ? "h-8" : "";
+  const itemClasses = compact ? "text-xs" : "";
+  const checkClasses = compact ? "mr-2 h-3 w-3" : "mr-2 h-4 w-4";
+
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
@@ -56,11 +70,11 @@ export const UniversityCombobox: React.FC<UniversityComboboxProps> = ({
           variant="outline"
           role="combobox"
           aria-expanded={open}
-          className="w-full justify-between"
+          className={buttonClasses}
           disabled={disabled}
         >
           {selectedUniversity ? selectedUniversity.name : placeholder}
-          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+          <ChevronsUpDown className={iconClasses} />
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-full p-0" align="start">
@@ -69,6 +83,7 @@ export const UniversityCombobox: React.FC<UniversityComboboxProps> = ({
             placeholder="Search universities..."
             value={searchQuery || ''}
             onValueChange={(search) => setSearchQuery(search || null)}
+            className={inputClasses}
           />
           <CommandList>
             <CommandEmpty>
@@ -83,10 +98,11 @@ export const UniversityCombobox: React.FC<UniversityComboboxProps> = ({
                     onValueChange(currentValue === value ? "" : currentValue);
                     setOpen(false);
                   }}
+                  className={itemClasses}
                 >
                   <Check
                     className={cn(
-                      "mr-2 h-4 w-4",
+                      checkClasses,
                       value === university.name ? "opacity-100" : "opacity-0"
                     )}
                   />
