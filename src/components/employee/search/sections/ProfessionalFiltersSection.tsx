@@ -2,7 +2,6 @@
 import React from 'react';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
-import { Slider } from '@/components/ui/slider';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import SkillTagsInput from '../SkillTagsInput';
 
@@ -31,6 +30,18 @@ const ProfessionalFiltersSection: React.FC<ProfessionalFiltersSectionProps> = ({
 
   const handleCompanyChange = (value: string) => {
     onCompanyFilter(value);
+  };
+
+  const handleMinExperienceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    const minValue = value === '' ? 0 : Math.max(0, parseInt(value) || 0);
+    onExperienceYearsChange([minValue, experienceYears[1]]);
+  };
+
+  const handleMaxExperienceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    const maxValue = value === '' ? 20 : Math.min(50, Math.max(experienceYears[0], parseInt(value) || 20));
+    onExperienceYearsChange([experienceYears[0], maxValue]);
   };
 
   return (
@@ -64,18 +75,41 @@ const ProfessionalFiltersSection: React.FC<ProfessionalFiltersSectionProps> = ({
           </div>
         </div>
 
-        <div className="space-y-1">
+        <div className="space-y-2">
           <Label className="text-xs font-medium text-blue-700 dark:text-blue-300">
-            Experience: {experienceYears[0]}-{experienceYears[1]} years
+            Years of Experience
           </Label>
-          <Slider
-            value={experienceYears}
-            onValueChange={onExperienceYearsChange}
-            max={20}
-            min={0}
-            step={1}
-            className="w-full"
-          />
+          <div className="grid grid-cols-2 gap-2">
+            <div className="space-y-1">
+              <Label className="text-xs text-blue-600 dark:text-blue-400">Min Years</Label>
+              <Input
+                type="number"
+                min="0"
+                max="50"
+                placeholder="0"
+                value={experienceYears[0] || ''}
+                onChange={handleMinExperienceChange}
+                className="text-xs h-7"
+              />
+            </div>
+            <div className="space-y-1">
+              <Label className="text-xs text-blue-600 dark:text-blue-400">Max Years</Label>
+              <Input
+                type="number"
+                min="0"
+                max="50"
+                placeholder="20"
+                value={experienceYears[1] || ''}
+                onChange={handleMaxExperienceChange}
+                className="text-xs h-7"
+              />
+            </div>
+          </div>
+          {(experienceYears[0] > 0 || experienceYears[1] < 20) && (
+            <p className="text-xs text-blue-600 dark:text-blue-400">
+              Filtering: {experienceYears[0]} - {experienceYears[1]} years
+            </p>
+          )}
         </div>
       </CardContent>
     </Card>

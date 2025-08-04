@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { SelectContent, SelectItem } from '@/components/ui/select';
@@ -24,7 +23,6 @@ import TechnologyTagsInput from '../TechnologyTagsInput';
 import GraduationYearRangeControl from '../GraduationYearRangeControl';
 import FloatingLabelInput from './FloatingLabelInput';
 import ThemedSelect from './ThemedSelect';
-import ThemedSlider from './ThemedSlider';
 import ThemedTagsInput from './ThemedTagsInput';
 import ThemedCombobox from './ThemedCombobox';
 
@@ -257,16 +255,53 @@ const CollapsibleFilterSection: React.FC<CollapsibleFilterSectionProps> = ({
             />
             
             {experienceYears && setExperienceYears && (
-              <ThemedSlider
-                label="Years of experience"
-                theme={theme}
-                icon={<TrendingUp className="h-4 w-4" />}
-                value={experienceYears}
-                onValueChange={handleExperienceYearsChange}
-                max={20}
-                min={0}
-                step={1}
-              />
+              <div className={`border rounded-md px-3 py-3 transition-all duration-200 bg-${theme}-50/30 border-${theme}-200`}>
+                <div className="flex items-center gap-2 mb-3">
+                  <TrendingUp className={`h-4 w-4 text-${theme}-500`} />
+                  <label className={`text-xs font-medium text-${theme}-600`}>
+                    Years of experience
+                  </label>
+                </div>
+                <div className="grid grid-cols-2 gap-2">
+                  <div className="space-y-1">
+                    <label className={`text-xs text-${theme}-600`}>Min Years</label>
+                    <input
+                      type="number"
+                      min="0"
+                      max="50"
+                      placeholder="0"
+                      value={experienceYears[0] || ''}
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        const minValue = value === '' ? 0 : Math.max(0, parseInt(value) || 0);
+                        handleExperienceYearsChange([minValue, experienceYears[1]]);
+                      }}
+                      className={`w-full px-2 py-1 text-xs border rounded bg-${theme}-50/30 border-${theme}-200 focus:border-${theme}-400 focus:outline-none`}
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <label className={`text-xs text-${theme}-600`}>Max Years</label>
+                    <input
+                      type="number"
+                      min="0"
+                      max="50"
+                      placeholder="20"
+                      value={experienceYears[1] || ''}
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        const maxValue = value === '' ? 20 : Math.min(50, Math.max(experienceYears[0], parseInt(value) || 20));
+                        handleExperienceYearsChange([experienceYears[0], maxValue]);
+                      }}
+                      className={`w-full px-2 py-1 text-xs border rounded bg-${theme}-50/30 border-${theme}-200 focus:border-${theme}-400 focus:outline-none`}
+                    />
+                  </div>
+                </div>
+                {(experienceYears[0] > 0 || experienceYears[1] < 20) && (
+                  <p className={`text-xs text-${theme}-600 mt-2`}>
+                    Filtering: {experienceYears[0]} - {experienceYears[1]} years
+                  </p>
+                )}
+              </div>
             )}
           </div>
         );
