@@ -117,7 +117,8 @@ export function useUnifiedSearch({
 
       console.log('Search response:', data);
       
-      const response = data as SearchResponse;
+      // Properly cast the response through unknown first
+      const response = data as unknown as SearchResponse;
       
       setProfiles(response.profiles || []);
       setPagination({

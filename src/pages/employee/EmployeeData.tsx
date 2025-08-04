@@ -140,6 +140,15 @@ const EmployeeData: React.FC = () => {
     console.log('Exporting profiles:', selectedProfilesData, 'Format:', format);
   };
 
+  // Map SearchPagination to PaginationData format expected by UserPagination
+  const mappedPagination = {
+    totalCount: pagination.total_count,
+    filteredCount: pagination.filtered_count,
+    page: pagination.page,
+    perPage: pagination.per_page,
+    pageCount: pagination.page_count
+  };
+
   return (
     <DashboardLayout>
       <div className="space-y-6">
@@ -254,7 +263,7 @@ const EmployeeData: React.FC = () => {
         {/* Pagination */}
         {pagination.page_count > 1 && (
           <UserPagination
-            pagination={pagination}
+            pagination={mappedPagination}
             onPageChange={handlePageChange}
             onPerPageChange={handlePerPageChange}
             isLoading={isLoading}
