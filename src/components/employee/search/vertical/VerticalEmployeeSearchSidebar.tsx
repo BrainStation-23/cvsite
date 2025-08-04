@@ -384,10 +384,8 @@ const VerticalEmployeeSearchSidebar: React.FC<VerticalEmployeeSearchSidebarProps
                   <div className="space-y-1">
                     <Label className="text-xs text-gray-500">Min %</Label>
                     <Input
-                      type="number"
+                      type="text"
                       placeholder="0"
-                      min="0"
-                      max="100"
                       value={minEngagementPercentage}
                       onChange={(e) => setMinEngagementPercentage(e.target.value)}
                     />
@@ -395,10 +393,8 @@ const VerticalEmployeeSearchSidebar: React.FC<VerticalEmployeeSearchSidebarProps
                   <div className="space-y-1">
                     <Label className="text-xs text-gray-500">Max %</Label>
                     <Input
-                      type="number"
+                      type="text"
                       placeholder="100"
-                      min="0"
-                      max="100"
                       value={maxEngagementPercentage}
                       onChange={(e) => setMaxEngagementPercentage(e.target.value)}
                     />
@@ -413,10 +409,8 @@ const VerticalEmployeeSearchSidebar: React.FC<VerticalEmployeeSearchSidebarProps
                   <div className="space-y-1">
                     <Label className="text-xs text-gray-500">Min %</Label>
                     <Input
-                      type="number"
+                      type="text"
                       placeholder="0"
-                      min="0"
-                      max="100"
                       value={minBillingPercentage}
                       onChange={(e) => setMinBillingPercentage(e.target.value)}
                     />
@@ -424,10 +418,8 @@ const VerticalEmployeeSearchSidebar: React.FC<VerticalEmployeeSearchSidebarProps
                   <div className="space-y-1">
                     <Label className="text-xs text-gray-500">Max %</Label>
                     <Input
-                      type="number"
+                      type="text"
                       placeholder="100"
-                      min="0"
-                      max="100"
                       value={maxBillingPercentage}
                       onChange={(e) => setMaxBillingPercentage(e.target.value)}
                     />
