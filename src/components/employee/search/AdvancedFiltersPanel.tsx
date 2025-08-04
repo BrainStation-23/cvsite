@@ -122,15 +122,18 @@ const AdvancedFiltersPanel: React.FC<AdvancedFiltersPanelProps> = ({
     onAchievementFilter(value);
   };
 
+  // Simplified experience years handler - directly call onAdvancedFilters
   const handleExperienceYearsChange = (years: number[]) => {
+    console.log('Experience years changed:', years);
     setExperienceYears(years);
-    // Fix: Convert array to separate min/max parameters
+    
+    // Direct call to hook's advanced filters with proper conversion
     onAdvancedFilters({
       minExperienceYears: years[0] || null,
       maxExperienceYears: years[1] || null,
       minGraduationYear,
       maxGraduationYear,
-      completionStatus
+      completionStatus: completionStatus === 'all' ? null : completionStatus
     });
   };
 
@@ -142,7 +145,7 @@ const AdvancedFiltersPanel: React.FC<AdvancedFiltersPanelProps> = ({
       maxExperienceYears: experienceYears[1] || null,
       minGraduationYear: minYear,
       maxGraduationYear: maxYear,
-      completionStatus
+      completionStatus: completionStatus === 'all' ? null : completionStatus
     });
   };
 
@@ -153,7 +156,7 @@ const AdvancedFiltersPanel: React.FC<AdvancedFiltersPanelProps> = ({
       maxExperienceYears: experienceYears[1] || null,
       minGraduationYear,
       maxGraduationYear,
-      completionStatus: status
+      completionStatus: status === 'all' ? null : status
     });
   };
 
