@@ -101,14 +101,14 @@ const CompactEmployeeProfile: React.FC<CompactEmployeeProfileProps> = ({
             {profile.total_experience_years !== null && profile.total_experience_years !== undefined && (
               <div className="flex items-center space-x-1 text-xs text-muted-foreground">
                 <Clock className="h-3 w-3" />
-                <span>{profile.total_experience_years}y total</span>
+                <span>{profile.total_experience_years.toFixed(2)}y total</span>
               </div>
             )}
             
             {profile.company_experience_years !== null && profile.company_experience_years !== undefined && (
               <div className="flex items-center space-x-1 text-xs text-muted-foreground">
                 <Building2 className="h-3 w-3" />
-                <span>{profile.company_experience_years}y here</span>
+                <span>{profile.company_experience_years.toFixed(2)}y here</span>
               </div>
             )}
             
