@@ -124,8 +124,10 @@ const AdvancedFiltersPanel: React.FC<AdvancedFiltersPanelProps> = ({
 
   const handleExperienceYearsChange = (years: number[]) => {
     setExperienceYears(years);
+    // Fix: Convert array to separate min/max parameters
     onAdvancedFilters({
-      experienceYears: years,
+      minExperienceYears: years[0] || null,
+      maxExperienceYears: years[1] || null,
       minGraduationYear,
       maxGraduationYear,
       completionStatus
@@ -136,7 +138,8 @@ const AdvancedFiltersPanel: React.FC<AdvancedFiltersPanelProps> = ({
     setMinGraduationYear(minYear);
     setMaxGraduationYear(maxYear);
     onAdvancedFilters({
-      experienceYears,
+      minExperienceYears: experienceYears[0] || null,
+      maxExperienceYears: experienceYears[1] || null,
       minGraduationYear: minYear,
       maxGraduationYear: maxYear,
       completionStatus
@@ -146,7 +149,8 @@ const AdvancedFiltersPanel: React.FC<AdvancedFiltersPanelProps> = ({
   const handleCompletionStatusChange = (status: string) => {
     setCompletionStatus(status);
     onAdvancedFilters({
-      experienceYears,
+      minExperienceYears: experienceYears[0] || null,
+      maxExperienceYears: experienceYears[1] || null,
       minGraduationYear,
       maxGraduationYear,
       completionStatus: status
