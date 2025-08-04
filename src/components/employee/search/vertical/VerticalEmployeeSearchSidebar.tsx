@@ -493,6 +493,7 @@ const VerticalEmployeeSearchSidebar: React.FC<VerticalEmployeeSearchSidebarProps
               setExperienceYears={setExperienceYears}
               onSkillFilter={onSkillFilter}
               onExperienceFilter={onExperienceFilter}
+              onAdvancedFilters={onAdvancedFilters}
               isLoading={isLoading}
             />
 
