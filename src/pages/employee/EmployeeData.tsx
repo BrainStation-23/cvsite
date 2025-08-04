@@ -1,25 +1,25 @@
 
 import React, { useEffect, useState } from 'react';
 import DashboardLayout from '../../components/Layout/DashboardLayout';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { useEmployeeProfilesEnhanced } from '@/hooks/use-employee-profiles-enhanced';
+import { useUnifiedSearch } from '@/hooks/use-unified-search';
 import { useEmployeeList } from '@/hooks/use-employee-list';
 import { useBulkSelection } from '@/hooks/use-bulk-selection';
-import VerticalEmployeeSearchSidebar from '@/components/employee/search/vertical/VerticalEmployeeSearchSidebar';
-import CompactEmployeeTable from '@/components/employee/CompactEmployeeTable';
+import UnifiedSearchBar from '@/components/employee/search/UnifiedSearchBar';
+import SimpleEmployeeTable from '@/components/employee/search/SimpleEmployeeTable';
 import BulkActionsToolbar from '@/components/employee/BulkActionsToolbar';
-import EmployeePageHeader from '@/components/employee/EmployeePageHeader';
 import UserPagination from '@/components/admin/UserPagination';
 import SendEmailModal from '@/components/admin/SendEmailModal';
 import { useToast } from '@/hooks/use-toast';
-import { AlertTriangle, RefreshCw } from 'lucide-react';
+import { AlertTriangle, RefreshCw, Search, Users } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 
 const EmployeeData: React.FC = () => {
   const { toast } = useToast();
   const [lastError, setLastError] = useState<string | null>(null);
-  const [retryCount, setRetryCount] = useState(0);
+  const [showSearchRank, setShowSearchRank] = useState(false);
   
   const {
     selectedProfile,
@@ -34,37 +34,17 @@ const EmployeeData: React.FC = () => {
     isLoading,
     pagination,
     searchQuery,
-    skillFilter,
-    experienceFilter,
-    educationFilter,
-    trainingFilter,
-    achievementFilter,
-    projectFilter,
-    sortBy,
-    sortOrder,
-    // New resource planning states
-    minEngagementPercentage,
-    maxEngagementPercentage,
-    minBillingPercentage,
-    maxBillingPercentage,
-    releaseDateFrom,
-    releaseDateTo,
-    availabilityStatus,
-    currentProjectSearch,
-    fetchProfiles,
-    handlePageChange,
+    minExperience,
+    maxExperience,
+    availabilityFilter,
+    sbuFilter,
+    search,
     handleSearch,
-    handleSkillFilter,
-    handleExperienceFilter,
-    handleEducationFilter,
-    handleTrainingFilter,
-    handleAchievementFilter,
-    handleProjectFilter,
+    handlePageChange,
+    handleFilterChange,
     handleSortChange,
-    handleAdvancedFilters,
-    handleResourcePlanningFilters,
     resetFilters
-  } = useEmployeeProfilesEnhanced();
+  } = useUnifiedSearch();
 
   const {
     selectedItems: selectedProfiles,
@@ -79,22 +59,15 @@ const EmployeeData: React.FC = () => {
     const loadData = async () => {
       try {
         setLastError(null);
-        await fetchProfiles();
+        await search();
       } catch (error) {
         console.error('Error loading employee data:', error);
         const errorMessage = error?.message || 'Unknown error occurred';
-        
-        if (errorMessage.includes('statement timeout') || errorMessage.includes('57014')) {
-          setLastError('The request timed out due to large dataset. Please try using filters to narrow down the results.');
-        } else {
-          setLastError(`Failed to load employee data: ${errorMessage}`);
-        }
+        setLastError(`Failed to load employee data: ${errorMessage}`);
         
         toast({
           title: "Error loading data",
-          description: errorMessage.includes('statement timeout') 
-            ? "Database query timed out. Try applying filters to reduce the dataset size."
-            : "There was an error loading employee profiles. Please try again.",
+          description: "There was an error loading employee profiles. Please try again.",
           variant: "destructive"
         });
       }
@@ -104,10 +77,9 @@ const EmployeeData: React.FC = () => {
   }, []);
 
   const handleRetry = async () => {
-    setRetryCount(prev => prev + 1);
     try {
       setLastError(null);
-      await fetchProfiles();
+      await search();
       toast({
         title: "Success",
         description: "Employee data loaded successfully!",
@@ -120,7 +92,7 @@ const EmployeeData: React.FC = () => {
   };
 
   const handlePerPageChange = (perPage: number) => {
-    fetchProfiles({ perPage, page: 1 });
+    search({ perPage, page: 1 });
   };
 
   const handleProfileSelect = (profileId: string) => {
@@ -170,94 +142,126 @@ const EmployeeData: React.FC = () => {
 
   return (
     <DashboardLayout>
-      <div className="flex h-full w-full min-h-screen overflow-x-hidden">
-        {/* Main Content Area - Left Side */}
-        <div className="flex-1 w-0 flex flex-col space-y-3 pr-6">
-          <EmployeePageHeader />
+      <div className="space-y-6">
+        {/* Page Header */}
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-white flex items-center">
+              <Users className="h-8 w-8 mr-3 text-blue-600" />
+              Employee Search
+            </h1>
+            <p className="text-gray-600 dark:text-gray-400 mt-2">
+              Search and manage employee profiles with intelligent full-text search
+            </p>
+          </div>
+          
+          <div className="flex items-center gap-4">
+            {/* Search Results Summary */}
+            {pagination.filtered_count > 0 && (
+              <div className="text-sm text-gray-600 dark:text-gray-400">
+                <Badge variant="outline" className="mr-2">
+                  {pagination.filtered_count} of {pagination.total_count} employees
+                </Badge>
+                {searchQuery && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setShowSearchRank(!showSearchRank)}
+                    className="text-xs"
+                  >
+                    <Search className="h-3 w-3 mr-1" />
+                    {showSearchRank ? 'Hide' : 'Show'} Relevance
+                  </Button>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
 
-          {lastError && (
-            <Alert variant="destructive">
-              <AlertTriangle className="h-4 w-4" />
-              <AlertDescription className="flex items-center justify-between">
-                <span>{lastError}</span>
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  onClick={handleRetry}
-                  className="ml-4"
-                >
-                  <RefreshCw className="h-4 w-4 mr-2" />
-                  Retry
-                </Button>
-              </AlertDescription>
-            </Alert>
-          )}
+        {/* Error Display */}
+        {lastError && (
+          <Alert variant="destructive">
+            <AlertTriangle className="h-4 w-4" />
+            <AlertDescription className="flex items-center justify-between">
+              <span>{lastError}</span>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={handleRetry}
+                className="ml-4"
+              >
+                <RefreshCw className="h-4 w-4 mr-2" />
+                Retry
+              </Button>
+            </AlertDescription>
+          </Alert>
+        )}
 
-          {hasSelection && (
-            <BulkActionsToolbar
+        {/* Unified Search Bar */}
+        <UnifiedSearchBar
+          searchQuery={searchQuery}
+          minExperience={minExperience}
+          maxExperience={maxExperience}
+          availabilityFilter={availabilityFilter}
+          sbuFilter={sbuFilter}
+          onSearch={handleSearch}
+          onFilterChange={handleFilterChange}
+          onReset={resetFilters}
+          isLoading={isLoading}
+        />
+
+        {/* Bulk Actions */}
+        {hasSelection && (
+          <BulkActionsToolbar
+            selectedProfiles={selectedProfiles}
+            totalProfiles={profiles.length}
+            onSelectAll={selectAll}
+            onClearSelection={clearSelection}
+            onBulkEmail={handleBulkEmail}
+            onBulkExport={handleBulkExport}
+            isAllSelected={isAllSelected}
+          />
+        )}
+
+        {/* Results Table */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center justify-between">
+              <span>Search Results</span>
+              {pagination.filtered_count > 0 && (
+                <div className="flex items-center gap-2 text-sm text-gray-500">
+                  <span>Page {pagination.page} of {pagination.page_count}</span>
+                </div>
+              )}
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-0">
+            <SimpleEmployeeTable
+              profiles={profiles}
+              isLoading={isLoading}
+              onViewProfile={handleViewProfile}
+              onSendEmail={handleSendEmail}
               selectedProfiles={selectedProfiles}
-              totalProfiles={profiles.length}
+              onProfileSelect={handleProfileSelect}
               onSelectAll={selectAll}
               onClearSelection={clearSelection}
-              onBulkEmail={handleBulkEmail}
-              onBulkExport={handleBulkExport}
               isAllSelected={isAllSelected}
+              showSearchRank={showSearchRank && searchQuery.length > 0}
             />
-          )}
+          </CardContent>
+        </Card>
 
-          <Card className="flex-1">
-            <CardContent className="p-0">
-              <CompactEmployeeTable
-                profiles={profiles}
-                isLoading={isLoading}
-                onViewProfile={handleViewProfile}
-                onSendEmail={handleSendEmail}
-                selectedProfiles={selectedProfiles}
-                onProfileSelect={handleProfileSelect}
-                onSelectAll={selectAll}
-                onClearSelection={clearSelection}
-                isAllSelected={isAllSelected}
-              />
-            </CardContent>
-          </Card>
-
-          {pagination.pageCount > 1 && (
-            <UserPagination
-              pagination={pagination}
-              onPageChange={handlePageChange}
-              onPerPageChange={handlePerPageChange}
-              isLoading={isLoading}
-            />
-          )}
-        </div>
-
-        {/* Vertical Search Sidebar - Right Side */}
-        <div className="flex-shrink-0 border-l border-gray-200 dark:border-gray-700">
-          <VerticalEmployeeSearchSidebar
-            onSearch={handleSearch}
-            onSkillFilter={handleSkillFilter}
-            onExperienceFilter={handleExperienceFilter}
-            onEducationFilter={handleEducationFilter}
-            onTrainingFilter={handleTrainingFilter}
-            onAchievementFilter={handleAchievementFilter}
-            onProjectFilter={handleProjectFilter}
-            onAdvancedFilters={handleAdvancedFilters}
-            onResourcePlanningFilters={handleResourcePlanningFilters}
-            onSortChange={handleSortChange}
-            onReset={resetFilters}
-            searchQuery={searchQuery}
-            skillFilter={skillFilter}
-            experienceFilter={experienceFilter}
-            educationFilter={educationFilter}
-            trainingFilter={trainingFilter}
-            achievementFilter={achievementFilter}
-            projectFilter={projectFilter}
-            sortBy={sortBy}
-            sortOrder={sortOrder}
+        {/* Pagination */}
+        {pagination.page_count > 1 && (
+          <UserPagination
+            pagination={pagination}
+            onPageChange={handlePageChange}
+            onPerPageChange={handlePerPageChange}
             isLoading={isLoading}
           />
-        </div>
+        )}
 
+        {/* Email Modal */}
         {selectedProfile && (
           <SendEmailModal
             isOpen={isEmailModalOpen}
