@@ -1,4 +1,5 @@
-import { useState, useCallback } from 'react';
+
+import { useState, useCallback, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { 
@@ -59,6 +60,9 @@ export function useEmployeeProfilesEnhanced() {
   const [availabilityStatus, setAvailabilityStatus] = useState<string | null>(null);
   const [currentProjectSearch, setCurrentProjectSearch] = useState<string | null>(null);
 
+  // Track if pagination change is in progress to avoid filter conflicts
+  const isPaginationChange = useRef(false);
+
   const fetchProfiles = useCallback(async (options: {
     page?: number;
     perPage?: number;
@@ -85,6 +89,7 @@ export function useEmployeeProfilesEnhanced() {
     currentProjectSearch?: string | null;
     sortBy?: EmployeeProfileSortColumn;
     sortOrder?: EmployeeProfileSortOrder;
+    isPaginationOnly?: boolean; // New flag to indicate this is only a pagination change
   } = {}) => {
     const {
       page = pagination.page,
@@ -111,7 +116,8 @@ export function useEmployeeProfilesEnhanced() {
       availabilityStatus: avStatus = availabilityStatus,
       currentProjectSearch: projSearch = currentProjectSearch,
       sortBy: sortField = sortBy,
-      sortOrder: sortDir = sortOrder
+      sortOrder: sortDir = sortOrder,
+      isPaginationOnly = false
     } = options;
 
     setIsLoading(true);
@@ -121,7 +127,7 @@ export function useEmployeeProfilesEnhanced() {
         search, skillF, expF, eduF, trainF, achF, projF,
         minExperienceYears, maxExperienceYears, minGraduationYear, maxGraduationYear, completionStatus,
         minEngPerc, maxEngPerc, minBillPerc, maxBillPerc, relFrom, relTo, avStatus, projSearch,
-        page, perPage, sortField, sortDir
+        page, perPage, sortField, sortDir, isPaginationOnly
       });
 
       // Add timeout handling for the query
@@ -179,24 +185,26 @@ export function useEmployeeProfilesEnhanced() {
           pageCount: paginationData?.page_count || 0
         });
 
-        // Update filter states
-        setSearchQuery(search);
-        setSkillFilter(skillF);
-        setExperienceFilter(expF);
-        setEducationFilter(eduF);
-        setTrainingFilter(trainF);
-        setAchievementFilter(achF);
-        setProjectFilter(projF);
-        setMinEngagementPercentage(minEngPerc);
-        setMaxEngagementPercentage(maxEngPerc);
-        setMinBillingPercentage(minBillPerc);
-        setMaxBillingPercentage(maxBillPerc);
-        setReleaseDateFrom(relFrom);
-        setReleaseDateTo(relTo);
-        setAvailabilityStatus(avStatus);
-        setCurrentProjectSearch(projSearch);
-        setSortBy(sortField);
-        setSortOrder(sortDir);
+        // Update filter states only if this is not a pagination-only change
+        if (!isPaginationOnly) {
+          setSearchQuery(search);
+          setSkillFilter(skillF);
+          setExperienceFilter(expF);
+          setEducationFilter(eduF);
+          setTrainingFilter(trainF);
+          setAchievementFilter(achF);
+          setProjectFilter(projF);
+          setMinEngagementPercentage(minEngPerc);
+          setMaxEngagementPercentage(maxEngPerc);
+          setMinBillingPercentage(minBillPerc);
+          setMaxBillingPercentage(maxBillPerc);
+          setReleaseDateFrom(relFrom);
+          setReleaseDateTo(relTo);
+          setAvailabilityStatus(avStatus);
+          setCurrentProjectSearch(projSearch);
+          setSortBy(sortField);
+          setSortOrder(sortDir);
+        }
       }
     } catch (error: any) {
       console.error('Error fetching employee profiles:', error);
@@ -222,17 +230,26 @@ export function useEmployeeProfilesEnhanced() {
       throw new Error(errorMessage);
     } finally {
       setIsLoading(false);
+      isPaginationChange.current = false;
     }
   }, [pagination.page, pagination.perPage, searchQuery, skillFilter, experienceFilter, educationFilter, trainingFilter, achievementFilter, projectFilter, minEngagementPercentage, maxEngagementPercentage, minBillingPercentage, maxBillingPercentage, releaseDateFrom, releaseDateTo, availabilityStatus, currentProjectSearch, sortBy, sortOrder, toast]);
 
   // Debounced search function to reduce query frequency
   const debouncedFetchProfiles = useCallback(
-    debounce(fetchProfiles, 500),
+    debounce((options: any) => {
+      // Don't debounce if this is a pagination change
+      if (isPaginationChange.current) {
+        fetchProfiles(options);
+      } else {
+        fetchProfiles(options);
+      }
+    }, 500),
     [fetchProfiles]
   );
 
   const handlePageChange = useCallback((newPage: number) => {
-    fetchProfiles({ page: newPage });
+    isPaginationChange.current = true;
+    fetchProfiles({ page: newPage, isPaginationOnly: true });
   }, [fetchProfiles]);
 
   const handleSearch = useCallback((query: string) => {
@@ -287,7 +304,10 @@ export function useEmployeeProfilesEnhanced() {
     availabilityStatus?: string | null;
     currentProjectSearch?: string | null;
   }) => {
-    debouncedFetchProfiles({ ...filters, page: 1 });
+    // Only trigger search if this is not during a pagination change
+    if (!isPaginationChange.current) {
+      debouncedFetchProfiles({ ...filters, page: 1 });
+    }
   }, [debouncedFetchProfiles]);
 
   const resetFilters = useCallback(() => {
