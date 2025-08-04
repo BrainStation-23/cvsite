@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import ProfessionalFiltersSection from './sections/ProfessionalFiltersSection';
@@ -124,17 +123,21 @@ const AdvancedFiltersPanel: React.FC<AdvancedFiltersPanelProps> = ({
 
   // Simplified experience years handler - directly call onAdvancedFilters
   const handleExperienceYearsChange = (years: number[]) => {
-    console.log('Experience years changed:', years);
+    console.log('AdvancedFiltersPanel - Experience years changed:', years);
+    console.log('Current state - minGraduationYear:', minGraduationYear, 'maxGraduationYear:', maxGraduationYear, 'completionStatus:', completionStatus);
+    
     setExperienceYears(years);
     
-    // Direct call to hook's advanced filters with proper conversion
-    onAdvancedFilters({
+    const filters = {
       minExperienceYears: years[0] || null,
       maxExperienceYears: years[1] || null,
       minGraduationYear,
       maxGraduationYear,
       completionStatus: completionStatus === 'all' ? null : completionStatus
-    });
+    };
+    
+    console.log('AdvancedFiltersPanel - Calling onAdvancedFilters with:', filters);
+    onAdvancedFilters(filters);
   };
 
   const handleGraduationYearChange = (minYear: number | null, maxYear: number | null) => {

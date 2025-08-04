@@ -34,14 +34,26 @@ const ProfessionalFiltersSection: React.FC<ProfessionalFiltersSectionProps> = ({
 
   const handleMinExperienceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
+    console.log('Min experience input changed:', value);
+    
+    // Allow empty string or convert to number
     const minValue = value === '' ? 0 : Math.max(0, parseInt(value) || 0);
-    onExperienceYearsChange([minValue, experienceYears[1]]);
+    const newYears = [minValue, experienceYears[1]];
+    
+    console.log('Calling onExperienceYearsChange with:', newYears);
+    onExperienceYearsChange(newYears);
   };
 
   const handleMaxExperienceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
+    console.log('Max experience input changed:', value);
+    
+    // Allow empty string or convert to number
     const maxValue = value === '' ? 20 : Math.min(50, Math.max(experienceYears[0], parseInt(value) || 20));
-    onExperienceYearsChange([experienceYears[0], maxValue]);
+    const newYears = [experienceYears[0], maxValue];
+    
+    console.log('Calling onExperienceYearsChange with:', newYears);
+    onExperienceYearsChange(newYears);
   };
 
   return (
@@ -83,11 +95,9 @@ const ProfessionalFiltersSection: React.FC<ProfessionalFiltersSectionProps> = ({
             <div className="space-y-1">
               <Label className="text-xs text-blue-600 dark:text-blue-400">Min Years</Label>
               <Input
-                type="number"
-                min="0"
-                max="50"
+                type="text"
                 placeholder="0"
-                value={experienceYears[0] || ''}
+                value={experienceYears[0] === 0 ? '' : experienceYears[0].toString()}
                 onChange={handleMinExperienceChange}
                 className="text-xs h-7"
               />
@@ -95,11 +105,9 @@ const ProfessionalFiltersSection: React.FC<ProfessionalFiltersSectionProps> = ({
             <div className="space-y-1">
               <Label className="text-xs text-blue-600 dark:text-blue-400">Max Years</Label>
               <Input
-                type="number"
-                min="0"
-                max="50"
+                type="text"
                 placeholder="20"
-                value={experienceYears[1] || ''}
+                value={experienceYears[1] === 20 ? '' : experienceYears[1].toString()}
                 onChange={handleMaxExperienceChange}
                 className="text-xs h-7"
               />
