@@ -34,6 +34,7 @@ export const useResourcePlanningState = ({ onResourcePlanningFilters }: UseResou
   const [releaseDateTo, setReleaseDateTo] = useState<Date | null>(null);
   const [availabilityStatus, setAvailabilityStatus] = useState<string>('available');
   const [currentProjectSearch, setCurrentProjectSearch] = useState<string>('');
+  const [isResourcePlanningOpen, setIsResourcePlanningOpen] = useState<boolean>(false);
 
   // Track if this is the initial render to avoid triggering search on mount
   const isInitialRender = useRef(true);
@@ -125,5 +126,7 @@ export const useResourcePlanningState = ({ onResourcePlanningFilters }: UseResou
     setAvailabilityStatus,
     currentProjectSearch,
     setCurrentProjectSearch,
+    isResourcePlanningOpen,
+    setIsResourcePlanningOpen,
   };
 };
