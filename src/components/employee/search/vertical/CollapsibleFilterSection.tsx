@@ -159,11 +159,40 @@ const CollapsibleFilterSection: React.FC<CollapsibleFilterSectionProps> = ({
   };
 
   const handleExperienceYearsChange = (years: number[]) => {
+    console.log('CollapsibleFilterSection - Experience years changed:', years);
     setExperienceYears?.(years);
     onAdvancedFilters?.({
       minExperienceYears: years[0],
       maxExperienceYears: years[1]
     });
+  };
+
+  const handleMinExperienceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!experienceYears || !setExperienceYears) return;
+    
+    const value = e.target.value;
+    console.log('CollapsibleFilterSection - Min experience input changed:', value);
+    
+    // Allow empty string or convert to number
+    const minValue = value === '' ? 0 : Math.max(0, parseInt(value) || 0);
+    const newYears = [minValue, experienceYears[1]];
+    
+    console.log('CollapsibleFilterSection - Calling handleExperienceYearsChange with:', newYears);
+    handleExperienceYearsChange(newYears);
+  };
+
+  const handleMaxExperienceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!experienceYears || !setExperienceYears) return;
+    
+    const value = e.target.value;
+    console.log('CollapsibleFilterSection - Max experience input changed:', value);
+    
+    // Allow empty string or convert to number
+    const maxValue = value === '' ? 20 : Math.min(50, Math.max(experienceYears[0], parseInt(value) || 20));
+    const newYears = [experienceYears[0], maxValue];
+    
+    console.log('CollapsibleFilterSection - Calling handleExperienceYearsChange with:', newYears);
+    handleExperienceYearsChange(newYears);
   };
 
   const handleUniversityChange = (value: string) => {
@@ -266,32 +295,20 @@ const CollapsibleFilterSection: React.FC<CollapsibleFilterSectionProps> = ({
                   <div className="space-y-1">
                     <label className={`text-xs text-${theme}-600`}>Min Years</label>
                     <input
-                      type="number"
-                      min="0"
-                      max="50"
+                      type="text"
                       placeholder="0"
-                      value={experienceYears[0] || ''}
-                      onChange={(e) => {
-                        const value = e.target.value;
-                        const minValue = value === '' ? 0 : Math.max(0, parseInt(value) || 0);
-                        handleExperienceYearsChange([minValue, experienceYears[1]]);
-                      }}
+                      value={experienceYears[0] === 0 ? '' : experienceYears[0].toString()}
+                      onChange={handleMinExperienceChange}
                       className={`w-full px-2 py-1 text-xs border rounded bg-${theme}-50/30 border-${theme}-200 focus:border-${theme}-400 focus:outline-none`}
                     />
                   </div>
                   <div className="space-y-1">
                     <label className={`text-xs text-${theme}-600`}>Max Years</label>
                     <input
-                      type="number"
-                      min="0"
-                      max="50"
+                      type="text"
                       placeholder="20"
-                      value={experienceYears[1] || ''}
-                      onChange={(e) => {
-                        const value = e.target.value;
-                        const maxValue = value === '' ? 20 : Math.min(50, Math.max(experienceYears[0], parseInt(value) || 20));
-                        handleExperienceYearsChange([experienceYears[0], maxValue]);
-                      }}
+                      value={experienceYears[1] === 20 ? '' : experienceYears[1].toString()}
+                      onChange={handleMaxExperienceChange}
                       className={`w-full px-2 py-1 text-xs border rounded bg-${theme}-50/30 border-${theme}-200 focus:border-${theme}-400 focus:outline-none`}
                     />
                   </div>
