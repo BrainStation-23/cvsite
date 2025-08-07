@@ -34,15 +34,16 @@ export function useCentralizedResourcePlanning() {
     endDateTo: '',
   });
 
-  // Stable callback for clearing basic filters
+  // Stable callbacks for clearing filters
   const clearBasicFilters = useCallback(() => {
+    console.log('Clearing basic filters');
     setSearchQuery('');
     setSelectedSbu(null);
     setSelectedManager(null);
   }, []);
 
-  // Stable callback for clearing advanced filters
   const clearAdvancedFilters = useCallback(() => {
+    console.log('Clearing advanced filters');
     setAdvancedFilters({
       billTypeFilter: null,
       projectSearch: '',
@@ -57,14 +58,24 @@ export function useCentralizedResourcePlanning() {
     });
   }, []);
 
+  // Stable callback for updating advanced filters
+  const updateAdvancedFilters = useCallback((updates: Partial<AdvancedFilters>) => {
+    console.log('Updating advanced filters:', updates);
+    setAdvancedFilters(prev => ({ ...prev, ...updates }));
+  }, []);
+
   // Memoize the params to prevent unnecessary re-renders
-  const resourcePlanningParams = useMemo(() => ({
-    activeTab,
-    searchQuery,
-    selectedSbu,
-    selectedManager,
-    advancedFilters,
-  }), [activeTab, searchQuery, selectedSbu, selectedManager, advancedFilters]);
+  const resourcePlanningParams = useMemo(() => {
+    const params = {
+      activeTab,
+      searchQuery,
+      selectedSbu,
+      selectedManager,
+      advancedFilters,
+    };
+    console.log('Resource planning params updated:', params);
+    return params;
+  }, [activeTab, searchQuery, selectedSbu, selectedManager, advancedFilters]);
 
   const resourcePlanningData = useResourcePlanningData(resourcePlanningParams);
 
@@ -85,6 +96,7 @@ export function useCentralizedResourcePlanning() {
     // Advanced filters
     advancedFilters,
     setAdvancedFilters,
+    updateAdvancedFilters,
     clearAdvancedFilters,
     
     // Resource planning data

@@ -1,5 +1,5 @@
 
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 
 interface ResourcePlanningFilters {
   minEngagementPercentage?: number | null;
@@ -40,9 +40,30 @@ export const useResourcePlanningState = ({ onResourcePlanningFilters }: UseResou
   const isInitialRender = useRef(true);
   const previousFiltersRef = useRef<ResourcePlanningFilters>({});
 
-  // Create a stable debounced function using useCallback
-  const debouncedApplyFilters = useCallback(
-    debounce((filters: ResourcePlanningFilters) => {
+  // Memoize the current filters to prevent unnecessary re-computations
+  const currentFilters = useMemo(() => ({
+    minEngagementPercentage: minEngagementPercentage ? parseFloat(minEngagementPercentage) : null,
+    maxEngagementPercentage: maxEngagementPercentage ? parseFloat(maxEngagementPercentage) : null,
+    minBillingPercentage: minBillingPercentage ? parseFloat(minBillingPercentage) : null,
+    maxBillingPercentage: maxBillingPercentage ? parseFloat(maxBillingPercentage) : null,
+    releaseDateFrom,
+    releaseDateTo,
+    availabilityStatus: availabilityStatus || null,
+    currentProjectSearch: currentProjectSearch || null,
+  }), [
+    minEngagementPercentage,
+    maxEngagementPercentage,
+    minBillingPercentage,
+    maxBillingPercentage,
+    releaseDateFrom,
+    releaseDateTo,
+    availabilityStatus,
+    currentProjectSearch
+  ]);
+
+  // Create a stable debounced function using useMemo
+  const debouncedApplyFilters = useMemo(
+    () => debounce((filters: ResourcePlanningFilters) => {
       // Only apply filters if they have actually changed
       const prevFilters = previousFiltersRef.current;
       const hasChanged = 
@@ -61,7 +82,7 @@ export const useResourcePlanningState = ({ onResourcePlanningFilters }: UseResou
         onResourcePlanningFilters(filters);
       }
     }, 300),
-    [] // Empty dependency array since onResourcePlanningFilters should be stable
+    [onResourcePlanningFilters] // Only recreate if onResourcePlanningFilters changes
   );
 
   // Apply filters when values change (but not on initial render)
@@ -85,29 +106,8 @@ export const useResourcePlanningState = ({ onResourcePlanningFilters }: UseResou
       return;
     }
 
-    const filters: ResourcePlanningFilters = {
-      minEngagementPercentage: minEngagementPercentage ? parseFloat(minEngagementPercentage) : null,
-      maxEngagementPercentage: maxEngagementPercentage ? parseFloat(maxEngagementPercentage) : null,
-      minBillingPercentage: minBillingPercentage ? parseFloat(minBillingPercentage) : null,
-      maxBillingPercentage: maxBillingPercentage ? parseFloat(maxBillingPercentage) : null,
-      releaseDateFrom,
-      releaseDateTo,
-      availabilityStatus: availabilityStatus || null,
-      currentProjectSearch: currentProjectSearch || null,
-    };
-
-    debouncedApplyFilters(filters);
-  }, [
-    minEngagementPercentage,
-    maxEngagementPercentage,
-    minBillingPercentage,
-    maxBillingPercentage,
-    releaseDateFrom,
-    releaseDateTo,
-    availabilityStatus,
-    currentProjectSearch
-    // Removed debouncedApplyFilters from dependencies to prevent infinite loops
-  ]);
+    debouncedApplyFilters(currentFilters);
+  }, [currentFilters, debouncedApplyFilters, onResourcePlanningFilters]);
 
   return {
     minEngagementPercentage,
