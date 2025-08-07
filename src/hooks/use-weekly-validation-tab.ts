@@ -3,7 +3,6 @@ import { useState, useCallback, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { useFilterNames } from './use-filter-names';
 
 interface AdvancedFilters {
   billTypeFilter: string | null;
@@ -47,9 +46,6 @@ export function useWeeklyValidationTab() {
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
   const itemsPerPage = 10;
 
-  // Get filter names for RPC calls
-  const { sbuName, managerName } = useFilterNames(selectedSbu, selectedManager);
-
   // Stable filter clear functions
   const clearBasicFilters = useCallback(() => {
     setSearchQuery('');
@@ -78,8 +74,8 @@ export function useWeeklyValidationTab() {
     items_per_page: itemsPerPage,
     sort_by: sortBy,
     sort_order: sortOrder,
-    sbu_filter: sbuName, // Pass string name instead of ID
-    manager_filter: managerName, // Pass string name instead of ID
+    sbu_filter: selectedSbu,
+    manager_filter: selectedManager,
     bill_type_filter: advancedFilters.billTypeFilter,
     project_search: advancedFilters.projectSearch || null,
     min_engagement_percentage: advancedFilters.minEngagementPercentage,
@@ -95,8 +91,8 @@ export function useWeeklyValidationTab() {
     currentPage,
     sortBy,
     sortOrder,
-    sbuName, // Use resolved name
-    managerName, // Use resolved name
+    selectedSbu,
+    selectedManager,
     advancedFilters
   ]);
 
@@ -137,8 +133,6 @@ export function useWeeklyValidationTab() {
         }
       };
     },
-    // Only enable the query when we have resolved the filter names (if they exist)
-    enabled: (!selectedSbu || !!sbuName) && (!selectedManager || !!managerName),
   });
 
   // Validation mutation
