@@ -1,11 +1,10 @@
-
 import React from 'react';
 import { TableCell, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Edit2, Trash2, CheckCircle } from 'lucide-react';
 import { format } from 'date-fns';
-import { usePlannedResources } from '@/hooks/use-planned-resources';
+import { useResourcePlanningOperations } from '@/hooks/use-resource-planning-operations';
 import { useConfirmationDialog } from '@/hooks/use-confirmation-dialog';
 import { ConfirmationDialog } from '@/components/ui/confirmation-dialog';
 import { ResourcePlanningTableEditRow } from './ResourcePlanningTableEditRow';
@@ -71,7 +70,7 @@ export const ResourcePlanningTableRow: React.FC<ResourcePlanningTableRowProps> =
   onEditDataChange,
   editLoading,
 }) => {
-  const { updateResourcePlanning, deleteResourcePlanning, isDeleting, isUpdating } = usePlannedResources();
+  const { updateResourcePlanning, deleteResourcePlanning, isDeleting, isUpdating } = useResourcePlanningOperations();
   const { isOpen, config, showConfirmation, hideConfirmation, handleConfirm } = useConfirmationDialog();
 
   const handleDeleteClick = () => {

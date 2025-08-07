@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { usePlannedResources } from '@/hooks/use-planned-resources';
+import { useResourcePlanningOperations } from '@/hooks/use-resource-planning-operations';
 import { useToast } from '@/hooks/use-toast';
 
 interface UseResourcePlanningSubmissionProps {
@@ -18,7 +18,7 @@ export const useResourcePlanningSubmission = ({
   onSuccess,
 }: UseResourcePlanningSubmissionProps) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const { createResourcePlanning, updateResourcePlanning } = usePlannedResources();
+  const { createResourcePlanning, updateResourcePlanning } = useResourcePlanningOperations();
   const { toast } = useToast();
 
   const handleSubmit = async (e: React.FormEvent) => {

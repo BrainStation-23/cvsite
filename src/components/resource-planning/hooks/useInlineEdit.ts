@@ -1,6 +1,5 @@
-
 import { useState, useCallback } from 'react';
-import { usePlannedResources } from '@/hooks/use-planned-resources';
+import { useResourcePlanningOperations } from '@/hooks/use-resource-planning-operations';
 import { useToast } from '@/hooks/use-toast';
 
 interface ResourcePlanningData {
@@ -33,7 +32,7 @@ interface EditFormData {
 export const useInlineEdit = () => {
   const [editingItemId, setEditingItemId] = useState<string | null>(null);
   const [editData, setEditData] = useState<EditFormData | null>(null);
-  const { updateResourcePlanning, isUpdating } = usePlannedResources();
+  const { updateResourcePlanning, isUpdating } = useResourcePlanningOperations();
   const { toast } = useToast();
 
   const startEdit = useCallback((item: ResourcePlanningData) => {
