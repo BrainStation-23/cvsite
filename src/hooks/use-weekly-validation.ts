@@ -103,8 +103,7 @@ export function useWeeklyValidation(params: WeeklyValidationParams) {
         end_date_from: endDateFrom || null,
         end_date_to: endDateTo || null,
         include_unplanned: false,
-        include_weekly_validation: true,
-        weekly_validation_filter: 'pending' // Only show pending validations
+        include_weekly_validation: true
       });
 
       if (error) {
@@ -115,15 +114,18 @@ export function useWeeklyValidation(params: WeeklyValidationParams) {
       console.log('Weekly validation RPC response:', rpcData);
       
       if (rpcData && typeof rpcData === 'object' && 'resource_planning' in rpcData) {
-        // No need for client-side filtering anymore - the database handles it
+        // Filter only records that need weekly validation (weekly_validation = false)
+        const allRecords = (rpcData as any).resource_planning || [];
+        const needsValidation = allRecords.filter((record: any) => !record.weekly_validation);
+        
         return {
-          resource_planning: (rpcData as any).resource_planning || [],
+          resource_planning: needsValidation,
           pagination: (rpcData as any).pagination || {
             total_count: 0,
-            filtered_count: 0,
+            filtered_count: needsValidation.length,
             page: currentPage,
             per_page: itemsPerPage,
-            page_count: 0
+            page_count: Math.ceil(needsValidation.length / itemsPerPage)
           }
         };
       }
