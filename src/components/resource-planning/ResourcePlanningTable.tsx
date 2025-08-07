@@ -2,7 +2,7 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Upload } from 'lucide-react';
-import { useCentralizedResourcePlanning } from '@/hooks/use-centralized-resource-planning';
+import { useUnifiedResourcePlanning } from '@/hooks/use-unified-resource-planning';
 import { useResourcePlanningState } from './hooks/useResourcePlanningState';
 import { useInlineEdit } from './hooks/useInlineEdit';
 import { ResourcePlanningFilters } from './ResourcePlanningFilters';
@@ -14,8 +14,8 @@ import { BulkResourcePlanningImport } from './BulkResourcePlanningImport';
 export const ResourcePlanningTable: React.FC = () => {
   const [showBulkImport, setShowBulkImport] = React.useState(false);
 
-  // Use centralized resource planning hook
-  const resourcePlanningState = useCentralizedResourcePlanning();
+  // Use unified resource planning hook
+  const resourcePlanningState = useUnifiedResourcePlanning();
 
   const {
     preselectedProfileId,

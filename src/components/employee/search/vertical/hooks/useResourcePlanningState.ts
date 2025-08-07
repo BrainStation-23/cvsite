@@ -16,15 +16,6 @@ interface UseResourcePlanningStateProps {
   onResourcePlanningFilters: (filters: ResourcePlanningFilters) => void;
 }
 
-// Debounce utility function
-const debounce = (func: Function, delay: number) => {
-  let timeoutId: NodeJS.Timeout;
-  return (...args: any[]) => {
-    clearTimeout(timeoutId);
-    timeoutId = setTimeout(() => func.apply(null, args), delay);
-  };
-};
-
 export const useResourcePlanningState = ({ onResourcePlanningFilters }: UseResourcePlanningStateProps) => {
   const [minEngagementPercentage, setMinEngagementPercentage] = useState<string>('');
   const [maxEngagementPercentage, setMaxEngagementPercentage] = useState<string>('');
@@ -36,11 +27,11 @@ export const useResourcePlanningState = ({ onResourcePlanningFilters }: UseResou
   const [currentProjectSearch, setCurrentProjectSearch] = useState<string>('');
   const [isResourcePlanningOpen, setIsResourcePlanningOpen] = useState<boolean>(false);
 
-  // Track if this is the initial render to avoid triggering search on mount
+  // Track if this is the initial render
   const isInitialRender = useRef(true);
   const previousFiltersRef = useRef<ResourcePlanningFilters>({});
 
-  // Memoize the current filters to prevent unnecessary re-computations
+  // Create stable filter object
   const currentFilters = useMemo(() => ({
     minEngagementPercentage: minEngagementPercentage ? parseFloat(minEngagementPercentage) : null,
     maxEngagementPercentage: maxEngagementPercentage ? parseFloat(maxEngagementPercentage) : null,
@@ -61,34 +52,9 @@ export const useResourcePlanningState = ({ onResourcePlanningFilters }: UseResou
     currentProjectSearch
   ]);
 
-  // Create a stable debounced function using useMemo
-  const debouncedApplyFilters = useMemo(
-    () => debounce((filters: ResourcePlanningFilters) => {
-      // Only apply filters if they have actually changed
-      const prevFilters = previousFiltersRef.current;
-      const hasChanged = 
-        filters.minEngagementPercentage !== prevFilters.minEngagementPercentage ||
-        filters.maxEngagementPercentage !== prevFilters.maxEngagementPercentage ||
-        filters.minBillingPercentage !== prevFilters.minBillingPercentage ||
-        filters.maxBillingPercentage !== prevFilters.maxBillingPercentage ||
-        filters.releaseDateFrom?.getTime() !== prevFilters.releaseDateFrom?.getTime() ||
-        filters.releaseDateTo?.getTime() !== prevFilters.releaseDateTo?.getTime() ||
-        filters.availabilityStatus !== prevFilters.availabilityStatus ||
-        filters.currentProjectSearch !== prevFilters.currentProjectSearch;
-
-      if (hasChanged) {
-        console.log('Resource planning filters changed, applying:', filters);
-        previousFiltersRef.current = { ...filters };
-        onResourcePlanningFilters(filters);
-      }
-    }, 300),
-    [onResourcePlanningFilters] // Only recreate if onResourcePlanningFilters changes
-  );
-
   // Apply filters when values change (but not on initial render)
   useEffect(() => {
     if (isInitialRender.current) {
-      // Set initial filters without triggering search
       const initialFilters = {
         minEngagementPercentage: null,
         maxEngagementPercentage: null,
@@ -106,8 +72,30 @@ export const useResourcePlanningState = ({ onResourcePlanningFilters }: UseResou
       return;
     }
 
-    debouncedApplyFilters(currentFilters);
-  }, [currentFilters, debouncedApplyFilters, onResourcePlanningFilters]);
+    // Only apply filters if they have actually changed
+    const prevFilters = previousFiltersRef.current;
+    const hasChanged = 
+      currentFilters.minEngagementPercentage !== prevFilters.minEngagementPercentage ||
+      currentFilters.maxEngagementPercentage !== prevFilters.maxEngagementPercentage ||
+      currentFilters.minBillingPercentage !== prevFilters.minBillingPercentage ||
+      currentFilters.maxBillingPercentage !== prevFilters.maxBillingPercentage ||
+      currentFilters.releaseDateFrom?.getTime() !== prevFilters.releaseDateFrom?.getTime() ||
+      currentFilters.releaseDateTo?.getTime() !== prevFilters.releaseDateTo?.getTime() ||
+      currentFilters.availabilityStatus !== prevFilters.availabilityStatus ||
+      currentFilters.currentProjectSearch !== prevFilters.currentProjectSearch;
+
+    if (hasChanged) {
+      console.log('Resource planning filters changed, applying:', currentFilters);
+      previousFiltersRef.current = { ...currentFilters };
+      
+      // Use setTimeout to debounce the filter application
+      const timeoutId = setTimeout(() => {
+        onResourcePlanningFilters(currentFilters);
+      }, 300);
+      
+      return () => clearTimeout(timeoutId);
+    }
+  }, [currentFilters, onResourcePlanningFilters]);
 
   return {
     minEngagementPercentage,
