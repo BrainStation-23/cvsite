@@ -1,5 +1,5 @@
 
-import { useState, useMemo } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -16,30 +16,58 @@ interface AdvancedFilters {
   endDateTo: string;
 }
 
-interface UseResourcePlanningDataParams {
-  activeTab: string;
-  searchQuery: string;
-  selectedSbu: string | null;
-  selectedManager: string | null;
-  advancedFilters: AdvancedFilters;
-}
+const defaultAdvancedFilters: AdvancedFilters = {
+  billTypeFilter: null,
+  projectSearch: '',
+  minEngagementPercentage: null,
+  maxEngagementPercentage: null,
+  minBillingPercentage: null,
+  maxBillingPercentage: null,
+  startDateFrom: '',
+  startDateTo: '',
+  endDateFrom: '',
+  endDateTo: '',
+};
 
-export function useResourcePlanningData({
-  activeTab,
-  searchQuery,
-  selectedSbu,
-  selectedManager,
-  advancedFilters,
-}: UseResourcePlanningDataParams) {
+export function useUnifiedResourcePlanning() {
+  // Core tab and filter state
+  const [activeTab, setActiveTab] = useState('planned');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedSbu, setSelectedSbu] = useState<string | null>(null);
+  const [selectedManager, setSelectedManager] = useState<string | null>(null);
+  const [advancedFilters, setAdvancedFilters] = useState<AdvancedFilters>(defaultAdvancedFilters);
+
+  // Pagination and sorting
   const [currentPage, setCurrentPage] = useState(1);
   const [sortBy, setSortBy] = useState('created_at');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
   const itemsPerPage = 10;
 
-  // Reset page when filters or tab changes
-  const resetPage = () => setCurrentPage(1);
+  // Stable filter clear functions
+  const clearBasicFilters = useCallback(() => {
+    console.log('Clearing basic filters');
+    setSearchQuery('');
+    setSelectedSbu(null);
+    setSelectedManager(null);
+    setCurrentPage(1);
+  }, []);
 
-  // Determine RPC parameters based on active tab
+  const clearAdvancedFilters = useCallback(() => {
+    console.log('Clearing advanced filters');
+    setAdvancedFilters(defaultAdvancedFilters);
+    setCurrentPage(1);
+  }, []);
+
+  const updateAdvancedFilters = useCallback((updates: Partial<AdvancedFilters>) => {
+    console.log('Updating advanced filters:', updates);
+    setAdvancedFilters(prev => ({ ...prev, ...updates }));
+    setCurrentPage(1);
+  }, []);
+
+  // Reset page when filters change
+  const resetPage = useCallback(() => setCurrentPage(1), []);
+
+  // Memoized RPC parameters
   const rpcParams = useMemo(() => {
     const baseParams = {
       search_query: searchQuery || null,
@@ -67,24 +95,28 @@ export function useResourcePlanningData({
           ...baseParams,
           include_unplanned: false,
           include_weekly_validation: false,
+          weekly_validation_filter: 'all',
         };
       case 'unplanned':
         return {
           ...baseParams,
           include_unplanned: true,
           include_weekly_validation: false,
+          weekly_validation_filter: 'all',
         };
       case 'weekly-validation':
         return {
           ...baseParams,
           include_unplanned: false,
           include_weekly_validation: true,
+          weekly_validation_filter: 'pending',
         };
       default:
         return {
           ...baseParams,
           include_unplanned: false,
           include_weekly_validation: false,
+          weekly_validation_filter: 'all',
         };
     }
   }, [
@@ -98,9 +130,10 @@ export function useResourcePlanningData({
     advancedFilters
   ]);
 
+  // Data fetching
   const { data, isLoading, error, refetch } = useQuery({
     queryKey: [
-      'resource-planning-data',
+      'unified-resource-planning',
       activeTab,
       searchQuery,
       currentPage,
@@ -111,7 +144,7 @@ export function useResourcePlanningData({
       advancedFilters,
     ],
     queryFn: async () => {
-      console.log('Resource Planning Query:', { activeTab, ...rpcParams });
+      console.log('Unified Resource Planning Query:', { activeTab, ...rpcParams });
 
       const { data: rpcData, error } = await supabase.rpc('get_comprehensive_resource_planning_data', rpcParams);
 
@@ -119,8 +152,6 @@ export function useResourcePlanningData({
         console.error('RPC call error:', error);
         throw error;
       }
-
-      console.log('RPC response:', rpcData);
 
       if (rpcData && typeof rpcData === 'object' && 'resource_planning' in rpcData) {
         return {
@@ -146,10 +177,30 @@ export function useResourcePlanningData({
         }
       };
     },
-    enabled: !!activeTab, // Only run query when we have an active tab
+    enabled: !!activeTab,
   });
 
   return {
+    // Tab state
+    activeTab,
+    setActiveTab,
+    
+    // Basic filters
+    searchQuery,
+    setSearchQuery,
+    selectedSbu,
+    setSelectedSbu,
+    selectedManager,
+    setSelectedManager,
+    clearBasicFilters,
+    
+    // Advanced filters
+    advancedFilters,
+    setAdvancedFilters,
+    updateAdvancedFilters,
+    clearAdvancedFilters,
+    
+    // Data and pagination
     data: data?.resource_planning || [],
     pagination: data?.pagination,
     isLoading,
