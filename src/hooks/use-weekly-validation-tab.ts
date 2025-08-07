@@ -1,4 +1,3 @@
-
 import { useState, useCallback, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -30,7 +29,7 @@ const defaultAdvancedFilters: AdvancedFilters = {
   endDateTo: '',
 };
 
-export function useWeeklyValidationTab() {
+export function useWeeklyValidationTab(isActive: boolean = true) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -96,7 +95,7 @@ export function useWeeklyValidationTab() {
     advancedFilters
   ]);
 
-  // Data fetching
+  // Data fetching - only enabled when tab is active
   const { data, isLoading, error, refetch } = useQuery({
     queryKey: ['weekly-validation-tab', rpcParams],
     queryFn: async () => {
@@ -133,6 +132,7 @@ export function useWeeklyValidationTab() {
         }
       };
     },
+    enabled: isActive, // Only run query when tab is active
   });
 
   // Validation mutation
@@ -182,7 +182,7 @@ export function useWeeklyValidationTab() {
     // Data and pagination
     data: data?.resource_planning || [],
     pagination: data?.pagination,
-    isLoading,
+    isLoading: isActive ? isLoading : false, // Only show loading when active
     error,
     refetch,
     currentPage,

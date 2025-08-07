@@ -1,4 +1,3 @@
-
 import { useState, useCallback, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -29,7 +28,7 @@ const defaultAdvancedFilters: AdvancedFilters = {
   endDateTo: '',
 };
 
-export function usePlannedResourcesTab() {
+export function usePlannedResourcesTab(isActive: boolean = true) {
   // Basic filters
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedSbu, setSelectedSbu] = useState<string | null>(null);
@@ -92,7 +91,7 @@ export function usePlannedResourcesTab() {
     advancedFilters
   ]);
 
-  // Data fetching
+  // Data fetching - only enabled when tab is active
   const { data, isLoading, error, refetch } = useQuery({
     queryKey: ['planned-resources-tab', rpcParams],
     queryFn: async () => {
@@ -129,6 +128,7 @@ export function usePlannedResourcesTab() {
         }
       };
     },
+    enabled: isActive, // Only run query when tab is active
   });
 
   return {
@@ -150,7 +150,7 @@ export function usePlannedResourcesTab() {
     // Data and pagination
     data: data?.resource_planning || [],
     pagination: data?.pagination,
-    isLoading,
+    isLoading: isActive ? isLoading : false, // Only show loading when active
     error,
     refetch,
     currentPage,

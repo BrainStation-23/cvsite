@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -30,25 +29,26 @@ export const ResourcePlanningTable: React.FC = () => {
     setSelectedManager(null);
   };
 
-  // Hook instances with shared basic filters
-  const plannedResourcesState = usePlannedResourcesTab();
-  const weeklyValidationState = useWeeklyValidationTab();
+  // Hook instances with active tab optimization
+  const plannedResourcesState = usePlannedResourcesTab(activeTab === 'planned');
+  const weeklyValidationState = useWeeklyValidationTab(activeTab === 'validation');
 
-  // Sync basic filters with hooks
+  // Sync basic filters only with the active tab
   React.useEffect(() => {
-    plannedResourcesState.setSearchQuery(searchQuery);
-    weeklyValidationState.setSearchQuery(searchQuery);
-  }, [searchQuery]);
-
-  React.useEffect(() => {
-    plannedResourcesState.setSelectedSbu(selectedSbu);
-    weeklyValidationState.setSelectedSbu(selectedSbu);
-  }, [selectedSbu]);
+    if (activeTab === 'planned') {
+      plannedResourcesState.setSearchQuery(searchQuery);
+      plannedResourcesState.setSelectedSbu(selectedSbu);
+      plannedResourcesState.setSelectedManager(selectedManager);
+    }
+  }, [searchQuery, selectedSbu, selectedManager, activeTab]);
 
   React.useEffect(() => {
-    plannedResourcesState.setSelectedManager(selectedManager);
-    weeklyValidationState.setSelectedManager(selectedManager);
-  }, [selectedManager]);
+    if (activeTab === 'validation') {
+      weeklyValidationState.setSearchQuery(searchQuery);
+      weeklyValidationState.setSelectedSbu(selectedSbu);
+      weeklyValidationState.setSelectedManager(selectedManager);
+    }
+  }, [searchQuery, selectedSbu, selectedManager, activeTab]);
 
   // CRUD operations
   const { updateResourcePlanning, deleteResourcePlanning } = useResourcePlanningOperations();
@@ -223,9 +223,12 @@ export const ResourcePlanningTable: React.FC = () => {
             </CardHeader>
             <CardContent>
               <CreateResourcePlanningForm onSuccess={() => {
-                // Refresh data when a new assignment is created
-                plannedResourcesState.refetch();
-                weeklyValidationState.refetch();
+                // Only refresh the active tab's data
+                if (activeTab === 'planned') {
+                  plannedResourcesState.refetch();
+                } else if (activeTab === 'validation') {
+                  weeklyValidationState.refetch();
+                }
               }} />
             </CardContent>
           </Card>
@@ -239,9 +242,12 @@ export const ResourcePlanningTable: React.FC = () => {
           onOpenChange={setEditDialogOpen}
           item={selectedItem}
           onSuccess={() => {
-            // Refresh data when an assignment is updated
-            plannedResourcesState.refetch();
-            weeklyValidationState.refetch();
+            // Only refresh the active tab's data
+            if (activeTab === 'planned') {
+              plannedResourcesState.refetch();
+            } else if (activeTab === 'validation') {
+              weeklyValidationState.refetch();
+            }
             setEditDialogOpen(false);
             setSelectedItem(null);
           }}
