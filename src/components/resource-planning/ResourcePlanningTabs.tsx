@@ -14,8 +14,9 @@ interface ResourcePlanningTabsProps {
   onCreateNewAssignment: () => void;
   onEditAssignment: (item: any) => void;
   onCreatePlan: (profileId: string) => void;
-  // Centralized resource planning state
-  resourcePlanningState: any;
+  // Separate state objects for each tab
+  plannedResourcesState: any;
+  weeklyValidationState: any;
   // Inline edit props
   editingItemId: string | null;
   editData: any;
@@ -35,7 +36,8 @@ export const ResourcePlanningTabs: React.FC<ResourcePlanningTabsProps> = ({
   onCreateNewAssignment,
   onEditAssignment,
   onCreatePlan,
-  resourcePlanningState,
+  plannedResourcesState,
+  weeklyValidationState,
   editingItemId,
   editData,
   onStartEdit,
@@ -65,7 +67,7 @@ export const ResourcePlanningTabs: React.FC<ResourcePlanningTabsProps> = ({
           selectedManager={selectedManager}
           onCreateNewAssignment={onCreateNewAssignment}
           onEditAssignment={onEditAssignment}
-          resourcePlanningState={resourcePlanningState}
+          resourcePlanningState={plannedResourcesState}
           editingItemId={editingItemId}
           editData={editData}
           onStartEdit={onStartEdit}
@@ -90,7 +92,7 @@ export const ResourcePlanningTabs: React.FC<ResourcePlanningTabsProps> = ({
           searchQuery={searchQuery}
           selectedSbu={selectedSbu}
           selectedManager={selectedManager}
-          resourcePlanningState={resourcePlanningState}
+          resourcePlanningState={weeklyValidationState}
           editingItemId={editingItemId}
           editData={editData}
           onStartEdit={onStartEdit}

@@ -2,7 +2,8 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Upload } from 'lucide-react';
-import { useUnifiedResourcePlanning } from '@/hooks/use-unified-resource-planning';
+import { usePlannedResourcesTab } from '@/hooks/use-planned-resources-tab';
+import { useWeeklyValidationTab } from '@/hooks/use-weekly-validation-tab';
 import { useResourcePlanningState } from './hooks/useResourcePlanningState';
 import { useInlineEdit } from './hooks/useInlineEdit';
 import { ResourcePlanningFilters } from './ResourcePlanningFilters';
@@ -13,10 +14,13 @@ import { BulkResourcePlanningImport } from './BulkResourcePlanningImport';
 
 export const ResourcePlanningTable: React.FC = () => {
   const [showBulkImport, setShowBulkImport] = React.useState(false);
+  const [activeTab, setActiveTab] = React.useState('planned');
 
-  // Use unified resource planning hook
-  const resourcePlanningState = useUnifiedResourcePlanning();
+  // Use separate hooks for each tab
+  const plannedResourcesState = usePlannedResourcesTab();
+  const weeklyValidationState = useWeeklyValidationTab();
 
+  // Resource planning form state
   const {
     preselectedProfileId,
     editingItem,
@@ -27,6 +31,7 @@ export const ResourcePlanningTable: React.FC = () => {
     handleFormCancel,
   } = useResourcePlanningState();
 
+  // Inline edit functionality
   const {
     editingItemId,
     editData,
@@ -37,9 +42,12 @@ export const ResourcePlanningTable: React.FC = () => {
     isLoading: editLoading,
   } = useInlineEdit();
 
+  // Get the current state based on active tab
+  const currentState = activeTab === 'planned' ? plannedResourcesState : weeklyValidationState;
+
   const handleBulkImportSuccess = () => {
-    resourcePlanningState.setSearchQuery('');
-    resourcePlanningState.refetch();
+    plannedResourcesState.refetch();
+    weeklyValidationState.refetch();
   };
 
   return (
@@ -58,32 +66,33 @@ export const ResourcePlanningTable: React.FC = () => {
         </div>
 
         <ResourcePlanningFilters
-          searchQuery={resourcePlanningState.searchQuery}
-          setSearchQuery={resourcePlanningState.setSearchQuery}
-          selectedSbu={resourcePlanningState.selectedSbu}
-          setSelectedSbu={resourcePlanningState.setSelectedSbu}
-          selectedManager={resourcePlanningState.selectedManager}
-          setSelectedManager={resourcePlanningState.setSelectedManager}
-          clearFilters={resourcePlanningState.clearBasicFilters}
-          activeTab={resourcePlanningState.activeTab}
+          searchQuery={currentState.searchQuery}
+          setSearchQuery={currentState.setSearchQuery}
+          selectedSbu={currentState.selectedSbu}
+          setSelectedSbu={currentState.setSelectedSbu}
+          selectedManager={currentState.selectedManager}
+          setSelectedManager={currentState.setSelectedManager}
+          clearFilters={currentState.clearBasicFilters}
+          activeTab={activeTab}
         >
           <AdvancedResourceFilters
-            filters={resourcePlanningState.advancedFilters}
-            onFiltersChange={resourcePlanningState.setAdvancedFilters}
-            onClearFilters={resourcePlanningState.clearAdvancedFilters}
+            filters={currentState.advancedFilters}
+            onFiltersChange={currentState.setAdvancedFilters}
+            onClearFilters={currentState.clearAdvancedFilters}
           />
         </ResourcePlanningFilters>
 
         <ResourcePlanningTabs
-          activeTab={resourcePlanningState.activeTab}
-          setActiveTab={resourcePlanningState.setActiveTab}
-          searchQuery={resourcePlanningState.searchQuery}
-          selectedSbu={resourcePlanningState.selectedSbu}
-          selectedManager={resourcePlanningState.selectedManager}
+          activeTab={activeTab}
+          setActiveTab={setActiveTab}
+          searchQuery={currentState.searchQuery}
+          selectedSbu={currentState.selectedSbu}
+          selectedManager={currentState.selectedManager}
           onCreateNewAssignment={handleCreateNewAssignment}
           onEditAssignment={startEdit}
           onCreatePlan={handleCreatePlan}
-          resourcePlanningState={resourcePlanningState}
+          plannedResourcesState={plannedResourcesState}
+          weeklyValidationState={weeklyValidationState}
           editingItemId={editingItemId}
           editData={editData}
           onStartEdit={startEdit}
