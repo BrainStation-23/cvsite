@@ -89,7 +89,7 @@ export const ResourcePlanningTable: React.FC = () => {
           selectedSbu={currentState.selectedSbu}
           selectedManager={currentState.selectedManager}
           onCreateNewAssignment={handleCreateNewAssignment}
-          onEditAssignment={startEdit}
+          onEditAssignment={handleEditAssignment}
           onCreatePlan={handleCreatePlan}
           plannedResourcesState={plannedResourcesState}
           weeklyValidationState={weeklyValidationState}
