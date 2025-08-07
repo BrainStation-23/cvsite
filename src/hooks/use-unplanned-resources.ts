@@ -2,6 +2,7 @@
 import { useState, useCallback, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { useFilterNames } from './use-filter-names';
 
 interface UseUnplannedResourcesProps {
   searchQuery: string;
@@ -17,14 +18,17 @@ export function useUnplannedResources({
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
 
+  // Get filter names for RPC calls
+  const { sbuName, managerName } = useFilterNames(selectedSbu, selectedManager);
+
   // Memoized RPC parameters
   const rpcParams = useMemo(() => ({
     search_query: searchQuery || null,
     page_number: currentPage,
     items_per_page: itemsPerPage,
-    sbu_filter: selectedSbu,
-    manager_filter: selectedManager,
-  }), [searchQuery, currentPage, selectedSbu, selectedManager]);
+    sbu_filter: sbuName, // Pass string name instead of ID
+    manager_filter: managerName, // Pass string name instead of ID
+  }), [searchQuery, currentPage, sbuName, managerName]);
 
   // Data fetching
   const { data, isLoading, error, refetch } = useQuery({
@@ -63,6 +67,8 @@ export function useUnplannedResources({
         }
       };
     },
+    // Only enable the query when we have resolved the filter names (if they exist)
+    enabled: (!selectedSbu || !!sbuName) && (!selectedManager || !!managerName),
   });
 
   return {

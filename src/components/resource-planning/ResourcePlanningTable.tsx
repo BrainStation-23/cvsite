@@ -30,25 +30,34 @@ export const ResourcePlanningTable: React.FC = () => {
     setSelectedManager(null);
   };
 
-  // Hook instances with shared basic filters
+  // Only instantiate the hook for the active tab to avoid unnecessary API calls
   const plannedResourcesState = usePlannedResourcesTab();
   const weeklyValidationState = useWeeklyValidationTab();
 
-  // Sync basic filters with hooks
-  React.useEffect(() => {
-    plannedResourcesState.setSearchQuery(searchQuery);
-    weeklyValidationState.setSearchQuery(searchQuery);
-  }, [searchQuery]);
+  // Get the current active state based on tab
+  const getCurrentState = () => {
+    switch (activeTab) {
+      case 'planned':
+        return plannedResourcesState;
+      case 'validation':
+        return weeklyValidationState;
+      default:
+        return plannedResourcesState;
+    }
+  };
 
+  // Sync basic filters with the active hook only
   React.useEffect(() => {
-    plannedResourcesState.setSelectedSbu(selectedSbu);
-    weeklyValidationState.setSelectedSbu(selectedSbu);
-  }, [selectedSbu]);
-
-  React.useEffect(() => {
-    plannedResourcesState.setSelectedManager(selectedManager);
-    weeklyValidationState.setSelectedManager(selectedManager);
-  }, [selectedManager]);
+    if (activeTab === 'planned') {
+      plannedResourcesState.setSearchQuery(searchQuery);
+      plannedResourcesState.setSelectedSbu(selectedSbu);
+      plannedResourcesState.setSelectedManager(selectedManager);
+    } else if (activeTab === 'validation') {
+      weeklyValidationState.setSearchQuery(searchQuery);
+      weeklyValidationState.setSelectedSbu(selectedSbu);
+      weeklyValidationState.setSelectedManager(selectedManager);
+    }
+  }, [searchQuery, selectedSbu, selectedManager, activeTab]);
 
   // CRUD operations
   const { updateResourcePlanning, deleteResourcePlanning } = useResourcePlanningOperations();
@@ -124,6 +133,14 @@ export const ResourcePlanningTable: React.FC = () => {
   const handleCreatePlan = (profileId: string) => {
     console.log('Create plan for profile:', profileId);
     // This would typically open a dialog or form to create a new resource plan
+  };
+
+  const refreshActiveTabData = () => {
+    if (activeTab === 'planned') {
+      plannedResourcesState.refetch();
+    } else if (activeTab === 'validation') {
+      weeklyValidationState.refetch();
+    }
   };
 
   return (
@@ -222,11 +239,7 @@ export const ResourcePlanningTable: React.FC = () => {
               <CardTitle>Create Resource Assignment</CardTitle>
             </CardHeader>
             <CardContent>
-              <CreateResourcePlanningForm onSuccess={() => {
-                // Refresh data when a new assignment is created
-                plannedResourcesState.refetch();
-                weeklyValidationState.refetch();
-              }} />
+              <CreateResourcePlanningForm onSuccess={refreshActiveTabData} />
             </CardContent>
           </Card>
         </div>
@@ -239,9 +252,7 @@ export const ResourcePlanningTable: React.FC = () => {
           onOpenChange={setEditDialogOpen}
           item={selectedItem}
           onSuccess={() => {
-            // Refresh data when an assignment is updated
-            plannedResourcesState.refetch();
-            weeklyValidationState.refetch();
+            refreshActiveTabData();
             setEditDialogOpen(false);
             setSelectedItem(null);
           }}
