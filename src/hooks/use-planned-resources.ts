@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -111,7 +110,7 @@ export function usePlannedResources() {
         advancedFilters
       });
 
-      const { data: rpcData, error } = await supabase.rpc('get_comprehensive_resource_planning_data', {
+      const { data: rpcData, error } = await supabase.rpc('get_planned_resource_data', {
         search_query: searchQuery || null,
         page_number: currentPage,
         items_per_page: itemsPerPage,
@@ -129,7 +128,6 @@ export function usePlannedResources() {
         start_date_to: advancedFilters.startDateTo || null,
         end_date_from: advancedFilters.endDateFrom || null,
         end_date_to: advancedFilters.endDateTo || null,
-        include_weekly_validation: false
       });
 
       if (error) {

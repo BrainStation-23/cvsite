@@ -68,59 +68,25 @@ export function useUnifiedResourcePlanning() {
   const resetPage = useCallback(() => setCurrentPage(1), []);
 
   // Memoized RPC parameters
-  const rpcParams = useMemo(() => {
-    const baseParams = {
-      search_query: searchQuery || null,
-      page_number: currentPage,
-      items_per_page: itemsPerPage,
-      sort_by: sortBy,
-      sort_order: sortOrder,
-      sbu_filter: selectedSbu,
-      manager_filter: selectedManager,
-      bill_type_filter: advancedFilters.billTypeFilter,
-      project_search: advancedFilters.projectSearch || null,
-      min_engagement_percentage: advancedFilters.minEngagementPercentage,
-      max_engagement_percentage: advancedFilters.maxEngagementPercentage,
-      min_billing_percentage: advancedFilters.minBillingPercentage,
-      max_billing_percentage: advancedFilters.maxBillingPercentage,
-      start_date_from: advancedFilters.startDateFrom || null,
-      start_date_to: advancedFilters.startDateTo || null,
-      end_date_from: advancedFilters.endDateFrom || null,
-      end_date_to: advancedFilters.endDateTo || null,
-    };
-
-    switch (activeTab) {
-      case 'planned':
-        return {
-          ...baseParams,
-          include_unplanned: false,
-          include_weekly_validation: false,
-          weekly_validation_filter: 'all',
-        };
-      case 'unplanned':
-        return {
-          ...baseParams,
-          include_unplanned: true,
-          include_weekly_validation: false,
-          weekly_validation_filter: 'all',
-        };
-      case 'weekly-validation':
-        return {
-          ...baseParams,
-          include_unplanned: false,
-          include_weekly_validation: true,
-          weekly_validation_filter: 'pending',
-        };
-      default:
-        return {
-          ...baseParams,
-          include_unplanned: false,
-          include_weekly_validation: false,
-          weekly_validation_filter: 'all',
-        };
-    }
-  }, [
-    activeTab,
+  const rpcParams = useMemo(() => ({
+    search_query: searchQuery || null,
+    page_number: currentPage,
+    items_per_page: itemsPerPage,
+    sort_by: sortBy,
+    sort_order: sortOrder,
+    sbu_filter: selectedSbu,
+    manager_filter: selectedManager,
+    bill_type_filter: advancedFilters.billTypeFilter,
+    project_search: advancedFilters.projectSearch || null,
+    min_engagement_percentage: advancedFilters.minEngagementPercentage,
+    max_engagement_percentage: advancedFilters.maxEngagementPercentage,
+    min_billing_percentage: advancedFilters.minBillingPercentage,
+    max_billing_percentage: advancedFilters.maxBillingPercentage,
+    start_date_from: advancedFilters.startDateFrom || null,
+    start_date_to: advancedFilters.startDateTo || null,
+    end_date_from: advancedFilters.endDateFrom || null,
+    end_date_to: advancedFilters.endDateTo || null,
+  }), [
     searchQuery,
     currentPage,
     sortBy,
@@ -130,7 +96,7 @@ export function useUnifiedResourcePlanning() {
     advancedFilters
   ]);
 
-  // Data fetching
+  // Data fetching with proper RPC function selection
   const { data, isLoading, error, refetch } = useQuery({
     queryKey: [
       'unified-resource-planning',
@@ -146,7 +112,20 @@ export function useUnifiedResourcePlanning() {
     queryFn: async () => {
       console.log('Unified Resource Planning Query:', { activeTab, ...rpcParams });
 
-      const { data: rpcData, error } = await supabase.rpc('get_comprehensive_resource_planning_data', rpcParams);
+      // Select the appropriate RPC function based on the active tab
+      let rpcFunction: string;
+      switch (activeTab) {
+        case 'planned':
+          rpcFunction = 'get_planned_resource_data';
+          break;
+        case 'weekly-validation':
+          rpcFunction = 'get_weekly_validation_data';
+          break;
+        default:
+          rpcFunction = 'get_planned_resource_data';
+      }
+
+      const { data: rpcData, error } = await supabase.rpc(rpcFunction as any, rpcParams);
 
       if (error) {
         console.error('RPC call error:', error);
