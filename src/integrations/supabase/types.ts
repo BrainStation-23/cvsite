@@ -47,13 +47,6 @@ export type Database = {
             foreignKeyName: "achievements_profile_id_fkey"
             columns: ["profile_id"]
             isOneToOne: false
-            referencedRelation: "employee_search_index"
-            referencedColumns: ["profile_id"]
-          },
-          {
-            foreignKeyName: "achievements_profile_id_fkey"
-            columns: ["profile_id"]
-            isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
@@ -238,13 +231,6 @@ export type Database = {
             foreignKeyName: "education_profile_id_fkey"
             columns: ["profile_id"]
             isOneToOne: false
-            referencedRelation: "employee_search_index"
-            referencedColumns: ["profile_id"]
-          },
-          {
-            foreignKeyName: "education_profile_id_fkey"
-            columns: ["profile_id"]
-            isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
@@ -342,13 +328,6 @@ export type Database = {
             foreignKeyName: "experiences_profile_id_fkey"
             columns: ["profile_id"]
             isOneToOne: false
-            referencedRelation: "employee_search_index"
-            referencedColumns: ["profile_id"]
-          },
-          {
-            foreignKeyName: "experiences_profile_id_fkey"
-            columns: ["profile_id"]
-            isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
@@ -416,13 +395,6 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "designations"
             referencedColumns: ["name"]
-          },
-          {
-            foreignKeyName: "general_information_profile_id_fkey"
-            columns: ["profile_id"]
-            isOneToOne: true
-            referencedRelation: "employee_search_index"
-            referencedColumns: ["profile_id"]
           },
           {
             foreignKeyName: "general_information_profile_id_fkey"
@@ -524,13 +496,6 @@ export type Database = {
             foreignKeyName: "notes_profile_id_fkey"
             columns: ["profile_id"]
             isOneToOne: false
-            referencedRelation: "employee_search_index"
-            referencedColumns: ["profile_id"]
-          },
-          {
-            foreignKeyName: "notes_profile_id_fkey"
-            columns: ["profile_id"]
-            isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
@@ -589,13 +554,6 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "expertise_types"
             referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "profiles_manager_fkey"
-            columns: ["manager"]
-            isOneToOne: false
-            referencedRelation: "employee_search_index"
-            referencedColumns: ["profile_id"]
           },
           {
             foreignKeyName: "profiles_manager_fkey"
@@ -695,13 +653,6 @@ export type Database = {
             foreignKeyName: "projects_profile_id_fkey"
             columns: ["profile_id"]
             isOneToOne: false
-            referencedRelation: "employee_search_index"
-            referencedColumns: ["profile_id"]
-          },
-          {
-            foreignKeyName: "projects_profile_id_fkey"
-            columns: ["profile_id"]
-            isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
@@ -742,13 +693,6 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
-          {
-            foreignKeyName: "projects_management_project_manager_fkey"
-            columns: ["project_manager"]
-            isOneToOne: false
-            referencedRelation: "employee_search_index"
-            referencedColumns: ["profile_id"]
-          },
           {
             foreignKeyName: "projects_management_project_manager_fkey"
             columns: ["project_manager"]
@@ -941,13 +885,6 @@ export type Database = {
             foreignKeyName: "specialized_skills_profile_id_fkey"
             columns: ["profile_id"]
             isOneToOne: false
-            referencedRelation: "employee_search_index"
-            referencedColumns: ["profile_id"]
-          },
-          {
-            foreignKeyName: "specialized_skills_profile_id_fkey"
-            columns: ["profile_id"]
-            isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
@@ -982,13 +919,6 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
-          {
-            foreignKeyName: "technical_skills_profile_id_fkey"
-            columns: ["profile_id"]
-            isOneToOne: false
-            referencedRelation: "employee_search_index"
-            referencedColumns: ["profile_id"]
-          },
           {
             foreignKeyName: "technical_skills_profile_id_fkey"
             columns: ["profile_id"]
@@ -1039,13 +969,6 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
-          {
-            foreignKeyName: "trainings_profile_id_fkey"
-            columns: ["profile_id"]
-            isOneToOne: false
-            referencedRelation: "employee_search_index"
-            referencedColumns: ["profile_id"]
-          },
           {
             foreignKeyName: "trainings_profile_id_fkey"
             columns: ["profile_id"]
@@ -1108,37 +1031,7 @@ export type Database = {
       }
     }
     Views: {
-      employee_search_index: {
-        Row: {
-          billing_percentage: number | null
-          biography: string | null
-          created_at: string | null
-          current_designation: string | null
-          current_project: string | null
-          employee_id: string | null
-          engagement_complete: boolean | null
-          engagement_percentage: number | null
-          expertise_type: string | null
-          first_name: string | null
-          last_name: string | null
-          profile_id: string | null
-          release_date: string | null
-          resource_type: string | null
-          sbu_name: string | null
-          search_vector: unknown | null
-          total_experience_years: number | null
-          updated_at: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "general_information_current_designation_fkey"
-            columns: ["current_designation"]
-            isOneToOne: false
-            referencedRelation: "designations"
-            referencedColumns: ["name"]
-          },
-        ]
-      }
+      [_ in never]: never
     }
     Functions: {
       calculate_experience_duration: {
@@ -1150,27 +1043,50 @@ export type Database = {
         Returns: Json
       }
       get_comprehensive_resource_planning_data: {
-        Args: {
-          search_query?: string
-          page_number?: number
-          items_per_page?: number
-          sort_by?: string
-          sort_order?: string
-          sbu_filter?: string
-          manager_filter?: string
-          bill_type_filter?: string
-          project_search?: string
-          min_engagement_percentage?: number
-          max_engagement_percentage?: number
-          min_billing_percentage?: number
-          max_billing_percentage?: number
-          start_date_from?: string
-          start_date_to?: string
-          end_date_from?: string
-          end_date_to?: string
-          include_unplanned?: boolean
-          include_weekly_validation?: boolean
-        }
+        Args:
+          | {
+              search_query?: string
+              page_number?: number
+              items_per_page?: number
+              sort_by?: string
+              sort_order?: string
+              sbu_filter?: string
+              manager_filter?: string
+              bill_type_filter?: string
+              project_search?: string
+              min_engagement_percentage?: number
+              max_engagement_percentage?: number
+              min_billing_percentage?: number
+              max_billing_percentage?: number
+              start_date_from?: string
+              start_date_to?: string
+              end_date_from?: string
+              end_date_to?: string
+              include_unplanned?: boolean
+              include_weekly_validation?: boolean
+            }
+          | {
+              search_query?: string
+              page_number?: number
+              items_per_page?: number
+              sort_by?: string
+              sort_order?: string
+              sbu_filter?: string
+              manager_filter?: string
+              bill_type_filter?: string
+              project_search?: string
+              min_engagement_percentage?: number
+              max_engagement_percentage?: number
+              min_billing_percentage?: number
+              max_billing_percentage?: number
+              start_date_from?: string
+              start_date_to?: string
+              end_date_from?: string
+              end_date_to?: string
+              include_unplanned?: boolean
+              include_weekly_validation?: boolean
+              weekly_validation_filter?: string
+            }
         Returns: Json
       }
       get_dashboard_analytics: {

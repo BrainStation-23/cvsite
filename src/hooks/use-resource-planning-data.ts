@@ -67,24 +67,28 @@ export function useResourcePlanningData({
           ...baseParams,
           include_unplanned: false,
           include_weekly_validation: false,
+          weekly_validation_filter: 'all',
         };
       case 'unplanned':
         return {
           ...baseParams,
           include_unplanned: true,
           include_weekly_validation: false,
+          weekly_validation_filter: 'all',
         };
       case 'weekly-validation':
         return {
           ...baseParams,
           include_unplanned: false,
           include_weekly_validation: true,
+          weekly_validation_filter: 'pending', // Only show pending validations
         };
       default:
         return {
           ...baseParams,
           include_unplanned: false,
           include_weekly_validation: false,
+          weekly_validation_filter: 'all',
         };
     }
   }, [
