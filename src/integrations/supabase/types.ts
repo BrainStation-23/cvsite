@@ -1091,45 +1091,25 @@ export type Database = {
         Returns: Json
       }
       get_planned_resource_data: {
-        Args:
-          | {
-              search_query?: string
-              page_number?: number
-              items_per_page?: number
-              sort_by?: string
-              sort_order?: string
-              sbu_filter?: string
-              manager_filter?: string
-              bill_type_filter?: string
-              project_search?: string
-              min_engagement_percentage?: number
-              max_engagement_percentage?: number
-              min_billing_percentage?: number
-              max_billing_percentage?: number
-              start_date_from?: string
-              start_date_to?: string
-              end_date_from?: string
-              end_date_to?: string
-            }
-          | {
-              search_query?: string
-              page_number?: number
-              items_per_page?: number
-              sort_by?: string
-              sort_order?: string
-              sbu_filter?: string
-              manager_filter?: string
-              bill_type_filter?: string
-              project_search?: string
-              min_engagement_percentage?: number
-              max_engagement_percentage?: number
-              min_billing_percentage?: number
-              max_billing_percentage?: number
-              start_date_from?: string
-              start_date_to?: string
-              end_date_from?: string
-              end_date_to?: string
-            }
+        Args: {
+          search_query?: string
+          page_number?: number
+          items_per_page?: number
+          sort_by?: string
+          sort_order?: string
+          sbu_filter?: string
+          manager_filter?: string
+          bill_type_filter?: string
+          project_search?: string
+          min_engagement_percentage?: number
+          max_engagement_percentage?: number
+          min_billing_percentage?: number
+          max_billing_percentage?: number
+          start_date_from?: string
+          start_date_to?: string
+          end_date_from?: string
+          end_date_to?: string
+        }
         Returns: Json
       }
       get_sbu_summary_stats: {
@@ -1176,45 +1156,25 @@ export type Database = {
         Returns: Json
       }
       get_weekly_validation_data: {
-        Args:
-          | {
-              search_query?: string
-              page_number?: number
-              items_per_page?: number
-              sort_by?: string
-              sort_order?: string
-              sbu_filter?: string
-              manager_filter?: string
-              bill_type_filter?: string
-              project_search?: string
-              min_engagement_percentage?: number
-              max_engagement_percentage?: number
-              min_billing_percentage?: number
-              max_billing_percentage?: number
-              start_date_from?: string
-              start_date_to?: string
-              end_date_from?: string
-              end_date_to?: string
-            }
-          | {
-              search_query?: string
-              page_number?: number
-              items_per_page?: number
-              sort_by?: string
-              sort_order?: string
-              sbu_filter?: string
-              manager_filter?: string
-              bill_type_filter?: string
-              project_search?: string
-              min_engagement_percentage?: number
-              max_engagement_percentage?: number
-              min_billing_percentage?: number
-              max_billing_percentage?: number
-              start_date_from?: string
-              start_date_to?: string
-              end_date_from?: string
-              end_date_to?: string
-            }
+        Args: {
+          search_query?: string
+          page_number?: number
+          items_per_page?: number
+          sort_by?: string
+          sort_order?: string
+          sbu_filter?: string
+          manager_filter?: string
+          bill_type_filter?: string
+          project_search?: string
+          min_engagement_percentage?: number
+          max_engagement_percentage?: number
+          min_billing_percentage?: number
+          max_billing_percentage?: number
+          start_date_from?: string
+          start_date_to?: string
+          end_date_from?: string
+          end_date_to?: string
+        }
         Returns: Json
       }
       has_any_role: {
