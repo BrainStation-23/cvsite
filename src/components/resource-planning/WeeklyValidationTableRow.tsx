@@ -1,13 +1,13 @@
-
 import React from 'react';
 import { TableCell, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { CheckCircle2, Edit2 } from 'lucide-react';
+import { CheckCircle2, Edit2, CheckCircle } from 'lucide-react';
 import { format } from 'date-fns';
 import { useConfirmationDialog } from '@/hooks/use-confirmation-dialog';
 import { ConfirmationDialog } from '@/components/ui/confirmation-dialog';
 import { WeeklyValidationTableEditRow } from './WeeklyValidationTableEditRow';
+import { useResourcePlanningOperations } from '@/hooks/use-resource-planning-operations';
 
 interface WeeklyValidationData {
   id: string;
@@ -76,6 +76,7 @@ export const WeeklyValidationTableRow: React.FC<WeeklyValidationTableRowProps> =
   editLoading,
 }) => {
   const { isOpen, config, showConfirmation, hideConfirmation, handleConfirm } = useConfirmationDialog();
+  const { updateResourcePlanning, isUpdating } = useResourcePlanningOperations();
 
   const handleValidateClick = () => {
     showConfirmation({
@@ -85,6 +86,20 @@ export const WeeklyValidationTableRow: React.FC<WeeklyValidationTableRowProps> =
       cancelText: 'Cancel',
       variant: 'default',
       onConfirm: () => onValidate(item.id)
+    });
+  };
+
+  const handleCompleteEngagement = () => {
+    showConfirmation({
+      title: 'Mark Engagement as Complete',
+      description: 'Are you sure you want to mark this engagement as complete? This will remove it from the planned resources view.',
+      confirmText: 'Mark Complete',
+      cancelText: 'Cancel',
+      variant: 'default',
+      onConfirm: () => updateResourcePlanning({ 
+        id: item.id, 
+        updates: { engagement_complete: true } 
+      })
     });
   };
 
@@ -162,16 +177,26 @@ export const WeeklyValidationTableRow: React.FC<WeeklyValidationTableRowProps> =
               variant="ghost"
               size="sm"
               onClick={() => onStartEdit(item)}
-              disabled={editLoading}
+              disabled={editLoading || isUpdating}
               className="h-6 w-6 p-0"
             >
               <Edit2 className="h-3 w-3" />
             </Button>
             <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleCompleteEngagement}
+              disabled={isUpdating || editLoading}
+              title="Mark engagement as complete"
+              className="h-6 w-6 p-0"
+            >
+              <CheckCircle className="h-3 w-3" />
+            </Button>
+            <Button
               variant="outline"
               size="sm"
               onClick={handleValidateClick}
-              disabled={isValidating}
+              disabled={isValidating || isUpdating}
               className="h-7 px-2 text-xs"
             >
               <CheckCircle2 className="h-3 w-3 mr-1" />

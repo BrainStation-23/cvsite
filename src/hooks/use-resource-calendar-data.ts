@@ -1,5 +1,4 @@
 
-import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { startOfQuarter, endOfQuarter, startOfMonth, endOfMonth } from 'date-fns';
@@ -65,8 +64,8 @@ export function useResourceCalendarData(
         viewType
       });
 
-      // Use the comprehensive resource planning data function
-      const { data: rpcData, error } = await supabase.rpc('get_comprehensive_resource_planning_data', {
+      // Use the planned resource data function for calendar view
+      const { data: rpcData, error } = await supabase.rpc('get_planned_resource_data', {
         search_query: searchQuery || null,
         page_number: 1,
         items_per_page: 1000, // High limit to get all records
@@ -84,8 +83,6 @@ export function useResourceCalendarData(
         start_date_to: dateRange.end.toISOString().split('T')[0],
         end_date_from: null,
         end_date_to: null,
-        include_unplanned: false,
-        include_weekly_validation: false,
       });
 
       if (error) {

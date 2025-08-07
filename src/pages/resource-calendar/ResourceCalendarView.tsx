@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { CalendarDays, Users, Clock, TrendingUp, ArrowLeft } from 'lucide-react';
 import ResourceCalendarViewComponent from '../../components/calendar/ResourceCalendarView';
 import { ResourceCalendarFilters } from '../../components/calendar/ResourceCalendarFilters';
-import { usePlannedResources } from '../../hooks/use-planned-resources';
+import { usePlannedResourcesTab } from '../../hooks/use-planned-resources-tab';
 
 const ResourceCalendarView: React.FC = () => {
   const location = useLocation();
@@ -27,7 +27,7 @@ const ResourceCalendarView: React.FC = () => {
     setShowUnplanned(false);
   };
 
-  const { data: resourceData, isLoading } = usePlannedResources();
+  const { data: resourceData, isLoading } = usePlannedResourcesTab();
 
   // Calculate quick stats
   const totalResources = resourceData?.length || 0;
