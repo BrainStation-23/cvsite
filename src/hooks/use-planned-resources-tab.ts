@@ -63,16 +63,16 @@ export function usePlannedResourcesTab() {
   // Reset page when filters change
   const resetPage = useCallback(() => setCurrentPage(1), []);
 
-  // Memoized RPC parameters
+  // Memoized RPC parameters - now using UUIDs for ID-based filters
   const rpcParams = useMemo(() => ({
     search_query: searchQuery || null,
     page_number: currentPage,
     items_per_page: itemsPerPage,
     sort_by: sortBy,
     sort_order: sortOrder,
-    sbu_filter: selectedSbu,
-    manager_filter: selectedManager,
-    bill_type_filter: advancedFilters.billTypeFilter,
+    sbu_filter: selectedSbu, // Pass UUID directly
+    manager_filter: selectedManager, // Pass UUID directly
+    bill_type_filter: advancedFilters.billTypeFilter, // Pass UUID directly
     project_search: advancedFilters.projectSearch || null,
     min_engagement_percentage: advancedFilters.minEngagementPercentage,
     max_engagement_percentage: advancedFilters.maxEngagementPercentage,

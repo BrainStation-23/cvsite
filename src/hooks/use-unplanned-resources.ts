@@ -17,13 +17,13 @@ export function useUnplannedResources({
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
 
-  // Memoized RPC parameters
+  // Memoized RPC parameters - now using UUIDs for ID-based filters
   const rpcParams = useMemo(() => ({
     search_query: searchQuery || null,
     page_number: currentPage,
     items_per_page: itemsPerPage,
-    sbu_filter: selectedSbu,
-    manager_filter: selectedManager,
+    sbu_filter: selectedSbu, // Pass UUID directly
+    manager_filter: selectedManager, // Pass UUID directly
   }), [searchQuery, currentPage, selectedSbu, selectedManager]);
 
   // Data fetching
