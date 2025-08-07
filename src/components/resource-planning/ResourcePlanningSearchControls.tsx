@@ -14,7 +14,7 @@ export const ResourcePlanningSearchControls: React.FC<ResourcePlanningSearchCont
   setSearchQuery,
 }) => {
   const [inputValue, setInputValue] = useState(searchQuery);
-  const debouncedSearchQuery = useDebounce(inputValue, 500); // 500ms delay
+  const debouncedSearchQuery = useDebounce(inputValue, 3000); // 500ms delay
 
   // Update the actual search query when debounced value changes
   useEffect(() => {
