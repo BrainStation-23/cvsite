@@ -40,7 +40,7 @@ export const useResourcePlanningState = ({ onResourcePlanningFilters }: UseResou
   const isInitialRender = useRef(true);
   const previousFiltersRef = useRef<ResourcePlanningFilters>({});
 
-  // Create debounced version of the filter function
+  // Create a stable debounced function using useCallback
   const debouncedApplyFilters = useCallback(
     debounce((filters: ResourcePlanningFilters) => {
       // Only apply filters if they have actually changed
@@ -61,7 +61,7 @@ export const useResourcePlanningState = ({ onResourcePlanningFilters }: UseResou
         onResourcePlanningFilters(filters);
       }
     }, 300),
-    [onResourcePlanningFilters]
+    [] // Empty dependency array since onResourcePlanningFilters should be stable
   );
 
   // Apply filters when values change (but not on initial render)
@@ -105,8 +105,8 @@ export const useResourcePlanningState = ({ onResourcePlanningFilters }: UseResou
     releaseDateFrom,
     releaseDateTo,
     availabilityStatus,
-    currentProjectSearch,
-    debouncedApplyFilters
+    currentProjectSearch
+    // Removed debouncedApplyFilters from dependencies to prevent infinite loops
   ]);
 
   return {
