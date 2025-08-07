@@ -1,58 +1,44 @@
 
-import { useState } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 
-interface UnplannedResourcesParams {
+interface UseUnplannedResourcesProps {
   searchQuery: string;
   selectedSbu: string | null;
   selectedManager: string | null;
 }
 
-export function useUnplannedResources(params: UnplannedResourcesParams) {
-  const { 
-    searchQuery, 
-    selectedSbu, 
-    selectedManager
-  } = params;
-
+export function useUnplannedResources({
+  searchQuery,
+  selectedSbu,
+  selectedManager,
+}: UseUnplannedResourcesProps) {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
 
-  const { data, isLoading, error, refetch } = useQuery({
-    queryKey: [
-      'unplanned-resources', 
-      searchQuery, 
-      selectedSbu, 
-      selectedManager,
-      currentPage
-    ],
-    queryFn: async () => {
-      console.log('Unplanned Resources Query:', {
-        searchQuery,
-        selectedSbu,
-        selectedManager,
-        currentPage
-      });
+  // Memoized RPC parameters
+  const rpcParams = useMemo(() => ({
+    search_query: searchQuery || null,
+    page_number: currentPage,
+    items_per_page: itemsPerPage,
+    sbu_filter: selectedSbu,
+    manager_filter: selectedManager,
+  }), [searchQuery, currentPage, selectedSbu, selectedManager]);
 
-      // Use the new dedicated RPC function for unplanned resources
-      const { data: rpcData, error } = await supabase.rpc('get_unplanned_resources', {
-        search_query: searchQuery || null,
-        page_number: currentPage,
-        items_per_page: itemsPerPage,
-        sort_by: 'created_at',
-        sort_order: 'desc',
-        sbu_filter: selectedSbu,
-        manager_filter: selectedManager
-      });
+  // Data fetching
+  const { data, isLoading, error, refetch } = useQuery({
+    queryKey: ['unplanned-resources', rpcParams],
+    queryFn: async () => {
+      console.log('Unplanned Resources Query:', rpcParams);
+
+      const { data: rpcData, error } = await supabase.rpc('get_unplanned_resources', rpcParams);
 
       if (error) {
         console.error('Unplanned resources RPC call error:', error);
         throw error;
       }
 
-      console.log('Unplanned Resources RPC response:', rpcData);
-      
       if (rpcData && typeof rpcData === 'object' && 'unplanned_resources' in rpcData) {
         return {
           unplanned_resources: (rpcData as any).unplanned_resources || [],
@@ -65,7 +51,7 @@ export function useUnplannedResources(params: UnplannedResourcesParams) {
           }
         };
       }
-      
+
       return {
         unplanned_resources: [],
         pagination: {
@@ -76,24 +62,15 @@ export function useUnplannedResources(params: UnplannedResourcesParams) {
           page_count: 0
         }
       };
-    }
+    },
   });
 
   return {
-    unplannedResources: data || {
-      unplanned_resources: [],
-      pagination: {
-        total_count: 0,
-        filtered_count: 0,
-        page: currentPage,
-        per_page: itemsPerPage,
-        page_count: 0
-      }
-    },
+    unplannedResources: data || { unplanned_resources: [], pagination: null },
     currentPage,
     setCurrentPage,
     isLoading,
     error,
-    refetch
+    refetch,
   };
 }
