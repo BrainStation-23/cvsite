@@ -3,7 +3,6 @@ import React from 'react';
 import { TableCell, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { ProfileCombobox } from '@/components/admin/user/ProfileCombobox';
 import BillTypeCombobox from './BillTypeCombobox';
 import { ProjectCombobox } from '@/components/projects/ProjectCombobox';
 import DatePicker from '@/components/admin/user/DatePicker';
@@ -69,80 +68,92 @@ export const WeeklyValidationTableEditRow: React.FC<WeeklyValidationTableEditRow
 }) => {
   return (
     <TableRow>
-      <TableCell>
-        <ProfileCombobox
-          value={editData.profileId}
-          onValueChange={(value) => onEditDataChange({ profileId: value || '' })}
-          placeholder="Select employee..."
-          disabled={true} // Profile shouldn't be changed in edit mode
-          label="Employee"
-        />
+      <TableCell className="py-1 px-2">
+        {/* Static employee display - matching the regular row format */}
+        <div className="flex flex-col">
+          <span className="font-medium text-xs">
+            {item.profile.first_name} {item.profile.last_name}
+          </span>
+          <span className="text-xs text-muted-foreground">
+            {item.profile.employee_id}
+          </span>
+        </div>
       </TableCell>
-      <TableCell>
-        <BillTypeCombobox
-          value={editData.billTypeId}
-          onValueChange={(value) => onEditDataChange({ billTypeId: value })}
-          placeholder="Select bill type..."
-        />
+      <TableCell className="py-1 px-2">
+        <div className="w-full max-w-[120px]">
+          <BillTypeCombobox
+            value={editData.billTypeId}
+            onValueChange={(value) => onEditDataChange({ billTypeId: value })}
+            placeholder="Select..."
+          />
+        </div>
       </TableCell>
-      <TableCell>
-        <ProjectCombobox
-          value={editData.projectId || undefined}
-          onValueChange={(value) => onEditDataChange({ projectId: value })}
-          placeholder="Select project..."
-        />
+      <TableCell className="py-1 px-2">
+        <div className="w-full max-w-[140px]">
+          <ProjectCombobox
+            value={editData.projectId || undefined}
+            onValueChange={(value) => onEditDataChange({ projectId: value })}
+            placeholder="Select..."
+          />
+        </div>
       </TableCell>
-      <TableCell>
+      <TableCell className="py-1 px-2">
         <Input
           type="number"
           min="1"
           max="100"
           value={editData.engagementPercentage}
           onChange={(e) => onEditDataChange({ engagementPercentage: Number(e.target.value) })}
-          className="w-20"
+          className="w-16 h-7 text-xs"
         />
       </TableCell>
-      <TableCell>
+      <TableCell className="py-1 px-2">
         <Input
           type="number"
           min="0"
           max="100"
           value={editData.billingPercentage}
           onChange={(e) => onEditDataChange({ billingPercentage: Number(e.target.value) })}
-          className="w-20"
+          className="w-16 h-7 text-xs"
         />
       </TableCell>
-      <TableCell>
-        <DatePicker
-          value={editData.engagementStartDate}
-          onChange={(value) => onEditDataChange({ engagementStartDate: value })}
-          placeholder="Select start date"
-        />
+      <TableCell className="py-1 px-2">
+        <div className="w-full max-w-[130px]">
+          <DatePicker
+            value={editData.engagementStartDate}
+            onChange={(value) => onEditDataChange({ engagementStartDate: value })}
+            placeholder="Start date"
+          />
+        </div>
       </TableCell>
-      <TableCell>
-        <DatePicker
-          value={editData.releaseDate}
-          onChange={(value) => onEditDataChange({ releaseDate: value })}
-          placeholder="Select release date"
-        />
+      <TableCell className="py-1 px-2">
+        <div className="w-full max-w-[130px]">
+          <DatePicker
+            value={editData.releaseDate}
+            onChange={(value) => onEditDataChange({ releaseDate: value })}
+            placeholder="Release date"
+          />
+        </div>
       </TableCell>
-      <TableCell>
-        <div className="flex items-center gap-2">
+      <TableCell className="py-1 px-2">
+        <div className="flex items-center gap-1">
           <Button
             variant="ghost"
             size="sm"
             onClick={onSave}
             disabled={isLoading}
+            className="h-6 w-6 p-0"
           >
-            <Check className="h-4 w-4" />
+            <Check className="h-3 w-3" />
           </Button>
           <Button
             variant="ghost"
             size="sm"
             onClick={onCancel}
             disabled={isLoading}
+            className="h-6 w-6 p-0"
           >
-            <X className="h-4 w-4" />
+            <X className="h-3 w-3" />
           </Button>
         </div>
       </TableCell>
