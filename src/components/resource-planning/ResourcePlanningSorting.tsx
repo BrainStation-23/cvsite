@@ -31,6 +31,17 @@ export const ResourcePlanningSorting: React.FC<ResourcePlanningSortingProps> = (
     return sortOrder === 'asc' ? <ArrowUp className="h-4 w-4" /> : <ArrowDown className="h-4 w-4" />;
   };
 
+  const getSortLabel = (column: string) => {
+    switch (column) {
+      case 'created_at': return 'Created Date';
+      case 'profile.last_name': return 'Employee Name';
+      case 'employee_id': return 'Employee ID';
+      case 'engagement_percentage': return 'Engagement %';
+      case 'billing_percentage': return 'Billing %';
+      default: return column;
+    }
+  };
+
   return (
     <div className="flex items-center gap-2">
       <span className="text-sm font-medium">Sort by:</span>
@@ -48,7 +59,15 @@ export const ResourcePlanningSorting: React.FC<ResourcePlanningSortingProps> = (
         onClick={() => handleSort('profile.last_name')}
         className="flex items-center gap-1"
       >
-        Employee {getSortIcon('profile.last_name')}
+        Employee Name {getSortIcon('profile.last_name')}
+      </Button>
+      <Button
+        variant="ghost"
+        size="sm"
+        onClick={() => handleSort('employee_id')}
+        className="flex items-center gap-1"
+      >
+        Employee ID {getSortIcon('employee_id')}
       </Button>
       <Button
         variant="ghost"
@@ -58,11 +77,17 @@ export const ResourcePlanningSorting: React.FC<ResourcePlanningSortingProps> = (
       >
         Engagement % {getSortIcon('engagement_percentage')}
       </Button>
+      <Button
+        variant="ghost"
+        size="sm"
+        onClick={() => handleSort('billing_percentage')}
+        className="flex items-center gap-1"
+      >
+        Billing % {getSortIcon('billing_percentage')}
+      </Button>
       {sortBy && (
         <Badge variant="secondary" className="ml-2">
-          {sortBy === 'created_at' ? 'Created Date' : 
-           sortBy === 'profile.last_name' ? 'Employee' : 
-           sortBy === 'engagement_percentage' ? 'Engagement %' : sortBy}
+          {getSortLabel(sortBy)}
           {sortOrder === 'asc' ? ' ↑' : ' ↓'}
         </Badge>
       )}

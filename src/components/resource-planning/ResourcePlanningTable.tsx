@@ -2,6 +2,8 @@
 import React, { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { PanelRightClose, PanelRightOpen } from 'lucide-react';
 import { ResourcePlanningFilters } from './ResourcePlanningFilters';
 import { AdvancedResourceFilters } from './AdvancedResourceFilters';
 import { PlannedResourcesTab } from './PlannedResourcesTab';
@@ -15,6 +17,7 @@ import { useInlineEdit } from './hooks/useInlineEdit';
 
 export const ResourcePlanningTable: React.FC = () => {
   const [activeTab, setActiveTab] = useState('planned');
+  const [showCreateForm, setShowCreateForm] = useState(false);
 
   // Basic filter states
   const [searchQuery, setSearchQuery] = useState('');
@@ -112,10 +115,33 @@ export const ResourcePlanningTable: React.FC = () => {
         )}
       </ResourcePlanningFilters>
 
+      {/* Header with toggle button */}
+      <div className="flex justify-between items-center">
+        <div></div>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => setShowCreateForm(!showCreateForm)}
+          className="flex items-center gap-2"
+        >
+          {showCreateForm ? (
+            <>
+              <PanelRightClose className="h-4 w-4" />
+              Hide Create Form
+            </>
+          ) : (
+            <>
+              <PanelRightOpen className="h-4 w-4" />
+              Show Create Form
+            </>
+          )}
+        </Button>
+      </div>
+
       {/* Main Content */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className={`grid gap-6 ${showCreateForm ? 'grid-cols-1 lg:grid-cols-3' : 'grid-cols-1'}`}>
         {/* Left side - Resource Planning Table */}
-        <div className="lg:col-span-2 space-y-4">
+        <div className={`space-y-4 ${showCreateForm ? 'lg:col-span-2' : 'col-span-1'}`}>
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
             <TabsList className="grid w-full grid-cols-3">
               <TabsTrigger value="planned">Planned Resources</TabsTrigger>
@@ -168,24 +194,26 @@ export const ResourcePlanningTable: React.FC = () => {
           </Tabs>
         </div>
 
-        {/* Right side - Create Form */}
-        <div className="lg:col-span-1">
-          <Card>
-            <CardHeader>
-              <CardTitle>Create Resource Assignment</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <CreateResourcePlanningForm onSuccess={() => {
-                // Only refresh the active tab's data
-                if (activeTab === 'planned') {
-                  plannedResourcesState.refetch();
-                } else if (activeTab === 'validation') {
-                  weeklyValidationState.refetch();
-                }
-              }} />
-            </CardContent>
-          </Card>
-        </div>
+        {/* Right side - Create Form (conditionally rendered) */}
+        {showCreateForm && (
+          <div className="lg:col-span-1">
+            <Card>
+              <CardHeader>
+                <CardTitle>Create Resource Assignment</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <CreateResourcePlanningForm onSuccess={() => {
+                  // Only refresh the active tab's data
+                  if (activeTab === 'planned') {
+                    plannedResourcesState.refetch();
+                  } else if (activeTab === 'validation') {
+                    weeklyValidationState.refetch();
+                  }
+                }} />
+              </CardContent>
+            </Card>
+          </div>
+        )}
       </div>
 
       {/* Edit Dialog */}
