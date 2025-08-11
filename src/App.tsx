@@ -359,6 +359,14 @@ function App(): React.ReactElement {
               }
             />
             <Route
+              path="/admin/cv-templates/:id"
+              element={
+                <ProtectedRoute allowedRoles={['admin']}>
+                  Placeholder
+                </ProtectedRoute>
+              }
+            />
+            <Route
               path="/admin/cv-templates/:id/edit"
               element={
                 <ProtectedRoute allowedRoles={['admin']}>
