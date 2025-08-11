@@ -32,6 +32,7 @@ import ResourceCalendarStatistics from '@/pages/resource-calendar/ResourceCalend
 import ResourceCalendarPlanning from '@/pages/resource-calendar/ResourceCalendarPlanning';
 import ProjectsManagement from '@/pages/admin/ProjectsManagement';
 import './App.css';
+import CVTemplatesPage from './pages/admin/cv-templates/CVTemplatesPage';
 
 // Create QueryClient instance outside component to prevent recreation
 const queryClient = new QueryClient({
@@ -353,7 +354,7 @@ function App(): React.ReactElement {
               path="/admin/cv-templates"
               element={
                 <ProtectedRoute allowedRoles={['admin']}>
-                  Placeholder
+                  <CVTemplatesPage/>
                 </ProtectedRoute>
               }
             />
