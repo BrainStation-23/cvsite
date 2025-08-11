@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -10,11 +11,9 @@ import { CreateResourcePlanningForm } from './CreateResourcePlanningForm';
 import { EditResourcePlanningDialog } from './EditResourcePlanningDialog';
 import { usePlannedResourcesTab } from '../../hooks/use-planned-resources-tab';
 import { useWeeklyValidationTab } from '../../hooks/use-weekly-validation-tab';
-import { useResourcePlanningOperations } from '../../hooks/use-resource-planning-operations';
-import { useToast } from '../../hooks/use-toast';
+import { useInlineEdit } from './hooks/useInlineEdit';
 
 export const ResourcePlanningTable: React.FC = () => {
-  const { toast } = useToast();
   const [activeTab, setActiveTab] = useState('planned');
 
   // Basic filter states
@@ -50,66 +49,20 @@ export const ResourcePlanningTable: React.FC = () => {
     }
   }, [searchQuery, selectedSbu, selectedManager, activeTab]);
 
-  // CRUD operations
-  const { updateResourcePlanning, deleteResourcePlanning } = useResourcePlanningOperations();
-
-  // Inline editing states
-  const [editingItemId, setEditingItemId] = useState<string | null>(null);
-  const [editData, setEditData] = useState<any>({});
-  const [editLoading, setEditLoading] = useState(false);
+  // Use the proper inline edit hook
+  const {
+    editingItemId,
+    editData,
+    startEdit,
+    cancelEdit,
+    saveEdit,
+    updateEditData,
+    isLoading: editLoading,
+  } = useInlineEdit();
 
   // Edit dialog states
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState<any>(null);
-
-  const handleStartEdit = (item: any) => {
-    setEditingItemId(item.id);
-    setEditData({
-      engagement_percentage: item.engagement_percentage,
-      billing_percentage: item.billing_percentage,
-      engagement_start_date: item.engagement_start_date?.split('T')[0] || '',
-      release_date: item.release_date?.split('T')[0] || '',
-      engagement_complete: item.engagement_complete,
-    });
-  };
-
-  const handleCancelEdit = () => {
-    setEditingItemId(null);
-    setEditData({});
-  };
-
-  const handleSaveEdit = async () => {
-    if (!editingItemId) return;
-
-    setEditLoading(true);
-    try {
-      await updateResourcePlanning({
-        id: editingItemId,
-        updates: editData,
-      });
-      
-      setEditingItemId(null);
-      setEditData({});
-      
-      toast({
-        title: 'Success',
-        description: 'Resource assignment updated successfully.',
-      });
-    } catch (error: any) {
-      console.error('Update error:', error);
-      toast({
-        title: 'Error',
-        description: 'Failed to update resource assignment.',
-        variant: 'destructive',
-      });
-    } finally {
-      setEditLoading(false);
-    }
-  };
-
-  const handleEditDataChange = (data: any) => {
-    setEditData(prev => ({ ...prev, ...data }));
-  };
 
   const handleEditAssignment = (item: any) => {
     setSelectedItem(item);
@@ -180,10 +133,10 @@ export const ResourcePlanningTable: React.FC = () => {
                 resourcePlanningState={plannedResourcesState}
                 editingItemId={editingItemId}
                 editData={editData}
-                onStartEdit={handleStartEdit}
-                onCancelEdit={handleCancelEdit}
-                onSaveEdit={handleSaveEdit}
-                onEditDataChange={handleEditDataChange}
+                onStartEdit={startEdit}
+                onCancelEdit={cancelEdit}
+                onSaveEdit={saveEdit}
+                onEditDataChange={updateEditData}
                 editLoading={editLoading}
               />
             </TabsContent>
@@ -196,10 +149,10 @@ export const ResourcePlanningTable: React.FC = () => {
                 resourcePlanningState={weeklyValidationState}
                 editingItemId={editingItemId}
                 editData={editData}
-                onStartEdit={handleStartEdit}
-                onCancelEdit={handleCancelEdit}
-                onSaveEdit={handleSaveEdit}
-                onEditDataChange={handleEditDataChange}
+                onStartEdit={startEdit}
+                onCancelEdit={cancelEdit}
+                onSaveEdit={saveEdit}
+                onEditDataChange={updateEditData}
                 editLoading={editLoading}
               />
             </TabsContent>
