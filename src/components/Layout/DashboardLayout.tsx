@@ -85,7 +85,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
       >
         {/* Fixed Header */}
         <div className="p-4 flex justify-between items-center bg-slate-900/90 border-b border-slate-700 flex-shrink-0">
-          {isSidebarOpen && <h1 className="font-bold text-xl">CVSite</h1>}
+          {isSidebarOpen && <h1 className="font-bold text-xl">Employee Database</h1>}
           <button 
             onClick={toggleSidebar}
             className="p-1 rounded hover:bg-cvsite-teal"
