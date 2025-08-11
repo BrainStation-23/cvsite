@@ -17,7 +17,7 @@ import { useInlineEdit } from './hooks/useInlineEdit';
 
 export const ResourcePlanningTable: React.FC = () => {
   const [activeTab, setActiveTab] = useState('planned');
-  const [showCreateForm, setShowCreateForm] = useState(true);
+  const [showCreateForm, setShowCreateForm] = useState(false);
 
   // Basic filter states
   const [searchQuery, setSearchQuery] = useState('');
@@ -127,12 +127,12 @@ export const ResourcePlanningTable: React.FC = () => {
           {showCreateForm ? (
             <>
               <PanelRightClose className="h-4 w-4" />
-              Hide Form
+              Hide Create Form
             </>
           ) : (
             <>
               <PanelRightOpen className="h-4 w-4" />
-              Show Form
+              Show Create Form
             </>
           )}
         </Button>
