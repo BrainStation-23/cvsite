@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import BillTypeCombobox from './BillTypeCombobox';
 import { ProjectCombobox } from '@/components/projects/ProjectCombobox';
-import DatePicker from '@/components/admin/user/DatePicker';
+import CompactDatePicker from './CompactDatePicker';
 import { Check, X } from 'lucide-react';
 
 interface ResourcePlanningData {
@@ -68,7 +68,7 @@ export const ResourcePlanningTableEditRow: React.FC<ResourcePlanningTableEditRow
   return (
     <TableRow>
       <TableCell className="py-1 px-2">
-        {/* Static employee display - matching the regular row format */}
+        {/* Static employee display */}
         <div className="flex flex-col">
           <span className="font-medium text-xs">
             {item.profile.first_name} {item.profile.last_name}
@@ -79,7 +79,7 @@ export const ResourcePlanningTableEditRow: React.FC<ResourcePlanningTableEditRow
         </div>
       </TableCell>
       <TableCell className="py-1 px-2">
-        <div className="w-full max-w-[120px]">
+        <div className="w-full max-w-[110px]">
           <BillTypeCombobox
             value={editData.billTypeId}
             onValueChange={(value) => onEditDataChange({ billTypeId: value })}
@@ -88,7 +88,7 @@ export const ResourcePlanningTableEditRow: React.FC<ResourcePlanningTableEditRow
         </div>
       </TableCell>
       <TableCell className="py-1 px-2">
-        <div className="w-full max-w-[140px]">
+        <div className="w-full max-w-[120px]">
           <ProjectCombobox
             value={editData.projectId || undefined}
             onValueChange={(value) => onEditDataChange({ projectId: value })}
@@ -96,41 +96,41 @@ export const ResourcePlanningTableEditRow: React.FC<ResourcePlanningTableEditRow
           />
         </div>
       </TableCell>
-      <TableCell className="py-1 px-2">
+      <TableCell className="py-1 px-2 w-20">
         <Input
           type="number"
           min="1"
           max="100"
           value={editData.engagementPercentage}
           onChange={(e) => onEditDataChange({ engagementPercentage: Number(e.target.value) })}
-          className="w-16 h-7 text-xs"
+          className="w-14 h-7 text-xs px-1"
         />
       </TableCell>
-      <TableCell className="py-1 px-2">
+      <TableCell className="py-1 px-2 w-20">
         <Input
           type="number"
           min="0"
           max="100"
           value={editData.billingPercentage}
           onChange={(e) => onEditDataChange({ billingPercentage: Number(e.target.value) })}
-          className="w-16 h-7 text-xs"
+          className="w-14 h-7 text-xs px-1"
         />
       </TableCell>
       <TableCell className="py-1 px-2">
-        <div className="w-full max-w-[130px]">
-          <DatePicker
+        <div className="w-full max-w-[100px]">
+          <CompactDatePicker
             value={editData.engagementStartDate}
             onChange={(value) => onEditDataChange({ engagementStartDate: value })}
-            placeholder="Start date"
+            placeholder="dd-mm-yyyy"
           />
         </div>
       </TableCell>
       <TableCell className="py-1 px-2">
-        <div className="w-full max-w-[130px]">
-          <DatePicker
+        <div className="w-full max-w-[100px]">
+          <CompactDatePicker
             value={editData.releaseDate}
             onChange={(value) => onEditDataChange({ releaseDate: value })}
-            placeholder="Release date"
+            placeholder="dd-mm-yyyy"
           />
         </div>
       </TableCell>

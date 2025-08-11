@@ -2,6 +2,7 @@
 import React from 'react';
 import { TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
 
 interface ResourcePlanningTableHeaderProps {
@@ -21,41 +22,57 @@ export const ResourcePlanningTableHeader: React.FC<ResourcePlanningTableHeaderPr
   };
 
   return (
-    <TableHeader>
-      <TableRow>
-        <TableHead>
-          <Button
-            variant="ghost"
-            onClick={() => onSort('profile.last_name')}
-            className="flex items-center gap-2 p-0 h-auto font-medium"
-          >
-            Employee {getSortIcon('profile.last_name')}
-          </Button>
-        </TableHead>
-        <TableHead>Bill Type</TableHead>
-        <TableHead>Project</TableHead>
-        <TableHead>
-          <Button
-            variant="ghost"
-            onClick={() => onSort('engagement_percentage')}
-            className="flex items-center gap-2 p-0 h-auto font-medium"
-          >
-            Engagement % {getSortIcon('engagement_percentage')}
-          </Button>
-        </TableHead>
-        <TableHead>
-          <Button
-            variant="ghost"
-            onClick={() => onSort('billing_percentage')}
-            className="flex items-center gap-2 p-0 h-auto font-medium"
-          >
-            Billing % {getSortIcon('billing_percentage')}
-          </Button>
-        </TableHead>
-        <TableHead>Start Date</TableHead>
-        <TableHead>Release Date</TableHead>
-        <TableHead>Actions</TableHead>
-      </TableRow>
-    </TableHeader>
+    <TooltipProvider>
+      <TableHeader>
+        <TableRow>
+          <TableHead>
+            <Button
+              variant="ghost"
+              onClick={() => onSort('profile.last_name')}
+              className="flex items-center gap-2 p-0 h-auto font-medium"
+            >
+              Employee {getSortIcon('profile.last_name')}
+            </Button>
+          </TableHead>
+          <TableHead>Bill Type</TableHead>
+          <TableHead>Project</TableHead>
+          <TableHead className="w-20">
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  onClick={() => onSort('engagement_percentage')}
+                  className="flex items-center gap-1 p-0 h-auto font-medium text-xs"
+                >
+                  Eng.% {getSortIcon('engagement_percentage')}
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Engagement Percentage</p>
+              </TooltipContent>
+            </Tooltip>
+          </TableHead>
+          <TableHead className="w-20">
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  onClick={() => onSort('billing_percentage')}
+                  className="flex items-center gap-1 p-0 h-auto font-medium text-xs"
+                >
+                  Bill.% {getSortIcon('billing_percentage')}
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Billing Percentage</p>
+              </TooltipContent>
+            </Tooltip>
+          </TableHead>
+          <TableHead>Start Date</TableHead>
+          <TableHead>Release Date</TableHead>
+          <TableHead>Actions</TableHead>
+        </TableRow>
+      </TableHeader>
+    </TooltipProvider>
   );
 };
