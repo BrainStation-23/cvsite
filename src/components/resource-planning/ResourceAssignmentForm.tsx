@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { ProfileCombobox } from '@/components/admin/user/ProfileCombobox';
 import BillTypeCombobox from './BillTypeCombobox';
-import ProjectSearchCombobox from './ProjectSearchCombobox';
+import { ProjectCombobox } from '@/components/projects/ProjectCombobox';
 import DatePicker from '@/components/admin/user/DatePicker';
 
 interface ResourceAssignmentFormProps {
@@ -105,7 +105,7 @@ export const ResourceAssignmentForm: React.FC<ResourceAssignmentFormProps> = ({
 
         <div className="space-y-2">
           <Label htmlFor="project" className="text-sm font-medium">Project</Label>
-          <ProjectSearchCombobox
+          <ProjectCombobox
             value={projectId}
             onValueChange={setProjectId}
             placeholder="Select project..."
