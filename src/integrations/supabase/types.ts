@@ -1384,6 +1384,17 @@ export type Database = {
         }
         Returns: Json
       }
+      get_engagement_percentage_statistics: {
+        Args: {
+          resource_type_filter?: string
+          bill_type_filter?: string
+          expertise_type_filter?: string
+          sbu_filter?: string
+          start_date_filter?: string
+          end_date_filter?: string
+        }
+        Returns: Json
+      }
       get_experience_distribution: {
         Args: Record<PropertyKey, never>
         Returns: {
@@ -1417,6 +1428,17 @@ export type Database = {
         }
         Returns: Json
       }
+      get_resource_count_statistics: {
+        Args: {
+          resource_type_filter?: string
+          bill_type_filter?: string
+          expertise_type_filter?: string
+          sbu_filter?: string
+          start_date_filter?: string
+          end_date_filter?: string
+        }
+        Returns: Json
+      }
       get_sbu_summary_stats: {
         Args: { sbu_filter?: string }
         Returns: {
@@ -1445,23 +1467,13 @@ export type Database = {
         }[]
       }
       get_unplanned_resources: {
-        Args:
-          | {
-              search_query?: string
-              page_number?: number
-              items_per_page?: number
-              sbu_filter?: string
-              manager_filter?: string
-            }
-          | {
-              search_query?: string
-              page_number?: number
-              items_per_page?: number
-              sort_by?: string
-              sort_order?: string
-              sbu_filter?: string
-              manager_filter?: string
-            }
+        Args: {
+          search_query?: string
+          page_number?: number
+          items_per_page?: number
+          sbu_filter?: string
+          manager_filter?: string
+        }
         Returns: Json
       }
       get_weekly_validation_cron_config: {
