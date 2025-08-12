@@ -1,8 +1,9 @@
+
 import React from 'react';
 import { TableCell, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { CheckCircle2, Edit2, CheckCircle } from 'lucide-react';
+import { CheckCircle2, Edit2, CheckCircle, Copy } from 'lucide-react';
 import { format } from 'date-fns';
 import { useConfirmationDialog } from '@/hooks/use-confirmation-dialog';
 import { ConfirmationDialog } from '@/components/ui/confirmation-dialog';
@@ -76,7 +77,7 @@ export const WeeklyValidationTableRow: React.FC<WeeklyValidationTableRowProps> =
   editLoading,
 }) => {
   const { isOpen, config, showConfirmation, hideConfirmation, handleConfirm } = useConfirmationDialog();
-  const { updateResourcePlanning, isUpdating } = useResourcePlanningOperations();
+  const { updateResourcePlanning, createResourcePlanning, isUpdating, isCreating } = useResourcePlanningOperations();
 
   const handleValidateClick = () => {
     showConfirmation({
@@ -100,6 +101,30 @@ export const WeeklyValidationTableRow: React.FC<WeeklyValidationTableRowProps> =
         id: item.id, 
         updates: { engagement_complete: true } 
       })
+    });
+  };
+
+  const handleDuplicateAssignment = () => {
+    showConfirmation({
+      title: 'Duplicate Resource Assignment',
+      description: 'This will create a new resource assignment with the same information. You can edit it after creation.',
+      confirmText: 'Duplicate',
+      cancelText: 'Cancel',
+      variant: 'default',
+      onConfirm: () => {
+        const duplicateData = {
+          profile_id: item.profile_id,
+          project_id: item.project?.id,
+          bill_type_id: item.bill_type?.id,
+          engagement_percentage: item.engagement_percentage,
+          billing_percentage: item.billing_percentage,
+          engagement_start_date: item.engagement_start_date,
+          release_date: item.release_date,
+          engagement_complete: false,
+          weekly_validation: false,
+        };
+        createResourcePlanning(duplicateData);
+      }
     });
   };
 
@@ -179,18 +204,19 @@ export const WeeklyValidationTableRow: React.FC<WeeklyValidationTableRowProps> =
               onClick={() => onStartEdit(item)}
               disabled={editLoading || isUpdating}
               className="h-6 w-6 p-0"
+              title="Edit assignment"
             >
               <Edit2 className="h-3 w-3" />
             </Button>
             <Button
-              variant="ghost"
+              variant="outline"
               size="sm"
               onClick={handleCompleteEngagement}
               disabled={isUpdating || editLoading}
-              title="Mark engagement as complete"
-              className="h-6 w-6 p-0"
+              className="h-7 px-2 text-xs"
             >
-              <CheckCircle className="h-3 w-3" />
+              <CheckCircle className="h-3 w-3 mr-1" />
+              Complete
             </Button>
             <Button
               variant="outline"
@@ -201,6 +227,16 @@ export const WeeklyValidationTableRow: React.FC<WeeklyValidationTableRowProps> =
             >
               <CheckCircle2 className="h-3 w-3 mr-1" />
               Validate
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleDuplicateAssignment}
+              disabled={isCreating || editLoading}
+              className="h-6 w-6 p-0"
+              title="Duplicate assignment"
+            >
+              <Copy className="h-3 w-3" />
             </Button>
           </div>
         </TableCell>
