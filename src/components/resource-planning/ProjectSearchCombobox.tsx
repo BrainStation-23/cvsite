@@ -9,7 +9,7 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 
 interface ProjectSearchComboboxProps {
-  value: string;
+  value: string | null;
   onValueChange: (value: string | null) => void;
   placeholder?: string;
   disabled?: boolean;
@@ -18,12 +18,30 @@ interface ProjectSearchComboboxProps {
 const ProjectSearchCombobox: React.FC<ProjectSearchComboboxProps> = ({
   value,
   onValueChange,
-  placeholder = "Search projects...",
+  placeholder = "Select project...",
   disabled = false
 }) => {
   const [open, setOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   
+  // Fetch selected project separately to ensure it's always available
+  const { data: selectedProject } = useQuery({
+    queryKey: ['selected-project', value],
+    queryFn: async () => {
+      if (!value) return null;
+      
+      const { data, error } = await supabase
+        .from('projects_management')
+        .select('id, project_name, client_name')
+        .eq('id', value)
+        .single();
+      
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!value,
+  });
+
   const { data: projects, isLoading } = useQuery({
     queryKey: ['projects-search', searchQuery],
     queryFn: async () => {
@@ -43,13 +61,28 @@ const ProjectSearchCombobox: React.FC<ProjectSearchComboboxProps> = ({
     },
   });
 
-  const selectedProject = projects?.find(project => project.project_name === value);
+  // Combine search results with selected project to ensure it's always available
+  const allProjects = React.useMemo(() => {
+    const combinedProjects = [...(projects || [])];
+    
+    // Add selected project if it's not already in the search results
+    if (selectedProject && !projects?.some(p => p.id === selectedProject.id)) {
+      combinedProjects.unshift(selectedProject);
+    }
+    
+    // Remove duplicates based on id
+    const uniqueProjects = combinedProjects.filter((project, index, self) => 
+      index === self.findIndex(p => p.id === project.id)
+    );
+    
+    return uniqueProjects;
+  }, [projects, selectedProject]);
 
-  const handleSelect = (projectName: string) => {
-    if (projectName === value) {
+  const handleSelect = (projectId: string) => {
+    if (projectId === value) {
       onValueChange(null);
     } else {
-      onValueChange(projectName);
+      onValueChange(projectId);
     }
     setOpen(false);
   };
@@ -59,8 +92,15 @@ const ProjectSearchCombobox: React.FC<ProjectSearchComboboxProps> = ({
     onValueChange(null);
   };
 
+  const handleOpenChange = (newOpen: boolean) => {
+    setOpen(newOpen);
+    if (!newOpen) {
+      setSearchQuery('');
+    }
+  };
+
   return (
-    <Popover open={open} onOpenChange={setOpen}>
+    <Popover open={open} onOpenChange={handleOpenChange}>
       <PopoverTrigger asChild>
         <Button
           variant="outline"
@@ -77,14 +117,6 @@ const ProjectSearchCombobox: React.FC<ProjectSearchComboboxProps> = ({
                 onClick={handleClear}
               />
             </div>
-          ) : value ? (
-            <div className="flex items-center justify-between w-full">
-              <span className="truncate">{value}</span>
-              <X 
-                className="ml-2 h-4 w-4 shrink-0 opacity-50 hover:opacity-100" 
-                onClick={handleClear}
-              />
-            </div>
           ) : (
             placeholder
           )}
@@ -92,7 +124,7 @@ const ProjectSearchCombobox: React.FC<ProjectSearchComboboxProps> = ({
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-full p-0">
-        <Command>
+        <Command shouldFilter={false}>
           <CommandInput 
             placeholder="Search projects..." 
             value={searchQuery}
@@ -103,16 +135,16 @@ const ProjectSearchCombobox: React.FC<ProjectSearchComboboxProps> = ({
               {isLoading ? "Loading..." : "No project found."}
             </CommandEmpty>
             <CommandGroup>
-              {projects?.map((project) => (
+              {allProjects.map((project) => (
                 <CommandItem
                   key={project.id}
-                  value={project.project_name}
-                  onSelect={() => handleSelect(project.project_name)}
+                  value={project.id}
+                  onSelect={() => handleSelect(project.id)}
                 >
                   <Check
                     className={cn(
                       "mr-2 h-4 w-4",
-                      value === project.project_name ? "opacity-100" : "opacity-0"
+                      value === project.id ? "opacity-100" : "opacity-0"
                     )}
                   />
                   <div className="flex flex-col">
