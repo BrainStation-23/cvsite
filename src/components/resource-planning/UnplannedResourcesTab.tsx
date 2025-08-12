@@ -48,13 +48,29 @@ export const UnplannedResourcesTab: React.FC<UnplannedResourcesTabProps> = ({
   }
 
   return (
-    <UnplannedResourcesTable 
-      resources={unplannedResources.unplanned_resources}
-      pagination={unplannedResources.pagination}
-      currentPage={currentPage}
-      setCurrentPage={setCurrentPage}
-      isLoading={isLoading}
-      onCreatePlan={onCreatePlan}
-    />
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <div>
+          <h3 className="text-lg font-semibold">Unplanned Resources</h3>
+          <p className="text-sm text-muted-foreground">
+            Resources with less than 51% engagement or no active assignments
+          </p>
+        </div>
+        {unplannedResources.pagination && (
+          <div className="text-sm text-muted-foreground">
+            {unplannedResources.pagination.filtered_count} resources found
+          </div>
+        )}
+      </div>
+      
+      <UnplannedResourcesTable 
+        resources={unplannedResources.unplanned_resources}
+        pagination={unplannedResources.pagination}
+        currentPage={currentPage}
+        setCurrentPage={setCurrentPage}
+        isLoading={isLoading}
+        onCreatePlan={onCreatePlan}
+      />
+    </div>
   );
 };
