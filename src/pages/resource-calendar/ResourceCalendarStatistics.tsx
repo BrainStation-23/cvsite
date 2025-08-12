@@ -72,7 +72,11 @@ const ResourceCalendarStatistics: React.FC = () => {
         {/* Statistics Content */}
         <div className="mt-6">
           {resourceCountData && (
-            <ResourceCountCharts data={resourceCountData} isLoading={resourceCountLoading} />
+            <ResourceCountCharts 
+              data={resourceCountData} 
+              isLoading={resourceCountLoading}
+              filters={filters}
+            />
           )}
         </div>
       </div>
