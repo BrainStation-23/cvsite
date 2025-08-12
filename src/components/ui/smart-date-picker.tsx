@@ -1,6 +1,6 @@
 
 import * as React from "react";
-import { format, setMonth, setYear, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isToday, isSameDay } from "date-fns";
+import { format, setMonth, setYear, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isToday, isSameDay, parse } from "date-fns";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -32,13 +32,45 @@ const SmartDatePicker: React.FC<SmartDatePickerProps> = ({
   const [open, setOpen] = React.useState(false);
   const [viewMode, setViewMode] = React.useState<ViewMode>('days');
   const [viewDate, setViewDate] = React.useState(() => value ? new Date(value) : new Date());
+  const [inputValue, setInputValue] = React.useState(
+    value ? format(new Date(value), 'dd-MM-yyyy') : ''
+  );
   
   const selectedDate = value ? new Date(value) : undefined;
+  const isCompact = className?.includes('text-xs');
+
+  React.useEffect(() => {
+    if (value) {
+      setInputValue(format(new Date(value), 'dd-MM-yyyy'));
+    } else {
+      setInputValue('');
+    }
+  }, [value]);
 
   const handleDateSelect = (date: Date) => {
-    onChange(format(date, 'yyyy-MM-dd'));
+    const formattedDate = format(date, 'yyyy-MM-dd');
+    const displayDate = format(date, 'dd-MM-yyyy');
+    setInputValue(displayDate);
+    onChange(formattedDate);
     setOpen(false);
     setViewMode('days');
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const inputVal = e.target.value;
+    setInputValue(inputVal);
+    
+    if (inputVal.length === 10) {
+      try {
+        const parsedDate = parse(inputVal, 'dd-MM-yyyy', new Date());
+        if (!isNaN(parsedDate.getTime())) {
+          onChange(format(parsedDate, 'yyyy-MM-dd'));
+          setViewDate(parsedDate);
+        }
+      } catch (error) {
+        // Invalid date format, ignore
+      }
+    }
   };
 
   const handleMonthSelect = (monthIndex: number) => {
@@ -64,7 +96,6 @@ const SmartDatePicker: React.FC<SmartDatePickerProps> = ({
     const monthEnd = endOfMonth(viewDate);
     const days = eachDayOfInterval({ start: monthStart, end: monthEnd });
     
-    // Calculate starting day of week (0 = Sunday, 1 = Monday, etc.)
     const startDayOfWeek = monthStart.getDay();
     const paddingDays = Array.from({ length: startDayOfWeek }, (_, i) => i);
 
@@ -85,15 +116,15 @@ const SmartDatePicker: React.FC<SmartDatePickerProps> = ({
               variant="ghost"
               size="sm"
               onClick={() => setViewMode('months')}
-              className="font-medium"
+              className={cn("font-medium", isCompact && "text-xs")}
             >
-              {format(viewDate, 'MMMM')}
+              {format(viewDate, isCompact ? 'MMM' : 'MMMM')}
             </Button>
             <Button
               variant="ghost"
               size="sm"
               onClick={() => setViewMode('years')}
-              className="font-medium"
+              className={cn("font-medium", isCompact && "text-xs")}
             >
               {format(viewDate, 'yyyy')}
             </Button>
@@ -111,7 +142,7 @@ const SmartDatePicker: React.FC<SmartDatePickerProps> = ({
         {/* Days of week header */}
         <div className="grid grid-cols-7 gap-1 mb-2">
           {['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'].map(day => (
-            <div key={day} className="text-center text-sm font-medium text-muted-foreground p-2">
+            <div key={day} className={cn("text-center font-medium text-muted-foreground", isCompact ? "text-xs p-1" : "text-sm p-2")}>
               {day}
             </div>
           ))}
@@ -119,19 +150,18 @@ const SmartDatePicker: React.FC<SmartDatePickerProps> = ({
 
         {/* Calendar grid */}
         <div className="grid grid-cols-7 gap-1">
-          {/* Padding days */}
           {paddingDays.map(i => (
-            <div key={`padding-${i}`} className="p-2" />
+            <div key={`padding-${i}`} className={isCompact ? "p-1" : "p-2"} />
           ))}
           
-          {/* Actual days */}
           {days.map(day => (
             <Button
               key={day.toISOString()}
               variant="ghost"
               size="sm"
               className={cn(
-                "h-9 w-9 p-0 font-normal",
+                "p-0 font-normal",
+                isCompact ? "h-8 w-8 text-xs" : "h-9 w-9",
                 isToday(day) && "bg-accent text-accent-foreground",
                 selectedDate && isSameDay(day, selectedDate) && "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground"
               )}
@@ -160,7 +190,7 @@ const SmartDatePicker: React.FC<SmartDatePickerProps> = ({
           variant="ghost"
           size="sm"
           onClick={() => setViewMode('years')}
-          className="font-medium"
+          className={cn("font-medium", isCompact && "text-xs")}
         >
           {format(viewDate, 'yyyy')}
         </Button>
@@ -181,7 +211,8 @@ const SmartDatePicker: React.FC<SmartDatePickerProps> = ({
             variant="ghost"
             size="sm"
             className={cn(
-              "h-12 font-normal",
+              "font-normal",
+              isCompact ? "h-10 text-xs" : "h-12",
               viewDate.getMonth() === index && "bg-primary text-primary-foreground"
             )}
             onClick={() => handleMonthSelect(index)}
@@ -207,7 +238,7 @@ const SmartDatePicker: React.FC<SmartDatePickerProps> = ({
             <ChevronLeft className="h-4 w-4" />
           </Button>
           
-          <div className="font-medium">
+          <div className={cn("font-medium", isCompact && "text-xs")}>
             {years[0]} - {years[years.length - 1]}
           </div>
           
@@ -227,7 +258,8 @@ const SmartDatePicker: React.FC<SmartDatePickerProps> = ({
               variant="ghost"
               size="sm"
               className={cn(
-                "h-12 font-normal",
+                "font-normal",
+                isCompact ? "h-10 text-xs" : "h-12",
                 viewDate.getFullYear() === year && "bg-primary text-primary-foreground"
               )}
               onClick={() => handleYearSelect(year)}
@@ -251,6 +283,28 @@ const SmartDatePicker: React.FC<SmartDatePickerProps> = ({
     }
   };
 
+  // For compact mode, show as input field
+  if (isCompact) {
+    return (
+      <Popover open={open} onOpenChange={setOpen}>
+        <PopoverTrigger asChild>
+          <Input
+            value={inputValue}
+            onChange={handleInputChange}
+            placeholder={placeholder}
+            disabled={disabled}
+            className={cn("cursor-pointer", className)}
+            onClick={() => setOpen(true)}
+          />
+        </PopoverTrigger>
+        <PopoverContent className="w-auto p-0" align="start">
+          {renderView()}
+        </PopoverContent>
+      </Popover>
+    );
+  }
+
+  // For regular mode, show as button
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>

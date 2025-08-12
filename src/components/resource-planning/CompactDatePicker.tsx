@@ -1,6 +1,6 @@
 
 import React from 'react';
-import CompactSmartDatePicker from '@/components/ui/compact-smart-date-picker';
+import SmartDatePicker from '@/components/ui/smart-date-picker';
 
 interface CompactDatePickerProps {
   value?: string;
@@ -16,11 +16,12 @@ const CompactDatePicker: React.FC<CompactDatePickerProps> = ({
   disabled = false
 }) => {
   return (
-    <CompactSmartDatePicker
+    <SmartDatePicker
       value={value}
       onChange={onChange}
       placeholder={placeholder}
       disabled={disabled}
+      className="text-xs h-7"
     />
   );
 };

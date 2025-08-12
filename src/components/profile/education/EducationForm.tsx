@@ -1,17 +1,14 @@
 
 import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { CalendarIcon } from 'lucide-react';
-import { format } from 'date-fns';
 import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Calendar } from '@/components/ui/calendar';
 import { Checkbox } from '@/components/ui/checkbox';
 import { UniversityCombobox } from '@/components/admin/university/UniversityCombobox';
 import { DegreeCombobox } from '@/components/admin/degree/DegreeCombobox';
 import { DepartmentCombobox } from '@/components/admin/department/DepartmentCombobox';
+import DatePicker from '@/components/admin/user/DatePicker';
 import { Education } from '@/types';
 
 interface EducationFormProps {
@@ -27,10 +24,12 @@ export const EducationForm: React.FC<EducationFormProps> = ({
   onSave,
   onCancel
 }) => {
-  const [startDate, setStartDate] = useState<Date | undefined>(
-    initialData?.startDate || new Date()
+  const [startDate, setStartDate] = useState<string>(
+    initialData?.startDate ? new Date(initialData.startDate).toISOString().split('T')[0] : ''
   );
-  const [endDate, setEndDate] = useState<Date | undefined>(initialData?.endDate);
+  const [endDate, setEndDate] = useState<string>(
+    initialData?.endDate ? new Date(initialData.endDate).toISOString().split('T')[0] : ''
+  );
   const [isCurrent, setIsCurrent] = useState(initialData?.isCurrent || false);
 
   const form = useForm<Omit<Education, 'id'>>({
@@ -45,8 +44,8 @@ export const EducationForm: React.FC<EducationFormProps> = ({
   });
 
   const handleSubmit = async (data: Omit<Education, 'id'>) => {
-    data.startDate = startDate || new Date();
-    data.endDate = isCurrent ? undefined : endDate;
+    data.startDate = startDate ? new Date(startDate) : new Date();
+    data.endDate = isCurrent ? undefined : (endDate ? new Date(endDate) : undefined);
     data.isCurrent = isCurrent;
     
     const success = await onSave(data);
@@ -58,7 +57,7 @@ export const EducationForm: React.FC<EducationFormProps> = ({
   const handleCurrentCheckboxChange = (checked: boolean) => {
     setIsCurrent(checked);
     if (checked) {
-      setEndDate(undefined);
+      setEndDate('');
     }
   };
 
@@ -132,56 +131,26 @@ export const EducationForm: React.FC<EducationFormProps> = ({
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <FormItem>
             <FormLabel>Start Date</FormLabel>
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button
-                  variant="outline"
-                  className="w-full justify-start text-left font-normal"
-                  data-tour="education-start-date"
-                >
-                  <CalendarIcon className="mr-2 h-4 w-4" />
-                  {startDate ? format(startDate, 'PPP') : <span>Pick a date</span>}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0">
-                <Calendar
-                  mode="single"
-                  selected={startDate}
-                  onSelect={setStartDate}
-                  initialFocus
-                />
-              </PopoverContent>
-            </Popover>
+            <div data-tour="education-start-date">
+              <DatePicker
+                value={startDate}
+                onChange={setStartDate}
+                placeholder="Select start date"
+              />
+            </div>
           </FormItem>
           
           <FormItem>
             <FormLabel>End Date</FormLabel>
             <div className="space-y-2">
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    className="w-full justify-start text-left font-normal"
-                    disabled={isCurrent}
-                    data-tour="education-end-date"
-                  >
-                    <CalendarIcon className="mr-2 h-4 w-4" />
-                    {endDate && !isCurrent ? format(endDate, 'PPP') : <span>Pick a date</span>}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0">
-                  <Calendar
-                    mode="single"
-                    selected={endDate}
-                    onSelect={setEndDate}
-                    initialFocus
-                    disabled={(date) => (
-                      (startDate ? date < startDate : false) || 
-                      date > new Date()
-                    )}
-                  />
-                </PopoverContent>
-              </Popover>
+              <div data-tour="education-end-date">
+                <DatePicker
+                  value={endDate}
+                  onChange={setEndDate}
+                  placeholder="Select end date"
+                  disabled={isCurrent}
+                />
+              </div>
               
               <div className="flex items-center space-x-2" data-tour="education-current-checkbox">
                 <Checkbox 
