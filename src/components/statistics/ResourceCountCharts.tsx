@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { BarChart3, Table as TableIcon } from 'lucide-react';
 import { ResourceCountStatistics } from '@/hooks/use-resource-count-statistics';
 import { ResourceCountTable } from './ResourceCountTable';
@@ -11,8 +11,6 @@ interface ResourceCountChartsProps {
   data: ResourceCountStatistics;
   isLoading: boolean;
 }
-
-const COLORS = ['#8884d8', '#82ca9d', '#ffc658', '#ff7300', '#0088fe', '#00c49f'];
 
 export const ResourceCountCharts: React.FC<ResourceCountChartsProps> = ({ data, isLoading }) => {
   const [viewMode, setViewMode] = useState<'table' | 'chart'>('table');
@@ -129,30 +127,20 @@ export const ResourceCountCharts: React.FC<ResourceCountChartsProps> = ({ data, 
               </CardContent>
             </Card>
 
-            {/* Bill Types Chart */}
+            {/* Bill Types Chart - Changed from Pie to Bar */}
             <Card>
               <CardHeader>
                 <CardTitle>Resources by Bill Type</CardTitle>
               </CardHeader>
               <CardContent>
                 <ResponsiveContainer width="100%" height={300}>
-                  <PieChart>
-                    <Pie
-                      data={data.by_bill_type || []}
-                      cx="50%"
-                      cy="50%"
-                      labelLine={false}
-                      label={({ name, value }) => `${name}: ${value}`}
-                      outerRadius={80}
-                      fill="#8884d8"
-                      dataKey="count"
-                    >
-                      {(data.by_bill_type || []).map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                      ))}
-                    </Pie>
+                  <BarChart data={data.by_bill_type || []}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="name" />
+                    <YAxis />
                     <Tooltip />
-                  </PieChart>
+                    <Bar dataKey="count" fill="#82ca9d" />
+                  </BarChart>
                 </ResponsiveContainer>
               </CardContent>
             </Card>
@@ -169,7 +157,7 @@ export const ResourceCountCharts: React.FC<ResourceCountChartsProps> = ({ data, 
                     <XAxis dataKey="name" />
                     <YAxis />
                     <Tooltip />
-                    <Bar dataKey="count" fill="#82ca9d" />
+                    <Bar dataKey="count" fill="#ffc658" />
                   </BarChart>
                 </ResponsiveContainer>
               </CardContent>
@@ -187,7 +175,7 @@ export const ResourceCountCharts: React.FC<ResourceCountChartsProps> = ({ data, 
                     <XAxis dataKey="name" />
                     <YAxis />
                     <Tooltip />
-                    <Bar dataKey="count" fill="#ffc658" />
+                    <Bar dataKey="count" fill="#ff7300" />
                   </BarChart>
                 </ResponsiveContainer>
               </CardContent>

@@ -19,8 +19,6 @@ const ResourceCalendarStatistics: React.FC = () => {
     billType: null as string | null,
     expertiseType: null as string | null,
     sbu: null as string | null,
-    startDate: null as Date | null,
-    endDate: null as Date | null,
   });
 
   // Fetch data with current filters
@@ -36,8 +34,6 @@ const ResourceCalendarStatistics: React.FC = () => {
       billType: null,
       expertiseType: null,
       sbu: null,
-      startDate: null,
-      endDate: null,
     });
   };
 

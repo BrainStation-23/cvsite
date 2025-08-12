@@ -7,8 +7,6 @@ interface ResourceCountFilters {
   billType?: string | null;
   expertiseType?: string | null;
   sbu?: string | null;
-  startDate?: Date | null;
-  endDate?: Date | null;
 }
 
 export interface ResourceCountStatistics {
@@ -30,8 +28,6 @@ export function useResourceCountStatistics(filters: ResourceCountFilters = {}) {
         bill_type_filter: filters.billType || null,
         expertise_type_filter: filters.expertiseType || null,
         sbu_filter: filters.sbu || null,
-        start_date_filter: filters.startDate ? filters.startDate.toISOString().split('T')[0] : null,
-        end_date_filter: filters.endDate ? filters.endDate.toISOString().split('T')[0] : null,
       });
 
       if (error) {
