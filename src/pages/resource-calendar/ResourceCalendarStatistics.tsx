@@ -4,12 +4,9 @@ import { Link, useLocation } from 'react-router-dom';
 import DashboardLayout from '../../components/Layout/DashboardLayout';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, BarChart3 } from 'lucide-react';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { StatisticsFilters } from '../../components/statistics/StatisticsFilters';
 import { ResourceCountCharts } from '../../components/statistics/ResourceCountCharts';
-import { EngagementPercentageCharts } from '../../components/statistics/EngagementPercentageCharts';
 import { useResourceCountStatistics } from '../../hooks/use-resource-count-statistics';
-import { useEngagementPercentageStatistics } from '../../hooks/use-engagement-percentage-statistics';
 
 const ResourceCalendarStatistics: React.FC = () => {
   const location = useLocation();
@@ -36,7 +33,6 @@ const ResourceCalendarStatistics: React.FC = () => {
 
   // Fetch data using hooks
   const { data: resourceCountData, isLoading: resourceCountLoading } = useResourceCountStatistics(filters);
-  const { data: engagementData, isLoading: engagementLoading } = useEngagementPercentageStatistics(filters);
 
   const clearFilters = () => {
     setResourceType('');
@@ -84,25 +80,12 @@ const ResourceCalendarStatistics: React.FC = () => {
           onClearFilters={clearFilters}
         />
 
-        {/* Statistics Tabs */}
-        <Tabs defaultValue="resource-count" className="w-full">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="resource-count">Resource Count Statistics</TabsTrigger>
-            <TabsTrigger value="engagement-percentage">Engagement % Statistics</TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="resource-count" className="mt-6">
-            {resourceCountData && (
-              <ResourceCountCharts data={resourceCountData} isLoading={resourceCountLoading} />
-            )}
-          </TabsContent>
-
-          <TabsContent value="engagement-percentage" className="mt-6">
-            {engagementData && (
-              <EngagementPercentageCharts data={engagementData} isLoading={engagementLoading} />
-            )}
-          </TabsContent>
-        </Tabs>
+        {/* Statistics Content */}
+        <div className="mt-6">
+          {resourceCountData && (
+            <ResourceCountCharts data={resourceCountData} isLoading={resourceCountLoading} />
+          )}
+        </div>
       </div>
     </DashboardLayout>
   );
