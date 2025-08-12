@@ -32,21 +32,12 @@ export const ProfileCombobox: React.FC<ProfileComboboxProps> = ({
 }) => {
   const [open, setOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  
-  console.log('=== ProfileCombobox Debug ===');
-  console.log('Current value prop:', value);
-  console.log('Label:', label);
-  console.log('Disabled:', disabled);
 
   // Fetch selected profile separately to ensure it's always available
-  const { data: selectedProfile, isLoading: selectedLoading, error: selectedError } = useQuery({
+  const { data: selectedProfile, isLoading: selectedLoading } = useQuery({
     queryKey: ['selected-profile', value],
     queryFn: async () => {
-      console.log('Fetching selected profile for value:', value);
-      if (!value) {
-        console.log('No value provided, returning null');
-        return null;
-      }
+      if (!value) return null;
       
       const { data, error } = await supabase
         .from('profiles')
@@ -54,12 +45,7 @@ export const ProfileCombobox: React.FC<ProfileComboboxProps> = ({
         .eq('id', value)
         .single();
       
-      console.log('Selected profile query result:', { data, error });
-      
-      if (error) {
-        console.error('Error fetching selected profile:', error);
-        throw error;
-      }
+      if (error) throw error;
       return data;
     },
     enabled: !!value,
@@ -69,8 +55,6 @@ export const ProfileCombobox: React.FC<ProfileComboboxProps> = ({
   const { data: searchProfiles, isLoading } = useQuery({
     queryKey: ['profiles-search', searchQuery],
     queryFn: async () => {
-      console.log('Searching profiles with query:', searchQuery);
-      
       let query = supabase
         .from('profiles')
         .select('id, first_name, last_name, employee_id')
@@ -83,23 +67,12 @@ export const ProfileCombobox: React.FC<ProfileComboboxProps> = ({
 
       const { data, error } = await query;
       
-      console.log('Profile search result:', { data, error, searchQuery });
-      
-      if (error) {
-        console.error('Error searching profiles:', error);
-        throw error;
-      }
-      
+      if (error) throw error;
       return data || [];
     },
   });
 
   const profiles = searchProfiles || [];
-  
-  console.log('Search result profiles:', profiles);
-  console.log('Selected profile from query:', selectedProfile);
-  console.log('Selected profile loading:', selectedLoading);
-  console.log('Selected profile error:', selectedError);
 
   // Combine search results with selected profile to ensure it's always available
   const allProfiles = React.useMemo(() => {
@@ -107,7 +80,6 @@ export const ProfileCombobox: React.FC<ProfileComboboxProps> = ({
     
     // Add selected profile if it's not already in the search results
     if (selectedProfile && !profiles.some(p => p.id === selectedProfile.id)) {
-      console.log('Adding selected profile to list:', selectedProfile);
       combinedProfiles.unshift(selectedProfile);
     }
     
@@ -116,17 +88,13 @@ export const ProfileCombobox: React.FC<ProfileComboboxProps> = ({
       index === self.findIndex(p => p.id === profile.id)
     );
     
-    console.log('Final combined profiles:', uniqueProfiles);
     return uniqueProfiles;
   }, [profiles, selectedProfile]);
 
   const handleSelect = (profileId: string) => {
-    console.log('Selecting profile:', profileId, 'current value:', value);
     if (profileId === value) {
-      console.log('Deselecting profile');
       onValueChange(null);
     } else {
-      console.log('Setting new profile:', profileId);
       onValueChange(profileId);
     }
     setOpen(false);
@@ -134,12 +102,10 @@ export const ProfileCombobox: React.FC<ProfileComboboxProps> = ({
 
   const handleClear = (e: React.MouseEvent) => {
     e.stopPropagation();
-    console.log('Clearing profile selection');
     onValueChange(null);
   };
 
   const handleOpenChange = (newOpen: boolean) => {
-    console.log('Popover open state changing to:', newOpen);
     setOpen(newOpen);
     if (!newOpen) {
       setSearchQuery('');
@@ -150,8 +116,6 @@ export const ProfileCombobox: React.FC<ProfileComboboxProps> = ({
     const name = [profile.first_name, profile.last_name].filter(Boolean).join(' ');
     return name || profile.employee_id || 'Unknown';
   };
-
-  console.log('Rendering with selected profile:', selectedProfile);
 
   return (
     <Popover open={open} onOpenChange={handleOpenChange}>

@@ -9,7 +9,7 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 
 interface ProjectSearchComboboxProps {
-  value: string;
+  value: string | null;
   onValueChange: (value: string | null) => void;
   placeholder?: string;
   disabled?: boolean;
@@ -43,13 +43,13 @@ const ProjectSearchCombobox: React.FC<ProjectSearchComboboxProps> = ({
     },
   });
 
-  const selectedProject = projects?.find(project => project.project_name === value);
+  const selectedProject = projects?.find(project => project.id === value);
 
-  const handleSelect = (projectName: string) => {
-    if (projectName === value) {
+  const handleSelect = (projectId: string) => {
+    if (projectId === value) {
       onValueChange(null);
     } else {
-      onValueChange(projectName);
+      onValueChange(projectId);
     }
     setOpen(false);
   };
@@ -77,14 +77,6 @@ const ProjectSearchCombobox: React.FC<ProjectSearchComboboxProps> = ({
                 onClick={handleClear}
               />
             </div>
-          ) : value ? (
-            <div className="flex items-center justify-between w-full">
-              <span className="truncate">{value}</span>
-              <X 
-                className="ml-2 h-4 w-4 shrink-0 opacity-50 hover:opacity-100" 
-                onClick={handleClear}
-              />
-            </div>
           ) : (
             placeholder
           )}
@@ -106,13 +98,13 @@ const ProjectSearchCombobox: React.FC<ProjectSearchComboboxProps> = ({
               {projects?.map((project) => (
                 <CommandItem
                   key={project.id}
-                  value={project.project_name}
-                  onSelect={() => handleSelect(project.project_name)}
+                  value={project.id}
+                  onSelect={() => handleSelect(project.id)}
                 >
                   <Check
                     className={cn(
                       "mr-2 h-4 w-4",
-                      value === project.project_name ? "opacity-100" : "opacity-0"
+                      value === project.id ? "opacity-100" : "opacity-0"
                     )}
                   />
                   <div className="flex flex-col">
