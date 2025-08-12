@@ -2,12 +2,15 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { CalendarIcon, Filter, X } from 'lucide-react';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
+import SbuCombobox from '@/components/admin/user/SbuCombobox';
+import ResourceTypeCombobox from '@/components/admin/user/ResourceTypeCombobox';
+import BillTypeCombobox from '@/components/resource-planning/BillTypeCombobox';
+import ExpertiseCombobox from '@/components/admin/user/ExpertiseCombobox';
 
 interface ResourceStatisticsFiltersProps {
   filters: {
@@ -30,7 +33,7 @@ export const ResourceStatisticsFilters: React.FC<ResourceStatisticsFiltersProps>
   const updateFilter = (key: string, value: any) => {
     onFiltersChange({
       ...filters,
-      [key]: value === "all" ? null : value
+      [key]: value
     });
   };
 
@@ -62,79 +65,41 @@ export const ResourceStatisticsFilters: React.FC<ResourceStatisticsFiltersProps>
           {/* SBU Filter */}
           <div className="space-y-2">
             <label className="text-sm font-medium">SBU</label>
-            <Select
-              value={filters.sbu || "all"}
+            <SbuCombobox
+              value={filters.sbu}
               onValueChange={(value) => updateFilter('sbu', value)}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="All SBUs" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All SBUs</SelectItem>
-                {/* These would typically come from an API call */}
-                <SelectItem value="Technology">Technology</SelectItem>
-                <SelectItem value="Consulting">Consulting</SelectItem>
-                <SelectItem value="Operations">Operations</SelectItem>
-              </SelectContent>
-            </Select>
+              placeholder="All SBUs"
+            />
           </div>
 
           {/* Resource Type Filter */}
           <div className="space-y-2">
             <label className="text-sm font-medium">Resource Type</label>
-            <Select
-              value={filters.resourceType || "all"}
+            <ResourceTypeCombobox
+              value={filters.resourceType}
               onValueChange={(value) => updateFilter('resourceType', value)}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="All Types" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Types</SelectItem>
-                <SelectItem value="Developer">Developer</SelectItem>
-                <SelectItem value="Consultant">Consultant</SelectItem>
-                <SelectItem value="Manager">Manager</SelectItem>
-              </SelectContent>
-            </Select>
+              placeholder="All Types"
+            />
           </div>
 
           {/* Bill Type Filter */}
           <div className="space-y-2">
             <label className="text-sm font-medium">Bill Type</label>
-            <Select
-              value={filters.billType || "all"}
+            <BillTypeCombobox
+              value={filters.billType}
               onValueChange={(value) => updateFilter('billType', value)}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="All Bill Types" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Bill Types</SelectItem>
-                <SelectItem value="Billable">Billable</SelectItem>
-                <SelectItem value="Non-Billable">Non-Billable</SelectItem>
-                <SelectItem value="Internal">Internal</SelectItem>
-              </SelectContent>
-            </Select>
+              placeholder="All Bill Types"
+            />
           </div>
 
           {/* Expertise Type Filter */}
           <div className="space-y-2">
             <label className="text-sm font-medium">Expertise</label>
-            <Select
-              value={filters.expertiseType || "all"}
+            <ExpertiseCombobox
+              value={filters.expertiseType}
               onValueChange={(value) => updateFilter('expertiseType', value)}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="All Expertise" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Expertise</SelectItem>
-                <SelectItem value="Frontend">Frontend</SelectItem>
-                <SelectItem value="Backend">Backend</SelectItem>
-                <SelectItem value="Full Stack">Full Stack</SelectItem>
-                <SelectItem value="DevOps">DevOps</SelectItem>
-              </SelectContent>
-            </Select>
+              placeholder="All Expertise"
+            />
           </div>
 
           {/* Start Date Filter */}
