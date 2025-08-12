@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { TableCell, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
@@ -6,7 +5,9 @@ import { Badge } from '@/components/ui/badge';
 import { CheckCircle2, Edit2, CheckCircle, Copy } from 'lucide-react';
 import { format } from 'date-fns';
 import { useConfirmationDialog } from '@/hooks/use-confirmation-dialog';
+import { useCompleteEngagementDialog } from '@/hooks/use-complete-engagement-dialog';
 import { ConfirmationDialog } from '@/components/ui/confirmation-dialog';
+import { CompleteEngagementDialog } from '@/components/ui/complete-engagement-dialog';
 import { WeeklyValidationTableEditRow } from './WeeklyValidationTableEditRow';
 import { useResourcePlanningOperations } from '@/hooks/use-resource-planning-operations';
 
@@ -77,6 +78,13 @@ export const WeeklyValidationTableRow: React.FC<WeeklyValidationTableRowProps> =
   editLoading,
 }) => {
   const { isOpen, config, showConfirmation, hideConfirmation, handleConfirm } = useConfirmationDialog();
+  const { 
+    isOpen: isCompleteDialogOpen, 
+    config: completeConfig, 
+    showCompleteDialog, 
+    hideCompleteDialog, 
+    handleConfirm: handleCompleteConfirm 
+  } = useCompleteEngagementDialog();
   const { updateResourcePlanning, createResourcePlanning, isUpdating, isCreating } = useResourcePlanningOperations();
 
   const handleValidateClick = () => {
@@ -91,16 +99,21 @@ export const WeeklyValidationTableRow: React.FC<WeeklyValidationTableRowProps> =
   };
 
   const handleCompleteEngagement = () => {
-    showConfirmation({
+    showCompleteDialog({
       title: 'Mark Engagement as Complete',
-      description: 'Are you sure you want to mark this engagement as complete? This will remove it from the planned resources view.',
-      confirmText: 'Mark Complete',
-      cancelText: 'Cancel',
-      variant: 'default',
-      onConfirm: () => updateResourcePlanning({ 
-        id: item.id, 
-        updates: { engagement_complete: true } 
-      })
+      description: 'Complete this engagement and optionally update the release date.',
+      currentReleaseDate: item.release_date,
+      employeeName: `${item.profile.first_name} ${item.profile.last_name}`,
+      projectName: item.project?.project_name,
+      onConfirm: (newReleaseDate: string) => {
+        updateResourcePlanning({ 
+          id: item.id, 
+          updates: { 
+            engagement_complete: true,
+            release_date: newReleaseDate
+          } 
+        });
+      }
     });
   };
 
@@ -251,6 +264,17 @@ export const WeeklyValidationTableRow: React.FC<WeeklyValidationTableRowProps> =
         confirmText={config?.confirmText}
         cancelText={config?.cancelText}
         variant={config?.variant}
+      />
+
+      <CompleteEngagementDialog
+        isOpen={isCompleteDialogOpen}
+        onClose={hideCompleteDialog}
+        onConfirm={handleCompleteConfirm}
+        title={completeConfig?.title || ''}
+        description={completeConfig?.description || ''}
+        currentReleaseDate={completeConfig?.currentReleaseDate}
+        employeeName={completeConfig?.employeeName || ''}
+        projectName={completeConfig?.projectName}
       />
     </>
   );
