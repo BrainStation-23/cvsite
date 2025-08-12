@@ -39,7 +39,7 @@ export function useResourceCountStatistics(filters: ResourceCountFilters = {}) {
         throw error;
       }
 
-      return data as ResourceCountStatistics;
+      return data as unknown as ResourceCountStatistics;
     },
   });
 }

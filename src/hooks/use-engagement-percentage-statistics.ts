@@ -47,7 +47,7 @@ export function useEngagementPercentageStatistics(filters: EngagementFilters = {
         throw error;
       }
 
-      return data as EngagementPercentageStatistics;
+      return data as unknown as EngagementPercentageStatistics;
     },
   });
 }
