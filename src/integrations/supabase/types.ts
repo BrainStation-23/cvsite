@@ -1384,17 +1384,6 @@ export type Database = {
         }
         Returns: Json
       }
-      get_engagement_percentage_statistics: {
-        Args: {
-          resource_type_filter?: string
-          bill_type_filter?: string
-          expertise_type_filter?: string
-          sbu_filter?: string
-          start_date_filter?: string
-          end_date_filter?: string
-        }
-        Returns: Json
-      }
       get_experience_distribution: {
         Args: Record<PropertyKey, never>
         Returns: {
@@ -1429,14 +1418,23 @@ export type Database = {
         Returns: Json
       }
       get_resource_count_statistics: {
-        Args: {
-          resource_type_filter?: string
-          bill_type_filter?: string
-          expertise_type_filter?: string
-          sbu_filter?: string
-          start_date_filter?: string
-          end_date_filter?: string
-        }
+        Args:
+          | {
+              resource_type_filter?: string
+              bill_type_filter?: string
+              expertise_type_filter?: string
+              sbu_filter?: string
+              start_date_filter?: string
+              end_date_filter?: string
+            }
+          | {
+              resource_type_filter?: string
+              bill_type_filter?: string
+              expertise_type_filter?: string
+              sbu_filter?: string
+              start_date_filter?: string
+              end_date_filter?: string
+            }
         Returns: Json
       }
       get_sbu_summary_stats: {
