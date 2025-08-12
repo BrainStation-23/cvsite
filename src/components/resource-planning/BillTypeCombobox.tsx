@@ -24,8 +24,26 @@ const BillTypeCombobox: React.FC<BillTypeComboboxProps> = ({
   const [open, setOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   
+  // Fetch selected bill type separately to ensure it's always available
+  const { data: selectedBillType } = useQuery({
+    queryKey: ['selected-bill-type', value],
+    queryFn: async () => {
+      if (!value) return null;
+      
+      const { data, error } = await supabase
+        .from('bill_types')
+        .select('id, name')
+        .eq('id', value)
+        .single();
+      
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!value,
+  });
+
   const { data: billTypes, isLoading } = useQuery({
-    queryKey: ['bill-types', searchQuery],
+    queryKey: ['bill-types-search', searchQuery],
     queryFn: async () => {
       let query = supabase
         .from('bill_types')
@@ -36,13 +54,28 @@ const BillTypeCombobox: React.FC<BillTypeComboboxProps> = ({
         query = query.ilike('name', `%${searchQuery}%`);
       }
 
-      const { data, error } = await query;
+      const { data, error } = await query.limit(20);
       if (error) throw error;
       return data || [];
     },
   });
 
-  const selectedBillType = billTypes?.find(billType => billType.id === value);
+  // Combine search results with selected bill type to ensure it's always available
+  const allBillTypes = React.useMemo(() => {
+    const combinedBillTypes = [...(billTypes || [])];
+    
+    // Add selected bill type if it's not already in the search results
+    if (selectedBillType && !billTypes?.some(bt => bt.id === selectedBillType.id)) {
+      combinedBillTypes.unshift(selectedBillType);
+    }
+    
+    // Remove duplicates based on id
+    const uniqueBillTypes = combinedBillTypes.filter((billType, index, self) => 
+      index === self.findIndex(bt => bt.id === billType.id)
+    );
+    
+    return uniqueBillTypes;
+  }, [billTypes, selectedBillType]);
 
   const handleSelect = (billTypeId: string) => {
     if (billTypeId === value) {
@@ -58,8 +91,15 @@ const BillTypeCombobox: React.FC<BillTypeComboboxProps> = ({
     onValueChange(null);
   };
 
+  const handleOpenChange = (newOpen: boolean) => {
+    setOpen(newOpen);
+    if (!newOpen) {
+      setSearchQuery('');
+    }
+  };
+
   return (
-    <Popover open={open} onOpenChange={setOpen}>
+    <Popover open={open} onOpenChange={handleOpenChange}>
       <PopoverTrigger asChild>
         <Button
           variant="outline"
@@ -83,9 +123,9 @@ const BillTypeCombobox: React.FC<BillTypeComboboxProps> = ({
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-full p-0">
-        <Command>
+        <Command shouldFilter={false}>
           <CommandInput 
-            placeholder="Search bill type..." 
+            placeholder="Search bill types..." 
             value={searchQuery}
             onValueChange={setSearchQuery}
           />
@@ -94,7 +134,7 @@ const BillTypeCombobox: React.FC<BillTypeComboboxProps> = ({
               {isLoading ? "Loading..." : "No bill type found."}
             </CommandEmpty>
             <CommandGroup>
-              {billTypes?.map((billType) => (
+              {allBillTypes.map((billType) => (
                 <CommandItem
                   key={billType.id}
                   value={billType.id}
