@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import DashboardLayout from '../../components/Layout/DashboardLayout';
 import { Button } from '@/components/ui/button';
-import { Upload, RefreshCw, UserPlus, Download, Users, Trash2, Sync } from 'lucide-react';
+import { Upload, RefreshCw, UserPlus, Download, Users, Trash2 } from 'lucide-react';
 import { useUserManagement } from '@/hooks/use-user-management';
 import UserSearchFilters from '@/components/admin/UserSearchFilters';
 import UserList from '@/components/admin/UserList';
@@ -180,7 +180,7 @@ const UserManagement: React.FC = () => {
             onClick={handleOdooSync}
             disabled={isSyncing}
           >
-            <Sync size={16} className={isSyncing ? 'animate-spin' : ''} />
+            <RefreshCw size={16} className={isSyncing ? 'animate-spin' : ''} />
             <span className="hidden md:inline">
               {isSyncing ? 'Syncing...' : 'Sync from Odoo'}
             </span>
