@@ -18,6 +18,7 @@ import { useInlineEdit } from './hooks/useInlineEdit';
 export const ResourcePlanningTable: React.FC = () => {
   const [activeTab, setActiveTab] = useState('planned');
   const [showCreateForm, setShowCreateForm] = useState(false);
+  const [preselectedProfileId, setPreselectedProfileId] = useState<string | null>(null);
 
   // Basic filter states
   const [searchQuery, setSearchQuery] = useState('');
@@ -73,13 +74,25 @@ export const ResourcePlanningTable: React.FC = () => {
   };
 
   const handleCreateNewAssignment = () => {
-    // This functionality would be handled by a parent component or routing
-    console.log('Create new assignment clicked');
+    setPreselectedProfileId(null);
+    setShowCreateForm(true);
   };
 
   const handleCreatePlan = (profileId: string) => {
     console.log('Create plan for profile:', profileId);
-    // This would typically open a dialog or form to create a new resource plan
+    setPreselectedProfileId(profileId);
+    setShowCreateForm(true);
+  };
+
+  const handleFormSuccess = () => {
+    // Only refresh the active tab's data
+    if (activeTab === 'planned') {
+      plannedResourcesState.refetch();
+    } else if (activeTab === 'validation') {
+      weeklyValidationState.refetch();
+    }
+    // Reset form state
+    setPreselectedProfileId(null);
   };
 
   return (
@@ -202,14 +215,10 @@ export const ResourcePlanningTable: React.FC = () => {
                 <CardTitle>Create Resource Assignment</CardTitle>
               </CardHeader>
               <CardContent>
-                <CreateResourcePlanningForm onSuccess={() => {
-                  // Only refresh the active tab's data
-                  if (activeTab === 'planned') {
-                    plannedResourcesState.refetch();
-                  } else if (activeTab === 'validation') {
-                    weeklyValidationState.refetch();
-                  }
-                }} />
+                <CreateResourcePlanningForm 
+                  preselectedProfileId={preselectedProfileId}
+                  onSuccess={handleFormSuccess} 
+                />
               </CardContent>
             </Card>
           </div>

@@ -5,13 +5,17 @@ import { useResourceAssignmentForm } from './hooks/useResourceAssignmentForm';
 import { useResourcePlanningSubmission } from './hooks/useResourcePlanningSubmission';
 
 interface CreateResourcePlanningFormProps {
+  preselectedProfileId?: string | null;
   onSuccess: () => void;
 }
 
-export const CreateResourcePlanningForm: React.FC<CreateResourcePlanningFormProps> = ({ onSuccess }) => {
+export const CreateResourcePlanningForm: React.FC<CreateResourcePlanningFormProps> = ({ 
+  preselectedProfileId = null,
+  onSuccess 
+}) => {
   const formState = useResourceAssignmentForm({
     mode: 'create',
-    preselectedProfileId: null,
+    preselectedProfileId,
     item: null,
   });
 
@@ -43,7 +47,7 @@ export const CreateResourcePlanningForm: React.FC<CreateResourcePlanningFormProp
         setReleaseDate={formState.setReleaseDate}
         engagementStartDate={formState.engagementStartDate}
         setEngagementStartDate={formState.setEngagementStartDate}
-        preselectedProfileId={null}
+        preselectedProfileId={preselectedProfileId}
         onSubmit={handleSubmit}
         onCancel={handleCancel}
         isLoading={isSubmitting}
