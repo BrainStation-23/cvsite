@@ -117,7 +117,7 @@ export const WeeklyValidationTableEditRow: React.FC<WeeklyValidationTableEditRow
         />
       </TableCell>
       <TableCell className="py-1 px-2">
-        <div className="w-full">
+        <div className="w-full max-w-[240px]">
           <DatePicker
             value={editData.engagementStartDate}
             onChange={(value) => onEditDataChange({ engagementStartDate: value })}
@@ -126,7 +126,7 @@ export const WeeklyValidationTableEditRow: React.FC<WeeklyValidationTableEditRow
         </div>
       </TableCell>
       <TableCell className="py-1 px-2">
-        <div className="w-full">
+        <div className="w-full max-w-[240px]">
           <DatePicker
             value={editData.releaseDate}
             onChange={(value) => onEditDataChange({ releaseDate: value })}

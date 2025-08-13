@@ -78,7 +78,7 @@ export const ResourcePlanningTableEditRow: React.FC<ResourcePlanningTableEditRow
         </div>
       </TableCell>
       <TableCell className="py-1 px-2">
-        <div className="w-full max-w-[110px]">
+        <div className="w-full max-w-[150px]">
           <BillTypeCombobox
             value={editData.billTypeId}
             onValueChange={(value) => onEditDataChange({ billTypeId: value })}
@@ -116,7 +116,7 @@ export const ResourcePlanningTableEditRow: React.FC<ResourcePlanningTableEditRow
         />
       </TableCell>
       <TableCell className="py-1 px-2">
-        <div className="w-full ">
+        <div className="w-full max-w-[240px]">
           <DatePicker
             value={editData.engagementStartDate}
             onChange={(value) => onEditDataChange({ engagementStartDate: value })}
@@ -125,7 +125,7 @@ export const ResourcePlanningTableEditRow: React.FC<ResourcePlanningTableEditRow
         </div>
       </TableCell>
       <TableCell className="py-1 px-2">
-        <div className="w-full ">
+        <div className="w-full max-w-[240px]">
           <DatePicker
             value={editData.releaseDate}
             onChange={(value) => onEditDataChange({ releaseDate: value })}
