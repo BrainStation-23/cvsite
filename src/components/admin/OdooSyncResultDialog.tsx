@@ -9,7 +9,9 @@ import {
 } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { CheckCircle, XCircle, AlertTriangle } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { CheckCircle, XCircle, AlertTriangle, Download } from 'lucide-react';
+import Papa from 'papaparse';
 
 interface SyncStats {
   total_processed: number;
@@ -55,6 +57,40 @@ export const OdooSyncResultDialog: React.FC<OdooSyncResultDialogProps> = ({
 
   const { stats, not_found_employees, error_employees } = syncResult;
 
+  const downloadNotFoundEmployeesCSV = () => {
+    if (!not_found_employees || not_found_employees.length === 0) return;
+
+    // Transform not found employees to bulk create format
+    const csvData = not_found_employees.map(employee => ({
+      email: employee.email || '',
+      firstName: employee.name ? employee.name.split(' ')[0] : '',
+      lastName: employee.name ? employee.name.split(' ').slice(1).join(' ') : '',
+      role: 'employee',
+      password: '', // Will be auto-generated
+      employeeId: employee.employeeId || '',
+      managerEmail: '',
+      sbuName: employee.sbuName || '',
+      expertiseName: '',
+      resourceTypeName: '',
+      dateOfJoining: '',
+      careerStartDate: ''
+    }));
+
+    const csv = Papa.unparse(csvData);
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    
+    if (link.download !== undefined) {
+      const url = URL.createObjectURL(blob);
+      link.setAttribute('href', url);
+      link.setAttribute('download', `not_found_employees_${new Date().toISOString().split('T')[0]}.csv`);
+      link.style.visibility = 'hidden';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+  };
+
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-4xl max-h-[80vh]">
@@ -96,10 +132,21 @@ export const OdooSyncResultDialog: React.FC<OdooSyncResultDialogProps> = ({
           {/* Not Found Employees */}
           {not_found_employees.length > 0 && (
             <div>
-              <h4 className="font-semibold mb-3 flex items-center gap-2">
-                <AlertTriangle className="h-4 w-4 text-orange-500" />
-                Employees Not Found in Database ({not_found_employees.length})
-              </h4>
+              <div className="flex items-center justify-between mb-3">
+                <h4 className="font-semibold flex items-center gap-2">
+                  <AlertTriangle className="h-4 w-4 text-orange-500" />
+                  Employees Not Found in Database ({not_found_employees.length})
+                </h4>
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={downloadNotFoundEmployeesCSV}
+                  className="flex items-center gap-2"
+                >
+                  <Download className="h-4 w-4" />
+                  Download CSV for Bulk Create
+                </Button>
+              </div>
               <ScrollArea className="h-48 border rounded-md p-3">
                 <div className="space-y-2">
                   {not_found_employees.map((employee, index) => (
