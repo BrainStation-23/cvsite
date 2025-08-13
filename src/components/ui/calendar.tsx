@@ -162,9 +162,10 @@ interface DayGridProps {
   currentDate: Date
   selected?: Date
   onDateSelect: (date: Date) => void
+  disabled?: (date: Date) => boolean
 }
 
-const DayGrid: React.FC<DayGridProps> = ({ currentDate, selected, onDateSelect }) => {
+const DayGrid: React.FC<DayGridProps> = ({ currentDate, selected, onDateSelect, disabled }) => {
   const monthStart = startOfMonth(currentDate)
   const monthEnd = endOfMonth(currentDate)
   
@@ -204,6 +205,7 @@ const DayGrid: React.FC<DayGridProps> = ({ currentDate, selected, onDateSelect }
           const isSelected = selected && isSameDay(day, selected)
           const isTodayDate = isToday(day)
           const isCurrentMonth = day.getMonth() === currentDate.getMonth()
+          const isDisabled = disabled ? disabled(day) : false
           
           return (
             <Button
@@ -214,9 +216,11 @@ const DayGrid: React.FC<DayGridProps> = ({ currentDate, selected, onDateSelect }
                 "h-8 w-8 p-0 font-normal text-sm",
                 !isCurrentMonth && "text-muted-foreground opacity-50",
                 isTodayDate && "bg-accent text-accent-foreground font-medium",
-                isSelected && "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground"
+                isSelected && "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground",
+                isDisabled && "opacity-50 cursor-not-allowed"
               )}
-              onClick={() => onDateSelect(day)}
+              onClick={() => !isDisabled && onDateSelect(day)}
+              disabled={isDisabled}
             >
               {format(day, 'd')}
             </Button>
@@ -227,9 +231,9 @@ const DayGrid: React.FC<DayGridProps> = ({ currentDate, selected, onDateSelect }
   )
 }
 
-// Dummy DayPicker type for compatibility
+// Updated DayPicker interface to support all the props used in the codebase
 interface DayPickerProps {
-  mode?: 'single' | 'multiple' | 'range'
+  mode?: 'single' | 'multiple' | 'range' | 'default'
   selected?: Date | Date[]
   onSelect?: (date: Date | Date[] | undefined) => void
   month?: Date
@@ -238,6 +242,9 @@ interface DayPickerProps {
   className?: string
   classNames?: any
   showOutsideDays?: boolean
+  initialFocus?: boolean
+  disabled?: (date: Date) => boolean
+  [key: string]: any
 }
 
 const DayPicker: React.FC<DayPickerProps> = () => null
@@ -246,6 +253,8 @@ function Calendar({
   className,
   classNames,
   showOutsideDays = true,
+  initialFocus,
+  disabled,
   ...props
 }: CalendarProps) {
   const [viewMode, setViewMode] = React.useState<ViewMode>('calendar')
@@ -337,6 +346,7 @@ function Calendar({
             currentDate={currentDate}
             selected={props.mode === 'single' ? props.selected as Date : undefined}
             onDateSelect={handleDateSelect}
+            disabled={disabled}
           />
         )
     }
