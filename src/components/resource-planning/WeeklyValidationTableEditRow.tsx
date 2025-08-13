@@ -1,11 +1,10 @@
-
 import React from 'react';
 import { TableCell, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import BillTypeCombobox from './BillTypeCombobox';
 import { ProjectCombobox } from '@/components/projects/ProjectCombobox';
-import CompactDatePicker from './CompactDatePicker';
+import DatePicker from '@/components/admin/user/DatePicker';
 import { Check, X } from 'lucide-react';
 
 interface WeeklyValidationData {
@@ -118,20 +117,20 @@ export const WeeklyValidationTableEditRow: React.FC<WeeklyValidationTableEditRow
         />
       </TableCell>
       <TableCell className="py-1 px-2">
-        <div className="w-full max-w-[100px]">
-          <CompactDatePicker
+        <div className="w-full">
+          <DatePicker
             value={editData.engagementStartDate}
             onChange={(value) => onEditDataChange({ engagementStartDate: value })}
-            placeholder="dd-mm-yyyy"
+            placeholder="Select date"
           />
         </div>
       </TableCell>
       <TableCell className="py-1 px-2">
-        <div className="w-full max-w-[100px]">
-          <CompactDatePicker
+        <div className="w-full">
+          <DatePicker
             value={editData.releaseDate}
             onChange={(value) => onEditDataChange({ releaseDate: value })}
-            placeholder="dd-mm-yyyy"
+            placeholder="Select date"
           />
         </div>
       </TableCell>
