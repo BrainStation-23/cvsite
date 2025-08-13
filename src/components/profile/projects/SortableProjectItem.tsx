@@ -56,6 +56,18 @@ export const SortableProjectItem: React.FC<SortableProjectItemProps> = ({
 
   const isCurrentlyEditing = editingId === project.id;
 
+  // Convert Project to ProjectExperience format for the form
+  const projectExperience = {
+    id: project.id,
+    projectName: project.name,
+    clientName: '', // This would need to be added to Project type if needed
+    role: project.role,
+    description: project.description,
+    startDate: project.startDate,
+    endDate: project.endDate,
+    isCurrent: project.isCurrent
+  };
+
   return (
     <AccordionItem 
       ref={setNodeRef} 
@@ -65,8 +77,7 @@ export const SortableProjectItem: React.FC<SortableProjectItemProps> = ({
     >
       {isCurrentlyEditing ? (
         <ProjectForm
-          project={project}
-          isEditing={true}
+          initialData={projectExperience}
           isSaving={isSaving}
           onSave={handleSaveEdit}
           onCancel={onCancelEdit}

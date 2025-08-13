@@ -10,6 +10,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { CalendarIcon } from 'lucide-react';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
+import { supabase } from '@/integrations/supabase/client';
 
 interface UserFormProps {
   onSubmit: (data: any) => Promise<void>;
@@ -17,6 +18,8 @@ interface UserFormProps {
   title: string;
   description: string;
   user?: any;
+  isEdit?: boolean;
+  initialData?: any;
 }
 
 const roleOptions = [
@@ -25,27 +28,33 @@ const roleOptions = [
   { value: 'sbu_lead', label: 'SBU Lead' },
 ];
 
-const UserForm: React.FC<UserFormProps> = ({ onSubmit, isLoading, title, description, user }) => {
+const UserForm: React.FC<UserFormProps> = ({ onSubmit, isLoading, title, description, user, initialData }) => {
   const [showPassword, setShowPassword] = useState(false);
   const [sbuList, setSbuList] = useState<any[]>([]);
   const [expertiseList, setExpertiseList] = useState<any[]>([]);
   const [resourceTypeList, setResourceTypeList] = useState<any[]>([]);
-  const [dateOfJoining, setDateOfJoining] = useState<Date | undefined>(user?.dateOfJoining ? new Date(user.dateOfJoining) : undefined);
-  const [careerStartDate, setCareerStartDate] = useState<Date | undefined>(user?.careerStartDate ? new Date(user.careerStartDate) : undefined);
+  const [dateOfJoining, setDateOfJoining] = useState<Date | undefined>(
+    (user?.dateOfJoining || initialData?.dateOfJoining) ? new Date(user?.dateOfJoining || initialData?.dateOfJoining) : undefined
+  );
+  const [careerStartDate, setCareerStartDate] = useState<Date | undefined>(
+    (user?.careerStartDate || initialData?.careerStartDate) ? new Date(user?.careerStartDate || initialData?.careerStartDate) : undefined
+  );
+
+  const formData = user || initialData || {};
 
   const form = useForm({
     defaultValues: {
-      firstName: user?.firstName || '',
-      lastName: user?.lastName || '',
-      email: user?.email || '',
+      firstName: formData?.firstName || '',
+      lastName: formData?.lastName || '',
+      email: formData?.email || '',
       password: '',
-      role: user?.role || 'employee',
-      employeeId: user?.employeeId || '',
-      sbuId: user?.sbuId || '',
-      expertiseId: user?.expertiseId || '',
-      resourceTypeId: user?.resourceTypeId || '',
-      dateOfJoining: user?.dateOfJoining || null,
-      careerStartDate: user?.careerStartDate || null
+      role: formData?.role || 'employee',
+      employeeId: formData?.employeeId || '',
+      sbuId: formData?.sbuId || '',
+      expertiseId: formData?.expertiseId || '',
+      resourceTypeId: formData?.resourceTypeId || '',
+      dateOfJoining: formData?.dateOfJoining || null,
+      careerStartDate: formData?.careerStartDate || null
     }
   });
 
@@ -53,7 +62,7 @@ const UserForm: React.FC<UserFormProps> = ({ onSubmit, isLoading, title, descrip
     const fetchLists = async () => {
       // Fetch SBU List
       const { data: sbuData, error: sbuError } = await supabase
-        .from('sbu')
+        .from('sbus')
         .select('id, name');
 
       if (sbuError) {
@@ -64,7 +73,7 @@ const UserForm: React.FC<UserFormProps> = ({ onSubmit, isLoading, title, descrip
 
       // Fetch Expertise List
       const { data: expertiseData, error: expertiseError } = await supabase
-        .from('expertise')
+        .from('expertise_types')
         .select('id, name');
 
       if (expertiseError) {
@@ -75,7 +84,7 @@ const UserForm: React.FC<UserFormProps> = ({ onSubmit, isLoading, title, descrip
 
       // Fetch Resource Type List
       const { data: resourceTypeData, error: resourceTypeError } = await supabase
-        .from('resource_type')
+        .from('resource_types')
         .select('id, name');
 
       if (resourceTypeError) {
@@ -176,7 +185,7 @@ const UserForm: React.FC<UserFormProps> = ({ onSubmit, isLoading, title, descrip
               )}
             />
 
-            {!user && (
+            {!user && !initialData && (
               <FormField
                 control={form.control}
                 name="password"

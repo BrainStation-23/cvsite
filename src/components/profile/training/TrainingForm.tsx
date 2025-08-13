@@ -24,21 +24,21 @@ export const TrainingForm: React.FC<TrainingFormProps> = ({
   onSave,
   onCancel
 }) => {
-  const [completionDate, setCompletionDate] = useState<Date | undefined>(
-    initialData?.completionDate || new Date()
+  const [date, setDate] = useState<Date | undefined>(
+    initialData?.date || new Date()
   );
 
   const form = useForm<Omit<Training, 'id'>>({
     defaultValues: {
-      trainingName: initialData?.trainingName || '',
+      title: initialData?.title || '',
       provider: initialData?.provider || '',
       description: initialData?.description || '',
-      completionDate: initialData?.completionDate || new Date()
+      date: initialData?.date || new Date()
     }
   });
 
   const handleSubmit = async (data: Omit<Training, 'id'>) => {
-    data.completionDate = completionDate || new Date();
+    data.date = date || new Date();
     
     const success = await onSave(data);
     if (success) {
@@ -46,9 +46,9 @@ export const TrainingForm: React.FC<TrainingFormProps> = ({
     }
   };
 
-  const handleCompletionDateSelect = (date: Date | Date[] | undefined) => {
-    if (date && !Array.isArray(date)) {
-      setCompletionDate(date);
+  const handleDateSelect = (selectedDate: Date | Date[] | undefined) => {
+    if (selectedDate && !Array.isArray(selectedDate)) {
+      setDate(selectedDate);
     }
   };
 
@@ -57,7 +57,7 @@ export const TrainingForm: React.FC<TrainingFormProps> = ({
       <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
         <FormField
           control={form.control}
-          name="trainingName"
+          name="title"
           rules={{ required: 'Training name is required' }}
           render={({ field }) => (
             <FormItem>
@@ -95,15 +95,15 @@ export const TrainingForm: React.FC<TrainingFormProps> = ({
                 data-tour="training-completion-date"
               >
                 <CalendarIcon className="mr-2 h-4 w-4" />
-                {completionDate ? format(completionDate, 'PPP') : <span>Pick a date</span>}
+                {date ? format(date, 'PPP') : <span>Pick a date</span>}
               </Button>
             </PopoverTrigger>
             <PopoverContent className="w-auto p-0">
               <Calendar
                 mode="single"
-                selected={completionDate}
-                onSelect={handleCompletionDateSelect}
-                disabled={(date) => date > new Date()}
+                selected={date}
+                onSelect={handleDateSelect}
+                disabled={(selectedDate) => selectedDate > new Date()}
               />
             </PopoverContent>
           </Popover>

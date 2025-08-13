@@ -75,6 +75,17 @@ export interface Project {
   responsibility?: string;
 }
 
+export interface ProjectExperience {
+  id: string;
+  projectName: string;
+  clientName: string;
+  role: string;
+  description: string;
+  startDate: Date;
+  endDate?: Date;
+  isCurrent?: boolean;
+}
+
 export interface GeneralInfo {
   firstName: string;
   lastName: string;
