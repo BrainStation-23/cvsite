@@ -32,7 +32,6 @@ export const CreateResourcePlanningForm: React.FC<CreateResourcePlanningFormProp
   return (
     <div className="space-y-4">
       <ResourceAssignmentForm
-        mode="create"
         profileId={formState.profileId}
         setProfileId={formState.setProfileId}
         billTypeId={formState.billTypeId}
@@ -47,7 +46,6 @@ export const CreateResourcePlanningForm: React.FC<CreateResourcePlanningFormProp
         setReleaseDate={formState.setReleaseDate}
         engagementStartDate={formState.engagementStartDate}
         setEngagementStartDate={formState.setEngagementStartDate}
-        preselectedProfileId={preselectedProfileId}
         onSubmit={handleSubmit}
         onCancel={handleCancel}
         isLoading={isSubmitting}

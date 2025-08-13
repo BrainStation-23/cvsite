@@ -9,7 +9,6 @@ import ProjectSearchCombobox from './ProjectSearchCombobox';
 import DatePicker from '@/components/admin/user/DatePicker';
 
 interface ResourceAssignmentFormProps {
-  mode: 'create' | 'edit';
   profileId: string | null;
   setProfileId: (value: string | null) => void;
   billTypeId: string | null;
@@ -24,14 +23,12 @@ interface ResourceAssignmentFormProps {
   setReleaseDate: (value: string) => void;
   engagementStartDate: string;
   setEngagementStartDate: (value: string) => void;
-  preselectedProfileId?: string | null;
   onSubmit: (e: React.FormEvent) => void;
   onCancel: () => void;
   isLoading: boolean;
 }
 
 export const ResourceAssignmentForm: React.FC<ResourceAssignmentFormProps> = ({
-  mode,
   profileId,
   setProfileId,
   billTypeId,
@@ -46,7 +43,6 @@ export const ResourceAssignmentForm: React.FC<ResourceAssignmentFormProps> = ({
   setReleaseDate,
   engagementStartDate,
   setEngagementStartDate,
-  preselectedProfileId,
   onSubmit,
   onCancel,
   isLoading,
@@ -60,7 +56,6 @@ export const ResourceAssignmentForm: React.FC<ResourceAssignmentFormProps> = ({
             value={profileId}
             onValueChange={setProfileId}
             placeholder="Select employee..."
-            disabled={!!preselectedProfileId || mode === 'edit'}
             label="Employee"
           />
         </div>
@@ -133,13 +128,10 @@ export const ResourceAssignmentForm: React.FC<ResourceAssignmentFormProps> = ({
 
       <div className="flex flex-col space-y-2 pt-4">
         <Button type="submit" disabled={isLoading || !profileId} className="w-full h-9">
-          {mode === 'create' 
-            ? (isLoading ? 'Creating...' : 'Create Assignment')
-            : (isLoading ? 'Updating...' : 'Update Assignment')
-          }
+          {isLoading ? 'Creating...' : 'Create Assignment'}
         </Button>
         <Button type="button" variant="outline" onClick={onCancel} className="w-full h-9">
-          {mode === 'edit' ? 'Cancel Edit' : 'Clear Form'}
+          Clear Form
         </Button>
       </div>
     </form>

@@ -6,25 +6,23 @@ import { useResourcePlanningSubmission } from './hooks/useResourcePlanningSubmis
 
 interface ResourcePlanningFormProps {
   preselectedProfileId: string | null;
-  editingItem: any | null;
   onSuccess: () => void;
   onCancel: () => void;
 }
 
 export const ResourcePlanningForm: React.FC<ResourcePlanningFormProps> = ({
   preselectedProfileId,
-  editingItem,
   onSuccess,
   onCancel,
 }) => {
   const formState = useResourceAssignmentForm({
-    mode: editingItem ? 'edit' : 'create',
+    mode: 'create',
     preselectedProfileId,
-    item: editingItem,
+    item: null,
   });
 
   const { handleSubmit, isSubmitting } = useResourcePlanningSubmission({
-    editingItem,
+    editingItem: null,
     formState,
     onSuccess,
   });
@@ -36,11 +34,8 @@ export const ResourcePlanningForm: React.FC<ResourcePlanningFormProps> = ({
 
   return (
     <div className="p-4 border rounded-lg bg-muted/30 h-fit">
-      <h3 className="text-lg font-semibold mb-4">
-        {editingItem ? 'Edit Resource Assignment' : 'Create Resource Assignment'}
-      </h3>
+      <h3 className="text-lg font-semibold mb-4">Create Resource Assignment</h3>
       <ResourceAssignmentForm
-        mode={editingItem ? 'edit' : 'create'}
         profileId={formState.profileId}
         setProfileId={formState.setProfileId}
         billTypeId={formState.billTypeId}
@@ -55,7 +50,6 @@ export const ResourcePlanningForm: React.FC<ResourcePlanningFormProps> = ({
         setReleaseDate={formState.setReleaseDate}
         engagementStartDate={formState.engagementStartDate}
         setEngagementStartDate={formState.setEngagementStartDate}
-        preselectedProfileId={preselectedProfileId}
         onSubmit={handleSubmit}
         onCancel={handleCancel}
         isLoading={isSubmitting}
