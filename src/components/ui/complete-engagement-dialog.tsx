@@ -10,8 +10,11 @@ import {
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import DatePicker from '@/components/admin/user/DatePicker';
+import { Calendar } from '@/components/ui/calendar';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { CalendarIcon } from 'lucide-react';
 import { format } from 'date-fns';
+import { cn } from '@/lib/utils';
 
 interface CompleteEngagementDialogProps {
   isOpen: boolean;
@@ -34,27 +37,37 @@ export const CompleteEngagementDialog: React.FC<CompleteEngagementDialogProps> =
   employeeName,
   projectName
 }) => {
-  const [releaseDate, setReleaseDate] = useState(currentReleaseDate);
+  const [releaseDate, setReleaseDate] = useState<Date | undefined>(
+    currentReleaseDate ? new Date(currentReleaseDate) : undefined
+  );
 
   useEffect(() => {
-    setReleaseDate(currentReleaseDate);
+    setReleaseDate(currentReleaseDate ? new Date(currentReleaseDate) : undefined);
   }, [currentReleaseDate, isOpen]);
 
   const handleConfirm = () => {
-    onConfirm(releaseDate);
+    const dateString = releaseDate ? format(releaseDate, 'yyyy-MM-dd') : '';
+    onConfirm(dateString);
+  };
+
+  const handleDateSelect = (date: Date | Date[] | undefined) => {
+    if (date && !Array.isArray(date)) {
+      setReleaseDate(date);
+    } else {
+      setReleaseDate(undefined);
+    }
   };
 
   const setToToday = () => {
-    const today = format(new Date(), 'yyyy-MM-dd');
-    setReleaseDate(today);
+    setReleaseDate(new Date());
   };
 
   const keepCurrentDate = () => {
-    setReleaseDate(currentReleaseDate);
+    setReleaseDate(currentReleaseDate ? new Date(currentReleaseDate) : undefined);
   };
 
   const clearDate = () => {
-    setReleaseDate('');
+    setReleaseDate(undefined);
   };
 
   return (
@@ -92,11 +105,27 @@ export const CompleteEngagementDialog: React.FC<CompleteEngagementDialogProps> =
             <div>
               <label className="text-sm font-medium">Release Date</label>
               <div className="mt-1">
-                <DatePicker
-                  value={releaseDate}
-                  onChange={setReleaseDate}
-                  placeholder="Select release date"
-                />
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className={cn(
+                        "w-full justify-start text-left font-normal",
+                        !releaseDate && "text-muted-foreground"
+                      )}
+                    >
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {releaseDate ? format(releaseDate, 'PPP') : 'Select release date'}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={releaseDate}
+                      onSelect={handleDateSelect}
+                    />
+                  </PopoverContent>
+                </Popover>
               </div>
             </div>
 
