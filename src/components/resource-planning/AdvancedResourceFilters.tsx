@@ -8,6 +8,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/component
 import { ChevronDown, Filter } from 'lucide-react';
 import BillTypeCombobox from './BillTypeCombobox';
 import ProjectSearchCombobox from './ProjectSearchCombobox';
+import DatePicker from '@/components/admin/user/DatePicker';
 
 interface AdvancedFilters {
   billTypeFilter: string | null;
@@ -138,15 +139,15 @@ export const AdvancedResourceFilters: React.FC<AdvancedResourceFiltersProps> = (
               <div className="space-y-2">
                 <Label>Start Date Range</Label>
                 <div className="flex gap-2">
-                  <Input
-                    type="date"
+                  <DatePicker
                     value={filters.startDateFrom}
-                    onChange={(e) => updateFilter('startDateFrom', e.target.value)}
+                    onChange={(val) => updateFilter('startDateFrom', val)}
+                    placeholder="From date"
                   />
-                  <Input
-                    type="date"
+                  <DatePicker
                     value={filters.startDateTo}
-                    onChange={(e) => updateFilter('startDateTo', e.target.value)}
+                    onChange={(val) => updateFilter('startDateTo', val)}
+                    placeholder="To date"
                   />
                 </div>
               </div>
@@ -154,15 +155,15 @@ export const AdvancedResourceFilters: React.FC<AdvancedResourceFiltersProps> = (
               <div className="space-y-2">
                 <Label>End Date Range</Label>
                 <div className="flex gap-2">
-                  <Input
-                    type="date"
+                  <DatePicker
                     value={filters.endDateFrom}
-                    onChange={(e) => updateFilter('endDateFrom', e.target.value)}
+                    onChange={(val) => updateFilter('endDateFrom', val)}
+                    placeholder="From date"
                   />
-                  <Input
-                    type="date"
+                  <DatePicker
                     value={filters.endDateTo}
-                    onChange={(e) => updateFilter('endDateTo', e.target.value)}
+                    onChange={(val) => updateFilter('endDateTo', val)}
+                    placeholder="To date"
                   />
                 </div>
               </div>
