@@ -62,18 +62,6 @@ export const EducationForm: React.FC<EducationFormProps> = ({
     }
   };
 
-  const handleStartDateSelect = (date: Date | Date[] | undefined) => {
-    if (date && !Array.isArray(date)) {
-      setStartDate(date);
-    }
-  };
-
-  const handleEndDateSelect = (date: Date | Date[] | undefined) => {
-    if (date && !Array.isArray(date)) {
-      setEndDate(date);
-    }
-  };
-
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
@@ -159,7 +147,8 @@ export const EducationForm: React.FC<EducationFormProps> = ({
                 <Calendar
                   mode="single"
                   selected={startDate}
-                  onSelect={handleStartDateSelect}
+                  onSelect={setStartDate}
+                  initialFocus
                 />
               </PopoverContent>
             </Popover>
@@ -184,7 +173,8 @@ export const EducationForm: React.FC<EducationFormProps> = ({
                   <Calendar
                     mode="single"
                     selected={endDate}
-                    onSelect={handleEndDateSelect}
+                    onSelect={setEndDate}
+                    initialFocus
                     disabled={(date) => (
                       (startDate ? date < startDate : false) || 
                       date > new Date()

@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -27,9 +26,11 @@ export const TrainingTab: React.FC<TrainingTabProps> = ({
 }) => {
   const [isAdding, setIsAdding] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [date, setDate] = useState<Date | undefined>(new Date());
 
   const handleStartAddNew = () => {
     setIsAdding(true);
+    setDate(new Date());
   };
 
   const handleCancelAdd = () => {
@@ -41,11 +42,11 @@ export const TrainingTab: React.FC<TrainingTabProps> = ({
     if (success) {
       setIsAdding(false);
     }
-    return success;
   };
 
   const handleStartEdit = (training: Training) => {
     setEditingId(training.id);
+    setDate(training.date);
   };
 
   const handleCancelEdit = () => {
@@ -53,13 +54,12 @@ export const TrainingTab: React.FC<TrainingTabProps> = ({
   };
 
   const handleSaveEdit = async (data: Omit<Training, 'id'>) => {
-    if (!editingId) return false;
+    if (!editingId) return;
     
     const success = await onUpdate(editingId, data);
     if (success) {
       setEditingId(null);
     }
-    return success;
   };
 
   return (
@@ -82,9 +82,12 @@ export const TrainingTab: React.FC<TrainingTabProps> = ({
         {isAdding && (
           <div className="mb-6 border rounded-md p-4 bg-gray-50 dark:bg-gray-800">
             <TrainingForm
-              onSave={handleSaveNew}
+              onSubmit={handleSaveNew}
               onCancel={handleCancelAdd}
               isSaving={isSaving}
+              date={date}
+              setDate={setDate}
+              isNew={true}
             />
           </div>
         )}
@@ -92,10 +95,18 @@ export const TrainingTab: React.FC<TrainingTabProps> = ({
         {editingId && (
           <div className="mb-6 border rounded-md p-4 bg-gray-50 dark:bg-gray-800">
             <TrainingForm
-              initialData={trainings.find(t => t.id === editingId)}
-              onSave={handleSaveEdit}
+              initialData={{
+                title: trainings.find(t => t.id === editingId)?.title || '',
+                provider: trainings.find(t => t.id === editingId)?.provider || '',
+                description: trainings.find(t => t.id === editingId)?.description || '',
+                date: trainings.find(t => t.id === editingId)?.date || new Date(),
+                certificateUrl: trainings.find(t => t.id === editingId)?.certificateUrl || ''
+              }}
+              onSubmit={handleSaveEdit}
               onCancel={handleCancelEdit}
               isSaving={isSaving}
+              date={date}
+              setDate={setDate}
             />
           </div>
         )}

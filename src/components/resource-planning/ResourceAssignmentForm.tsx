@@ -1,41 +1,37 @@
 
-import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
+import React from 'react';
 import { Button } from '@/components/ui/button';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Calendar } from '@/components/ui/calendar';
-import { CalendarIcon } from 'lucide-react';
-import { format } from 'date-fns';
-import { cn } from '@/lib/utils';
-import { useForm } from 'react-hook-form';
-import { ProfileCombobox } from './ProfileCombobox';
-import { BillTypeCombobox } from './BillTypeCombobox';
-import { ProjectCombobox } from './ProjectCombobox';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { ProfileCombobox } from '@/components/admin/user/ProfileCombobox';
+import BillTypeCombobox from './BillTypeCombobox';
+import ProjectSearchCombobox from './ProjectSearchCombobox';
+import DatePicker from '@/components/admin/user/DatePicker';
 
 interface ResourceAssignmentFormProps {
-  profileId: string;
-  setProfileId: (value: string) => void;
-  billTypeId: string;
-  setBillTypeId: (value: string) => void;
-  projectId: string;
-  setProjectId: (value: string) => void;
-  engagementPercentage: string;
-  setEngagementPercentage: (value: string) => void;
-  billingPercentage: string;
-  setBillingPercentage: (value: string) => void;
-  engagementStartDate: Date;
-  setEngagementStartDate: (value: Date) => void;
-  releaseDate: Date;
-  setReleaseDate: (value: Date) => void;
-  weeklyValidation: boolean;
-  setWeeklyValidation: (value: boolean) => void;
-  onSubmit: () => void;
+  mode: 'create' | 'edit';
+  profileId: string | null;
+  setProfileId: (value: string | null) => void;
+  billTypeId: string | null;
+  setBillTypeId: (value: string | null) => void;
+  projectId: string | null;
+  setProjectId: (value: string | null) => void;
+  engagementPercentage: number;
+  setEngagementPercentage: (value: number) => void;
+  billingPercentage: number;
+  setBillingPercentage: (value: number) => void;
+  releaseDate: string;
+  setReleaseDate: (value: string) => void;
+  engagementStartDate: string;
+  setEngagementStartDate: (value: string) => void;
+  preselectedProfileId?: string | null;
+  onSubmit: (e: React.FormEvent) => void;
+  onCancel: () => void;
   isLoading: boolean;
 }
 
 export const ResourceAssignmentForm: React.FC<ResourceAssignmentFormProps> = ({
+  mode,
   profileId,
   setProfileId,
   billTypeId,
@@ -46,155 +42,106 @@ export const ResourceAssignmentForm: React.FC<ResourceAssignmentFormProps> = ({
   setEngagementPercentage,
   billingPercentage,
   setBillingPercentage,
-  engagementStartDate,
-  setEngagementStartDate,
   releaseDate,
   setReleaseDate,
-  weeklyValidation,
-  setWeeklyValidation,
+  engagementStartDate,
+  setEngagementStartDate,
+  preselectedProfileId,
   onSubmit,
-  isLoading
+  onCancel,
+  isLoading,
 }) => {
-  const form = useForm();
-
-  const handleEngagementStartDateSelect = (date: Date | Date[] | undefined) => {
-    if (date && !Array.isArray(date)) {
-      setEngagementStartDate(date);
-    }
-  };
-
-  const handleReleaseDateSelect = (date: Date | Date[] | undefined) => {
-    if (date && !Array.isArray(date)) {
-      setReleaseDate(date);
-    }
-  };
-
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Resource Assignment</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <Form {...form}>
-          <form onSubmit={(e) => { e.preventDefault(); onSubmit(); }} className="space-y-4">
-            <FormItem>
-              <FormLabel>Employee</FormLabel>
-              <ProfileCombobox
-                value={profileId}
-                onValueChange={setProfileId}
-                placeholder="Select employee"
-              />
-            </FormItem>
+    <form onSubmit={onSubmit} className="space-y-4">
+      <div className="space-y-4">
+        <div className="space-y-2">
+          <Label htmlFor="profile" className="text-sm font-medium">Employee *</Label>
+          <ProfileCombobox
+            value={profileId}
+            onValueChange={setProfileId}
+            placeholder="Select employee..."
+            disabled={!!preselectedProfileId || mode === 'edit'}
+            label="Employee"
+          />
+        </div>
 
-            <FormItem>
-              <FormLabel>Bill Type</FormLabel>
-              <BillTypeCombobox
-                value={billTypeId}
-                onValueChange={setBillTypeId}
-                placeholder="Select bill type"
-              />
-            </FormItem>
+        <div className="space-y-2">
+          <Label htmlFor="engagement" className="text-sm font-medium">Engagement % *</Label>
+          <Input
+            id="engagement"
+            type="number"
+            min="1"
+            max="100"
+            value={engagementPercentage}
+            onChange={(e) => setEngagementPercentage(Number(e.target.value))}
+            placeholder="100"
+            required
+            className="h-9"
+          />
+        </div>
 
-            <FormItem>
-              <FormLabel>Project</FormLabel>
-              <ProjectCombobox
-                value={projectId}
-                onValueChange={setProjectId}
-                placeholder="Select project"
-              />
-            </FormItem>
+        <div className="space-y-2">
+          <Label htmlFor="billing" className="text-sm font-medium">Billing %</Label>
+          <Input
+            id="billing"
+            type="number"
+            min="0"
+            max="100"
+            value={billingPercentage}
+            onChange={(e) => setBillingPercentage(Number(e.target.value))}
+            placeholder="0"
+            className="h-9"
+          />
+        </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <FormItem>
-                <FormLabel>Engagement Percentage</FormLabel>
-                <FormControl>
-                  <Input
-                    type="number"
-                    min="0"
-                    max="100"
-                    placeholder="Engagement %"
-                    value={engagementPercentage}
-                    onChange={(e) => setEngagementPercentage(e.target.value)}
-                  />
-                </FormControl>
-              </FormItem>
+        <div className="space-y-2">
+          <Label htmlFor="billType" className="text-sm font-medium">Bill Type</Label>
+          <BillTypeCombobox
+            value={billTypeId}
+            onValueChange={setBillTypeId}
+            placeholder="Select bill type..."
+          />
+        </div>
 
-              <FormItem>
-                <FormLabel>Billing Percentage</FormLabel>
-                <FormControl>
-                  <Input
-                    type="number"
-                    min="0"
-                    max="100"
-                    placeholder="Billing %"
-                    value={billingPercentage}
-                    onChange={(e) => setBillingPercentage(e.target.value)}
-                  />
-                </FormControl>
-              </FormItem>
-            </div>
+        <div className="space-y-2">
+          <Label htmlFor="project" className="text-sm font-medium">Project</Label>
+          <ProjectSearchCombobox
+            value={projectId}
+            onValueChange={setProjectId}
+            placeholder="Select project..."
+          />
+        </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <FormItem>
-                <FormLabel>Engagement Start Date</FormLabel>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button
-                      variant="outline"
-                      className={cn(
-                        "w-full justify-start text-left font-normal",
-                        !engagementStartDate && "text-muted-foreground"
-                      )}
-                    >
-                      <CalendarIcon className="mr-2 h-4 w-4" />
-                      {engagementStartDate ? format(engagementStartDate, "PPP") : <span>Pick a date</span>}
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
-                    <Calendar
-                      mode="single"
-                      selected={engagementStartDate}
-                      onSelect={handleEngagementStartDateSelect}
-                    />
-                  </PopoverContent>
-                </Popover>
-              </FormItem>
+        <div className="space-y-2">
+          <Label htmlFor="startDate" className="text-sm font-medium">Start Date</Label>
+          <DatePicker
+            value={engagementStartDate}
+            onChange={setEngagementStartDate}
+            placeholder="Select start date"
+          />
+        </div>
 
-              <FormItem>
-                <FormLabel>Release Date</FormLabel>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button
-                      variant="outline"
-                      className={cn(
-                        "w-full justify-start text-left font-normal",
-                        !releaseDate && "text-muted-foreground"
-                      )}
-                    >
-                      <CalendarIcon className="mr-2 h-4 w-4" />
-                      {releaseDate ? format(releaseDate, "PPP") : <span>Pick a date</span>}
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
-                    <Calendar
-                      mode="single"
-                      selected={releaseDate}
-                      onSelect={handleReleaseDateSelect}
-                      disabled={(date) => 
-                        engagementStartDate ? date < engagementStartDate : false
-                      }
-                    />
-                  </PopoverContent>
-                </Popover>
-              </FormItem>
-            </div>
+        <div className="space-y-2">
+          <Label htmlFor="releaseDate" className="text-sm font-medium">Release Date</Label>
+          <DatePicker
+            value={releaseDate}
+            onChange={setReleaseDate}
+            placeholder="Select release date"
+          />
+        </div>
+      </div>
 
-            <Button type="submit" disabled={isLoading} className="w-full">
-              {isLoading ? 'Assigning...' : 'Assign Resource'}
-            </Button>
-          </form>
-        </Form>
-      </CardContent>
-    </Card>
+      <div className="flex flex-col space-y-2 pt-4">
+        <Button type="submit" disabled={isLoading || !profileId} className="w-full h-9">
+          {mode === 'create' 
+            ? (isLoading ? 'Creating...' : 'Create Assignment')
+            : (isLoading ? 'Updating...' : 'Update Assignment')
+          }
+        </Button>
+        <Button type="button" variant="outline" onClick={onCancel} className="w-full h-9">
+          {mode === 'edit' ? 'Cancel Edit' : 'Clear Form'}
+        </Button>
+      </div>
+    </form>
   );
 };

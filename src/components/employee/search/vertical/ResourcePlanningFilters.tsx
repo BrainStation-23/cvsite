@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -70,22 +71,6 @@ const ResourcePlanningFilters: React.FC<ResourcePlanningFiltersProps> = ({
   isResourcePlanningOpen,
   setIsResourcePlanningOpen,
 }) => {
-  const handleReleaseDateFromSelect = (date: Date | Date[] | undefined) => {
-    if (date && !Array.isArray(date)) {
-      setReleaseDateFrom(date);
-    } else {
-      setReleaseDateFrom(null);
-    }
-  };
-
-  const handleReleaseDateToSelect = (date: Date | Date[] | undefined) => {
-    if (date && !Array.isArray(date)) {
-      setReleaseDateTo(date);
-    } else {
-      setReleaseDateTo(null);
-    }
-  };
-
   return (
     <Collapsible open={isResourcePlanningOpen} onOpenChange={setIsResourcePlanningOpen}>
       <CollapsibleTrigger asChild>
@@ -198,7 +183,8 @@ const ResourcePlanningFilters: React.FC<ResourcePlanningFiltersProps> = ({
                 <Calendar
                   mode="single"
                   selected={releaseDateFrom}
-                  onSelect={handleReleaseDateFromSelect}
+                  onSelect={setReleaseDateFrom}
+                  initialFocus
                 />
               </PopoverContent>
             </Popover>
@@ -220,7 +206,8 @@ const ResourcePlanningFilters: React.FC<ResourcePlanningFiltersProps> = ({
                 <Calendar
                   mode="single"
                   selected={releaseDateTo}
-                  onSelect={handleReleaseDateToSelect}
+                  onSelect={setReleaseDateTo}
+                  initialFocus
                 />
               </PopoverContent>
             </Popover>

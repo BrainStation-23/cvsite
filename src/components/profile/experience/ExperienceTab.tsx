@@ -60,18 +60,6 @@ export const ExperienceTab: React.FC<ExperienceTabProps> = ({
     }
   });
 
-  const handleStartDateSelect = (date: Date | Date[] | undefined) => {
-    if (date && !Array.isArray(date)) {
-      setStartDate(date);
-    }
-  };
-
-  const handleEndDateSelect = (date: Date | Date[] | undefined) => {
-    if (date && !Array.isArray(date)) {
-      setEndDate(date);
-    }
-  };
-
   const handleStartAddNew = () => {
     setIsAdding(true);
     setEditingExperience(null);
@@ -220,7 +208,8 @@ export const ExperienceTab: React.FC<ExperienceTabProps> = ({
                       <Calendar
                         mode="single"
                         selected={startDate}
-                        onSelect={handleStartDateSelect}
+                        onSelect={setStartDate}
+                        initialFocus
                       />
                     </PopoverContent>
                   </Popover>
@@ -245,7 +234,8 @@ export const ExperienceTab: React.FC<ExperienceTabProps> = ({
                         <Calendar
                           mode="single"
                           selected={endDate}
-                          onSelect={handleEndDateSelect}
+                          onSelect={setEndDate}
+                          initialFocus
                           disabled={(date) => (
                             (startDate ? date < startDate : false) || 
                             date > new Date()
