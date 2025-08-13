@@ -173,6 +173,8 @@ const DayGrid: React.FC<DayGridProps> = ({ currentDate, selected, onDateSelect }
   // Calculate starting day of week (0 = Sunday)
   const startDayOfWeek = monthStart.getDay()
   const paddingDays = Array.from({ length: startDayOfWeek }, (_, i) => i)
+  const totalCells = startDayOfWeek + days.length
+  const trailingDays = Array.from({ length: Math.max(0, 42 - totalCells) }, (_, i) => i)
 
   const weekDays = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa']
 
@@ -215,6 +217,9 @@ const DayGrid: React.FC<DayGridProps> = ({ currentDate, selected, onDateSelect }
             </Button>
           )
         })}
+        {trailingDays.map(i => (
+          <div key={`trailing-${i}`} className="h-9" />
+        ))}
       </div>
     </div>
   )
