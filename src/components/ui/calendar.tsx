@@ -161,11 +161,11 @@ const YearGrid: React.FC<YearGridProps> = ({ currentDate, onYearSelect }) => {
 
 interface DayGridProps {
   currentDate: Date
-  selectedDate?: Date
+  selected?: Date
   onDateSelect: (date: Date) => void
 }
 
-const DayGrid: React.FC<DayGridProps> = ({ currentDate, selectedDate, onDateSelect }) => {
+const DayGrid: React.FC<DayGridProps> = ({ currentDate, selected, onDateSelect }) => {
   const monthStart = startOfMonth(currentDate)
   const monthEnd = endOfMonth(currentDate)
   const days = eachDayOfInterval({ start: monthStart, end: monthEnd })
@@ -196,7 +196,7 @@ const DayGrid: React.FC<DayGridProps> = ({ currentDate, selectedDate, onDateSele
         
         {/* Days */}
         {days.map(day => {
-          const isSelected = selectedDate && isSameDay(day, selectedDate)
+          const isSelected = selected && isSameDay(day, selected)
           const isTodayDate = isToday(day)
           
           return (
@@ -284,7 +284,13 @@ function Calendar({
   }
 
   const handleDateSelect = (date: Date) => {
-    props.onSelect?.(date)
+    // Handle different DayPicker modes
+    if (props.mode === 'single') {
+      (props as any).onSelect?.(date)
+    } else {
+      // For backwards compatibility, also call onSelect if it exists
+      (props as any).onSelect?.(date)
+    }
   }
 
   const renderContent = () => {
@@ -307,7 +313,7 @@ function Calendar({
         return (
           <DayGrid
             currentDate={currentDate}
-            selectedDate={props.selected}
+            selected={props.mode === 'single' ? props.selected as Date : undefined}
             onDateSelect={handleDateSelect}
           />
         )
