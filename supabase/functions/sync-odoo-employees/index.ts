@@ -48,7 +48,7 @@ Deno.serve(async (req) => {
     const graphqlQuery = {
       query: `
         query AllEmployees {
-          allEmployees() {
+          allEmployees {
             employeeId
             sbu {
               name
