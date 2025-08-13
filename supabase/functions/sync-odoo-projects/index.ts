@@ -43,7 +43,7 @@ Deno.serve(async (req) => {
     const graphqlQuery = {
       query: `
         query {
-          allProjects {
+          allProjects(includeArchived: true){
             name
             projectValue
             projectType
