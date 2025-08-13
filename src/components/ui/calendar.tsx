@@ -10,6 +10,8 @@ import { Button } from "@/components/ui/button"
 
 export type CalendarProps = React.ComponentProps<typeof DayPicker>
 
+type ViewMode = 'calendar' | 'months' | 'years';
+
 interface MonthYearSelectorProps {
   date: Date
   onMonthChange: (month: number) => void
@@ -21,47 +23,86 @@ const MonthYearSelector: React.FC<MonthYearSelectorProps> = ({
   onMonthChange,
   onYearChange,
 }) => {
-  const [showMonths, setShowMonths] = React.useState(false)
-  const [showYears, setShowYears] = React.useState(false)
+  const [viewMode, setViewMode] = React.useState<ViewMode>('calendar')
 
   const months = [
     'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
     'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
   ]
 
-  const currentYear = date.getFullYear()
-  const years = Array.from({ length: 21 }, (_, i) => currentYear - 10 + i)
+  const generateYearRange = () => {
+    const currentYear = date.getFullYear()
+    const startYear = Math.floor(currentYear / 12) * 12
+    return Array.from({ length: 12 }, (_, i) => startYear + i)
+  }
 
   const handleMonthSelect = (monthIndex: number) => {
     onMonthChange(monthIndex)
-    setShowMonths(false)
+    setViewMode('calendar')
   }
 
   const handleYearSelect = (year: number) => {
     onYearChange(year)
-    setShowYears(false)
+    setViewMode('calendar')
   }
 
-  if (showMonths) {
+  const handlePreviousYearRange = () => {
+    const newYear = date.getFullYear() - 12
+    onYearChange(newYear)
+  }
+
+  const handleNextYearRange = () => {
+    const newYear = date.getFullYear() + 12
+    onYearChange(newYear)
+  }
+
+  const handlePreviousYear = () => {
+    const newYear = date.getFullYear() - 1
+    onYearChange(newYear)
+  }
+
+  const handleNextYear = () => {
+    const newYear = date.getFullYear() + 1
+    onYearChange(newYear)
+  }
+
+  if (viewMode === 'months') {
     return (
-      <div className="p-3">
-        <div className="flex items-center justify-between mb-3">
+      <div className="p-3 w-[280px]">
+        <div className="flex items-center justify-between mb-4">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handlePreviousYear}
+          >
+            <ChevronLeft className="h-4 w-4" />
+          </Button>
+          
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => setShowMonths(false)}
+            onClick={() => setViewMode('years')}
+            className="font-medium"
           >
-            ← Back
+            {format(date, 'yyyy')}
           </Button>
-          <div className="text-sm font-medium">Select Month</div>
+          
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleNextYear}
+          >
+            <ChevronRight className="h-4 w-4" />
+          </Button>
         </div>
+
         <div className="grid grid-cols-3 gap-2">
           {months.map((month, index) => (
             <Button
               key={month}
               variant={date.getMonth() === index ? "default" : "ghost"}
               size="sm"
-              className="h-8"
+              className="h-12 font-normal"
               onClick={() => handleMonthSelect(index)}
             >
               {month}
@@ -72,26 +113,40 @@ const MonthYearSelector: React.FC<MonthYearSelectorProps> = ({
     )
   }
 
-  if (showYears) {
+  if (viewMode === 'years') {
+    const years = generateYearRange()
+    
     return (
-      <div className="p-3">
-        <div className="flex items-center justify-between mb-3">
+      <div className="p-3 w-[280px]">
+        <div className="flex items-center justify-between mb-4">
           <Button
-            variant="ghost"
+            variant="outline"
             size="sm"
-            onClick={() => setShowYears(false)}
+            onClick={handlePreviousYearRange}
           >
-            ← Back
+            <ChevronLeft className="h-4 w-4" />
           </Button>
-          <div className="text-sm font-medium">Select Year</div>
+          
+          <div className="font-medium text-sm">
+            {years[0]} - {years[years.length - 1]}
+          </div>
+          
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleNextYearRange}
+          >
+            <ChevronRight className="h-4 w-4" />
+          </Button>
         </div>
-        <div className="grid grid-cols-3 gap-2 max-h-48 overflow-y-auto">
-          {years.map((year) => (
+
+        <div className="grid grid-cols-3 gap-2">
+          {years.map(year => (
             <Button
               key={year}
               variant={date.getFullYear() === year ? "default" : "ghost"}
               size="sm"
-              className="h-8"
+              className="h-12 font-normal"
               onClick={() => handleYearSelect(year)}
             >
               {year}
@@ -108,7 +163,7 @@ const MonthYearSelector: React.FC<MonthYearSelectorProps> = ({
         variant="ghost"
         size="sm"
         className="text-sm font-medium hover:bg-accent"
-        onClick={() => setShowMonths(true)}
+        onClick={() => setViewMode('months')}
       >
         {format(date, 'MMMM')}
       </Button>
@@ -116,7 +171,7 @@ const MonthYearSelector: React.FC<MonthYearSelectorProps> = ({
         variant="ghost"
         size="sm"
         className="text-sm font-medium hover:bg-accent"
-        onClick={() => setShowYears(true)}
+        onClick={() => setViewMode('years')}
       >
         {format(date, 'yyyy')}
       </Button>
