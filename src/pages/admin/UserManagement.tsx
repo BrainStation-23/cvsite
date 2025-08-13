@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import DashboardLayout from '../../components/Layout/DashboardLayout';
 import { Button } from '@/components/ui/button';
-import { Upload, RefreshCw, UserPlus, Download, Users, Trash2 } from 'lucide-react';
+import { Upload, RefreshCw, UserPlus, Download, Users, Trash2, Sync } from 'lucide-react';
 import { useUserManagement } from '@/hooks/use-user-management';
 import UserSearchFilters from '@/components/admin/UserSearchFilters';
 import UserList from '@/components/admin/UserList';
@@ -10,6 +10,8 @@ import UserPagination from '@/components/admin/UserPagination';
 import { ResetPasswordDialog, DeleteUserDialog, BulkUploadDialog, BulkDeleteUsersDialog } from '@/components/admin/UserDialogs';
 import { UserData, SortColumn, SortOrder } from '@/hooks/types/user-management';
 import { UserRole } from '@/types';
+import { useOdooEmployeeSync } from '@/hooks/use-odoo-employee-sync';
+import { OdooSyncResultDialog } from '@/components/admin/OdooSyncResultDialog';
 
 const UserManagement: React.FC = () => {
   const navigate = useNavigate();
@@ -18,6 +20,7 @@ const UserManagement: React.FC = () => {
   const [isBulkCreateDialogOpen, setIsBulkCreateDialogOpen] = useState(false);
   const [isBulkUpdateDialogOpen, setIsBulkUpdateDialogOpen] = useState(false);
   const [isBulkDeleteDialogOpen, setIsBulkDeleteDialogOpen] = useState(false);
+  const [isSyncResultDialogOpen, setIsSyncResultDialogOpen] = useState(false);
 
   const {
     users,
@@ -40,6 +43,8 @@ const UserManagement: React.FC = () => {
     bulkUpdate,
     exportUsers
   } = useUserManagement();
+
+  const { syncEmployees, isSyncing, lastSyncResult } = useOdooEmployeeSync();
 
   useEffect(() => {
     fetchUsers();
@@ -129,6 +134,17 @@ const UserManagement: React.FC = () => {
     fetchUsers(); // Refresh the user list after bulk delete
   };
 
+  const handleOdooSync = async () => {
+    try {
+      await syncEmployees();
+      setIsSyncResultDialogOpen(true);
+      // Refresh the user list after sync
+      fetchUsers();
+    } catch (error) {
+      // Error is already handled by the hook
+    }
+  };
+
   return (
     <DashboardLayout>
       <div className="flex justify-between items-center mb-6">
@@ -156,6 +172,18 @@ const UserManagement: React.FC = () => {
           <Button variant="outline" className="flex items-center gap-2" onClick={() => setIsBulkCreateDialogOpen(true)}>
             <Upload size={16} />
             <span className="hidden md:inline">Bulk Create</span>
+          </Button>
+
+          <Button 
+            variant="outline" 
+            className="flex items-center gap-2 text-blue-600 hover:text-blue-700 hover:bg-blue-50" 
+            onClick={handleOdooSync}
+            disabled={isSyncing}
+          >
+            <Sync size={16} className={isSyncing ? 'animate-spin' : ''} />
+            <span className="hidden md:inline">
+              {isSyncing ? 'Syncing...' : 'Sync from Odoo'}
+            </span>
           </Button>
           
           <Button className="flex items-center gap-2" onClick={handleAddUserClick}>
@@ -232,6 +260,12 @@ const UserManagement: React.FC = () => {
         mode="update" 
         title="Bulk Update Users" 
         description="Upload a CSV file to update existing users in bulk." 
+      />
+
+      <OdooSyncResultDialog 
+        isOpen={isSyncResultDialogOpen}
+        onOpenChange={setIsSyncResultDialogOpen}
+        syncResult={lastSyncResult}
       />
     </DashboardLayout>
   );

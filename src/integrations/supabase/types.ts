@@ -1339,6 +1339,10 @@ export type Database = {
       }
     }
     Functions: {
+      bulk_sync_odoo_employees: {
+        Args: { employees_data: Json }
+        Returns: Json
+      }
       bulk_sync_odoo_projects: {
         Args: { projects_data: Json }
         Returns: Json
