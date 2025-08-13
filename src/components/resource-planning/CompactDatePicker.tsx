@@ -28,14 +28,15 @@ const CompactDatePicker: React.FC<CompactDatePickerProps> = ({
     value ? format(new Date(value), 'dd-MM-yyyy') : ''
   );
 
-  const handleSelect = (selectedDate: Date | undefined) => {
-    setDate(selectedDate);
-    if (selectedDate) {
+  const handleSelect = (selectedDate: Date | Date[] | undefined) => {
+    if (selectedDate && !Array.isArray(selectedDate)) {
+      setDate(selectedDate);
       const formattedDate = format(selectedDate, 'yyyy-MM-dd');
       const displayDate = format(selectedDate, 'dd-MM-yyyy');
       setInputValue(displayDate);
       onChange(formattedDate);
     } else {
+      setDate(undefined);
       setInputValue('');
       onChange('');
     }
@@ -68,7 +69,7 @@ const CompactDatePicker: React.FC<CompactDatePickerProps> = ({
           onChange={handleInputChange}
           placeholder={placeholder}
           disabled={disabled}
-          className="w-full  text-xs cursor-pointer"
+          className="w-full text-xs cursor-pointer"
           onClick={() => setOpen(true)}
         />
       </PopoverTrigger>
@@ -77,7 +78,6 @@ const CompactDatePicker: React.FC<CompactDatePickerProps> = ({
           mode="single"
           selected={date}
           onSelect={handleSelect}
-          initialFocus
           className="pointer-events-auto"
         />
       </PopoverContent>
