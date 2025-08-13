@@ -1,11 +1,9 @@
-
 import * as React from "react"
 import { ChevronLeft, ChevronRight } from "lucide-react"
 import { DayPicker } from "react-day-picker"
 import { format, setMonth, setYear, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, isToday } from "date-fns"
 
 import { cn } from "@/lib/utils"
-import { buttonVariants } from "@/components/ui/button"
 import { Button } from "@/components/ui/button"
 
 export type CalendarProps = React.ComponentProps<typeof DayPicker>
@@ -22,7 +20,7 @@ const monthsShort = [
   'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
 ];
 
-interface CalendarHeaderProps {
+interface MonthNavigatorHeaderProps {
   currentDate: Date
   onPrevious: () => void
   onNext: () => void
@@ -31,7 +29,7 @@ interface CalendarHeaderProps {
   viewMode: ViewMode
 }
 
-const CalendarHeader: React.FC<CalendarHeaderProps> = ({
+const MonthNavigatorHeader: React.FC<MonthNavigatorHeaderProps> = ({
   currentDate,
   onPrevious,
   onNext,
@@ -327,7 +325,7 @@ function Calendar({
 
   return (
     <div className={cn("w-[280px] rounded-md border shadow pointer-events-auto", className)}>
-      <CalendarHeader
+      <MonthNavigatorHeader
         currentDate={currentDate}
         onPrevious={handlePrevious}
         onNext={handleNext}
