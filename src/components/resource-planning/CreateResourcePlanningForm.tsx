@@ -25,10 +25,6 @@ export const CreateResourcePlanningForm: React.FC<CreateResourcePlanningFormProp
     onSuccess,
   });
 
-  const handleCancel = () => {
-    formState.resetForm();
-  };
-
   return (
     <div className="space-y-4">
       <ResourceAssignmentForm
@@ -47,7 +43,6 @@ export const CreateResourcePlanningForm: React.FC<CreateResourcePlanningFormProp
         engagementStartDate={formState.engagementStartDate}
         setEngagementStartDate={formState.setEngagementStartDate}
         onSubmit={handleSubmit}
-        onCancel={handleCancel}
         isLoading={isSubmitting}
       />
     </div>

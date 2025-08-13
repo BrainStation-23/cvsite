@@ -7,13 +7,11 @@ import { useResourcePlanningSubmission } from './hooks/useResourcePlanningSubmis
 interface ResourcePlanningFormProps {
   preselectedProfileId: string | null;
   onSuccess: () => void;
-  onCancel: () => void;
 }
 
 export const ResourcePlanningForm: React.FC<ResourcePlanningFormProps> = ({
   preselectedProfileId,
   onSuccess,
-  onCancel,
 }) => {
   const formState = useResourceAssignmentForm({
     mode: 'create',
@@ -26,11 +24,6 @@ export const ResourcePlanningForm: React.FC<ResourcePlanningFormProps> = ({
     formState,
     onSuccess,
   });
-
-  const handleCancel = () => {
-    formState.resetForm();
-    onCancel();
-  };
 
   return (
     <div className="p-4 border rounded-lg bg-muted/30 h-fit">
@@ -51,7 +44,6 @@ export const ResourcePlanningForm: React.FC<ResourcePlanningFormProps> = ({
         engagementStartDate={formState.engagementStartDate}
         setEngagementStartDate={formState.setEngagementStartDate}
         onSubmit={handleSubmit}
-        onCancel={handleCancel}
         isLoading={isSubmitting}
       />
     </div>

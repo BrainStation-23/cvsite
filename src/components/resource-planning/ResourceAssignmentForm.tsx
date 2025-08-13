@@ -24,7 +24,6 @@ interface ResourceAssignmentFormProps {
   engagementStartDate: string;
   setEngagementStartDate: (value: string) => void;
   onSubmit: (e: React.FormEvent) => void;
-  onCancel: () => void;
   isLoading: boolean;
 }
 
@@ -44,7 +43,6 @@ export const ResourceAssignmentForm: React.FC<ResourceAssignmentFormProps> = ({
   engagementStartDate,
   setEngagementStartDate,
   onSubmit,
-  onCancel,
   isLoading,
 }) => {
   return (
@@ -129,9 +127,6 @@ export const ResourceAssignmentForm: React.FC<ResourceAssignmentFormProps> = ({
       <div className="flex flex-col space-y-2 pt-4">
         <Button type="submit" disabled={isLoading || !profileId} className="w-full h-9">
           {isLoading ? 'Creating...' : 'Create Assignment'}
-        </Button>
-        <Button type="button" variant="outline" onClick={onCancel} className="w-full h-9">
-          Clear Form
         </Button>
       </div>
     </form>
