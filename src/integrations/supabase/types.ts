@@ -1339,6 +1339,10 @@ export type Database = {
       }
     }
     Functions: {
+      bulk_sync_odoo_projects: {
+        Args: { projects_data: Json }
+        Returns: Json
+      }
       calculate_experience_duration: {
         Args: { start_date: string; end_date: string; is_current: boolean }
         Returns: number
@@ -1418,23 +1422,14 @@ export type Database = {
         Returns: Json
       }
       get_resource_count_statistics: {
-        Args:
-          | {
-              resource_type_filter?: string
-              bill_type_filter?: string
-              expertise_type_filter?: string
-              sbu_filter?: string
-              start_date_filter?: string
-              end_date_filter?: string
-            }
-          | {
-              resource_type_filter?: string
-              bill_type_filter?: string
-              expertise_type_filter?: string
-              sbu_filter?: string
-              start_date_filter?: string
-              end_date_filter?: string
-            }
+        Args: {
+          resource_type_filter?: string
+          bill_type_filter?: string
+          expertise_type_filter?: string
+          sbu_filter?: string
+          start_date_filter?: string
+          end_date_filter?: string
+        }
         Returns: Json
       }
       get_sbu_summary_stats: {

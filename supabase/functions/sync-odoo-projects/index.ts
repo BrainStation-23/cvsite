@@ -30,7 +30,7 @@ Deno.serve(async (req) => {
   }
 
   try {
-    console.log('Starting Odoo projects sync...');
+    console.log('Starting optimized Odoo projects sync...');
 
     // Initialize Supabase client
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
@@ -57,7 +57,7 @@ Deno.serve(async (req) => {
       `
     };
 
-    console.log('Fetching projects from Odoo...');
+    console.log('Fetching projects from Odoo GraphQL API...');
 
     // Fetch projects from Odoo GraphQL API
     const odooResponse = await fetch('https://erp.brainstation-23.com/graphql', {
@@ -76,113 +76,38 @@ Deno.serve(async (req) => {
     const odooData: OdooResponse = await odooResponse.json();
     console.log(`Fetched ${odooData.data.allProjects.length} projects from Odoo`);
 
-    // Get existing projects from our database to avoid duplicates
-    const { data: existingProjects, error: fetchError } = await supabase
-      .from('projects_management')
-      .select('project_name, project_manager, project_type, client_name');
+    // Pre-process the data for bulk operations
+    const processedProjects = odooData.data.allProjects.map(project => ({
+      name: project.name,
+      projectValue: project.projectValue || null,
+      projectType: project.projectType || null,
+      managerEmail: project.projectManager?.email || null,
+      active: project.active
+    }));
 
-    if (fetchError) {
-      throw new Error(`Failed to fetch existing projects: ${fetchError.message}`);
+    console.log(`Pre-processed ${processedProjects.length} projects, calling bulk sync function...`);
+
+    // Call the bulk sync RPC function
+    const { data: syncResult, error: syncError } = await supabase.rpc(
+      'bulk_sync_odoo_projects',
+      { projects_data: processedProjects }
+    );
+
+    if (syncError) {
+      throw new Error(`Bulk sync function failed: ${syncError.message}`);
     }
 
-    const existingProjectNames = new Set(existingProjects?.map(p => p.project_name) || []);
-    
-    // Process and sync projects
-    let syncedCount = 0;
-    let updatedCount = 0;
-    let skippedCount = 0;
+    console.log('Bulk sync completed successfully:', syncResult);
 
-    for (const odooProject of odooData.data.allProjects) {
-      try {
-        // Find project manager UUID by email if available
-        let projectManagerId = null;
-        if (odooProject.projectManager?.email) {
-          const { data: managerProfile } = await supabase
-            .from('profiles')
-            .select('id')
-            .eq('email', odooProject.projectManager.email)
-            .single();
-          
-          projectManagerId = managerProfile?.id || null;
-        }
-
-        // Find project type UUID by name if available
-        let projectTypeId = null;
-        if (odooProject.projectType) {
-          const { data: projectType } = await supabase
-            .from('project_types')
-            .select('id')
-            .eq('name', odooProject.projectType)
-            .single();
-          
-          projectTypeId = projectType?.id || null;
-          
-          if (!projectTypeId) {
-            console.log(`Project type "${odooProject.projectType}" not found for project: ${odooProject.name}`);
-          }
-        }
-
-        const projectData = {
-          project_name: odooProject.name,
-          client_name: null, // Odoo doesn't provide client info in this query
-          project_manager: projectManagerId,
-          project_type: projectTypeId,
-          budget: odooProject.projectValue || null,
-          is_active: odooProject.active
-        };
-
-        if (existingProjectNames.has(odooProject.name)) {
-          // Update existing project
-          const { error: updateError } = await supabase
-            .from('projects_management')
-            .update({
-              project_manager: projectManagerId,
-              project_type: projectTypeId,
-              budget: odooProject.projectValue || null,
-              is_active: odooProject.active,
-              updated_at: new Date().toISOString()
-            })
-            .eq('project_name', odooProject.name);
-
-          if (updateError) {
-            console.error(`Failed to update project ${odooProject.name}:`, updateError);
-          } else {
-            updatedCount++;
-            console.log(`Updated project: ${odooProject.name} with project type: ${odooProject.projectType}`);
-          }
-        } else {
-          // Insert new project
-          const { error: insertError } = await supabase
-            .from('projects_management')
-            .insert(projectData);
-
-          if (insertError) {
-            console.error(`Failed to insert project ${odooProject.name}:`, insertError);
-          } else {
-            syncedCount++;
-            console.log(`Synced new project: ${odooProject.name} with project type: ${odooProject.projectType}`);
-          }
-        }
-      } catch (projectError) {
-        console.error(`Error processing project ${odooProject.name}:`, projectError);
-        skippedCount++;
-      }
-    }
-
-    const result = {
+    // Return the result from the RPC function
+    return new Response(JSON.stringify({
       success: true,
-      message: 'Projects sync completed',
+      message: 'Projects sync completed using bulk processing',
       stats: {
         total_fetched: odooData.data.allProjects.length,
-        new_synced: syncedCount,
-        updated: updatedCount,
-        skipped: skippedCount
+        ...syncResult.stats
       }
-    };
-
-    console.log('Sync completed:', result);
-
-    return new Response(JSON.stringify(result), {
+    }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       status: 200
     });
