@@ -27,6 +27,7 @@ interface NotFoundEmployee {
   name: string;
   email: string;
   sbuName: string;
+  managerEmail?: string;
 }
 
 interface ErrorEmployee {
@@ -68,7 +69,7 @@ export const OdooSyncResultDialog: React.FC<OdooSyncResultDialogProps> = ({
       role: 'employee',
       password: '', // Will be auto-generated
       employeeId: employee.employeeId || '',
-      managerEmail: '',
+      managerEmail: employee.managerEmail || '',
       sbuName: employee.sbuName || '',
       expertiseName: '',
       resourceTypeName: '',
@@ -93,7 +94,7 @@ export const OdooSyncResultDialog: React.FC<OdooSyncResultDialogProps> = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl max-h-[80vh]">
+      <DialogContent className="max-w-5xl max-h-[90vh]">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             {syncResult.success ? (
@@ -147,14 +148,17 @@ export const OdooSyncResultDialog: React.FC<OdooSyncResultDialogProps> = ({
                   Download CSV for Bulk Create
                 </Button>
               </div>
-              <ScrollArea className="h-48 border rounded-md p-3">
+              <ScrollArea className="h-64 border rounded-md p-3">
                 <div className="space-y-2">
                   {not_found_employees.map((employee, index) => (
-                    <div key={index} className="flex items-center justify-between p-2 bg-orange-50 rounded">
+                    <div key={index} className="flex items-center justify-between p-3 bg-orange-50 rounded">
                       <div className="flex-1">
                         <div className="font-medium">{employee.employeeId}</div>
                         <div className="text-sm text-gray-600">{employee.name}</div>
                         <div className="text-xs text-gray-500">{employee.email}</div>
+                        {employee.managerEmail && (
+                          <div className="text-xs text-gray-500">Manager: {employee.managerEmail}</div>
+                        )}
                       </div>
                       <Badge variant="outline" className="text-orange-700 border-orange-300">
                         {employee.sbuName || 'No SBU'}
