@@ -2,7 +2,7 @@
 import * as React from "react"
 import { ChevronLeft, ChevronRight } from "lucide-react"
 import { DayPicker } from "react-day-picker"
-import { format } from "date-fns"
+import { format, setMonth, setYear, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, isToday } from "date-fns"
 
 import { cn } from "@/lib/utils"
 import { buttonVariants } from "@/components/ui/button"
@@ -12,185 +12,210 @@ export type CalendarProps = React.ComponentProps<typeof DayPicker>
 
 type ViewMode = 'calendar' | 'months' | 'years';
 
-interface MonthYearSelectorProps {
-  date: Date
-  onMonthChange: (month: number) => void
-  onYearChange: (year: number) => void
+const months = [
+  'January', 'February', 'March', 'April', 'May', 'June',
+  'July', 'August', 'September', 'October', 'November', 'December'
+];
+
+const monthsShort = [
+  'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+  'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+];
+
+interface CalendarHeaderProps {
+  currentDate: Date
+  onPrevious: () => void
+  onNext: () => void
+  onMonthClick: () => void
+  onYearClick: () => void
+  viewMode: ViewMode
 }
 
-const MonthYearSelector: React.FC<MonthYearSelectorProps> = ({
-  date,
-  onMonthChange,
-  onYearChange,
+const CalendarHeader: React.FC<CalendarHeaderProps> = ({
+  currentDate,
+  onPrevious,
+  onNext,
+  onMonthClick,
+  onYearClick,
+  viewMode,
 }) => {
-  const [viewMode, setViewMode] = React.useState<ViewMode>('calendar')
-
-  const months = [
-    'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-    'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
-  ]
-
-  const generateYearRange = () => {
-    const currentYear = date.getFullYear()
-    const startYear = Math.floor(currentYear / 12) * 12
-    return Array.from({ length: 12 }, (_, i) => startYear + i)
+  const getTitle = () => {
+    switch (viewMode) {
+      case 'months':
+        return format(currentDate, 'yyyy')
+      case 'years':
+        const currentYear = currentDate.getFullYear()
+        const startYear = Math.floor(currentYear / 12) * 12
+        return `${startYear} - ${startYear + 11}`
+      default:
+        return null
+    }
   }
 
-  const handleMonthSelect = (monthIndex: number) => {
-    onMonthChange(monthIndex)
-    setViewMode('calendar')
-  }
-
-  const handleYearSelect = (year: number) => {
-    onYearChange(year)
-    setViewMode('calendar')
-  }
-
-  const handlePreviousYearRange = (e: React.MouseEvent) => {
-    e.preventDefault()
-    e.stopPropagation()
-    const newYear = date.getFullYear() - 12
-    onYearChange(newYear)
-  }
-
-  const handleNextYearRange = (e: React.MouseEvent) => {
-    e.preventDefault()
-    e.stopPropagation()
-    const newYear = date.getFullYear() + 12
-    onYearChange(newYear)
-  }
-
-  const handlePreviousYear = (e: React.MouseEvent) => {
-    e.preventDefault()
-    e.stopPropagation()
-    const newYear = date.getFullYear() - 1
-    onYearChange(newYear)
-  }
-
-  const handleNextYear = (e: React.MouseEvent) => {
-    e.preventDefault()
-    e.stopPropagation()
-    const newYear = date.getFullYear() + 1
-    onYearChange(newYear)
-  }
-
-  if (viewMode === 'months') {
-    return (
-      <div className="w-[252px]">
-        <div className="flex items-center justify-between p-2 border-b">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handlePreviousYear}
-            className="h-7 w-7 p-0"
-          >
-            <ChevronLeft className="h-4 w-4" />
-          </Button>
-          
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => setViewMode('years')}
-            className="font-medium text-sm"
-          >
-            {format(date, 'yyyy')}
-          </Button>
-          
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleNextYear}
-            className="h-7 w-7 p-0"
-          >
-            <ChevronRight className="h-4 w-4" />
-          </Button>
-        </div>
-
-        <div className="p-3">
-          <div className="grid grid-cols-3 gap-2">
-            {months.map((month, index) => (
-              <Button
-                key={month}
-                variant={date.getMonth() === index ? "default" : "ghost"}
-                size="sm"
-                className="h-9 text-xs font-normal"
-                onClick={() => handleMonthSelect(index)}
-              >
-                {month}
-              </Button>
-            ))}
-          </div>
-        </div>
-      </div>
-    )
-  }
-
-  if (viewMode === 'years') {
-    const years = generateYearRange()
-    
-    return (
-      <div className="w-[252px]">
-        <div className="flex items-center justify-between p-2 border-b">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handlePreviousYearRange}
-            className="h-7 w-7 p-0"
-          >
-            <ChevronLeft className="h-4 w-4" />
-          </Button>
-          
-          <div className="font-medium text-sm">
-            {years[0]} - {years[years.length - 1]}
-          </div>
-          
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleNextYearRange}
-            className="h-7 w-7 p-0"
-          >
-            <ChevronRight className="h-4 w-4" />
-          </Button>
-        </div>
-
-        <div className="p-3">
-          <div className="grid grid-cols-3 gap-2">
-            {years.map(year => (
-              <Button
-                key={year}
-                variant={date.getFullYear() === year ? "default" : "ghost"}
-                size="sm"
-                className="h-9 text-xs font-normal"
-                onClick={() => handleYearSelect(year)}
-              >
-                {year}
-              </Button>
-            ))}
-          </div>
-        </div>
-      </div>
-    )
-  }
+  const title = getTitle()
 
   return (
-    <div className="flex items-center justify-center space-x-1">
+    <div className="flex items-center justify-between p-3 border-b">
       <Button
-        variant="ghost"
+        variant="outline"
         size="sm"
-        className="text-sm font-medium hover:bg-accent"
-        onClick={() => setViewMode('months')}
+        onClick={onPrevious}
+        className="h-8 w-8 p-0"
       >
-        {format(date, 'MMMM')}
+        <ChevronLeft className="h-4 w-4" />
       </Button>
+      
+      <div className="flex items-center space-x-1">
+        {viewMode === 'calendar' && (
+          <>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={onMonthClick}
+              className="text-sm font-medium hover:bg-accent"
+            >
+              {format(currentDate, 'MMMM')}
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={onYearClick}
+              className="text-sm font-medium hover:bg-accent"
+            >
+              {format(currentDate, 'yyyy')}
+            </Button>
+          </>
+        )}
+        {title && (
+          <div className="text-sm font-medium px-2">
+            {title}
+          </div>
+        )}
+      </div>
+      
       <Button
-        variant="ghost"
+        variant="outline"
         size="sm"
-        className="text-sm font-medium hover:bg-accent"
-        onClick={() => setViewMode('years')}
+        onClick={onNext}
+        className="h-8 w-8 p-0"
       >
-        {format(date, 'yyyy')}
+        <ChevronRight className="h-4 w-4" />
       </Button>
+    </div>
+  )
+}
+
+interface MonthGridProps {
+  currentDate: Date
+  onMonthSelect: (monthIndex: number) => void
+}
+
+const MonthGrid: React.FC<MonthGridProps> = ({ currentDate, onMonthSelect }) => {
+  return (
+    <div className="p-4">
+      <div className="grid grid-cols-3 gap-2">
+        {monthsShort.map((month, index) => (
+          <Button
+            key={month}
+            variant={currentDate.getMonth() === index ? "default" : "ghost"}
+            size="sm"
+            className="h-11 text-sm font-normal"
+            onClick={() => onMonthSelect(index)}
+          >
+            {month}
+          </Button>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+interface YearGridProps {
+  currentDate: Date
+  onYearSelect: (year: number) => void
+}
+
+const YearGrid: React.FC<YearGridProps> = ({ currentDate, onYearSelect }) => {
+  const currentYear = currentDate.getFullYear()
+  const startYear = Math.floor(currentYear / 12) * 12
+  const years = Array.from({ length: 12 }, (_, i) => startYear + i)
+
+  return (
+    <div className="p-4">
+      <div className="grid grid-cols-3 gap-2">
+        {years.map(year => (
+          <Button
+            key={year}
+            variant={currentDate.getFullYear() === year ? "default" : "ghost"}
+            size="sm"
+            className="h-11 text-sm font-normal"
+            onClick={() => onYearSelect(year)}
+          >
+            {year}
+          </Button>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+interface DayGridProps {
+  currentDate: Date
+  selectedDate?: Date
+  onDateSelect: (date: Date) => void
+}
+
+const DayGrid: React.FC<DayGridProps> = ({ currentDate, selectedDate, onDateSelect }) => {
+  const monthStart = startOfMonth(currentDate)
+  const monthEnd = endOfMonth(currentDate)
+  const days = eachDayOfInterval({ start: monthStart, end: monthEnd })
+  
+  // Calculate starting day of week (0 = Sunday)
+  const startDayOfWeek = monthStart.getDay()
+  const paddingDays = Array.from({ length: startDayOfWeek }, (_, i) => i)
+
+  const weekDays = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa']
+
+  return (
+    <div className="p-4">
+      {/* Day headers */}
+      <div className="grid grid-cols-7 gap-1 mb-2">
+        {weekDays.map(day => (
+          <div key={day} className="text-center text-xs font-medium text-muted-foreground p-2">
+            {day}
+          </div>
+        ))}
+      </div>
+
+      {/* Calendar grid */}
+      <div className="grid grid-cols-7 gap-1">
+        {/* Empty cells for padding */}
+        {paddingDays.map(i => (
+          <div key={`padding-${i}`} className="h-9" />
+        ))}
+        
+        {/* Days */}
+        {days.map(day => {
+          const isSelected = selectedDate && isSameDay(day, selectedDate)
+          const isTodayDate = isToday(day)
+          
+          return (
+            <Button
+              key={day.toISOString()}
+              variant="ghost"
+              size="sm"
+              className={cn(
+                "h-9 w-9 p-0 font-normal",
+                isTodayDate && "bg-accent text-accent-foreground font-medium",
+                isSelected && "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground"
+              )}
+              onClick={() => onDateSelect(day)}
+            >
+              {format(day, 'd')}
+            </Button>
+          )
+        })}
+      </div>
     </div>
   )
 }
@@ -201,97 +226,109 @@ function Calendar({
   showOutsideDays = true,
   ...props
 }: CalendarProps) {
-  const [month, setMonth] = React.useState<Date>(
+  const [viewMode, setViewMode] = React.useState<ViewMode>('calendar')
+  const [currentDate, setCurrentDate] = React.useState<Date>(
     props.month || props.defaultMonth || new Date()
   )
 
   React.useEffect(() => {
-    if (props.month && props.month !== month) {
-      setMonth(props.month)
+    if (props.month && props.month !== currentDate) {
+      setCurrentDate(props.month)
     }
   }, [props.month])
 
-  const handleMonthChange = (monthIndex: number) => {
-    const newDate = new Date(month.getFullYear(), monthIndex, 1)
-    setMonth(newDate)
+  const handlePrevious = () => {
+    let newDate: Date
+    switch (viewMode) {
+      case 'months':
+        newDate = setYear(currentDate, currentDate.getFullYear() - 1)
+        break
+      case 'years':
+        newDate = setYear(currentDate, currentDate.getFullYear() - 12)
+        break
+      default:
+        newDate = new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1)
+    }
+    setCurrentDate(newDate)
     props.onMonthChange?.(newDate)
   }
 
-  const handleYearChange = (year: number) => {
-    const newDate = new Date(year, month.getMonth(), 1)
-    setMonth(newDate)
+  const handleNext = () => {
+    let newDate: Date
+    switch (viewMode) {
+      case 'months':
+        newDate = setYear(currentDate, currentDate.getFullYear() + 1)
+        break
+      case 'years':
+        newDate = setYear(currentDate, currentDate.getFullYear() + 12)
+        break
+      default:
+        newDate = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1)
+    }
+    setCurrentDate(newDate)
     props.onMonthChange?.(newDate)
   }
 
-  const handlePreviousMonth = () => {
-    const newDate = new Date(month.getFullYear(), month.getMonth() - 1, 1)
-    setMonth(newDate)
+  const handleMonthSelect = (monthIndex: number) => {
+    const newDate = setMonth(currentDate, monthIndex)
+    setCurrentDate(newDate)
+    setViewMode('calendar')
     props.onMonthChange?.(newDate)
   }
 
-  const handleNextMonth = () => {
-    const newDate = new Date(month.getFullYear(), month.getMonth() + 1, 1)
-    setMonth(newDate)
+  const handleYearSelect = (year: number) => {
+    const newDate = setYear(currentDate, year)
+    setCurrentDate(newDate)
+    setViewMode('calendar')
     props.onMonthChange?.(newDate)
+  }
+
+  const handleDateSelect = (date: Date) => {
+    props.onSelect?.(date)
+  }
+
+  const renderContent = () => {
+    switch (viewMode) {
+      case 'months':
+        return (
+          <MonthGrid
+            currentDate={currentDate}
+            onMonthSelect={handleMonthSelect}
+          />
+        )
+      case 'years':
+        return (
+          <YearGrid
+            currentDate={currentDate}
+            onYearSelect={handleYearSelect}
+          />
+        )
+      default:
+        return (
+          <DayGrid
+            currentDate={currentDate}
+            selectedDate={props.selected}
+            onDateSelect={handleDateSelect}
+          />
+        )
+    }
   }
 
   return (
-    <DayPicker
-      showOutsideDays={showOutsideDays}
-      className={cn("p-3 pointer-events-auto w-fit", className)}
-      classNames={{
-        months: "flex flex-col sm:flex-row space-y-4 sm:space-x-4 sm:space-y-0",
-        month: "space-y-4 w-[252px]",
-        caption: "flex justify-center pt-1 relative items-center",
-        caption_label: "text-sm font-medium",
-        nav: "space-x-1 flex items-center",
-        nav_button: cn(
-          buttonVariants({ variant: "outline" }),
-          "h-7 w-7 bg-transparent p-0 opacity-50 hover:opacity-100"
-        ),
-        nav_button_previous: "absolute left-1",
-        nav_button_next: "absolute right-1",
-        table: "w-full border-collapse space-y-1",
-        head_row: "flex",
-        head_cell:
-          "text-muted-foreground rounded-md w-8 font-normal text-[0.8rem]",
-        row: "flex w-full mt-2",
-        cell: "h-8 w-8 text-center text-sm p-0 relative [&:has([aria-selected].day-range-end)]:rounded-r-md [&:has([aria-selected].day-outside)]:bg-accent/50 [&:has([aria-selected])]:bg-accent first:[&:has([aria-selected])]:rounded-l-md last:[&:has([aria-selected])]:rounded-r-md focus-within:relative focus-within:z-20",
-        day: cn(
-          buttonVariants({ variant: "ghost" }),
-          "h-8 w-8 p-0 font-normal aria-selected:opacity-100 text-sm"
-        ),
-        day_range_end: "day-range-end",
-        day_selected:
-          "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground focus:bg-primary focus:text-primary-foreground",
-        day_today: "bg-accent text-accent-foreground",
-        day_outside:
-          "day-outside text-muted-foreground opacity-50 aria-selected:bg-accent/50 aria-selected:text-muted-foreground aria-selected:opacity-30",
-        day_disabled: "text-muted-foreground opacity-50",
-        day_range_middle:
-          "aria-selected:bg-accent aria-selected:text-accent-foreground",
-        day_hidden: "invisible",
-        ...classNames,
-      }}
-      components={{
-        IconLeft: ({ ...props }) => <ChevronLeft className="h-4 w-4" />,
-        IconRight: ({ ...props }) => <ChevronRight className="h-4 w-4" />,
-        Caption: ({ displayMonth }) => (
-          <MonthYearSelector
-            date={displayMonth}
-            onMonthChange={handleMonthChange}
-            onYearChange={handleYearChange}
-          />
-        ),
-      }}
-      month={month}
-      onMonthChange={setMonth}
-      onPrevClick={handlePreviousMonth}
-      onNextClick={handleNextMonth}
-      {...props}
-    />
+    <div className={cn("w-[280px] rounded-md border shadow pointer-events-auto", className)}>
+      <CalendarHeader
+        currentDate={currentDate}
+        onPrevious={handlePrevious}
+        onNext={handleNext}
+        onMonthClick={() => setViewMode('months')}
+        onYearClick={() => setViewMode('years')}
+        viewMode={viewMode}
+      />
+      {renderContent()}
+    </div>
   )
 }
+
 Calendar.displayName = "Calendar"
 
 export { Calendar }
