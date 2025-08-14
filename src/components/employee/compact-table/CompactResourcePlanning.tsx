@@ -2,121 +2,247 @@
 import React from 'react';
 import { Badge } from '@/components/ui/badge';
 import { 
-  Calendar, 
-  TrendingUp, 
-  Building2,
-  Clock
-} from 'lucide-react';
-import { 
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
-
-interface ResourcePlanningData {
-  availability_status?: string;
-  current_project?: {
-    project_name?: string;
-    client_name?: string;
-  };
-  engagement_percentage?: number;
-  billing_percentage?: number;
-  release_date?: string;
-  days_until_available?: number;
-}
+import { 
+  Calendar, 
+  TrendingUp, 
+  Building2,
+  Clock,
+  Percent
+} from 'lucide-react';
+import { ResourcePlanningInfo } from '@/hooks/types/employee-profiles';
 
 interface CompactResourcePlanningProps {
-  resourcePlanning?: ResourcePlanningData;
+  resourcePlanning?: ResourcePlanningInfo;
+  className?: string;
 }
 
 const CompactResourcePlanning: React.FC<CompactResourcePlanningProps> = ({
-  resourcePlanning
+  resourcePlanning,
+  className = ''
 }) => {
-  const getAvailabilityBadge = (resourcePlanningData?: ResourcePlanningData) => {
-    const status = resourcePlanningData?.availability_status || 'available';
-    const variant = status === 'available' ? 'default' : status === 'engaged' ? 'secondary' : 'outline';
-    const color = status === 'available' ? 'text-green-700 bg-green-50 border-green-200' : 
-                  status === 'engaged' ? 'text-orange-700 bg-orange-50 border-orange-200' : 
-                  'text-gray-700 bg-gray-50 border-gray-200';
-    
-    return (
-      <Badge variant={variant} className={`${color} text-xs`}>
-        {status === 'available' ? 'Available' : status === 'engaged' ? 'Engaged' : 'Unknown'}
-      </Badge>
-    );
-  };
-
-  const formatReleaseDate = (date?: string) => {
-    if (!date) return 'N/A';
-    return new Date(date).toLocaleDateString();
-  };
-
   if (!resourcePlanning) {
     return (
-      <div className="text-xs text-muted-foreground italic">
-        No resource planning data
+      <div className={`flex items-center gap-2 text-xs ${className}`}>
+        <Badge variant="secondary" className="bg-green-50 text-green-700 border-green-200">
+          Available
+        </Badge>
+        <span className="text-muted-foreground">0% engaged</span>
       </div>
     );
   }
 
-  return (
-    <TooltipProvider>
-      <div className="space-y-2">
-        {/* Availability Status */}
-        <div className="flex items-center gap-2">
-          {getAvailabilityBadge(resourcePlanning)}
+  const {
+    availability_status,
+    days_until_available,
+    cumulative_engagement_percent,
+    cumulative_billing_percent,
+    final_release_date,
+    breakdown
+  } = resourcePlanning;
+
+  const engagementPercent = cumulative_engagement_percent || 0;
+  const billingPercent = cumulative_billing_percent || 0;
+  const assignmentCount = breakdown?.length || 0;
+
+  const getStatusBadge = () => {
+    if (engagementPercent === 0) {
+      return (
+        <Badge className="bg-green-50 text-green-700 border-green-200">
+          Available
+        </Badge>
+      );
+    } else if (engagementPercent >= 100) {
+      return (
+        <Badge className="bg-red-50 text-red-700 border-red-200">
+          Fully Engaged
+        </Badge>
+      );
+    } else {
+      return (
+        <Badge className="bg-yellow-50 text-yellow-700 border-yellow-200">
+          Partially Engaged
+        </Badge>
+      );
+    }
+  };
+
+  const formatDate = (dateString: string | null) => {
+    if (!dateString) return 'N/A';
+    return new Date(dateString).toLocaleDateString();
+  };
+
+  const renderDetailedTooltip = () => {
+    return (
+      <div className="space-y-3 max-w-sm">
+        <div className="font-semibold text-sm border-b pb-2">
+          Resource Status Details
         </div>
         
-        {/* Current Project */}
-        {resourcePlanning.current_project && (
+        {/* Summary */}
+        <div className="space-y-2 text-xs">
+          <div className="flex items-center justify-between">
+            <span className="flex items-center gap-1">
+              <Percent className="h-3 w-3" />
+              Total Engagement:
+            </span>
+            <span className="font-medium">{engagementPercent}%</span>
+          </div>
+          <div className="flex items-center justify-between">
+            <span className="flex items-center gap-1">
+              <Percent className="h-3 w-3" />
+              Total Billing:
+            </span>
+            <span className="font-medium">{billingPercent}%</span>
+          </div>
+          {final_release_date && (
+            <div className="flex items-center justify-between">
+              <span className="flex items-center gap-1">
+                <Calendar className="h-3 w-3" />
+                Final Release:
+              </span>
+              <span className="font-medium">{formatDate(final_release_date)}</span>
+            </div>
+          )}
+          {days_until_available > 0 && (
+            <div className="flex items-center justify-between">
+              <span className="flex items-center gap-1">
+                <Clock className="h-3 w-3" />
+                Available in:
+              </span>
+              <span className="font-medium">{days_until_available} days</span>
+            </div>
+          )}
+        </div>
+
+        {/* Active Assignments Breakdown */}
+        {assignmentCount > 0 && breakdown && (
+          <>
+            <div className="border-t pt-2">
+              <div className="font-semibold text-sm mb-2">
+                Active Assignments ({assignmentCount})
+              </div>
+              
+              <div className="space-y-2 max-h-48 overflow-y-auto">
+                {breakdown.map((item, index) => (
+                  <div key={item.id || index} className="space-y-1 text-xs bg-gray-50 p-2 rounded">
+                    <div className="flex items-center gap-2">
+                      <Building2 className="h-3 w-3 text-blue-600" />
+                      <span className="font-medium">
+                        {item.project_name || 'Unnamed Project'}
+                      </span>
+                    </div>
+                    
+                    {item.client_name && (
+                      <div className="ml-5 text-muted-foreground">
+                        Client: {item.client_name}
+                      </div>
+                    )}
+                    
+                    <div className="ml-5 flex items-center gap-4">
+                      <span className="flex items-center gap-1">
+                        <Percent className="h-2 w-2" />
+                        Eng: {item.engagement_percentage}%
+                      </span>
+                      <span className="flex items-center gap-1">
+                        <Percent className="h-2 w-2" />
+                        Bill: {item.billing_percentage}%
+                      </span>
+                    </div>
+                    
+                    {item.release_date && (
+                      <div className="ml-5 flex items-center gap-1 text-muted-foreground">
+                        <Calendar className="h-2 w-2" />
+                        Release: {formatDate(item.release_date)}
+                      </div>
+                    )}
+                    
+                    {item.project_manager && (
+                      <div className="ml-5 text-muted-foreground">
+                        PM: {item.project_manager}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          </>
+        )}
+        
+        {assignmentCount === 0 && engagementPercent === 0 && (
+          <div className="text-center text-muted-foreground text-xs py-2">
+            No active assignments - fully available
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  return (
+    <TooltipProvider>
+      <div className={`flex items-center gap-2 text-xs ${className}`}>
+        {/* Status Badge with Tooltip */}
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <div className="cursor-help">
+              {getStatusBadge()}
+            </div>
+          </TooltipTrigger>
+          <TooltipContent side="bottom" className="p-3">
+            {renderDetailedTooltip()}
+          </TooltipContent>
+        </Tooltip>
+
+        {/* Engagement Percentage - Always Show */}
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <div className="flex items-center gap-1 text-muted-foreground cursor-help">
+              <TrendingUp className="h-3 w-3" />
+              <span className="font-medium">{engagementPercent}%</span>
+            </div>
+          </TooltipTrigger>
+          <TooltipContent>
+            <div className="text-xs">
+              <div>Engagement: {engagementPercent}%</div>
+              <div>Billing: {billingPercent}%</div>
+            </div>
+          </TooltipContent>
+        </Tooltip>
+
+        {/* Days Until Available - Show if applicable */}
+        {final_release_date && days_until_available > 0 && (
           <Tooltip>
             <TooltipTrigger asChild>
-              <div className="flex items-center gap-1 text-sm">
-                <Building2 className="h-3 w-3 text-blue-600" />
-                <span className="truncate max-w-[150px]">
-                  {resourcePlanning.current_project.project_name}
-                </span>
+              <div className="flex items-center gap-1 text-orange-600 cursor-help">
+                <Clock className="h-3 w-3" />
+                <span>{days_until_available}d</span>
               </div>
             </TooltipTrigger>
             <TooltipContent>
-              <div>
-                <div className="font-medium">{resourcePlanning.current_project.project_name}</div>
-                {resourcePlanning.current_project.client_name && (
-                  <div className="text-xs text-gray-600">Client: {resourcePlanning.current_project.client_name}</div>
-                )}
+              <div className="text-xs">
+                <div>Available in {days_until_available} days</div>
+                <div>Release: {formatDate(final_release_date)}</div>
               </div>
             </TooltipContent>
           </Tooltip>
         )}
-        
-        {/* Engagement & Billing Percentages */}
-        {resourcePlanning.engagement_percentage && (
-          <div className="flex items-center gap-1 text-xs text-gray-600">
-            <TrendingUp className="h-3 w-3" />
-            <span>
-              Eng: {resourcePlanning.engagement_percentage}%
-              {resourcePlanning.billing_percentage && (
-                ` | Bill: ${resourcePlanning.billing_percentage}%`
-              )}
-            </span>
-          </div>
-        )}
-        
-        {/* Release Date */}
-        {resourcePlanning.release_date && (
-          <div className="flex items-center gap-1 text-xs text-gray-600">
-            <Calendar className="h-3 w-3" />
-            <span>Release: {formatReleaseDate(resourcePlanning.release_date)}</span>
-          </div>
-        )}
-        
-        {/* Days Until Available */}
-        {resourcePlanning.days_until_available && resourcePlanning.days_until_available > 0 && (
-          <div className="flex items-center gap-1 text-xs text-orange-600">
-            <Clock className="h-3 w-3" />
-            <span>{resourcePlanning.days_until_available} days until available</span>
-          </div>
+
+        {/* Multiple Projects Indicator */}
+        {assignmentCount > 1 && (
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Badge variant="secondary" className="text-xs cursor-help bg-blue-50 text-blue-700 border-blue-200">
+                {assignmentCount} projects
+              </Badge>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Working on {assignmentCount} active assignments</p>
+            </TooltipContent>
+          </Tooltip>
         )}
       </div>
     </TooltipProvider>
