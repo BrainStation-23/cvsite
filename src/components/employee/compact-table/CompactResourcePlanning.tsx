@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -77,15 +76,26 @@ const CompactResourcePlanning: React.FC<CompactResourcePlanningProps> = ({
       {hasBreakdown ? (
         <Popover>
           <PopoverTrigger asChild>
-            <Button variant="outline" size="sm" className="h-6 text-xs">
-              <Info className="h-3 w-3 mr-1" />
-              View Details ({breakdown.length})
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-6 text-xs px-2 rounded-full text-primary hover:bg-primary/10 focus-visible:ring-primary"
+            >
+              <Info className="h-3 w-3" />
+              <span className="ml-1">Details</span>
+              <Badge
+                variant="outline"
+                className="ml-2 h-4 leading-none px-1.5 rounded-full bg-primary/5 text-primary border-primary/20"
+              >
+                {breakdown.length}
+              </Badge>
             </Button>
           </PopoverTrigger>
           <PopoverContent side="right" className="p-3 max-w-md">
             <div className="space-y-3 max-w-sm">
-              <div className="font-semibold text-sm border-b pb-2">
-                Resource Status Details
+              <div className="flex items-center gap-2 text-sm font-medium border-b pb-2">
+                <Info className="h-4 w-4 text-primary" />
+                <span>Resource Status Details</span>
               </div>
               
               {/* Summary */}
@@ -130,7 +140,7 @@ const CompactResourcePlanning: React.FC<CompactResourcePlanningProps> = ({
           </PopoverContent>
         </Popover>
       ) : (
-        <Button variant="outline" size="sm" disabled className="h-6 text-xs">
+        <Button variant="ghost" size="sm" disabled className="h-6 text-xs opacity-60">
           No Active Projects
         </Button>
       )}
