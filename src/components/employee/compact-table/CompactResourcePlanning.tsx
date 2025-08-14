@@ -8,18 +8,22 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip';
 import { 
-  Calendar, 
   TrendingUp, 
-  Building2,
-  Clock,
-  Percent
+  Clock
 } from 'lucide-react';
 import { ResourcePlanningInfo } from '@/hooks/types/employee-profiles';
+import { ResourceStatusBadge } from './ResourceStatusBadge';
+import { ResourceTooltipContent } from './ResourceTooltipContent';
 
 interface CompactResourcePlanningProps {
   resourcePlanning?: ResourcePlanningInfo;
   className?: string;
 }
+
+const formatDate = (dateString: string | null) => {
+  if (!dateString) return 'N/A';
+  return new Date(dateString).toLocaleDateString();
+};
 
 const CompactResourcePlanning: React.FC<CompactResourcePlanningProps> = ({
   resourcePlanning,
@@ -37,150 +41,16 @@ const CompactResourcePlanning: React.FC<CompactResourcePlanningProps> = ({
   }
 
   const {
-    availability_status,
-    days_until_available,
     cumulative_engagement_percent,
     cumulative_billing_percent,
     final_release_date,
+    days_until_available,
     breakdown
   } = resourcePlanning;
 
   const engagementPercent = cumulative_engagement_percent || 0;
   const billingPercent = cumulative_billing_percent || 0;
   const assignmentCount = breakdown?.length || 0;
-
-  const getStatusBadge = () => {
-    if (engagementPercent === 0) {
-      return (
-        <Badge className="bg-green-50 text-green-700 border-green-200">
-          Available
-        </Badge>
-      );
-    } else if (engagementPercent >= 100) {
-      return (
-        <Badge className="bg-red-50 text-red-700 border-red-200">
-          Fully Engaged
-        </Badge>
-      );
-    } else {
-      return (
-        <Badge className="bg-yellow-50 text-yellow-700 border-yellow-200">
-          Partially Engaged
-        </Badge>
-      );
-    }
-  };
-
-  const formatDate = (dateString: string | null) => {
-    if (!dateString) return 'N/A';
-    return new Date(dateString).toLocaleDateString();
-  };
-
-  const renderDetailedTooltip = () => {
-    return (
-      <div className="space-y-3 max-w-sm">
-        <div className="font-semibold text-sm border-b pb-2">
-          Resource Status Details
-        </div>
-        
-        {/* Summary */}
-        <div className="space-y-2 text-xs">
-          <div className="flex items-center justify-between">
-            <span className="flex items-center gap-1">
-              <Percent className="h-3 w-3" />
-              Total Engagement:
-            </span>
-            <span className="font-medium">{engagementPercent}%</span>
-          </div>
-          <div className="flex items-center justify-between">
-            <span className="flex items-center gap-1">
-              <Percent className="h-3 w-3" />
-              Total Billing:
-            </span>
-            <span className="font-medium">{billingPercent}%</span>
-          </div>
-          {final_release_date && (
-            <div className="flex items-center justify-between">
-              <span className="flex items-center gap-1">
-                <Calendar className="h-3 w-3" />
-                Final Release:
-              </span>
-              <span className="font-medium">{formatDate(final_release_date)}</span>
-            </div>
-          )}
-          {days_until_available > 0 && (
-            <div className="flex items-center justify-between">
-              <span className="flex items-center gap-1">
-                <Clock className="h-3 w-3" />
-                Available in:
-              </span>
-              <span className="font-medium">{days_until_available} days</span>
-            </div>
-          )}
-        </div>
-
-        {/* Active Assignments Breakdown */}
-        {assignmentCount > 0 && breakdown && (
-          <>
-            <div className="border-t pt-2">
-              <div className="font-semibold text-sm mb-2">
-                Active Assignments ({assignmentCount})
-              </div>
-              
-              <div className="space-y-2 max-h-48 overflow-y-auto">
-                {breakdown.map((item, index) => (
-                  <div key={item.id || index} className="space-y-1 text-xs bg-gray-50 p-2 rounded">
-                    <div className="flex items-center gap-2">
-                      <Building2 className="h-3 w-3 text-blue-600" />
-                      <span className="font-medium">
-                        {item.project_name || 'Unnamed Project'}
-                      </span>
-                    </div>
-                    
-                    {item.client_name && (
-                      <div className="ml-5 text-muted-foreground">
-                        Client: {item.client_name}
-                      </div>
-                    )}
-                    
-                    <div className="ml-5 flex items-center gap-4">
-                      <span className="flex items-center gap-1">
-                        <Percent className="h-2 w-2" />
-                        Eng: {item.engagement_percentage}%
-                      </span>
-                      <span className="flex items-center gap-1">
-                        <Percent className="h-2 w-2" />
-                        Bill: {item.billing_percentage}%
-                      </span>
-                    </div>
-                    
-                    {item.release_date && (
-                      <div className="ml-5 flex items-center gap-1 text-muted-foreground">
-                        <Calendar className="h-2 w-2" />
-                        Release: {formatDate(item.release_date)}
-                      </div>
-                    )}
-                    
-                    {item.project_manager && (
-                      <div className="ml-5 text-muted-foreground">
-                        PM: {item.project_manager}
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </div>
-          </>
-        )}
-        
-        {assignmentCount === 0 && engagementPercent === 0 && (
-          <div className="text-center text-muted-foreground text-xs py-2">
-            No active assignments - fully available
-          </div>
-        )}
-      </div>
-    );
-  };
 
   return (
     <TooltipProvider>
@@ -189,11 +59,11 @@ const CompactResourcePlanning: React.FC<CompactResourcePlanningProps> = ({
         <Tooltip>
           <TooltipTrigger asChild>
             <div className="cursor-help">
-              {getStatusBadge()}
+              <ResourceStatusBadge engagementPercent={engagementPercent} />
             </div>
           </TooltipTrigger>
           <TooltipContent side="bottom" className="p-3">
-            {renderDetailedTooltip()}
+            <ResourceTooltipContent resourcePlanning={resourcePlanning} />
           </TooltipContent>
         </Tooltip>
 
