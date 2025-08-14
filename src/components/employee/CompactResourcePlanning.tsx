@@ -12,7 +12,6 @@ export const CompactResourcePlanning: React.FC<CompactResourcePlanningProps> = (
   resourcePlanning,
   className = ''
 }) => {
-  // Use the enhanced version which handles both new cumulative data and legacy fields
   return (
     <CompactResourcePlanningEnhanced 
       resourcePlanning={resourcePlanning}
@@ -20,3 +19,5 @@ export const CompactResourcePlanning: React.FC<CompactResourcePlanningProps> = (
     />
   );
 };
+
+export default CompactResourcePlanning;
