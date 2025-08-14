@@ -1,4 +1,29 @@
+
+export interface ResourcePlanningBreakdownItem {
+  id: string;
+  project_id: string | null;
+  project_name: string | null;
+  client_name: string | null;
+  project_manager: string | null;
+  bill_type_id: string | null;
+  bill_type_name: string | null;
+  engagement_percentage: number | null;
+  billing_percentage: number | null;
+  engagement_start_date: string | null;
+  release_date: string | null;
+  engagement_complete: boolean;
+  weekly_validation: boolean;
+}
+
 export interface ResourcePlanningInfo {
+  availability_status: string;
+  days_until_available: number;
+  cumulative_engagement_percent: number | null;
+  cumulative_billing_percent: number | null;
+  final_release_date: string | null;
+  breakdown: ResourcePlanningBreakdownItem[];
+  
+  // Legacy fields for backward compatibility (will be deprecated)
   id?: string;
   engagement_percentage?: number;
   billing_percentage?: number;
@@ -6,8 +31,6 @@ export interface ResourcePlanningInfo {
   release_date?: string;
   engagement_complete?: boolean;
   weekly_validation?: boolean;
-  availability_status: string;
-  days_until_available: number;
   current_project?: {
     id: string;
     project_name: string;

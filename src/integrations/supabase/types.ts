@@ -64,6 +64,13 @@ export type Database = {
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "achievements_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "resource_availability_view"
+            referencedColumns: ["profile_id"]
+          },
         ]
       }
       bill_types: {
@@ -287,6 +294,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "education_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "resource_availability_view"
+            referencedColumns: ["profile_id"]
+          },
+          {
             foreignKeyName: "education_university_fkey"
             columns: ["university"]
             isOneToOne: false
@@ -397,6 +411,13 @@ export type Database = {
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "experiences_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "resource_availability_view"
+            referencedColumns: ["profile_id"]
+          },
         ]
       }
       expertise_types: {
@@ -482,6 +503,13 @@ export type Database = {
             isOneToOne: true
             referencedRelation: "profiles"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "general_information_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: true
+            referencedRelation: "resource_availability_view"
+            referencedColumns: ["profile_id"]
           },
         ]
       }
@@ -593,6 +621,13 @@ export type Database = {
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "notes_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "resource_availability_view"
+            referencedColumns: ["profile_id"]
+          },
         ]
       }
       profiles: {
@@ -676,6 +711,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "profiles_manager_fkey"
+            columns: ["manager"]
+            isOneToOne: false
+            referencedRelation: "resource_availability_view"
+            referencedColumns: ["profile_id"]
           },
           {
             foreignKeyName: "profiles_resource_type_fkey"
@@ -799,6 +841,13 @@ export type Database = {
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "projects_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "resource_availability_view"
+            referencedColumns: ["profile_id"]
+          },
         ]
       }
       projects_management: {
@@ -856,6 +905,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "projects_management_project_manager_fkey"
+            columns: ["project_manager"]
+            isOneToOne: false
+            referencedRelation: "resource_availability_view"
+            referencedColumns: ["profile_id"]
           },
           {
             foreignKeyName: "projects_management_project_type_fkey"
@@ -1073,6 +1129,13 @@ export type Database = {
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "specialized_skills_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "resource_availability_view"
+            referencedColumns: ["profile_id"]
+          },
         ]
       }
       technical_skills: {
@@ -1124,6 +1187,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "technical_skills_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "resource_availability_view"
+            referencedColumns: ["profile_id"]
           },
         ]
       }
@@ -1188,6 +1258,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "trainings_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "resource_availability_view"
+            referencedColumns: ["profile_id"]
           },
         ]
       }
@@ -1335,7 +1412,26 @@ export type Database = {
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "projects_management_project_manager_fkey"
+            columns: ["current_project_manager_id"]
+            isOneToOne: false
+            referencedRelation: "resource_availability_view"
+            referencedColumns: ["profile_id"]
+          },
         ]
+      }
+      resource_availability_view: {
+        Row: {
+          availability_status: string | null
+          breakdown: Json | null
+          cumulative_billing_percent: number | null
+          cumulative_engagement_percent: number | null
+          days_until_available: number | null
+          final_release_date: string | null
+          profile_id: string | null
+        }
+        Relationships: []
       }
     }
     Functions: {
@@ -1364,32 +1460,59 @@ export type Database = {
         Returns: Json
       }
       get_employee_profiles: {
-        Args: {
-          search_query?: string
-          skill_filter?: string
-          experience_filter?: string
-          education_filter?: string
-          training_filter?: string
-          achievement_filter?: string
-          project_filter?: string
-          min_experience_years?: number
-          max_experience_years?: number
-          min_graduation_year?: number
-          max_graduation_year?: number
-          completion_status?: string
-          min_engagement_percentage?: number
-          max_engagement_percentage?: number
-          min_billing_percentage?: number
-          max_billing_percentage?: number
-          release_date_from?: string
-          release_date_to?: string
-          availability_status?: string
-          current_project_search?: string
-          page_number?: number
-          items_per_page?: number
-          sort_by?: string
-          sort_order?: string
-        }
+        Args:
+          | {
+              search_query?: string
+              skill_filter?: string
+              experience_filter?: string
+              education_filter?: string
+              training_filter?: string
+              achievement_filter?: string
+              project_filter?: string
+              min_experience_years?: number
+              max_experience_years?: number
+              min_graduation_year?: number
+              max_graduation_year?: number
+              completion_status?: string
+              min_engagement_percentage?: number
+              max_engagement_percentage?: number
+              min_billing_percentage?: number
+              max_billing_percentage?: number
+              release_date_from?: string
+              release_date_to?: string
+              availability_status?: string
+              current_project_search?: string
+              page_number?: number
+              items_per_page?: number
+              sort_by?: string
+              sort_order?: string
+            }
+          | {
+              search_query?: string
+              skill_filter?: string
+              experience_filter?: string
+              education_filter?: string
+              training_filter?: string
+              achievement_filter?: string
+              project_filter?: string
+              min_experience_years?: number
+              max_experience_years?: number
+              min_graduation_year?: number
+              max_graduation_year?: number
+              completion_status?: string
+              min_engagement_percentage?: number
+              max_engagement_percentage?: number
+              min_billing_percentage?: number
+              max_billing_percentage?: number
+              release_date_from?: string
+              release_date_to?: string
+              availability_status?: string
+              current_project_search?: string
+              page_number?: number
+              items_per_page?: number
+              sort_by?: string
+              sort_order?: string
+            }
         Returns: Json
       }
       get_experience_distribution: {
