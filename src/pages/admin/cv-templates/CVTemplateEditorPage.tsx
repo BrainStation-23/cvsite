@@ -1,9 +1,11 @@
+
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, Save, Eye } from 'lucide-react';
 import { toast } from 'sonner';
 import DashboardLayout from '@/components/Layout/DashboardLayout';
+import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from '@/components/ui/resizable';
 import { useCVTemplates } from '@/hooks/use-cv-templates';
 import { CVTemplateHTMLEditor } from '@/components/admin/cv-templates/CVTemplateHTMLEditor';
 import { TemplateVariableHelper } from '@/components/admin/cv-templates/TemplateVariableHelper';
@@ -12,7 +14,7 @@ const CVTemplateEditorPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { templates, updateTemplate, isUpdating } = useCVTemplates();
-
+  
   const [templateName, setTemplateName] = useState('');
   const [htmlTemplate, setHtmlTemplate] = useState('');
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
@@ -37,7 +39,7 @@ const CVTemplateEditorPage: React.FC = () => {
       name: templateName.trim(),
       html_template: htmlTemplate.trim(),
     });
-
+    
     setHasUnsavedChanges(false);
     toast.success('Template saved successfully');
   };
@@ -75,62 +77,70 @@ const CVTemplateEditorPage: React.FC = () => {
   }
 
   return (
-    <DashboardLayout>
-      <div className="flex flex-col h-full -m-4">
-        {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b bg-background flex-shrink-0">
-          <div className="flex items-center gap-4">
-            <Button variant="ghost" size="sm" onClick={handleBack}>
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Back to Templates
-            </Button>
-            <div className="flex flex-col">
-              <input
-                type="text"
-                value={templateName}
-                onChange={(e) => handleNameChange(e.target.value)}
-                className="text-xl font-semibold bg-transparent border-none outline-none focus:bg-muted/50 rounded px-2 py-1"
-                placeholder="Template name..."
-              />
-              <span className="text-sm text-muted-foreground px-2">
-                Template ID: {id}
-              </span>
+    <div className="h-screen flex flex-col">
+      <DashboardLayout>
+        <div className="h-full flex flex-col -m-4">
+          {/* Header */}
+          <div className="flex items-center justify-between p-4 border-b bg-background flex-shrink-0">
+            <div className="flex items-center gap-4">
+              <Button variant="ghost" size="sm" onClick={handleBack}>
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                Back to Templates
+              </Button>
+              <div className="flex flex-col">
+                <input
+                  type="text"
+                  value={templateName}
+                  onChange={(e) => handleNameChange(e.target.value)}
+                  className="text-xl font-semibold bg-transparent border-none outline-none focus:bg-muted/50 rounded px-2 py-1"
+                  placeholder="Template name..."
+                />
+                <span className="text-sm text-muted-foreground px-2">
+                  Template ID: {id}
+                </span>
+              </div>
+              {hasUnsavedChanges && (
+                <span className="text-xs text-amber-600 bg-amber-50 px-2 py-1 rounded">
+                  Unsaved changes
+                </span>
+              )}
             </div>
-            {hasUnsavedChanges && (
-              <span className="text-xs text-amber-600 bg-amber-50 px-2 py-1 rounded">
-                Unsaved changes
-              </span>
-            )}
-          </div>
-          <div className="flex gap-2">
-            <Button variant="outline" onClick={handlePreview}>
-              <Eye className="h-4 w-4 mr-2" />
-              Preview
-            </Button>
-            <Button onClick={handleSave} disabled={isUpdating}>
-              <Save className="h-4 w-4 mr-2" />
-              {isUpdating ? 'Saving...' : 'Save Template'}
-            </Button>
-          </div>
-        </div>
-
-        {/* Main Content - Fixed 70/30 */}
-        <div className="flex flex-1 min-h-0">
-          {/* Left panel */}
-          <div className="w-[70%] flex-shrink-0 flex-grow-0 border-r overflow-auto">
-            <CVTemplateHTMLEditor
-              value={htmlTemplate}
-              onChange={handleTemplateChange}
-            />
+            <div className="flex gap-2">
+              <Button variant="outline" onClick={handlePreview}>
+                <Eye className="h-4 w-4 mr-2" />
+                Preview
+              </Button>
+              <Button onClick={handleSave} disabled={isUpdating}>
+                <Save className="h-4 w-4 mr-2" />
+                {isUpdating ? 'Saving...' : 'Save Template'}
+              </Button>
+            </div>
           </div>
 
-          {/* Right panel */}
-          <div className="w-[30%] flex-shrink-0 flex-grow-0 overflow-y-auto">
-            <TemplateVariableHelper selectedEmployeeId={null} />
+          {/* Main Content - Two Panel Layout */}
+          <div className="flex-1 min-h-0">
+            <ResizablePanelGroup direction="horizontal" className="h-full">
+              {/* Left Panel - HTML Editor */}
+              <ResizablePanel defaultSize={60} minSize={40}>
+                <CVTemplateHTMLEditor
+                  value={htmlTemplate}
+                  onChange={handleTemplateChange}
+                />
+              </ResizablePanel>
+
+              <ResizableHandle withHandle />
+
+              {/* Right Panel - Variable Helper */}
+              <ResizablePanel defaultSize={40} minSize={30}>
+                <TemplateVariableHelper
+                  selectedEmployeeId={null}
+                />
+              </ResizablePanel>
+            </ResizablePanelGroup>
           </div>
         </div>
-      </div>
-    </DashboardLayout>
+      </DashboardLayout>
+    </div>
   );
 };
 
