@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import DashboardLayout from '../../components/Layout/DashboardLayout';
@@ -21,7 +20,11 @@ const ResourceCalendarStatistics: React.FC = () => {
     sbu: null as string | null,
   });
 
+  // Add state for group by dimension
+  const [groupBy, setGroupBy] = useState<'all' | 'sbu' | 'resourceType' | 'billType' | 'expertiseType'>('all');
+
   console.log('Current filters state:', filters);
+  console.log('Current groupBy state:', groupBy);
 
   // Fetch data with current filters
   const { data: resourceCountData, isLoading: resourceCountLoading } = useResourceCountStatistics(filters);
@@ -39,42 +42,34 @@ const ResourceCalendarStatistics: React.FC = () => {
       expertiseType: null,
       sbu: null,
     });
+    setGroupBy('all');
   };
 
   // Get current grouping description
   const getGroupingDescription = () => {
     const hasSpecificFilter = filters.sbu || filters.resourceType || filters.billType || filters.expertiseType;
     
-    if (filters.sbu) {
+    if (groupBy === 'sbu') {
       return hasSpecificFilter && filters.sbu 
         ? `SBU-focused view (${filters.sbu})` 
         : 'SBU-focused view across all SBUs';
     }
-    if (filters.resourceType) {
+    if (groupBy === 'resourceType') {
       return hasSpecificFilter && filters.resourceType 
         ? `Resource Type view (${filters.resourceType})` 
         : 'Resource Type view across all types';
     }
-    if (filters.billType) {
+    if (groupBy === 'billType') {
       return hasSpecificFilter && filters.billType 
         ? `Bill Type view (${filters.billType})` 
         : 'Bill Type view across all bill types';
     }
-    if (filters.expertiseType) {
+    if (groupBy === 'expertiseType') {
       return hasSpecificFilter && filters.expertiseType 
         ? `Expertise view (${filters.expertiseType})` 
         : 'Expertise view across all expertise types';
     }
     return 'Organization-wide view across all dimensions';
-  };
-
-  // Determine current group by dimension
-  const getCurrentGroupBy = () => {
-    if (filters.sbu !== null) return 'sbu';
-    if (filters.resourceType !== null) return 'resourceType';
-    if (filters.billType !== null) return 'billType';
-    if (filters.expertiseType !== null) return 'expertiseType';
-    return 'all';
   };
 
   return (
@@ -113,7 +108,7 @@ const ResourceCalendarStatistics: React.FC = () => {
               data={resourceCountData} 
               isLoading={resourceCountLoading}
               filters={filters}
-              groupBy={getCurrentGroupBy()}
+              groupBy={groupBy}
             />
           )}
         </div>
