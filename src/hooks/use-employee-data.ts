@@ -20,8 +20,8 @@ export function useEmployeeData(profileId: string) {
 
       if (!data) return null;
 
-      // Type assertion to ensure we get the correct type
-      const employeeData = data as EmployeeProfile;
+      // Proper type conversion: Json -> unknown -> EmployeeProfile
+      const employeeData = data as unknown as EmployeeProfile;
 
       // Ensure projects include responsibility field
       if (employeeData.projects) {
