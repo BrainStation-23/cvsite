@@ -2,6 +2,8 @@
 import React from 'react';
 import { useTemplateEngine } from '@/hooks/use-template-engine';
 import { useEmployeeData } from '@/hooks/use-employee-data';
+import { useShadowDOM } from '@/hooks/use-shadow-dom';
+import { extractCSSFromHTML } from '@/utils/css-extractor';
 import { Button } from '@/components/ui/button';
 import { Download, Maximize } from 'lucide-react';
 
@@ -17,6 +19,18 @@ export const CVTemplatePreview: React.FC<CVTemplatePreviewProps> = ({
   const { data: employeeData, isLoading: isLoadingEmployee } = useEmployeeData(selectedEmployeeId || '');
   const { processedHTML, error, isProcessing } = useTemplateEngine(htmlTemplate, employeeData);
 
+  // Extract CSS and HTML for Shadow DOM isolation
+  const { css: extractedCSS, html: cleanHTML } = React.useMemo(() => {
+    if (!processedHTML) return { css: '', html: '' };
+    return extractCSSFromHTML(processedHTML);
+  }, [processedHTML]);
+
+  // Use Shadow DOM for CSS isolation
+  const shadowRef = useShadowDOM({
+    html: cleanHTML,
+    styles: extractedCSS
+  });
+
   const handleFullscreen = () => {
     const newWindow = window.open('', '_blank');
     if (newWindow) {
@@ -28,10 +42,11 @@ export const CVTemplatePreview: React.FC<CVTemplatePreviewProps> = ({
             <style>
               body { font-family: Arial, sans-serif; margin: 20px; line-height: 1.6; }
               .container { max-width: 800px; margin: 0 auto; }
+              ${extractedCSS}
             </style>
           </head>
           <body>
-            <div class="container">${processedHTML}</div>
+            <div class="container">${cleanHTML}</div>
           </body>
         </html>
       `);
@@ -40,7 +55,24 @@ export const CVTemplatePreview: React.FC<CVTemplatePreviewProps> = ({
   };
 
   const handleDownload = () => {
-    const blob = new Blob([processedHTML], { type: 'text/html' });
+    const fullHTML = `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <title>CV Preview</title>
+          <style>
+            body { font-family: Arial, sans-serif; margin: 20px; line-height: 1.6; }
+            .container { max-width: 800px; margin: 0 auto; }
+            ${extractedCSS}
+          </style>
+        </head>
+        <body>
+          <div class="container">${cleanHTML}</div>
+        </body>
+      </html>
+    `;
+    
+    const blob = new Blob([fullHTML], { type: 'text/html' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
@@ -121,11 +153,9 @@ export const CVTemplatePreview: React.FC<CVTemplatePreviewProps> = ({
             {(htmlTemplate.trim() || processedHTML) && (
               <div className="p-4">
                 <div 
+                  ref={shadowRef}
                   className="bg-white shadow-lg border rounded-lg p-6 max-w-4xl mx-auto"
-                  style={{ minHeight: '297mm', fontFamily: 'Arial, sans-serif' }}
-                  dangerouslySetInnerHTML={{ 
-                    __html: processedHTML || htmlTemplate 
-                  }}
+                  style={{ minHeight: '297mm' }}
                 />
               </div>
             )}
