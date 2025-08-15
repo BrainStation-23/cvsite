@@ -114,18 +114,18 @@ const CVTemplateEditorPage: React.FC = () => {
           </div>
         </div>
 
-        {/* Main Content - Fixed Split */}
+        {/* Main Content - Fixed 70/30 */}
         <div className="flex flex-1 min-h-0">
-          {/* Left panel - 70% */}
-          <div className="w-[70%] h-full border-r">
+          {/* Left panel */}
+          <div className="w-[70%] flex-shrink-0 flex-grow-0 border-r overflow-auto">
             <CVTemplateHTMLEditor
               value={htmlTemplate}
               onChange={handleTemplateChange}
             />
           </div>
 
-          {/* Right panel - 30% */}
-          <div className="w-[30%] h-full overflow-y-auto">
+          {/* Right panel */}
+          <div className="w-[30%] flex-shrink-0 flex-grow-0 overflow-y-auto">
             <TemplateVariableHelper selectedEmployeeId={null} />
           </div>
         </div>
