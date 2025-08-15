@@ -11,8 +11,19 @@ export const useShadowDOM = ({ html, styles }: UseShadowDOMOptions) => {
   const shadowRootRef = useRef<ShadowRoot | null>(null);
 
   useEffect(() => {
-    if (!containerRef.current || !html) {
-      console.log('Shadow DOM: No container or HTML content');
+    if (!containerRef.current) {
+      console.log('Shadow DOM: No container element');
+      return;
+    }
+
+    if (!html) {
+      console.log('Shadow DOM: No HTML content, clearing container');
+      // Clear container if no content
+      if (shadowRootRef.current) {
+        shadowRootRef.current.innerHTML = '';
+      } else if (containerRef.current) {
+        containerRef.current.innerHTML = '';
+      }
       return;
     }
 
@@ -34,7 +45,7 @@ export const useShadowDOM = ({ html, styles }: UseShadowDOMOptions) => {
 
     const shadowRoot = shadowRootRef.current;
 
-    // Clear previous content
+    // Always clear previous content before adding new content
     shadowRoot.innerHTML = '';
 
     // Add base styles for better rendering
@@ -43,27 +54,40 @@ export const useShadowDOM = ({ html, styles }: UseShadowDOMOptions) => {
         display: block;
         font-family: Arial, sans-serif;
         line-height: 1.6;
+        width: 100%;
+        height: 100%;
       }
       * {
         box-sizing: border-box;
       }
+      body {
+        margin: 0;
+        padding: 0;
+      }
     `;
 
-    // Create style element
-    if (styles || baseStyles) {
-      const styleElement = document.createElement('style');
-      styleElement.textContent = baseStyles + (styles || '');
-      shadowRoot.appendChild(styleElement);
-      console.log('Shadow DOM: Added styles');
-    }
+    // Create and add style element
+    const styleElement = document.createElement('style');
+    styleElement.textContent = baseStyles + (styles || '');
+    shadowRoot.appendChild(styleElement);
+    console.log('Shadow DOM: Added styles');
 
-    // Create content container
+    // Create content container and add HTML
     const contentDiv = document.createElement('div');
     contentDiv.innerHTML = html;
     shadowRoot.appendChild(contentDiv);
     console.log('Shadow DOM: Added HTML content');
 
-  }, [html, styles]);
+  }, [html, styles]); // Re-run effect when html or styles change
+
+  // Cleanup function to handle component unmount
+  useEffect(() => {
+    return () => {
+      if (shadowRootRef.current) {
+        shadowRootRef.current.innerHTML = '';
+      }
+    };
+  }, []);
 
   return containerRef;
 };
