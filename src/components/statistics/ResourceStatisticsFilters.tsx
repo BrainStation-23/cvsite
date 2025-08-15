@@ -18,6 +18,8 @@ interface ResourceStatisticsFiltersProps {
   };
   onFiltersChange: (filters: any) => void;
   onClearFilters: () => void;
+  groupBy?: 'all' | 'sbu' | 'resourceType' | 'billType' | 'expertiseType';
+  onGroupByChange?: (groupBy: 'all' | 'sbu' | 'resourceType' | 'billType' | 'expertiseType') => void;
 }
 
 type GroupByDimension = 'all' | 'sbu' | 'resourceType' | 'billType' | 'expertiseType';
@@ -25,18 +27,18 @@ type GroupByDimension = 'all' | 'sbu' | 'resourceType' | 'billType' | 'expertise
 export const ResourceStatisticsFilters: React.FC<ResourceStatisticsFiltersProps> = ({
   filters,
   onFiltersChange,
-  onClearFilters
+  onClearFilters,
+  groupBy = 'all',
+  onGroupByChange
 }) => {
-  // Add state for selected group by dimension
-  const [selectedGroupBy, setSelectedGroupBy] = useState<GroupByDimension>('all');
-
   const hasActiveFilter = Object.values(filters).some(value => value !== null && value !== undefined);
 
   const handleGroupByChange = (dimension: GroupByDimension) => {
     console.log('Group by changed to:', dimension);
     
-    // Update the selected group by state
-    setSelectedGroupBy(dimension);
+    if (onGroupByChange) {
+      onGroupByChange(dimension);
+    }
     
     // Clear all filters when changing group by dimension
     const clearedFilters = {
@@ -58,7 +60,7 @@ export const ResourceStatisticsFilters: React.FC<ResourceStatisticsFiltersProps>
   };
 
   const renderConditionalFilter = () => {
-    switch (selectedGroupBy) {
+    switch (groupBy) {
       case 'sbu':
         return (
           <div className="space-y-2">
@@ -109,7 +111,9 @@ export const ResourceStatisticsFilters: React.FC<ResourceStatisticsFiltersProps>
   };
 
   const handleClearAll = () => {
-    setSelectedGroupBy('all');
+    if (onGroupByChange) {
+      onGroupByChange('all');
+    }
     onClearFilters();
   };
 
@@ -121,7 +125,7 @@ export const ResourceStatisticsFilters: React.FC<ResourceStatisticsFiltersProps>
             <BarChart3 className="h-5 w-5" />
             Group By & Filter
           </CardTitle>
-          {(hasActiveFilter || selectedGroupBy !== 'all') && (
+          {(hasActiveFilter || groupBy !== 'all') && (
             <Button
               variant="outline"
               size="sm"
@@ -140,7 +144,7 @@ export const ResourceStatisticsFilters: React.FC<ResourceStatisticsFiltersProps>
           <div className="space-y-2 flex-1">
             <label className="text-sm font-medium">Group By</label>
             <Select
-              value={selectedGroupBy}
+              value={groupBy}
               onValueChange={handleGroupByChange}
             >
               <SelectTrigger>
@@ -157,7 +161,7 @@ export const ResourceStatisticsFilters: React.FC<ResourceStatisticsFiltersProps>
           </div>
 
           {/* Conditional Filter */}
-          {selectedGroupBy !== 'all' && (
+          {groupBy !== 'all' && (
             <div className="flex-1">
               {renderConditionalFilter()}
             </div>
@@ -165,15 +169,15 @@ export const ResourceStatisticsFilters: React.FC<ResourceStatisticsFiltersProps>
         </div>
 
         {/* Active Filter Indicator */}
-        {(hasActiveFilter || selectedGroupBy !== 'all') && (
+        {(hasActiveFilter || groupBy !== 'all') && (
           <div className="mt-4 p-3 bg-muted/50 rounded-lg">
             <div className="text-sm text-muted-foreground">
               Currently showing: <span className="font-medium text-foreground">
-                {selectedGroupBy === 'all' && 'All dimensions with breakdowns'}
-                {selectedGroupBy === 'sbu' && (filters.sbu ? `${filters.sbu} SBU only` : 'All SBUs grouped by SBU')}
-                {selectedGroupBy === 'resourceType' && (filters.resourceType ? `${filters.resourceType} resources only` : 'All Resource Types grouped by Type')}
-                {selectedGroupBy === 'billType' && (filters.billType ? `${filters.billType} bill type only` : 'All Bill Types grouped by Bill Type')}
-                {selectedGroupBy === 'expertiseType' && (filters.expertiseType ? `${filters.expertiseType} expertise only` : 'All Expertise Types grouped by Expertise')}
+                {groupBy === 'all' && 'All dimensions with breakdowns'}
+                {groupBy === 'sbu' && (filters.sbu ? `${filters.sbu} SBU only` : 'All SBUs grouped by SBU')}
+                {groupBy === 'resourceType' && (filters.resourceType ? `${filters.resourceType} resources only` : 'All Resource Types grouped by Type')}
+                {groupBy === 'billType' && (filters.billType ? `${filters.billType} bill type only` : 'All Bill Types grouped by Bill Type')}
+                {groupBy === 'expertiseType' && (filters.expertiseType ? `${filters.expertiseType} expertise only` : 'All Expertise Types grouped by Expertise')}
               </span>
             </div>
           </div>
