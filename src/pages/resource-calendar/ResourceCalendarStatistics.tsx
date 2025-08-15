@@ -159,9 +159,7 @@ const ResourceCalendarStatistics: React.FC = () => {
         {/* Group By & Filtering Controls */}
         <ResourceStatisticsFilters
           filters={filters}
-          groupBy={groupBy}
           onFiltersChange={handleFiltersChange}
-          onGroupByChange={handleGroupByChange}
           onClearFilters={handleClearFilters}
         />
 
