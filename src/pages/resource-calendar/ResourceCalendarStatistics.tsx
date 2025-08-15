@@ -37,6 +37,15 @@ const ResourceCalendarStatistics: React.FC = () => {
     });
   };
 
+  // Get current grouping description
+  const getGroupingDescription = () => {
+    if (filters.sbu) return `SBU-focused view${filters.sbu ? ` (${filters.sbu})` : ''}`;
+    if (filters.resourceType) return `Resource Type view${filters.resourceType ? ` (${filters.resourceType})` : ''}`;
+    if (filters.billType) return `Bill Type view${filters.billType ? ` (${filters.billType})` : ''}`;
+    if (filters.expertiseType) return `Expertise view${filters.expertiseType ? ` (${filters.expertiseType})` : ''}`;
+    return 'Organization-wide view across all dimensions';
+  };
+
   return (
     <DashboardLayout>
       <div className="space-y-6">
@@ -51,18 +60,15 @@ const ResourceCalendarStatistics: React.FC = () => {
           <div>
             <h1 className="text-2xl font-bold flex items-center gap-2">
               <BarChart3 className="h-6 w-6" />
-              Resource Calendar Statistics
+              Resource Analytics Dashboard
             </h1>
             <p className="text-muted-foreground">
-              {filters.sbu 
-                ? `Analytics and insights for ${filters.sbu} SBU` 
-                : 'Analytics and insights for resource planning (Organization-wide view)'
-              }
+              {getGroupingDescription()}
             </p>
           </div>
         </div>
 
-        {/* Filters */}
+        {/* Group By & Filtering Controls */}
         <ResourceStatisticsFilters
           filters={filters}
           onFiltersChange={handleFiltersChange}

@@ -1,11 +1,9 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { BarChart3, Table as TableIcon } from 'lucide-react';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
+import { Users, TrendingUp, CheckCircle, Building } from 'lucide-react';
 import { ResourceCountStatistics } from '@/hooks/use-resource-count-statistics';
-import { ResourceCountTable } from './ResourceCountTable';
 
 interface ResourceCountChartsProps {
   data: ResourceCountStatistics;
@@ -18,28 +16,23 @@ interface ResourceCountChartsProps {
   };
 }
 
-export const ResourceCountCharts: React.FC<ResourceCountChartsProps> = ({ data, isLoading, filters }) => {
-  const [viewMode, setViewMode] = useState<'table' | 'chart'>('table');
+const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8', '#82CA9D'];
 
-  // Determine which cards to show based on active filters
-  const showResourceTypeCard = !filters.resourceType;
-  const showBillTypeCard = !filters.billType;
-  const showExpertiseCard = !filters.expertiseType;
-  const showSbuCard = !filters.sbu;
-
+export const ResourceCountCharts: React.FC<ResourceCountChartsProps> = ({
+  data,
+  isLoading,
+  filters
+}) => {
   if (isLoading) {
-    // Count how many cards should be shown for loading state
-    const cardsToShow = [showResourceTypeCard, showBillTypeCard, showExpertiseCard, showSbuCard].filter(Boolean).length;
-    
     return (
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {Array.from({ length: cardsToShow }, (_, i) => (
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {[1, 2, 3, 4].map((i) => (
           <Card key={i}>
-            <CardHeader>
-              <div className="h-6 bg-gray-200 rounded animate-pulse" />
-            </CardHeader>
-            <CardContent>
-              <div className="h-64 bg-gray-100 rounded animate-pulse" />
+            <CardContent className="p-6">
+              <div className="animate-pulse">
+                <div className="h-4 bg-gray-200 rounded w-1/3 mb-4"></div>
+                <div className="h-64 bg-gray-200 rounded"></div>
+              </div>
             </CardContent>
           </Card>
         ))}
@@ -47,173 +40,242 @@ export const ResourceCountCharts: React.FC<ResourceCountChartsProps> = ({ data, 
     );
   }
 
+  // Determine current grouping dimension
+  const getCurrentGroupBy = () => {
+    if (filters.sbu) return 'sbu';
+    if (filters.resourceType) return 'resourceType';
+    if (filters.billType) return 'billType';
+    if (filters.expertiseType) return 'expertiseType';
+    return 'all';
+  };
+
+  const currentGroupBy = getCurrentGroupBy();
+
+  // Summary Cards
+  const SummaryCards = () => (
+    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+      <Card>
+        <CardContent className="p-4">
+          <div className="flex items-center space-x-3">
+            <div className="p-2 bg-blue-100 rounded-full">
+              <Users className="h-5 w-5 text-blue-600" />
+            </div>
+            <div>
+              <p className="text-sm text-muted-foreground">Total Resources</p>
+              <p className="text-2xl font-bold">{data.total_resources}</p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+      
+      <Card>
+        <CardContent className="p-4">
+          <div className="flex items-center space-x-3">
+            <div className="p-2 bg-green-100 rounded-full">
+              <TrendingUp className="h-5 w-5 text-green-600" />
+            </div>
+            <div>
+              <p className="text-sm text-muted-foreground">Active Engagements</p>
+              <p className="text-2xl font-bold">{data.active_engagements}</p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+      
+      <Card>
+        <CardContent className="p-4">
+          <div className="flex items-center space-x-3">
+            <div className="p-2 bg-purple-100 rounded-full">
+              <CheckCircle className="h-5 w-5 text-purple-600" />
+            </div>
+            <div>
+              <p className="text-sm text-muted-foreground">Completed</p>
+              <p className="text-2xl font-bold">{data.completed_engagements}</p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+
+  // Chart component for individual breakdowns
+  const BreakdownChart = ({ 
+    title, 
+    data: chartData, 
+    icon: Icon 
+  }: { 
+    title: string; 
+    data: Array<{ name: string; count: number }>; 
+    icon: React.ComponentType<any>;
+  }) => (
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2 text-lg">
+          <Icon className="h-5 w-5" />
+          {title}
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="h-64">
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart data={chartData}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis 
+                dataKey="name" 
+                tick={{ fontSize: 12 }}
+                angle={-45}
+                textAnchor="end"
+                height={80}
+              />
+              <YAxis tick={{ fontSize: 12 }} />
+              <Tooltip />
+              <Bar dataKey="count" fill="#0088FE" />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+      </CardContent>
+    </Card>
+  );
+
+  // Pie chart component
+  const PieBreakdownChart = ({ 
+    title, 
+    data: chartData, 
+    icon: Icon 
+  }: { 
+    title: string; 
+    data: Array<{ name: string; count: number }>; 
+    icon: React.ComponentType<any>;
+  }) => (
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2 text-lg">
+          <Icon className="h-5 w-5" />
+          {title}
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="h-64">
+          <ResponsiveContainer width="100%" height="100%">
+            <PieChart>
+              <Pie
+                data={chartData}
+                cx="50%"
+                cy="50%"
+                labelLine={false}
+                label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                outerRadius={80}
+                fill="#8884d8"
+                dataKey="count"
+              >
+                {chartData.map((entry, index) => (
+                  <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                ))}
+              </Pie>
+              <Tooltip />
+            </PieChart>
+          </ResponsiveContainer>
+        </div>
+      </CardContent>
+    </Card>
+  );
+
+  // Render charts based on current grouping
+  const renderCharts = () => {
+    switch (currentGroupBy) {
+      case 'sbu':
+        return (
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <BreakdownChart
+              title="Resources by SBU"
+              data={data.by_sbu}
+              icon={Building}
+            />
+            <PieBreakdownChart
+              title="SBU Distribution"
+              data={data.by_sbu}
+              icon={Building}
+            />
+          </div>
+        );
+      case 'resourceType':
+        return (
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <BreakdownChart
+              title="Resources by Type"
+              data={data.by_resource_type}
+              icon={Users}
+            />
+            <PieBreakdownChart
+              title="Resource Type Distribution"
+              data={data.by_resource_type}
+              icon={Users}
+            />
+          </div>
+        );
+      case 'billType':
+        return (
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <BreakdownChart
+              title="Resources by Bill Type"
+              data={data.by_bill_type}
+              icon={TrendingUp}
+            />
+            <PieBreakdownChart
+              title="Bill Type Distribution"
+              data={data.by_bill_type}
+              icon={TrendingUp}
+            />
+          </div>
+        );
+      case 'expertiseType':
+        return (
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <BreakdownChart
+              title="Resources by Expertise"
+              data={data.by_expertise_type}
+              icon={CheckCircle}
+            />
+            <PieBreakdownChart
+              title="Expertise Distribution"
+              data={data.by_expertise_type}
+              icon={CheckCircle}
+            />
+          </div>
+        );
+      default:
+        // Show all dimensions when "All" is selected
+        return (
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <BreakdownChart
+              title="Resources by SBU"
+              data={data.by_sbu}
+              icon={Building}
+            />
+            <BreakdownChart
+              title="Resources by Type"
+              data={data.by_resource_type}
+              icon={Users}
+            />
+            <BreakdownChart
+              title="Resources by Bill Type"
+              data={data.by_bill_type}
+              icon={TrendingUp}
+            />
+            <BreakdownChart
+              title="Resources by Expertise"
+              data={data.by_expertise_type}
+              icon={CheckCircle}
+            />
+          </div>
+        );
+    }
+  };
+
   return (
     <div className="space-y-6">
-      {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card>
-          <CardContent className="p-6">
-            <div className="text-2xl font-bold">{data.total_resources}</div>
-            <p className="text-sm text-muted-foreground">Total Resources</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-6">
-            <div className="text-2xl font-bold text-green-600">{data.active_engagements}</div>
-            <p className="text-sm text-muted-foreground">Active Engagements</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-6">
-            <div className="text-2xl font-bold text-blue-600">{data.completed_engagements}</div>
-            <p className="text-sm text-muted-foreground">Completed Engagements</p>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* View Toggle */}
-      <div className="flex justify-end">
-        <div className="flex gap-2 p-1 bg-muted rounded-lg">
-          <Button
-            variant={viewMode === 'table' ? 'default' : 'ghost'}
-            size="sm"
-            onClick={() => setViewMode('table')}
-            className="h-8"
-          >
-            <TableIcon className="h-4 w-4 mr-2" />
-            Table View
-          </Button>
-          <Button
-            variant={viewMode === 'chart' ? 'default' : 'ghost'}
-            size="sm"
-            onClick={() => setViewMode('chart')}
-            className="h-8"
-          >
-            <BarChart3 className="h-4 w-4 mr-2" />
-            Chart View
-          </Button>
-        </div>
-      </div>
-
-      {/* Content Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {viewMode === 'table' ? (
-          // Table Views
-          <>
-            {showResourceTypeCard && (
-              <ResourceCountTable
-                title="Resources by Type"
-                data={data.by_resource_type || []}
-                isLoading={isLoading}
-              />
-            )}
-            {showBillTypeCard && (
-              <ResourceCountTable
-                title="Resources by Bill Type"
-                data={data.by_bill_type || []}
-                isLoading={isLoading}
-              />
-            )}
-            {showExpertiseCard && (
-              <ResourceCountTable
-                title="Resources by Expertise"
-                data={data.by_expertise_type || []}
-                isLoading={isLoading}
-              />
-            )}
-            {showSbuCard && (
-              <ResourceCountTable
-                title="Resources by SBU"
-                data={data.by_sbu || []}
-                isLoading={isLoading}
-              />
-            )}
-          </>
-        ) : (
-          // Chart Views
-          <>
-            {/* Resource Types Chart */}
-            {showResourceTypeCard && (
-              <Card>
-                <CardHeader>
-                  <CardTitle>Resources by Type</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <ResponsiveContainer width="100%" height={300}>
-                    <BarChart data={data.by_resource_type || []}>
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis dataKey="name" />
-                      <YAxis />
-                      <Tooltip />
-                      <Bar dataKey="count" fill="#8884d8" />
-                    </BarChart>
-                  </ResponsiveContainer>
-                </CardContent>
-              </Card>
-            )}
-
-            {/* Bill Types Chart */}
-            {showBillTypeCard && (
-              <Card>
-                <CardHeader>
-                  <CardTitle>Resources by Bill Type</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <ResponsiveContainer width="100%" height={300}>
-                    <BarChart data={data.by_bill_type || []}>
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis dataKey="name" />
-                      <YAxis />
-                      <Tooltip />
-                      <Bar dataKey="count" fill="#82ca9d" />
-                    </BarChart>
-                  </ResponsiveContainer>
-                </CardContent>
-              </Card>
-            )}
-
-            {/* Expertise Types Chart */}
-            {showExpertiseCard && (
-              <Card>
-                <CardHeader>
-                  <CardTitle>Resources by Expertise</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <ResponsiveContainer width="100%" height={300}>
-                    <BarChart data={data.by_expertise_type || []}>
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis dataKey="name" />
-                      <YAxis />
-                      <Tooltip />
-                      <Bar dataKey="count" fill="#ffc658" />
-                    </BarChart>
-                  </ResponsiveContainer>
-                </CardContent>
-              </Card>
-            )}
-
-            {/* SBU Chart */}
-            {showSbuCard && (
-              <Card>
-                <CardHeader>
-                  <CardTitle>Resources by SBU</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <ResponsiveContainer width="100%" height={300}>
-                    <BarChart data={data.by_sbu || []}>
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis dataKey="name" />
-                      <YAxis />
-                      <Tooltip />
-                      <Bar dataKey="count" fill="#ff7300" />
-                    </BarChart>
-                  </ResponsiveContainer>
-                </CardContent>
-              </Card>
-            )}
-          </>
-        )}
-      </div>
+      <SummaryCards />
+      {renderCharts()}
     </div>
   );
 };
