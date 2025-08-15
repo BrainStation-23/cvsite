@@ -48,7 +48,7 @@ const CVTemplatesPage: React.FC = () => {
   };
 
   const handlePreview = (template: CVTemplate) => {
-    setPreviewTemplate(template);
+    navigate(`/admin/cv-templates/${id}`);
   };
 
   const handleFormSubmit = (data: { name: string; html_template: string }) => {
@@ -169,24 +169,6 @@ const CVTemplatesPage: React.FC = () => {
           isLoading={isCreating || isUpdating}
         />
 
-        {/* Preview Dialog */}
-        {previewTemplate && (
-          <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
-            <div className="bg-white dark:bg-gray-800 rounded-lg max-w-4xl w-full max-h-[90vh] overflow-hidden">
-              <div className="p-4 border-b flex justify-between items-center">
-                <h3 className="text-lg font-semibold">Preview: {previewTemplate.name}</h3>
-                <Button variant="ghost" onClick={() => setPreviewTemplate(undefined)}>
-                  ×
-                </Button>
-              </div>
-              <div className="p-4 overflow-auto max-h-[80vh]">
-                <div 
-                  className="border rounded-lg p-4 bg-white"
-                  dangerouslySetInnerHTML={{ __html: previewTemplate.html_template }}
-                />
-              </div>
-            </div>
-          </div>
         )}
 
         {/* Confirmation Dialog */}
