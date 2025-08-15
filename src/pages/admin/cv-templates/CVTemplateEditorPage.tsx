@@ -78,7 +78,7 @@ const CVTemplateEditorPage: React.FC = () => {
 
   return (
     <DashboardLayout>
-      <div className="h-full flex flex-col">
+      <div className="h-4 flex flex-col">
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b bg-background">
           <div className="flex items-center gap-4">
