@@ -31,8 +31,10 @@ import ResourceCalendarView from '@/pages/resource-calendar/ResourceCalendarView
 import ResourceCalendarStatistics from '@/pages/resource-calendar/ResourceCalendarStatistics';
 import ResourceCalendarPlanning from '@/pages/resource-calendar/ResourceCalendarPlanning';
 import ProjectsManagement from '@/pages/admin/ProjectsManagement';
-import './App.css';
 import CVTemplatesPage from './pages/admin/cv-templates/CVTemplatesPage';
+import CVTemplateEditorPage from './pages/admin/cv-templates/CVTemplateEditorPage';
+import CVTemplateViewPage from './pages/admin/cv-templates/CVTemplateViewPage';
+import './App.css';
 
 // Create QueryClient instance outside component to prevent recreation
 const queryClient = new QueryClient({
@@ -362,7 +364,7 @@ function App(): React.ReactElement {
               path="/admin/cv-templates/:id"
               element={
                 <ProtectedRoute allowedRoles={['admin']}>
-                  Placeholder
+                  <CVTemplateViewPage />
                 </ProtectedRoute>
               }
             />
@@ -370,7 +372,7 @@ function App(): React.ReactElement {
               path="/admin/cv-templates/:id/edit"
               element={
                 <ProtectedRoute allowedRoles={['admin']}>
-                  Placeholder
+                  <CVTemplateEditorPage />
                 </ProtectedRoute>
               }
             />

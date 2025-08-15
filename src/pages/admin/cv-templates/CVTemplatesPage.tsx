@@ -1,5 +1,5 @@
-
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import DashboardLayout from '@/components/Layout/DashboardLayout';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -10,6 +10,7 @@ import { ConfirmationDialog } from '@/components/ui/confirmation-dialog';
 import { useConfirmationDialog } from '@/hooks/use-confirmation-dialog';
 
 const CVTemplatesPage: React.FC = () => {
+  const navigate = useNavigate();
   const { 
     templates, 
     isLoading, 
@@ -33,8 +34,7 @@ const CVTemplatesPage: React.FC = () => {
   };
 
   const handleEdit = (template: CVTemplate) => {
-    setEditingTemplate(template);
-    setIsFormOpen(true);
+    navigate(`/admin/cv-templates/${template.id}/edit`);
   };
 
   const handleDelete = (template: CVTemplate) => {
