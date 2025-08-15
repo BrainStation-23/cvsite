@@ -14,6 +14,7 @@ interface ResourceCountChartsProps {
     expertiseType?: string | null;
     sbu?: string | null;
   };
+  groupBy?: 'all' | 'sbu' | 'resourceType' | 'billType' | 'expertiseType';
 }
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8', '#82CA9D'];
@@ -21,8 +22,11 @@ const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8', '#82CA9D'
 export const ResourceCountCharts: React.FC<ResourceCountChartsProps> = ({
   data,
   isLoading,
-  filters
+  filters,
+  groupBy = 'all'
 }) => {
+  console.log('ResourceCountCharts rendering with groupBy:', groupBy, 'filters:', filters);
+
   if (isLoading) {
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -39,17 +43,6 @@ export const ResourceCountCharts: React.FC<ResourceCountChartsProps> = ({
       </div>
     );
   }
-
-  // Determine current grouping dimension
-  const getCurrentGroupBy = () => {
-    if (filters.sbu) return 'sbu';
-    if (filters.resourceType) return 'resourceType';
-    if (filters.billType) return 'billType';
-    if (filters.expertiseType) return 'expertiseType';
-    return 'all';
-  };
-
-  const currentGroupBy = getCurrentGroupBy();
 
   // Summary Cards
   const SummaryCards = () => (
@@ -182,17 +175,17 @@ export const ResourceCountCharts: React.FC<ResourceCountChartsProps> = ({
 
   // Render charts based on current grouping
   const renderCharts = () => {
-    switch (currentGroupBy) {
+    switch (groupBy) {
       case 'sbu':
         return (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <BreakdownChart
-              title="Resources by SBU"
+              title={filters.sbu ? `SBU Resources (${filters.sbu})` : "Resources by SBU"}
               data={data.by_sbu}
               icon={Building}
             />
             <PieBreakdownChart
-              title="SBU Distribution"
+              title={filters.sbu ? `SBU Distribution (${filters.sbu})` : "SBU Distribution"}
               data={data.by_sbu}
               icon={Building}
             />
@@ -202,12 +195,12 @@ export const ResourceCountCharts: React.FC<ResourceCountChartsProps> = ({
         return (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <BreakdownChart
-              title="Resources by Type"
+              title={filters.resourceType ? `Resource Type (${filters.resourceType})` : "Resources by Type"}
               data={data.by_resource_type}
               icon={Users}
             />
             <PieBreakdownChart
-              title="Resource Type Distribution"
+              title={filters.resourceType ? `Resource Type Distribution (${filters.resourceType})` : "Resource Type Distribution"}
               data={data.by_resource_type}
               icon={Users}
             />
@@ -217,12 +210,12 @@ export const ResourceCountCharts: React.FC<ResourceCountChartsProps> = ({
         return (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <BreakdownChart
-              title="Resources by Bill Type"
+              title={filters.billType ? `Bill Type (${filters.billType})` : "Resources by Bill Type"}
               data={data.by_bill_type}
               icon={TrendingUp}
             />
             <PieBreakdownChart
-              title="Bill Type Distribution"
+              title={filters.billType ? `Bill Type Distribution (${filters.billType})` : "Bill Type Distribution"}
               data={data.by_bill_type}
               icon={TrendingUp}
             />
@@ -232,12 +225,12 @@ export const ResourceCountCharts: React.FC<ResourceCountChartsProps> = ({
         return (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <BreakdownChart
-              title="Resources by Expertise"
+              title={filters.expertiseType ? `Expertise (${filters.expertiseType})` : "Resources by Expertise"}
               data={data.by_expertise_type}
               icon={CheckCircle}
             />
             <PieBreakdownChart
-              title="Expertise Distribution"
+              title={filters.expertiseType ? `Expertise Distribution (${filters.expertiseType})` : "Expertise Distribution"}
               data={data.by_expertise_type}
               icon={CheckCircle}
             />

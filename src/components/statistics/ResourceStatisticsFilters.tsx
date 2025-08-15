@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -29,10 +28,10 @@ export const ResourceStatisticsFilters: React.FC<ResourceStatisticsFiltersProps>
 }) => {
   // Determine current group by dimension based on active filters
   const getCurrentGroupBy = (): GroupByDimension => {
-    if (filters.sbu) return 'sbu';
-    if (filters.resourceType) return 'resourceType';
-    if (filters.billType) return 'billType';
-    if (filters.expertiseType) return 'expertiseType';
+    if (filters.sbu !== null && filters.sbu !== undefined) return 'sbu';
+    if (filters.resourceType !== null && filters.resourceType !== undefined) return 'resourceType';
+    if (filters.billType !== null && filters.billType !== undefined) return 'billType';
+    if (filters.expertiseType !== null && filters.expertiseType !== undefined) return 'expertiseType';
     return 'all';
   };
 
@@ -40,15 +39,37 @@ export const ResourceStatisticsFilters: React.FC<ResourceStatisticsFiltersProps>
   const hasActiveFilter = Object.values(filters).some(value => value !== null && value !== undefined);
 
   const handleGroupByChange = (dimension: GroupByDimension) => {
+    console.log('Group by changed to:', dimension);
+    
     // Clear all filters when changing group by dimension
-    onClearFilters();
+    const clearedFilters = {
+      resourceType: null,
+      billType: null,
+      expertiseType: null,
+      sbu: null,
+    };
+    
+    // If selecting a specific dimension, we keep the filters cleared
+    // The user can then optionally set a filter for that dimension
+    onFiltersChange(clearedFilters);
   };
 
   const updateFilter = (key: string, value: any) => {
+    console.log(`Updating filter ${key} to:`, value);
     onFiltersChange({
       ...filters,
       [key]: value
     });
+  };
+
+  const getGroupByDisplayValue = () => {
+    switch (currentGroupBy) {
+      case 'sbu': return 'sbu';
+      case 'resourceType': return 'resourceType';
+      case 'billType': return 'billType';
+      case 'expertiseType': return 'expertiseType';
+      default: return 'all';
+    }
   };
 
   const renderConditionalFilter = () => {
@@ -129,7 +150,7 @@ export const ResourceStatisticsFilters: React.FC<ResourceStatisticsFiltersProps>
           <div className="space-y-2 flex-1">
             <label className="text-sm font-medium">Group By</label>
             <Select
-              value={currentGroupBy}
+              value={getGroupByDisplayValue()}
               onValueChange={handleGroupByChange}
             >
               <SelectTrigger>
@@ -162,6 +183,10 @@ export const ResourceStatisticsFilters: React.FC<ResourceStatisticsFiltersProps>
                 {currentGroupBy === 'resourceType' && filters.resourceType && `${filters.resourceType} resources only`}
                 {currentGroupBy === 'billType' && filters.billType && `${filters.billType} bill type only`}
                 {currentGroupBy === 'expertiseType' && filters.expertiseType && `${filters.expertiseType} expertise only`}
+                {currentGroupBy === 'sbu' && !filters.sbu && 'All SBUs grouped by SBU'}
+                {currentGroupBy === 'resourceType' && !filters.resourceType && 'All Resource Types grouped by Type'}
+                {currentGroupBy === 'billType' && !filters.billType && 'All Bill Types grouped by Bill Type'}
+                {currentGroupBy === 'expertiseType' && !filters.expertiseType && 'All Expertise Types grouped by Expertise'}
               </span>
             </div>
           </div>

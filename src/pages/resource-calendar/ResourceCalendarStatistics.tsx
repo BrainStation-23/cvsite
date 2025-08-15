@@ -21,14 +21,18 @@ const ResourceCalendarStatistics: React.FC = () => {
     sbu: null as string | null,
   });
 
+  console.log('Current filters state:', filters);
+
   // Fetch data with current filters
   const { data: resourceCountData, isLoading: resourceCountLoading } = useResourceCountStatistics(filters);
 
   const handleFiltersChange = (newFilters: typeof filters) => {
+    console.log('Filters changing from:', filters, 'to:', newFilters);
     setFilters(newFilters);
   };
 
   const handleClearFilters = () => {
+    console.log('Clearing all filters');
     setFilters({
       resourceType: null,
       billType: null,
@@ -39,11 +43,38 @@ const ResourceCalendarStatistics: React.FC = () => {
 
   // Get current grouping description
   const getGroupingDescription = () => {
-    if (filters.sbu) return `SBU-focused view${filters.sbu ? ` (${filters.sbu})` : ''}`;
-    if (filters.resourceType) return `Resource Type view${filters.resourceType ? ` (${filters.resourceType})` : ''}`;
-    if (filters.billType) return `Bill Type view${filters.billType ? ` (${filters.billType})` : ''}`;
-    if (filters.expertiseType) return `Expertise view${filters.expertiseType ? ` (${filters.expertiseType})` : ''}`;
+    const hasSpecificFilter = filters.sbu || filters.resourceType || filters.billType || filters.expertiseType;
+    
+    if (filters.sbu) {
+      return hasSpecificFilter && filters.sbu 
+        ? `SBU-focused view (${filters.sbu})` 
+        : 'SBU-focused view across all SBUs';
+    }
+    if (filters.resourceType) {
+      return hasSpecificFilter && filters.resourceType 
+        ? `Resource Type view (${filters.resourceType})` 
+        : 'Resource Type view across all types';
+    }
+    if (filters.billType) {
+      return hasSpecificFilter && filters.billType 
+        ? `Bill Type view (${filters.billType})` 
+        : 'Bill Type view across all bill types';
+    }
+    if (filters.expertiseType) {
+      return hasSpecificFilter && filters.expertiseType 
+        ? `Expertise view (${filters.expertiseType})` 
+        : 'Expertise view across all expertise types';
+    }
     return 'Organization-wide view across all dimensions';
+  };
+
+  // Determine current group by dimension
+  const getCurrentGroupBy = () => {
+    if (filters.sbu !== null) return 'sbu';
+    if (filters.resourceType !== null) return 'resourceType';
+    if (filters.billType !== null) return 'billType';
+    if (filters.expertiseType !== null) return 'expertiseType';
+    return 'all';
   };
 
   return (
@@ -82,6 +113,7 @@ const ResourceCalendarStatistics: React.FC = () => {
               data={resourceCountData} 
               isLoading={resourceCountLoading}
               filters={filters}
+              groupBy={getCurrentGroupBy()}
             />
           )}
         </div>
