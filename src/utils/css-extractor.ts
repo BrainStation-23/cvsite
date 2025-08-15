@@ -27,6 +27,9 @@ export const extractCSSFromHTML = (htmlString: string) => {
     }
   });
 
+  console.log('CSS Extractor: Extracted CSS length:', extractedCSS.length + inlineCSS.length);
+  console.log('CSS Extractor: Clean HTML length:', tempDiv.innerHTML.length);
+
   return {
     css: extractedCSS + inlineCSS,
     html: tempDiv.innerHTML

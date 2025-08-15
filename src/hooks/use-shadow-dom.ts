@@ -11,12 +11,19 @@ export const useShadowDOM = ({ html, styles }: UseShadowDOMOptions) => {
   const shadowRootRef = useRef<ShadowRoot | null>(null);
 
   useEffect(() => {
-    if (!containerRef.current || !html) return;
+    if (!containerRef.current || !html) {
+      console.log('Shadow DOM: No container or HTML content');
+      return;
+    }
+
+    console.log('Shadow DOM: Processing HTML:', html.substring(0, 100) + '...');
+    console.log('Shadow DOM: Processing styles:', styles?.substring(0, 100) + '...');
 
     // Create shadow root if it doesn't exist
     if (!shadowRootRef.current) {
       try {
         shadowRootRef.current = containerRef.current.attachShadow({ mode: 'open' });
+        console.log('Shadow DOM: Created shadow root');
       } catch (error) {
         console.warn('Shadow DOM not supported, falling back to regular DOM');
         // Fallback: use regular innerHTML
@@ -47,12 +54,14 @@ export const useShadowDOM = ({ html, styles }: UseShadowDOMOptions) => {
       const styleElement = document.createElement('style');
       styleElement.textContent = baseStyles + (styles || '');
       shadowRoot.appendChild(styleElement);
+      console.log('Shadow DOM: Added styles');
     }
 
     // Create content container
     const contentDiv = document.createElement('div');
     contentDiv.innerHTML = html;
     shadowRoot.appendChild(contentDiv);
+    console.log('Shadow DOM: Added HTML content');
 
   }, [html, styles]);
 

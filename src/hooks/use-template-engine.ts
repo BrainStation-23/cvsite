@@ -23,10 +23,12 @@ export const useTemplateEngine = (
         let processed = template;
 
         if (data) {
-          // Create a flattened employee object for easier template access
+          console.log('Processing template with employee data:', data);
+          
+          // Map the flat API response to template variables
           const employeeObj = {
-            firstName: data.general_information?.first_name || '',
-            lastName: data.general_information?.last_name || '',
+            firstName: data.first_name || data.general_information?.first_name || '',
+            lastName: data.last_name || data.general_information?.last_name || '',
             email: data.email || '',
             employeeId: data.employee_id || '',
             biography: data.general_information?.biography || '',
@@ -41,9 +43,12 @@ export const useTemplateEngine = (
             achievements: data.achievements || []
           };
 
+          console.log('Mapped employee object:', employeeObj);
+
           // Replace simple variables
           processed = processed.replace(/\{\{employee\.(\w+)\}\}/g, (match, property) => {
             const value = employeeObj[property as keyof typeof employeeObj];
+            console.log(`Replacing ${match} with:`, value);
             return value || '';
           });
 
@@ -52,6 +57,8 @@ export const useTemplateEngine = (
             /\{\{#each employee\.(\w+)\}\}([\s\S]*?)\{\{\/each\}\}/g,
             (match, arrayName, loopContent) => {
               const array = employeeObj[arrayName as keyof typeof employeeObj];
+              console.log(`Processing loop for ${arrayName}:`, array);
+              
               if (!Array.isArray(array)) return '';
 
               return array.map(item => {
@@ -78,6 +85,8 @@ export const useTemplateEngine = (
               return value ? content : '';
             }
           );
+
+          console.log('Final processed HTML:', processed);
         } else {
           // If no data, show placeholder values
           processed = processed.replace(/\{\{employee\.(\w+)\}\}/g, (match, property) => {
@@ -90,6 +99,7 @@ export const useTemplateEngine = (
 
         return processed;
       } catch (err) {
+        console.error('Template processing error:', err);
         throw new Error(`Template processing error: ${err instanceof Error ? err.message : 'Unknown error'}`);
       }
     };
@@ -113,6 +123,7 @@ export const useTemplateEngine = (
         const result = processTemplate(htmlTemplate, employeeData);
         setProcessedHTML(result);
       } catch (err) {
+        console.error('Template engine error:', err);
         setError(err instanceof Error ? err.message : 'Unknown error');
         setProcessedHTML('');
       } finally {
