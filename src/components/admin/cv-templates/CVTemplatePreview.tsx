@@ -30,58 +30,6 @@ export const CVTemplatePreview: React.FC<CVTemplatePreviewProps> = ({
     styles: extractedCSS
   });
 
-  const handleFullscreen = () => {
-    const newWindow = window.open('', '_blank');
-    if (newWindow) {
-      newWindow.document.write(`
-        <!DOCTYPE html>
-        <html>
-          <head>
-            <title>CV Preview</title>
-            <style>
-              body { font-family: Arial, sans-serif; margin: 20px; line-height: 1.6; }
-              .container { max-width: 800px; margin: 0 auto; }
-              ${extractedCSS}
-            </style>
-          </head>
-          <body>
-            <div class="container">${cleanHTML}</div>
-          </body>
-        </html>
-      `);
-      newWindow.document.close();
-    }
-  };
-
-  const handleDownload = () => {
-    const fullHTML = `
-      <!DOCTYPE html>
-      <html>
-        <head>
-          <title>CV Preview</title>
-          <style>
-            body { font-family: Arial, sans-serif; margin: 20px; line-height: 1.6; }
-            .container { max-width: 800px; margin: 0 auto; }
-            ${extractedCSS}
-          </style>
-        </head>
-        <body>
-          <div class="container">${cleanHTML}</div>
-        </body>
-      </html>
-    `;
-    
-    const blob = new Blob([fullHTML], { type: 'text/html' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'cv-preview.html';
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-  };
-
   const handleRefresh = () => {
     console.log('Manual refresh triggered');
     refreshShadowDOM();
@@ -172,4 +120,56 @@ export const CVTemplatePreview: React.FC<CVTemplatePreviewProps> = ({
       </div>
     </div>
   );
+
+  function handleFullscreen() {
+    const newWindow = window.open('', '_blank');
+    if (newWindow) {
+      newWindow.document.write(`
+        <!DOCTYPE html>
+        <html>
+          <head>
+            <title>CV Preview</title>
+            <style>
+              body { font-family: Arial, sans-serif; margin: 20px; line-height: 1.6; }
+              .container { max-width: 800px; margin: 0 auto; }
+              ${extractedCSS}
+            </style>
+          </head>
+          <body>
+            <div class="container">${cleanHTML}</div>
+          </body>
+        </html>
+      `);
+      newWindow.document.close();
+    }
+  }
+
+  function handleDownload() {
+    const fullHTML = `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <title>CV Preview</title>
+          <style>
+            body { font-family: Arial, sans-serif; margin: 20px; line-height: 1.6; }
+            .container { max-width: 800px; margin: 0 auto; }
+            ${extractedCSS}
+          </style>
+        </head>
+        <body>
+          <div class="container">${cleanHTML}</div>
+        </body>
+      </html>
+    `;
+    
+    const blob = new Blob([fullHTML], { type: 'text/html' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'cv-preview.html';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
 };
