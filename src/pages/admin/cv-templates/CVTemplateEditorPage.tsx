@@ -2,13 +2,14 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Save, Eye } from 'lucide-react';
+import { ArrowLeft, Save, Eye, FileText } from 'lucide-react';
 import { toast } from 'sonner';
 import DashboardLayout from '@/components/Layout/DashboardLayout';
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from '@/components/ui/resizable';
 import { useCVTemplates } from '@/hooks/use-cv-templates';
 import { CVTemplateHTMLEditor } from '@/components/admin/cv-templates/CVTemplateHTMLEditor';
 import { TemplateVariableHelper } from '@/components/admin/cv-templates/TemplateVariableHelper';
+import { EXAMPLE_CV_TEMPLATE } from '@/constants/cv-template-examples';
 
 const CVTemplateEditorPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -54,6 +55,17 @@ const CVTemplateEditorPage: React.FC = () => {
 
   const handlePreview = () => {
     navigate(`/admin/cv-templates/${id}`);
+  };
+
+  const handleInsertExample = () => {
+    if (hasUnsavedChanges) {
+      const confirmed = window.confirm('This will replace your current template. Are you sure?');
+      if (!confirmed) return;
+    }
+    
+    setHtmlTemplate(EXAMPLE_CV_TEMPLATE);
+    setHasUnsavedChanges(true);
+    toast.success('Example template inserted');
   };
 
   const handleTemplateChange = (value: string) => {
@@ -105,6 +117,10 @@ const CVTemplateEditorPage: React.FC = () => {
             )}
           </div>
           <div className="flex gap-2">
+            <Button variant="outline" onClick={handleInsertExample}>
+              <FileText className="h-4 w-4 mr-2" />
+              Insert Example
+            </Button>
             <Button variant="outline" onClick={handlePreview}>
               <Eye className="h-4 w-4 mr-2" />
               Preview
