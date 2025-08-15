@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import DashboardLayout from '@/components/Layout/DashboardLayout';
@@ -48,7 +49,7 @@ const CVTemplatesPage: React.FC = () => {
   };
 
   const handlePreview = (template: CVTemplate) => {
-    navigate(`/admin/cv-templates/${id}`);
+    navigate(`/admin/cv-templates/${template.id}`);
   };
 
   const handleFormSubmit = (data: { name: string; html_template: string }) => {
@@ -168,8 +169,6 @@ const CVTemplatesPage: React.FC = () => {
           template={editingTemplate}
           isLoading={isCreating || isUpdating}
         />
-
-        )}
 
         {/* Confirmation Dialog */}
         {config && (
