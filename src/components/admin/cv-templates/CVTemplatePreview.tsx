@@ -179,10 +179,6 @@ export const CVTemplatePreview: React.FC<CVTemplatePreviewProps> = ({
                   {/* CV Content with isolated styles */}
                   <div 
                     style={{
-                      fontFamily: 'Arial, sans-serif',
-                      fontSize: '14px',
-                      lineHeight: '1.6',
-                      color: '#333',
                       all: 'unset',
                       display: 'block',
                       fontFamily: 'Arial, sans-serif',
