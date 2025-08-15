@@ -1,16 +1,21 @@
 
-import { useRef, useEffect } from 'react';
+import { useRef, useEffect, useCallback } from 'react';
 
 interface UseShadowDOMOptions {
   html: string;
   styles?: string;
 }
 
-export const useShadowDOM = ({ html, styles }: UseShadowDOMOptions) => {
+interface UseShadowDOMReturn {
+  ref: React.RefObject<HTMLDivElement>;
+  refresh: () => void;
+}
+
+export const useShadowDOM = ({ html, styles }: UseShadowDOMOptions): UseShadowDOMReturn => {
   const containerRef = useRef<HTMLDivElement>(null);
   const shadowRootRef = useRef<ShadowRoot | null>(null);
 
-  useEffect(() => {
+  const renderContent = useCallback(() => {
     if (!containerRef.current) {
       console.log('Shadow DOM: No container element');
       return;
@@ -77,8 +82,11 @@ export const useShadowDOM = ({ html, styles }: UseShadowDOMOptions) => {
     contentDiv.innerHTML = html;
     shadowRoot.appendChild(contentDiv);
     console.log('Shadow DOM: Added HTML content');
+  }, [html, styles]);
 
-  }, [html, styles]); // Re-run effect when html or styles change
+  useEffect(() => {
+    renderContent();
+  }, [renderContent]);
 
   // Cleanup function to handle component unmount
   useEffect(() => {
@@ -89,5 +97,13 @@ export const useShadowDOM = ({ html, styles }: UseShadowDOMOptions) => {
     };
   }, []);
 
-  return containerRef;
+  const refresh = useCallback(() => {
+    console.log('Shadow DOM: Manual refresh triggered');
+    renderContent();
+  }, [renderContent]);
+
+  return {
+    ref: containerRef,
+    refresh
+  };
 };

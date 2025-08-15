@@ -1,11 +1,10 @@
-
 import React from 'react';
 import { useTemplateEngine } from '@/hooks/use-template-engine';
 import { useEmployeeData } from '@/hooks/use-employee-data';
 import { useShadowDOM } from '@/hooks/use-shadow-dom';
 import { extractCSSFromHTML } from '@/utils/css-extractor';
 import { Button } from '@/components/ui/button';
-import { Download, Maximize } from 'lucide-react';
+import { Download, Maximize, RefreshCw } from 'lucide-react';
 
 interface CVTemplatePreviewProps {
   htmlTemplate: string;
@@ -26,7 +25,7 @@ export const CVTemplatePreview: React.FC<CVTemplatePreviewProps> = ({
   }, [processedHTML]);
 
   // Use Shadow DOM for CSS isolation
-  const shadowRef = useShadowDOM({
+  const { ref: shadowRef, refresh: refreshShadowDOM } = useShadowDOM({
     html: cleanHTML,
     styles: extractedCSS
   });
@@ -83,6 +82,11 @@ export const CVTemplatePreview: React.FC<CVTemplatePreviewProps> = ({
     URL.revokeObjectURL(url);
   };
 
+  const handleRefresh = () => {
+    console.log('Manual refresh triggered');
+    refreshShadowDOM();
+  };
+
   return (
     <div className="h-full flex flex-col">
       {/* Header */}
@@ -96,6 +100,10 @@ export const CVTemplatePreview: React.FC<CVTemplatePreviewProps> = ({
         <div className="flex gap-2">
           {processedHTML && (
             <>
+              <Button size="sm" variant="outline" onClick={handleRefresh}>
+                <RefreshCw className="h-3 w-3 mr-1" />
+                Refresh
+              </Button>
               <Button size="sm" variant="outline" onClick={handleFullscreen}>
                 <Maximize className="h-3 w-3 mr-1" />
                 Fullscreen
