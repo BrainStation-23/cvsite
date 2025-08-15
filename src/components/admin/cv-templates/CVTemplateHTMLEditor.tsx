@@ -101,13 +101,13 @@ export const CVTemplateHTMLEditor: React.FC<CVTemplateHTMLEditorProps> = ({
 
   return (
     <div className="h-full flex flex-col">
-      <div className="p-3 border-b bg-muted/50 flex-shrink-0">
+      <div className="p-3 border-b bg-muted/50">
         <h3 className="font-medium text-sm">HTML Template Editor</h3>
         <p className="text-xs text-muted-foreground mt-1">
           {`Use {{employee.fieldName}} for data variables and {{#each}} for loops`}
         </p>
       </div>
-      <div className="flex-1 min-h-0">
+      <div className="flex-1">
         <MonacoEditor
           height="100%"
           defaultLanguage="html"
@@ -137,10 +137,6 @@ export const CVTemplateHTMLEditor: React.FC<CVTemplateHTMLEditorProps> = ({
             },
             parameterHints: {
               enabled: true
-            },
-            scrollbar: {
-              vertical: 'auto',
-              horizontal: 'auto'
             }
           }}
           theme="vs"

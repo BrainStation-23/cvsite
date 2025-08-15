@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Save, Eye, PanelRight, PanelRightClose } from 'lucide-react';
+import { ArrowLeft, Save, Eye } from 'lucide-react';
 import { toast } from 'sonner';
 import DashboardLayout from '@/components/Layout/DashboardLayout';
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from '@/components/ui/resizable';
@@ -18,7 +18,6 @@ const CVTemplateEditorPage: React.FC = () => {
   const [templateName, setTemplateName] = useState('');
   const [htmlTemplate, setHtmlTemplate] = useState('');
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
-  const [isVariablePanelOpen, setIsVariablePanelOpen] = useState(false);
 
   const currentTemplate = templates.find(t => t.id === id);
 
@@ -67,10 +66,6 @@ const CVTemplateEditorPage: React.FC = () => {
     setHasUnsavedChanges(true);
   };
 
-  const toggleVariablePanel = () => {
-    setIsVariablePanelOpen(!isVariablePanelOpen);
-  };
-
   if (!currentTemplate) {
     return (
       <DashboardLayout>
@@ -83,9 +78,9 @@ const CVTemplateEditorPage: React.FC = () => {
 
   return (
     <DashboardLayout>
-      <div className="h-full flex flex-col overflow-hidden">
+      <div className="h-full flex flex-col">
         {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b bg-background flex-shrink-0">
+        <div className="flex items-center justify-between p-4 border-b bg-background">
           <div className="flex items-center gap-4">
             <Button variant="ghost" size="sm" onClick={handleBack}>
               <ArrowLeft className="h-4 w-4 mr-2" />
@@ -110,19 +105,6 @@ const CVTemplateEditorPage: React.FC = () => {
             )}
           </div>
           <div className="flex gap-2">
-            <Button variant="outline" onClick={toggleVariablePanel}>
-              {isVariablePanelOpen ? (
-                <>
-                  <PanelRightClose className="h-4 w-4 mr-2" />
-                  Hide Variables
-                </>
-              ) : (
-                <>
-                  <PanelRight className="h-4 w-4 mr-2" />
-                  Show Variables
-                </>
-              )}
-            </Button>
             <Button variant="outline" onClick={handlePreview}>
               <Eye className="h-4 w-4 mr-2" />
               Preview
@@ -134,33 +116,26 @@ const CVTemplateEditorPage: React.FC = () => {
           </div>
         </div>
 
-        {/* Main Content */}
-        <div className="flex-1 min-h-0">
-          {isVariablePanelOpen ? (
-            <ResizablePanelGroup direction="horizontal" className="h-full">
-              {/* Left Panel - HTML Editor */}
-              <ResizablePanel defaultSize={60} minSize={40}>
-                <CVTemplateHTMLEditor
-                  value={htmlTemplate}
-                  onChange={handleTemplateChange}
-                />
-              </ResizablePanel>
+        {/* Main Content - Two Panel Layout */}
+        <div className="flex-1 overflow-hidden">
+          <ResizablePanelGroup direction="horizontal">
+            {/* Left Panel - HTML Editor */}
+            <ResizablePanel defaultSize={60} minSize={40}>
+              <CVTemplateHTMLEditor
+                value={htmlTemplate}
+                onChange={handleTemplateChange}
+              />
+            </ResizablePanel>
 
-              <ResizableHandle withHandle />
+            <ResizableHandle withHandle />
 
-              {/* Right Panel - Variable Helper */}
-              <ResizablePanel defaultSize={40} minSize={30}>
-                <TemplateVariableHelper
-                  selectedEmployeeId={null}
-                />
-              </ResizablePanel>
-            </ResizablePanelGroup>
-          ) : (
-            <CVTemplateHTMLEditor
-              value={htmlTemplate}
-              onChange={handleTemplateChange}
-            />
-          )}
+            {/* Right Panel - Variable Helper */}
+            <ResizablePanel defaultSize={40} minSize={30}>
+              <TemplateVariableHelper
+                selectedEmployeeId={null}
+              />
+            </ResizablePanel>
+          </ResizablePanelGroup>
         </div>
       </div>
     </DashboardLayout>
