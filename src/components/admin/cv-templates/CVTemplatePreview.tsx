@@ -26,12 +26,26 @@ export const CVTemplatePreview: React.FC<CVTemplatePreviewProps> = ({
           <head>
             <title>CV Preview</title>
             <style>
-              body { font-family: Arial, sans-serif; margin: 20px; line-height: 1.6; }
-              .container { max-width: 800px; margin: 0 auto; }
+              body { 
+                font-family: Arial, sans-serif; 
+                margin: 0; 
+                padding: 20px; 
+                line-height: 1.6; 
+                background: #f5f5f5;
+              }
+              .a4-container { 
+                width: 210mm; 
+                min-height: 297mm; 
+                margin: 0 auto; 
+                background: white; 
+                box-shadow: 0 0 10px rgba(0,0,0,0.1); 
+                padding: 20mm;
+                box-sizing: border-box;
+              }
             </style>
           </head>
           <body>
-            <div class="container">${processedHTML}</div>
+            <div class="a4-container">${processedHTML}</div>
           </body>
         </html>
       `);
@@ -48,12 +62,26 @@ export const CVTemplatePreview: React.FC<CVTemplatePreviewProps> = ({
         <head>
           <title>CV Preview</title>
           <style>
-            body { font-family: Arial, sans-serif; margin: 20px; line-height: 1.6; }
-            .container { max-width: 800px; margin: 0 auto; }
+            body { 
+              font-family: Arial, sans-serif; 
+              margin: 0; 
+              padding: 20px; 
+              line-height: 1.6; 
+              background: #f5f5f5;
+            }
+            .a4-container { 
+              width: 210mm; 
+              min-height: 297mm; 
+              margin: 0 auto; 
+              background: white; 
+              box-shadow: 0 0 10px rgba(0,0,0,0.1); 
+              padding: 20mm;
+              box-sizing: border-box;
+            }
           </style>
         </head>
         <body>
-          <div class="container">${processedHTML}</div>
+          <div class="a4-container">${processedHTML}</div>
         </body>
       </html>
     `;
@@ -96,7 +124,7 @@ export const CVTemplatePreview: React.FC<CVTemplatePreviewProps> = ({
       </div>
 
       {/* Preview Content */}
-      <div className="flex-1 overflow-auto">
+      <div className="flex-1 overflow-auto bg-gray-100">
         {isLoadingEmployee && selectedEmployeeId && (
           <div className="flex items-center justify-center h-full">
             <div className="text-center">
@@ -137,12 +165,34 @@ export const CVTemplatePreview: React.FC<CVTemplatePreviewProps> = ({
             )}
 
             {(htmlTemplate.trim() || processedHTML) && (
-              <div className="p-4">
+              <div className="p-8">
+                {/* A4 Paper Container */}
                 <div 
-                  className="bg-white shadow-lg border rounded-lg p-6 max-w-4xl mx-auto"
-                  style={{ minHeight: '297mm' }}
-                  dangerouslySetInnerHTML={{ __html: processedHTML || '' }}
-                />
+                  className="mx-auto bg-white shadow-lg"
+                  style={{ 
+                    width: '210mm', 
+                    minHeight: '297mm',
+                    padding: '20mm',
+                    boxSizing: 'border-box'
+                  }}
+                >
+                  {/* CV Content with isolated styles */}
+                  <div 
+                    style={{
+                      fontFamily: 'Arial, sans-serif',
+                      fontSize: '14px',
+                      lineHeight: '1.6',
+                      color: '#333',
+                      all: 'unset',
+                      display: 'block',
+                      fontFamily: 'Arial, sans-serif',
+                      fontSize: '14px',
+                      lineHeight: '1.6',
+                      color: '#333'
+                    }}
+                    dangerouslySetInnerHTML={{ __html: processedHTML || '' }}
+                  />
+                </div>
               </div>
             )}
           </>
