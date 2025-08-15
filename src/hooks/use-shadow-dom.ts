@@ -1,34 +1,18 @@
 
-import { useRef, useEffect, useCallback } from 'react';
+import { useRef, useEffect } from 'react';
 
 interface UseShadowDOMOptions {
   html: string;
   styles?: string;
 }
 
-interface UseShadowDOMReturn {
-  ref: React.RefObject<HTMLDivElement>;
-  refresh: () => void;
-}
-
-export const useShadowDOM = ({ html, styles }: UseShadowDOMOptions): UseShadowDOMReturn => {
+export const useShadowDOM = ({ html, styles }: UseShadowDOMOptions) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const shadowRootRef = useRef<ShadowRoot | null>(null);
 
-  const renderContent = useCallback(() => {
-    if (!containerRef.current) {
-      console.log('Shadow DOM: No container element');
-      return;
-    }
-
-    if (!html) {
-      console.log('Shadow DOM: No HTML content, clearing container');
-      // Clear container if no content
-      if (shadowRootRef.current) {
-        shadowRootRef.current.innerHTML = '';
-      } else if (containerRef.current) {
-        containerRef.current.innerHTML = '';
-      }
+  useEffect(() => {
+    if (!containerRef.current || !html) {
+      console.log('Shadow DOM: No container or HTML content');
       return;
     }
 
@@ -50,7 +34,7 @@ export const useShadowDOM = ({ html, styles }: UseShadowDOMOptions): UseShadowDO
 
     const shadowRoot = shadowRootRef.current;
 
-    // Always clear previous content before adding new content
+    // Clear previous content
     shadowRoot.innerHTML = '';
 
     // Add base styles for better rendering
@@ -59,51 +43,27 @@ export const useShadowDOM = ({ html, styles }: UseShadowDOMOptions): UseShadowDO
         display: block;
         font-family: Arial, sans-serif;
         line-height: 1.6;
-        width: 100%;
-        height: 100%;
       }
       * {
         box-sizing: border-box;
       }
-      body {
-        margin: 0;
-        padding: 0;
-      }
     `;
 
-    // Create and add style element
-    const styleElement = document.createElement('style');
-    styleElement.textContent = baseStyles + (styles || '');
-    shadowRoot.appendChild(styleElement);
-    console.log('Shadow DOM: Added styles');
+    // Create style element
+    if (styles || baseStyles) {
+      const styleElement = document.createElement('style');
+      styleElement.textContent = baseStyles + (styles || '');
+      shadowRoot.appendChild(styleElement);
+      console.log('Shadow DOM: Added styles');
+    }
 
-    // Create content container and add HTML
+    // Create content container
     const contentDiv = document.createElement('div');
     contentDiv.innerHTML = html;
     shadowRoot.appendChild(contentDiv);
     console.log('Shadow DOM: Added HTML content');
+
   }, [html, styles]);
 
-  useEffect(() => {
-    renderContent();
-  }, [renderContent]);
-
-  // Cleanup function to handle component unmount
-  useEffect(() => {
-    return () => {
-      if (shadowRootRef.current) {
-        shadowRootRef.current.innerHTML = '';
-      }
-    };
-  }, []);
-
-  const refresh = useCallback(() => {
-    console.log('Shadow DOM: Manual refresh triggered');
-    renderContent();
-  }, [renderContent]);
-
-  return {
-    ref: containerRef,
-    refresh
-  };
+  return containerRef;
 };

@@ -1,10 +1,11 @@
+
 import React from 'react';
 import { useTemplateEngine } from '@/hooks/use-template-engine';
 import { useEmployeeData } from '@/hooks/use-employee-data';
 import { useShadowDOM } from '@/hooks/use-shadow-dom';
 import { extractCSSFromHTML } from '@/utils/css-extractor';
 import { Button } from '@/components/ui/button';
-import { Download, Maximize, RefreshCw } from 'lucide-react';
+import { Download, Maximize } from 'lucide-react';
 
 interface CVTemplatePreviewProps {
   htmlTemplate: string;
@@ -25,14 +26,61 @@ export const CVTemplatePreview: React.FC<CVTemplatePreviewProps> = ({
   }, [processedHTML]);
 
   // Use Shadow DOM for CSS isolation
-  const { ref: shadowRef, refresh: refreshShadowDOM } = useShadowDOM({
+  const shadowRef = useShadowDOM({
     html: cleanHTML,
     styles: extractedCSS
   });
 
-  const handleRefresh = () => {
-    console.log('Manual refresh triggered');
-    refreshShadowDOM();
+  const handleFullscreen = () => {
+    const newWindow = window.open('', '_blank');
+    if (newWindow) {
+      newWindow.document.write(`
+        <!DOCTYPE html>
+        <html>
+          <head>
+            <title>CV Preview</title>
+            <style>
+              body { font-family: Arial, sans-serif; margin: 20px; line-height: 1.6; }
+              .container { max-width: 800px; margin: 0 auto; }
+              ${extractedCSS}
+            </style>
+          </head>
+          <body>
+            <div class="container">${cleanHTML}</div>
+          </body>
+        </html>
+      `);
+      newWindow.document.close();
+    }
+  };
+
+  const handleDownload = () => {
+    const fullHTML = `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <title>CV Preview</title>
+          <style>
+            body { font-family: Arial, sans-serif; margin: 20px; line-height: 1.6; }
+            .container { max-width: 800px; margin: 0 auto; }
+            ${extractedCSS}
+          </style>
+        </head>
+        <body>
+          <div class="container">${cleanHTML}</div>
+        </body>
+      </html>
+    `;
+    
+    const blob = new Blob([fullHTML], { type: 'text/html' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'cv-preview.html';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
   };
 
   return (
@@ -48,10 +96,6 @@ export const CVTemplatePreview: React.FC<CVTemplatePreviewProps> = ({
         <div className="flex gap-2">
           {processedHTML && (
             <>
-              <Button size="sm" variant="outline" onClick={handleRefresh}>
-                <RefreshCw className="h-3 w-3 mr-1" />
-                Refresh
-              </Button>
               <Button size="sm" variant="outline" onClick={handleFullscreen}>
                 <Maximize className="h-3 w-3 mr-1" />
                 Fullscreen
@@ -120,56 +164,4 @@ export const CVTemplatePreview: React.FC<CVTemplatePreviewProps> = ({
       </div>
     </div>
   );
-
-  function handleFullscreen() {
-    const newWindow = window.open('', '_blank');
-    if (newWindow) {
-      newWindow.document.write(`
-        <!DOCTYPE html>
-        <html>
-          <head>
-            <title>CV Preview</title>
-            <style>
-              body { font-family: Arial, sans-serif; margin: 20px; line-height: 1.6; }
-              .container { max-width: 800px; margin: 0 auto; }
-              ${extractedCSS}
-            </style>
-          </head>
-          <body>
-            <div class="container">${cleanHTML}</div>
-          </body>
-        </html>
-      `);
-      newWindow.document.close();
-    }
-  }
-
-  function handleDownload() {
-    const fullHTML = `
-      <!DOCTYPE html>
-      <html>
-        <head>
-          <title>CV Preview</title>
-          <style>
-            body { font-family: Arial, sans-serif; margin: 20px; line-height: 1.6; }
-            .container { max-width: 800px; margin: 0 auto; }
-            ${extractedCSS}
-          </style>
-        </head>
-        <body>
-          <div class="container">${cleanHTML}</div>
-        </body>
-      </html>
-    `;
-    
-    const blob = new Blob([fullHTML], { type: 'text/html' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'cv-preview.html';
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-  }
 };
