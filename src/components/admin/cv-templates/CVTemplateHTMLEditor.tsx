@@ -24,54 +24,71 @@ export const CVTemplateHTMLEditor: React.FC<CVTemplateHTMLEditorProps> = ({
         // Register custom completion provider for template variables
         monaco.languages.registerCompletionItemProvider('html', {
           provideCompletionItems: (model, position) => {
-            const suggestions = [
+            // Get the current word range
+            const word = model.getWordUntilPosition(position);
+            const range = {
+              startLineNumber: position.lineNumber,
+              endLineNumber: position.lineNumber,
+              startColumn: word.startColumn,
+              endColumn: word.endColumn
+            };
+
+            const suggestions: monaco.languages.CompletionItem[] = [
               {
                 label: '{{employee.firstName}}',
                 kind: monaco.languages.CompletionItemKind.Variable,
                 insertText: '{{employee.firstName}}',
-                documentation: 'Employee first name'
+                documentation: 'Employee first name',
+                range: range
               },
               {
                 label: '{{employee.lastName}}',
                 kind: monaco.languages.CompletionItemKind.Variable,
                 insertText: '{{employee.lastName}}',
-                documentation: 'Employee last name'
+                documentation: 'Employee last name',
+                range: range
               },
               {
                 label: '{{employee.email}}',
                 kind: monaco.languages.CompletionItemKind.Variable,
                 insertText: '{{employee.email}}',
-                documentation: 'Employee email address'
+                documentation: 'Employee email address',
+                range: range
               },
               {
                 label: '{{employee.biography}}',
                 kind: monaco.languages.CompletionItemKind.Variable,
                 insertText: '{{employee.biography}}',
-                documentation: 'Employee biography'
+                documentation: 'Employee biography',
+                range: range
               },
               {
                 label: '{{employee.currentDesignation}}',
                 kind: monaco.languages.CompletionItemKind.Variable,
                 insertText: '{{employee.currentDesignation}}',
-                documentation: 'Current designation'
+                documentation: 'Current designation',
+                range: range
               },
               {
                 label: '{{#each employee.technicalSkills}}',
                 kind: monaco.languages.CompletionItemKind.Snippet,
                 insertText: '{{#each employee.technicalSkills}}\n  <li>{{this.name}} - {{this.proficiency}}/10</li>\n{{/each}}',
-                documentation: 'Loop through technical skills'
+                documentation: 'Loop through technical skills',
+                range: range
               },
               {
                 label: '{{#each employee.experiences}}',
                 kind: monaco.languages.CompletionItemKind.Snippet,
                 insertText: '{{#each employee.experiences}}\n  <div>\n    <h3>{{this.designation}} at {{this.companyName}}</h3>\n    <p>{{this.startDate}} - {{this.endDate}}</p>\n  </div>\n{{/each}}',
-                documentation: 'Loop through work experiences'
+                documentation: 'Loop through work experiences',
+                range: range
               },
               {
                 label: '{{#each employee.education}}',
                 kind: monaco.languages.CompletionItemKind.Snippet,
                 insertText: '{{#each employee.education}}\n  <div>\n    <h3>{{this.degree}} - {{this.department}}</h3>\n    <p>{{this.university}}</p>\n  </div>\n{{/each}}',
-                documentation: 'Loop through education'
+                documentation: 'Loop through education',
+                range: range
               }
             ];
 

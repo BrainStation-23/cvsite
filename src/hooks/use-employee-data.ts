@@ -1,11 +1,12 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { EmployeeProfile } from '@/hooks/types/employee-profiles';
 
 export function useEmployeeData(profileId: string) {
   return useQuery({
     queryKey: ['employee-data', profileId],
-    queryFn: async () => {
+    queryFn: async (): Promise<EmployeeProfile | null> => {
       if (!profileId) return null;
 
       const { data, error } = await supabase.rpc('get_employee_data', {
@@ -17,20 +18,22 @@ export function useEmployeeData(profileId: string) {
         throw error;
       }
 
+      if (!data) return null;
+
+      // Type assertion to ensure we get the correct type
+      const employeeData = data as EmployeeProfile;
+
       // Ensure projects include responsibility field
-      if (data && typeof data === 'object' && data !== null && 'projects' in data) {
-        const typedData = data as any;
-        if (typedData.projects) {
-          typedData.projects = typedData.projects.map((project: any) => ({
-            ...project,
-            // Ensure responsibility field is included, with fallback to empty string
-            responsibility: project.responsibility || ''
-          }));
-        }
+      if (employeeData.projects) {
+        employeeData.projects = employeeData.projects.map((project: any) => ({
+          ...project,
+          // Ensure responsibility field is included, with fallback to empty string
+          responsibility: project.responsibility || ''
+        }));
       }
 
-      console.log('Employee data fetched:', data);
-      return data;
+      console.log('Employee data fetched:', employeeData);
+      return employeeData;
     },
     enabled: !!profileId,
   });
