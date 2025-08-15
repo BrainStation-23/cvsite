@@ -24,7 +24,16 @@ export const TemplateVariableHelper: React.FC<TemplateVariableHelperProps> = ({
   selectedEmployeeId,
 }) => {
   const { data: employeeData } = useEmployeeData(selectedEmployeeId || '');
-  const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set(['general']));
+  const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set(
+    [
+    'General Information',
+    'Technical Skills',
+    'Work Experience',
+    'Education',
+    'Projects',
+    'Training & Certifications'
+    ]
+  ));
 
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
