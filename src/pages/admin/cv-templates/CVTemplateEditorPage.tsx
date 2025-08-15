@@ -2,14 +2,12 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Save } from 'lucide-react';
+import { ArrowLeft, Save, Eye } from 'lucide-react';
 import { toast } from 'sonner';
 import DashboardLayout from '@/components/Layout/DashboardLayout';
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from '@/components/ui/resizable';
 import { useCVTemplates } from '@/hooks/use-cv-templates';
 import { CVTemplateHTMLEditor } from '@/components/admin/cv-templates/CVTemplateHTMLEditor';
-import { EmployeeDataSelector } from '@/components/admin/cv-templates/EmployeeDataSelector';
-import { CVTemplatePreview } from '@/components/admin/cv-templates/CVTemplatePreview';
 import { TemplateVariableHelper } from '@/components/admin/cv-templates/TemplateVariableHelper';
 
 const CVTemplateEditorPage: React.FC = () => {
@@ -19,7 +17,6 @@ const CVTemplateEditorPage: React.FC = () => {
   
   const [templateName, setTemplateName] = useState('');
   const [htmlTemplate, setHtmlTemplate] = useState('');
-  const [selectedEmployeeId, setSelectedEmployeeId] = useState<string | null>(null);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
 
   const currentTemplate = templates.find(t => t.id === id);
@@ -53,6 +50,10 @@ const CVTemplateEditorPage: React.FC = () => {
       if (!confirmed) return;
     }
     navigate('/admin/cv-templates');
+  };
+
+  const handlePreview = () => {
+    navigate(`/admin/cv-templates/${id}`);
   };
 
   const handleTemplateChange = (value: string) => {
@@ -103,52 +104,35 @@ const CVTemplateEditorPage: React.FC = () => {
               </span>
             )}
           </div>
-          <Button onClick={handleSave} disabled={isUpdating}>
-            <Save className="h-4 w-4 mr-2" />
-            {isUpdating ? 'Saving...' : 'Save Template'}
-          </Button>
+          <div className="flex gap-2">
+            <Button variant="outline" onClick={handlePreview}>
+              <Eye className="h-4 w-4 mr-2" />
+              Preview
+            </Button>
+            <Button onClick={handleSave} disabled={isUpdating}>
+              <Save className="h-4 w-4 mr-2" />
+              {isUpdating ? 'Saving...' : 'Save Template'}
+            </Button>
+          </div>
         </div>
 
-        {/* Employee Selector */}
-        <div className="p-4 border-b bg-muted/30">
-          <EmployeeDataSelector
-            selectedEmployeeId={selectedEmployeeId}
-            onEmployeeSelect={setSelectedEmployeeId}
-          />
-        </div>
-
-        {/* Main Content */}
+        {/* Main Content - Two Panel Layout */}
         <div className="flex-1 overflow-hidden">
           <ResizablePanelGroup direction="horizontal">
-            {/* Left Panel - Editor and Helper */}
-            <ResizablePanel defaultSize={50} minSize={30}>
-              <ResizablePanelGroup direction="vertical">
-                {/* Template Editor */}
-                <ResizablePanel defaultSize={70} minSize={40}>
-                  <CVTemplateHTMLEditor
-                    value={htmlTemplate}
-                    onChange={handleTemplateChange}
-                  />
-                </ResizablePanel>
-                
-                <ResizableHandle withHandle />
-                
-                {/* Variable Helper */}
-                <ResizablePanel defaultSize={30} minSize={20}>
-                  <TemplateVariableHelper
-                    selectedEmployeeId={selectedEmployeeId}
-                  />
-                </ResizablePanel>
-              </ResizablePanelGroup>
+            {/* Left Panel - HTML Editor */}
+            <ResizablePanel defaultSize={60} minSize={40}>
+              <CVTemplateHTMLEditor
+                value={htmlTemplate}
+                onChange={handleTemplateChange}
+              />
             </ResizablePanel>
 
             <ResizableHandle withHandle />
 
-            {/* Right Panel - Preview */}
-            <ResizablePanel defaultSize={50} minSize={30}>
-              <CVTemplatePreview
-                htmlTemplate={htmlTemplate}
-                selectedEmployeeId={selectedEmployeeId}
+            {/* Right Panel - Variable Helper */}
+            <ResizablePanel defaultSize={40} minSize={30}>
+              <TemplateVariableHelper
+                selectedEmployeeId={null}
               />
             </ResizablePanel>
           </ResizablePanelGroup>

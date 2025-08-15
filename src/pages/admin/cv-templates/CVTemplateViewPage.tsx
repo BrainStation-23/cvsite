@@ -1,15 +1,18 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, Edit } from 'lucide-react';
 import DashboardLayout from '@/components/Layout/DashboardLayout';
 import { useCVTemplates } from '@/hooks/use-cv-templates';
+import { EmployeeDataSelector } from '@/components/admin/cv-templates/EmployeeDataSelector';
+import { CVTemplatePreview } from '@/components/admin/cv-templates/CVTemplatePreview';
 
 const CVTemplateViewPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { templates } = useCVTemplates();
+  const [selectedEmployeeId, setSelectedEmployeeId] = useState<string | null>(null);
 
   const currentTemplate = templates.find(t => t.id === id);
 
@@ -33,9 +36,9 @@ const CVTemplateViewPage: React.FC = () => {
 
   return (
     <DashboardLayout>
-      <div className="space-y-6">
+      <div className="h-full flex flex-col">
         {/* Header */}
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between p-4 border-b bg-background">
           <div className="flex items-center gap-4">
             <Button variant="ghost" size="sm" onClick={handleBack}>
               <ArrowLeft className="h-4 w-4 mr-2" />
@@ -56,16 +59,20 @@ const CVTemplateViewPage: React.FC = () => {
           </Button>
         </div>
 
-        {/* Template Content */}
-        <div className="border rounded-md">
-          <div className="p-4 border-b bg-muted/50">
-            <h3 className="font-medium">Template HTML</h3>
-          </div>
-          <div className="p-4">
-            <pre className="bg-muted/30 p-4 rounded-md overflow-auto text-sm">
-              <code>{currentTemplate.html_template}</code>
-            </pre>
-          </div>
+        {/* Employee Selector */}
+        <div className="p-4 border-b bg-muted/30">
+          <EmployeeDataSelector
+            selectedEmployeeId={selectedEmployeeId}
+            onEmployeeSelect={setSelectedEmployeeId}
+          />
+        </div>
+
+        {/* Preview Content */}
+        <div className="flex-1 overflow-hidden">
+          <CVTemplatePreview
+            htmlTemplate={currentTemplate.html_template}
+            selectedEmployeeId={selectedEmployeeId}
+          />
         </div>
       </div>
     </DashboardLayout>
