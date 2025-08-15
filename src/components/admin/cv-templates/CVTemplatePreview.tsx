@@ -34,12 +34,9 @@ export const CVTemplatePreview: React.FC<CVTemplatePreviewProps> = ({
                 background: #f5f5f5;
               }
               .a4-container { 
-                width: 210mm; 
-                min-height: 297mm; 
                 margin: 0 auto; 
                 background: white; 
                 box-shadow: 0 0 10px rgba(0,0,0,0.1); 
-                padding: 20mm;
                 box-sizing: border-box;
               }
             </style>
@@ -70,12 +67,10 @@ export const CVTemplatePreview: React.FC<CVTemplatePreviewProps> = ({
               background: #f5f5f5;
             }
             .a4-container { 
-              width: 210mm; 
               min-height: 297mm; 
               margin: 0 auto; 
               background: white; 
               box-shadow: 0 0 10px rgba(0,0,0,0.1); 
-              padding: 20mm;
               box-sizing: border-box;
             }
           </style>
@@ -165,18 +160,7 @@ export const CVTemplatePreview: React.FC<CVTemplatePreviewProps> = ({
             )}
 
             {(htmlTemplate.trim() || processedHTML) && (
-              <div className="p-8">
-                {/* A4 Paper Container */}
-                <div 
-                  className="mx-auto bg-white shadow-lg"
-                  style={{ 
-                    width: '210mm', 
-                    minHeight: '297mm',
-                    padding: '20mm',
-                    boxSizing: 'border-box'
-                  }}
-                >
-                  {/* CV Content with isolated styles */}
+              <div>
                   <div 
                     style={{
                       all: 'unset',
@@ -188,7 +172,7 @@ export const CVTemplatePreview: React.FC<CVTemplatePreviewProps> = ({
                     }}
                     dangerouslySetInnerHTML={{ __html: processedHTML || '' }}
                   />
-                </div>
+                
               </div>
             )}
           </>
