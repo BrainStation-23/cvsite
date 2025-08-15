@@ -87,7 +87,7 @@ export const CVTemplateHTMLEditor: React.FC<CVTemplateHTMLEditorProps> = ({
       <div className="p-3 border-b bg-muted/50">
         <h3 className="font-medium text-sm">HTML Template Editor</h3>
         <p className="text-xs text-muted-foreground mt-1">
-          Use {{employee.fieldName}} for data variables and {{#each}} for loops
+          {`Use {{employee.fieldName}} for data variables and {{#each}} for loops`}
         </p>
       </div>
       <div className="flex-1">
