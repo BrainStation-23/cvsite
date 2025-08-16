@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import DashboardLayout from '../../components/Layout/DashboardLayout';
 import { Card, CardContent } from '@/components/ui/card';
@@ -128,26 +127,6 @@ const EmployeeData: React.FC = () => {
     selectItem(profileId, !isCurrentlySelected);
   };
 
-  const handleBulkEmail = (profileIds: string[]) => {
-    const selectedProfilesData = profiles.filter(profile => profileIds.includes(profile.id));
-    
-    if (selectedProfilesData.length === 0) {
-      toast({
-        title: "No profiles selected",
-        description: "Please select at least one profile to send emails.",
-        variant: "destructive"
-      });
-      return;
-    }
-
-    toast({
-      title: "Bulk email initiated",
-      description: `Sending emails to ${selectedProfilesData.length} employees...`,
-    });
-
-    console.log('Sending bulk emails to:', selectedProfilesData);
-  };
-
   const handleBulkExport = (profileIds: string[], format: 'csv' | 'excel' | 'pdf') => {
     const selectedProfilesData = profiles.filter(profile => profileIds.includes(profile.id));
     
@@ -199,7 +178,7 @@ const EmployeeData: React.FC = () => {
               totalProfiles={profiles.length}
               onSelectAll={selectAll}
               onClearSelection={clearSelection}
-              onBulkEmail={handleBulkEmail}
+              onBulkEmail={() => {}}
               onBulkExport={handleBulkExport}
               isAllSelected={isAllSelected}
             />
