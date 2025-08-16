@@ -39,11 +39,11 @@ export const ExamplesSection: React.FC<ExamplesSectionProps> = ({ onInsertExampl
       </div>
 
       <div className="grid gap-6">
-        {/* Comprehensive Template */}
+        {/* Comprehensive Sidebar Template */}
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center justify-between">
-              Comprehensive CV Template
+              Comprehensive Sidebar CV Template
               <div className="flex gap-2">
                 <Button
                   size="sm"
@@ -56,7 +56,7 @@ export const ExamplesSection: React.FC<ExamplesSectionProps> = ({ onInsertExampl
                 <Button
                   size="sm"
                   variant="outline"
-                  onClick={() => downloadTemplate(STRUCTURE_EXAMPLES.comprehensive, 'comprehensive-cv-template')}
+                  onClick={() => downloadTemplate(STRUCTURE_EXAMPLES.comprehensive, 'comprehensive-sidebar-cv-template')}
                 >
                   <Download className="h-4 w-4 mr-2" />
                   Download
@@ -72,7 +72,7 @@ export const ExamplesSection: React.FC<ExamplesSectionProps> = ({ onInsertExampl
               </div>
             </CardTitle>
             <CardDescription>
-              A complete, professional CV template with sidebar layout, timeline experience section, 
+              A professional CV template with sidebar layout, timeline experience section, 
               skill bars, star ratings for English skills, and comprehensive styling.
             </CardDescription>
           </CardHeader>
@@ -80,21 +80,80 @@ export const ExamplesSection: React.FC<ExamplesSectionProps> = ({ onInsertExampl
             <div className="bg-muted p-4 rounded-md">
               <h4 className="font-medium mb-2">Features included:</h4>
               <ul className="text-sm space-y-1 text-muted-foreground">
-                <li>• Two-column layout with sidebar</li>
-                <li>• Profile image with styling</li>
-                <li>• Skill bars for technical skills</li>
-                <li>• Star ratings for English skills</li>
-                <li>• Timeline-style experience section</li>
-                <li>• Numbered project list</li>
-                <li>• Complete CSS styling with Google Fonts</li>
-                <li>• Responsive design elements</li>
-                <li>• Professional color scheme</li>
+                <li>• Two-column layout with dark sidebar</li>
+                <li>• Profile image with professional styling</li>
+                <li>• Skill bars for technical skills visualization</li>
+                <li>• Star ratings for English skills assessment</li>
+                <li>• Timeline-style experience section with visual elements</li>
+                <li>• Numbered project list with structured details</li>
+                <li>• Complete CSS styling with Google Fonts integration</li>
+                <li>• Professional blue and dark color scheme</li>
               </ul>
             </div>
             <details className="mt-4">
               <summary className="cursor-pointer font-medium text-sm">View Code Preview</summary>
               <pre className="text-xs bg-slate-50 p-3 rounded mt-2 overflow-x-auto">
 {STRUCTURE_EXAMPLES.comprehensive.substring(0, 500)}...
+              </pre>
+            </details>
+          </CardContent>
+        </Card>
+
+        {/* Single Column Template */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center justify-between">
+              Single Column CV Template
+              <div className="flex gap-2">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => copyToClipboard(STRUCTURE_EXAMPLES.singleColumn)}
+                >
+                  <Copy className="h-4 w-4 mr-2" />
+                  Copy
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => downloadTemplate(STRUCTURE_EXAMPLES.singleColumn, 'single-column-cv-template')}
+                >
+                  <Download className="h-4 w-4 mr-2" />
+                  Download
+                </Button>
+                {onInsertExample && (
+                  <Button
+                    size="sm"
+                    onClick={() => onInsertExample(STRUCTURE_EXAMPLES.singleColumn)}
+                  >
+                    Insert Template
+                  </Button>
+                )}
+              </div>
+            </CardTitle>
+            <CardDescription>
+              A modern single-column CV template with gradient header, card-based sections, 
+              and clean typography. Perfect for a contemporary professional look.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="bg-muted p-4 rounded-md">
+              <h4 className="font-medium mb-2">Features included:</h4>
+              <ul className="text-sm space-y-1 text-muted-foreground">
+                <li>• Single-column responsive layout</li>
+                <li>• Gradient header with centered profile image</li>
+                <li>• Grid-based skills section layout</li>
+                <li>• Card-style sections with subtle shadows</li>
+                <li>• Timeline experience with visual indicators</li>
+                <li>• Color-coded section borders</li>
+                <li>• Mobile-responsive design</li>
+                <li>• Modern typography and spacing</li>
+              </ul>
+            </div>
+            <details className="mt-4">
+              <summary className="cursor-pointer font-medium text-sm">View Code Preview</summary>
+              <pre className="text-xs bg-slate-50 p-3 rounded mt-2 overflow-x-auto">
+{STRUCTURE_EXAMPLES.singleColumn.substring(0, 500)}...
               </pre>
             </details>
           </CardContent>
@@ -140,11 +199,12 @@ export const ExamplesSection: React.FC<ExamplesSectionProps> = ({ onInsertExampl
             <div className="bg-muted p-4 rounded-md">
               <h4 className="font-medium mb-2">Features included:</h4>
               <ul className="text-sm space-y-1 text-muted-foreground">
-                <li>• Clean, minimal structure</li>
-                <li>• Standard CV CSS classes</li>
+                <li>• Clean, minimal HTML structure</li>
+                <li>• Standard CV CSS classes for styling</li>
                 <li>• Header, summary, and experience sections</li>
                 <li>• Page break control classes</li>
                 <li>• Easy to customize and extend</li>
+                <li>• Semantic HTML structure</li>
               </ul>
             </div>
             <details className="mt-4">
@@ -160,8 +220,9 @@ export const ExamplesSection: React.FC<ExamplesSectionProps> = ({ onInsertExampl
       <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
         <h4 className="font-medium text-blue-900 mb-2">💡 Template Usage Tips</h4>
         <ul className="text-sm text-blue-800 space-y-1">
-          <li>• The comprehensive template includes complete HTML with head, body, and embedded CSS</li>
-          <li>• The basic template provides just the body structure for integration with existing styles</li>
+          <li>• The comprehensive sidebar template offers a classic two-column professional layout</li>
+          <li>• The single-column template provides a modern, mobile-friendly design approach</li>
+          <li>• The basic template provides just the structure for integration with existing styles</li>
           <li>• All templates use Handlebars syntax for dynamic content</li>
           <li>• You can mix and match sections from different templates</li>
           <li>• Remember to test with real employee data to ensure proper rendering</li>
