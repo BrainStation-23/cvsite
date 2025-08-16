@@ -1,11 +1,11 @@
-
 import React from 'react';
 import { useTemplateEngine } from '@/hooks/use-template-engine';
 import { useEmployeeData } from '@/hooks/use-employee-data';
 import { Button } from '@/components/ui/button';
-import { Download, Maximize } from 'lucide-react';
+import { Download, Maximize, FileDown } from 'lucide-react';
 import { CVRenderer } from './CVRenderer';
 import { generateFullCVHTML } from '@/utils/cv-html-generator';
+import { downloadAsPDF } from '@/utils/pdf-generator';
 
 interface CVTemplatePreviewProps {
   htmlTemplate: string;
@@ -45,6 +45,13 @@ export const CVTemplatePreview: React.FC<CVTemplatePreviewProps> = ({
     URL.revokeObjectURL(url);
   };
 
+  const handlePDFDownload = () => {
+    if (!processedHTML) return;
+    
+    const fullHTML = generateFullCVHTML(processedHTML, 'download');
+    downloadAsPDF(fullHTML, 'cv-template');
+  };
+
   return (
     <div className="h-full flex flex-col">
       {/* Header */}
@@ -64,7 +71,11 @@ export const CVTemplatePreview: React.FC<CVTemplatePreviewProps> = ({
               </Button>
               <Button size="sm" variant="outline" onClick={handleDownload}>
                 <Download className="h-3 w-3 mr-1" />
-                Download
+                HTML
+              </Button>
+              <Button size="sm" variant="outline" onClick={handlePDFDownload}>
+                <FileDown className="h-3 w-3 mr-1" />
+                PDF
               </Button>
             </>
           )}
