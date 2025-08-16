@@ -34,6 +34,7 @@ import ProjectsManagement from '@/pages/admin/ProjectsManagement';
 import CVTemplatesPage from './pages/admin/cv-templates/CVTemplatesPage';
 import CVTemplateEditorPage from './pages/admin/cv-templates/CVTemplateEditorPage';
 import CVTemplateViewPage from './pages/admin/cv-templates/CVTemplateViewPage';
+import CVTemplateDocumentationPage from './pages/admin/cv-templates/CVTemplateDocumentationPage';
 import './App.css';
 
 // Create QueryClient instance outside component to prevent recreation
@@ -357,6 +358,14 @@ function App(): React.ReactElement {
               element={
                 <ProtectedRoute allowedRoles={['admin']}>
                   <CVTemplatesPage/>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/cv-templates/documentation"
+              element={
+                <ProtectedRoute allowedRoles={['admin']}>
+                  <CVTemplateDocumentationPage />
                 </ProtectedRoute>
               }
             />
