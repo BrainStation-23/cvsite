@@ -20,8 +20,10 @@ export const CVTemplatePreview: React.FC<CVTemplatePreviewProps> = ({
   const { processedHTML, error, isProcessing } = useTemplateEngine(htmlTemplate, employeeData);
 
   const handleFullscreen = () => {
+    if (!processedHTML) return;
+    
     const newWindow = window.open('', '_blank');
-    if (newWindow && processedHTML) {
+    if (newWindow) {
       const fullHTML = generateFullCVHTML(processedHTML, 'fullscreen');
       newWindow.document.write(fullHTML);
       newWindow.document.close();

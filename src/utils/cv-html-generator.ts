@@ -1,4 +1,5 @@
 
+import React from 'react';
 import { CVRenderer } from '@/components/admin/cv-templates/CVRenderer';
 import { renderToString } from 'react-dom/server';
 
@@ -11,26 +12,38 @@ export const generateFullCVHTML = (processedHTML: string, mode: 'fullscreen' | '
       line-height: 1.6; 
       background: #f5f5f5;
     }
-    .cv-container { 
-      width: 210mm; 
-      min-height: 297mm; 
-      margin: 0 auto; 
-      background: white; 
-      box-shadow: 0 0 10px rgba(0,0,0,0.1); 
-      padding: 20mm;
-      box-sizing: border-box;
+    @media print {
+      body { 
+        background: white; 
+        padding: 0; 
+      }
+      .cv-container {
+        box-shadow: none !important;
+        transform: none !important;
+        margin: 0 !important;
+      }
     }
   `;
+
+  // Generate the CV content using CVRenderer
+  const cvContent = renderToString(
+    React.createElement(CVRenderer, {
+      processedHTML,
+      mode
+    })
+  );
 
   return `
     <!DOCTYPE html>
     <html>
       <head>
         <title>CV Preview</title>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
         <style>${baseStyles}</style>
       </head>
       <body>
-        <div class="cv-container">${processedHTML}</div>
+        ${cvContent}
       </body>
     </html>
   `;
