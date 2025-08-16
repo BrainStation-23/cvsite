@@ -4,6 +4,8 @@ import { useTemplateEngine } from '@/hooks/use-template-engine';
 import { useEmployeeData } from '@/hooks/use-employee-data';
 import { Button } from '@/components/ui/button';
 import { Download, Maximize } from 'lucide-react';
+import { CVRenderer } from './CVRenderer';
+import { generateFullCVHTML } from '@/utils/cv-html-generator';
 
 interface CVTemplatePreviewProps {
   htmlTemplate: string;
@@ -20,32 +22,8 @@ export const CVTemplatePreview: React.FC<CVTemplatePreviewProps> = ({
   const handleFullscreen = () => {
     const newWindow = window.open('', '_blank');
     if (newWindow && processedHTML) {
-      newWindow.document.write(`
-        <!DOCTYPE html>
-        <html>
-          <head>
-            <title>CV Preview</title>
-            <style>
-              body { 
-                font-family: Arial, sans-serif; 
-                margin: 0; 
-                padding: 20px; 
-                line-height: 1.6; 
-                background: #f5f5f5;
-              }
-              .a4-container { 
-                margin: 0 auto; 
-                background: white; 
-                box-shadow: 0 0 10px rgba(0,0,0,0.1); 
-                box-sizing: border-box;
-              }
-            </style>
-          </head>
-          <body>
-            <div class="a4-container">${processedHTML}</div>
-          </body>
-        </html>
-      `);
+      const fullHTML = generateFullCVHTML(processedHTML, 'fullscreen');
+      newWindow.document.write(fullHTML);
       newWindow.document.close();
     }
   };
@@ -53,34 +31,7 @@ export const CVTemplatePreview: React.FC<CVTemplatePreviewProps> = ({
   const handleDownload = () => {
     if (!processedHTML) return;
     
-    const fullHTML = `
-      <!DOCTYPE html>
-      <html>
-        <head>
-          <title>CV Preview</title>
-          <style>
-            body { 
-              font-family: Arial, sans-serif; 
-              margin: 0; 
-              padding: 20px; 
-              line-height: 1.6; 
-              background: #f5f5f5;
-            }
-            .a4-container { 
-              min-height: 297mm; 
-              margin: 0 auto; 
-              background: white; 
-              box-shadow: 0 0 10px rgba(0,0,0,0.1); 
-              box-sizing: border-box;
-            }
-          </style>
-        </head>
-        <body>
-          <div class="a4-container">${processedHTML}</div>
-        </body>
-      </html>
-    `;
-    
+    const fullHTML = generateFullCVHTML(processedHTML, 'download');
     const blob = new Blob([fullHTML], { type: 'text/html' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -159,20 +110,12 @@ export const CVTemplatePreview: React.FC<CVTemplatePreviewProps> = ({
               </div>
             )}
 
-            {(htmlTemplate.trim() || processedHTML) && (
-              <div>
-                  <div 
-                    style={{
-                      all: 'unset',
-                      display: 'block',
-                      fontFamily: 'Arial, sans-serif',
-                      fontSize: '14px',
-                      lineHeight: '1.6',
-                      color: '#333'
-                    }}
-                    dangerouslySetInnerHTML={{ __html: processedHTML || '' }}
-                  />
-                
+            {(htmlTemplate.trim() || processedHTML) && processedHTML && (
+              <div className="p-8">
+                <CVRenderer 
+                  processedHTML={processedHTML} 
+                  mode="preview" 
+                />
               </div>
             )}
           </>
