@@ -57,13 +57,13 @@ const CVTemplateEditorPage: React.FC = () => {
     navigate(`/admin/cv-templates/${id}`);
   };
 
-  const handleInsertExample = () => {
+  const handleInsertExample = (exampleHTML: string) => {
     if (hasUnsavedChanges) {
       const confirmed = window.confirm('This will replace your current template. Are you sure?');
       if (!confirmed) return;
     }
     
-    setHtmlTemplate(EXAMPLE_CV_TEMPLATE);
+    setHtmlTemplate(exampleHTML);
     setHasUnsavedChanges(true);
     toast.success('Example template inserted');
   };
@@ -117,7 +117,7 @@ const CVTemplateEditorPage: React.FC = () => {
             )}
           </div>
           <div className="flex gap-2">
-            <Button variant="outline" onClick={handleInsertExample}>
+            <Button variant="outline" onClick={() => handleInsertExample(EXAMPLE_CV_TEMPLATE)}>
               <FileText className="h-4 w-4 mr-2" />
               Insert Example
             </Button>
@@ -145,10 +145,11 @@ const CVTemplateEditorPage: React.FC = () => {
 
             <ResizableHandle withHandle />
 
-            {/* Right Panel - Variable Helper */}
+            {/* Right Panel - Template Helper */}
             <ResizablePanel defaultSize={40} minSize={30}>
               <TemplateVariableHelper
                 selectedEmployeeId={null}
+                onInsertExample={handleInsertExample}
               />
             </ResizablePanel>
           </ResizablePanelGroup>

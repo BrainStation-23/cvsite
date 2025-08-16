@@ -6,6 +6,7 @@ import { Download, Maximize, FileDown } from 'lucide-react';
 import { CVRenderer } from './CVRenderer';
 import { generateFullCVHTML } from '@/utils/cv-html-generator';
 import { downloadAsPDF } from '@/utils/pdf-generator';
+import { toast } from 'sonner';
 
 interface CVTemplatePreviewProps {
   htmlTemplate: string;
@@ -16,7 +17,7 @@ export const CVTemplatePreview: React.FC<CVTemplatePreviewProps> = ({
   htmlTemplate,
   selectedEmployeeId,
 }) => {
-  const { data: employeeData, isLoading: isLoadingEmployee } = useEmployeeData(selectedEmployeeId || '',true);
+  const { data: employeeData, isLoading: isLoadingEmployee } = useEmployeeData(selectedEmployeeId || '', true);
   const { processedHTML, error, isProcessing } = useTemplateEngine(htmlTemplate, employeeData);
 
   const handleFullscreen = () => {
@@ -45,11 +46,25 @@ export const CVTemplatePreview: React.FC<CVTemplatePreviewProps> = ({
     URL.revokeObjectURL(url);
   };
 
-  const handlePDFDownload = () => {
+  const handlePDFDownload = async () => {
     if (!processedHTML) return;
     
-    const fullHTML = generateFullCVHTML(processedHTML, 'download');
-    downloadAsPDF(fullHTML, 'cv-template');
+    try {
+      const fullHTML = generateFullCVHTML(processedHTML, 'download');
+      const { enhancedPDFGenerator } = await import('@/utils/enhanced-pdf-generator');
+      
+      await enhancedPDFGenerator.generatePDF(fullHTML, {
+        filename: 'cv-template',
+        includeStandardCSS: true,
+        validateTemplate: true,
+        pageSize: 'a4'
+      });
+      
+      toast.success('PDF downloaded successfully');
+    } catch (error) {
+      console.error('PDF generation failed:', error);
+      toast.error('Failed to generate PDF. Please try again.');
+    }
   };
 
   return (
