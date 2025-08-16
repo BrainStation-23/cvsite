@@ -8,7 +8,6 @@ export const generateFullCVHTML = (processedHTML: string, mode: 'fullscreen' | '
     body { 
       font-family: Arial, sans-serif; 
       margin: 0; 
-      padding: 20px; 
       line-height: 1.6; 
       background: #f5f5f5;
     }

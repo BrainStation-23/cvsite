@@ -15,11 +15,8 @@ export const CVRenderer: React.FC<CVRendererProps> = ({ processedHTML, mode }) =
       fontSize: '14px',
       lineHeight: '1.6',
       color: '#333',
-      width: '210mm', // A4 width
-      minHeight: '297mm', // A4 height
-      margin: '0 auto',
+      margin: 'auto',
       background: 'white',
-      padding: '20mm',
       boxSizing: 'border-box' as const
     };
 
@@ -27,9 +24,7 @@ export const CVRenderer: React.FC<CVRendererProps> = ({ processedHTML, mode }) =
     if (mode === 'preview') {
       return {
         ...baseStyles,
-        transform: 'scale(0.7)',
         transformOrigin: 'top center',
-        marginBottom: '40px',
         boxShadow: '0 0 10px rgba(0,0,0,0.1)'
       };
     }
