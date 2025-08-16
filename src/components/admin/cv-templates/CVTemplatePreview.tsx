@@ -16,7 +16,7 @@ export const CVTemplatePreview: React.FC<CVTemplatePreviewProps> = ({
   htmlTemplate,
   selectedEmployeeId,
 }) => {
-  const { data: employeeData, isLoading: isLoadingEmployee } = useEmployeeData(selectedEmployeeId || '');
+  const { data: employeeData, isLoading: isLoadingEmployee } = useEmployeeData(selectedEmployeeId || '',true);
   const { processedHTML, error, isProcessing } = useTemplateEngine(htmlTemplate, employeeData);
 
   const handleFullscreen = () => {
