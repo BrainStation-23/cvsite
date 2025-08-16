@@ -24,7 +24,7 @@ export const ProgressDialog: React.FC<ProgressDialogProps> = ({
 }) => {
   return (
     <Dialog open={isOpen} onOpenChange={allowCancel ? onClose : undefined}>
-      <DialogContent className="sm:max-w-md" hideCloseButton={!allowCancel}>
+      <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <div className="flex items-center justify-between">
             <DialogTitle>{title}</DialogTitle>
