@@ -3,21 +3,18 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { EmployeeProfile } from '@/hooks/types/employee-profiles';
 
-export function useEmployeeData(profileId: string, masked: boolean = false) {
-  const rpcFunction = masked ? 'get_employee_data_masked' : 'get_employee_data';
-  const queryKey = masked ? ['employee-data-masked', profileId] : ['employee-data', profileId];
-
+export function useEmployeeDataMasked(profileId: string) {
   return useQuery({
-    queryKey,
+    queryKey: ['employee-data-masked', profileId],
     queryFn: async (): Promise<EmployeeProfile | null> => {
       if (!profileId) return null;
 
-      const { data, error } = await supabase.rpc(rpcFunction, {
+      const { data, error } = await supabase.rpc('get_employee_data_masked', {
         profile_uuid: profileId
       });
 
       if (error) {
-        console.error(`Error fetching ${masked ? 'masked ' : ''}employee data:`, error);
+        console.error('Error fetching masked employee data:', error);
         throw error;
       }
 
@@ -35,7 +32,7 @@ export function useEmployeeData(profileId: string, masked: boolean = false) {
         }));
       }
 
-      console.log(`${masked ? 'Masked ' : ''}Employee data fetched:`, employeeData);
+      console.log('Masked employee data fetched:', employeeData);
       return employeeData;
     },
     enabled: !!profileId,

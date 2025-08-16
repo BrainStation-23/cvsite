@@ -7,7 +7,7 @@ export type Json =
   | Json[]
 
 export type Database = {
-  // Allows to automatically instanciate createClient with right options
+  // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
     PostgrestVersion: "12.2.3 (519615d)"
@@ -1444,7 +1444,7 @@ export type Database = {
         Returns: Json
       }
       calculate_experience_duration: {
-        Args: { start_date: string; end_date: string; is_current: boolean }
+        Args: { end_date: string; is_current: boolean; start_date: string }
         Returns: number
       }
       export_profile_json: {
@@ -1459,67 +1459,44 @@ export type Database = {
         Args: { profile_uuid: string }
         Returns: Json
       }
+      get_employee_data_masked: {
+        Args: { profile_uuid: string }
+        Returns: Json
+      }
       get_employee_profiles: {
-        Args:
-          | {
-              search_query?: string
-              skill_filter?: string
-              experience_filter?: string
-              education_filter?: string
-              training_filter?: string
-              achievement_filter?: string
-              project_filter?: string
-              min_experience_years?: number
-              max_experience_years?: number
-              min_graduation_year?: number
-              max_graduation_year?: number
-              completion_status?: string
-              min_engagement_percentage?: number
-              max_engagement_percentage?: number
-              min_billing_percentage?: number
-              max_billing_percentage?: number
-              release_date_from?: string
-              release_date_to?: string
-              availability_status?: string
-              current_project_search?: string
-              page_number?: number
-              items_per_page?: number
-              sort_by?: string
-              sort_order?: string
-            }
-          | {
-              search_query?: string
-              skill_filter?: string
-              experience_filter?: string
-              education_filter?: string
-              training_filter?: string
-              achievement_filter?: string
-              project_filter?: string
-              min_experience_years?: number
-              max_experience_years?: number
-              min_graduation_year?: number
-              max_graduation_year?: number
-              completion_status?: string
-              min_engagement_percentage?: number
-              max_engagement_percentage?: number
-              min_billing_percentage?: number
-              max_billing_percentage?: number
-              release_date_from?: string
-              release_date_to?: string
-              availability_status?: string
-              current_project_search?: string
-              page_number?: number
-              items_per_page?: number
-              sort_by?: string
-              sort_order?: string
-            }
+        Args: {
+          achievement_filter?: string
+          availability_status?: string
+          completion_status?: string
+          current_project_search?: string
+          education_filter?: string
+          experience_filter?: string
+          items_per_page?: number
+          max_billing_percentage?: number
+          max_engagement_percentage?: number
+          max_experience_years?: number
+          max_graduation_year?: number
+          min_billing_percentage?: number
+          min_engagement_percentage?: number
+          min_experience_years?: number
+          min_graduation_year?: number
+          page_number?: number
+          project_filter?: string
+          release_date_from?: string
+          release_date_to?: string
+          search_query?: string
+          skill_filter?: string
+          sort_by?: string
+          sort_order?: string
+          training_filter?: string
+        }
         Returns: Json
       }
       get_experience_distribution: {
         Args: Record<PropertyKey, never>
         Returns: {
-          range: string
           count: number
+          range: string
         }[]
       }
       get_experiences_by_company: {
@@ -1528,71 +1505,71 @@ export type Database = {
       }
       get_planned_resource_data: {
         Args: {
-          search_query?: string
-          page_number?: number
-          items_per_page?: number
-          sort_by?: string
-          sort_order?: string
-          sbu_filter?: string
-          manager_filter?: string
           bill_type_filter?: string
-          project_search?: string
-          min_engagement_percentage?: number
-          max_engagement_percentage?: number
-          min_billing_percentage?: number
-          max_billing_percentage?: number
-          start_date_from?: string
-          start_date_to?: string
           end_date_from?: string
           end_date_to?: string
+          items_per_page?: number
+          manager_filter?: string
+          max_billing_percentage?: number
+          max_engagement_percentage?: number
+          min_billing_percentage?: number
+          min_engagement_percentage?: number
+          page_number?: number
+          project_search?: string
+          sbu_filter?: string
+          search_query?: string
+          sort_by?: string
+          sort_order?: string
+          start_date_from?: string
+          start_date_to?: string
         }
         Returns: Json
       }
       get_resource_count_statistics: {
         Args: {
-          resource_type_filter?: string
           bill_type_filter?: string
+          end_date_filter?: string
           expertise_type_filter?: string
+          resource_type_filter?: string
           sbu_filter?: string
           start_date_filter?: string
-          end_date_filter?: string
         }
         Returns: Json
       }
       get_sbu_summary_stats: {
         Args: { sbu_filter?: string }
         Returns: {
-          total_resources: number
           active_projects: number
           avg_engagement_percentage: number
+          total_resources: number
         }[]
       }
       get_section_fields: {
         Args: { section_type_param: string }
         Returns: {
-          field_name: string
-          display_label: string
           default_enabled: boolean
-          default_masked: boolean
           default_mask_value: string
+          default_masked: boolean
           default_order: number
+          display_label: string
+          field_name: string
           field_type: string
         }[]
       }
       get_skill_matrix: {
         Args: Record<PropertyKey, never>
         Returns: {
-          skill: string
           count: number
+          skill: string
         }[]
       }
       get_unplanned_resources: {
         Args: {
-          search_query?: string
-          page_number?: number
           items_per_page?: number
-          sbu_filter?: string
           manager_filter?: string
+          page_number?: number
+          sbu_filter?: string
+          search_query?: string
         }
         Returns: Json
       }
@@ -1602,23 +1579,23 @@ export type Database = {
       }
       get_weekly_validation_data: {
         Args: {
-          search_query?: string
-          page_number?: number
-          items_per_page?: number
-          sort_by?: string
-          sort_order?: string
-          sbu_filter?: string
-          manager_filter?: string
           bill_type_filter?: string
-          project_search?: string
-          min_engagement_percentage?: number
-          max_engagement_percentage?: number
-          min_billing_percentage?: number
-          max_billing_percentage?: number
-          start_date_from?: string
-          start_date_to?: string
           end_date_from?: string
           end_date_to?: string
+          items_per_page?: number
+          manager_filter?: string
+          max_billing_percentage?: number
+          max_engagement_percentage?: number
+          min_billing_percentage?: number
+          min_engagement_percentage?: number
+          page_number?: number
+          project_search?: string
+          sbu_filter?: string
+          search_query?: string
+          sort_by?: string
+          sort_order?: string
+          start_date_from?: string
+          start_date_to?: string
         }
         Returns: Json
       }
@@ -1627,7 +1604,7 @@ export type Database = {
         Returns: boolean
       }
       has_role: {
-        Args: { _role: string } | { _user_id: string; _role: string }
+        Args: { _role: string } | { _role: string; _user_id: string }
         Returns: boolean
       }
       import_profile_json: {
@@ -1648,22 +1625,18 @@ export type Database = {
       }
       list_users: {
         Args: {
-          search_query?: string
           filter_role?: string
-          page_number?: number
           items_per_page?: number
+          page_number?: number
+          search_query?: string
           sort_by?: string
           sort_order?: string
         }
         Returns: Json
       }
       manage_weekly_validation_cron: {
-        Args: { p_schedule?: string; p_enabled?: boolean }
+        Args: { p_enabled?: boolean; p_schedule?: string }
         Returns: Json
-      }
-      refresh_employee_search_index: {
-        Args: Record<PropertyKey, never>
-        Returns: undefined
       }
       reset_weekly_validation: {
         Args: Record<PropertyKey, never>
@@ -1671,11 +1644,11 @@ export type Database = {
       }
       search_certifications: {
         Args: {
-          search_query?: string
+          items_per_page?: number
+          page_number?: number
           provider_filter?: string
           sbu_filter?: string
-          page_number?: number
-          items_per_page?: number
+          search_query?: string
           sort_by?: string
           sort_order?: string
         }
@@ -1683,9 +1656,9 @@ export type Database = {
       }
       search_degrees: {
         Args: {
-          search_query?: string
-          page_number?: number
           items_per_page?: number
+          page_number?: number
+          search_query?: string
           sort_by?: string
           sort_order?: string
         }
@@ -1693,23 +1666,9 @@ export type Database = {
       }
       search_departments: {
         Args: {
-          search_query?: string
-          page_number?: number
           items_per_page?: number
-          sort_by?: string
-          sort_order?: string
-        }
-        Returns: Json
-      }
-      search_employees: {
-        Args: {
-          search_query?: string
-          min_experience_years?: number
-          max_experience_years?: number
-          availability_filter?: string
-          sbu_filter?: string
           page_number?: number
-          items_per_page?: number
+          search_query?: string
           sort_by?: string
           sort_order?: string
         }
@@ -1717,9 +1676,9 @@ export type Database = {
       }
       search_projects: {
         Args: {
-          search_query?: string
-          page_number?: number
           items_per_page?: number
+          page_number?: number
+          search_query?: string
           sort_by?: string
           sort_order?: string
         }
@@ -1727,9 +1686,9 @@ export type Database = {
       }
       search_references: {
         Args: {
-          search_query?: string
-          page_number?: number
           items_per_page?: number
+          page_number?: number
+          search_query?: string
           sort_by?: string
           sort_order?: string
         }
@@ -1737,12 +1696,12 @@ export type Database = {
       }
       search_universities: {
         Args: {
-          search_query?: string
-          type_filter?: string
-          page_number?: number
           items_per_page?: number
+          page_number?: number
+          search_query?: string
           sort_by?: string
           sort_order?: string
+          type_filter?: string
         }
         Returns: Json
       }
