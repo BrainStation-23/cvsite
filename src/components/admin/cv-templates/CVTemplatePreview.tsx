@@ -124,7 +124,7 @@ export const CVTemplatePreview: React.FC<CVTemplatePreviewProps> = ({
             )}
 
             {(htmlTemplate.trim() || processedHTML) && processedHTML && (
-              <div className="p-8">
+              <div className="flex items-center justify-center p-8">
                 <CVRenderer 
                   processedHTML={processedHTML} 
                   mode="preview" 
