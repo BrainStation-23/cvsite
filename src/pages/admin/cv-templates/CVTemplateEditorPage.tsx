@@ -10,11 +10,14 @@ import { useCVTemplates } from '@/hooks/use-cv-templates';
 import { CVTemplateHTMLEditor } from '@/components/admin/cv-templates/CVTemplateHTMLEditor';
 import { TemplateVariableHelper } from '@/components/admin/cv-templates/TemplateVariableHelper';
 import { EXAMPLE_CV_TEMPLATE } from '@/constants/cv-template-examples';
+import { useConfirmationDialog } from '@/hooks/use-confirmation-dialog';
+import { ConfirmationDialog } from '@/components/ui/confirmation-dialog';
 
 const CVTemplateEditorPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { templates, updateTemplate, isUpdating } = useCVTemplates();
+  const { isOpen, config, showConfirmation, hideConfirmation, handleConfirm } = useConfirmationDialog();
   
   const [templateName, setTemplateName] = useState('');
   const [htmlTemplate, setHtmlTemplate] = useState('');
@@ -47,10 +50,17 @@ const CVTemplateEditorPage: React.FC = () => {
 
   const handleBack = () => {
     if (hasUnsavedChanges) {
-      const confirmed = window.confirm('You have unsaved changes. Are you sure you want to leave?');
-      if (!confirmed) return;
+      showConfirmation({
+        title: 'Unsaved Changes',
+        description: 'You have unsaved changes. Are you sure you want to leave?',
+        confirmText: 'Leave',
+        cancelText: 'Stay',
+        variant: 'destructive',
+        onConfirm: () => navigate('/admin/cv-templates')
+      });
+    } else {
+      navigate('/admin/cv-templates');
     }
-    navigate('/admin/cv-templates');
   };
 
   const handlePreview = () => {
@@ -59,13 +69,23 @@ const CVTemplateEditorPage: React.FC = () => {
 
   const handleInsertExample = (exampleHTML: string) => {
     if (hasUnsavedChanges) {
-      const confirmed = window.confirm('This will replace your current template. Are you sure?');
-      if (!confirmed) return;
+      showConfirmation({
+        title: 'Replace Current Template',
+        description: 'This will replace your current template. Are you sure?',
+        confirmText: 'Replace',
+        cancelText: 'Cancel',
+        variant: 'destructive',
+        onConfirm: () => {
+          setHtmlTemplate(exampleHTML);
+          setHasUnsavedChanges(true);
+          toast.success('Example template inserted');
+        }
+      });
+    } else {
+      setHtmlTemplate(exampleHTML);
+      setHasUnsavedChanges(true);
+      toast.success('Example template inserted');
     }
-    
-    setHtmlTemplate(exampleHTML);
-    setHasUnsavedChanges(true);
-    toast.success('Example template inserted');
   };
 
   const handleTemplateChange = (value: string) => {
@@ -155,6 +175,18 @@ const CVTemplateEditorPage: React.FC = () => {
           </ResizablePanelGroup>
         </div>
       </div>
+
+      {/* Confirmation Dialog */}
+      <ConfirmationDialog
+        isOpen={isOpen}
+        onClose={hideConfirmation}
+        onConfirm={handleConfirm}
+        title={config?.title || ''}
+        description={config?.description || ''}
+        confirmText={config?.confirmText}
+        cancelText={config?.cancelText}
+        variant={config?.variant}
+      />
     </DashboardLayout>
   );
 };
