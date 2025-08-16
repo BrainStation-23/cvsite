@@ -1,4 +1,3 @@
-
 import html2pdf from 'html2pdf.js';
 import { STANDARD_CV_CSS } from '@/constants/cv-template-standards';
 import { templateValidator } from './template-validator';
@@ -9,6 +8,7 @@ interface PDFGenerationOptions {
   validateTemplate?: boolean;
   pageSize?: 'a4' | 'letter';
   margin?: number;
+  onProgress?: (progress: number, message: string) => void;
 }
 
 export class EnhancedPDFGenerator {
@@ -68,17 +68,22 @@ export class EnhancedPDFGenerator {
       includeStandardCSS = true,
       validateTemplate = true,
       pageSize = 'a4',
-      margin = 15
+      margin = 15,
+      onProgress
     } = options;
+
+    // Report initial progress
+    onProgress?.(0, 'Preparing template...');
 
     // Validate template if requested
     if (validateTemplate) {
       const validationResult = templateValidator.validate(htmlContent);
       if (!validationResult.isValid) {
         console.warn('Template validation failed:', validationResult.errors);
-        // You might want to show these errors to the user
       }
     }
+
+    onProgress?.(10, 'Processing template...');
 
     // Process HTML content
     let processedHTML = htmlContent;
@@ -88,6 +93,8 @@ export class EnhancedPDFGenerator {
     }
     
     processedHTML = this.optimizeForPDF(processedHTML);
+
+    onProgress?.(25, 'Configuring PDF settings...');
 
     // Configure PDF options
     const [width, height] = this.getPageSize(pageSize);
@@ -122,9 +129,25 @@ export class EnhancedPDFGenerator {
       }
     };
 
-    // Generate PDF
+    // Generate PDF with progress updates
     try {
-      await html2pdf().from(processedHTML).set(opt).save();
+      onProgress?.(40, 'Converting to canvas...');
+      
+      await html2pdf()
+        .from(processedHTML)
+        .set(opt)
+        .toCanvas()
+        .then(() => {
+          onProgress?.(70, 'Generating PDF...');
+        })
+        .toPdf()
+        .then(() => {
+          onProgress?.(90, 'Finalizing...');
+        })
+        .save()
+        .then(() => {
+          onProgress?.(100, 'Done!');
+        });
     } catch (error) {
       console.error('PDF generation failed:', error);
       throw new Error(`PDF generation failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
