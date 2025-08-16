@@ -3,9 +3,11 @@ import React from 'react';
 import { useTemplateEngine } from '@/hooks/use-template-engine';
 import { useEmployeeData } from '@/hooks/use-employee-data';
 import { Button } from '@/components/ui/button';
-import { Download, Maximize } from 'lucide-react';
+import { Download, Maximize, FileText } from 'lucide-react';
 import { CVRenderer } from './CVRenderer';
 import { generateFullCVHTML } from '@/utils/cv-html-generator';
+import { generatePDFFromHTML } from '@/utils/pdf-generator';
+import { useToast } from '@/hooks/use-toast';
 
 interface CVTemplatePreviewProps {
   htmlTemplate: string;
@@ -16,6 +18,7 @@ export const CVTemplatePreview: React.FC<CVTemplatePreviewProps> = ({
   htmlTemplate,
   selectedEmployeeId,
 }) => {
+  const { toast } = useToast();
   const { data: employeeData, isLoading: isLoadingEmployee } = useEmployeeData(selectedEmployeeId || '');
   const { processedHTML, error, isProcessing } = useTemplateEngine(htmlTemplate, employeeData);
 
@@ -30,7 +33,7 @@ export const CVTemplatePreview: React.FC<CVTemplatePreviewProps> = ({
     }
   };
 
-  const handleDownload = () => {
+  const handleDownloadHTML = () => {
     if (!processedHTML) return;
     
     const fullHTML = generateFullCVHTML(processedHTML, 'download');
@@ -43,6 +46,31 @@ export const CVTemplatePreview: React.FC<CVTemplatePreviewProps> = ({
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
+  };
+
+  const handleDownloadPDF = async () => {
+    if (!processedHTML) return;
+    
+    try {
+      toast({
+        title: "Generating PDF",
+        description: "Please wait while we generate your CV PDF...",
+      });
+
+      await generatePDFFromHTML(processedHTML, 'cv-preview.pdf');
+      
+      toast({
+        title: "PDF Generated",
+        description: "Your CV has been successfully downloaded as PDF.",
+      });
+    } catch (error) {
+      console.error('PDF generation failed:', error);
+      toast({
+        title: "PDF Generation Failed", 
+        description: "There was an error generating the PDF. Please try again.",
+        variant: "destructive"
+      });
+    }
   };
 
   return (
@@ -62,9 +90,13 @@ export const CVTemplatePreview: React.FC<CVTemplatePreviewProps> = ({
                 <Maximize className="h-3 w-3 mr-1" />
                 Fullscreen
               </Button>
-              <Button size="sm" variant="outline" onClick={handleDownload}>
+              <Button size="sm" variant="outline" onClick={handleDownloadHTML}>
                 <Download className="h-3 w-3 mr-1" />
-                Download
+                HTML
+              </Button>
+              <Button size="sm" variant="outline" onClick={handleDownloadPDF}>
+                <FileText className="h-3 w-3 mr-1" />
+                PDF
               </Button>
             </>
           )}
