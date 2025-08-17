@@ -109,7 +109,7 @@ export class ProfileImportDataCleaner {
 
     return {
       title: achievement.title || '',
-      description: achievement.description || '',
+      description: achievement.description || null,
       date: dateResult.date || new Date() // Default to current date if invalid
     };
   }
