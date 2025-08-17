@@ -2,7 +2,7 @@
 export const CV_TEMPLATE_STANDARDS = {
   // Required CSS classes for page break control
   PAGE_BREAK_CLASSES: {
-    'cv-page-break-before': 'page-break-before: always;',
+    'cv-page-break-before': 'page-break-before: always; padding-top: 20mm;',
     'cv-page-break-after': 'page-break-after: always;',
     'cv-page-break-avoid': 'page-break-inside: avoid;',
     'cv-page-break-auto': 'page-break-inside: auto;',
@@ -16,7 +16,6 @@ export const CV_TEMPLATE_STANDARDS = {
     'cv-section-content': 'Section content wrapper',
   },
   
-  // Item-level classes
   ITEM_CLASSES: {
     'cv-item': 'Individual items within sections (jobs, education)',
     'cv-item-group': 'Groups of related items',
@@ -24,13 +23,11 @@ export const CV_TEMPLATE_STANDARDS = {
     'cv-item-content': 'Content of individual items',
   },
   
-  // Required data attributes
   DATA_ATTRIBUTES: {
     'data-section': 'Identifies the section type (header, experience, education, skills, etc.)',
     'data-item': 'Identifies individual items within sections',
   },
   
-  // Standard section types
   SECTION_TYPES: [
     'header',
     'summary', 
@@ -48,10 +45,19 @@ export const CV_TEMPLATE_STANDARDS = {
 export const STANDARD_CV_CSS = `
 /* CV Template Standard CSS */
 /* Page Break Control Classes */
-.cv-page-break-before { page-break-before: always !important; }
-.cv-page-break-after { page-break-after: always !important; }
-.cv-page-break-avoid { page-break-inside: avoid !important; }
-.cv-page-break-auto { page-break-inside: auto !important; }
+.cv-page-break-before { 
+  page-break-before: always !important; 
+  padding-top: 20mm !important;
+}
+.cv-page-break-after { 
+  page-break-after: always !important; 
+}
+.cv-page-break-avoid { 
+  page-break-inside: avoid !important; 
+}
+.cv-page-break-auto { 
+  page-break-inside: auto !important; 
+}
 
 /* Container */
 .cv-container {
@@ -117,6 +123,11 @@ export const STANDARD_CV_CSS = `
   
   .cv-item {
     margin-bottom: 10px;
+  }
+  
+  /* Ensure padding is maintained in print mode */
+  .cv-page-break-before {
+    padding-top: 15mm !important;
   }
 }
 `;
