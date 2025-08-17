@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import SbuSettings from '@/components/admin/SbuSettings';
 import HrContactSettings from '@/components/admin/HrContactSettings';
 import NoteCategorySettings from '@/components/admin/NoteCategorySettings';
+import SystemHealthSettings from '@/components/admin/system-health/SystemHealthSettings';
 
 const SystemConfigurationSettings: React.FC = () => {
   return (
@@ -27,7 +28,7 @@ const SystemConfigurationSettings: React.FC = () => {
               System Configuration
             </h1>
             <p className="text-gray-600 dark:text-gray-400">
-              Configure system-wide settings including SBUs, HR contacts, and note categories.
+              Configure system-wide settings including SBUs, HR contacts, note categories, and system health.
             </p>
           </div>
         </div>
@@ -54,6 +55,12 @@ const SystemConfigurationSettings: React.FC = () => {
               >
                 Note Categories
               </TabsTrigger>
+              <TabsTrigger 
+                value="system-health" 
+                className="h-12 rounded-none border-b-2 border-transparent data-[state=active]:border-cvsite-teal data-[state=active]:bg-transparent data-[state=active]:shadow-none px-6 font-medium"
+              >
+                System Health
+              </TabsTrigger>
             </TabsList>
           </div>
           
@@ -79,6 +86,14 @@ const SystemConfigurationSettings: React.FC = () => {
               <ScrollArea className="h-full">
                 <div className="p-6">
                   <NoteCategorySettings />
+                </div>
+              </ScrollArea>
+            </TabsContent>
+            
+            <TabsContent value="system-health" className="mt-0 h-full">
+              <ScrollArea className="h-full">
+                <div className="p-6">
+                  <SystemHealthSettings />
                 </div>
               </ScrollArea>
             </TabsContent>

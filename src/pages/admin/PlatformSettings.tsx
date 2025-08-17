@@ -47,10 +47,10 @@ const PlatformSettings: React.FC = () => {
     },
     {
       title: 'System Configuration',
-      description: 'Configure system-wide settings including SBUs, HR contacts, and note categories.',
+      description: 'Configure system-wide settings including SBUs, HR contacts, note categories, and system health.',
       icon: Settings,
       route: '/admin/platform-settings/system',
-      items: ['SBUs', 'HR Contacts', 'Note Categories'],
+      items: ['SBUs', 'HR Contacts', 'Note Categories', 'System Health'],
       color: 'bg-orange-50 dark:bg-orange-950 border-orange-200 dark:border-orange-800',
       iconColor: 'text-orange-600 dark:text-orange-400'
     }
@@ -138,7 +138,7 @@ const PlatformSettings: React.FC = () => {
               <div className="text-sm text-gray-600 dark:text-gray-400">CV Settings</div>
             </div>
             <div>
-              <div className="text-2xl font-bold text-orange-600 dark:text-orange-400">3</div>
+              <div className="text-2xl font-bold text-orange-600 dark:text-orange-400">4</div>
               <div className="text-sm text-gray-600 dark:text-gray-400">System Settings</div>
             </div>
           </div>
