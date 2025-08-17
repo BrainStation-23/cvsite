@@ -43,7 +43,7 @@ export interface ProfileJSONData {
   }>;
   achievements: Array<{
     title: string;
-    description: string | null;
+    description?: string | null;
     date?: string;
   }>;
   projects: Array<{
@@ -173,7 +173,7 @@ export class ProfileJSONService {
         .filter(training => training.title && training.title.trim() !== '') // Only filter on required field
         .map(training => ProfileImportDataCleaner.cleanTraining(training)),
       achievements: data.achievements
-        .filter(achievement => achievement.title && achievement.title.trim() !== '' && achievement.description && achievement.description.trim() !== '') // Only filter on required fields
+        .filter(achievement => achievement.title && achievement.title.trim() !== '') // Only filter on required field - description can be null
         .map(achievement => ProfileImportDataCleaner.cleanAchievement(achievement)),
       projects: data.projects
         .filter(project => project.name && project.name.trim() !== '' && project.description && project.description.trim() !== '') // Only filter on required fields
