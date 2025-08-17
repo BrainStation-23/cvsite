@@ -30,6 +30,9 @@ export const COMPREHENSIVE_SIDEBAR_TEMPLATE = `<!DOCTYPE html>
             border-radius: 12px;
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
             overflow: hidden;
+            margin: 0 auto;
+            padding: 0;
+            box-sizing: border-box;
         }
 
         .sidebar {
@@ -74,19 +77,32 @@ export const COMPREHENSIVE_SIDEBAR_TEMPLATE = `<!DOCTYPE html>
             font-weight: 400;
         }
 
-        /* Sidebar Section Styling */
-        .sidebar .section {
+        /* CV Section Styling */
+        .cv-section {
+            page-break-inside: avoid;
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .sidebar .cv-section {
             margin-bottom: 30px;
             border-bottom: 1px solid #34495e;
             padding-bottom: 20px;
         }
 
-        .sidebar .section:last-of-type {
+        .sidebar .cv-section:last-of-type {
             border-bottom: none;
             padding-bottom: 0;
         }
 
-        .sidebar h3 {
+        .cv-section-header {
+            page-break-after: avoid;
+            page-break-inside: avoid;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+
+        .sidebar .cv-section-header {
             font-size: 1.4em;
             color: #3498db;
             margin-bottom: 15px;
@@ -95,6 +111,51 @@ export const COMPREHENSIVE_SIDEBAR_TEMPLATE = `<!DOCTYPE html>
             padding-bottom: 5px;
         }
 
+        .main-content .cv-section-header {
+            color: #2c3e50;
+            border-bottom: 3px solid #3498db;
+            padding-bottom: 10px;
+            margin-bottom: 25px;
+            font-size: 2em;
+            font-weight: 500;
+        }
+
+        .cv-section-content {
+            orphans: 3;
+            widows: 3;
+        }
+
+        /* CV Item Styling */
+        .cv-item {
+            page-break-inside: avoid;
+            margin-bottom: 15px;
+            position: relative;
+        }
+
+        .sidebar .cv-item {
+            margin-bottom: 15px;
+        }
+
+        .main-content .cv-item {
+            margin-bottom: 30px;
+            padding-left: 20px;
+        }
+
+        .cv-item-group {
+            page-break-inside: auto;
+        }
+
+        .cv-item-header {
+            page-break-after: avoid;
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+
+        .cv-item-content {
+            margin-top: 5px;
+        }
+
+        /* Sidebar Specific Styling */
         .sidebar ul {
             list-style: none;
             padding: 0;
@@ -105,7 +166,7 @@ export const COMPREHENSIVE_SIDEBAR_TEMPLATE = `<!DOCTYPE html>
             margin-bottom: 15px;
         }
 
-        /* New Skill Bar Styling */
+        /* Technical Skills Styling */
         .skill-item {
             font-size: 1em;
             color: #ecf0f1;
@@ -154,26 +215,7 @@ export const COMPREHENSIVE_SIDEBAR_TEMPLATE = `<!DOCTYPE html>
             color: #34495e;
         }
 
-        /* Main Content Styling */
-        .main-content .section {
-            margin-bottom: 40px;
-        }
-
-        .main-content h2 {
-            color: #2c3e50;
-            border-bottom: 3px solid #3498db;
-            padding-bottom: 10px;
-            margin-bottom: 25px;
-            font-size: 2em;
-            font-weight: 500;
-        }
-
-        .main-content .item {
-            margin-bottom: 30px;
-            padding-left: 20px;
-        }
-
-        /* Fixed Vertical Timeline Styling */
+        /* Experience Timeline Styling */
         .experience-timeline {
             position: relative;
             padding-left: 0;
@@ -192,7 +234,6 @@ export const COMPREHENSIVE_SIDEBAR_TEMPLATE = `<!DOCTYPE html>
             margin-bottom: 0;
         }
 
-        /* Timeline date column */
         .timeline-date {
             font-style: italic;
             color: #7f8c8d;
@@ -201,13 +242,11 @@ export const COMPREHENSIVE_SIDEBAR_TEMPLATE = `<!DOCTYPE html>
             padding-top: 3px;
         }
 
-        /* Timeline content with line and circle */
         .timeline-content {
             position: relative;
             padding-left: 35px;
         }
 
-        /* Vertical line */
         .timeline-content::before {
             content: '';
             position: absolute;
@@ -218,12 +257,10 @@ export const COMPREHENSIVE_SIDEBAR_TEMPLATE = `<!DOCTYPE html>
             background-color: #bdc3c7;
         }
 
-        /* Hide line for last item */
         .timeline-item:last-child .timeline-content::before {
             display: none;
         }
 
-        /* Circle/node */
         .timeline-content::after {
             content: '';
             position: absolute;
@@ -251,6 +288,7 @@ export const COMPREHENSIVE_SIDEBAR_TEMPLATE = `<!DOCTYPE html>
             color: #555;
         }
 
+        /* Projects Styling */
         .projects-list {
             counter-reset: project-counter;
         }
@@ -277,126 +315,175 @@ export const COMPREHENSIVE_SIDEBAR_TEMPLATE = `<!DOCTYPE html>
             color: #555;
             font-size: 0.9em;
         }
+
+        /* Print-specific styles */
+        @media print {
+            .cv-container {
+                max-width: none;
+                margin: 0;
+                padding: 15mm;
+                box-shadow: none;
+                border-radius: 0;
+                grid-template-columns: 300px 1fr;
+            }
+            
+            .cv-section {
+                margin-bottom: 15px;
+            }
+            
+            .cv-item {
+                margin-bottom: 10px;
+            }
+            
+            .sidebar {
+                padding: 20px 15px;
+            }
+            
+            .main-content {
+                padding: 20px 15px;
+            }
+        }
     </style>
 </head>
 
 <body>
     <div class="cv-container">
         <div class="sidebar">
-            <img src="{{employee.profileImage}}" alt="Profile Photo" class="profile-img">
-            <div class="sidebar-header">
-                <h1>{{employee.firstName}} {{employee.lastName}}</h1>
-                <h2>{{employee.currentDesignation}}</h2>
+            <div class="cv-section cv-page-break-avoid" data-section="header">
+                <div class="cv-section-content">
+                    <img src="{{employee.profileImage}}" alt="Profile Photo" class="profile-img">
+                    <div class="sidebar-header">
+                        <h1>{{employee.firstName}} {{employee.lastName}}</h1>
+                        <h2>{{employee.currentDesignation}}</h2>
+                    </div>
+                </div>
             </div>
 
-            <div class="section">
-                <h3>Technical Skills</h3>
-                <ul>
-                    {{#each employee.technicalSkills}}
-                    <li class="skill-item">
-                        <span>{{this.name}} ({{this.proficiency}}/10)</span>
-                        <div class="skill-bar-container">
-                            <div class="skill-bar" style="width: {{this.proficiency}}0%;"></div>
-                        </div>
-                    </li>
-                    {{/each}}
-                </ul>
+            <div class="cv-section cv-page-break-avoid" data-section="skills">
+                <h3 class="cv-section-header">Technical Skills</h3>
+                <div class="cv-section-content">
+                    <ul class="cv-item-group">
+                        {{#each employee.technicalSkills}}
+                        <li class="cv-item" data-item="skill">
+                            <div class="cv-item-content skill-item">
+                                <span>{{this.name}} ({{this.proficiency}}/10)</span>
+                                <div class="skill-bar-container">
+                                    <div class="skill-bar" style="width: {{this.proficiency}}0%;"></div>
+                                </div>
+                            </div>
+                        </li>
+                        {{/each}}
+                    </ul>
+                </div>
             </div>
 
-            <div class="section">
-                <h3>English Skills</h3>
-                <div class="english-skills">
-                    <div class="english-skill-item">
-                        <span class="skill-name">Speaking</span>
-                        <div class="star-rating">
-                            <span class="star filled">★</span>
-                            <span class="star filled">★</span>
-                            <span class="star filled">★</span>
-                            <span class="star filled">★</span>
-                            <span class="star empty">★</span>
+            <div class="cv-section cv-page-break-avoid" data-section="languages">
+                <h3 class="cv-section-header">English Skills</h3>
+                <div class="cv-section-content">
+                    <div class="english-skills cv-item-group">
+                        <div class="cv-item english-skill-item" data-item="language-skill">
+                            <span class="skill-name">Speaking</span>
+                            <div class="star-rating">
+                                <span class="star filled">★</span>
+                                <span class="star filled">★</span>
+                                <span class="star filled">★</span>
+                                <span class="star filled">★</span>
+                                <span class="star empty">★</span>
+                            </div>
                         </div>
-                    </div>
-                    <div class="english-skill-item">
-                        <span class="skill-name">Writing</span>
-                        <div class="star-rating">
-                            <span class="star filled">★</span>
-                            <span class="star filled">★</span>
-                            <span class="star filled">★</span>
-                            <span class="star filled">★</span>
-                            <span class="star filled">★</span>
+                        <div class="cv-item english-skill-item" data-item="language-skill">
+                            <span class="skill-name">Writing</span>
+                            <div class="star-rating">
+                                <span class="star filled">★</span>
+                                <span class="star filled">★</span>
+                                <span class="star filled">★</span>
+                                <span class="star filled">★</span>
+                                <span class="star filled">★</span>
+                            </div>
                         </div>
-                    </div>
-                    <div class="english-skill-item">
-                        <span class="skill-name">Listening</span>
-                        <div class="star-rating">
-                            <span class="star filled">★</span>
-                            <span class="star filled">★</span>
-                            <span class="star filled">★</span>
-                            <span class="star empty">★</span>
-                            <span class="star empty">★</span>
+                        <div class="cv-item english-skill-item" data-item="language-skill">
+                            <span class="skill-name">Listening</span>
+                            <div class="star-rating">
+                                <span class="star filled">★</span>
+                                <span class="star filled">★</span>
+                                <span class="star filled">★</span>
+                                <span class="star empty">★</span>
+                                <span class="star empty">★</span>
+                            </div>
                         </div>
-                    </div>
-                    <div class="english-skill-item">
-                        <span class="skill-name">Reading</span>
-                        <div class="star-rating">
-                            <span class="star filled">★</span>
-                            <span class="star filled">★</span>
-                            <span class="star filled">★</span>
-                            <span class="star filled">★</span>
-                            <span class="star empty">★</span>
+                        <div class="cv-item english-skill-item" data-item="language-skill">
+                            <span class="skill-name">Reading</span>
+                            <div class="star-rating">
+                                <span class="star filled">★</span>
+                                <span class="star filled">★</span>
+                                <span class="star filled">★</span>
+                                <span class="star filled">★</span>
+                                <span class="star empty">★</span>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <div class="section">
-                <h3>Education</h3>
-                <ul>
-                    {{#each employee.education}}
-                    <li>
-                        <strong>{{this.degree}}</strong><br>
-                        {{this.university}}<br>
-                        Group: {{this.department}}<br>
-                        Passing Year: {{this.endDate | formatDate 'YYYY'}}
-                    </li>
-                    {{/each}}
-                </ul>
+            <div class="cv-section cv-page-break-avoid" data-section="education">
+                <h3 class="cv-section-header">Education</h3>
+                <div class="cv-section-content">
+                    <ul class="cv-item-group">
+                        {{#each employee.education}}
+                        <li class="cv-item" data-item="education">
+                            <div class="cv-item-content">
+                                <strong class="cv-item-header">{{this.degree}}</strong><br>
+                                {{this.university}}<br>
+                                Group: {{this.department}}<br>
+                                Passing Year: {{this.endDate | formatDate 'YYYY'}}
+                            </div>
+                        </li>
+                        {{/each}}
+                    </ul>
+                </div>
             </div>
         </div>
 
         <div class="main-content">
-            <div class="section">
-                <h2>Biography</h2>
-                <p>{{employee.biography}}</p>
-            </div>
-
-            <div class="section">
-                <h2>Experience</h2>
-                <div class="experience-timeline">
-                    {{#each employee.experiences}}
-                    <div class="timeline-item">
-                        <span class="timeline-date">{{this.dateRange}}</span>
-                        <div class="timeline-content">
-                            <h3>{{this.designation}}</h3>
-                            <p>{{this.companyName}}</p>
-                        </div>
-                    </div>
-                    {{/each}}
+            <div class="cv-section cv-page-break-avoid" data-section="summary">
+                <h2 class="cv-section-header">Biography</h2>
+                <div class="cv-section-content">
+                    <p>{{employee.biography}}</p>
                 </div>
             </div>
-            <div class="section">
-                <h2>Projects</h2>
-                <div class="projects-list">
-                    {{#each employee.projects}}
-                    <div class="project-item">
-                        <h3>{{this.name}}</h3>
-                        <div class="project-details">
-                            <p><strong class="technologies-used">Technology Used:</strong> {{this.technologiesUsed}}</p>
-                            <p><strong>Technical Responsibility:</strong> {{this.responsibility}}</p>
-                            <p><strong>Short Description:</strong> {{this.description}}</p>
+
+            <div class="cv-section cv-page-break-before" data-section="experience">
+                <h2 class="cv-section-header">Experience</h2>
+                <div class="cv-section-content">
+                    <div class="experience-timeline cv-item-group">
+                        {{#each employee.experiences}}
+                        <div class="cv-item timeline-item" data-item="experience">
+                            <span class="timeline-date">{{this.dateRange}}</span>
+                            <div class="timeline-content cv-item-content">
+                                <h3 class="cv-item-header">{{this.designation}}</h3>
+                                <p>{{this.companyName}}</p>
+                            </div>
                         </div>
+                        {{/each}}
                     </div>
-                    {{/each}}
+                </div>
+            </div>
+
+            <div class="cv-section cv-page-break-before" data-section="projects">
+                <h2 class="cv-section-header">Projects</h2>
+                <div class="cv-section-content">
+                    <div class="projects-list cv-item-group">
+                        {{#each employee.projects}}
+                        <div class="cv-item project-item" data-item="project">
+                            <h3 class="cv-item-header">{{this.name}}</h3>
+                            <div class="project-details cv-item-content">
+                                <p><strong class="technologies-used">Technology Used:</strong> {{this.technologiesUsed}}</p>
+                                <p><strong>Technical Responsibility:</strong> {{this.responsibility}}</p>
+                                <p><strong>Short Description:</strong> {{this.description}}</p>
+                            </div>
+                        </div>
+                        {{/each}}
+                    </div>
                 </div>
             </div>
         </div>
