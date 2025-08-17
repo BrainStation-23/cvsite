@@ -5,18 +5,21 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { Trash2, HardDrive, AlertTriangle, CheckCircle } from 'lucide-react';
+import { Trash2, HardDrive, AlertTriangle, CheckCircle, RefreshCw } from 'lucide-react';
 
 interface CleanupResult {
   success: boolean;
   summary: {
     totalFilesInStorage: number;
     totalReferencedImages: number;
+    uniqueReferencedPaths: number;
     orphanedFilesFound: number;
     filesDeleted: number;
+    filesRemaining: number;
     errors: number;
   };
   deletedFiles: string[];
+  referencedFiles: string[];
   errors: Array<{ file: string; error: string }>;
 }
 
@@ -38,9 +41,10 @@ const StorageCleanup: React.FC = () => {
       setLastResult(data);
       
       if (data.success) {
+        const { summary } = data;
         toast({
           title: "Storage cleanup completed",
-          description: `Deleted ${data.summary.filesDeleted} orphaned files. Found ${data.summary.orphanedFilesFound} total orphaned files.`,
+          description: `Found ${summary.orphanedFilesFound} orphaned files, deleted ${summary.filesDeleted}. ${summary.filesRemaining} files remaining.`,
         });
       } else {
         toast({
@@ -81,7 +85,11 @@ const StorageCleanup: React.FC = () => {
               disabled={isLoading}
               className="flex items-center gap-2"
             >
-              <Trash2 className="h-4 w-4" />
+              {isLoading ? (
+                <RefreshCw className="h-4 w-4 animate-spin" />
+              ) : (
+                <Trash2 className="h-4 w-4" />
+              )}
               {isLoading ? 'Cleaning...' : 'Clean Up Storage'}
             </Button>
             
@@ -101,22 +109,22 @@ const StorageCleanup: React.FC = () => {
             <div className="mt-6 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
               <h4 className="font-semibold mb-3">Last Cleanup Results</h4>
               
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-4">
                 <div className="text-center">
                   <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">
                     {lastResult.summary.totalFilesInStorage}
                   </div>
                   <div className="text-sm text-gray-600 dark:text-gray-400">
-                    Files in Storage
+                    Files Found
                   </div>
                 </div>
                 
                 <div className="text-center">
                   <div className="text-2xl font-bold text-green-600 dark:text-green-400">
-                    {lastResult.summary.totalReferencedImages}
+                    {lastResult.summary.uniqueReferencedPaths}
                   </div>
                   <div className="text-sm text-gray-600 dark:text-gray-400">
-                    Referenced Images
+                    Referenced Files
                   </div>
                 </div>
                 
@@ -137,6 +145,26 @@ const StorageCleanup: React.FC = () => {
                     Files Deleted
                   </div>
                 </div>
+                
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-purple-600 dark:text-purple-400">
+                    {lastResult.summary.filesRemaining}
+                  </div>
+                  <div className="text-sm text-gray-600 dark:text-gray-400">
+                    Files Remaining
+                  </div>
+                </div>
+                
+                {lastResult.summary.errors > 0 && (
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-red-600 dark:text-red-400">
+                      {lastResult.summary.errors}
+                    </div>
+                    <div className="text-sm text-gray-600 dark:text-gray-400">
+                      Errors
+                    </div>
+                  </div>
+                )}
               </div>
 
               {lastResult.errors.length > 0 && (
@@ -167,6 +195,21 @@ const StorageCleanup: React.FC = () => {
                   <div className="mt-2 space-y-1 max-h-40 overflow-y-auto">
                     {lastResult.deletedFiles.map((file, index) => (
                       <div key={index} className="text-sm text-gray-600 dark:text-gray-400 font-mono">
+                        {file}
+                      </div>
+                    ))}
+                  </div>
+                </details>
+              )}
+
+              {lastResult.referencedFiles && lastResult.referencedFiles.length > 0 && (
+                <details className="mt-4">
+                  <summary className="cursor-pointer font-medium text-gray-700 dark:text-gray-300">
+                    Sample Referenced Files ({lastResult.referencedFiles.length} shown)
+                  </summary>
+                  <div className="mt-2 space-y-1 max-h-40 overflow-y-auto">
+                    {lastResult.referencedFiles.map((file, index) => (
+                      <div key={index} className="text-sm text-green-600 dark:text-green-400 font-mono">
                         {file}
                       </div>
                     ))}

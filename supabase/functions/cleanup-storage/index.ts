@@ -49,47 +49,78 @@ serve(async (req) => {
 
     console.log(`Found ${referencedImages?.length || 0} referenced images in database`)
 
-    // Extract just the filenames from the URLs
-    const referencedFilenames = new Set(
-      referencedImages
-        ?.map(item => {
-          if (!item.profile_image) return null
-          
-          // Handle both full URLs and just filenames
-          if (item.profile_image.includes('/storage/v1/object/public/profile-images/')) {
-            return item.profile_image.split('/profile-images/')[1]
-          } else if (item.profile_image.startsWith('http')) {
-            // Handle other URL formats
-            const parts = item.profile_image.split('/')
-            return parts[parts.length - 1]
-          } else {
-            // Assume it's already just a filename or path
-            return item.profile_image
+    // Create a set of all referenced file paths for faster lookup
+    const referencedPaths = new Set<string>()
+    
+    referencedImages?.forEach(item => {
+      if (item.profile_image) {
+        // Handle different URL formats
+        let filePath = item.profile_image
+        
+        // If it's a full URL, extract just the path after profile-images/
+        if (filePath.includes('/storage/v1/object/public/profile-images/')) {
+          filePath = filePath.split('/storage/v1/object/public/profile-images/')[1]
+        } else if (filePath.startsWith('http')) {
+          // Handle other URL formats by taking everything after the last /profile-images/
+          if (filePath.includes('/profile-images/')) {
+            filePath = filePath.split('/profile-images/')[1]
           }
-        })
-        .filter(Boolean) || []
-    )
+        }
+        
+        // Clean up the path
+        filePath = filePath.replace(/^\/+/, '') // Remove leading slashes
+        
+        if (filePath) {
+          referencedPaths.add(filePath)
+          console.log(`Referenced file: ${filePath}`)
+        }
+      }
+    })
 
-    console.log('Referenced filenames:', Array.from(referencedFilenames))
+    console.log(`Total unique referenced paths: ${referencedPaths.size}`)
 
-    // Find orphaned files
-    const orphanedFiles = files?.filter(file => {
-      // Check if this file (or any path containing it) is referenced
-      const isReferenced = Array.from(referencedFilenames).some(refFile => 
-        refFile.includes(file.name) || file.name.includes(refFile)
-      )
-      return !isReferenced
-    }) || []
+    // Find orphaned files by checking each storage file against referenced paths
+    const orphanedFiles = []
+    const referencedFiles = []
+
+    for (const file of files || []) {
+      const fileName = file.name
+      let isReferenced = false
+
+      // Check if this file is directly referenced
+      if (referencedPaths.has(fileName)) {
+        isReferenced = true
+      } else {
+        // Check if this file is part of a referenced path (for nested folders)
+        for (const referencedPath of referencedPaths) {
+          if (referencedPath.includes(fileName) || fileName.includes(referencedPath)) {
+            isReferenced = true
+            break
+          }
+        }
+      }
+
+      if (isReferenced) {
+        referencedFiles.push(fileName)
+        console.log(`Keeping referenced file: ${fileName}`)
+      } else {
+        orphanedFiles.push(file)
+        console.log(`Found orphaned file: ${fileName}`)
+      }
+    }
 
     console.log(`Found ${orphanedFiles.length} orphaned files`)
+    console.log(`Found ${referencedFiles.length} referenced files`)
 
-    // Delete orphaned files
+    // Delete orphaned files one by one with detailed logging
     const deletedFiles = []
     const errors = []
 
     for (const file of orphanedFiles) {
       try {
-        const { error: deleteError } = await supabase.storage
+        console.log(`Attempting to delete: ${file.name}`)
+        
+        const { data: deleteData, error: deleteError } = await supabase.storage
           .from('profile-images')
           .remove([file.name])
 
@@ -98,12 +129,28 @@ serve(async (req) => {
           errors.push({ file: file.name, error: deleteError.message })
         } else {
           console.log(`Successfully deleted: ${file.name}`)
+          console.log(`Delete response:`, deleteData)
           deletedFiles.push(file.name)
         }
       } catch (err) {
         console.error(`Exception deleting ${file.name}:`, err)
         errors.push({ file: file.name, error: err.message })
       }
+
+      // Add a small delay between deletions to avoid rate limiting
+      await new Promise(resolve => setTimeout(resolve, 100))
+    }
+
+    // Verify deletion by listing files again
+    const { data: remainingFiles, error: verifyError } = await supabase.storage
+      .from('profile-images')
+      .list('', {
+        limit: 1000,
+        sortBy: { column: 'name', order: 'asc' }
+      })
+
+    if (!verifyError) {
+      console.log(`Files remaining after cleanup: ${remainingFiles?.length || 0}`)
     }
 
     const result = {
@@ -111,11 +158,14 @@ serve(async (req) => {
       summary: {
         totalFilesInStorage: files?.length || 0,
         totalReferencedImages: referencedImages?.length || 0,
+        uniqueReferencedPaths: referencedPaths.size,
         orphanedFilesFound: orphanedFiles.length,
         filesDeleted: deletedFiles.length,
+        filesRemaining: remainingFiles?.length || 0,
         errors: errors.length
       },
       deletedFiles,
+      referencedFiles: referencedFiles.slice(0, 10), // Show first 10 for debugging
       errors
     }
 
@@ -138,8 +188,10 @@ serve(async (req) => {
         summary: {
           totalFilesInStorage: 0,
           totalReferencedImages: 0,
+          uniqueReferencedPaths: 0,
           orphanedFilesFound: 0,
           filesDeleted: 0,
+          filesRemaining: 0,
           errors: 1
         }
       }),
