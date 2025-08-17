@@ -13,20 +13,22 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Eye, Mail, MessageSquare, MoreHorizontal } from 'lucide-react';
+import { Eye, Mail, MessageSquare, MoreHorizontal, Download } from 'lucide-react';
 
 interface CompactEmployeeActionsProps {
   profile: any;
   onViewProfile: (profileId: string) => void;
   onSendEmail: (profile: any) => void;
   onNotesClick: (profile: any) => void;
+  onPDFExport: (profileId: string) => void;
 }
 
 const CompactEmployeeActions: React.FC<CompactEmployeeActionsProps> = ({
   profile,
   onViewProfile,
   onSendEmail,
-  onNotesClick
+  onNotesClick,
+  onPDFExport
 }) => {
   return (
     <TooltipProvider>
@@ -45,6 +47,22 @@ const CompactEmployeeActions: React.FC<CompactEmployeeActionsProps> = ({
           </TooltipTrigger>
           <TooltipContent>
             <p>View Profile</p>
+          </TooltipContent>
+        </Tooltip>
+
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button 
+              variant="ghost" 
+              size="sm"
+              onClick={() => onPDFExport(profile.id)}
+              className="h-8 w-8 p-0"
+            >
+              <Download className="h-4 w-4" />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>Export CV as PDF</p>
           </TooltipContent>
         </Tooltip>
 
