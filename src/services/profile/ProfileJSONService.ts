@@ -43,7 +43,7 @@ export interface ProfileJSONData {
   }>;
   achievements: Array<{
     title: string;
-    description: string;
+    description: string | null;
     date?: string;
   }>;
   projects: Array<{
