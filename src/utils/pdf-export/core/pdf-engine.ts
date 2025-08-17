@@ -1,17 +1,17 @@
+
 import html2pdf from 'html2pdf.js';
 import { STANDARD_CV_CSS } from '@/constants/cv-template-standards';
-import { templateValidator } from './template-validator';
+import { templateValidator } from '@/utils/template-validator';
 
-interface PDFGenerationOptions {
+interface PDFEngineOptions {
   filename?: string;
   includeStandardCSS?: boolean;
   validateTemplate?: boolean;
   pageSize?: 'a4' | 'letter';
   margin?: number;
-  onProgress?: (progress: number, message: string) => void;
 }
 
-export class EnhancedPDFGenerator {
+export class PDFEngine {
   private injectStandardCSS(htmlContent: string): string {
     // Check if standard CSS is already included
     if (htmlContent.includes('cv-container') && htmlContent.includes('<style>')) {
@@ -61,19 +61,15 @@ export class EnhancedPDFGenerator {
 
   async generatePDF(
     htmlContent: string, 
-    options: PDFGenerationOptions = {}
+    options: PDFEngineOptions = {}
   ): Promise<void> {
     const {
-      filename = 'cv-template',
+      filename = 'cv-export',
       includeStandardCSS = true,
       validateTemplate = true,
       pageSize = 'a4',
-      margin = 15,
-      onProgress
+      margin = 15
     } = options;
-
-    // Report initial progress
-    onProgress?.(0, 'Preparing template...');
 
     // Validate template if requested
     if (validateTemplate) {
@@ -83,8 +79,6 @@ export class EnhancedPDFGenerator {
       }
     }
 
-    onProgress?.(10, 'Processing template...');
-
     // Process HTML content
     let processedHTML = htmlContent;
     
@@ -93,8 +87,6 @@ export class EnhancedPDFGenerator {
     }
     
     processedHTML = this.optimizeForPDF(processedHTML);
-
-    onProgress?.(25, 'Configuring PDF settings...');
 
     // Configure PDF options
     const [width, height] = this.getPageSize(pageSize);
@@ -129,59 +121,12 @@ export class EnhancedPDFGenerator {
       }
     };
 
-    // Generate PDF with progress updates
-    try {
-      onProgress?.(40, 'Converting to canvas...');
-      
-      await html2pdf()
-        .from(processedHTML)
-        .set(opt)
-        .toCanvas()
-        .then(() => {
-          onProgress?.(70, 'Generating PDF...');
-        })
-        .toPdf()
-        .then(() => {
-          onProgress?.(90, 'Finalizing...');
-        })
-        .save()
-        .then(() => {
-          onProgress?.(100, 'Done!');
-        });
-    } catch (error) {
-      console.error('PDF generation failed:', error);
-      throw new Error(`PDF generation failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
-    }
-  }
-
-  // Method to preview PDF without downloading
-  async previewPDF(htmlContent: string, options: PDFGenerationOptions = {}): Promise<Blob> {
-    const processedOptions = { ...options, includeStandardCSS: true };
-    let processedHTML = htmlContent;
-    
-    if (processedOptions.includeStandardCSS) {
-      processedHTML = this.injectStandardCSS(processedHTML);
-    }
-    
-    processedHTML = this.optimizeForPDF(processedHTML);
-
-    const opt = {
-      image: { type: 'webp', quality: 0.98 },
-      html2canvas: { scale: 2, useCORS: true },
-      jsPDF: { orientation: 'portrait', format: 'a4' },
-      pagebreak: {
-        mode: ['avoid-all', 'css', 'legacy'],
-        avoid: '.cv-page-break-avoid'
-      }
-    };
-
-    return html2pdf().from(processedHTML).set(opt).output('blob');
+    // Generate PDF
+    await html2pdf()
+      .from(processedHTML)
+      .set(opt)
+      .save();
   }
 }
 
-export const enhancedPDFGenerator = new EnhancedPDFGenerator();
-
-// Legacy function for backward compatibility
-export const downloadAsPDF = (htmlContent: string, filename: string = 'cv') => {
-  enhancedPDFGenerator.generatePDF(htmlContent, { filename });
-};
+export const pdfEngine = new PDFEngine();

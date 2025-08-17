@@ -1,12 +1,13 @@
+
 import React, { useState } from 'react';
+import { useParams } from 'react-router-dom';
 import { useTemplateEngine } from '@/hooks/use-template-engine';
 import { useEmployeeData } from '@/hooks/use-employee-data';
 import { Button } from '@/components/ui/button';
 import { Download, Maximize, FileDown } from 'lucide-react';
 import { CVRenderer } from './CVRenderer';
 import { generateFullCVHTML } from '@/utils/cv-html-generator';
-import { downloadAsPDF } from '@/utils/pdf-generator';
-import { ProgressDialog } from '@/components/ui/progress-dialog';
+import { exportCVAsPDF, ProgressDialog, ProgressStep } from '@/utils/pdf-export';
 import { toast } from 'sonner';
 
 interface CVTemplatePreviewProps {
@@ -18,12 +19,13 @@ export const CVTemplatePreview: React.FC<CVTemplatePreviewProps> = ({
   htmlTemplate,
   selectedEmployeeId,
 }) => {
+  const { id: templateId } = useParams<{ id: string }>();
   const { data: employeeData, isLoading: isLoadingEmployee } = useEmployeeData(selectedEmployeeId || '', true);
   const { processedHTML, error, isProcessing } = useTemplateEngine(htmlTemplate, employeeData);
   
   const [showProgressDialog, setShowProgressDialog] = useState(false);
+  const [progressSteps, setProgressSteps] = useState<ProgressStep[]>([]);
   const [progress, setProgress] = useState(0);
-  const [progressMessage, setProgressMessage] = useState('');
 
   const handleFullscreen = () => {
     if (!processedHTML) return;
@@ -52,24 +54,18 @@ export const CVTemplatePreview: React.FC<CVTemplatePreviewProps> = ({
   };
 
   const handlePDFDownload = async () => {
-    if (!processedHTML) return;
+    if (!selectedEmployeeId || !templateId) {
+      toast.error('Please select an employee to generate PDF');
+      return;
+    }
     
     try {
       setShowProgressDialog(true);
-      setProgress(0);
-      setProgressMessage('Starting PDF generation...');
       
-      const fullHTML = generateFullCVHTML(processedHTML, 'download');
-      const { enhancedPDFGenerator } = await import('@/utils/enhanced-pdf-generator');
-      
-      await enhancedPDFGenerator.generatePDF(fullHTML, {
-        filename: 'cv-template',
-        includeStandardCSS: true,
-        validateTemplate: true,
-        pageSize: 'a4',
-        onProgress: (progressValue, message) => {
+      await exportCVAsPDF(selectedEmployeeId, templateId, {
+        onProgress: (steps, progressValue) => {
+          setProgressSteps(steps);
           setProgress(progressValue);
-          setProgressMessage(message);
         }
       });
       
@@ -108,7 +104,12 @@ export const CVTemplatePreview: React.FC<CVTemplatePreviewProps> = ({
                   <Download className="h-3 w-3 mr-1" />
                   HTML
                 </Button>
-                <Button size="sm" variant="outline" onClick={handlePDFDownload}>
+                <Button 
+                  size="sm" 
+                  variant="outline" 
+                  onClick={handlePDFDownload}
+                  disabled={!selectedEmployeeId}
+                >
                   <FileDown className="h-3 w-3 mr-1" />
                   PDF
                 </Button>
@@ -176,7 +177,7 @@ export const CVTemplatePreview: React.FC<CVTemplatePreviewProps> = ({
         isOpen={showProgressDialog}
         onClose={() => setShowProgressDialog(false)}
         title="Generating PDF"
-        message={progressMessage}
+        steps={progressSteps}
         progress={progress}
         allowCancel={false}
       />
