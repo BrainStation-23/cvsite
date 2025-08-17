@@ -124,7 +124,7 @@ export class ProfileJSONService {
       })),
       achievements: profileData.achievements.map(achievement => ({
         title: achievement.title,
-        description: achievement.description,
+        description: achievement.description || null,
         date: achievement.date instanceof Date ? achievement.date.toISOString().split('T')[0] : achievement.date
       })),
       projects: profileData.projects.map(project => ({
