@@ -52,9 +52,9 @@ export class ProfileImportDataCleaner {
     return {
       firstName: personalInfo.firstName || '',
       lastName: personalInfo.lastName || '',
-      biography: personalInfo.biography || '',
-      profileImage: personalInfo.profileImage || '',
-      current_designation: personalInfo.current_designation || null
+      biography: personalInfo.biography || null, // Allow null for optional field
+      profileImage: personalInfo.profileImage || null, // Allow null for optional field
+      current_designation: personalInfo.current_designation || null // Allow null for optional field
     };
   }
 
@@ -68,7 +68,7 @@ export class ProfileImportDataCleaner {
     return {
       companyName: experience.companyName || '',
       designation: experience.designation || '',
-      description: experience.description || '',
+      description: experience.description || null, // Allow null for optional field
       startDate: startDateResult.date,
       endDate: isCurrent ? undefined : endDateResult.date,
       isCurrent: isCurrent
@@ -83,9 +83,9 @@ export class ProfileImportDataCleaner {
 
     return {
       university: education.university || '',
-      degree: education.degree || '',
-      department: education.department || '',
-      gpa: education.gpa || '',
+      degree: education.degree || null, // Allow null for optional field
+      department: education.department || null, // Allow null for optional field
+      gpa: education.gpa || null, // Allow null for optional field
       startDate: startDateResult.date,
       endDate: isCurrent ? undefined : endDateResult.date,
       isCurrent: isCurrent
@@ -97,10 +97,10 @@ export class ProfileImportDataCleaner {
 
     return {
       title: training.title || '',
-      provider: training.provider || '',
-      description: training.description || '',
+      provider: training.provider || null, // Allow null for optional field
+      description: training.description || null, // Allow null for optional field
       date: dateResult.date || new Date(), // Default to current date if invalid
-      certificateUrl: training.certificateUrl || ''
+      certificateUrl: training.certificateUrl || null // Allow null for optional field
     };
   }
 
@@ -122,14 +122,14 @@ export class ProfileImportDataCleaner {
 
     return {
       name: project.name || '',
-      role: project.role || '',
+      role: project.role || null, // Allow null for optional field
       description: project.description || '',
-      responsibility: project.responsibility || '',
+      responsibility: project.responsibility || null, // Allow null for optional field
       startDate: startDateResult.date,
       endDate: isCurrent ? undefined : endDateResult.date,
       isCurrent: isCurrent,
       technologiesUsed: Array.isArray(project.technologiesUsed) ? project.technologiesUsed : [],
-      url: project.url || ''
+      url: project.url || null // Allow null for optional field
     };
   }
 

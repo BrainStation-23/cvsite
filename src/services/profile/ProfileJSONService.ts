@@ -5,9 +5,9 @@ export interface ProfileJSONData {
   generalInfo: {
     firstName: string;
     lastName: string;
-    biography?: string;
-    profileImage?: string;
-    current_designation?: string;
+    biography?: string | null;
+    profileImage?: string | null;
+    current_designation?: string | null;
   };
   technicalSkills: Array<{
     name: string;
@@ -20,26 +20,26 @@ export interface ProfileJSONData {
   experiences: Array<{
     companyName: string;
     designation: string;
-    description?: string;
+    description?: string | null;
     startDate?: string;
     endDate?: string;
     isCurrent?: boolean;
   }>;
   education: Array<{
     university: string;
-    degree?: string;
-    department?: string;
-    gpa?: string;
+    degree?: string | null;
+    department?: string | null;
+    gpa?: string | null;
     startDate?: string;
     endDate?: string;
     isCurrent?: boolean;
   }>;
   trainings: Array<{
     title: string;
-    provider?: string;
-    description?: string;
+    provider?: string | null;
+    description?: string | null;
     date?: string;
-    certificateUrl?: string;
+    certificateUrl?: string | null;
   }>;
   achievements: Array<{
     title: string;
@@ -48,27 +48,27 @@ export interface ProfileJSONData {
   }>;
   projects: Array<{
     name: string;
-    role?: string;
+    role?: string | null;
     description: string;
-    responsibility?: string;
+    responsibility?: string | null;
     startDate?: string;
     endDate?: string;
     isCurrent?: boolean;
     technologiesUsed?: string[];
-    url?: string;
+    url?: string | null;
   }>;
 }
 
 export interface ProjectJSON {
   name: string;
-  role?: string;
+  role?: string | null;
   description: string;
-  responsibility?: string;
+  responsibility?: string | null;
   startDate?: string;
   endDate?: string;
   isCurrent?: boolean;
   technologiesUsed?: string[];
-  url?: string;
+  url?: string | null;
 }
 
 export class ProfileJSONService {
@@ -86,9 +86,9 @@ export class ProfileJSONService {
       generalInfo: {
         firstName: profileData.generalInfo?.firstName || profileData.generalInfo?.first_name || '',
         lastName: profileData.generalInfo?.lastName || profileData.generalInfo?.last_name || '',
-        biography: profileData.generalInfo?.biography || '',
-        profileImage: profileData.generalInfo?.profileImage || profileData.generalInfo?.profile_image,
-        current_designation: profileData.generalInfo?.currentDesignation || profileData.generalInfo?.current_designation
+        biography: profileData.generalInfo?.biography || null,
+        profileImage: profileData.generalInfo?.profileImage || profileData.generalInfo?.profile_image || null,
+        current_designation: profileData.generalInfo?.currentDesignation || profileData.generalInfo?.current_designation || null
       },
       technicalSkills: profileData.technicalSkills.map(skill => ({
         name: skill.name,
@@ -101,26 +101,26 @@ export class ProfileJSONService {
       experiences: profileData.experiences.map(exp => ({
         companyName: exp.companyName || exp.company_name,
         designation: exp.designation,
-        description: exp.description || '',
+        description: exp.description || null,
         startDate: exp.startDate instanceof Date ? exp.startDate.toISOString().split('T')[0] : exp.start_date,
         endDate: exp.endDate ? (exp.endDate instanceof Date ? exp.endDate.toISOString().split('T')[0] : exp.end_date) : undefined,
         isCurrent: exp.isCurrent || exp.is_current || false
       })),
       education: profileData.education.map(edu => ({
         university: edu.university,
-        degree: edu.degree || '',
-        department: edu.department || '',
-        gpa: edu.gpa || '',
+        degree: edu.degree || null,
+        department: edu.department || null,
+        gpa: edu.gpa || null,
         startDate: edu.startDate instanceof Date ? edu.startDate.toISOString().split('T')[0] : edu.start_date,
         endDate: edu.endDate ? (edu.endDate instanceof Date ? edu.endDate.toISOString().split('T')[0] : edu.end_date) : undefined,
         isCurrent: edu.isCurrent || edu.is_current || false
       })),
       trainings: profileData.trainings.map(training => ({
         title: training.title,
-        provider: training.provider,
-        description: training.description || '',
+        provider: training.provider || null,
+        description: training.description || null,
         date: training.date instanceof Date ? training.date.toISOString().split('T')[0] : training.certification_date,
-        certificateUrl: training.certificateUrl || training.certificate_url
+        certificateUrl: training.certificateUrl || training.certificate_url || null
       })),
       achievements: profileData.achievements.map(achievement => ({
         title: achievement.title,
@@ -129,14 +129,14 @@ export class ProfileJSONService {
       })),
       projects: profileData.projects.map(project => ({
         name: project.name,
-        role: project.role,
+        role: project.role || null,
         description: project.description,
-        responsibility: project.responsibility || '',
+        responsibility: project.responsibility || null,
         startDate: project.startDate instanceof Date ? project.startDate.toISOString().split('T')[0] : project.start_date,
         endDate: project.endDate ? (project.endDate instanceof Date ? project.endDate.toISOString().split('T')[0] : project.end_date) : undefined,
         isCurrent: project.isCurrent || project.is_current || false,
         technologiesUsed: project.technologiesUsed || project.technologies_used || [],
-        url: project.url
+        url: project.url || null
       }))
     };
   }
@@ -158,25 +158,25 @@ export class ProfileJSONService {
     return {
       generalInfo: ProfileImportDataCleaner.cleanPersonalInfo(data.generalInfo),
       technicalSkills: data.technicalSkills
-        .filter(skill => skill.name && skill.name.trim() !== '')
+        .filter(skill => skill.name && skill.name.trim() !== '') // Only filter on required field
         .map(skill => ProfileImportDataCleaner.cleanSkill(skill)),
       specializedSkills: data.specializedSkills
-        .filter(skill => skill.name && skill.name.trim() !== '')
+        .filter(skill => skill.name && skill.name.trim() !== '') // Only filter on required field
         .map(skill => ProfileImportDataCleaner.cleanSkill(skill)),
       experiences: data.experiences
-        .filter(exp => exp.companyName && exp.companyName.trim() !== '' && exp.designation && exp.designation.trim() !== '')
+        .filter(exp => exp.companyName && exp.companyName.trim() !== '' && exp.designation && exp.designation.trim() !== '') // Only filter on required fields
         .map(exp => ProfileImportDataCleaner.cleanExperience(exp)),
       education: data.education
-        .filter(edu => edu.university && edu.university.trim() !== '')
+        .filter(edu => edu.university && edu.university.trim() !== '') // Only filter on required field
         .map(edu => ProfileImportDataCleaner.cleanEducation(edu)),
       trainings: data.trainings
-        .filter(training => training.title && training.title.trim() !== '')
+        .filter(training => training.title && training.title.trim() !== '') // Only filter on required field
         .map(training => ProfileImportDataCleaner.cleanTraining(training)),
       achievements: data.achievements
-        .filter(achievement => achievement.title && achievement.title.trim() !== '' && achievement.description && achievement.description.trim() !== '')
+        .filter(achievement => achievement.title && achievement.title.trim() !== '' && achievement.description && achievement.description.trim() !== '') // Only filter on required fields
         .map(achievement => ProfileImportDataCleaner.cleanAchievement(achievement)),
       projects: data.projects
-        .filter(project => project.name && project.name.trim() !== '' && project.description && project.description.trim() !== '')
+        .filter(project => project.name && project.name.trim() !== '' && project.description && project.description.trim() !== '') // Only filter on required fields
         .map(project => ProfileImportDataCleaner.cleanProject(project))
     };
   }
