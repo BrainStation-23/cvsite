@@ -6,7 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Label } from '@/components/ui/label';
 import { Loader2, Download } from 'lucide-react';
 import { useCVTemplates } from '@/hooks/use-cv-templates';
-import { exportCVAsPDF, ProgressDialog } from '@/utils/pdf-export';
+import { exportCVAsPDF, ProgressDialog, ProgressStep } from '@/utils/pdf-export';
 import { toast } from 'sonner';
 
 interface PDFExportModalProps {
@@ -26,16 +26,7 @@ const PDFExportModal: React.FC<PDFExportModalProps> = ({
   const [isExporting, setIsExporting] = useState(false);
   const [showProgressDialog, setShowProgressDialog] = useState(false);
   const [exportProgress, setExportProgress] = useState(0);
-  const [progressSteps, setProgressSteps] = useState([
-    { id: 'fetch-employee', label: 'Fetching employee data', isComplete: false, isActive: false },
-    { id: 'fetch-template', label: 'Loading CV template', isComplete: false, isActive: false },
-    { id: 'process-template', label: 'Processing template', isComplete: false, isActive: false },
-    { id: 'prepare-pdf', label: 'Preparing PDF', isComplete: false, isActive: false },
-    { id: 'convert-canvas', label: 'Converting to canvas', isComplete: false, isActive: false },
-    { id: 'generate-pdf', label: 'Generating PDF', isComplete: false, isActive: false },
-    { id: 'finalize', label: 'Finalizing document', isComplete: false, isActive: false },
-    { id: 'complete', label: 'Export complete', isComplete: false, isActive: false }
-  ]);
+  const [progressSteps, setProgressSteps] = useState<ProgressStep[]>([]);
 
   const { templates, isLoading: templatesLoading } = useCVTemplates();
 
@@ -55,32 +46,16 @@ const PDFExportModal: React.FC<PDFExportModalProps> = ({
     setIsExporting(true);
     setShowProgressDialog(true);
     setExportProgress(0);
-    
-    // Reset progress steps
-    setProgressSteps(steps => 
-      steps.map(step => ({ ...step, isComplete: false, isActive: false }))
-    );
+    setProgressSteps([]);
 
     try {
       await exportCVAsPDF(employeeId, selectedTemplateId, {
         filename: `${employeeName.replace(/\s+/g, '_')}_CV`,
-        onProgress: (step, progress) => {
+        onProgress: (steps: ProgressStep[], progress: number) => {
+          setProgressSteps(steps);
           setExportProgress(progress);
-          setProgressSteps(prevSteps => 
-            prevSteps.map(s => ({
-              ...s,
-              isActive: s.id === step,
-              isComplete: prevSteps.findIndex(ps => ps.id === step) < prevSteps.findIndex(ps => ps.id === s.id)
-            }))
-          );
         }
       });
-
-      // Mark all steps as complete
-      setProgressSteps(steps => 
-        steps.map(step => ({ ...step, isComplete: true, isActive: false }))
-      );
-      setExportProgress(100);
 
       toast.success('CV exported successfully!');
       
