@@ -102,20 +102,20 @@
     },
     "Achievement": {
       "type": "object",
-      "required": ["title", "description"],
+      "required": ["title"],
       "properties": {
         "title": { "type": "string" },
-        "description": { "type": "string" },
+        "description": { "type": ["string", "null"] },
         "date": { "type": ["string", "null"] }
       }
     },
     "ProjectJSON": {
       "type": "object",
-      "required": ["name", "description"],
+      "required": ["name"],
       "properties": {
         "name": { "type": "string" },
         "role": { "type": ["string", "null"] },
-        "description": { "type": "string" },
+        "description": { "type": ["string", "null"] },
         "responsibility": { "type": ["string", "null"] },
         "startDate": { "type": ["string", "null"] },
         "endDate": { "type": ["string", "null"] },
