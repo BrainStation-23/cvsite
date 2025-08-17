@@ -56,6 +56,26 @@ export const useDegreeSettings = () => {
       queryClient.invalidateQueries({ queryKey: ['degrees'] });
     },
   });
+
+  // Update degree mutation
+  const updateDegreeMutation = useMutation({
+    mutationFn: async ({ id, name, fullForm }: { id: string; name: string; fullForm?: string }) => {
+      const { data, error } = await supabase
+        .from('degrees')
+        .update({
+          name: name,
+          full_form: fullForm || null
+        })
+        .eq('id', id)
+        .select();
+      
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['degrees'] });
+    },
+  });
   
   // Bulk import degrees mutation
   const bulkImportMutation = useMutation({
@@ -107,6 +127,24 @@ export const useDegreeSettings = () => {
     });
   };
 
+  const updateDegree = (id: string, name: string, fullForm?: string) => {
+    updateDegreeMutation.mutate({ id, name, fullForm }, {
+      onSuccess: () => {
+        toast({
+          title: "Degree updated",
+          description: `"${name}" has been updated.`,
+        });
+      },
+      onError: (error) => {
+        toast({
+          title: "Error",
+          description: `Failed to update degree: ${error instanceof Error ? error.message : 'Unknown error'}`,
+          variant: "destructive"
+        });
+      }
+    });
+  };
+
   const bulkImportDegrees = (degrees: DegreeFormData[]) => {
     bulkImportMutation.mutate(degrees, {
       onSuccess: (data) => {
@@ -148,9 +186,11 @@ export const useDegreeSettings = () => {
     isLoading,
     error,
     addDegree,
+    updateDegree,
     bulkImportDegrees,
     deleteDegree,
     isAddingDegree: addDegreeMutation.isPending,
+    isUpdatingDegree: updateDegreeMutation.isPending,
     isBulkImporting: bulkImportMutation.isPending,
     isDeletingDegree: deleteMutation.isPending
   };

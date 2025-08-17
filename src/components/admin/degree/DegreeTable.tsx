@@ -1,8 +1,9 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
-import { Trash2, ArrowUpDown } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Trash2, ArrowUpDown, Edit, Check, X } from 'lucide-react';
 import { DegreeItem } from '@/utils/degreeCsvUtils';
 import { ConfirmationDialog } from '@/components/ui/confirmation-dialog';
 import { useConfirmationDialog } from '@/hooks/use-confirmation-dialog';
@@ -10,6 +11,7 @@ import { useConfirmationDialog } from '@/hooks/use-confirmation-dialog';
 interface DegreeTableProps {
   degrees: DegreeItem[];
   onDelete: (id: string, name: string) => void;
+  onUpdate: (id: string, name: string, fullForm?: string) => void;
   isLoading: boolean;
   sortBy: string;
   sortOrder: 'asc' | 'desc';
@@ -19,12 +21,15 @@ interface DegreeTableProps {
 const DegreeTable: React.FC<DegreeTableProps> = ({
   degrees,
   onDelete,
+  onUpdate,
   isLoading,
   sortBy,
   sortOrder,
   onSort,
 }) => {
   const { isOpen, config, showConfirmation, hideConfirmation, handleConfirm } = useConfirmationDialog();
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editForm, setEditForm] = useState({ name: '', full_form: '' });
 
   const handleDelete = (item: DegreeItem) => {
     showConfirmation({
@@ -34,6 +39,27 @@ const DegreeTable: React.FC<DegreeTableProps> = ({
       variant: 'destructive',
       onConfirm: () => onDelete(item.id, item.name)
     });
+  };
+
+  const handleEdit = (item: DegreeItem) => {
+    setEditingId(item.id);
+    setEditForm({
+      name: item.name,
+      full_form: item.full_form || ''
+    });
+  };
+
+  const handleSaveEdit = () => {
+    if (editingId && editForm.name.trim()) {
+      onUpdate(editingId, editForm.name.trim(), editForm.full_form.trim() || undefined);
+      setEditingId(null);
+      setEditForm({ name: '', full_form: '' });
+    }
+  };
+
+  const handleCancelEdit = () => {
+    setEditingId(null);
+    setEditForm({ name: '', full_form: '' });
   };
 
   const getSortIcon = (field: string) => {
@@ -72,25 +98,81 @@ const DegreeTable: React.FC<DegreeTableProps> = ({
                 {getSortIcon('created_at')}
               </Button>
             </TableHead>
-            <TableHead className="w-[100px]">Actions</TableHead>
+            <TableHead className="w-[150px]">Actions</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {degrees.map((degree) => (
             <TableRow key={degree.id}>
-              <TableCell className="font-medium">{degree.name}</TableCell>
-              <TableCell>{degree.full_form || '-'}</TableCell>
+              <TableCell className="font-medium">
+                {editingId === degree.id ? (
+                  <Input
+                    value={editForm.name}
+                    onChange={(e) => setEditForm(prev => ({ ...prev, name: e.target.value }))}
+                    className="h-8"
+                    autoFocus
+                  />
+                ) : (
+                  degree.name
+                )}
+              </TableCell>
+              <TableCell>
+                {editingId === degree.id ? (
+                  <Input
+                    value={editForm.full_form}
+                    onChange={(e) => setEditForm(prev => ({ ...prev, full_form: e.target.value }))}
+                    className="h-8"
+                    placeholder="Optional"
+                  />
+                ) : (
+                  degree.full_form || '-'
+                )}
+              </TableCell>
               <TableCell>{new Date(degree.created_at).toLocaleDateString()}</TableCell>
               <TableCell>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => handleDelete(degree)}
-                  disabled={isLoading}
-                  className="text-red-600 hover:text-red-800 hover:bg-red-50"
-                >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
+                {editingId === degree.id ? (
+                  <div className="flex space-x-1">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={handleSaveEdit}
+                      disabled={isLoading || !editForm.name.trim()}
+                      className="text-green-600 hover:text-green-800 hover:bg-green-50"
+                    >
+                      <Check className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={handleCancelEdit}
+                      disabled={isLoading}
+                      className="text-gray-600 hover:text-gray-800 hover:bg-gray-50"
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="flex space-x-1">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleEdit(degree)}
+                      disabled={isLoading}
+                      className="text-blue-600 hover:text-blue-800 hover:bg-blue-50"
+                    >
+                      <Edit className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleDelete(degree)}
+                      disabled={isLoading}
+                      className="text-red-600 hover:text-red-800 hover:bg-red-50"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                )}
               </TableCell>
             </TableRow>
           ))}

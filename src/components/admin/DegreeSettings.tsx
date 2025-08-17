@@ -22,10 +22,12 @@ const DegreeSettings: React.FC = () => {
 
   const { 
     degrees: allDegrees,
-    addDegree, 
+    addDegree,
+    updateDegree,
     deleteDegree, 
     bulkImportDegrees,
     isAddingDegree,
+    isUpdatingDegree,
     isBulkImporting,
     isDeletingDegree 
   } = useDegreeSettings();
@@ -127,7 +129,8 @@ const DegreeSettings: React.FC = () => {
               <DegreeTable
                 degrees={degrees}
                 onDelete={deleteDegree}
-                isLoading={isDeletingDegree}
+                onUpdate={updateDegree}
+                isLoading={isDeletingDegree || isUpdatingDegree}
                 sortBy={sortBy}
                 sortOrder={sortOrder}
                 onSort={handleSort}
