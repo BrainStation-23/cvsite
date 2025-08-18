@@ -57,7 +57,20 @@ export function useResourcePivotStatistics(
         throw error;
       }
 
-      return data as PivotStatistics;
+      // Properly parse the JSON response from the RPC function
+      const result = data as unknown as PivotStatistics;
+      
+      // Ensure the data has the expected structure with default values
+      return {
+        pivot_data: result?.pivot_data || [],
+        row_totals: result?.row_totals || [],
+        col_totals: result?.col_totals || [],
+        grand_total: result?.grand_total || 0,
+        dimensions: result?.dimensions || {
+          primary: primaryDimension,
+          secondary: secondaryDimension
+        }
+      } as PivotStatistics;
     },
   });
 }
