@@ -50,7 +50,6 @@ const PDFExportModal: React.FC<PDFExportModalProps> = ({
 
     try {
       await exportCVAsPDF(employeeId, selectedTemplateId, {
-        filename: `${employeeName.replace(/\s+/g, '_')}_CV`,
         onProgress: (steps: ProgressStep[], progress: number) => {
           setProgressSteps(steps);
           setExportProgress(progress);
