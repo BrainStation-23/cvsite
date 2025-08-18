@@ -1,0 +1,58 @@
+
+import React from 'react';
+import { Link } from 'react-router-dom';
+import { Button } from '@/components/ui/button';
+import { ArrowLeft, BarChart3 } from 'lucide-react';
+import { ViewToggle } from './ViewToggle';
+
+interface ResourceStatisticsHeaderProps {
+  baseUrl: string;
+  groupingDescription: string;
+  activeTab: string;
+  showCharts: boolean;
+  showTables: boolean;
+  onToggleCharts: () => void;
+  onToggleTables: () => void;
+}
+
+export const ResourceStatisticsHeader: React.FC<ResourceStatisticsHeaderProps> = ({
+  baseUrl,
+  groupingDescription,
+  activeTab,
+  showCharts,
+  showTables,
+  onToggleCharts,
+  onToggleTables,
+}) => {
+  return (
+    <div className="flex items-center justify-between">
+      <div className="flex items-center space-x-4">
+        <Link to={baseUrl}>
+          <Button variant="outline" size="sm">
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back to Resource Calendar
+          </Button>
+        </Link>
+        <div>
+          <h1 className="text-2xl font-bold flex items-center gap-2">
+            <BarChart3 className="h-6 w-6" />
+            Resource Analytics Dashboard
+          </h1>
+          <p className="text-muted-foreground">
+            {groupingDescription}
+          </p>
+        </div>
+      </div>
+      
+      {/* View Toggle - Only show for overview tab */}
+      {activeTab === 'overview' && (
+        <ViewToggle
+          showCharts={showCharts}
+          showTables={showTables}
+          onToggleCharts={onToggleCharts}
+          onToggleTables={onToggleTables}
+        />
+      )}
+    </div>
+  );
+};
