@@ -2,31 +2,43 @@
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Switch } from '@/components/ui/switch';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Pencil, Trash2, Plus, Check, X } from 'lucide-react';
 import { usePlatformSettings, SettingItem } from '@/hooks/use-platform-settings';
 import { ConfirmationDialog } from '@/components/ui/confirmation-dialog';
 import { useConfirmationDialog } from '@/hooks/use-confirmation-dialog';
 
+// Extend the SettingItem to include is_billable
+interface BillTypeItem extends SettingItem {
+  is_billable: boolean;
+}
+
 export const BillTypeTable: React.FC = () => {
   const { items, isLoading, addItem, updateItem, removeItem, isAddingItem, isUpdatingItem, isRemovingItem } = usePlatformSettings('bill_types');
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editValue, setEditValue] = useState('');
+  const [editIsBillable, setEditIsBillable] = useState(false);
   const [newItemValue, setNewItemValue] = useState('');
+  const [newIsBillable, setNewIsBillable] = useState(false);
   const { isOpen, config, showConfirmation, hideConfirmation, handleConfirm } = useConfirmationDialog();
 
-  const handleEdit = (item: SettingItem) => {
+  const billTypeItems = items as BillTypeItem[] | undefined;
+
+  const handleEdit = (item: BillTypeItem) => {
     setEditingId(item.id);
     setEditValue(item.name);
+    setEditIsBillable(item.is_billable);
   };
 
   const handleSaveEdit = () => {
     if (editValue.trim() && editingId) {
-      const originalItem = items?.find(item => item.id === editingId);
+      const originalItem = billTypeItems?.find(item => item.id === editingId);
       if (originalItem) {
         updateItem(editingId, editValue.trim(), originalItem.name);
         setEditingId(null);
         setEditValue('');
+        setEditIsBillable(false);
       }
     }
   };
@@ -34,9 +46,10 @@ export const BillTypeTable: React.FC = () => {
   const handleCancelEdit = () => {
     setEditingId(null);
     setEditValue('');
+    setEditIsBillable(false);
   };
 
-  const handleDelete = (item: SettingItem) => {
+  const handleDelete = (item: BillTypeItem) => {
     showConfirmation({
       title: 'Delete Bill Type',
       description: `Are you sure you want to delete "${item.name}"? This action cannot be undone.`,
@@ -50,6 +63,7 @@ export const BillTypeTable: React.FC = () => {
     if (newItemValue.trim()) {
       addItem(newItemValue);
       setNewItemValue('');
+      setNewIsBillable(false);
     }
   };
 
@@ -60,14 +74,22 @@ export const BillTypeTable: React.FC = () => {
   return (
     <div className="space-y-4">
       {/* Add new bill type */}
-      <div className="flex gap-2">
-        <Input
-          placeholder="Enter new bill type..."
-          value={newItemValue}
-          onChange={(e) => setNewItemValue(e.target.value)}
-          onKeyDown={(e) => e.key === 'Enter' && handleAddNew()}
-          className="flex-1"
-        />
+      <div className="flex gap-2 items-end">
+        <div className="flex-1">
+          <Input
+            placeholder="Enter new bill type..."
+            value={newItemValue}
+            onChange={(e) => setNewItemValue(e.target.value)}
+            onKeyDown={(e) => e.key === 'Enter' && handleAddNew()}
+          />
+        </div>
+        <div className="flex items-center space-x-2">
+          <Switch
+            checked={newIsBillable}
+            onCheckedChange={setNewIsBillable}
+          />
+          <label className="text-sm text-gray-600">Billable</label>
+        </div>
         <Button 
           onClick={handleAddNew}
           disabled={!newItemValue.trim() || isAddingItem}
@@ -83,19 +105,19 @@ export const BillTypeTable: React.FC = () => {
           <TableHeader>
             <TableRow>
               <TableHead>Name</TableHead>
-              <TableHead>Created</TableHead>
+              <TableHead>Billable</TableHead>
               <TableHead className="w-[100px]">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {items?.length === 0 ? (
+            {billTypeItems?.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={3} className="text-center text-muted-foreground py-8">
                   No bill types found. Add one above to get started.
                 </TableCell>
               </TableRow>
             ) : (
-              items?.map((item) => (
+              billTypeItems?.map((item) => (
                 <TableRow key={item.id}>
                   <TableCell>
                     {editingId === item.id ? (
@@ -130,8 +152,24 @@ export const BillTypeTable: React.FC = () => {
                       <span className="font-medium">{item.name}</span>
                     )}
                   </TableCell>
-                  <TableCell className="text-muted-foreground">
-                    {new Date(item.created_at).toLocaleDateString()}
+                  <TableCell>
+                    {editingId === item.id ? (
+                      <Switch
+                        checked={editIsBillable}
+                        onCheckedChange={setEditIsBillable}
+                      />
+                    ) : (
+                      <div className="flex items-center">
+                        <Switch
+                          checked={item.is_billable}
+                          onCheckedChange={(checked) => {
+                            // Handle direct toggle when not editing
+                            updateItem(item.id, item.name, item.name);
+                          }}
+                          disabled={isUpdatingItem}
+                        />
+                      </div>
+                    )}
                   </TableCell>
                   <TableCell>
                     <div className="flex gap-1">
