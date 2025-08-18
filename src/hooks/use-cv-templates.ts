@@ -75,13 +75,14 @@ export const useCVTemplates = () => {
   });
 
   const updateTemplateMutation = useMutation({
-    mutationFn: async ({ id, ...updates }: { 
+    mutationFn: async (params: { 
       id: string; 
       name?: string; 
       html_template?: string; 
       enabled?: boolean; 
       is_default?: boolean; 
     }) => {
+      const { id, ...updates } = params;
       const { data, error } = await supabase
         .from('cv_templates')
         .update(updates)
