@@ -2,6 +2,7 @@
 import React from 'react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { PivotStatistics } from '@/hooks/use-resource-pivot-statistics';
 
 interface PivotTableProps {
@@ -64,70 +65,80 @@ export const PivotTable: React.FC<PivotTableProps> = ({ data, isLoading }) => {
   };
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>
+    <Card className="h-[600px] flex flex-col">
+      <CardHeader className="flex-shrink-0 pb-2">
+        <CardTitle className="text-lg">
           {getDimensionLabel(data.dimensions.primary)} × {getDimensionLabel(data.dimensions.secondary)} Analysis
         </CardTitle>
       </CardHeader>
-      <CardContent>
-        <div className="overflow-auto">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead className="font-bold">
-                  {getDimensionLabel(data.dimensions.primary)}
-                </TableHead>
-                {uniqueCols.map(col => (
-                  <TableHead key={col} className="text-center font-medium">
-                    {col}
+      <CardContent className="flex-1 p-0 overflow-hidden">
+        <ScrollArea className="h-full">
+          <div className="relative">
+            <Table className="text-sm border-collapse">
+              <TableHeader className="sticky top-0 z-20 bg-background shadow-sm">
+                <TableRow className="border-b-2 border-primary/20">
+                  <TableHead className="sticky left-0 z-30 bg-muted font-bold text-xs p-2 border-r-2 border-primary/20 min-w-[120px]">
+                    {getDimensionLabel(data.dimensions.primary)}
                   </TableHead>
+                  {uniqueCols.map(col => (
+                    <TableHead key={col} className="text-center font-bold text-xs p-2 border-r border-border min-w-[80px] bg-background">
+                      {col}
+                    </TableHead>
+                  ))}
+                  <TableHead className="text-center font-bold text-xs p-2 bg-primary text-primary-foreground min-w-[80px]">
+                    Total
+                  </TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {uniqueRows.map((row, rowIndex) => (
+                  <TableRow key={row} className={`hover:bg-muted/50 ${rowIndex % 2 === 0 ? 'bg-background' : 'bg-muted/20'}`}>
+                    <TableCell className="sticky left-0 z-10 font-bold text-xs p-2 bg-muted border-r-2 border-primary/20 min-w-[120px]">
+                      {row}
+                    </TableCell>
+                    {uniqueCols.map(col => {
+                      const value = dataMap.get(`${row}|${col}`) || 0;
+                      return (
+                        <TableCell key={col} className="text-center p-1 border-r border-border">
+                          <span className={`inline-block px-1.5 py-0.5 rounded text-xs min-w-[24px] ${
+                            value > 0 
+                              ? 'bg-primary/10 text-primary font-semibold border border-primary/20' 
+                              : 'text-muted-foreground'
+                          }`}>
+                            {value > 0 ? value : '-'}
+                          </span>
+                        </TableCell>
+                      );
+                    })}
+                    <TableCell className="text-center font-bold text-xs p-2 bg-primary/5 border-l-2 border-primary/20">
+                      <span className="bg-primary/10 text-primary px-2 py-1 rounded font-bold text-xs">
+                        {rowTotalsMap.get(row) || 0}
+                      </span>
+                    </TableCell>
+                  </TableRow>
                 ))}
-                <TableHead className="text-center font-bold bg-muted">
-                  Total
-                </TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {uniqueRows.map(row => (
-                <TableRow key={row}>
-                  <TableCell className="font-medium bg-muted">
-                    {row}
+                {/* Totals row */}
+                <TableRow className="border-t-2 border-primary/20 bg-primary/5 sticky bottom-0 z-10">
+                  <TableCell className="sticky left-0 z-20 font-bold text-xs p-2 bg-primary text-primary-foreground border-r-2 border-primary/20">
+                    Total
                   </TableCell>
-                  {uniqueCols.map(col => {
-                    const value = dataMap.get(`${row}|${col}`) || 0;
-                    return (
-                      <TableCell key={col} className="text-center">
-                        <span className={`px-2 py-1 rounded text-sm ${
-                          value > 0 ? 'bg-primary/10 text-primary font-medium' : 'text-gray-400'
-                        }`}>
-                          {value}
-                        </span>
-                      </TableCell>
-                    );
-                  })}
-                  <TableCell className="text-center font-bold bg-muted">
-                    {rowTotalsMap.get(row) || 0}
+                  {uniqueCols.map(col => (
+                    <TableCell key={col} className="text-center font-bold text-xs p-2 bg-primary/10 border-r border-border">
+                      <span className="bg-primary/20 text-primary px-2 py-1 rounded font-bold text-xs">
+                        {colTotalsMap.get(col) || 0}
+                      </span>
+                    </TableCell>
+                  ))}
+                  <TableCell className="text-center font-bold text-xs p-2 bg-primary text-primary-foreground">
+                    <span className="font-bold text-sm">
+                      {data.grand_total}
+                    </span>
                   </TableCell>
                 </TableRow>
-              ))}
-              {/* Totals row */}
-              <TableRow className="border-t-2 border-primary/20">
-                <TableCell className="font-bold bg-muted">
-                  Total
-                </TableCell>
-                {uniqueCols.map(col => (
-                  <TableCell key={col} className="text-center font-bold bg-muted">
-                    {colTotalsMap.get(col) || 0}
-                  </TableCell>
-                ))}
-                <TableCell className="text-center font-bold bg-primary text-primary-foreground">
-                  {data.grand_total}
-                </TableCell>
-              </TableRow>
-            </TableBody>
-          </Table>
-        </div>
+              </TableBody>
+            </Table>
+          </div>
+        </ScrollArea>
       </CardContent>
     </Card>
   );
