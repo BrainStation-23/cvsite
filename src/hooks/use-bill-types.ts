@@ -3,80 +3,76 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
-// Define the shape of a setting item
-export interface SettingItem {
+// Define the shape of a bill type item
+export interface BillTypeItem {
   id: string;
   name: string;
+  is_billable: boolean;
   created_at: string;
   updated_at: string;
 }
 
-// Define valid table names for type safety
-export type SettingTableName = 'universities' | 'departments' | 'degrees' | 'designations' | 'references' | 'sbus' | 'hr_contacts' | 'resource_types' | 'project_types' | 'expertise_types';
-
-export const usePlatformSettings = (table: SettingTableName) => {
+export const useBillTypes = () => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   
-  // Fetch data from the specified table
-  const fetchSettings = async () => {
+  // Fetch bill types
+  const fetchBillTypes = async (): Promise<BillTypeItem[]> => {
     const { data, error } = await supabase
-      .from(table)
+      .from('bill_types')
       .select('*')
       .order('name');
     
     if (error) throw error;
-    return data as SettingItem[];
+    return data as BillTypeItem[];
   };
   
-  // Query hook for the specific table
+  // Query hook
   const { 
     data: items, 
     isLoading,
     error
   } = useQuery({
-    queryKey: [table],
-    queryFn: fetchSettings,
+    queryKey: ['bill_types'],
+    queryFn: fetchBillTypes,
   });
   
-  // Add setting mutation
-  const addSettingMutation = useMutation({
-    mutationFn: async (newItemData: string | { name: string }) => {
-      const itemData = typeof newItemData === 'string' 
-        ? { name: newItemData }
-        : newItemData;
-      
+  // Add bill type mutation
+  const addBillTypeMutation = useMutation({
+    mutationFn: async (newItemData: { name: string; is_billable: boolean }) => {
       // Check if item already exists to prevent duplicates
       const existingItems = items || [];
       const itemExists = existingItems.some(item => 
-        item.name.toLowerCase() === itemData.name.toLowerCase()
+        item.name.toLowerCase() === newItemData.name.toLowerCase()
       );
       
       if (itemExists) {
-        throw new Error(`"${itemData.name}" already exists`);
+        throw new Error(`"${newItemData.name}" already exists`);
       }
       
       const { data, error } = await supabase
-        .from(table)
-        .insert(itemData)
+        .from('bill_types')
+        .insert(newItemData)
         .select();
       
       if (error) throw error;
       return data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [table] });
+      queryClient.invalidateQueries({ queryKey: ['bill_types'] });
     },
   });
   
-  // Update setting mutation
-  const updateSettingMutation = useMutation({
+  // Update bill type mutation
+  const updateBillTypeMutation = useMutation({
     mutationFn: async ({ 
       id, 
-      name
+      name, 
+      is_billable 
     }: { 
       id: string; 
-      name: string;
+      name: string; 
+      is_billable: boolean; 
     }) => {
       // Check if another item with the same name already exists (excluding current item)
       const existingItems = items || [];
@@ -89,9 +85,10 @@ export const usePlatformSettings = (table: SettingTableName) => {
       }
       
       const { data, error } = await supabase
-        .from(table)
+        .from('bill_types')
         .update({ 
           name, 
+          is_billable,
           updated_at: new Date().toISOString() 
         })
         .eq('id', id)
@@ -101,15 +98,15 @@ export const usePlatformSettings = (table: SettingTableName) => {
       return data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [table] });
+      queryClient.invalidateQueries({ queryKey: ['bill_types'] });
     },
   });
   
-  // Delete setting mutation
-  const deleteSettingMutation = useMutation({
+  // Delete bill type mutation
+  const deleteBillTypeMutation = useMutation({
     mutationFn: async (id: string) => {
       const { data, error } = await supabase
-        .from(table)
+        .from('bill_types')
         .delete()
         .eq('id', id);
       
@@ -117,30 +114,27 @@ export const usePlatformSettings = (table: SettingTableName) => {
       return data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [table] });
+      queryClient.invalidateQueries({ queryKey: ['bill_types'] });
     },
   });
   
-  const addItem = (value: string | { name: string }) => {
-    const itemName = typeof value === 'string' ? value : value.name;
-    if (!itemName.trim()) return;
+  const addItem = (value: { name: string; is_billable: boolean }) => {
+    if (!value.name.trim()) return;
     
-    // Perform the mutation
-    addSettingMutation.mutate(value, {
+    addBillTypeMutation.mutate(value, {
       onSuccess: () => {
         toast({
-          title: "Item added",
-          description: `"${itemName}" has been added.`,
+          title: "Bill type added",
+          description: `"${value.name}" has been added.`,
         });
       },
       onError: (error) => {
-        // Don't show error toast for duplicate items when adding multiple items
         if (error instanceof Error && error.message.includes("already exists")) {
           console.log(error.message);
         } else {
           toast({
             title: "Error",
-            description: `Failed to add item: ${error instanceof Error ? error.message : 'Unknown error'}`,
+            description: `Failed to add bill type: ${error instanceof Error ? error.message : 'Unknown error'}`,
             variant: "destructive"
           });
         }
@@ -151,22 +145,22 @@ export const usePlatformSettings = (table: SettingTableName) => {
   const updateItem = (
     id: string, 
     name: string, 
-    originalName: string
+    originalName: string, 
+    is_billable: boolean
   ) => {
     if (!name.trim()) return;
     
-    // Perform the mutation
-    updateSettingMutation.mutate({ id, name: name.trim() }, {
+    updateBillTypeMutation.mutate({ id, name: name.trim(), is_billable }, {
       onSuccess: () => {
         toast({
-          title: "Item updated",
+          title: "Bill type updated",
           description: `"${originalName}" has been updated.`,
         });
       },
       onError: (error) => {
         toast({
           title: "Error",
-          description: `Failed to update item: ${error instanceof Error ? error.message : 'Unknown error'}`,
+          description: `Failed to update bill type: ${error instanceof Error ? error.message : 'Unknown error'}`,
           variant: "destructive"
         });
       }
@@ -174,18 +168,17 @@ export const usePlatformSettings = (table: SettingTableName) => {
   };
   
   const removeItem = (id: string, name: string) => {
-    // Perform the mutation
-    deleteSettingMutation.mutate(id, {
+    deleteBillTypeMutation.mutate(id, {
       onSuccess: () => {
         toast({
-          title: "Item removed",
+          title: "Bill type removed",
           description: `"${name}" has been removed.`,
         });
       },
       onError: (error) => {
         toast({
           title: "Error",
-          description: `Failed to remove item: ${error instanceof Error ? error.message : 'Unknown error'}`,
+          description: `Failed to remove bill type: ${error instanceof Error ? error.message : 'Unknown error'}`,
           variant: "destructive"
         });
       }
@@ -199,8 +192,8 @@ export const usePlatformSettings = (table: SettingTableName) => {
     addItem,
     updateItem,
     removeItem,
-    isAddingItem: addSettingMutation.isPending,
-    isUpdatingItem: updateSettingMutation.isPending,
-    isRemovingItem: deleteSettingMutation.isPending
+    isAddingItem: addBillTypeMutation.isPending,
+    isUpdatingItem: updateBillTypeMutation.isPending,
+    isRemovingItem: deleteBillTypeMutation.isPending
   };
 };

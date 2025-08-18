@@ -5,25 +5,18 @@ import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Pencil, Trash2, Plus, Check, X } from 'lucide-react';
-import { usePlatformSettings, SettingItem } from '@/hooks/use-platform-settings';
+import { useBillTypes, BillTypeItem } from '@/hooks/use-bill-types';
 import { ConfirmationDialog } from '@/components/ui/confirmation-dialog';
 import { useConfirmationDialog } from '@/hooks/use-confirmation-dialog';
 
-// Extend the SettingItem to include is_billable
-interface BillTypeItem extends SettingItem {
-  is_billable: boolean;
-}
-
 export const BillTypeTable: React.FC = () => {
-  const { items, isLoading, addItem, updateItem, removeItem, isAddingItem, isUpdatingItem, isRemovingItem } = usePlatformSettings('bill_types');
+  const { items, isLoading, addItem, updateItem, removeItem, isAddingItem, isUpdatingItem, isRemovingItem } = useBillTypes();
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editValue, setEditValue] = useState('');
   const [editIsBillable, setEditIsBillable] = useState(false);
   const [newItemValue, setNewItemValue] = useState('');
   const [newIsBillable, setNewIsBillable] = useState(false);
   const { isOpen, config, showConfirmation, hideConfirmation, handleConfirm } = useConfirmationDialog();
-
-  const billTypeItems = items as BillTypeItem[] | undefined;
 
   const handleEdit = (item: BillTypeItem) => {
     setEditingId(item.id);
@@ -33,7 +26,7 @@ export const BillTypeTable: React.FC = () => {
 
   const handleSaveEdit = () => {
     if (editValue.trim() && editingId) {
-      const originalItem = billTypeItems?.find(item => item.id === editingId);
+      const originalItem = items?.find(item => item.id === editingId);
       if (originalItem) {
         updateItem(editingId, editValue.trim(), originalItem.name, editIsBillable);
         setEditingId(null);
@@ -114,14 +107,14 @@ export const BillTypeTable: React.FC = () => {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {billTypeItems?.length === 0 ? (
+            {items?.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={3} className="text-center text-muted-foreground py-8">
                   No bill types found. Add one above to get started.
                 </TableCell>
               </TableRow>
             ) : (
-              billTypeItems?.map((item) => (
+              items?.map((item) => (
                 <TableRow key={item.id}>
                   <TableCell>
                     {editingId === item.id ? (
