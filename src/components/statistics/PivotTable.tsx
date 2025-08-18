@@ -65,63 +65,63 @@ export const PivotTable: React.FC<PivotTableProps> = ({ data, isLoading }) => {
 
   return (
     <Card>
-      <CardHeader>
-        <CardTitle>
+      <CardHeader className="pb-3">
+        <CardTitle className="text-lg">
           {getDimensionLabel(data.dimensions.primary)} × {getDimensionLabel(data.dimensions.secondary)} Analysis
         </CardTitle>
       </CardHeader>
-      <CardContent>
-        <div className="overflow-auto">
+      <CardContent className="p-3">
+        <div className="overflow-auto max-h-[600px] border rounded-md">
           <Table>
             <TableHeader>
-              <TableRow>
-                <TableHead className="font-bold">
+              <TableRow className="bg-muted/50">
+                <TableHead className="font-semibold text-xs h-8 px-2 sticky left-0 bg-muted/50 border-r">
                   {getDimensionLabel(data.dimensions.primary)}
                 </TableHead>
                 {uniqueCols.map(col => (
-                  <TableHead key={col} className="text-center font-medium">
+                  <TableHead key={col} className="text-center font-medium text-xs h-8 px-2 min-w-[80px]">
                     {col}
                   </TableHead>
                 ))}
-                <TableHead className="text-center font-bold bg-muted">
+                <TableHead className="text-center font-semibold bg-muted text-xs h-8 px-2 min-w-[80px] sticky right-0 border-l">
                   Total
                 </TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {uniqueRows.map(row => (
-                <TableRow key={row}>
-                  <TableCell className="font-medium bg-muted">
+                <TableRow key={row} className="hover:bg-muted/30">
+                  <TableCell className="font-medium text-xs h-7 px-2 bg-muted/30 sticky left-0 border-r max-w-[120px] truncate">
                     {row}
                   </TableCell>
                   {uniqueCols.map(col => {
                     const value = dataMap.get(`${row}|${col}`) || 0;
                     return (
-                      <TableCell key={col} className="text-center">
-                        <span className={`px-2 py-1 rounded text-sm ${
-                          value > 0 ? 'bg-primary/10 text-primary font-medium' : 'text-gray-400'
+                      <TableCell key={col} className="text-center h-7 px-1">
+                        <span className={`text-xs px-1 py-0.5 rounded ${
+                          value > 0 ? 'bg-primary/10 text-primary font-medium' : 'text-muted-foreground'
                         }`}>
                           {value}
                         </span>
                       </TableCell>
                     );
                   })}
-                  <TableCell className="text-center font-bold bg-muted">
+                  <TableCell className="text-center font-medium text-xs h-7 px-2 bg-muted/30 sticky right-0 border-l">
                     {rowTotalsMap.get(row) || 0}
                   </TableCell>
                 </TableRow>
               ))}
               {/* Totals row */}
-              <TableRow className="border-t-2 border-primary/20">
-                <TableCell className="font-bold bg-muted">
+              <TableRow className="border-t-2 border-primary/20 bg-muted/50">
+                <TableCell className="font-semibold text-xs h-7 px-2 bg-muted/50 sticky left-0 border-r">
                   Total
                 </TableCell>
                 {uniqueCols.map(col => (
-                  <TableCell key={col} className="text-center font-bold bg-muted">
+                  <TableCell key={col} className="text-center font-medium text-xs h-7 px-2 bg-muted/50">
                     {colTotalsMap.get(col) || 0}
                   </TableCell>
                 ))}
-                <TableCell className="text-center font-bold bg-primary text-primary-foreground">
+                <TableCell className="text-center font-bold bg-primary text-primary-foreground text-xs h-7 px-2 sticky right-0 border-l">
                   {data.grand_total}
                 </TableCell>
               </TableRow>

@@ -39,6 +39,12 @@ export const PivotTableContainer: React.FC<PivotTableContainerProps> = ({ filter
     }
   };
 
+  const handleSwapDimensions = () => {
+    const temp = primaryDimension;
+    setPrimaryDimension(secondaryDimension);
+    setSecondaryDimension(temp);
+  };
+
   return (
     <div className="space-y-6">
       <PivotControls
@@ -46,6 +52,7 @@ export const PivotTableContainer: React.FC<PivotTableContainerProps> = ({ filter
         secondaryDimension={secondaryDimension}
         onPrimaryDimensionChange={handlePrimaryDimensionChange}
         onSecondaryDimensionChange={handleSecondaryDimensionChange}
+        onSwapDimensions={handleSwapDimensions}
       />
       
       {pivotData && (
