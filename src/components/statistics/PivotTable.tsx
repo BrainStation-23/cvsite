@@ -2,7 +2,6 @@
 import React from 'react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { PivotStatistics } from '@/hooks/use-resource-pivot-statistics';
 
 interface PivotTableProps {
@@ -72,73 +71,80 @@ export const PivotTable: React.FC<PivotTableProps> = ({ data, isLoading }) => {
         </CardTitle>
       </CardHeader>
       <CardContent className="flex-1 p-0 overflow-hidden">
-        <ScrollArea className="h-full">
-          <div className="relative">
-            <Table className="text-sm border-collapse">
-              <TableHeader className="sticky top-0 z-20 bg-background shadow-sm">
-                <TableRow className="border-b-2 border-primary/20">
-                  <TableHead className="sticky left-0 z-30 bg-muted font-bold text-xs p-2 border-r-2 border-primary/20 min-w-[120px]">
-                    {getDimensionLabel(data.dimensions.primary)}
-                  </TableHead>
-                  {uniqueCols.map(col => (
-                    <TableHead key={col} className="text-center font-bold text-xs p-2 border-r border-border min-w-[80px] bg-background">
-                      {col}
-                    </TableHead>
-                  ))}
-                  <TableHead className="text-center font-bold text-xs p-2 bg-primary text-primary-foreground min-w-[80px]">
-                    Total
-                  </TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {uniqueRows.map((row, rowIndex) => (
-                  <TableRow key={row} className={`hover:bg-muted/50 ${rowIndex % 2 === 0 ? 'bg-background' : 'bg-muted/20'}`}>
-                    <TableCell className="sticky left-0 z-10 font-bold text-xs p-2 bg-muted border-r-2 border-primary/20 min-w-[120px]">
-                      {row}
-                    </TableCell>
-                    {uniqueCols.map(col => {
-                      const value = dataMap.get(`${row}|${col}`) || 0;
-                      return (
-                        <TableCell key={col} className="text-center p-1 border-r border-border">
-                          <span className={`inline-block px-1.5 py-0.5 rounded text-xs min-w-[24px] ${
-                            value > 0 
-                              ? 'bg-primary/10 text-primary font-semibold border border-primary/20' 
-                              : 'text-muted-foreground'
-                          }`}>
-                            {value > 0 ? value : '-'}
-                          </span>
-                        </TableCell>
-                      );
-                    })}
-                    <TableCell className="text-center font-bold text-xs p-2 bg-primary/5 border-l-2 border-primary/20">
-                      <span className="bg-primary/10 text-primary px-2 py-1 rounded font-bold text-xs">
-                        {rowTotalsMap.get(row) || 0}
-                      </span>
-                    </TableCell>
-                  </TableRow>
+        <div className="h-full w-full overflow-auto relative">
+          <table className="text-xs border-collapse w-full">
+            <thead>
+              <tr>
+                {/* Top-left corner cell - sticky to both top and left */}
+                <th className="sticky top-0 left-0 z-30 bg-muted font-bold text-xs p-1 border border-border min-w-[100px] max-w-[100px]">
+                  {getDimensionLabel(data.dimensions.primary)}
+                </th>
+                {/* Column headers - sticky to top only */}
+                {uniqueCols.map(col => (
+                  <th key={col} className="sticky top-0 z-20 text-center font-bold text-xs p-1 border border-border min-w-[70px] max-w-[70px] bg-background truncate" title={col}>
+                    {col}
+                  </th>
                 ))}
-                {/* Totals row */}
-                <TableRow className="border-t-2 border-primary/20 bg-primary/5 sticky bottom-0 z-10">
-                  <TableCell className="sticky left-0 z-20 font-bold text-xs p-2 bg-primary text-primary-foreground border-r-2 border-primary/20">
-                    Total
-                  </TableCell>
-                  {uniqueCols.map(col => (
-                    <TableCell key={col} className="text-center font-bold text-xs p-2 bg-primary/10 border-r border-border">
-                      <span className="bg-primary/20 text-primary px-2 py-1 rounded font-bold text-xs">
-                        {colTotalsMap.get(col) || 0}
-                      </span>
-                    </TableCell>
-                  ))}
-                  <TableCell className="text-center font-bold text-xs p-2 bg-primary text-primary-foreground">
-                    <span className="font-bold text-sm">
-                      {data.grand_total}
+                {/* Total column header - sticky to top only */}
+                <th className="sticky top-0 z-20 text-center font-bold text-xs p-1 bg-primary text-primary-foreground min-w-[60px] max-w-[60px] border border-border">
+                  Total
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {uniqueRows.map((row, rowIndex) => (
+                <tr key={row} className={`${rowIndex % 2 === 0 ? 'bg-background' : 'bg-muted/20'}`}>
+                  {/* Row header - sticky to left only */}
+                  <td className="sticky left-0 z-10 font-bold text-xs p-1 bg-muted border border-border min-w-[100px] max-w-[100px] truncate" title={row}>
+                    {row}
+                  </td>
+                  {/* Data cells - scrollable */}
+                  {uniqueCols.map(col => {
+                    const value = dataMap.get(`${row}|${col}`) || 0;
+                    return (
+                      <td key={col} className="text-center p-0.5 border border-border min-w-[70px] max-w-[70px]">
+                        <span className={`inline-block px-1 py-0.5 rounded text-xs w-full ${
+                          value > 0 
+                            ? 'bg-primary/10 text-primary font-semibold' 
+                            : 'text-muted-foreground'
+                        }`}>
+                          {value > 0 ? value : '-'}
+                        </span>
+                      </td>
+                    );
+                  })}
+                  {/* Row total - scrollable */}
+                  <td className="text-center font-bold text-xs p-1 bg-primary/5 border border-border min-w-[60px] max-w-[60px]">
+                    <span className="bg-primary/10 text-primary px-1 py-0.5 rounded font-bold text-xs">
+                      {rowTotalsMap.get(row) || 0}
                     </span>
-                  </TableCell>
-                </TableRow>
-              </TableBody>
-            </Table>
-          </div>
-        </ScrollArea>
+                  </td>
+                </tr>
+              ))}
+              {/* Totals row */}
+              <tr className="bg-primary/5">
+                {/* Total row header - sticky to left */}
+                <td className="sticky left-0 z-10 font-bold text-xs p-1 bg-primary text-primary-foreground border border-border min-w-[100px] max-w-[100px]">
+                  Total
+                </td>
+                {/* Column totals - scrollable */}
+                {uniqueCols.map(col => (
+                  <td key={col} className="text-center font-bold text-xs p-1 bg-primary/10 border border-border min-w-[70px] max-w-[70px]">
+                    <span className="bg-primary/20 text-primary px-1 py-0.5 rounded font-bold text-xs">
+                      {colTotalsMap.get(col) || 0}
+                    </span>
+                  </td>
+                ))}
+                {/* Grand total - scrollable */}
+                <td className="text-center font-bold text-xs p-1 bg-primary text-primary-foreground border border-border min-w-[60px] max-w-[60px]">
+                  <span className="font-bold text-xs">
+                    {data.grand_total}
+                  </span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </CardContent>
     </Card>
   );
