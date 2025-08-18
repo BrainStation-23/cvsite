@@ -5,7 +5,9 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { ArrowLeft } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import ReferenceSettings from '@/components/admin/reference/ReferenceSettings';
+import { PlaceholderImageSettings } from '@/components/admin/placeholder-images/PlaceholderImageSettings';
 
 const CVTemplateSettings: React.FC = () => {
   return (
@@ -24,16 +26,29 @@ const CVTemplateSettings: React.FC = () => {
               CV Template Settings
             </h1>
             <p className="text-gray-600 dark:text-gray-400">
-              Configure references and other settings related to CV template generation.
+              Configure references, placeholder images, and other settings related to CV template generation.
             </p>
           </div>
         </div>
 
-        {/* Content area */}
+        {/* Content area with tabs */}
         <div className="flex-1 min-h-0">
           <ScrollArea className="h-full">
             <div className="p-6">
-              <ReferenceSettings />
+              <Tabs defaultValue="references" className="space-y-6">
+                <TabsList>
+                  <TabsTrigger value="references">References</TabsTrigger>
+                  <TabsTrigger value="placeholder-images">Placeholder Images</TabsTrigger>
+                </TabsList>
+                
+                <TabsContent value="references" className="space-y-6">
+                  <ReferenceSettings />
+                </TabsContent>
+                
+                <TabsContent value="placeholder-images" className="space-y-6">
+                  <PlaceholderImageSettings />
+                </TabsContent>
+              </Tabs>
             </div>
           </ScrollArea>
         </div>
