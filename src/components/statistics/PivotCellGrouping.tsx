@@ -23,7 +23,7 @@ export const PivotCellGrouping: React.FC<PivotCellGroupingProps> = ({
   selectedCells,
   onCreateGroup,
   onRemoveGroup,
-  groups
+  groups = [] // Provide default empty array
 }) => {
   const handleGroupCells = () => {
     if (selectedCells.size < 2) return;
@@ -88,7 +88,7 @@ export const PivotCellGrouping: React.FC<PivotCellGroupingProps> = ({
         </PopoverContent>
       </Popover>
 
-      {groups.length > 0 && (
+      {groups && groups.length > 0 && (
         <Button
           variant="outline"
           size="sm"

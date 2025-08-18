@@ -1,4 +1,3 @@
-
 import React, { useRef, useCallback, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { PivotStatistics } from '@/hooks/use-resource-pivot-statistics';
@@ -42,6 +41,19 @@ export const CustomPivotTable: React.FC<CustomPivotTableProps> = ({ data, isLoad
       rowHeaderScrollRef.current.scrollTop = scrollTop;
     }
   }, []);
+
+  const handleCreateGroup = (group: CellGroup) => {
+    setCellGroups([...cellGroups, group]);
+  };
+
+  const handleRemoveGroup = (groupId: string) => {
+    if (groupId === 'all') {
+      setCellGroups([]);
+    } else {
+      const index = parseInt(groupId);
+      setCellGroups(cellGroups.filter((_, i) => i !== index));
+    }
+  };
 
   if (isLoading) {
     return (
@@ -109,6 +121,14 @@ export const CustomPivotTable: React.FC<CustomPivotTableProps> = ({ data, isLoad
       
       <CardContent className="flex-1 p-0 overflow-hidden min-h-0">
         <div className="h-full flex flex-col max-w-full">
+          {/* Cell Grouping Component */}
+          <PivotCellGrouping
+            selectedCells={selectedCells}
+            groups={cellGroups}
+            onCreateGroup={handleCreateGroup}
+            onRemoveGroup={handleRemoveGroup}
+          />
+
           {/* Top section: Corner cell + Column headers */}
           <div className="flex flex-shrink-0 border-b border-border">
             {/* Corner cell - frozen */}
@@ -248,14 +268,6 @@ export const CustomPivotTable: React.FC<CustomPivotTableProps> = ({ data, isLoad
             </div>
           </div>
         </div>
-
-        {/* Cell Grouping Component */}
-        <PivotCellGrouping
-          selectedCells={selectedCells}
-          cellGroups={cellGroups}
-          onCreateGroup={(group) => setCellGroups([...cellGroups, group])}
-          onRemoveGroup={(index) => setCellGroups(cellGroups.filter((_, i) => i !== index))}
-        />
       </CardContent>
     </Card>
   );
