@@ -35,7 +35,7 @@ export const BillTypeTable: React.FC = () => {
     if (editValue.trim() && editingId) {
       const originalItem = billTypeItems?.find(item => item.id === editingId);
       if (originalItem) {
-        updateItem(editingId, editValue.trim(), originalItem.name);
+        updateItem(editingId, editValue.trim(), originalItem.name, editIsBillable);
         setEditingId(null);
         setEditValue('');
         setEditIsBillable(false);
@@ -61,10 +61,14 @@ export const BillTypeTable: React.FC = () => {
 
   const handleAddNew = () => {
     if (newItemValue.trim()) {
-      addItem(newItemValue);
+      addItem({ name: newItemValue.trim(), is_billable: newIsBillable });
       setNewItemValue('');
       setNewIsBillable(false);
     }
+  };
+
+  const handleToggleBillable = (item: BillTypeItem) => {
+    updateItem(item.id, item.name, item.name, !item.is_billable);
   };
 
   if (isLoading) {
@@ -162,10 +166,7 @@ export const BillTypeTable: React.FC = () => {
                       <div className="flex items-center">
                         <Switch
                           checked={item.is_billable}
-                          onCheckedChange={(checked) => {
-                            // Handle direct toggle when not editing
-                            updateItem(item.id, item.name, item.name);
-                          }}
+                          onCheckedChange={() => handleToggleBillable(item)}
                           disabled={isUpdatingItem}
                         />
                       </div>

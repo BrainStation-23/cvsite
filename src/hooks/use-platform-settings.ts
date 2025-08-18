@@ -41,20 +41,24 @@ export const usePlatformSettings = (table: SettingTableName) => {
   
   // Add setting mutation
   const addSettingMutation = useMutation({
-    mutationFn: async (name: string) => {
+    mutationFn: async (newItemData: string | { name: string; is_billable?: boolean }) => {
+      const itemData = typeof newItemData === 'string' 
+        ? { name: newItemData }
+        : newItemData;
+      
       // Check if item already exists to prevent duplicates
       const existingItems = items || [];
       const itemExists = existingItems.some(item => 
-        item.name.toLowerCase() === name.toLowerCase()
+        item.name.toLowerCase() === itemData.name.toLowerCase()
       );
       
       if (itemExists) {
-        throw new Error(`"${name}" already exists`);
+        throw new Error(`"${itemData.name}" already exists`);
       }
       
       const { data, error } = await supabase
         .from(table)
-        .insert({ name })
+        .insert(itemData)
         .select();
       
       if (error) throw error;
@@ -67,7 +71,15 @@ export const usePlatformSettings = (table: SettingTableName) => {
   
   // Update setting mutation
   const updateSettingMutation = useMutation({
-    mutationFn: async ({ id, name }: { id: string; name: string }) => {
+    mutationFn: async ({ 
+      id, 
+      name, 
+      is_billable 
+    }: { 
+      id: string; 
+      name: string; 
+      is_billable?: boolean; 
+    }) => {
       // Check if another item with the same name already exists (excluding current item)
       const existingItems = items || [];
       const itemExists = existingItems.some(item => 
@@ -78,9 +90,19 @@ export const usePlatformSettings = (table: SettingTableName) => {
         throw new Error(`"${name}" already exists`);
       }
       
+      const updateData: any = { 
+        name, 
+        updated_at: new Date().toISOString() 
+      };
+      
+      // Only include is_billable for bill_types table
+      if (table === 'bill_types' && is_billable !== undefined) {
+        updateData.is_billable = is_billable;
+      }
+      
       const { data, error } = await supabase
         .from(table)
-        .update({ name, updated_at: new Date().toISOString() })
+        .update(updateData)
         .eq('id', id)
         .select();
       
@@ -108,15 +130,16 @@ export const usePlatformSettings = (table: SettingTableName) => {
     },
   });
   
-  const addItem = (value: string) => {
-    if (!value.trim()) return;
+  const addItem = (value: string | { name: string; is_billable?: boolean }) => {
+    const itemName = typeof value === 'string' ? value : value.name;
+    if (!itemName.trim()) return;
     
     // Perform the mutation
-    addSettingMutation.mutate(value.trim(), {
+    addSettingMutation.mutate(value, {
       onSuccess: () => {
         toast({
           title: "Item added",
-          description: `"${value}" has been added.`,
+          description: `"${itemName}" has been added.`,
         });
       },
       onError: (error) => {
@@ -134,15 +157,20 @@ export const usePlatformSettings = (table: SettingTableName) => {
     });
   };
   
-  const updateItem = (id: string, name: string, originalName: string) => {
+  const updateItem = (
+    id: string, 
+    name: string, 
+    originalName: string, 
+    is_billable?: boolean
+  ) => {
     if (!name.trim()) return;
     
     // Perform the mutation
-    updateSettingMutation.mutate({ id, name: name.trim() }, {
+    updateSettingMutation.mutate({ id, name: name.trim(), is_billable }, {
       onSuccess: () => {
         toast({
           title: "Item updated",
-          description: `"${originalName}" has been updated to "${name}".`,
+          description: `"${originalName}" has been updated.`,
         });
       },
       onError: (error) => {
