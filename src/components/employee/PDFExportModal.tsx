@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -29,6 +29,19 @@ const PDFExportModal: React.FC<PDFExportModalProps> = ({
   const [progressSteps, setProgressSteps] = useState<ProgressStep[]>([]);
 
   const { templates, isLoading: templatesLoading } = useCVTemplates();
+
+  // Filter for enabled templates only
+  const enabledTemplates = templates.filter(template => template.enabled);
+
+  // Auto-select default template when modal opens
+  useEffect(() => {
+    if (isOpen && enabledTemplates.length > 0 && !selectedTemplateId) {
+      const defaultTemplate = enabledTemplates.find(template => template.is_default);
+      if (defaultTemplate) {
+        setSelectedTemplateId(defaultTemplate.id);
+      }
+    }
+  }, [isOpen, enabledTemplates, selectedTemplateId]);
 
   const handleClose = () => {
     if (!isExporting) {
@@ -92,7 +105,7 @@ const PDFExportModal: React.FC<PDFExportModalProps> = ({
                   <SelectValue placeholder={templatesLoading ? "Loading templates..." : "Choose a template"} />
                 </SelectTrigger>
                 <SelectContent>
-                  {templates.map((template) => (
+                  {enabledTemplates.map((template) => (
                     <SelectItem key={template.id} value={template.id}>
                       {template.name}
                     </SelectItem>
