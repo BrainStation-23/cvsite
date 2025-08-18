@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { PivotControls } from './PivotControls';
-import { PivotTable } from './PivotTable';
+import { CustomPivotTable } from './CustomPivotTable';
 import { useResourcePivotStatistics } from '@/hooks/use-resource-pivot-statistics';
 
 interface PivotTableContainerProps {
@@ -40,7 +40,7 @@ export const PivotTableContainer: React.FC<PivotTableContainerProps> = ({ filter
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       <PivotControls
         primaryDimension={primaryDimension}
         secondaryDimension={secondaryDimension}
@@ -49,7 +49,7 @@ export const PivotTableContainer: React.FC<PivotTableContainerProps> = ({ filter
       />
       
       {pivotData && (
-        <PivotTable
+        <CustomPivotTable
           data={pivotData}
           isLoading={isLoading}
         />
