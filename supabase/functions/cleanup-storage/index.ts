@@ -50,6 +50,7 @@ serve(async (req) => {
 
     // Create set of referenced file paths for quick lookup
     const referencedPaths = new Set<string>()
+    const sampleReferencedFiles: string[] = []
     
     profileImages?.forEach(record => {
       if (record.profile_image) {
@@ -60,6 +61,9 @@ serve(async (req) => {
           if (pathParts.length > 1) {
             const filePath = pathParts[1]
             referencedPaths.add(filePath)
+            if (sampleReferencedFiles.length < 20) {
+              sampleReferencedFiles.push(filePath)
+            }
             console.log('Referenced path:', filePath)
           }
         } catch (error) {
@@ -73,34 +77,42 @@ serve(async (req) => {
     // Identify orphaned files
     const orphanedFiles: string[] = []
     const allStorageFiles: string[] = []
+    const errors: Array<{ file: string; error: string }> = []
 
     // Process all files and folders in storage
     const processStorageItems = async (items: any[], prefix = '') => {
       for (const item of items) {
         const fullPath = prefix ? `${prefix}/${item.name}` : item.name
         
-        if (item.metadata) {
-          // This is a file
-          allStorageFiles.push(fullPath)
-          
-          if (!referencedPaths.has(fullPath)) {
-            orphanedFiles.push(fullPath)
-            console.log('Orphaned file found:', fullPath)
+        try {
+          if (item.metadata) {
+            // This is a file
+            allStorageFiles.push(fullPath)
+            
+            if (!referencedPaths.has(fullPath)) {
+              orphanedFiles.push(fullPath)
+              console.log('Orphaned file found:', fullPath)
+            } else {
+              console.log('Referenced file found:', fullPath)
+            }
           } else {
-            console.log('Referenced file found:', fullPath)
+            // This might be a folder, list its contents
+            const { data: subItems, error: subError } = await supabaseClient.storage
+              .from('profile-images')
+              .list(fullPath, {
+                limit: 1000,
+                sortBy: { column: 'name', order: 'asc' }
+              })
+            
+            if (!subError && subItems) {
+              await processStorageItems(subItems, fullPath)
+            } else if (subError) {
+              console.error('Error listing subfolder:', fullPath, subError)
+            }
           }
-        } else {
-          // This might be a folder, list its contents
-          const { data: subItems, error: subError } = await supabaseClient.storage
-            .from('profile-images')
-            .list(fullPath, {
-              limit: 1000,
-              sortBy: { column: 'name', order: 'asc' }
-            })
-          
-          if (!subError && subItems) {
-            await processStorageItems(subItems, fullPath)
-          }
+        } catch (error) {
+          console.error('Error processing item:', fullPath, error)
+          errors.push({ file: fullPath, error: error.message })
         }
       }
     }
@@ -114,7 +126,7 @@ serve(async (req) => {
 
     // Delete orphaned files
     let deletedCount = 0
-    let failedCount = 0
+    const deletedFiles: string[] = []
 
     if (orphanedFiles.length > 0) {
       const { data: deleteResult, error: deleteError } = await supabaseClient.storage
@@ -123,9 +135,10 @@ serve(async (req) => {
 
       if (deleteError) {
         console.error('Error deleting files:', deleteError)
-        failedCount = orphanedFiles.length
+        errors.push({ file: 'bulk_delete', error: deleteError.message })
       } else {
         deletedCount = deleteResult?.length || 0
+        deletedFiles.push(...orphanedFiles)
         console.log(`Successfully deleted ${deletedCount} files`)
       }
 
@@ -142,12 +155,18 @@ serve(async (req) => {
 
     const result = {
       success: true,
-      totalFilesFound: allStorageFiles.length,
-      referencedFiles: referencedPaths.size,
-      orphanedFilesFound: orphanedFiles.length,
-      filesDeleted: deletedCount,
-      filesFailed: failedCount,
-      orphanedFilesList: orphanedFiles,
+      summary: {
+        totalFilesInStorage: allStorageFiles.length,
+        totalReferencedImages: profileImages?.length || 0,
+        uniqueReferencedPaths: referencedPaths.size,
+        orphanedFilesFound: orphanedFiles.length,
+        filesDeleted: deletedCount,
+        filesRemaining: allStorageFiles.length - deletedCount,
+        errors: errors.length
+      },
+      deletedFiles: deletedFiles,
+      referencedFiles: sampleReferencedFiles,
+      errors: errors,
       message: orphanedFiles.length === 0 
         ? 'No orphaned files found. Storage is clean!'
         : `Cleanup completed. Deleted ${deletedCount} orphaned files.`
