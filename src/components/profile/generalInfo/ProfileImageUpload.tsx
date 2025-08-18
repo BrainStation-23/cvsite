@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
@@ -45,19 +46,16 @@ export const ProfileImageUpload: React.FC<ProfileImageUploadProps> = ({
     try {
       setUploading(true);
 
-      // Create file name with user ID and timestamp
+      // Create consistent file name without timestamp
       const fileExt = file.name.split('.').pop();
-      const fileName = `${targetProfileId}/profile-${Date.now()}.${fileExt}`;
+      const fileName = `${targetProfileId}/profile.${fileExt}`;
 
-      // Delete existing image if it exists
-      if (currentImageUrl) {
-        await deleteCurrentImage();
-      }
-
-      // Upload new image
+      // Upload new image with upsert to automatically replace existing file
       const { error: uploadError } = await supabase.storage
         .from('profile-images')
-        .upload(fileName, file);
+        .upload(fileName, file, {
+          upsert: true // This automatically replaces any existing file
+        });
 
       if (uploadError) throw uploadError;
 

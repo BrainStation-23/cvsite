@@ -29,7 +29,7 @@ const BulkImageImportModal: React.FC<BulkImageImportModalProps> = ({ isOpen, onC
   const [isProcessing, setIsProcessing] = useState(false);
   const [progress, setProgress] = useState(0);
   
-  const { uploadImageToSupabase, updateProfileImage, deleteExistingImage, findProfileIds } = useImageUpload();
+  const { uploadImageToSupabase, updateProfileImage, findProfileIds } = useImageUpload();
 
   const onDrop = useCallback(async (acceptedFiles: File[]) => {
     const processedFiles: ImageFileWithData[] = [];
@@ -92,7 +92,7 @@ const BulkImageImportModal: React.FC<BulkImageImportModalProps> = ({ isOpen, onC
                 : f
             ));
 
-            await deleteExistingImage(file.profileId!);
+            // No longer calling deleteExistingImage - upsert handles replacement
             const imageUrl = await uploadImageToSupabase(file.file, file.profileId!);
             await updateProfileImage(file.profileId!, imageUrl);
 

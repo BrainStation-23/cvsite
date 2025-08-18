@@ -17,11 +17,14 @@ export const useImageUpload = () => {
 
   const uploadImageToSupabase = async (file: File, profileId: string): Promise<string> => {
     const fileExt = file.name.split('.').pop();
-    const fileName = `${profileId}/profile-${Date.now()}.${fileExt}`;
+    // Use consistent filename pattern: profileId.extension (no timestamp)
+    const fileName = `${profileId}/profile.${fileExt}`;
 
     const { error: uploadError } = await supabase.storage
       .from('profile-images')
-      .upload(fileName, file);
+      .upload(fileName, file, {
+        upsert: true // This will automatically overwrite existing files
+      });
 
     if (uploadError) throw uploadError;
 
@@ -68,29 +71,6 @@ export const useImageUpload = () => {
     }
   };
 
-  const deleteExistingImage = async (profileId: string) => {
-    try {
-      const { data: generalInfo } = await supabase
-        .from('general_information')
-        .select('profile_image')
-        .eq('profile_id', profileId)
-        .single();
-
-      if (generalInfo?.profile_image) {
-        const url = new URL(generalInfo.profile_image);
-        const filePath = url.pathname.split('/profile-images/')[1];
-        
-        if (filePath) {
-          await supabase.storage
-            .from('profile-images')
-            .remove([filePath]);
-        }
-      }
-    } catch (error) {
-      console.warn('Could not delete existing image:', error);
-    }
-  };
-
   const findProfileIds = async (files: ImageFileWithData[]): Promise<ImageFileWithData[]> => {
     if (files.length === 0) return files;
 
@@ -134,7 +114,6 @@ export const useImageUpload = () => {
   return {
     uploadImageToSupabase,
     updateProfileImage,
-    deleteExistingImage,
     findProfileIds
   };
 };

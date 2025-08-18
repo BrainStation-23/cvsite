@@ -1,6 +1,6 @@
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.38.4"
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -8,21 +8,20 @@ const corsHeaders = {
 }
 
 serve(async (req) => {
-  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders })
+    return new Response('ok', { headers: corsHeaders })
   }
 
   try {
-    const supabaseUrl = Deno.env.get('SUPABASE_URL')!
-    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
-    
-    const supabase = createClient(supabaseUrl, supabaseServiceKey)
+    const supabaseClient = createClient(
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+    )
 
     console.log('Starting storage cleanup process...')
 
-    // Get all files from the profile-images bucket
-    const { data: files, error: listError } = await supabase.storage
+    // Get all files from profile-images bucket
+    const { data: files, error: listError } = await supabaseClient.storage
       .from('profile-images')
       .list('', {
         limit: 1000,
@@ -36,169 +35,144 @@ serve(async (req) => {
 
     console.log(`Found ${files?.length || 0} files in storage`)
 
-    // Get all profile images referenced in the database
-    const { data: referencedImages, error: dbError } = await supabase
+    // Get all referenced profile images from database
+    const { data: profileImages, error: dbError } = await supabaseClient
       .from('general_information')
       .select('profile_image')
       .not('profile_image', 'is', null)
 
     if (dbError) {
-      console.error('Error fetching referenced images:', dbError)
+      console.error('Error fetching profile images from database:', dbError)
       throw dbError
     }
 
-    console.log(`Found ${referencedImages?.length || 0} referenced images in database`)
+    console.log(`Found ${profileImages?.length || 0} referenced images in database`)
 
-    // Create a set of all referenced file paths for faster lookup
+    // Create set of referenced file paths for quick lookup
     const referencedPaths = new Set<string>()
     
-    referencedImages?.forEach(item => {
-      if (item.profile_image) {
-        // Handle different URL formats
-        let filePath = item.profile_image
-        
-        // If it's a full URL, extract just the path after profile-images/
-        if (filePath.includes('/storage/v1/object/public/profile-images/')) {
-          filePath = filePath.split('/storage/v1/object/public/profile-images/')[1]
-        } else if (filePath.startsWith('http')) {
-          // Handle other URL formats by taking everything after the last /profile-images/
-          if (filePath.includes('/profile-images/')) {
-            filePath = filePath.split('/profile-images/')[1]
+    profileImages?.forEach(record => {
+      if (record.profile_image) {
+        try {
+          const url = new URL(record.profile_image)
+          // Extract the path after /profile-images/
+          const pathParts = url.pathname.split('/profile-images/')
+          if (pathParts.length > 1) {
+            const filePath = pathParts[1]
+            referencedPaths.add(filePath)
+            console.log('Referenced path:', filePath)
           }
-        }
-        
-        // Clean up the path
-        filePath = filePath.replace(/^\/+/, '') // Remove leading slashes
-        
-        if (filePath) {
-          referencedPaths.add(filePath)
-          console.log(`Referenced file: ${filePath}`)
+        } catch (error) {
+          console.error('Error parsing URL:', record.profile_image, error)
         }
       }
     })
 
-    console.log(`Total unique referenced paths: ${referencedPaths.size}`)
+    console.log(`Extracted ${referencedPaths.size} referenced file paths`)
 
-    // Find orphaned files by checking each storage file against referenced paths
-    const orphanedFiles = []
-    const referencedFiles = []
+    // Identify orphaned files
+    const orphanedFiles: string[] = []
+    const allStorageFiles: string[] = []
 
-    for (const file of files || []) {
-      const fileName = file.name
-      let isReferenced = false
-
-      // Check if this file is directly referenced
-      if (referencedPaths.has(fileName)) {
-        isReferenced = true
-      } else {
-        // Check if this file is part of a referenced path (for nested folders)
-        for (const referencedPath of referencedPaths) {
-          if (referencedPath.includes(fileName) || fileName.includes(referencedPath)) {
-            isReferenced = true
-            break
+    // Process all files and folders in storage
+    const processStorageItems = async (items: any[], prefix = '') => {
+      for (const item of items) {
+        const fullPath = prefix ? `${prefix}/${item.name}` : item.name
+        
+        if (item.metadata) {
+          // This is a file
+          allStorageFiles.push(fullPath)
+          
+          if (!referencedPaths.has(fullPath)) {
+            orphanedFiles.push(fullPath)
+            console.log('Orphaned file found:', fullPath)
+          } else {
+            console.log('Referenced file found:', fullPath)
+          }
+        } else {
+          // This might be a folder, list its contents
+          const { data: subItems, error: subError } = await supabaseClient.storage
+            .from('profile-images')
+            .list(fullPath, {
+              limit: 1000,
+              sortBy: { column: 'name', order: 'asc' }
+            })
+          
+          if (!subError && subItems) {
+            await processStorageItems(subItems, fullPath)
           }
         }
       }
+    }
 
-      if (isReferenced) {
-        referencedFiles.push(fileName)
-        console.log(`Keeping referenced file: ${fileName}`)
+    if (files) {
+      await processStorageItems(files)
+    }
+
+    console.log(`Total files in storage: ${allStorageFiles.length}`)
+    console.log(`Orphaned files to delete: ${orphanedFiles.length}`)
+
+    // Delete orphaned files
+    let deletedCount = 0
+    let failedCount = 0
+
+    if (orphanedFiles.length > 0) {
+      const { data: deleteResult, error: deleteError } = await supabaseClient.storage
+        .from('profile-images')
+        .remove(orphanedFiles)
+
+      if (deleteError) {
+        console.error('Error deleting files:', deleteError)
+        failedCount = orphanedFiles.length
       } else {
-        orphanedFiles.push(file)
-        console.log(`Found orphaned file: ${fileName}`)
-      }
-    }
-
-    console.log(`Found ${orphanedFiles.length} orphaned files`)
-    console.log(`Found ${referencedFiles.length} referenced files`)
-
-    // Delete orphaned files one by one with detailed logging
-    const deletedFiles = []
-    const errors = []
-
-    for (const file of orphanedFiles) {
-      try {
-        console.log(`Attempting to delete: ${file.name}`)
-        
-        const { data: deleteData, error: deleteError } = await supabase.storage
-          .from('profile-images')
-          .remove([file.name])
-
-        if (deleteError) {
-          console.error(`Error deleting ${file.name}:`, deleteError)
-          errors.push({ file: file.name, error: deleteError.message })
-        } else {
-          console.log(`Successfully deleted: ${file.name}`)
-          console.log(`Delete response:`, deleteData)
-          deletedFiles.push(file.name)
-        }
-      } catch (err) {
-        console.error(`Exception deleting ${file.name}:`, err)
-        errors.push({ file: file.name, error: err.message })
+        deletedCount = deleteResult?.length || 0
+        console.log(`Successfully deleted ${deletedCount} files`)
       }
 
-      // Add a small delay between deletions to avoid rate limiting
-      await new Promise(resolve => setTimeout(resolve, 100))
-    }
+      // Verify deletion
+      console.log('Verifying deletion...')
+      const { data: remainingFiles, error: verifyError } = await supabaseClient.storage
+        .from('profile-images')
+        .list('', { limit: 1000 })
 
-    // Verify deletion by listing files again
-    const { data: remainingFiles, error: verifyError } = await supabase.storage
-      .from('profile-images')
-      .list('', {
-        limit: 1000,
-        sortBy: { column: 'name', order: 'asc' }
-      })
-
-    if (!verifyError) {
-      console.log(`Files remaining after cleanup: ${remainingFiles?.length || 0}`)
+      if (!verifyError) {
+        console.log(`Files remaining after cleanup: ${remainingFiles?.length || 0}`)
+      }
     }
 
     const result = {
       success: true,
-      summary: {
-        totalFilesInStorage: files?.length || 0,
-        totalReferencedImages: referencedImages?.length || 0,
-        uniqueReferencedPaths: referencedPaths.size,
-        orphanedFilesFound: orphanedFiles.length,
-        filesDeleted: deletedFiles.length,
-        filesRemaining: remainingFiles?.length || 0,
-        errors: errors.length
-      },
-      deletedFiles,
-      referencedFiles: referencedFiles.slice(0, 10), // Show first 10 for debugging
-      errors
+      totalFilesFound: allStorageFiles.length,
+      referencedFiles: referencedPaths.size,
+      orphanedFilesFound: orphanedFiles.length,
+      filesDeleted: deletedCount,
+      filesFailed: failedCount,
+      orphanedFilesList: orphanedFiles,
+      message: orphanedFiles.length === 0 
+        ? 'No orphaned files found. Storage is clean!'
+        : `Cleanup completed. Deleted ${deletedCount} orphaned files.`
     }
-
-    console.log('Cleanup completed:', result.summary)
 
     return new Response(
       JSON.stringify(result),
-      { 
+      {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 200 
-      }
+        status: 200,
+      },
     )
 
   } catch (error) {
     console.error('Storage cleanup error:', error)
     return new Response(
-      JSON.stringify({ 
-        success: false, 
+      JSON.stringify({
+        success: false,
         error: error.message,
-        summary: {
-          totalFilesInStorage: 0,
-          totalReferencedImages: 0,
-          uniqueReferencedPaths: 0,
-          orphanedFilesFound: 0,
-          filesDeleted: 0,
-          filesRemaining: 0,
-          errors: 1
-        }
+        message: 'Failed to cleanup storage'
       }),
-      { 
+      {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 500 
-      }
+        status: 500,
+      },
     )
   }
 })
