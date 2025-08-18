@@ -1,8 +1,10 @@
 
 import React, { useState } from 'react';
-import { PivotControls } from './PivotControls';
-import { PivotTable } from './PivotTable';
+import { CompactPivotControls } from './CompactPivotControls';
+import { SpreadsheetPivotTable } from './SpreadsheetPivotTable';
 import { useResourcePivotStatistics } from '@/hooks/use-resource-pivot-statistics';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Table2 } from 'lucide-react';
 
 interface PivotTableContainerProps {
   filters: {
@@ -40,20 +42,30 @@ export const PivotTableContainer: React.FC<PivotTableContainerProps> = ({ filter
   };
 
   return (
-    <div className="space-y-6">
-      <PivotControls
-        primaryDimension={primaryDimension}
-        secondaryDimension={secondaryDimension}
-        onPrimaryDimensionChange={handlePrimaryDimensionChange}
-        onSecondaryDimensionChange={handleSecondaryDimensionChange}
-      />
-      
-      {pivotData && (
-        <PivotTable
-          data={pivotData}
-          isLoading={isLoading}
+    <Card className="w-full">
+      <CardHeader className="pb-0">
+        <CardTitle className="flex items-center gap-2 text-lg">
+          <Table2 className="h-5 w-5" />
+          Cross-Dimensional Resource Analysis
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="p-0">
+        <CompactPivotControls
+          primaryDimension={primaryDimension}
+          secondaryDimension={secondaryDimension}
+          onPrimaryDimensionChange={handlePrimaryDimensionChange}
+          onSecondaryDimensionChange={handleSecondaryDimensionChange}
         />
-      )}
-    </div>
+        
+        <div className="p-4">
+          {pivotData && (
+            <SpreadsheetPivotTable
+              data={pivotData}
+              isLoading={isLoading}
+            />
+          )}
+        </div>
+      </CardContent>
+    </Card>
   );
 };
