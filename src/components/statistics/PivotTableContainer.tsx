@@ -46,21 +46,27 @@ export const PivotTableContainer: React.FC<PivotTableContainerProps> = ({ filter
   };
 
   return (
-    <div className="space-y-6">
-      <PivotControls
-        primaryDimension={primaryDimension}
-        secondaryDimension={secondaryDimension}
-        onPrimaryDimensionChange={handlePrimaryDimensionChange}
-        onSecondaryDimensionChange={handleSecondaryDimensionChange}
-        onSwapDimensions={handleSwapDimensions}
-      />
-      
-      {pivotData && (
-        <PivotTable
-          data={pivotData}
-          isLoading={isLoading}
+    <div className="flex flex-col h-full max-h-[80vh] space-y-4">
+      {/* Controls - Fixed at top */}
+      <div className="flex-shrink-0">
+        <PivotControls
+          primaryDimension={primaryDimension}
+          secondaryDimension={secondaryDimension}
+          onPrimaryDimensionChange={handlePrimaryDimensionChange}
+          onSecondaryDimensionChange={handleSecondaryDimensionChange}
+          onSwapDimensions={handleSwapDimensions}
         />
-      )}
+      </div>
+      
+      {/* Table container - Fixed height with scrolling */}
+      <div className="flex-1 min-h-0 w-full">
+        {pivotData && (
+          <PivotTable
+            data={pivotData}
+            isLoading={isLoading}
+          />
+        )}
+      </div>
     </div>
   );
 };
