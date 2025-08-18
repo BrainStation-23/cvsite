@@ -8,12 +8,13 @@ import { Upload, Trash2, Copy, Image, ExternalLink } from 'lucide-react';
 import { usePlaceholderImages } from '@/hooks/use-placeholder-images';
 import { toast } from 'sonner';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { useConfirmation } from '@/components/ui/confirmation-dialog';
+import { useConfirmationDialog } from '@/hooks/use-confirmation-dialog';
+import { ConfirmationDialog } from '@/components/ui/confirmation-dialog';
 
 export const PlaceholderImageManager: React.FC = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { images, isLoading, uploadImage, deleteImage, getImageUrl, isUploading, isDeleting } = usePlaceholderImages();
-  const { showConfirmation } = useConfirmation();
+  const { isOpen, config, showConfirmation, hideConfirmation, handleConfirm } = useConfirmationDialog();
 
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
@@ -56,15 +57,15 @@ export const PlaceholderImageManager: React.FC = () => {
     window.open(url, '_blank');
   };
 
-  const handleDeleteImage = async (imageName: string) => {
-    const confirmed = await showConfirmation(
-      'Delete Placeholder Image',
-      `Are you sure you want to delete "${imageName}"? This action cannot be undone.`
-    );
-
-    if (confirmed) {
-      deleteImage(imageName);
-    }
+  const handleDeleteImage = (imageName: string) => {
+    showConfirmation({
+      title: 'Delete Placeholder Image',
+      description: `Are you sure you want to delete "${imageName}"? This action cannot be undone.`,
+      confirmText: 'Delete',
+      cancelText: 'Cancel',
+      variant: 'destructive',
+      onConfirm: () => deleteImage(imageName)
+    });
   };
 
   const formatFileSize = (bytes: number): string => {
@@ -94,123 +95,139 @@ export const PlaceholderImageManager: React.FC = () => {
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Image className="h-5 w-5" />
-          Placeholder Images
-        </CardTitle>
-        <p className="text-sm text-muted-foreground">
-          Manage placeholder images that can be used in CV templates. These images are publicly accessible.
-        </p>
-      </CardHeader>
-      <CardContent className="space-y-6">
-        {/* Upload Section */}
-        <div className="border-2 border-dashed border-muted rounded-lg p-6">
-          <div className="text-center">
-            <Upload className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
-            <h3 className="text-lg font-medium mb-2">Upload Placeholder Image</h3>
-            <p className="text-sm text-muted-foreground mb-4">
-              Upload images that can be used as placeholders in CV templates
-            </p>
-            <Button 
-              onClick={handleUploadClick} 
-              disabled={isUploading}
-              className="mb-2"
-            >
-              {isUploading ? 'Uploading...' : 'Select Image'}
-            </Button>
-            <p className="text-xs text-muted-foreground">
-              Supported formats: JPG, PNG, GIF, WebP. Max size: 5MB
-            </p>
-          </div>
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept="image/*"
-            onChange={handleFileSelect}
-            className="hidden"
-          />
-        </div>
-
-        {/* Images Grid */}
-        <div>
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-medium">
-              Uploaded Images ({images.length})
-            </h3>
-          </div>
-
-          {images.length === 0 ? (
-            <div className="text-center py-8 text-muted-foreground">
-              <Image className="mx-auto h-12 w-12 mb-4 opacity-50" />
-              <p>No placeholder images uploaded yet.</p>
-              <p className="text-sm">Upload your first image to get started.</p>
+    <>
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Image className="h-5 w-5" />
+            Placeholder Images
+          </CardTitle>
+          <p className="text-sm text-muted-foreground">
+            Manage placeholder images that can be used in CV templates. These images are publicly accessible.
+          </p>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          {/* Upload Section */}
+          <div className="border-2 border-dashed border-muted rounded-lg p-6">
+            <div className="text-center">
+              <Upload className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
+              <h3 className="text-lg font-medium mb-2">Upload Placeholder Image</h3>
+              <p className="text-sm text-muted-foreground mb-4">
+                Upload images that can be used as placeholders in CV templates
+              </p>
+              <Button 
+                onClick={handleUploadClick} 
+                disabled={isUploading}
+                className="mb-2"
+              >
+                {isUploading ? 'Uploading...' : 'Select Image'}
+              </Button>
+              <p className="text-xs text-muted-foreground">
+                Supported formats: JPG, PNG, GIF, WebP. Max size: 5MB
+              </p>
             </div>
-          ) : (
-            <ScrollArea className="h-96">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {images.map((image) => (
-                  <div key={image.id} className="border rounded-lg p-4 space-y-3">
-                    {/* Image Preview */}
-                    <div className="aspect-video bg-muted rounded-md overflow-hidden">
-                      <img
-                        src={getImageUrl(image.name)}
-                        alt={image.name}
-                        className="w-full h-full object-cover"
-                        loading="lazy"
-                      />
-                    </div>
-                    
-                    {/* Image Info */}
-                    <div>
-                      <h4 className="font-medium text-sm truncate" title={image.name}>
-                        {image.name}
-                      </h4>
-                      <div className="flex items-center gap-2 mt-1">
-                        <Badge variant="secondary" className="text-xs">
-                          {formatFileSize(image.metadata?.size || 0)}
-                        </Badge>
-                        <Badge variant="outline" className="text-xs">
-                          {image.metadata?.mimetype || 'Unknown'}
-                        </Badge>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              onChange={handleFileSelect}
+              className="hidden"
+            />
+          </div>
+
+          {/* Images Grid */}
+          <div>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-medium">
+                Uploaded Images ({images.length})
+              </h3>
+            </div>
+
+            {images.length === 0 ? (
+              <div className="text-center py-8 text-muted-foreground">
+                <Image className="mx-auto h-12 w-12 mb-4 opacity-50" />
+                <p>No placeholder images uploaded yet.</p>
+                <p className="text-sm">Upload your first image to get started.</p>
+              </div>
+            ) : (
+              <ScrollArea className="h-96">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {images.map((image) => (
+                    <div key={image.id} className="border rounded-lg p-4 space-y-3">
+                      {/* Image Preview */}
+                      <div className="aspect-video bg-muted rounded-md overflow-hidden">
+                        <img
+                          src={getImageUrl(image.name)}
+                          alt={image.name}
+                          className="w-full h-full object-cover"
+                          loading="lazy"
+                        />
+                      </div>
+                      
+                      {/* Image Info */}
+                      <div>
+                        <h4 className="font-medium text-sm truncate" title={image.name}>
+                          {image.name}
+                        </h4>
+                        <div className="flex items-center gap-2 mt-1">
+                          <Badge variant="secondary" className="text-xs">
+                            {formatFileSize(image.metadata?.size || 0)}
+                          </Badge>
+                          <Badge variant="outline" className="text-xs">
+                            {image.metadata?.mimetype || 'Unknown'}
+                          </Badge>
+                        </div>
+                      </div>
+
+                      {/* Actions */}
+                      <div className="flex items-center gap-2">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => copyImageUrl(image.name)}
+                          className="flex-1"
+                        >
+                          <Copy className="h-3 w-3 mr-1" />
+                          Copy URL
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => openImageInNewTab(image.name)}
+                        >
+                          <ExternalLink className="h-3 w-3" />
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="destructive"
+                          onClick={() => handleDeleteImage(image.name)}
+                          disabled={isDeleting}
+                        >
+                          <Trash2 className="h-3 w-3" />
+                        </Button>
                       </div>
                     </div>
+                  ))}
+                </div>
+              </ScrollArea>
+            )}
+          </div>
+        </CardContent>
+      </Card>
 
-                    {/* Actions */}
-                    <div className="flex items-center gap-2">
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => copyImageUrl(image.name)}
-                        className="flex-1"
-                      >
-                        <Copy className="h-3 w-3 mr-1" />
-                        Copy URL
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => openImageInNewTab(image.name)}
-                      >
-                        <ExternalLink className="h-3 w-3" />
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="destructive"
-                        onClick={() => handleDeleteImage(image.name)}
-                        disabled={isDeleting}
-                      >
-                        <Trash2 className="h-3 w-3" />
-                      </Button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </ScrollArea>
-          )}
-        </div>
-      </CardContent>
-    </Card>
+      {/* Confirmation Dialog */}
+      {config && (
+        <ConfirmationDialog
+          isOpen={isOpen}
+          onClose={hideConfirmation}
+          onConfirm={handleConfirm}
+          title={config.title}
+          description={config.description}
+          confirmText={config.confirmText}
+          cancelText={config.cancelText}
+          variant={config.variant}
+        />
+      )}
+    </>
   );
 };

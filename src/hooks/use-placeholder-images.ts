@@ -9,15 +9,7 @@ export interface PlaceholderImage {
   updated_at: string;
   created_at: string;
   last_accessed_at: string;
-  metadata: {
-    eTag: string;
-    size: number;
-    mimetype: string;
-    cacheControl: string;
-    lastModified: string;
-    contentLength: number;
-    httpStatusCode: number;
-  };
+  metadata: Record<string, any>;
 }
 
 export const usePlaceholderImages = () => {
@@ -38,7 +30,7 @@ export const usePlaceholderImages = () => {
         throw error;
       }
 
-      return data as PlaceholderImage[];
+      return data || [];
     },
   });
 
