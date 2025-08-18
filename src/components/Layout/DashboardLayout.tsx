@@ -78,7 +78,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
   );
 
   return (
-    <div className="flex h-screen bg-gray-100 dark:bg-gray-900">
+    <div className="flex h-screen bg-gray-100 dark:bg-gray-900 overflow-x-auto">
       {/* Sidebar */}
       <aside 
         className={`${isSidebarOpen ? 'w-64' : 'w-16'} transition-width duration-300 ease-in-out fixed h-full z-10 bg-gradient-to-b from-slate-900 to-slate-800 text-slate-100 flex flex-col`}
@@ -119,9 +119,9 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
 
         {/* Content */}
         <main className="flex-1 p-2 bg-slate-50 dark:bg-slate-900">
-          <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm p-4">
+          <ScrollArea className="bg-white dark:bg-slate-800 rounded-xl shadow-sm p-4 max-w-screen">
             {children}
-          </div>
+          </ScrollArea>
         </main>
       </div>
       
