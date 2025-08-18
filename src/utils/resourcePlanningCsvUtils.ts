@@ -1,4 +1,3 @@
-
 import Papa from 'papaparse';
 import { SettingTableName } from '@/hooks/use-platform-settings';
 
@@ -28,7 +27,6 @@ export const ENTITY_NAMES: Record<SettingTableName, string> = {
   'sbus': 'SBU',
   'hr_contacts': 'HR Contact',
   'resource_types': 'Resource Type',
-  'bill_types': 'Bill Type',
   'project_types': 'Project Type',
   'expertise_types': 'Expertise Type'
 };
