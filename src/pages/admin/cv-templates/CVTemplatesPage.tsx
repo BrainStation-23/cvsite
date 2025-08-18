@@ -1,232 +1,323 @@
-
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import DashboardLayout from '@/components/Layout/DashboardLayout';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
+import {
+  Table,
+  TableBody,
+  TableCaption,
+  TableCell,
+  TableFooter,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 import { Switch } from '@/components/ui/switch';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Plus, Pencil, Trash2, Eye, Star } from 'lucide-react';
+import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogFooter,
+  DialogClose,
+} from "@/components/ui/dialog"
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form"
+import { useForm } from 'react-hook-form';
+import { zodResolver } from "@hookform/resolvers/zod"
+import * as z from "zod"
 import { useCVTemplates, CVTemplate } from '@/hooks/use-cv-templates';
-import { CVTemplateForm } from '@/components/admin/cv-templates/CVTemplateForm';
-import { ConfirmationDialog } from '@/components/ui/confirmation-dialog';
-import { useConfirmationDialog } from '@/hooks/use-confirmation-dialog';
+import { toast } from 'sonner';
+import { useToast } from '@/hooks/use-toast';
+import { Loader2 } from 'lucide-react';
 
 const CVTemplatesPage: React.FC = () => {
-  const navigate = useNavigate();
-  const { 
-    templates, 
-    isLoading, 
-    createTemplate, 
-    updateTemplate, 
-    deleteTemplate, 
-    isCreating, 
-    isUpdating, 
-    isDeleting 
+  const [selectedTemplate, setSelectedTemplate] = useState<CVTemplate | null>(null);
+  const [isFormOpen, setIsFormOpen] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [templateToDelete, setTemplateToDelete] = useState<CVTemplate | null>(null);
+
+  const {
+    allTemplates: templates, // Use allTemplates for admin view to show disabled templates
+    isLoading,
+    createTemplate,
+    updateTemplate,
+    deleteTemplate,
+    isCreating,
+    isUpdating,
+    isDeleting
   } = useCVTemplates();
 
-  const [isFormOpen, setIsFormOpen] = useState(false);
-  const [editingTemplate, setEditingTemplate] = useState<CVTemplate | undefined>();
-  
-  const { isOpen, config, showConfirmation, hideConfirmation, handleConfirm } = useConfirmationDialog();
+  const formSchema = z.object({
+    name: z.string().min(2, {
+      message: "Template name must be at least 2 characters.",
+    }),
+    html_template: z.string().min(10, {
+      message: "Template content must be at least 10 characters.",
+    }),
+    enabled: z.boolean().default(true),
+    is_default: z.boolean().default(false),
+  })
 
-  const handleCreateNew = () => {
-    setEditingTemplate(undefined);
+  type FormValues = z.infer<typeof formSchema>
+
+  const form = useForm<FormValues>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      name: '',
+      html_template: '',
+      enabled: true,
+      is_default: false,
+    },
+    mode: "onChange",
+  })
+
+  const handleCreate = (values: FormValues) => {
+    createTemplate(values);
+    setIsFormOpen(false);
+    form.reset();
+  };
+
+  const handleUpdate = (id: string, values: FormValues) => {
+    updateTemplate({ id, ...values });
+    setSelectedTemplate(null);
+    setIsFormOpen(false);
+    form.reset();
+  };
+
+  const handleDelete = (id: string) => {
+    deleteTemplate(id);
+    setIsDeleteDialogOpen(false);
+    setTemplateToDelete(null);
+  };
+
+  const handleOpenForm = (template?: CVTemplate) => {
+    setSelectedTemplate(template || null);
+    if (template) {
+      form.setValue("name", template.name);
+      form.setValue("html_template", template.html_template);
+      form.setValue("enabled", template.enabled);
+      form.setValue("is_default", template.is_default);
+    } else {
+      form.reset();
+    }
     setIsFormOpen(true);
   };
 
-  const handleEdit = (template: CVTemplate) => {
-    navigate(`/admin/cv-templates/${template.id}/edit`);
-  };
-
-  const handleDelete = (template: CVTemplate) => {
-    showConfirmation({
-      title: 'Delete CV Template',
-      description: `Are you sure you want to delete "${template.name}"? This action cannot be undone.`,
-      confirmText: 'Delete',
-      variant: 'destructive',
-      onConfirm: () => deleteTemplate(template.id)
-    });
-  };
-
-  const handlePreview = (template: CVTemplate) => {
-    navigate(`/admin/cv-templates/${template.id}`);
-  };
-
-  const handleToggleEnabled = (template: CVTemplate) => {
-    updateTemplate({ 
-      id: template.id, 
-      enabled: !template.enabled 
-    });
-  };
-
-  const handleToggleDefault = (template: CVTemplate) => {
-    updateTemplate({ 
-      id: template.id, 
-      is_default: !template.is_default 
-    });
-  };
-
-  const handleFormSubmit = (data: { 
-    name: string; 
-    html_template: string; 
-    enabled?: boolean; 
-    is_default?: boolean; 
-  }) => {
-    if (editingTemplate) {
-      updateTemplate({ id: editingTemplate.id, ...data });
-    } else {
-      createTemplate(data);
-    }
+  const handleCloseForm = () => {
     setIsFormOpen(false);
+    setSelectedTemplate(null);
+    form.reset();
   };
-
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString();
-  };
-
-  if (isLoading) {
-    return (
-      <DashboardLayout>
-        <div className="flex justify-center items-center h-64">
-          <div className="text-lg">Loading CV templates...</div>
-        </div>
-      </DashboardLayout>
-    );
-  }
 
   return (
-    <DashboardLayout>
-      <div className="space-y-6">
-        {/* Header */}
-        <div className="flex justify-between items-center">
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-              CV Templates
-            </h1>
-            <p className="text-gray-600 dark:text-gray-400">
-              Manage CV templates for generating customized resumes
-            </p>
-          </div>
-          <Button onClick={handleCreateNew}>
-            <Plus className="h-4 w-4 mr-2" />
-            Create Template
-          </Button>
-        </div>
+    <div>
+      <div className="mb-4 flex justify-between items-center">
+        <h1 className="text-2xl font-bold">CV Templates</h1>
+        <Button onClick={() => handleOpenForm()}>Create Template</Button>
+      </div>
 
-        {/* Templates Table */}
-        <div className="border rounded-md">
+      <Card>
+        <CardHeader>
+          <CardTitle>Templates List</CardTitle>
+          <CardDescription>Manage your CV templates here.</CardDescription>
+        </CardHeader>
+        <CardContent>
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Name</TableHead>
-                <TableHead>Status</TableHead>
+                <TableHead className="w-[200px]">Name</TableHead>
+                <TableHead>Enabled</TableHead>
                 <TableHead>Default</TableHead>
-                <TableHead>Last Updated</TableHead>
-                <TableHead className="w-[200px]">Actions</TableHead>
+                <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {templates.length === 0 ? (
+              {isLoading ? (
                 <TableRow>
-                  <TableCell colSpan={5} className="text-center text-muted-foreground py-8">
-                    No CV templates found. Create one to get started.
+                  <TableCell colSpan={4} className="text-center">
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin inline-block" /> Loading templates...
+                  </TableCell>
+                </TableRow>
+              ) : templates.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={4} className="text-center">
+                    No templates found.
                   </TableCell>
                 </TableRow>
               ) : (
                 templates.map((template) => (
                   <TableRow key={template.id}>
-                    <TableCell>
-                      <div className="flex items-center gap-2">
-                        <span className="font-medium">{template.name}</span>
-                        {template.is_default && (
-                          <Star className="h-4 w-4 text-yellow-500 fill-current" />
-                        )}
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-2">
-                        <Switch
-                          checked={template.enabled}
-                          onCheckedChange={() => handleToggleEnabled(template)}
-                          disabled={isUpdating}
-                        />
-                        <Badge variant={template.enabled ? "default" : "secondary"}>
-                          {template.enabled ? 'Enabled' : 'Disabled'}
-                        </Badge>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <Switch
-                        checked={template.is_default}
-                        onCheckedChange={() => handleToggleDefault(template)}
-                        disabled={isUpdating}
-                      />
-                    </TableCell>
-                    <TableCell className="text-muted-foreground">
-                      {formatDate(template.updated_at)}
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex gap-1">
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          onClick={() => handlePreview(template)}
-                          title="Preview"
-                        >
-                          <Eye className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          onClick={() => handleEdit(template)}
-                          disabled={isUpdating}
-                          title="Edit"
-                        >
-                          <Pencil className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          onClick={() => handleDelete(template)}
-                          disabled={isDeleting || template.is_default}
-                          title={template.is_default ? "Cannot delete default template" : "Delete"}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
+                    <TableCell className="font-medium">{template.name}</TableCell>
+                    <TableCell>{template.enabled ? 'Yes' : 'No'}</TableCell>
+                    <TableCell>{template.is_default ? 'Yes' : 'No'}</TableCell>
+                    <TableCell className="text-right">
+                      <Button
+                        variant="secondary"
+                        size="sm"
+                        onClick={() => handleOpenForm(template)}
+                      >
+                        Edit
+                      </Button>
+                      <Button
+                        variant="destructive"
+                        size="sm"
+                        onClick={() => {
+                          setIsDeleteDialogOpen(true);
+                          setTemplateToDelete(template);
+                        }}
+                        className="ml-2"
+                        disabled={template.is_default}
+                      >
+                        Delete
+                      </Button>
                     </TableCell>
                   </TableRow>
                 ))
               )}
             </TableBody>
           </Table>
-        </div>
+        </CardContent>
+      </Card>
 
-        {/* Create/Edit Form Dialog */}
-        <CVTemplateForm
-          isOpen={isFormOpen}
-          onClose={() => setIsFormOpen(false)}
-          onSubmit={handleFormSubmit}
-          template={editingTemplate}
-          isLoading={isCreating || isUpdating}
-        />
+      <Dialog open={isFormOpen} onOpenChange={handleCloseForm}>
+        <DialogContent className="sm:max-w-[625px]">
+          <DialogHeader>
+            <DialogTitle>{selectedTemplate ? 'Edit Template' : 'Create Template'}</DialogTitle>
+            <DialogDescription>
+              {selectedTemplate ? 'Update the template details.' : 'Create a new CV template.'}
+            </DialogDescription>
+          </DialogHeader>
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(selectedTemplate ? (values) => handleUpdate(selectedTemplate.id, values) : handleCreate)} className="space-y-4">
+              <FormField
+                control={form.control}
+                name="name"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Template Name</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Template Name" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="html_template"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>HTML Template</FormLabel>
+                    <FormControl>
+                      <Textarea placeholder="HTML Template" className="min-h-[300px]" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <div className="flex items-center space-x-2">
+                <FormField
+                  control={form.control}
+                  name="enabled"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-row items-center space-x-3 space-y-0">
+                      <FormControl>
+                        <Switch
+                          checked={field.value}
+                          onCheckedChange={field.onChange}
+                        />
+                      </FormControl>
+                      <FormLabel>Enabled</FormLabel>
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="is_default"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-row items-center space-x-3 space-y-0">
+                      <FormControl>
+                        <Switch
+                          checked={field.value}
+                          onCheckedChange={field.onChange}
+                          disabled={selectedTemplate?.is_default}
+                        />
+                      </FormControl>
+                      <FormLabel>Default</FormLabel>
+                    </FormItem>
+                  )}
+                />
+              </div>
+              <DialogFooter>
+                <Button type="submit" disabled={isCreating || isUpdating}>
+                  {isCreating || isUpdating ? (
+                    <>
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      {selectedTemplate ? 'Updating...' : 'Creating...'}
+                    </>
+                  ) : (
+                    selectedTemplate ? 'Update Template' : 'Create Template'
+                  )}
+                </Button>
+              </DialogFooter>
+            </form>
+          </Form>
+        </DialogContent>
+      </Dialog>
 
-        {/* Confirmation Dialog */}
-        {config && (
-          <ConfirmationDialog
-            isOpen={isOpen}
-            onClose={hideConfirmation}
-            onConfirm={handleConfirm}
-            title={config.title}
-            description={config.description}
-            confirmText={config.confirmText}
-            cancelText={config.cancelText}
-            variant={config.variant}
-          />
-        )}
-      </div>
-    </DashboardLayout>
+      <Dialog open={isDeleteDialogOpen} onOpenChange={() => setIsDeleteDialogOpen(false)}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Delete Template</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete this template? This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <DialogClose asChild>
+              <Button type="button" variant="secondary">Cancel</Button>
+            </DialogClose>
+            <Button
+              type="button"
+              variant="destructive"
+              onClick={() => {
+                if (templateToDelete) {
+                  handleDelete(templateToDelete.id);
+                }
+              }}
+              disabled={isDeleting}
+            >
+              {isDeleting ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Deleting...
+                </>
+              ) : (
+                'Delete Template'
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </div>
   );
 };
 

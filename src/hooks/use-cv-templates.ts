@@ -1,4 +1,3 @@
-
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -16,7 +15,7 @@ export interface CVTemplate {
 export const useCVTemplates = () => {
   const queryClient = useQueryClient();
 
-  const { data: templates, isLoading } = useQuery({
+  const { data: allTemplates, isLoading } = useQuery({
     queryKey: ['cv-templates'],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -33,6 +32,12 @@ export const useCVTemplates = () => {
       return data as CVTemplate[];
     },
   });
+
+  // Filter enabled templates for production use
+  const templates = allTemplates?.filter(template => template.enabled) || [];
+  
+  // Get default template
+  const defaultTemplate = templates.find(template => template.is_default) || null;
 
   const createTemplateMutation = useMutation({
     mutationFn: async (template: { 
@@ -123,7 +128,9 @@ export const useCVTemplates = () => {
   });
 
   return {
-    templates: templates || [],
+    templates,
+    allTemplates: allTemplates || [], // For admin use where all templates are needed
+    defaultTemplate,
     isLoading,
     createTemplate: createTemplateMutation.mutate,
     updateTemplate: updateTemplateMutation.mutate,
