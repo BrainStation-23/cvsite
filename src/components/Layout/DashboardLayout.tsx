@@ -78,7 +78,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
   );
 
   return (
-    <div className="flex h-screen bg-gray-100 dark:bg-gray-900 overflow-hidden">
+    <div className="flex h-screen bg-gray-100 dark:bg-gray-900">
       {/* Sidebar */}
       <aside 
         className={`${isSidebarOpen ? 'w-64' : 'w-16'} transition-width duration-300 ease-in-out fixed h-full z-10 bg-gradient-to-b from-slate-900 to-slate-800 text-slate-100 flex flex-col`}
@@ -114,15 +114,13 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
       </aside>
 
       {/* Main content */}
-      <div className={`flex-1 ${isSidebarOpen ? 'ml-64' : 'ml-16'} transition-margin duration-300 ease-in-out flex flex-col min-w-0 max-w-full overflow-hidden`}>
+      <div className={`flex-1 ${isSidebarOpen ? 'ml-64' : 'ml-16'} transition-margin duration-300 ease-in-out flex flex-col`}>
         <DashboardHeader pageTitle={getPageTitle()} user={user} />
 
         {/* Content */}
-        <main className="flex-1 p-2 bg-slate-50 dark:bg-slate-900 min-h-0 overflow-hidden">
-          <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm p-4 h-full overflow-hidden">
-            <div className="h-full max-w-full overflow-x-hidden">
-              {children}
-            </div>
+        <main className="flex-1 p-2 bg-slate-50 dark:bg-slate-900">
+          <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm p-4">
+            {children}
           </div>
         </main>
       </div>

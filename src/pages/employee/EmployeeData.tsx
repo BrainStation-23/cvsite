@@ -149,79 +149,69 @@ const EmployeeData: React.FC = () => {
 
   return (
     <DashboardLayout>
-      <div className="h-full w-full flex overflow-hidden">
+      <div className="flex h-full w-full min-h-screen overflow-x-hidden">
         {/* Main Content Area - Left Side */}
-        <div className="flex-1 min-w-0 flex flex-col h-full">
-          <div className="flex-shrink-0 mb-3">
-            <EmployeePageHeader />
-          </div>
+        <div className="flex-1 w-0 flex flex-col space-y-3 pr-6">
+          <EmployeePageHeader />
 
           {lastError && (
-            <div className="flex-shrink-0 mb-3">
-              <Alert variant="destructive">
-                <AlertTriangle className="h-4 w-4" />
-                <AlertDescription className="flex items-center justify-between">
-                  <span>{lastError}</span>
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    onClick={handleRetry}
-                    className="ml-4"
-                  >
-                    <RefreshCw className="h-4 w-4 mr-2" />
-                    Retry
-                  </Button>
-                </AlertDescription>
-              </Alert>
-            </div>
+            <Alert variant="destructive">
+              <AlertTriangle className="h-4 w-4" />
+              <AlertDescription className="flex items-center justify-between">
+                <span>{lastError}</span>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={handleRetry}
+                  className="ml-4"
+                >
+                  <RefreshCw className="h-4 w-4 mr-2" />
+                  Retry
+                </Button>
+              </AlertDescription>
+            </Alert>
           )}
 
           {hasSelection && (
-            <div className="flex-shrink-0 mb-3">
-              <BulkActionsToolbar
-                selectedProfiles={selectedProfiles}
-                totalProfiles={profiles.length}
-                onSelectAll={selectAll}
-                onClearSelection={clearSelection}
-                onBulkEmail={() => {}}
-                onBulkExport={handleBulkExport}
-                isAllSelected={isAllSelected}
-              />
-            </div>
+            <BulkActionsToolbar
+              selectedProfiles={selectedProfiles}
+              totalProfiles={profiles.length}
+              onSelectAll={selectAll}
+              onClearSelection={clearSelection}
+              onBulkEmail={() => {}}
+              onBulkExport={handleBulkExport}
+              isAllSelected={isAllSelected}
+            />
           )}
 
-          <div className="flex-1 min-h-0 flex flex-col">
-            <Card className="flex-1 min-h-0">
-              <CardContent className="p-0 h-full">
-                <CompactEmployeeTable
-                  profiles={profiles}
-                  isLoading={isLoading}
-                  onViewProfile={handleViewProfile}
-                  onSendEmail={handleSendEmail}
-                  selectedProfiles={selectedProfiles}
-                  onProfileSelect={handleProfileSelect}
-                  onSelectAll={selectAll}
-                  onClearSelection={clearSelection}
-                  isAllSelected={isAllSelected}
-                />
-              </CardContent>
-            </Card>
-          </div>
+          <Card className="flex-1">
+            <CardContent className="p-0">
+              <CompactEmployeeTable
+                profiles={profiles}
+                isLoading={isLoading}
+                onViewProfile={handleViewProfile}
+                onSendEmail={handleSendEmail}
+                selectedProfiles={selectedProfiles}
+                onProfileSelect={handleProfileSelect}
+                onSelectAll={selectAll}
+                onClearSelection={clearSelection}
+                isAllSelected={isAllSelected}
+              />
+            </CardContent>
+          </Card>
 
           {pagination.pageCount > 1 && (
-            <div className="flex-shrink-0 mt-3">
-              <UserPagination
-                pagination={pagination}
-                onPageChange={handlePageChange}
-                onPerPageChange={handlePerPageChange}
-                isLoading={isLoading}
-              />
-            </div>
+            <UserPagination
+              pagination={pagination}
+              onPageChange={handlePageChange}
+              onPerPageChange={handlePerPageChange}
+              isLoading={isLoading}
+            />
           )}
         </div>
 
         {/* Vertical Search Sidebar - Right Side */}
-        <div className="flex-shrink-0 border-l border-gray-200 dark:border-gray-700 h-full">
+        <div className="flex-shrink-0 border-l border-gray-200 dark:border-gray-700">
           <VerticalEmployeeSearchSidebar
             onSearch={handleSearch}
             onSkillFilter={handleSkillFilter}

@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { PivotControls } from './PivotControls';
-import { CustomPivotTable } from './CustomPivotTable';
+import { PivotTable } from './PivotTable';
 import { useResourcePivotStatistics } from '@/hooks/use-resource-pivot-statistics';
 
 interface PivotTableContainerProps {
@@ -40,26 +40,20 @@ export const PivotTableContainer: React.FC<PivotTableContainerProps> = ({ filter
   };
 
   return (
-    <div className="h-full flex flex-col max-w-full overflow-hidden">
-      {/* Controls - Fixed at top */}
-      <div className="flex-shrink-0 mb-4">
-        <PivotControls
-          primaryDimension={primaryDimension}
-          secondaryDimension={secondaryDimension}
-          onPrimaryDimensionChange={handlePrimaryDimensionChange}
-          onSecondaryDimensionChange={handleSecondaryDimensionChange}
-        />
-      </div>
+    <div className="space-y-6">
+      <PivotControls
+        primaryDimension={primaryDimension}
+        secondaryDimension={secondaryDimension}
+        onPrimaryDimensionChange={handlePrimaryDimensionChange}
+        onSecondaryDimensionChange={handleSecondaryDimensionChange}
+      />
       
-      {/* Table - Scrollable container */}
-      <div className="flex-1 min-h-0 overflow-hidden">
-        {pivotData && (
-          <CustomPivotTable
-            data={pivotData}
-            isLoading={isLoading}
-          />
-        )}
-      </div>
+      {pivotData && (
+        <PivotTable
+          data={pivotData}
+          isLoading={isLoading}
+        />
+      )}
     </div>
   );
 };
