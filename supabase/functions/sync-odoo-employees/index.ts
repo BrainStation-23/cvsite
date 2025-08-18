@@ -8,6 +8,9 @@ const corsHeaders = {
 
 interface OdooEmployee {
   employeeId: string;
+  joiningDate: string | null;
+  careerStartDate: string | null;
+  dateOfBirth: string | null;
   sbu: {
     name: string;
   } | null;
@@ -44,12 +47,15 @@ Deno.serve(async (req) => {
     
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    // GraphQL query to fetch employees from Odoo
+    // GraphQL query to fetch employees from Odoo with new date fields
     const graphqlQuery = {
       query: `
         query AllEmployees {
           allEmployees {
             employeeId
+            joiningDate
+            careerStartDate
+            dateOfBirth
             sbu {
               name
             }
@@ -98,7 +104,10 @@ Deno.serve(async (req) => {
         email: employee.user?.email,
         name: employee.user?.name || '',
         managerEmail: employee.parent?.user?.email || null,
-        sbuName: employee.sbu?.name || null
+        sbuName: employee.sbu?.name || null,
+        joiningDate: employee.joiningDate || null,
+        careerStartDate: employee.careerStartDate || null,
+        dateOfBirth: employee.dateOfBirth || null
       }));
 
     console.log(`Pre-processed ${processedEmployees.length} valid employees, calling bulk sync function...`);

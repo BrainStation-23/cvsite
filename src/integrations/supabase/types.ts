@@ -634,6 +634,7 @@ export type Database = {
         Row: {
           career_start_date: string | null
           created_at: string
+          date_of_birth: string | null
           date_of_joining: string | null
           email: string | null
           employee_id: string | null
@@ -649,6 +650,7 @@ export type Database = {
         Insert: {
           career_start_date?: string | null
           created_at?: string
+          date_of_birth?: string | null
           date_of_joining?: string | null
           email?: string | null
           employee_id?: string | null
@@ -664,6 +666,7 @@ export type Database = {
         Update: {
           career_start_date?: string | null
           created_at?: string
+          date_of_birth?: string | null
           date_of_joining?: string | null
           email?: string | null
           employee_id?: string | null
