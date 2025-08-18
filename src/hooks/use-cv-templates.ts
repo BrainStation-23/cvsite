@@ -1,3 +1,4 @@
+
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -6,6 +7,8 @@ export interface CVTemplate {
   id: string;
   name: string;
   html_template: string;
+  enabled: boolean;
+  is_default: boolean;
   created_at: string;
   updated_at: string;
 }
@@ -19,7 +22,8 @@ export const useCVTemplates = () => {
       const { data, error } = await supabase
         .from('cv_templates')
         .select('*')
-        .order('created_at', { ascending: false });
+        .order('is_default', { ascending: false })
+        .order('name', { ascending: true });
 
       if (error) {
         console.error('Error fetching CV templates:', error);
@@ -31,10 +35,19 @@ export const useCVTemplates = () => {
   });
 
   const createTemplateMutation = useMutation({
-    mutationFn: async (template: { name: string; html_template: string }) => {
+    mutationFn: async (template: { 
+      name: string; 
+      html_template: string; 
+      enabled?: boolean; 
+      is_default?: boolean; 
+    }) => {
       const { data, error } = await supabase
         .from('cv_templates')
-        .insert([template])
+        .insert([{
+          ...template,
+          enabled: template.enabled ?? true,
+          is_default: template.is_default ?? false
+        }])
         .select()
         .single();
 
@@ -56,7 +69,13 @@ export const useCVTemplates = () => {
   });
 
   const updateTemplateMutation = useMutation({
-    mutationFn: async ({ id, ...updates }: { id: string; name?: string; html_template?: string }) => {
+    mutationFn: async ({ id, ...updates }: { 
+      id: string; 
+      name?: string; 
+      html_template?: string; 
+      enabled?: boolean; 
+      is_default?: boolean; 
+    }) => {
       const { data, error } = await supabase
         .from('cv_templates')
         .update(updates)

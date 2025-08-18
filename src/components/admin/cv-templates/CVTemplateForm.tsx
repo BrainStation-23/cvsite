@@ -3,13 +3,19 @@ import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Switch } from '@/components/ui/switch';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { CVTemplate } from '@/hooks/use-cv-templates';
 
 interface CVTemplateFormProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (data: { name: string; html_template: string }) => void;
+  onSubmit: (data: { 
+    name: string; 
+    html_template: string; 
+    enabled?: boolean; 
+    is_default?: boolean; 
+  }) => void;
   template?: CVTemplate;
   isLoading?: boolean;
 }
@@ -23,14 +29,20 @@ export const CVTemplateForm: React.FC<CVTemplateFormProps> = ({
 }) => {
   const [name, setName] = useState('');
   const [htmlTemplate, setHtmlTemplate] = useState('');
+  const [enabled, setEnabled] = useState(true);
+  const [isDefault, setIsDefault] = useState(false);
 
   useEffect(() => {
     if (template) {
       setName(template.name);
       setHtmlTemplate(template.html_template);
+      setEnabled(template.enabled);
+      setIsDefault(template.is_default);
     } else {
       setName('');
       setHtmlTemplate('');
+      setEnabled(true);
+      setIsDefault(false);
     }
   }, [template, isOpen]);
 
@@ -40,6 +52,8 @@ export const CVTemplateForm: React.FC<CVTemplateFormProps> = ({
       onSubmit({
         name: name.trim(),
         html_template: htmlTemplate.trim(),
+        enabled,
+        is_default: isDefault,
       });
     }
   };
@@ -47,6 +61,8 @@ export const CVTemplateForm: React.FC<CVTemplateFormProps> = ({
   const handleClose = () => {
     setName('');
     setHtmlTemplate('');
+    setEnabled(true);
+    setIsDefault(false);
     onClose();
   };
 
@@ -69,6 +85,26 @@ export const CVTemplateForm: React.FC<CVTemplateFormProps> = ({
               placeholder="Enter template name..."
               required
             />
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div className="flex items-center space-x-2">
+              <Switch
+                id="enabled"
+                checked={enabled}
+                onCheckedChange={setEnabled}
+              />
+              <Label htmlFor="enabled">Enabled</Label>
+            </div>
+
+            <div className="flex items-center space-x-2">
+              <Switch
+                id="is_default"
+                checked={isDefault}
+                onCheckedChange={setIsDefault}
+              />
+              <Label htmlFor="is_default">Default Template</Label>
+            </div>
           </div>
 
           <div className="space-y-2">
