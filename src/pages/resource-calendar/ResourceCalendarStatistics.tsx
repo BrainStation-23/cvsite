@@ -3,17 +3,22 @@ import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import DashboardLayout from '../../components/Layout/DashboardLayout';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, BarChart3 } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { ArrowLeft, BarChart3, Table2 } from 'lucide-react';
 import { ResourceCountCharts } from '../../components/statistics/ResourceCountCharts';
 import { ResourceCountTable } from '../../components/statistics/ResourceCountTable';
 import { ResourceStatisticsFilters } from '../../components/statistics/ResourceStatisticsFilters';
 import { ViewToggle } from '../../components/statistics/ViewToggle';
+import { PivotTableContainer } from '../../components/statistics/PivotTableContainer';
 import { useResourceCountStatistics } from '../../hooks/use-resource-count-statistics';
 
 const ResourceCalendarStatistics: React.FC = () => {
   const location = useLocation();
   const isAdmin = location.pathname.includes('/admin/');
   const baseUrl = isAdmin ? '/admin/resource-calendar' : '/manager/resource-calendar';
+
+  // State for active tab
+  const [activeTab, setActiveTab] = useState('overview');
 
   // State for filters
   const [filters, setFilters] = useState({
@@ -66,6 +71,10 @@ const ResourceCalendarStatistics: React.FC = () => {
 
   // Get current grouping description
   const getGroupingDescription = () => {
+    if (activeTab === 'pivot') {
+      return 'Cross-dimensional analysis of resources across different categories';
+    }
+    
     const hasSpecificFilter = filters.sbu || filters.resourceType || filters.billType || filters.expertiseType;
     
     if (groupBy === 'sbu') {
@@ -147,76 +156,98 @@ const ResourceCalendarStatistics: React.FC = () => {
             </div>
           </div>
           
-          {/* View Toggle */}
-          <ViewToggle
-            showCharts={showCharts}
-            showTables={showTables}
-            onToggleCharts={() => setShowCharts(!showCharts)}
-            onToggleTables={() => setShowTables(!showTables)}
-          />
+          {/* View Toggle - Only show for overview tab */}
+          {activeTab === 'overview' && (
+            <ViewToggle
+              showCharts={showCharts}
+              showTables={showTables}
+              onToggleCharts={() => setShowCharts(!showCharts)}
+              onToggleTables={() => setShowTables(!showTables)}
+            />
+          )}
         </div>
 
-        {/* Group By & Filtering Controls */}
-        <ResourceStatisticsFilters
-          filters={filters}
-          onFiltersChange={handleFiltersChange}
-          onClearFilters={handleClearFilters}
-        />
+        {/* Tabs */}
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="overview" className="flex items-center gap-2">
+              <BarChart3 className="h-4 w-4" />
+              Overview
+            </TabsTrigger>
+            <TabsTrigger value="pivot" className="flex items-center gap-2">
+              <Table2 className="h-4 w-4" />
+              Pivot Analysis
+            </TabsTrigger>
+          </TabsList>
 
-        {/* Statistics Content */}
-        <div className="mt-6">
-          {resourceCountData && (
-            <div className={`grid gap-6 ${showCharts && showTables ? 'grid-cols-2' : 'grid-cols-1'}`}>
-              {/* Charts Section */}
-              {showCharts && (
-                <div className="space-y-6">
-                  <ResourceCountCharts 
-                    data={resourceCountData} 
-                    isLoading={resourceCountLoading}
-                    filters={filters}
-                    groupBy={groupBy}
-                  />
-                </div>
-              )}
-              
-              {/* Tables Section */}
-              {showTables && (
-                <div className="space-y-6">
-                  {groupBy !== 'all' ? (
-                    <ResourceCountTable
-                      title={getTableTitle()}
-                      data={getTableData()}
-                      isLoading={resourceCountLoading}
-                    />
-                  ) : (
-                    <div className="grid gap-4">
-                      <ResourceCountTable
-                        title="Resources by SBU"
-                        data={resourceCountData.by_sbu}
+          <TabsContent value="overview" className="mt-6 space-y-6">
+            {/* Group By & Filtering Controls */}
+            <ResourceStatisticsFilters
+              filters={filters}
+              onFiltersChange={handleFiltersChange}
+              onClearFilters={handleClearFilters}
+            />
+
+            {/* Statistics Content */}
+            <div className="mt-6">
+              {resourceCountData && (
+                <div className={`grid gap-6 ${showCharts && showTables ? 'grid-cols-2' : 'grid-cols-1'}`}>
+                  {/* Charts Section */}
+                  {showCharts && (
+                    <div className="space-y-6">
+                      <ResourceCountCharts 
+                        data={resourceCountData} 
                         isLoading={resourceCountLoading}
+                        filters={filters}
+                        groupBy={groupBy}
                       />
-                      <ResourceCountTable
-                        title="Resources by Type"
-                        data={resourceCountData.by_resource_type}
-                        isLoading={resourceCountLoading}
-                      />
-                      <ResourceCountTable
-                        title="Resources by Bill Type"
-                        data={resourceCountData.by_bill_type}
-                        isLoading={resourceCountLoading}
-                      />
-                      <ResourceCountTable
-                        title="Resources by Expertise"
-                        data={resourceCountData.by_expertise_type}
-                        isLoading={resourceCountLoading}
-                      />
+                    </div>
+                  )}
+                  
+                  {/* Tables Section */}
+                  {showTables && (
+                    <div className="space-y-6">
+                      {groupBy !== 'all' ? (
+                        <ResourceCountTable
+                          title={getTableTitle()}
+                          data={getTableData()}
+                          isLoading={resourceCountLoading}
+                        />
+                      ) : (
+                        <div className="grid gap-4">
+                          <ResourceCountTable
+                            title="Resources by SBU"
+                            data={resourceCountData.by_sbu}
+                            isLoading={resourceCountLoading}
+                          />
+                          <ResourceCountTable
+                            title="Resources by Type"
+                            data={resourceCountData.by_resource_type}
+                            isLoading={resourceCountLoading}
+                          />
+                          <ResourceCountTable
+                            title="Resources by Bill Type"
+                            data={resourceCountData.by_bill_type}
+                            isLoading={resourceCountLoading}
+                          />
+                          <ResourceCountTable
+                            title="Resources by Expertise"
+                            data={resourceCountData.by_expertise_type}
+                            isLoading={resourceCountLoading}
+                          />
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>
               )}
             </div>
-          )}
-        </div>
+          </TabsContent>
+
+          <TabsContent value="pivot" className="mt-6">
+            <PivotTableContainer filters={filters} />
+          </TabsContent>
+        </Tabs>
       </div>
     </DashboardLayout>
   );

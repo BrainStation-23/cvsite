@@ -77,18 +77,21 @@ export type Database = {
         Row: {
           created_at: string
           id: string
+          is_billable: boolean
           name: string
           updated_at: string
         }
         Insert: {
           created_at?: string
           id?: string
+          is_billable?: boolean
           name: string
           updated_at?: string
         }
         Update: {
           created_at?: string
           id?: string
+          is_billable?: boolean
           name?: string
           updated_at?: string
         }
@@ -127,22 +130,28 @@ export type Database = {
       cv_templates: {
         Row: {
           created_at: string
+          enabled: boolean
           html_template: string
           id: string
+          is_default: boolean
           name: string
           updated_at: string
         }
         Insert: {
           created_at?: string
+          enabled?: boolean
           html_template: string
           id?: string
+          is_default?: boolean
           name: string
           updated_at?: string
         }
         Update: {
           created_at?: string
+          enabled?: boolean
           html_template?: string
           id?: string
+          is_default?: boolean
           name?: string
           updated_at?: string
         }
@@ -1535,6 +1544,19 @@ export type Database = {
           expertise_type_filter?: string
           resource_type_filter?: string
           sbu_filter?: string
+          start_date_filter?: string
+        }
+        Returns: Json
+      }
+      get_resource_pivot_statistics: {
+        Args: {
+          bill_type_filter?: string
+          end_date_filter?: string
+          expertise_type_filter?: string
+          primary_dimension?: string
+          resource_type_filter?: string
+          sbu_filter?: string
+          secondary_dimension?: string
           start_date_filter?: string
         }
         Returns: Json
