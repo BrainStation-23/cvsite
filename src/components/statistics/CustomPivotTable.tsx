@@ -2,6 +2,8 @@
 import React, { useRef, useCallback, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { PivotStatistics } from '@/hooks/use-resource-pivot-statistics';
+import { PivotCellGrouping } from './PivotCellGrouping';
+import './pivot-table.css';
 
 interface CustomPivotTableProps {
   data: PivotStatistics;
@@ -43,7 +45,7 @@ export const CustomPivotTable: React.FC<CustomPivotTableProps> = ({ data, isLoad
 
   if (isLoading) {
     return (
-      <Card className="w-full h-[600px]">
+      <Card className="h-full max-w-full">
         <CardContent className="flex items-center justify-center h-full">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
         </CardContent>
@@ -53,7 +55,7 @@ export const CustomPivotTable: React.FC<CustomPivotTableProps> = ({ data, isLoad
 
   if (!data || !data.pivot_data?.length) {
     return (
-      <Card className="w-full h-[600px]">
+      <Card className="h-full max-w-full">
         <CardContent className="flex items-center justify-center h-full">
           <div className="text-center text-muted-foreground">No data available for the selected dimensions</div>
         </CardContent>
@@ -98,34 +100,34 @@ export const CustomPivotTable: React.FC<CustomPivotTableProps> = ({ data, isLoad
   const frozenHeight = 32;
 
   return (
-    <Card className="w-full h-[600px] flex flex-col">
+    <Card className="h-full max-w-full flex flex-col overflow-hidden">
       <CardHeader className="flex-shrink-0 pb-3">
-        <CardTitle className="text-lg">
+        <CardTitle className="text-lg truncate">
           {getDimensionLabel(data.dimensions.primary)} × {getDimensionLabel(data.dimensions.secondary)} Analysis
         </CardTitle>
       </CardHeader>
       
-      <CardContent className="flex-1 p-0 overflow-hidden">
-        <div className="h-full flex flex-col">
+      <CardContent className="flex-1 p-0 overflow-hidden min-h-0">
+        <div className="h-full flex flex-col max-w-full">
           {/* Top section: Corner cell + Column headers */}
           <div className="flex flex-shrink-0 border-b border-border">
             {/* Corner cell - frozen */}
             <div 
-              className="bg-muted border-r border-border flex items-center justify-center font-medium text-xs"
+              className="bg-muted border-r border-border flex items-center justify-center font-medium text-xs flex-shrink-0"
               style={{ width: frozenWidth, height: frozenHeight }}
             >
-              {getDimensionLabel(data.dimensions.primary)}
+              <span className="truncate px-1">{getDimensionLabel(data.dimensions.primary)}</span>
             </div>
             
             {/* Column headers - horizontally scrollable */}
-            <div className="flex-1 overflow-hidden">
+            <div className="flex-1 min-w-0 overflow-hidden">
               <div 
                 ref={headerScrollRef}
                 className="overflow-x-auto overflow-y-hidden scrollbar-thin"
                 style={{ height: frozenHeight }}
               >
-                <div className="flex">
-                  {uniqueCols.map((col, index) => (
+                <div className="flex" style={{ minWidth: 'max-content' }}>
+                  {uniqueCols.map((col) => (
                     <div
                       key={col}
                       className="bg-muted border-r border-border flex items-center justify-center font-medium text-xs px-1 flex-shrink-0"
@@ -146,7 +148,7 @@ export const CustomPivotTable: React.FC<CustomPivotTableProps> = ({ data, isLoad
           </div>
 
           {/* Bottom section: Row headers + Content */}
-          <div className="flex flex-1 overflow-hidden">
+          <div className="flex flex-1 overflow-hidden min-h-0">
             {/* Row headers - vertically scrollable */}
             <div className="flex-shrink-0 border-r border-border">
               <div 
@@ -155,7 +157,7 @@ export const CustomPivotTable: React.FC<CustomPivotTableProps> = ({ data, isLoad
                 style={{ width: frozenWidth }}
               >
                 <div>
-                  {uniqueRows.map((row, index) => (
+                  {uniqueRows.map((row) => (
                     <div
                       key={row}
                       className="bg-muted border-b border-border flex items-center px-2 font-medium text-xs"
@@ -176,13 +178,13 @@ export const CustomPivotTable: React.FC<CustomPivotTableProps> = ({ data, isLoad
             </div>
 
             {/* Content area - scrollable in both directions */}
-            <div className="flex-1 overflow-hidden">
+            <div className="flex-1 min-w-0 overflow-hidden">
               <div 
                 ref={scrollAreaRef}
                 className="overflow-auto scrollbar-thin h-full"
                 onScroll={handleContentScroll}
               >
-                <div>
+                <div style={{ minWidth: 'max-content' }}>
                   {/* Data rows */}
                   {uniqueRows.map((row, rowIndex) => (
                     <div key={row} className="flex">
@@ -191,7 +193,7 @@ export const CustomPivotTable: React.FC<CustomPivotTableProps> = ({ data, isLoad
                         return (
                           <div
                             key={`${row}-${col}`}
-                            className="border-r border-b border-border flex items-center justify-center text-xs flex-shrink-0 hover:bg-accent/50 cursor-pointer"
+                            className="border-r border-b border-border flex items-center justify-center text-xs flex-shrink-0 hover:bg-accent/50 cursor-pointer pivot-cell"
                             style={{ width: cellWidth, height: cellHeight, minHeight: cellHeight }}
                             onClick={() => {
                               const cellKey = `${rowIndex}-${colIndex}`;
@@ -246,6 +248,14 @@ export const CustomPivotTable: React.FC<CustomPivotTableProps> = ({ data, isLoad
             </div>
           </div>
         </div>
+
+        {/* Cell Grouping Component */}
+        <PivotCellGrouping
+          selectedCells={selectedCells}
+          cellGroups={cellGroups}
+          onCreateGroup={(group) => setCellGroups([...cellGroups, group])}
+          onRemoveGroup={(index) => setCellGroups(cellGroups.filter((_, i) => i !== index))}
+        />
       </CardContent>
     </Card>
   );

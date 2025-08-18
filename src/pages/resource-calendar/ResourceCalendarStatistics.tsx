@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import DashboardLayout from '../../components/Layout/DashboardLayout';
@@ -135,22 +134,22 @@ const ResourceCalendarStatistics: React.FC = () => {
 
   return (
     <DashboardLayout>
-      <div className="space-y-6">
+      <div className="h-full max-w-full overflow-hidden flex flex-col">
         {/* Header */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-4">
+        <div className="flex-shrink-0 flex items-center justify-between mb-6">
+          <div className="flex items-center space-x-4 min-w-0">
             <Link to={baseUrl}>
               <Button variant="outline" size="sm">
                 <ArrowLeft className="h-4 w-4 mr-2" />
                 Back to Resource Calendar
               </Button>
             </Link>
-            <div>
+            <div className="min-w-0">
               <h1 className="text-2xl font-bold flex items-center gap-2">
                 <BarChart3 className="h-6 w-6" />
                 Resource Analytics Dashboard
               </h1>
-              <p className="text-muted-foreground">
+              <p className="text-muted-foreground truncate">
                 {getGroupingDescription()}
               </p>
             </div>
@@ -158,96 +157,102 @@ const ResourceCalendarStatistics: React.FC = () => {
           
           {/* View Toggle - Only show for overview tab */}
           {activeTab === 'overview' && (
-            <ViewToggle
-              showCharts={showCharts}
-              showTables={showTables}
-              onToggleCharts={() => setShowCharts(!showCharts)}
-              onToggleTables={() => setShowTables(!showTables)}
-            />
+            <div className="flex-shrink-0">
+              <ViewToggle
+                showCharts={showCharts}
+                showTables={showTables}
+                onToggleCharts={() => setShowCharts(!showCharts)}
+                onToggleTables={() => setShowTables(!showTables)}
+              />
+            </div>
           )}
         </div>
 
         {/* Tabs */}
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="overview" className="flex items-center gap-2">
-              <BarChart3 className="h-4 w-4" />
-              Overview
-            </TabsTrigger>
-            <TabsTrigger value="pivot" className="flex items-center gap-2">
-              <Table2 className="h-4 w-4" />
-              Pivot Analysis
-            </TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="overview" className="mt-6 space-y-6">
-            {/* Group By & Filtering Controls */}
-            <ResourceStatisticsFilters
-              filters={filters}
-              onFiltersChange={handleFiltersChange}
-              onClearFilters={handleClearFilters}
-            />
-
-            {/* Statistics Content */}
-            <div className="mt-6">
-              {resourceCountData && (
-                <div className={`grid gap-6 ${showCharts && showTables ? 'grid-cols-2' : 'grid-cols-1'}`}>
-                  {/* Charts Section */}
-                  {showCharts && (
-                    <div className="space-y-6">
-                      <ResourceCountCharts 
-                        data={resourceCountData} 
-                        isLoading={resourceCountLoading}
-                        filters={filters}
-                        groupBy={groupBy}
-                      />
-                    </div>
-                  )}
-                  
-                  {/* Tables Section */}
-                  {showTables && (
-                    <div className="space-y-6">
-                      {groupBy !== 'all' ? (
-                        <ResourceCountTable
-                          title={getTableTitle()}
-                          data={getTableData()}
-                          isLoading={resourceCountLoading}
-                        />
-                      ) : (
-                        <div className="grid gap-4">
-                          <ResourceCountTable
-                            title="Resources by SBU"
-                            data={resourceCountData.by_sbu}
-                            isLoading={resourceCountLoading}
-                          />
-                          <ResourceCountTable
-                            title="Resources by Type"
-                            data={resourceCountData.by_resource_type}
-                            isLoading={resourceCountLoading}
-                          />
-                          <ResourceCountTable
-                            title="Resources by Bill Type"
-                            data={resourceCountData.by_bill_type}
-                            isLoading={resourceCountLoading}
-                          />
-                          <ResourceCountTable
-                            title="Resources by Expertise"
-                            data={resourceCountData.by_expertise_type}
-                            isLoading={resourceCountLoading}
-                          />
-                        </div>
-                      )}
-                    </div>
-                  )}
-                </div>
-              )}
+        <div className="flex-1 min-h-0 overflow-hidden">
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="h-full flex flex-col">
+            <div className="flex-shrink-0">
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="overview" className="flex items-center gap-2">
+                  <BarChart3 className="h-4 w-4" />
+                  Overview
+                </TabsTrigger>
+                <TabsTrigger value="pivot" className="flex items-center gap-2">
+                  <Table2 className="h-4 w-4" />
+                  Pivot Analysis
+                </TabsTrigger>
+              </TabsList>
             </div>
-          </TabsContent>
 
-          <TabsContent value="pivot" className="mt-6">
-            <PivotTableContainer filters={filters} />
-          </TabsContent>
-        </Tabs>
+            <TabsContent value="overview" className="flex-1 min-h-0 overflow-auto">
+              <div className="space-y-6">
+                {/* Group By & Filtering Controls */}
+                <ResourceStatisticsFilters
+                  filters={filters}
+                  onFiltersChange={handleFiltersChange}
+                  onClearFilters={handleClearFilters}
+                />
+
+                {/* Statistics Content */}
+                {resourceCountData && (
+                  <div className={`grid gap-6 ${showCharts && showTables ? 'grid-cols-2' : 'grid-cols-1'}`}>
+                    {/* Charts Section */}
+                    {showCharts && (
+                      <div className="space-y-6">
+                        <ResourceCountCharts 
+                          data={resourceCountData} 
+                          isLoading={resourceCountLoading}
+                          filters={filters}
+                          groupBy={groupBy}
+                        />
+                      </div>
+                    )}
+                    
+                    {/* Tables Section */}
+                    {showTables && (
+                      <div className="space-y-6">
+                        {groupBy !== 'all' ? (
+                          <ResourceCountTable
+                            title={getTableTitle()}
+                            data={getTableData()}
+                            isLoading={resourceCountLoading}
+                          />
+                        ) : (
+                          <div className="grid gap-4">
+                            <ResourceCountTable
+                              title="Resources by SBU"
+                              data={resourceCountData.by_sbu}
+                              isLoading={resourceCountLoading}
+                            />
+                            <ResourceCountTable
+                              title="Resources by Type"
+                              data={resourceCountData.by_resource_type}
+                              isLoading={resourceCountLoading}
+                            />
+                            <ResourceCountTable
+                              title="Resources by Bill Type"
+                              data={resourceCountData.by_bill_type}
+                              isLoading={resourceCountLoading}
+                            />
+                            <ResourceCountTable
+                              title="Resources by Expertise"
+                              data={resourceCountData.by_expertise_type}
+                              isLoading={resourceCountLoading}
+                            />
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            </TabsContent>
+
+            <TabsContent value="pivot" className="flex-1 min-h-0 overflow-hidden">
+              <PivotTableContainer filters={filters} />
+            </TabsContent>
+          </Tabs>
+        </div>
       </div>
     </DashboardLayout>
   );
