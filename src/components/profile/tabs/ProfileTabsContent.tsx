@@ -194,7 +194,10 @@ export const ProfileTabsContent: React.FC<ProfileTabsContentProps> = ({
       </TabsContent>
 
       <TabsContent value="cv-import" className="mt-6">
-        <CVImportTab onImportSuccess={onDataChange} />
+        <CVImportTab 
+          profileId={profileId}
+          onImportSuccess={onDataChange} 
+        />
       </TabsContent>
 
       <TabsContent value="json" className="mt-6">

@@ -9,10 +9,12 @@ import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
 
 interface CVImportTabProps {
+  profileId?: string;
   onImportSuccess?: () => void;
 }
 
 export const CVImportTab: React.FC<CVImportTabProps> = ({
+  profileId,
   onImportSuccess
 }) => {
   const [analysisResult, setAnalysisResult] = useState<CVProcessResult | null>(null);
@@ -24,7 +26,7 @@ export const CVImportTab: React.FC<CVImportTabProps> = ({
 
   const handleImport = async (profileData: ProfileJSONData) => {
     try {
-      const result = await importProfile(profileData);
+      const result = await importProfile(profileData, profileId);
       if (result.success && onImportSuccess) {
         onImportSuccess();
       }
