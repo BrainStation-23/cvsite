@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
@@ -34,10 +35,10 @@ export function useGeneralInfo(profileId?: string) {
     try {
       setIsLoading(true);
       const { data, error } = await supabase
-        .from('profiles')
+        .from('general_information')
         .select('first_name, last_name, biography, profile_image, current_designation')
-        .eq('id', targetProfileId)
-        .single();
+        .eq('profile_id', targetProfileId)
+        .maybeSingle();
       
       if (error) throw error;
       
@@ -48,6 +49,15 @@ export function useGeneralInfo(profileId?: string) {
           biography: data.biography,
           profileImage: data.profile_image,
           currentDesignation: data.current_designation
+        });
+      } else {
+        // No data found, reset to defaults
+        setGeneralInfo({
+          firstName: '',
+          lastName: '',
+          biography: null,
+          profileImage: null,
+          currentDesignation: null
         });
       }
     } catch (error) {
@@ -66,18 +76,6 @@ export function useGeneralInfo(profileId?: string) {
   const refetch = () => {
     fetchGeneralInfo();
   };
-
-  // Handle error in fetching
-  useEffect(() => {
-    if (error) {
-      console.error('Error fetching general info:', error);
-      toast({
-        title: 'Error',
-        description: 'Failed to load profile information',
-        variant: 'destructive'
-      });
-    }
-  }, [error, toast]);
 
   // Save general info
   const saveGeneralInfo = async (data: {

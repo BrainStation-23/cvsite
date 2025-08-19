@@ -60,7 +60,7 @@ export function useSkills(profileId?: string) {
         }
       });
       // Refetch to ensure consistency
-      refetch();
+      fetchRefetch();
     }
     return success;
   };
@@ -80,7 +80,7 @@ export function useSkills(profileId?: string) {
         }
       });
       // Refetch to ensure consistency
-      refetch();
+      fetchRefetch();
     }
     return success;
   };
@@ -112,7 +112,7 @@ export function useSkills(profileId?: string) {
     const success = await reorderTechSkills(reorderedSkills);
     if (!success) {
       // Revert on failure
-      refetch();
+      fetchRefetch();
     }
     return success;
   };
@@ -127,12 +127,17 @@ export function useSkills(profileId?: string) {
     const success = await reorderSpecSkills(reorderedSkills);
     if (!success) {
       // Revert on failure
-      refetch();
+      fetchRefetch();
     }
     return success;
   };
 
   const isSaving = operationsSaving || reorderSaving;
+
+  // Refetch function
+  const refetch = () => {
+    fetchRefetch();
+  };
 
   return {
     isLoading,
@@ -145,6 +150,6 @@ export function useSkills(profileId?: string) {
     deleteSpecializedSkill,
     reorderTechnicalSkills,
     reorderSpecializedSkills,
-    refetch: fetchRefetch
+    refetch
   };
 }
