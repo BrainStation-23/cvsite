@@ -162,7 +162,7 @@ export const WeeklyScoreCardTab: React.FC = () => {
                   </TableRow>
 
                   {/* Billed Breakdown */}
-                  <TableRow className="border-b border-border bg-blue-50 hover:bg-blue-100">
+                  <TableRow className="border-b border-border bg-blue-50 hover:bg-blue-200 hover:text-blue-900">
                     <TableCell className="border-r border-border pl-6 text-blue-700 font-medium text-sm h-6 p-2">Billed</TableCell>
                     {scoreCards.map((scoreCard) => (
                       <TableCell key={scoreCard.id} className="border-r border-border text-center font-medium text-sm h-6 p-2">
@@ -172,7 +172,7 @@ export const WeeklyScoreCardTab: React.FC = () => {
                   </TableRow>
 
                   {/* Non Billed Breakdown */}
-                  <TableRow className="border-b border-border bg-blue-50 hover:bg-blue-100">
+                  <TableRow className="border-b border-border bg-blue-50 hover:bg-blue-200 hover:text-blue-900">
                     <TableCell className="border-r border-border pl-6 text-blue-700 font-medium text-sm h-6 p-2">Non Billed</TableCell>
                     {scoreCards.map((scoreCard) => (
                       <TableCell key={scoreCard.id} className="border-r border-border text-center font-medium text-sm h-6 p-2">
@@ -209,7 +209,7 @@ export const WeeklyScoreCardTab: React.FC = () => {
 
                   {/* Non Billed Distribution Items */}
                   {scoreCards[0]?.jsonb_record?.non_billed_distribution?.map((item: any, index: number) => (
-                    <TableRow key={`non-billed-${index}`} className="border-b border-border bg-orange-50 hover:bg-orange-100">
+                    <TableRow key={`non-billed-${index}`} className="border-b border-border bg-orange-50 hover:bg-orange-200 hover:text-orange-900">
                       <TableCell className="border-r border-border pl-6 text-orange-700 text-sm h-6 p-2">{item.bill_type_name}</TableCell>
                       {scoreCards.map((scoreCard) => {
                         const matchingItem = scoreCard.jsonb_record?.non_billed_distribution?.find((dist: any) => dist.bill_type_name === item.bill_type_name);
@@ -237,7 +237,7 @@ export const WeeklyScoreCardTab: React.FC = () => {
 
                   {/* Support Distribution Items */}
                   {scoreCards[0]?.jsonb_record?.support_distribution?.map((item: any, index: number) => (
-                    <TableRow key={`support-${index}`} className="border-b border-border bg-green-50 hover:bg-green-100">
+                    <TableRow key={`support-${index}`} className="border-b border-border bg-green-50 hover:bg-green-200 hover:text-green-900">
                       <TableCell className="border-r border-border pl-6 text-green-700 text-sm h-6 p-2">{item.bill_type_name}</TableCell>
                       {scoreCards.map((scoreCard) => {
                         const matchingItem = scoreCard.jsonb_record?.support_distribution?.find((dist: any) => dist.bill_type_name === item.bill_type_name);
@@ -251,7 +251,7 @@ export const WeeklyScoreCardTab: React.FC = () => {
                   ))}
 
                   {/* Grand Total Header Row */}
-                  <TableRow className="border-t-2 border-gray-400 bg-gray-800 text-white">
+                  <TableRow className="border-t-2 border-gray-400 bg-gray-900 text-white">
                     <TableCell className="border-r border-border font-bold text-sm h-12 p-2">Grand Total</TableCell>
                     {scoreCards.map((scoreCard) => {
                       const grandTotal = scoreCard.billed_count + scoreCard.non_billed_count + 
