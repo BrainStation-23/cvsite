@@ -58,8 +58,8 @@ export const SpreadsheetPivotTable: React.FC<SpreadsheetPivotTableProps> = ({ da
   };
 
   return (
-    <div className="border rounded-md bg-background overflow-hidden max-w-full">
-      <ScrollArea className="w-full max-w-full">
+    <div className="border rounded-md bg-background overflow-hidden w-full max-w-full">
+      <ScrollArea className="w-full max-w-full max-h-[70vh]">
         <div className="min-w-max">
           <Table className="text-xs">
             <TableHeader className="sticky top-0 bg-muted/50 z-20">

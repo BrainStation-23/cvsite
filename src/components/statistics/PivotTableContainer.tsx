@@ -42,7 +42,7 @@ export const PivotTableContainer: React.FC<PivotTableContainerProps> = ({ filter
   };
 
   return (
-    <Card className="w-full">
+    <Card className="max-w-full overflow-hidden">
       <CardHeader className="pb-0">
         <CardTitle className="flex items-center gap-2 text-lg">
           <Table2 className="h-5 w-5" />
