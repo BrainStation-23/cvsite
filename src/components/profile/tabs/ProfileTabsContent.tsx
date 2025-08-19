@@ -56,7 +56,6 @@ interface ProfileTabsContentProps {
   profileId?: string;
   handleGeneralInfoSave: (data: GeneralInfoFormData) => Promise<boolean>;
   profileData: any;
-  importProfile: (data: any) => Promise<any>;
   onDataChange?: () => void;
 }
 
@@ -103,7 +102,6 @@ export const ProfileTabsContent: React.FC<ProfileTabsContentProps> = ({
   profileId,
   handleGeneralInfoSave,
   profileData,
-  importProfile,
   onDataChange
 }) => {
   return (
