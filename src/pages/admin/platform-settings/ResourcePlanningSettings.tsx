@@ -11,6 +11,7 @@ import BillTypeSettings from '@/components/admin/BillTypeSettings';
 import ProjectTypeSettings from '@/components/admin/ProjectTypeSettings';
 import ExpertiseTypeSettings from '@/components/admin/ExpertiseTypeSettings';
 import WeeklyValidationScheduling from '@/components/admin/WeeklyValidationScheduling';
+import WeeklyScoreCardScheduling from '@/components/admin/WeeklyScoreCardScheduling';
 
 const ResourcePlanningSettings: React.FC = () => {
   return (
@@ -68,6 +69,12 @@ const ResourcePlanningSettings: React.FC = () => {
               >
                 Weekly Validation Scheduling
               </TabsTrigger>
+              <TabsTrigger 
+                value="weekly-score-card-scheduling" 
+                className="h-12 rounded-none border-b-2 border-transparent data-[state=active]:border-cvsite-teal data-[state=active]:bg-transparent data-[state=active]:shadow-none px-6 font-medium"
+              >
+                Weekly Score Card Scheduling
+              </TabsTrigger>
             </TabsList>
           </div>
           
@@ -109,6 +116,14 @@ const ResourcePlanningSettings: React.FC = () => {
               <ScrollArea className="h-full">
                 <div className="p-6">
                   <WeeklyValidationScheduling />
+                </div>
+              </ScrollArea>
+            </TabsContent>
+            
+            <TabsContent value="weekly-score-card-scheduling" className="mt-0 h-full">
+              <ScrollArea className="h-full">
+                <div className="p-6">
+                  <WeeklyScoreCardScheduling />
                 </div>
               </ScrollArea>
             </TabsContent>
