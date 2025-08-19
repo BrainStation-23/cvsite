@@ -147,13 +147,13 @@ export const WeeklyScoreCardTab: React.FC = () => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {/* Billable Row */}
+                {/* Billable Header Row */}
                 <TableRow>
-                  <TableCell className="font-semibold bg-blue-600 text-white">Billable</TableCell>
+                  <TableCell className="font-bold text-lg bg-primary text-primary-foreground">Billable</TableCell>
                   {scoreCards.map((scoreCard) => {
                     const totalBillable = scoreCard.billed_count + scoreCard.non_billed_count;
                     return (
-                      <TableCell key={scoreCard.id} className="text-center text-orange-500 font-bold text-lg">
+                      <TableCell key={scoreCard.id} className="text-center text-orange-600 font-bold text-xl">
                         {totalBillable}
                       </TableCell>
                     );
@@ -162,9 +162,9 @@ export const WeeklyScoreCardTab: React.FC = () => {
 
                 {/* Billed Breakdown */}
                 <TableRow>
-                  <TableCell className="pl-8 text-blue-600">Billed</TableCell>
+                  <TableCell className="pl-8 text-blue-600 font-medium">Billed</TableCell>
                   {scoreCards.map((scoreCard) => (
-                    <TableCell key={scoreCard.id} className="text-center">
+                    <TableCell key={scoreCard.id} className="text-center font-medium">
                       {scoreCard.billed_count}
                     </TableCell>
                   ))}
@@ -172,21 +172,21 @@ export const WeeklyScoreCardTab: React.FC = () => {
 
                 {/* Non Billed Breakdown */}
                 <TableRow>
-                  <TableCell className="pl-8 text-blue-600">Non Billed</TableCell>
+                  <TableCell className="pl-8 text-blue-600 font-medium">Non Billed</TableCell>
                   {scoreCards.map((scoreCard) => (
-                    <TableCell key={scoreCard.id} className="text-center">
+                    <TableCell key={scoreCard.id} className="text-center font-medium">
                       {scoreCard.non_billed_count}
                     </TableCell>
                   ))}
                 </TableRow>
 
-                {/* Utilization Rate */}
+                {/* Utilization Rate Header Row */}
                 <TableRow>
-                  <TableCell className="font-semibold bg-teal-600 text-white">Utilization Rate</TableCell>
+                  <TableCell className="font-bold text-lg bg-secondary text-secondary-foreground">Utilization Rate</TableCell>
                   {scoreCards.map((scoreCard) => {
-                    const utilizationPercentage = (scoreCard.utilization_rate * 100).toFixed(2);
+                    const utilizationPercentage = (scoreCard.utilization_rate * 100).toFixed(1);
                     return (
-                      <TableCell key={scoreCard.id} className="text-center text-orange-500 font-bold">
+                      <TableCell key={scoreCard.id} className="text-center text-orange-600 font-bold text-xl">
                         {utilizationPercentage}%
                       </TableCell>
                     );
@@ -195,11 +195,11 @@ export const WeeklyScoreCardTab: React.FC = () => {
 
                 {/* Non Billed Breakdown Header */}
                 <TableRow>
-                  <TableCell className="font-semibold bg-blue-500 text-white">Non Billed Breakdown</TableCell>
+                  <TableCell className="font-bold text-lg bg-blue-600 text-white">Non Billed Breakdown</TableCell>
                   {scoreCards.map((scoreCard) => {
                     const nonBilledTotal = scoreCard.jsonb_record?.non_billed_distribution?.reduce((sum: number, item: any) => sum + item.count, 0) || 0;
                     return (
-                      <TableCell key={scoreCard.id} className="text-center text-blue-600 font-bold">
+                      <TableCell key={scoreCard.id} className="text-center text-blue-600 font-bold text-lg">
                         {nonBilledTotal}
                       </TableCell>
                     );
@@ -209,7 +209,7 @@ export const WeeklyScoreCardTab: React.FC = () => {
                 {/* Non Billed Distribution Items */}
                 {scoreCards[0]?.jsonb_record?.non_billed_distribution?.map((item: any, index: number) => (
                   <TableRow key={`non-billed-${index}`}>
-                    <TableCell className="pl-8 text-sm">{item.bill_type_name}</TableCell>
+                    <TableCell className="pl-8 text-sm text-gray-600">{item.bill_type_name}</TableCell>
                     {scoreCards.map((scoreCard) => {
                       const matchingItem = scoreCard.jsonb_record?.non_billed_distribution?.find((dist: any) => dist.bill_type_name === item.bill_type_name);
                       return (
@@ -223,11 +223,11 @@ export const WeeklyScoreCardTab: React.FC = () => {
 
                 {/* Support Breakdown Header */}
                 <TableRow>
-                  <TableCell className="font-semibold bg-blue-400 text-white">Support Breakdown</TableCell>
+                  <TableCell className="font-bold text-lg bg-green-600 text-white">Support Breakdown</TableCell>
                   {scoreCards.map((scoreCard) => {
                     const supportTotal = scoreCard.jsonb_record?.support_distribution?.reduce((sum: number, item: any) => sum + item.count, 0) || 0;
                     return (
-                      <TableCell key={scoreCard.id} className="text-center text-blue-600 font-bold">
+                      <TableCell key={scoreCard.id} className="text-center text-green-600 font-bold text-lg">
                         {supportTotal}
                       </TableCell>
                     );
@@ -237,7 +237,7 @@ export const WeeklyScoreCardTab: React.FC = () => {
                 {/* Support Distribution Items */}
                 {scoreCards[0]?.jsonb_record?.support_distribution?.map((item: any, index: number) => (
                   <TableRow key={`support-${index}`}>
-                    <TableCell className="pl-8 text-sm">{item.bill_type_name}</TableCell>
+                    <TableCell className="pl-8 text-sm text-gray-600">{item.bill_type_name}</TableCell>
                     {scoreCards.map((scoreCard) => {
                       const matchingItem = scoreCard.jsonb_record?.support_distribution?.find((dist: any) => dist.bill_type_name === item.bill_type_name);
                       return (
@@ -248,6 +248,20 @@ export const WeeklyScoreCardTab: React.FC = () => {
                     })}
                   </TableRow>
                 ))}
+
+                {/* Grand Total Header Row */}
+                <TableRow className="border-t-2 border-gray-300">
+                  <TableCell className="font-bold text-lg bg-gray-800 text-white">Grand Total</TableCell>
+                  {scoreCards.map((scoreCard) => {
+                    const grandTotal = scoreCard.billed_count + scoreCard.non_billed_count + 
+                      (scoreCard.jsonb_record?.support_distribution?.reduce((sum: number, item: any) => sum + item.count, 0) || 0);
+                    return (
+                      <TableCell key={scoreCard.id} className="text-center text-gray-800 font-bold text-xl">
+                        {grandTotal}
+                      </TableCell>
+                    );
+                  })}
+                </TableRow>
               </TableBody>
             </Table>
           </CardContent>
@@ -264,7 +278,7 @@ export const WeeklyScoreCardTab: React.FC = () => {
               <RefreshCw className={`h-4 w-4 ${isCalculating ? 'animate-spin' : ''}`} />
               Calculate First Score Card
             </Button>
-          </CardContent>
+          </Content>
         </Card>
       )}
     </div>
