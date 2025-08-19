@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { CVUploadProcessor } from './CVUploadProcessor';
 import { CVAnalysisReview } from './CVAnalysisReview';
 import { useProfileImport } from '@/hooks/profile/use-profile-import';
-import { CVAnalysisResult } from '@/hooks/use-cv-import';
+import { CVProcessResult } from '@/hooks/use-cv-import';
 import { ProfileJSONData } from '@/services/profile/ProfileJSONService';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
@@ -34,7 +34,7 @@ export const CVImportTab: React.FC<CVImportTabProps> = ({
   saveAchievement,
   saveProject
 }) => {
-  const [analysisResult, setAnalysisResult] = useState<CVAnalysisResult | null>(null);
+  const [analysisResult, setAnalysisResult] = useState<CVProcessResult | null>(null);
   const [isImporting, setIsImporting] = useState(false);
 
   const { importProfile } = useProfileImport({
@@ -48,7 +48,7 @@ export const CVImportTab: React.FC<CVImportTabProps> = ({
     saveProject
   });
 
-  const handleAnalysisComplete = (result: CVAnalysisResult) => {
+  const handleAnalysisComplete = (result: CVProcessResult) => {
     setAnalysisResult(result);
   };
 

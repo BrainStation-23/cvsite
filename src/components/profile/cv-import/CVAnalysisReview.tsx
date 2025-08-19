@@ -6,11 +6,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { FileText, Eye, Edit3, CheckCircle, AlertTriangle } from 'lucide-react';
-import { CVAnalysisResult } from '@/hooks/use-cv-import';
+import { CVProcessResult } from '@/hooks/use-cv-import';
 import { ProfileJSONData } from '@/services/profile/ProfileJSONService';
 
 interface CVAnalysisReviewProps {
-  analysisResult: CVAnalysisResult;
+  analysisResult: CVProcessResult;
   onImport: (profileData: ProfileJSONData) => void;
   onEdit: () => void;
   isImporting?: boolean;
@@ -125,7 +125,7 @@ export const CVAnalysisReview: React.FC<CVAnalysisReviewProps> = ({
         <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="details">Detailed Data</TabsTrigger>
-          <TabsTrigger value="raw">Original Text</TabsTrigger>
+          <TabsTrigger value="raw">File Info</TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview" className="space-y-4">
@@ -252,15 +252,18 @@ export const CVAnalysisReview: React.FC<CVAnalysisReviewProps> = ({
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <FileText className="h-5 w-5" />
-                Original CV Text (Preview)
+                File Information
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <ScrollArea className="h-[400px]">
-                <pre className="text-sm text-muted-foreground whitespace-pre-wrap">
-                  {analysisResult.extractedText}
-                </pre>
-              </ScrollArea>
+              <div className="space-y-2 text-sm">
+                <div><strong>File Name:</strong> {analysisResult.fileName}</div>
+                <div><strong>File Size:</strong> {Math.round(analysisResult.fileSize / 1024)} KB</div>
+                <div><strong>File Type:</strong> {analysisResult.fileType}</div>
+                {analysisResult.fileUri && (
+                  <div><strong>File URI:</strong> {analysisResult.fileUri}</div>
+                )}
+              </div>
             </CardContent>
           </Card>
         </TabsContent>

@@ -3,40 +3,32 @@ import React, { useState, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Upload, FileText, Loader2, CheckCircle } from 'lucide-react';
-import { useCVImport, CVUploadResult, CVAnalysisResult } from '@/hooks/use-cv-import';
+import { useCVImport, CVProcessResult } from '@/hooks/use-cv-import';
 
 interface CVUploadProcessorProps {
-  onAnalysisComplete: (result: CVAnalysisResult) => void;
+  onAnalysisComplete: (result: CVProcessResult) => void;
 }
 
 export const CVUploadProcessor: React.FC<CVUploadProcessorProps> = ({
   onAnalysisComplete
 }) => {
   const [isDragOver, setIsDragOver] = useState(false);
-  const [currentStep, setCurrentStep] = useState<'upload' | 'parsing' | 'analyzing' | 'complete'>('upload');
+  const [currentStep, setCurrentStep] = useState<'upload' | 'processing' | 'complete'>('upload');
   const fileInputRef = useRef<HTMLInputElement>(null);
   
-  const { uploadAndParseCV, analyzeCV, isProcessing, uploadResult } = useCVImport();
+  const { processCV, isProcessing } = useCVImport();
 
   const handleFileSelect = async (file: File) => {
     if (!file) return;
 
-    setCurrentStep('parsing');
+    setCurrentStep('processing');
     
     try {
-      const uploadResult = await uploadAndParseCV(file);
+      const result = await processCV(file);
       
-      if (uploadResult) {
-        setCurrentStep('analyzing');
-        
-        const analysisResult = await analyzeCV(uploadResult.extractedText);
-        
-        if (analysisResult) {
-          setCurrentStep('complete');
-          onAnalysisComplete(analysisResult);
-        } else {
-          setCurrentStep('upload');
-        }
+      if (result) {
+        setCurrentStep('complete');
+        onAnalysisComplete(result);
       } else {
         setCurrentStep('upload');
       }
@@ -96,7 +88,7 @@ export const CVUploadProcessor: React.FC<CVUploadProcessorProps> = ({
                 Drag and drop your CV here, or click to browse
               </p>
               <p className="text-sm text-muted-foreground mb-4">
-                Supported formats: PDF, DOCX, TXT (Max 10MB)
+                Supported formats: PDF, DOCX, TXT (Max 20MB)
               </p>
               
               <input
@@ -126,33 +118,14 @@ export const CVUploadProcessor: React.FC<CVUploadProcessorProps> = ({
           </div>
         );
 
-      case 'parsing':
+      case 'processing':
         return (
           <div className="text-center py-8">
             <Loader2 className="mx-auto h-12 w-12 animate-spin text-primary mb-4" />
-            <h3 className="text-lg font-semibold mb-2">Extracting Text</h3>
+            <h3 className="text-lg font-semibold mb-2">AI Processing in Progress</h3>
             <p className="text-muted-foreground">
-              Reading and parsing your CV file...
+              AI is analyzing your CV and extracting profile data...
             </p>
-          </div>
-        );
-
-      case 'analyzing':
-        return (
-          <div className="text-center py-8">
-            <Loader2 className="mx-auto h-12 w-12 animate-spin text-primary mb-4" />
-            <h3 className="text-lg font-semibold mb-2">AI Analysis in Progress</h3>
-            <p className="text-muted-foreground">
-              AI is extracting and structuring your profile data...
-            </p>
-            {uploadResult && (
-              <div className="mt-4 p-3 bg-muted rounded-lg">
-                <p className="text-sm">
-                  <FileText className="inline h-4 w-4 mr-1" />
-                  {uploadResult.fileName} ({Math.round(uploadResult.fileSize / 1024)} KB)
-                </p>
-              </div>
-            )}
           </div>
         );
 
