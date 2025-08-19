@@ -225,7 +225,7 @@ IMPORTANT RULES:
 9. Extract technical skills (programming languages, frameworks, tools) and specialized skills (domain expertise)
 10. Return ONLY the JSON object, no additional text or explanation`;
 
-    const generateResponse = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent', {
+    const generateResponse = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-exp:generateContent', {
       method: 'POST',
       headers: {
         'x-goog-api-key': geminiApiKey,
