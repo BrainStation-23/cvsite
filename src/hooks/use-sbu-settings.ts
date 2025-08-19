@@ -7,6 +7,8 @@ export interface SbuItem {
   id: string;
   name: string;
   sbu_head_email: string;
+  sbu_head_name: string;
+  is_department: boolean;
   created_at: string;
   updated_at: string;
 }
@@ -14,6 +16,8 @@ export interface SbuItem {
 export interface SbuFormData {
   name: string;
   sbu_head_email: string;
+  sbu_head_name: string;
+  is_department: boolean;
 }
 
 export const useSbuSettings = () => {

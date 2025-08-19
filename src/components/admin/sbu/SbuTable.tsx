@@ -3,6 +3,8 @@ import React from 'react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Switch } from '@/components/ui/switch';
+import { Badge } from '@/components/ui/badge';
 import { Edit, Trash2, Check, X } from 'lucide-react';
 import { SbuItem, SbuFormData } from '@/hooks/use-sbu-settings';
 import { ConfirmationDialog } from '@/components/ui/confirmation-dialog';
@@ -15,7 +17,7 @@ interface SbuTableProps {
   onEdit: (id: string, sbu: SbuItem) => void;
   onSaveEdit: () => void;
   onCancelEdit: () => void;
-  onEditItemChange: (field: keyof SbuFormData, value: string) => void;
+  onEditItemChange: (field: keyof SbuFormData, value: string | boolean) => void;
   onDelete: (id: string, name: string) => void;
   isUpdating: boolean;
   isRemoving: boolean;
@@ -63,7 +65,8 @@ const SbuTable: React.FC<SbuTableProps> = ({
             <TableRow>
               <TableHead>SBU Name</TableHead>
               <TableHead>SBU Head Email</TableHead>
-              <TableHead>Created</TableHead>
+              <TableHead>SBU Head Name</TableHead>
+              <TableHead>Type</TableHead>
               <TableHead className="text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
@@ -94,7 +97,30 @@ const SbuTable: React.FC<SbuTableProps> = ({
                   )}
                 </TableCell>
                 <TableCell>
-                  {new Date(sbu.created_at).toLocaleDateString()}
+                  {editingId === sbu.id ? (
+                    <Input
+                      value={editItem.sbu_head_name}
+                      onChange={(e) => onEditItemChange('sbu_head_name', e.target.value)}
+                      className="w-full"
+                    />
+                  ) : (
+                    <span>{sbu.sbu_head_name || '-'}</span>
+                  )}
+                </TableCell>
+                <TableCell>
+                  {editingId === sbu.id ? (
+                    <div className="flex items-center space-x-2">
+                      <Switch
+                        checked={editItem.is_department}
+                        onCheckedChange={(checked) => onEditItemChange('is_department', checked)}
+                      />
+                      <span className="text-sm">Department</span>
+                    </div>
+                  ) : (
+                    <Badge variant={sbu.is_department ? "default" : "secondary"}>
+                      {sbu.is_department ? 'Department' : 'Division'}
+                    </Badge>
+                  )}
                 </TableCell>
                 <TableCell className="text-right">
                   {editingId === sbu.id ? (

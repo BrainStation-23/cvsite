@@ -4,12 +4,16 @@ import Papa from 'papaparse';
 export interface SbuFormData {
   name: string;
   sbu_head_email: string;
+  sbu_head_name: string;
+  is_department: boolean;
 }
 
 export interface SbuItem {
   id: string;
   name: string;
   sbu_head_email: string;
+  sbu_head_name: string;
+  is_department: boolean;
   created_at: string;
   updated_at: string;
 }
@@ -21,7 +25,12 @@ export const parseSbuCSV = (file: File): Promise<SbuFormData[]> => {
       skipEmptyLines: true,
       complete: (results) => {
         try {
-          const sbus = results.data as SbuFormData[];
+          const sbus = results.data.map((item: any) => ({
+            name: item.name || '',
+            sbu_head_email: item.sbu_head_email || '',
+            sbu_head_name: item.sbu_head_name || '',
+            is_department: item.is_department === 'true' || item.is_department === true
+          })) as SbuFormData[];
           resolve(sbus);
         } catch (error) {
           reject(error);
@@ -106,7 +115,9 @@ export const validateSbuCSVData = (
     } else {
       valid.push({
         name: item.name.trim(),
-        sbu_head_email: item.sbu_head_email.trim()
+        sbu_head_email: item.sbu_head_email.trim(),
+        sbu_head_name: item.sbu_head_name?.trim() || '',
+        is_department: item.is_department || false
       });
     }
   });
@@ -117,7 +128,9 @@ export const validateSbuCSVData = (
 export const exportSbusToCSV = (sbus: SbuItem[]) => {
   const csvData = sbus.map(sbu => ({
     name: sbu.name,
-    sbu_head_email: sbu.sbu_head_email
+    sbu_head_email: sbu.sbu_head_email,
+    sbu_head_name: sbu.sbu_head_name,
+    is_department: sbu.is_department
   }));
 
   const csv = Papa.unparse(csvData);
@@ -139,15 +152,21 @@ export const downloadSbuCSVTemplate = () => {
   const templateData = [
     { 
       name: 'Technology Division',
-      sbu_head_email: 'tech.head@company.com'
+      sbu_head_email: 'tech.head@company.com',
+      sbu_head_name: 'John Doe',
+      is_department: false
     },
     { 
       name: 'Marketing Department',
-      sbu_head_email: 'marketing.head@company.com'
+      sbu_head_email: 'marketing.head@company.com',
+      sbu_head_name: 'Jane Smith',
+      is_department: true
     },
     { 
       name: 'Finance Division',
-      sbu_head_email: 'finance.head@company.com'
+      sbu_head_email: 'finance.head@company.com',
+      sbu_head_name: 'Bob Johnson',
+      is_department: false
     }
   ];
 

@@ -23,7 +23,9 @@ const SbuSettings: React.FC = () => {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editItem, setEditItem] = useState<SbuFormData>({
     name: '',
-    sbu_head_email: ''
+    sbu_head_email: '',
+    sbu_head_name: '',
+    is_department: false
   });
 
   const {
@@ -76,7 +78,9 @@ const SbuSettings: React.FC = () => {
     setEditingId(id);
     setEditItem({
       name: sbu.name,
-      sbu_head_email: sbu.sbu_head_email
+      sbu_head_email: sbu.sbu_head_email,
+      sbu_head_name: sbu.sbu_head_name,
+      is_department: sbu.is_department
     });
   };
 
@@ -86,7 +90,9 @@ const SbuSettings: React.FC = () => {
       setEditingId(null);
       setEditItem({
         name: '',
-        sbu_head_email: ''
+        sbu_head_email: '',
+        sbu_head_name: '',
+        is_department: false
       });
     }
   };
@@ -95,11 +101,13 @@ const SbuSettings: React.FC = () => {
     setEditingId(null);
     setEditItem({
       name: '',
-      sbu_head_email: ''
+      sbu_head_email: '',
+      sbu_head_name: '',
+      is_department: false
     });
   };
 
-  const handleEditItemChange = (field: keyof SbuFormData, value: string) => {
+  const handleEditItemChange = (field: keyof SbuFormData, value: string | boolean) => {
     setEditItem(prev => ({
       ...prev,
       [field]: value
