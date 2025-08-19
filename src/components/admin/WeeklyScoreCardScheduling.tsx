@@ -10,6 +10,7 @@ import { Separator } from '@/components/ui/separator';
 import { Clock, Calendar, Info, AlertCircle } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useWeeklyScoreCardCron } from '@/hooks/use-weekly-score-card-cron';
+import DatePicker from '@/components/admin/user/DatePicker';
 
 const WeeklyScoreCardScheduling: React.FC = () => {
   const { config, isLoading, updateCronJob, isUpdating } = useWeeklyScoreCardCron();
