@@ -8,7 +8,8 @@ export function useProfileTraining(profileId?: string) {
     isSaving,
     saveTraining,
     updateTraining,
-    deleteTraining
+    deleteTraining,
+    refetch
   } = useTraining(profileId);
 
   return {
@@ -17,6 +18,7 @@ export function useProfileTraining(profileId?: string) {
     isSaving,
     saveTraining,
     updateTraining,
-    deleteTraining
+    deleteTraining,
+    refetch
   };
 }

@@ -12,7 +12,8 @@ export function useProfileSkills(profileId?: string) {
     deleteTechnicalSkill,
     deleteSpecializedSkill,
     reorderTechnicalSkills,
-    reorderSpecializedSkills
+    reorderSpecializedSkills,
+    refetch
   } = useSkills(profileId);
 
   return {
@@ -25,6 +26,7 @@ export function useProfileSkills(profileId?: string) {
     deleteTechnicalSkill,
     deleteSpecializedSkill,
     reorderTechnicalSkills,
-    reorderSpecializedSkills
+    reorderSpecializedSkills,
+    refetch
   };
 }

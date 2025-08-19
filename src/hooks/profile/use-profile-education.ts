@@ -8,7 +8,8 @@ export function useProfileEducation(profileId?: string) {
     isSaving,
     saveEducation,
     updateEducation,
-    deleteEducation
+    deleteEducation,
+    refetch
   } = useEducation(profileId);
 
   return {
@@ -17,6 +18,7 @@ export function useProfileEducation(profileId?: string) {
     isSaving,
     saveEducation,
     updateEducation,
-    deleteEducation
+    deleteEducation,
+    refetch
   };
 }

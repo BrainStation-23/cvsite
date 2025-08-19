@@ -8,7 +8,8 @@ export function useProfileAchievements(profileId?: string) {
     isSaving,
     saveAchievement,
     updateAchievement,
-    deleteAchievement
+    deleteAchievement,
+    refetch
   } = useAchievements(profileId);
 
   return {
@@ -17,6 +18,7 @@ export function useProfileAchievements(profileId?: string) {
     isSaving,
     saveAchievement,
     updateAchievement,
-    deleteAchievement
+    deleteAchievement,
+    refetch
   };
 }

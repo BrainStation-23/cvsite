@@ -9,7 +9,8 @@ export function useProfileProjects(profileId?: string) {
     saveProject,
     updateProject,
     deleteProject,
-    reorderProjects
+    reorderProjects,
+    refetch
   } = useProjects(profileId);
 
   return {
@@ -19,6 +20,7 @@ export function useProfileProjects(profileId?: string) {
     saveProject,
     updateProject,
     deleteProject,
-    reorderProjects
+    reorderProjects,
+    refetch
   };
 }
