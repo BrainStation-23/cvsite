@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -278,7 +277,7 @@ export const WeeklyScoreCardTab: React.FC = () => {
               <RefreshCw className={`h-4 w-4 ${isCalculating ? 'animate-spin' : ''}`} />
               Calculate First Score Card
             </Button>
-          </Content>
+          </CardContent>
         </Card>
       )}
     </div>
