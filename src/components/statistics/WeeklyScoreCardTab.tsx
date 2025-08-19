@@ -1,8 +1,6 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { CalendarIcon, RefreshCw } from 'lucide-react';
@@ -10,6 +8,7 @@ import { useWeeklyScoreCard, useCalculateWeeklyScoreCard } from '@/hooks/use-wee
 import { useQueryClient } from '@tanstack/react-query';
 import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
+import DatePicker from '@/components/admin/user/DatePicker';
 
 export const WeeklyScoreCardTab: React.FC = () => {
   const [startDate, setStartDate] = useState<string>('');
@@ -92,20 +91,18 @@ export const WeeklyScoreCardTab: React.FC = () => {
           <div className="flex flex-wrap items-end gap-4">
             <div className="flex-1 min-w-48">
               <Label htmlFor="startDate">Start Date</Label>
-              <Input
-                id="startDate"
-                type="date"
+              <DatePicker
                 value={startDate}
-                onChange={(e) => setStartDate(e.target.value)}
+                onChange={setStartDate}
+                placeholder="Select start date"
               />
             </div>
             <div className="flex-1 min-w-48">
               <Label htmlFor="endDate">End Date</Label>
-              <Input
-                id="endDate"
-                type="date"
+              <DatePicker
                 value={endDate}
-                onChange={(e) => setEndDate(e.target.value)}
+                onChange={setEndDate}
+                placeholder="Select end date"
               />
             </div>
             <Button variant="outline" onClick={clearFilters}>
