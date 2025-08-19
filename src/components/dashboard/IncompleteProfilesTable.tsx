@@ -110,7 +110,7 @@ export const IncompleteProfilesTable: React.FC<IncompleteProfilesTableProps> = (
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="max-h-[400px] overflow-y-auto">
+        <div className="h-full  overflow-y-auto">
           <div className="space-y-3">
             {data.map((profile) => (
               <div 
