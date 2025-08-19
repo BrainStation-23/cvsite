@@ -47,20 +47,6 @@ export type Database = {
             foreignKeyName: "achievements_profile_id_fkey"
             columns: ["profile_id"]
             isOneToOne: false
-            referencedRelation: "employee_profiles_search_view"
-            referencedColumns: ["manager_id"]
-          },
-          {
-            foreignKeyName: "achievements_profile_id_fkey"
-            columns: ["profile_id"]
-            isOneToOne: false
-            referencedRelation: "employee_profiles_search_view"
-            referencedColumns: ["profile_id"]
-          },
-          {
-            foreignKeyName: "achievements_profile_id_fkey"
-            columns: ["profile_id"]
-            isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
@@ -73,6 +59,33 @@ export type Database = {
           },
         ]
       }
+      bill_type_change_history: {
+        Row: {
+          changed_at: string
+          created_at: string
+          id: string
+          new_bill_type_id: string | null
+          old_bill_type_id: string | null
+          project_id: string | null
+        }
+        Insert: {
+          changed_at?: string
+          created_at?: string
+          id?: string
+          new_bill_type_id?: string | null
+          old_bill_type_id?: string | null
+          project_id?: string | null
+        }
+        Update: {
+          changed_at?: string
+          created_at?: string
+          id?: string
+          new_bill_type_id?: string | null
+          old_bill_type_id?: string | null
+          project_id?: string | null
+        }
+        Relationships: []
+      }
       bill_types: {
         Row: {
           created_at: string
@@ -80,6 +93,7 @@ export type Database = {
           is_billable: boolean
           is_support: boolean | null
           name: string
+          non_billed: boolean | null
           updated_at: string
         }
         Insert: {
@@ -88,6 +102,7 @@ export type Database = {
           is_billable?: boolean
           is_support?: boolean | null
           name: string
+          non_billed?: boolean | null
           updated_at?: string
         }
         Update: {
@@ -96,6 +111,7 @@ export type Database = {
           is_billable?: boolean
           is_support?: boolean | null
           name?: string
+          non_billed?: boolean | null
           updated_at?: string
         }
         Relationships: []
@@ -288,20 +304,6 @@ export type Database = {
             foreignKeyName: "education_profile_id_fkey"
             columns: ["profile_id"]
             isOneToOne: false
-            referencedRelation: "employee_profiles_search_view"
-            referencedColumns: ["manager_id"]
-          },
-          {
-            foreignKeyName: "education_profile_id_fkey"
-            columns: ["profile_id"]
-            isOneToOne: false
-            referencedRelation: "employee_profiles_search_view"
-            referencedColumns: ["profile_id"]
-          },
-          {
-            foreignKeyName: "education_profile_id_fkey"
-            columns: ["profile_id"]
-            isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
@@ -406,20 +408,6 @@ export type Database = {
             foreignKeyName: "experiences_profile_id_fkey"
             columns: ["profile_id"]
             isOneToOne: false
-            referencedRelation: "employee_profiles_search_view"
-            referencedColumns: ["manager_id"]
-          },
-          {
-            foreignKeyName: "experiences_profile_id_fkey"
-            columns: ["profile_id"]
-            isOneToOne: false
-            referencedRelation: "employee_profiles_search_view"
-            referencedColumns: ["profile_id"]
-          },
-          {
-            foreignKeyName: "experiences_profile_id_fkey"
-            columns: ["profile_id"]
-            isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
@@ -494,20 +482,6 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "designations"
             referencedColumns: ["name"]
-          },
-          {
-            foreignKeyName: "general_information_profile_id_fkey"
-            columns: ["profile_id"]
-            isOneToOne: true
-            referencedRelation: "employee_profiles_search_view"
-            referencedColumns: ["manager_id"]
-          },
-          {
-            foreignKeyName: "general_information_profile_id_fkey"
-            columns: ["profile_id"]
-            isOneToOne: true
-            referencedRelation: "employee_profiles_search_view"
-            referencedColumns: ["profile_id"]
           },
           {
             foreignKeyName: "general_information_profile_id_fkey"
@@ -616,20 +590,6 @@ export type Database = {
             foreignKeyName: "notes_profile_id_fkey"
             columns: ["profile_id"]
             isOneToOne: false
-            referencedRelation: "employee_profiles_search_view"
-            referencedColumns: ["manager_id"]
-          },
-          {
-            foreignKeyName: "notes_profile_id_fkey"
-            columns: ["profile_id"]
-            isOneToOne: false
-            referencedRelation: "employee_profiles_search_view"
-            referencedColumns: ["profile_id"]
-          },
-          {
-            foreignKeyName: "notes_profile_id_fkey"
-            columns: ["profile_id"]
-            isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
@@ -696,29 +656,8 @@ export type Database = {
             foreignKeyName: "profiles_expertise_fkey"
             columns: ["expertise"]
             isOneToOne: false
-            referencedRelation: "employee_profiles_search_view"
-            referencedColumns: ["expertise_id"]
-          },
-          {
-            foreignKeyName: "profiles_expertise_fkey"
-            columns: ["expertise"]
-            isOneToOne: false
             referencedRelation: "expertise_types"
             referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "profiles_manager_fkey"
-            columns: ["manager"]
-            isOneToOne: false
-            referencedRelation: "employee_profiles_search_view"
-            referencedColumns: ["manager_id"]
-          },
-          {
-            foreignKeyName: "profiles_manager_fkey"
-            columns: ["manager"]
-            isOneToOne: false
-            referencedRelation: "employee_profiles_search_view"
-            referencedColumns: ["profile_id"]
           },
           {
             foreignKeyName: "profiles_manager_fkey"
@@ -738,22 +677,8 @@ export type Database = {
             foreignKeyName: "profiles_resource_type_fkey"
             columns: ["resource_type"]
             isOneToOne: false
-            referencedRelation: "employee_profiles_search_view"
-            referencedColumns: ["resource_type_id"]
-          },
-          {
-            foreignKeyName: "profiles_resource_type_fkey"
-            columns: ["resource_type"]
-            isOneToOne: false
             referencedRelation: "resource_types"
             referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "profiles_sbu_id_fkey"
-            columns: ["sbu_id"]
-            isOneToOne: false
-            referencedRelation: "employee_profiles_search_view"
-            referencedColumns: ["sbu_id"]
           },
           {
             foreignKeyName: "profiles_sbu_id_fkey"
@@ -839,20 +764,6 @@ export type Database = {
             foreignKeyName: "projects_profile_id_fkey"
             columns: ["profile_id"]
             isOneToOne: false
-            referencedRelation: "employee_profiles_search_view"
-            referencedColumns: ["manager_id"]
-          },
-          {
-            foreignKeyName: "projects_profile_id_fkey"
-            columns: ["profile_id"]
-            isOneToOne: false
-            referencedRelation: "employee_profiles_search_view"
-            referencedColumns: ["profile_id"]
-          },
-          {
-            foreignKeyName: "projects_profile_id_fkey"
-            columns: ["profile_id"]
-            isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
@@ -900,20 +811,6 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
-          {
-            foreignKeyName: "projects_management_project_manager_fkey"
-            columns: ["project_manager"]
-            isOneToOne: false
-            referencedRelation: "employee_profiles_search_view"
-            referencedColumns: ["manager_id"]
-          },
-          {
-            foreignKeyName: "projects_management_project_manager_fkey"
-            columns: ["project_manager"]
-            isOneToOne: false
-            referencedRelation: "employee_profiles_search_view"
-            referencedColumns: ["profile_id"]
-          },
           {
             foreignKeyName: "projects_management_project_manager_fkey"
             columns: ["project_manager"]
@@ -1023,13 +920,6 @@ export type Database = {
             foreignKeyName: "fk_resource_planning_project"
             columns: ["project_id"]
             isOneToOne: false
-            referencedRelation: "employee_profiles_search_view"
-            referencedColumns: ["current_project_id"]
-          },
-          {
-            foreignKeyName: "fk_resource_planning_project"
-            columns: ["project_id"]
-            isOneToOne: false
             referencedRelation: "projects_management"
             referencedColumns: ["id"]
           },
@@ -1039,13 +929,6 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "bill_types"
             referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "resource_planning_bill_type_id_fkey"
-            columns: ["bill_type_id"]
-            isOneToOne: false
-            referencedRelation: "employee_profiles_search_view"
-            referencedColumns: ["bill_type_id"]
           },
         ]
       }
@@ -1067,6 +950,33 @@ export type Database = {
           id?: string
           name?: string
           updated_at?: string
+        }
+        Relationships: []
+      }
+      sbu_change_history: {
+        Row: {
+          changed_at: string
+          created_at: string
+          id: string
+          new_sbu_id: string | null
+          old_sbu_id: string | null
+          profile_id: string
+        }
+        Insert: {
+          changed_at?: string
+          created_at?: string
+          id?: string
+          new_sbu_id?: string | null
+          old_sbu_id?: string | null
+          profile_id: string
+        }
+        Update: {
+          changed_at?: string
+          created_at?: string
+          id?: string
+          new_sbu_id?: string | null
+          old_sbu_id?: string | null
+          profile_id?: string
         }
         Relationships: []
       }
@@ -1133,20 +1043,6 @@ export type Database = {
             foreignKeyName: "specialized_skills_profile_id_fkey"
             columns: ["profile_id"]
             isOneToOne: false
-            referencedRelation: "employee_profiles_search_view"
-            referencedColumns: ["manager_id"]
-          },
-          {
-            foreignKeyName: "specialized_skills_profile_id_fkey"
-            columns: ["profile_id"]
-            isOneToOne: false
-            referencedRelation: "employee_profiles_search_view"
-            referencedColumns: ["profile_id"]
-          },
-          {
-            foreignKeyName: "specialized_skills_profile_id_fkey"
-            columns: ["profile_id"]
-            isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
@@ -1188,20 +1084,6 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
-          {
-            foreignKeyName: "technical_skills_profile_id_fkey"
-            columns: ["profile_id"]
-            isOneToOne: false
-            referencedRelation: "employee_profiles_search_view"
-            referencedColumns: ["manager_id"]
-          },
-          {
-            foreignKeyName: "technical_skills_profile_id_fkey"
-            columns: ["profile_id"]
-            isOneToOne: false
-            referencedRelation: "employee_profiles_search_view"
-            referencedColumns: ["profile_id"]
-          },
           {
             foreignKeyName: "technical_skills_profile_id_fkey"
             columns: ["profile_id"]
@@ -1259,20 +1141,6 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
-          {
-            foreignKeyName: "trainings_profile_id_fkey"
-            columns: ["profile_id"]
-            isOneToOne: false
-            referencedRelation: "employee_profiles_search_view"
-            referencedColumns: ["manager_id"]
-          },
-          {
-            foreignKeyName: "trainings_profile_id_fkey"
-            columns: ["profile_id"]
-            isOneToOne: false
-            referencedRelation: "employee_profiles_search_view"
-            referencedColumns: ["profile_id"]
-          },
           {
             foreignKeyName: "trainings_profile_id_fkey"
             columns: ["profile_id"]
@@ -1340,108 +1208,41 @@ export type Database = {
         }
         Relationships: []
       }
+      weekly_score_card: {
+        Row: {
+          billed_count: number
+          created_at: string
+          id: string
+          jsonb_record: Json
+          non_billed_count: number
+          timestamp: string
+          updated_at: string
+          utilization_rate: number
+        }
+        Insert: {
+          billed_count?: number
+          created_at?: string
+          id?: string
+          jsonb_record: Json
+          non_billed_count?: number
+          timestamp?: string
+          updated_at?: string
+          utilization_rate?: number
+        }
+        Update: {
+          billed_count?: number
+          created_at?: string
+          id?: string
+          jsonb_record?: Json
+          non_billed_count?: number
+          timestamp?: string
+          updated_at?: string
+          utilization_rate?: number
+        }
+        Relationships: []
+      }
     }
     Views: {
-      employee_profiles_search_view: {
-        Row: {
-          achievement_titles_text: string | null
-          achievements: Json | null
-          availability_status: string | null
-          bill_type_id: string | null
-          bill_type_name: string | null
-          billing_percentage: number | null
-          biography: string | null
-          career_start_date: string | null
-          company_experience_years: number | null
-          created_at: string | null
-          current_designation: string | null
-          current_project_client: string | null
-          current_project_id: string | null
-          current_project_manager_id: string | null
-          current_project_name: string | null
-          date_of_joining: string | null
-          days_until_available: number | null
-          education: Json | null
-          education_degrees_text: string | null
-          education_institutions_text: string | null
-          email: string | null
-          employee_id: string | null
-          engagement_complete: boolean | null
-          engagement_percentage: number | null
-          engagement_start_date: string | null
-          experience_companies_text: string | null
-          experience_designations_text: string | null
-          experiences: Json | null
-          expertise_id: string | null
-          expertise_name: string | null
-          first_name: string | null
-          last_name: string | null
-          manager_employee_id: string | null
-          manager_first_name: string | null
-          manager_id: string | null
-          manager_last_name: string | null
-          profile_id: string | null
-          profile_image: string | null
-          project_names_text: string | null
-          project_technologies_text: string | null
-          projects: Json | null
-          release_date: string | null
-          resource_planning_id: string | null
-          resource_type_id: string | null
-          resource_type_name: string | null
-          sbu_head_email: string | null
-          sbu_id: string | null
-          sbu_name: string | null
-          search_text: string | null
-          specialized_skills: Json | null
-          specialized_skills_text: string | null
-          technical_skills: Json | null
-          technical_skills_text: string | null
-          total_experience_years: number | null
-          training_providers_text: string | null
-          training_titles_text: string | null
-          trainings: Json | null
-          updated_at: string | null
-          weekly_validation: boolean | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "general_information_current_designation_fkey"
-            columns: ["current_designation"]
-            isOneToOne: false
-            referencedRelation: "designations"
-            referencedColumns: ["name"]
-          },
-          {
-            foreignKeyName: "projects_management_project_manager_fkey"
-            columns: ["current_project_manager_id"]
-            isOneToOne: false
-            referencedRelation: "employee_profiles_search_view"
-            referencedColumns: ["manager_id"]
-          },
-          {
-            foreignKeyName: "projects_management_project_manager_fkey"
-            columns: ["current_project_manager_id"]
-            isOneToOne: false
-            referencedRelation: "employee_profiles_search_view"
-            referencedColumns: ["profile_id"]
-          },
-          {
-            foreignKeyName: "projects_management_project_manager_fkey"
-            columns: ["current_project_manager_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "projects_management_project_manager_fkey"
-            columns: ["current_project_manager_id"]
-            isOneToOne: false
-            referencedRelation: "resource_availability_view"
-            referencedColumns: ["profile_id"]
-          },
-        ]
-      }
       resource_availability_view: {
         Row: {
           availability_status: string | null
@@ -1467,6 +1268,10 @@ export type Database = {
       calculate_experience_duration: {
         Args: { end_date: string; is_current: boolean; start_date: string }
         Returns: number
+      }
+      calculate_weekly_score_card: {
+        Args: Record<PropertyKey, never>
+        Returns: Json
       }
       export_profile_json: {
         Args: { target_user_id?: string }
