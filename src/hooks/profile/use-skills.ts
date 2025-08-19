@@ -19,7 +19,7 @@ export function useSkills(profileId?: string) {
     isLoading, 
     technicalSkills: fetchedTechnicalSkills, 
     specializedSkills: fetchedSpecializedSkills,
-    refetch
+    refetch: fetchRefetch
   } = useSkillsFetch(targetProfileId || '');
 
   // Use the operations hook
@@ -144,6 +144,7 @@ export function useSkills(profileId?: string) {
     deleteTechnicalSkill,
     deleteSpecializedSkill,
     reorderTechnicalSkills,
-    reorderSpecializedSkills
+    reorderSpecializedSkills,
+    refetch: fetchRefetch
   };
 }

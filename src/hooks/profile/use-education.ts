@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
@@ -83,6 +82,11 @@ export function useEducation(profileId?: string) {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  // Refetch function
+  const refetch = () => {
+    fetchEducation();
   };
 
   // Save education
@@ -231,6 +235,7 @@ export function useEducation(profileId?: string) {
     isSaving,
     saveEducation,
     updateEducation,
-    deleteEducation
+    deleteEducation,
+    refetch
   };
 }
