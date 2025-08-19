@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { TabsContent } from '@/components/ui/tabs';
 import { GeneralInfoTab } from '../generalInfo/GeneralInfoTab';
@@ -8,6 +9,7 @@ import { TrainingTab } from '../training/TrainingTab';
 import { AchievementsTab } from '../achievements/AchievementsTab';
 import { ProjectsTab } from '../projects/ProjectsTab';
 import { ServerSideJSONImportExport } from '../importExport/ServerSideJSONImportExport';
+import { CVImportTab } from '../cv-import/CVImportTab';
 import { UseFormReturn } from 'react-hook-form';
 import { GeneralInfoFormData } from '../generalInfo/GeneralInfoTab';
 import { Skill, Experience, Education, Training, Achievement, Project } from '@/types';
@@ -191,6 +193,21 @@ export const ProfileTabsContent: React.FC<ProfileTabsContentProps> = ({
           onUpdate={updateProject}
           onDelete={deleteProject}
           onReorder={reorderProjects}
+        />
+      </TabsContent>
+
+      <TabsContent value="cv-import" className="mt-6">
+        <CVImportTab
+          profileId={profileId}
+          onImportSuccess={onDataChange}
+          saveGeneralInfo={handleGeneralInfoSave}
+          saveTechnicalSkill={saveTechnicalSkill}
+          saveSpecializedSkill={saveSpecializedSkill}
+          saveExperience={saveExperience}
+          saveEducation={saveEducation}
+          saveTraining={saveTraining}
+          saveAchievement={saveAchievement}
+          saveProject={saveProject}
         />
       </TabsContent>
 

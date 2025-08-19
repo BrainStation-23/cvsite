@@ -1,13 +1,10 @@
 
 import React from 'react';
-import { Tabs } from '@/components/ui/tabs';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { ProfileTabsContent } from './tabs/ProfileTabsContent';
 import { UseFormReturn } from 'react-hook-form';
 import { GeneralInfoFormData } from './generalInfo/GeneralInfoTab';
-import { useProfileImport } from '@/hooks/profile/use-profile-import';
-import { ProfileJSONService } from '@/services/profile/ProfileJSONService';
 import { Skill, Experience, Education, Training, Achievement, Project } from '@/types';
-import { ProfileTabsList } from './tabs/ProfileTabsList';
-import { ProfileTabsContent } from './tabs/ProfileTabsContent';
 
 interface ProfileTabsProps {
   form: UseFormReturn<GeneralInfoFormData>;
@@ -54,161 +51,46 @@ interface ProfileTabsProps {
   onDataChange?: () => void;
 }
 
-export const ProfileTabs: React.FC<ProfileTabsProps> = ({
-  form,
-  isEditing,
-  onImageUpdate,
-  technicalSkills,
-  specializedSkills,
-  experiences,
-  education,
-  trainings,
-  achievements,
-  projects,
-  isSaving,
-  newTechnicalSkill,
-  newSpecializedSkill,
-  setNewTechnicalSkill,
-  setNewSpecializedSkill,
-  handleAddTechnicalSkill,
-  handleAddSpecializedSkill,
-  saveExperience,
-  updateExperience,
-  deleteExperience,
-  saveEducation,
-  updateEducation,
-  deleteEducation,
-  saveTraining,
-  updateTraining,
-  deleteTraining,
-  saveAchievement,
-  updateAchievement,
-  deleteAchievement,
-  saveProject,
-  updateProject,
-  deleteProject,
-  reorderProjects,
-  deleteTechnicalSkill,
-  deleteSpecializedSkill,
-  saveTechnicalSkill,
-  saveSpecializedSkill,
-  reorderTechnicalSkills,
-  reorderSpecializedSkills,
-  profileId,
-  saveGeneralInfo,
-  onDataChange
-}) => {
-  // Handle general info save with proper conversion and return boolean
-  const handleGeneralInfoSave = async (data: GeneralInfoFormData): Promise<boolean> => {
-    const saveData = {
-      firstName: data.firstName,
-      lastName: data.lastName,
-      biography: data.biography || null,
-      profileImage: data.profileImage,
-      currentDesignation: data.currentDesignation || null
-    };
-    
-    try {
-      const success = await saveGeneralInfo(saveData);
-      return success;
-    } catch (error) {
-      console.error('Failed to save general information:', error);
-      return false;
-    }
-  };
-
-  // Set up import handlers for JSON import
-  const { importProfile } = useProfileImport({
-    saveGeneralInfo: handleGeneralInfoSave,
-    saveTechnicalSkill,
-    saveSpecializedSkill,
-    saveExperience,
-    saveEducation,
-    saveTraining,
-    saveAchievement,
-    saveProject
-  });
-
-  // Prepare raw profile data for processing
-  const rawProfileData = {
+export const ProfileTabs: React.FC<ProfileTabsProps> = (props) => {
+  const profileData = {
     generalInfo: {
-      firstName: form.getValues('firstName'),
-      lastName: form.getValues('lastName'),
-      biography: form.getValues('biography'),
-      profileImage: form.getValues('profileImage'),
-      currentDesignation: form.getValues('currentDesignation')
+      firstName: props.form.getValues('firstName'),
+      lastName: props.form.getValues('lastName'),
+      biography: props.form.getValues('biography'),
+      profileImage: props.form.getValues('profileImage'),
+      currentDesignation: props.form.getValues('currentDesignation'),
     },
-    technicalSkills,
-    specializedSkills,
-    experiences,
-    education,
-    trainings,
-    achievements,
-    projects
+    technicalSkills: props.technicalSkills,
+    specializedSkills: props.specializedSkills,
+    experiences: props.experiences,
+    education: props.education,
+    trainings: props.trainings,
+    achievements: props.achievements,
+    projects: props.projects,
   };
-
-  // Use ProfileJSONService to get clean, properly formatted data for JSON display
-  const profileData = ProfileJSONService.exportProfile(rawProfileData);
 
   return (
-    <Tabs defaultValue="general" className="w-full h-full flex flex-col">
-      <ProfileTabsList
-        form={form}
-        technicalSkills={technicalSkills}
-        specializedSkills={specializedSkills}
-        experiences={experiences}
-        education={education}
-        trainings={trainings}
-        achievements={achievements}
-        projects={projects}
-      />
-      
-      <ProfileTabsContent
-        form={form}
-        isEditing={isEditing}
-        onImageUpdate={onImageUpdate}
-        technicalSkills={technicalSkills}
-        specializedSkills={specializedSkills}
-        experiences={experiences}
-        education={education}
-        trainings={trainings}
-        achievements={achievements}
-        projects={projects}
-        isSaving={isSaving}
-        newTechnicalSkill={newTechnicalSkill}
-        newSpecializedSkill={newSpecializedSkill}
-        setNewTechnicalSkill={setNewTechnicalSkill}
-        setNewSpecializedSkill={setNewSpecializedSkill}
-        handleAddTechnicalSkill={handleAddTechnicalSkill}
-        handleAddSpecializedSkill={handleAddSpecializedSkill}
-        saveExperience={saveExperience}
-        updateExperience={updateExperience}
-        deleteExperience={deleteExperience}
-        saveEducation={saveEducation}
-        updateEducation={updateEducation}
-        deleteEducation={deleteEducation}
-        saveTraining={saveTraining}
-        updateTraining={updateTraining}
-        deleteTraining={deleteTraining}
-        saveAchievement={saveAchievement}
-        updateAchievement={updateAchievement}
-        deleteAchievement={deleteAchievement}
-        saveProject={saveProject}
-        updateProject={updateProject}
-        deleteProject={deleteProject}
-        reorderProjects={reorderProjects}
-        deleteTechnicalSkill={deleteTechnicalSkill}
-        deleteSpecializedSkill={deleteSpecializedSkill}
-        saveTechnicalSkill={saveTechnicalSkill}
-        saveSpecializedSkill={saveSpecializedSkill}
-        reorderTechnicalSkills={reorderTechnicalSkills}
-        reorderSpecializedSkills={reorderSpecializedSkills}
-        profileId={profileId}
-        handleGeneralInfoSave={handleGeneralInfoSave}
-        profileData={profileData}
-        importProfile={importProfile}
-        onDataChange={onDataChange}
-      />
-    </Tabs>
+    <div className="w-full">
+      <Tabs defaultValue="general" className="w-full">
+        <TabsList className="grid w-full grid-cols-9">
+          <TabsTrigger value="general">General</TabsTrigger>
+          <TabsTrigger value="skills">Skills</TabsTrigger>
+          <TabsTrigger value="experience">Experience</TabsTrigger>
+          <TabsTrigger value="education">Education</TabsTrigger>
+          <TabsTrigger value="training">Training</TabsTrigger>
+          <TabsTrigger value="achievements">Achievements</TabsTrigger>
+          <TabsTrigger value="projects">Projects</TabsTrigger>
+          <TabsTrigger value="cv-import">AI Import</TabsTrigger>
+          <TabsTrigger value="json">JSON</TabsTrigger>
+        </TabsList>
+
+        <ProfileTabsContent
+          {...props}
+          profileData={profileData}
+          handleGeneralInfoSave={props.saveGeneralInfo}
+          importProfile={async () => {}} // This will be handled by CVImportTab
+        />
+      </Tabs>
+    </div>
   );
 };
