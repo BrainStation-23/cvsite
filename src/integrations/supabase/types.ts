@@ -1412,6 +1412,10 @@ export type Database = {
         }
         Returns: Json
       }
+      get_weekly_score_card_cron_config: {
+        Args: Record<PropertyKey, never>
+        Returns: Json
+      }
       get_weekly_validation_cron_config: {
         Args: Record<PropertyKey, never>
         Returns: Json
@@ -1471,6 +1475,10 @@ export type Database = {
           sort_by?: string
           sort_order?: string
         }
+        Returns: Json
+      }
+      manage_weekly_score_card_cron: {
+        Args: { p_enabled: boolean; p_schedule: string }
         Returns: Json
       }
       manage_weekly_validation_cron: {

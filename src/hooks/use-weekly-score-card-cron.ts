@@ -34,7 +34,7 @@ export const useWeeklyScoreCardCron = () => {
       }
       
       console.log('Cron config response:', data);
-      return data as unknown as CronResponse;
+      return data as CronResponse;
     },
   });
 
@@ -53,7 +53,7 @@ export const useWeeklyScoreCardCron = () => {
       }
 
       console.log('Cron management response:', data);
-      return data as unknown as CronResponse;
+      return data as CronResponse;
     },
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['weekly-score-card-cron-config'] });
