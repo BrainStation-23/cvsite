@@ -81,6 +81,7 @@ const ViewProfilePage: React.FC = () => {
     form.setValue('profileImage', imageUrl);
   };
 
+  // Wrapper functions that return void instead of boolean
   const handleAddTechnicalSkillWrapper = async () => {
     if (newTechnicalSkill.name.trim()) {
       const success = await saveTechnicalSkill({ ...newTechnicalSkill, id: '' });
@@ -88,7 +89,6 @@ const ViewProfilePage: React.FC = () => {
         setNewTechnicalSkill({ name: '', proficiency: 1, priority: 0 });
       }
     }
-    return false;
   };
 
   const handleAddSpecializedSkillWrapper = async () => {
@@ -98,7 +98,6 @@ const ViewProfilePage: React.FC = () => {
         setNewSpecializedSkill({ name: '', proficiency: 1, priority: 0 });
       }
     }
-    return false;
   };
 
   // Handle data refresh after import
