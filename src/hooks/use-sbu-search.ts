@@ -43,7 +43,7 @@ export const useSbuSearch = (params: SbuSearchParams = {}) => {
   return useQuery({
     queryKey: ['sbu-search', searchQuery, page, perPage, sortBy, sortOrder],
     queryFn: async (): Promise<SbuSearchResult> => {
-      let query = supabase.from('sbus').select('*', { count: 'exact' });
+      let query = supabase.from('sbus').select('id, name, sbu_head_email, sbu_head_name, is_department, created_at, updated_at', { count: 'exact' });
       
       // Apply search filter
       if (searchQuery) {
