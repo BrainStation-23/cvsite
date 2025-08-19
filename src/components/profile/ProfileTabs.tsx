@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Tabs } from '@/components/ui/tabs';
 import { UseFormReturn } from 'react-hook-form';
@@ -115,18 +116,6 @@ export const ProfileTabs: React.FC<ProfileTabsProps> = ({
     }
   };
 
-  // Set up import handlers for JSON import
-  const { importProfile } = useProfileImport({
-    saveGeneralInfo: handleGeneralInfoSave,
-    saveTechnicalSkill,
-    saveSpecializedSkill,
-    saveExperience,
-    saveEducation,
-    saveTraining,
-    saveAchievement,
-    saveProject
-  });
-
   // Prepare raw profile data for processing
   const rawProfileData = {
     generalInfo: {
@@ -204,7 +193,6 @@ export const ProfileTabs: React.FC<ProfileTabsProps> = ({
         profileId={profileId}
         handleGeneralInfoSave={handleGeneralInfoSave}
         profileData={profileData}
-        importProfile={importProfile}
         onDataChange={onDataChange}
       />
     </Tabs>
