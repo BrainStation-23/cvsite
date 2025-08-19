@@ -1,4 +1,3 @@
-
 import React from 'react';
 import DashboardLayout from '../../components/Layout/DashboardLayout';
 import { useDashboardAnalytics } from '@/hooks/use-dashboard-analytics';
@@ -12,21 +11,40 @@ import { IncompleteProfilesTable } from '@/components/dashboard/IncompleteProfil
 const Dashboard: React.FC = () => {
   const { analytics, isLoading, exportIncompleteProfiles } = useDashboardAnalytics();
 
+  // Debug logging
+  console.log('=== ADMIN DASHBOARD DEBUG ===');
+  console.log('Component: src/pages/admin/Dashboard.tsx');
+  console.log('isLoading:', isLoading);
+  console.log('analytics.incompleteProfiles.length:', analytics.incompleteProfiles.length);
+  console.log('exportIncompleteProfiles function exists:', !!exportIncompleteProfiles);
+  console.log('First few incomplete profiles:', analytics.incompleteProfiles.slice(0, 3));
+
   return (
     <DashboardLayout>
       <div className="space-y-6">
         <div className="flex justify-between items-center">
-          <h1 className="text-2xl font-semibold text-cvsite-navy dark:text-white">Dashboard</h1>
-          {!isLoading && analytics.incompleteProfiles.length > 0 && (
+          <h1 className="text-2xl font-semibold text-cvsite-navy dark:text-white">Dashboard (Admin)</h1>
+          {analytics.incompleteProfiles.length > 0 && (
             <Button
-              onClick={exportIncompleteProfiles}
+              onClick={() => {
+                console.log('Export button clicked in admin dashboard');
+                exportIncompleteProfiles();
+              }}
               className="flex items-center gap-2"
               variant="outline"
             >
               <Download className="h-4 w-4" />
-              Export Incomplete Profiles
+              Export Incomplete Profiles ({analytics.incompleteProfiles.length})
             </Button>
           )}
+        </div>
+        
+        {/* Debug info */}
+        <div className="bg-yellow-100 p-4 rounded border">
+          <p><strong>Debug Info (Admin Dashboard):</strong></p>
+          <p>Loading: {isLoading ? 'true' : 'false'}</p>
+          <p>Incomplete Profiles Count: {analytics.incompleteProfiles.length}</p>
+          <p>Should show button: {analytics.incompleteProfiles.length > 0 ? 'YES' : 'NO'}</p>
         </div>
         
         {/* Stats Cards */}
