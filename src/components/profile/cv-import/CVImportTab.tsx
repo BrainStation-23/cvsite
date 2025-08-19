@@ -1,7 +1,8 @@
+
 import React, { useState } from 'react';
 import { CVUploadProcessor } from './CVUploadProcessor';
 import { CVAnalysisReview } from './CVAnalysisReview';
-import { useProfileJsonRpc } from '@/hooks/profile/use-profile-json-rpc';
+import { useProfileImport } from '@/hooks/profile/use-profile-import';
 import { CVProcessResult } from '@/hooks/use-cv-import';
 import { ProfileJSONData } from '@/services/profile/ProfileJSONService';
 import { Button } from '@/components/ui/button';
@@ -10,7 +11,7 @@ import { ArrowLeft } from 'lucide-react';
 interface CVImportTabProps {
   profileId?: string;
   onImportSuccess?: () => void;
-  // Import handlers from profile - keeping for compatibility but not using
+  // Import handlers from profile
   saveGeneralInfo: (data: any) => Promise<boolean>;
   saveTechnicalSkill: (skill: any) => Promise<boolean>;
   saveSpecializedSkill: (skill: any) => Promise<boolean>;
@@ -23,25 +24,46 @@ interface CVImportTabProps {
 
 export const CVImportTab: React.FC<CVImportTabProps> = ({
   profileId,
-  onImportSuccess
+  onImportSuccess,
+  saveGeneralInfo,
+  saveTechnicalSkill,
+  saveSpecializedSkill,
+  saveExperience,
+  saveEducation,
+  saveTraining,
+  saveAchievement,
+  saveProject
 }) => {
   const [analysisResult, setAnalysisResult] = useState<CVProcessResult | null>(null);
-  const { importProfile, isImporting } = useProfileJsonRpc();
+  const [isImporting, setIsImporting] = useState(false);
+
+  const { importProfile } = useProfileImport({
+    saveGeneralInfo,
+    saveTechnicalSkill,
+    saveSpecializedSkill,
+    saveExperience,
+    saveEducation,
+    saveTraining,
+    saveAchievement,
+    saveProject
+  });
 
   const handleAnalysisComplete = (result: CVProcessResult) => {
     setAnalysisResult(result);
   };
 
   const handleImport = async (profileData: ProfileJSONData) => {
+    setIsImporting(true);
+    
     try {
-      const result = await importProfile(profileData, profileId);
-      if (result.success && onImportSuccess) {
+      const success = await importProfile(profileData);
+      if (success && onImportSuccess) {
         onImportSuccess();
-        // Reset the analysis result after successful import
-        setAnalysisResult(null);
       }
     } catch (error) {
       console.error('Import error:', error);
+    } finally {
+      setIsImporting(false);
     }
   };
 
