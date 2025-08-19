@@ -4,8 +4,8 @@ import DashboardLayout from '../../components/Layout/DashboardLayout';
 import { useDashboardAnalytics } from '@/hooks/use-dashboard-analytics';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Users, CheckCircle, TrendingUp, Award } from 'lucide-react';
-import { SkillMatrixChart } from '@/components/dashboard/SkillMatrixChart';
-import { ExperienceDistributionChart } from '@/components/dashboard/ExperienceDistributionChart';
+import { SkillsChart } from '@/components/dashboard/SkillsChart';
+import { ExperienceChart } from '@/components/dashboard/ExperienceChart';
 import { IncompleteProfilesTable } from '@/components/dashboard/IncompleteProfilesTable';
 
 const Dashboard: React.FC = () => {
@@ -69,12 +69,12 @@ const Dashboard: React.FC = () => {
         
         {/* Charts and Analytics */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <SkillMatrixChart 
+          <SkillsChart 
             data={analytics.skillMatrix}
             isLoading={isLoading}
           />
           
-          <ExperienceDistributionChart 
+          <ExperienceChart 
             data={analytics.experienceDistribution}
             isLoading={isLoading}
           />
