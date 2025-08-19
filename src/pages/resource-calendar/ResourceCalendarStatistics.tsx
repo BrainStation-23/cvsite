@@ -3,10 +3,11 @@ import React, { useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import DashboardLayout from '../../components/Layout/DashboardLayout';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { BarChart3, Table2 } from 'lucide-react';
+import { BarChart3, Table2, TrendingUp } from 'lucide-react';
 import { ResourceStatisticsHeader } from '../../components/statistics/ResourceStatisticsHeader';
 import { ResourceStatisticsOverview } from '../../components/statistics/ResourceStatisticsOverview';
 import { PivotTableContainer } from '../../components/statistics/PivotTableContainer';
+import { WeeklyScoreCardTab } from '../../components/statistics/WeeklyScoreCardTab';
 import { useResourceCountStatistics } from '../../hooks/use-resource-count-statistics';
 
 const ResourceCalendarStatistics: React.FC = () => {
@@ -59,6 +60,9 @@ const ResourceCalendarStatistics: React.FC = () => {
     if (activeTab === 'pivot') {
       return 'Cross-dimensional analysis of resources across different categories';
     }
+    if (activeTab === 'weekly-scorecard') {
+      return 'Weekly utilization and billing analysis dashboard';
+    }
     
     const hasSpecificFilter = filters.sbu || filters.resourceType || filters.billType || filters.expertiseType;
     
@@ -101,7 +105,7 @@ const ResourceCalendarStatistics: React.FC = () => {
 
         {/* Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-2">
+          <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="overview" className="flex items-center gap-2">
               <BarChart3 className="h-4 w-4" />
               Overview
@@ -109,6 +113,10 @@ const ResourceCalendarStatistics: React.FC = () => {
             <TabsTrigger value="pivot" className="flex items-center gap-2">
               <Table2 className="h-4 w-4" />
               Pivot Analysis
+            </TabsTrigger>
+            <TabsTrigger value="weekly-scorecard" className="flex items-center gap-2">
+              <TrendingUp className="h-4 w-4" />
+              Weekly Score Card
             </TabsTrigger>
           </TabsList>
 
@@ -127,6 +135,10 @@ const ResourceCalendarStatistics: React.FC = () => {
 
           <TabsContent value="pivot" className="mt-6">
             <PivotTableContainer filters={filters} />
+          </TabsContent>
+
+          <TabsContent value="weekly-scorecard" className="mt-6">
+            <WeeklyScoreCardTab />
           </TabsContent>
         </Tabs>
       </div>
