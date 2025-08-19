@@ -60,31 +60,31 @@ export const SpreadsheetPivotTable: React.FC<SpreadsheetPivotTableProps> = ({ da
     <div className="border rounded-md bg-background">
       <Table className="text-xs">
         <TableHeader className="sticky top-0 bg-muted/50">
-          <TableRow className="border-b-2">
-            <TableHead className="font-semibold bg-muted text-left border-r">
+          <TableRow className="border-b-2 h-8">
+            <TableHead className="h-8 px-2 py-1 font-semibold bg-muted text-left border-r">
               {getDimensionLabel(data.dimensions.primary)}
             </TableHead>
             {uniqueCols.map(col => (
-              <TableHead key={col} className=" text-center font-medium border-r min-w-20 max-w-32">
+              <TableHead key={col} className="h-8 px-2 py-1 text-center font-medium border-r min-w-20 max-w-32">
                 <div className="truncate" title={col}>{col}</div>
               </TableHead>
             ))}
-            <TableHead className="text-center font-bold bg-accent border-r min-w-16">
+            <TableHead className="h-8 px-2 py-1 text-center font-bold bg-accent border-r min-w-16">
               Total
             </TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {uniqueRows.map((row, index) => (
-            <TableRow key={row} >
-              <TableCell className="font-medium bg-muted/30 border-r sticky left-0 min-w-32 max-w-48">
+            <TableRow key={row} className="h-7">
+              <TableCell className="h-7 px-2 py-1 font-medium bg-muted/30 border-r sticky left-0 min-w-32 max-w-48">
                 <div className="truncate" title={row}>{row}</div>
               </TableCell>
               {uniqueCols.map(col => {
                 const value = dataMap.get(`${row}|${col}`) || 0;
                 return (
-                  <TableCell key={col} className=" text-center border-r">
-                    <div className={` rounded text-xs font-mono ${
+                  <TableCell key={col} className="h-7 px-1 py-1 text-center border-r">
+                    <div className={`rounded text-xs font-mono leading-none ${
                       value > 0 
                         ? 'bg-primary/10 text-primary font-semibold' 
                         : 'text-muted-foreground'
@@ -94,27 +94,27 @@ export const SpreadsheetPivotTable: React.FC<SpreadsheetPivotTableProps> = ({ da
                   </TableCell>
                 );
               })}
-              <TableCell className="text-center font-bold bg-accent/50 border-r">
-                <div className="font-mono font-semibold">
+              <TableCell className="h-7 px-2 py-1 text-center font-bold bg-accent/50 border-r">
+                <div className="font-mono font-semibold leading-none">
                   {rowTotalsMap.get(row) || 0}
                 </div>
               </TableCell>
             </TableRow>
           ))}
           {/* Totals row */}
-          <TableRow className="border-t-2 bg-accent/30 ">
-            <TableCell className="font-bold bg-accent border-r sticky left-0">
+          <TableRow className="border-t-2 bg-accent/30 h-8">
+            <TableCell className="h-8 px-2 py-1 font-bold bg-accent border-r sticky left-0">
               Total
             </TableCell>
             {uniqueCols.map(col => (
-              <TableCell key={col} className="text-center font-bold bg-accent/50 border-r">
-                <div className="font-mono font-semibold">
+              <TableCell key={col} className="h-8 px-2 py-1 text-center font-bold bg-accent/50 border-r">
+                <div className="font-mono font-semibold leading-none">
                   {colTotalsMap.get(col) || 0}
                 </div>
               </TableCell>
             ))}
-            <TableCell className="text-center font-bold bg-primary text-primary-foreground border-r">
-              <div className="font-mono font-bold">
+            <TableCell className="h-8 px-2 py-1 text-center font-bold bg-primary text-primary-foreground border-r">
+              <div className="font-mono font-bold leading-none">
                 {data.grand_total}
               </div>
             </TableCell>
