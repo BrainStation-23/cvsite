@@ -9,6 +9,7 @@ export interface BillTypeItem {
   name: string;
   is_billable: boolean;
   is_support: boolean;
+  non_billed: boolean;
   created_at: string;
   updated_at: string;
 }
@@ -40,7 +41,7 @@ export const useBillTypes = () => {
   
   // Add bill type mutation
   const addBillTypeMutation = useMutation({
-    mutationFn: async (newItemData: { name: string; is_billable: boolean; is_support: boolean }) => {
+    mutationFn: async (newItemData: { name: string; is_billable: boolean; is_support: boolean; non_billed: boolean }) => {
       // Check if item already exists to prevent duplicates
       const existingItems = items || [];
       const itemExists = existingItems.some(item => 
@@ -70,12 +71,14 @@ export const useBillTypes = () => {
       id, 
       name, 
       is_billable,
-      is_support
+      is_support,
+      non_billed
     }: { 
       id: string; 
       name: string; 
       is_billable: boolean;
       is_support: boolean;
+      non_billed: boolean;
     }) => {
       // Check if another item with the same name already exists (excluding current item)
       const existingItems = items || [];
@@ -93,6 +96,7 @@ export const useBillTypes = () => {
           name, 
           is_billable,
           is_support,
+          non_billed,
           updated_at: new Date().toISOString() 
         })
         .eq('id', id)
@@ -122,7 +126,7 @@ export const useBillTypes = () => {
     },
   });
   
-  const addItem = (value: { name: string; is_billable: boolean; is_support: boolean }) => {
+  const addItem = (value: { name: string; is_billable: boolean; is_support: boolean; non_billed: boolean }) => {
     if (!value.name.trim()) return;
     
     addBillTypeMutation.mutate(value, {
@@ -151,11 +155,12 @@ export const useBillTypes = () => {
     name: string, 
     originalName: string, 
     is_billable: boolean,
-    is_support: boolean
+    is_support: boolean,
+    non_billed: boolean
   ) => {
     if (!name.trim()) return;
     
-    updateBillTypeMutation.mutate({ id, name: name.trim(), is_billable, is_support }, {
+    updateBillTypeMutation.mutate({ id, name: name.trim(), is_billable, is_support, non_billed }, {
       onSuccess: () => {
         toast({
           title: "Bill type updated",
