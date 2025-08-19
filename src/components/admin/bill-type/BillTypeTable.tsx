@@ -14,24 +14,28 @@ export const BillTypeTable: React.FC = () => {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editValue, setEditValue] = useState('');
   const [editIsBillable, setEditIsBillable] = useState(false);
+  const [editIsSupport, setEditIsSupport] = useState(false);
   const [newItemValue, setNewItemValue] = useState('');
   const [newIsBillable, setNewIsBillable] = useState(false);
+  const [newIsSupport, setNewIsSupport] = useState(false);
   const { isOpen, config, showConfirmation, hideConfirmation, handleConfirm } = useConfirmationDialog();
 
   const handleEdit = (item: BillTypeItem) => {
     setEditingId(item.id);
     setEditValue(item.name);
     setEditIsBillable(item.is_billable);
+    setEditIsSupport(item.is_support || false);
   };
 
   const handleSaveEdit = () => {
     if (editValue.trim() && editingId) {
       const originalItem = items?.find(item => item.id === editingId);
       if (originalItem) {
-        updateItem(editingId, editValue.trim(), originalItem.name, editIsBillable);
+        updateItem(editingId, editValue.trim(), originalItem.name, editIsBillable, editIsSupport);
         setEditingId(null);
         setEditValue('');
         setEditIsBillable(false);
+        setEditIsSupport(false);
       }
     }
   };
@@ -40,6 +44,7 @@ export const BillTypeTable: React.FC = () => {
     setEditingId(null);
     setEditValue('');
     setEditIsBillable(false);
+    setEditIsSupport(false);
   };
 
   const handleDelete = (item: BillTypeItem) => {
@@ -54,14 +59,19 @@ export const BillTypeTable: React.FC = () => {
 
   const handleAddNew = () => {
     if (newItemValue.trim()) {
-      addItem({ name: newItemValue.trim(), is_billable: newIsBillable });
+      addItem({ name: newItemValue.trim(), is_billable: newIsBillable, is_support: newIsSupport });
       setNewItemValue('');
       setNewIsBillable(false);
+      setNewIsSupport(false);
     }
   };
 
   const handleToggleBillable = (item: BillTypeItem) => {
-    updateItem(item.id, item.name, item.name, !item.is_billable);
+    updateItem(item.id, item.name, item.name, !item.is_billable, item.is_support || false);
+  };
+
+  const handleToggleSupport = (item: BillTypeItem) => {
+    updateItem(item.id, item.name, item.name, item.is_billable, !item.is_support);
   };
 
   if (isLoading) {
@@ -87,6 +97,13 @@ export const BillTypeTable: React.FC = () => {
           />
           <label className="text-sm text-gray-600">Billable</label>
         </div>
+        <div className="flex items-center space-x-2">
+          <Switch
+            checked={newIsSupport}
+            onCheckedChange={setNewIsSupport}
+          />
+          <label className="text-sm text-gray-600">Support</label>
+        </div>
         <Button 
           onClick={handleAddNew}
           disabled={!newItemValue.trim() || isAddingItem}
@@ -103,13 +120,14 @@ export const BillTypeTable: React.FC = () => {
             <TableRow>
               <TableHead>Name</TableHead>
               <TableHead>Billable</TableHead>
+              <TableHead>Support</TableHead>
               <TableHead className="w-[100px]">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {items?.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={3} className="text-center text-muted-foreground py-8">
+                <TableCell colSpan={4} className="text-center text-muted-foreground py-8">
                   No bill types found. Add one above to get started.
                 </TableCell>
               </TableRow>
@@ -160,6 +178,22 @@ export const BillTypeTable: React.FC = () => {
                         <Switch
                           checked={item.is_billable}
                           onCheckedChange={() => handleToggleBillable(item)}
+                          disabled={isUpdatingItem}
+                        />
+                      </div>
+                    )}
+                  </TableCell>
+                  <TableCell>
+                    {editingId === item.id ? (
+                      <Switch
+                        checked={editIsSupport}
+                        onCheckedChange={setEditIsSupport}
+                      />
+                    ) : (
+                      <div className="flex items-center">
+                        <Switch
+                          checked={item.is_support || false}
+                          onCheckedChange={() => handleToggleSupport(item)}
                           disabled={isUpdatingItem}
                         />
                       </div>
