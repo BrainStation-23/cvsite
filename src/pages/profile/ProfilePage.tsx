@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import DashboardLayout from '../../components/Layout/DashboardLayout';
 import { useToast } from '@/hooks/use-toast';
@@ -127,6 +126,28 @@ const ProfilePage: React.FC = () => {
     }
   };
 
+  // Simple dummy handlers for CV import tab (these won't be used since we're using RPC)
+  const dummyHandlers = {
+    saveGeneralInfo: handleUpdateProfile,
+    saveTechnicalSkill,
+    saveSpecializedSkill,
+    saveExperience,
+    updateExperience,
+    deleteExperience,
+    saveEducation,
+    updateEducation,
+    deleteEducation,
+    saveTraining,
+    updateTraining,
+    deleteTraining,
+    saveAchievement,
+    updateAchievement,
+    deleteAchievement,
+    saveProject,
+    updateProject,
+    deleteProject,
+  };
+
   return (
     <DashboardLayout>
       <div className="flex flex-col h-full">
@@ -178,6 +199,8 @@ const ProfilePage: React.FC = () => {
               reorderTechnicalSkills={reorderTechnicalSkills}
               reorderSpecializedSkills={reorderSpecializedSkills}
               saveGeneralInfo={handleUpdateProfile}
+              // Pass dummy handlers for CV import (they won't be used)
+              cvImportHandlers={dummyHandlers}
             />
           )}
         </div>
