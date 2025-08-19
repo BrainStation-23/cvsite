@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Users, Edit, User } from 'lucide-react';
+import { Users, Edit, User, Download } from 'lucide-react';
 
 interface IncompleteProfile {
   id: string;
@@ -17,6 +17,7 @@ interface IncompleteProfile {
 interface IncompleteProfilesTableProps {
   data: IncompleteProfile[];
   isLoading?: boolean;
+  onExport?: () => void;
 }
 
 const getSectionDisplayName = (section: string) => {
@@ -49,7 +50,11 @@ const getSectionColor = (section: string) => {
   }
 };
 
-export const IncompleteProfilesTable: React.FC<IncompleteProfilesTableProps> = ({ data, isLoading }) => {
+export const IncompleteProfilesTable: React.FC<IncompleteProfilesTableProps> = ({ 
+  data, 
+  isLoading, 
+  onExport 
+}) => {
   const navigate = useNavigate();
 
   const handleEditProfile = (profileId: string) => {
@@ -107,6 +112,17 @@ export const IncompleteProfilesTable: React.FC<IncompleteProfilesTableProps> = (
               {data.length} {data.length === 1 ? 'profile' : 'profiles'}
             </Badge>
           </div>
+          {onExport && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={onExport}
+              className="flex items-center gap-2"
+            >
+              <Download className="h-4 w-4" />
+              Export CSV
+            </Button>
+          )}
         </CardTitle>
       </CardHeader>
       <CardContent>

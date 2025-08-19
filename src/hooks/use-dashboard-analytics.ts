@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import Papa from 'papaparse';
 
 interface IncompleteProfile {
   id: string;
@@ -83,9 +84,50 @@ export function useDashboardAnalytics() {
     }
   };
 
+  const exportIncompleteProfiles = () => {
+    try {
+      const csvData = analytics.incompleteProfiles.map(profile => ({
+        employee_id: profile.employee_id || '',
+        first_name: profile.first_name,
+        last_name: profile.last_name,
+        missing_sections: profile.missing_sections.join(', '),
+        missing_sections_count: profile.missing_sections.length
+      }));
+
+      const csv = Papa.unparse(csvData, {
+        header: true
+      });
+
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement('a');
+      const url = URL.createObjectURL(blob);
+      link.setAttribute('href', url);
+      link.setAttribute('download', `incomplete_profiles_${new Date().toISOString().split('T')[0]}.csv`);
+      link.style.visibility = 'hidden';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      toast({
+        title: 'Export successful',
+        description: 'Incomplete profiles have been exported to CSV file',
+      });
+
+      console.log('Incomplete profiles exported successfully');
+    } catch (error) {
+      console.error('Error exporting incomplete profiles:', error);
+      toast({
+        title: 'Export failed',
+        description: 'There was an error exporting the incomplete profiles',
+        variant: 'destructive',
+      });
+    }
+  };
+
   return {
     analytics,
     isLoading,
-    refetch: fetchAnalytics
+    refetch: fetchAnalytics,
+    exportIncompleteProfiles
   };
 }
