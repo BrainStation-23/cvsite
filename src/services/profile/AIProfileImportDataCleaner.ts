@@ -1,5 +1,6 @@
 
 import { ProfileImportDataCleaner } from './ProfileImportDataCleaner';
+import { ProfileJSONData } from './ProfileJSONService';
 
 export class AIProfileImportDataCleaner extends ProfileImportDataCleaner {
   // Handle AI-specific data cleaning and validation
@@ -17,7 +18,37 @@ export class AIProfileImportDataCleaner extends ProfileImportDataCleaner {
     return cleaned;
   }
 
+  // Add the missing cleanImportData method
+  static cleanImportData(data: ProfileJSONData): ProfileJSONData {
+    return {
+      generalInfo: this.cleanPersonalInfo(data.generalInfo),
+      technicalSkills: (data.technicalSkills || [])
+        .filter(skill => skill.name && skill.name.trim() !== '')
+        .map(skill => this.cleanSkill(skill)),
+      specializedSkills: (data.specializedSkills || [])
+        .filter(skill => skill.name && skill.name.trim() !== '')
+        .map(skill => this.cleanSkill(skill)),
+      experiences: (data.experiences || [])
+        .filter(exp => exp.companyName && exp.companyName.trim() !== '' && exp.designation && exp.designation.trim() !== '')
+        .map(exp => this.cleanExperience(exp)),
+      education: (data.education || [])
+        .filter(edu => edu.university && edu.university.trim() !== '')
+        .map(edu => this.cleanEducation(edu)),
+      trainings: (data.trainings || [])
+        .filter(training => training.title && training.title.trim() !== '')
+        .map(training => this.cleanTraining(training)),
+      achievements: (data.achievements || [])
+        .filter(achievement => achievement.title && achievement.title.trim() !== '')
+        .map(achievement => this.cleanAchievement(achievement)),
+      projects: (data.projects || [])
+        .filter(project => project.name && project.name.trim() !== '' && project.description && project.description.trim() !== '')
+        .map(project => this.cleanProject(project))
+    };
+  }
+
   private static cleanAISkills(skills: any[], type: 'technical' | 'specialized'): any[] {
+    if (!Array.isArray(skills)) return [];
+    
     return skills.map(skill => ({
       ...skill,
       // Ensure proficiency is set to 1 if missing or invalid
@@ -41,6 +72,8 @@ export class AIProfileImportDataCleaner extends ProfileImportDataCleaner {
   }
 
   private static cleanAIExperiences(experiences: any[]): any[] {
+    if (!Array.isArray(experiences)) return [];
+    
     return experiences.map(exp => ({
       ...this.cleanExperience(exp),
       // Additional AI-specific cleaning
@@ -79,6 +112,8 @@ export class AIProfileImportDataCleaner extends ProfileImportDataCleaner {
   }
 
   private static cleanAIEducation(education: any[]): any[] {
+    if (!Array.isArray(education)) return [];
+    
     return education.map(edu => ({
       ...this.cleanEducation(edu),
       // Additional AI-specific cleaning for education
@@ -138,6 +173,8 @@ export class AIProfileImportDataCleaner extends ProfileImportDataCleaner {
   }
 
   private static cleanAIProjects(projects: any[]): any[] {
+    if (!Array.isArray(projects)) return [];
+    
     return projects.map(project => ({
       ...this.cleanProject(project),
       // Clean technologies used array
