@@ -3,7 +3,8 @@ import React from 'react';
 import DashboardLayout from '../../components/Layout/DashboardLayout';
 import { useDashboardAnalytics } from '@/hooks/use-dashboard-analytics';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Users, CheckCircle, TrendingUp, Award } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Users, CheckCircle, TrendingUp, Award, Download } from 'lucide-react';
 import { SkillsChart } from '@/components/dashboard/SkillsChart';
 import { ExperienceChart } from '@/components/dashboard/ExperienceChart';
 import { IncompleteProfilesTable } from '@/components/dashboard/IncompleteProfilesTable';
@@ -14,7 +15,19 @@ const Dashboard: React.FC = () => {
   return (
     <DashboardLayout>
       <div className="space-y-6">
-        <h1 className="text-2xl font-semibold text-cvsite-navy dark:text-white">Dashboard</h1>
+        <div className="flex justify-between items-center">
+          <h1 className="text-2xl font-semibold text-cvsite-navy dark:text-white">Dashboard</h1>
+          {!isLoading && analytics.incompleteProfiles.length > 0 && (
+            <Button
+              onClick={exportIncompleteProfiles}
+              className="flex items-center gap-2"
+              variant="outline"
+            >
+              <Download className="h-4 w-4" />
+              Export Incomplete Profiles
+            </Button>
+          )}
+        </div>
         
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -84,7 +97,6 @@ const Dashboard: React.FC = () => {
         <IncompleteProfilesTable 
           data={analytics.incompleteProfiles}
           isLoading={isLoading}
-          onExport={exportIncompleteProfiles}
         />
       </div>
     </DashboardLayout>
