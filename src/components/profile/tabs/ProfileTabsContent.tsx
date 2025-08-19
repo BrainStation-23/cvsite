@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { TabsContent } from '@/components/ui/tabs';
 import { GeneralInfoTab } from '../generalInfo/GeneralInfoTab';
@@ -197,18 +196,7 @@ export const ProfileTabsContent: React.FC<ProfileTabsContentProps> = ({
       </TabsContent>
 
       <TabsContent value="cv-import" className="mt-6">
-        <CVImportTab
-          profileId={profileId}
-          onImportSuccess={onDataChange}
-          saveGeneralInfo={handleGeneralInfoSave}
-          saveTechnicalSkill={saveTechnicalSkill}
-          saveSpecializedSkill={saveSpecializedSkill}
-          saveExperience={saveExperience}
-          saveEducation={saveEducation}
-          saveTraining={saveTraining}
-          saveAchievement={saveAchievement}
-          saveProject={saveProject}
-        />
+        <CVImportTab onImportSuccess={onDataChange} />
       </TabsContent>
 
       <TabsContent value="json" className="mt-6">
