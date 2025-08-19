@@ -70,7 +70,8 @@ export function useProjects(profileId?: string) {
         .from('projects')
         .select('*')
         .eq('profile_id', targetProfileId)
-        .order('priority', { ascending: true });
+        .order('display_order', { ascending: true })
+        .order('start_date', { ascending: false });
       
       if (error) throw error;
       
@@ -89,11 +90,6 @@ export function useProjects(profileId?: string) {
     } finally {
       setIsLoading(false);
     }
-  };
-
-  // Refetch function
-  const refetch = () => {
-    fetchProjects();
   };
 
   // Save project
@@ -330,7 +326,6 @@ export function useProjects(profileId?: string) {
     saveProject,
     updateProject,
     deleteProject,
-    reorderProjects,
-    refetch
+    reorderProjects
   };
 }

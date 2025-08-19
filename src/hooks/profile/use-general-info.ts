@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import { useQuery } from '@tanstack/react-query';
 
 export interface GeneralInfo {
   firstName: string;
@@ -15,67 +16,115 @@ export interface GeneralInfo {
 export function useGeneralInfo(profileId?: string) {
   const { user } = useAuth();
   const { toast } = useToast();
-  const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
-  const [generalInfo, setGeneralInfo] = useState({
-    firstName: '',
-    lastName: '',
-    biography: null,
-    profileImage: null,
-    currentDesignation: null
-  });
-
+  
   // Use provided profileId or fallback to auth user id
   const targetProfileId = profileId || user?.id;
 
-  // Fetch general info
-  const fetchGeneralInfo = async () => {
-    if (!targetProfileId) return;
-    
-    try {
-      setIsLoading(true);
-      const { data, error } = await supabase
+  console.log('=== useGeneralInfo Debug ===');
+  console.log('Profile ID:', profileId);
+  console.log('Target Profile ID:', targetProfileId);
+  console.log('Auth User ID:', user?.id);
+
+  // Use React Query to fetch general info
+  const { data, error, refetch, isLoading } = useQuery({
+    queryKey: ['generalInfo', targetProfileId],
+    queryFn: async () => {
+      if (!targetProfileId) throw new Error('No profile ID available');
+      
+      console.log('=== Fetching General Info ===');
+      console.log('Fetching for profile ID:', targetProfileId);
+      
+      // Check if profile exists
+      const { data: profile, error: profileError } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('id', targetProfileId)
+        .maybeSingle();
+        
+      if (profileError && profileError.code !== 'PGRST116') {
+        console.error('Profile fetch error:', profileError);
+        throw profileError;
+      }
+      
+      console.log('Profile exists:', !!profile);
+      
+      if (!profile && !profileId) {
+        // Only create profile if this is for the current user (no profileId provided)
+        console.log('Creating new profile for current user');
+        const { error } = await supabase
+          .from('profiles')
+          .insert({ id: targetProfileId });
+          
+        if (error) {
+          console.error('Profile creation error:', error);
+          throw error;
+        }
+      }
+      
+      // Get general info
+      console.log('Fetching general information...');
+      const { data, error: generalInfoError } = await supabase
         .from('general_information')
-        .select('first_name, last_name, biography, profile_image, current_designation')
+        .select('*')
         .eq('profile_id', targetProfileId)
         .maybeSingle();
       
-      if (error) throw error;
+      if (generalInfoError && generalInfoError.code !== 'PGRST116') {
+        console.error('General info fetch error:', generalInfoError);
+        throw generalInfoError;
+      }
+      
+      console.log('Raw general info data:', data);
       
       if (data) {
-        setGeneralInfo({
-          firstName: data.first_name || '',
-          lastName: data.last_name || '',
+        const result = {
+          firstName: data.first_name,
+          lastName: data.last_name,
           biography: data.biography,
           profileImage: data.profile_image,
           currentDesignation: data.current_designation
-        });
+        };
+        console.log('Processed general info result:', result);
+        return result;
       } else {
-        // No data found, reset to defaults
-        setGeneralInfo({
+        // Use user data as fallback only if this is current user
+        if (!profileId && user) {
+          const fallbackResult = {
+            firstName: user.firstName || '',
+            lastName: user.lastName || '',
+            biography: null,
+            profileImage: user.profileImageUrl || null,
+            currentDesignation: null
+          };
+          console.log('Using fallback user data:', fallbackResult);
+          return fallbackResult;
+        }
+        const emptyResult = {
           firstName: '',
           lastName: '',
           biography: null,
           profileImage: null,
           currentDesignation: null
-        });
+        };
+        console.log('Returning empty result:', emptyResult);
+        return emptyResult;
       }
-    } catch (error) {
+    },
+    enabled: !!targetProfileId,
+  });
+
+  // Handle error in fetching
+  useEffect(() => {
+    if (error) {
       console.error('Error fetching general info:', error);
       toast({
         title: 'Error',
         description: 'Failed to load profile information',
         variant: 'destructive'
       });
-    } finally {
-      setIsLoading(false);
     }
-  };
-
-  // Refetch function
-  const refetch = () => {
-    fetchGeneralInfo();
-  };
+  }, [error, toast]);
 
   // Save general info
   const saveGeneralInfo = async (data: {
@@ -171,18 +220,16 @@ export function useGeneralInfo(profileId?: string) {
     }
   };
 
-  // Load general info data
-  useEffect(() => {
-    if (targetProfileId) {
-      fetchGeneralInfo();
-    }
-  }, [targetProfileId]);
-
   return {
     isLoading,
     isSaving,
-    generalInfo,
+    generalInfo: data || {
+      firstName: '',
+      lastName: '',
+      biography: null,
+      profileImage: null,
+      currentDesignation: null
+    },
     saveGeneralInfo,
-    refetch
   };
 }

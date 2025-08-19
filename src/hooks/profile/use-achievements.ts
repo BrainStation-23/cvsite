@@ -73,11 +73,6 @@ export function useAchievements(profileId?: string) {
     }
   };
 
-  // Refetch function
-  const refetch = () => {
-    fetchAchievements();
-  };
-
   // Save achievement
   const saveAchievement = async (achievement: Omit<Achievement, 'id'>) => {
     if (!targetProfileId) return false;
@@ -214,7 +209,6 @@ export function useAchievements(profileId?: string) {
     isSaving,
     saveAchievement,
     updateAchievement,
-    deleteAchievement,
-    refetch
+    deleteAchievement
   };
 }

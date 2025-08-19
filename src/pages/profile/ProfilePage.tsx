@@ -21,7 +21,6 @@ const ProfilePage: React.FC = () => {
     priority: 0
   });
 
-  const profileComposite = useProfileComposite();
   const {
     isLoading,
     isSaving,
@@ -56,7 +55,7 @@ const ProfilePage: React.FC = () => {
     updateProject,
     deleteProject,
     reorderProjects
-  } = profileComposite;
+  } = useProfileComposite();
 
   // Updated form to match the GeneralInfoFormData interface
   const form = useForm<GeneralInfoFormData>({
@@ -128,14 +127,6 @@ const ProfilePage: React.FC = () => {
     }
   };
 
-  // Handle data refresh after import success
-  const handleDataRefresh = () => {
-    // Refetch all profile data using the refetch methods from individual hooks
-    if (profileComposite.refetch) {
-      profileComposite.refetch();
-    }
-  };
-
   return (
     <DashboardLayout>
       <div className="flex flex-col h-full">
@@ -187,7 +178,6 @@ const ProfilePage: React.FC = () => {
               reorderTechnicalSkills={reorderTechnicalSkills}
               reorderSpecializedSkills={reorderSpecializedSkills}
               saveGeneralInfo={handleUpdateProfile}
-              onDataChange={handleDataRefresh}
             />
           )}
         </div>

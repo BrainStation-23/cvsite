@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
@@ -52,10 +53,14 @@ export function useExperience(profileId?: string) {
 
   // Fetch experiences
   const fetchExperiences = async () => {
-    if (!targetProfileId) return;
+    if (!targetProfileId) {
+      setIsLoading(false);
+      return;
+    }
     
     try {
       setIsLoading(true);
+      console.log('Fetching experiences for profile:', targetProfileId);
       const { data, error } = await supabase
         .from('experiences')
         .select('*')
@@ -67,6 +72,7 @@ export function useExperience(profileId?: string) {
       if (data) {
         // Map database records to application model format
         const mappedData = data.map(mapToExperience);
+        console.log('Fetched experiences:', mappedData);
         setExperiences(mappedData);
       }
     } catch (error) {
@@ -79,11 +85,6 @@ export function useExperience(profileId?: string) {
     } finally {
       setIsLoading(false);
     }
-  };
-
-  // Refetch function
-  const refetch = () => {
-    fetchExperiences();
   };
 
   // Save experience - only allow if editing own profile or admin/manager
@@ -263,7 +264,6 @@ export function useExperience(profileId?: string) {
     isSaving,
     saveExperience,
     updateExperience,
-    deleteExperience,
-    refetch
+    deleteExperience
   };
 }

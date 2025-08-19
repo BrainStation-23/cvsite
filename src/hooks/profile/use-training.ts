@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
@@ -83,11 +82,6 @@ export function useTraining(profileId?: string) {
     } finally {
       setIsLoading(false);
     }
-  };
-
-  // Refetch function
-  const refetch = () => {
-    fetchTrainings();
   };
 
   // Save training
@@ -232,7 +226,6 @@ export function useTraining(profileId?: string) {
     isSaving,
     saveTraining,
     updateTraining,
-    deleteTraining,
-    refetch
+    deleteTraining
   };
 }

@@ -8,8 +8,7 @@ export function useProfileExperience(profileId?: string) {
     isSaving,
     saveExperience,
     updateExperience,
-    deleteExperience,
-    refetch
+    deleteExperience
   } = useExperience(profileId);
 
   return {
@@ -18,7 +17,6 @@ export function useProfileExperience(profileId?: string) {
     isSaving,
     saveExperience,
     updateExperience,
-    deleteExperience,
-    refetch
+    deleteExperience
   };
 }

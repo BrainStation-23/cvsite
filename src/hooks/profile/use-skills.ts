@@ -19,7 +19,7 @@ export function useSkills(profileId?: string) {
     isLoading, 
     technicalSkills: fetchedTechnicalSkills, 
     specializedSkills: fetchedSpecializedSkills,
-    refetch: fetchRefetch
+    refetch
   } = useSkillsFetch(targetProfileId || '');
 
   // Use the operations hook
@@ -60,7 +60,7 @@ export function useSkills(profileId?: string) {
         }
       });
       // Refetch to ensure consistency
-      fetchRefetch();
+      refetch();
     }
     return success;
   };
@@ -80,7 +80,7 @@ export function useSkills(profileId?: string) {
         }
       });
       // Refetch to ensure consistency
-      fetchRefetch();
+      refetch();
     }
     return success;
   };
@@ -112,7 +112,7 @@ export function useSkills(profileId?: string) {
     const success = await reorderTechSkills(reorderedSkills);
     if (!success) {
       // Revert on failure
-      fetchRefetch();
+      refetch();
     }
     return success;
   };
@@ -127,17 +127,12 @@ export function useSkills(profileId?: string) {
     const success = await reorderSpecSkills(reorderedSkills);
     if (!success) {
       // Revert on failure
-      fetchRefetch();
+      refetch();
     }
     return success;
   };
 
   const isSaving = operationsSaving || reorderSaving;
-
-  // Refetch function
-  const refetch = () => {
-    fetchRefetch();
-  };
 
   return {
     isLoading,
@@ -149,7 +144,6 @@ export function useSkills(profileId?: string) {
     deleteTechnicalSkill,
     deleteSpecializedSkill,
     reorderTechnicalSkills,
-    reorderSpecializedSkills,
-    refetch
+    reorderSpecializedSkills
   };
 }

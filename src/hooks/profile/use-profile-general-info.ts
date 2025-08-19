@@ -3,7 +3,7 @@ import { useGeneralInfo } from './use-general-info';
 import { GeneralInfoFormData } from '@/components/profile/generalInfo/GeneralInfoTab';
 
 export function useProfileGeneralInfo(profileId?: string) {
-  const { generalInfo, isLoading, isSaving, saveGeneralInfo, refetch } = useGeneralInfo(profileId);
+  const { generalInfo, isLoading, isSaving, saveGeneralInfo } = useGeneralInfo(profileId);
 
   const handleSaveGeneralInfo = async (data: GeneralInfoFormData) => {
     return await saveGeneralInfo({
@@ -19,7 +19,6 @@ export function useProfileGeneralInfo(profileId?: string) {
     generalInfo,
     isLoading,
     isSaving,
-    saveGeneralInfo: handleSaveGeneralInfo,
-    refetch
+    saveGeneralInfo: handleSaveGeneralInfo
   };
 }
