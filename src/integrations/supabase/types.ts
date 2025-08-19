@@ -78,6 +78,7 @@ export type Database = {
           created_at: string
           id: string
           is_billable: boolean
+          is_support: boolean | null
           name: string
           updated_at: string
         }
@@ -85,6 +86,7 @@ export type Database = {
           created_at?: string
           id?: string
           is_billable?: boolean
+          is_support?: boolean | null
           name: string
           updated_at?: string
         }
@@ -92,6 +94,7 @@ export type Database = {
           created_at?: string
           id?: string
           is_billable?: boolean
+          is_support?: boolean | null
           name?: string
           updated_at?: string
         }
@@ -1071,22 +1074,28 @@ export type Database = {
         Row: {
           created_at: string
           id: string
+          is_department: boolean | null
           name: string
           sbu_head_email: string | null
+          sbu_head_name: string | null
           updated_at: string
         }
         Insert: {
           created_at?: string
           id?: string
+          is_department?: boolean | null
           name: string
           sbu_head_email?: string | null
+          sbu_head_name?: string | null
           updated_at?: string
         }
         Update: {
           created_at?: string
           id?: string
+          is_department?: boolean | null
           name?: string
           sbu_head_email?: string | null
+          sbu_head_name?: string | null
           updated_at?: string
         }
         Relationships: []

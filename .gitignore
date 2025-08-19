@@ -26,3 +26,13 @@ dist-ssr
 
 # Local Netlify folder
 .netlify
+
+
+# Supabase
+.branches
+.temp
+
+# dotenvx
+.env.keys
+.env.local
+.env.*.local
