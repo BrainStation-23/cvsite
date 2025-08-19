@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { ScrollArea } from '@/components/ui/scroll-area';
+import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { PivotStatistics } from '@/hooks/use-resource-pivot-statistics';
 
 interface SpreadsheetPivotTableProps {
@@ -58,38 +58,38 @@ export const SpreadsheetPivotTable: React.FC<SpreadsheetPivotTableProps> = ({ da
   };
 
   return (
-    <div className="border rounded-md bg-background overflow-hidden">
-      <ScrollArea className="w-full">
+    <div className="border rounded-md bg-background overflow-hidden max-w-full">
+      <ScrollArea className="w-full max-w-full">
         <div className="min-w-max">
           <Table className="text-xs">
             <TableHeader className="sticky top-0 bg-muted/50 z-20">
-              <TableRow className="border-b-2 h-8">
-                <TableHead className="h-8 px-2 py-1 font-semibold bg-muted text-left border-r sticky left-0 z-30 min-w-32">
+              <TableRow className="border-b-2 h-6">
+                <TableHead className="h-6 px-2 py-0.5 font-semibold bg-muted text-left border-r sticky left-0 z-30 min-w-32">
                   {getDimensionLabel(data.dimensions.primary)}
                 </TableHead>
                 {uniqueCols.map(col => (
-                  <TableHead key={col} className="h-8 px-2 py-1 text-center font-medium border-r min-w-20 max-w-32">
+                  <TableHead key={col} className="h-6 px-2 py-0.5 text-center font-medium border-r min-w-20 max-w-32">
                     <div className="truncate" title={col}>{col}</div>
                   </TableHead>
                 ))}
-                <TableHead className="h-8 px-2 py-1 text-center font-bold bg-accent border-r min-w-16">
+                <TableHead className="h-6 px-2 py-0.5 text-center font-bold bg-accent border-r min-w-16">
                   Total
                 </TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {uniqueRows.map((row, index) => (
-                <TableRow key={row} className="h-7">
-                  <TableCell className="h-7 px-2 py-1 font-medium bg-muted/30 border-r sticky left-0 z-10 min-w-32 max-w-48">
+                <TableRow key={row} className="h-5">
+                  <TableCell className="h-5 px-2 py-0.5 font-medium bg-muted/30 border-r sticky left-0 z-10 min-w-32 max-w-48">
                     <div className="truncate" title={row}>{row}</div>
                   </TableCell>
                   {uniqueCols.map(col => {
                     const value = dataMap.get(`${row}|${col}`) || 0;
                     return (
-                      <TableCell key={col} className="h-7 px-1 py-1 text-center border-r">
-                        <div className={`rounded text-xs font-mono leading-none ${
+                      <TableCell key={col} className="h-5 px-1 py-0.5 text-center border-r">
+                        <div className={`text-xs font-mono leading-none ${
                           value > 0 
-                            ? 'bg-primary/10 text-primary font-semibold' 
+                            ? 'text-primary font-semibold' 
                             : 'text-muted-foreground'
                         }`}>
                           {value || '—'}
@@ -97,27 +97,27 @@ export const SpreadsheetPivotTable: React.FC<SpreadsheetPivotTableProps> = ({ da
                       </TableCell>
                     );
                   })}
-                  <TableCell className="h-7 px-2 py-1 text-center font-bold bg-accent/50 border-r">
-                    <div className="font-mono font-semibold leading-none">
+                  <TableCell className="h-5 px-2 py-0.5 text-center font-bold bg-accent/50 border-r">
+                    <div className="font-mono font-semibold leading-none text-xs">
                       {rowTotalsMap.get(row) || 0}
                     </div>
                   </TableCell>
                 </TableRow>
               ))}
               {/* Totals row */}
-              <TableRow className="border-t-2 bg-accent/30 h-8">
-                <TableCell className="h-8 px-2 py-1 font-bold bg-accent border-r sticky left-0 z-10">
+              <TableRow className="border-t-2 bg-accent/30 h-6">
+                <TableCell className="h-6 px-2 py-0.5 font-bold bg-accent border-r sticky left-0 z-10">
                   Total
                 </TableCell>
                 {uniqueCols.map(col => (
-                  <TableCell key={col} className="h-8 px-2 py-1 text-center font-bold bg-accent/50 border-r">
-                    <div className="font-mono font-semibold leading-none">
+                  <TableCell key={col} className="h-6 px-2 py-0.5 text-center font-bold bg-accent/50 border-r">
+                    <div className="font-mono font-semibold leading-none text-xs">
                       {colTotalsMap.get(col) || 0}
                     </div>
                   </TableCell>
                 ))}
-                <TableCell className="h-8 px-2 py-1 text-center font-bold bg-primary text-primary-foreground border-r">
-                  <div className="font-mono font-bold leading-none">
+                <TableCell className="h-6 px-2 py-0.5 text-center font-bold bg-primary text-primary-foreground border-r">
+                  <div className="font-mono font-bold leading-none text-xs">
                     {data.grand_total}
                   </div>
                 </TableCell>
@@ -125,6 +125,8 @@ export const SpreadsheetPivotTable: React.FC<SpreadsheetPivotTableProps> = ({ da
             </TableBody>
           </Table>
         </div>
+        <ScrollBar orientation="vertical" />
+        <ScrollBar orientation="horizontal" />
       </ScrollArea>
     </div>
   );
