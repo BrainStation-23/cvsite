@@ -4,26 +4,21 @@ import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { ProfileJSONData } from '@/services/profile/ProfileJSONService';
 
-export interface CVUploadResult {
-  extractedText: string;
+export interface CVProcessResult {
+  profileData: ProfileJSONData;
+  confidence: string;
   fileName: string;
   fileSize: number;
   fileType: string;
-}
-
-export interface CVAnalysisResult {
-  profileData: ProfileJSONData;
-  confidence: string;
-  extractedText: string;
+  fileUri?: string;
 }
 
 export function useCVImport() {
   const [isProcessing, setIsProcessing] = useState(false);
-  const [uploadResult, setUploadResult] = useState<CVUploadResult | null>(null);
-  const [analysisResult, setAnalysisResult] = useState<CVAnalysisResult | null>(null);
+  const [processResult, setProcessResult] = useState<CVProcessResult | null>(null);
   const { toast } = useToast();
 
-  const uploadAndParseCV = async (file: File): Promise<CVUploadResult | null> => {
+  const processCV = async (file: File): Promise<CVProcessResult | null> => {
     if (!file) {
       toast({
         title: 'Error',
@@ -55,73 +50,15 @@ export function useCVImport() {
       const formData = new FormData();
       formData.append('file', file);
 
-      const { data, error } = await supabase.functions.invoke('ai-cv-parser', {
+      const { data, error } = await supabase.functions.invoke('ai-cv-processor', {
         body: formData
       });
 
       if (error) {
-        console.error('File parsing error:', error);
+        console.error('CV processing error:', error);
         toast({
-          title: 'Parsing Failed',
-          description: 'Failed to extract text from the file. Please try again.',
-          variant: 'destructive'
-        });
-        return null;
-      }
-
-      if (!data?.extractedText) {
-        toast({
-          title: 'Parsing Failed',
-          description: 'No text could be extracted from the file.',
-          variant: 'destructive'
-        });
-        return null;
-      }
-
-      const result = data as CVUploadResult;
-      setUploadResult(result);
-
-      toast({
-        title: 'File Parsed',
-        description: `Successfully extracted ${result.extractedText.length} characters from ${result.fileName}`,
-      });
-
-      return result;
-    } catch (error) {
-      console.error('Upload error:', error);
-      toast({
-        title: 'Upload Failed',
-        description: 'An error occurred while processing the file.',
-        variant: 'destructive'
-      });
-      return null;
-    } finally {
-      setIsProcessing(false);
-    }
-  };
-
-  const analyzeCV = async (extractedText: string): Promise<CVAnalysisResult | null> => {
-    if (!extractedText) {
-      toast({
-        title: 'Error',
-        description: 'No text to analyze',
-        variant: 'destructive'
-      });
-      return null;
-    }
-
-    try {
-      setIsProcessing(true);
-
-      const { data, error } = await supabase.functions.invoke('ai-cv-analyzer', {
-        body: { extractedText }
-      });
-
-      if (error) {
-        console.error('CV analysis error:', error);
-        toast({
-          title: 'Analysis Failed',
-          description: 'Failed to analyze CV with AI. Please try again.',
+          title: 'Processing Failed',
+          description: 'Failed to process CV. Please try again.',
           variant: 'destructive'
         });
         return null;
@@ -129,27 +66,27 @@ export function useCVImport() {
 
       if (!data?.profileData) {
         toast({
-          title: 'Analysis Failed',
-          description: 'AI could not extract profile data from the CV.',
+          title: 'Processing Failed',
+          description: 'No profile data could be extracted from the CV.',
           variant: 'destructive'
         });
         return null;
       }
 
-      const result = data as CVAnalysisResult;
-      setAnalysisResult(result);
+      const result = data as CVProcessResult;
+      setProcessResult(result);
 
       toast({
-        title: 'CV Analyzed',
-        description: `Successfully extracted profile data with ${result.confidence} confidence`,
+        title: 'CV Processed',
+        description: `Successfully extracted profile data from ${result.fileName}`,
       });
 
       return result;
     } catch (error) {
-      console.error('Analysis error:', error);
+      console.error('Processing error:', error);
       toast({
-        title: 'Analysis Failed',
-        description: 'An error occurred while analyzing the CV.',
+        title: 'Processing Failed',
+        description: 'An error occurred while processing the CV.',
         variant: 'destructive'
       });
       return null;
@@ -159,17 +96,14 @@ export function useCVImport() {
   };
 
   const reset = () => {
-    setUploadResult(null);
-    setAnalysisResult(null);
+    setProcessResult(null);
     setIsProcessing(false);
   };
 
   return {
-    uploadAndParseCV,
-    analyzeCV,
+    processCV,
     reset,
     isProcessing,
-    uploadResult,
-    analysisResult
+    processResult
   };
 }
