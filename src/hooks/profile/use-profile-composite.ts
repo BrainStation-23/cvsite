@@ -32,9 +32,21 @@ export function useProfileComposite(profileId?: string) {
                   achievementsHook.isSaving ||
                   projectsHook.isSaving;
 
+  // Refetch all data
+  const refetch = () => {
+    if (generalInfoHook.refetch) generalInfoHook.refetch();
+    if (skillsHook.refetch) skillsHook.refetch();
+    if (experienceHook.refetch) experienceHook.refetch();
+    if (educationHook.refetch) educationHook.refetch();
+    if (trainingHook.refetch) trainingHook.refetch();
+    if (achievementsHook.refetch) achievementsHook.refetch();
+    if (projectsHook.refetch) projectsHook.refetch();
+  };
+
   return {
     isLoading,
     isSaving,
+    refetch,
     // General info
     generalInfo: generalInfoHook.generalInfo,
     saveGeneralInfo: generalInfoHook.saveGeneralInfo,
