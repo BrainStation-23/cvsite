@@ -1,15 +1,18 @@
 
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
-import { AlertTriangle } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { AlertTriangle, Edit } from 'lucide-react';
 import { useIncompleteCvProfiles } from '@/hooks/use-incomplete-cv-profiles';
 import { useProfileCountsByResourceType } from '@/hooks/use-profile-counts-by-resource-type';
 import { Skeleton } from '@/components/ui/skeleton';
 
 export const IncompleteProfilesTable: React.FC = () => {
+  const navigate = useNavigate();
   const [resourceTypeFilter, setResourceTypeFilter] = useState<string>('');
   const { data: resourceTypes } = useProfileCountsByResourceType();
   const { data: incompleteProfiles, isLoading, error } = useIncompleteCvProfiles(
@@ -18,6 +21,10 @@ export const IncompleteProfilesTable: React.FC = () => {
 
   const handleFilterChange = (value: string) => {
     setResourceTypeFilter(value === 'all' ? '' : value);
+  };
+
+  const handleEditProfile = (profileId: string) => {
+    navigate(`/employee/profile/${profileId}`);
   };
 
   if (error) {
@@ -96,13 +103,24 @@ export const IncompleteProfilesTable: React.FC = () => {
                         ID: {profile.employee_id} • {profile.resource_type_name || 'Unspecified'}
                       </p>
                     </div>
-                    <div className="text-right">
-                      <div className="text-sm font-medium">
-                        {completionPercentage}% Complete
+                    <div className="flex items-center gap-3">
+                      <div className="text-right">
+                        <div className="text-sm font-medium">
+                          {completionPercentage}% Complete
+                        </div>
+                        <div className="text-xs text-muted-foreground">
+                          {profile.missing_count} missing sections
+                        </div>
                       </div>
-                      <div className="text-xs text-muted-foreground">
-                        {profile.missing_count} missing sections
-                      </div>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => handleEditProfile(profile.profile_id)}
+                        className="flex items-center gap-2"
+                      >
+                        <Edit className="h-4 w-4" />
+                        Edit
+                      </Button>
                     </div>
                   </div>
                   
