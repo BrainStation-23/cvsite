@@ -1,3 +1,4 @@
+
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -32,11 +33,9 @@ export function useIncompleteCvProfiles({
     queryFn: async () => {
       console.log('Fetching incomplete profiles:', { resourceTypeFilter, page, pageSize, searchTerm });
       
-      const { data, error } = await supabase.rpc('get_incomplete_cv_profiles_paginated', {
+      // Use the existing RPC function instead of the non-existent paginated one
+      const { data, error } = await supabase.rpc('get_incomplete_cv_profiles', {
         resource_type_filter: resourceTypeFilter || null,
-        search_term: searchTerm || null,
-        page_number: page,
-        page_size: pageSize,
       });
 
       if (error) {
@@ -44,10 +43,28 @@ export function useIncompleteCvProfiles({
         throw error;
       }
 
+      // Filter and paginate on the client side for now
+      let filteredData = (data || []) as IncompleteProfile[];
+      
+      // Apply search filter if provided
+      if (searchTerm) {
+        const searchLower = searchTerm.toLowerCase();
+        filteredData = filteredData.filter(profile => 
+          profile.first_name.toLowerCase().includes(searchLower) ||
+          profile.last_name.toLowerCase().includes(searchLower) ||
+          profile.employee_id.toLowerCase().includes(searchLower)
+        );
+      }
+
+      // Apply pagination
+      const startIndex = (page - 1) * pageSize;
+      const endIndex = startIndex + pageSize;
+      const paginatedData = filteredData.slice(startIndex, endIndex);
+
       return {
-        profiles: (data?.profiles || []) as IncompleteProfile[],
-        total_count: data?.total_count || 0,
-        total_pages: Math.ceil((data?.total_count || 0) / pageSize),
+        profiles: paginatedData,
+        total_count: filteredData.length,
+        total_pages: Math.ceil(filteredData.length / pageSize),
       };
     },
     staleTime: 5 * 60 * 1000, // Cache for 5 minutes
@@ -57,8 +74,23 @@ export function useIncompleteCvProfiles({
 
 // Keep the original hook for backward compatibility but with a smaller default page size
 export function useIncompleteCvProfilesLegacy(resourceTypeFilter?: string) {
-  return useIncompleteCvProfiles({
-    resourceTypeFilter,
-    pageSize: 5, // Reduced from loading all
+  return useQuery({
+    queryKey: ['incomplete-cv-profiles-legacy', resourceTypeFilter],
+    queryFn: async () => {
+      console.log('Fetching incomplete profiles (legacy):', { resourceTypeFilter });
+      
+      const { data, error } = await supabase.rpc('get_incomplete_cv_profiles', {
+        resource_type_filter: resourceTypeFilter || null,
+      });
+
+      if (error) {
+        console.error('Error fetching incomplete CV profiles:', error);
+        throw error;
+      }
+
+      return (data || []) as IncompleteProfile[];
+    },
+    staleTime: 5 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
   });
 }

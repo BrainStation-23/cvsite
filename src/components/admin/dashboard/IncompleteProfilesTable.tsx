@@ -7,7 +7,7 @@ import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { AlertTriangle, Edit } from 'lucide-react';
-import { useIncompleteCvProfiles } from '@/hooks/use-incomplete-cv-profiles';
+import { useIncompleteCvProfilesLegacy } from '@/hooks/use-incomplete-cv-profiles';
 import { useProfileCountsByResourceType } from '@/hooks/use-profile-counts-by-resource-type';
 import { Skeleton } from '@/components/ui/skeleton';
 
@@ -15,7 +15,7 @@ export const IncompleteProfilesTable: React.FC = () => {
   const navigate = useNavigate();
   const [resourceTypeFilter, setResourceTypeFilter] = useState<string>('');
   const { data: resourceTypes } = useProfileCountsByResourceType();
-  const { data: incompleteProfiles, isLoading, error } = useIncompleteCvProfiles(
+  const { data: incompleteProfiles, isLoading, error } = useIncompleteCvProfilesLegacy(
     resourceTypeFilter || undefined
   );
 
