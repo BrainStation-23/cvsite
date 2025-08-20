@@ -1350,6 +1350,15 @@ export type Database = {
           total_sections: number
         }[]
       }
+      get_incomplete_cv_profiles_paginated: {
+        Args: {
+          page_number?: number
+          page_size?: number
+          resource_type_filter?: string
+          search_term?: string
+        }
+        Returns: Json
+      }
       get_planned_resource_data: {
         Args: {
           bill_type_filter?: string

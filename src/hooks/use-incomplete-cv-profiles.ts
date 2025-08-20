@@ -1,4 +1,3 @@
-
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -22,6 +21,17 @@ interface UseIncompleteProfilesOptions {
   searchTerm?: string;
 }
 
+interface PaginatedResponse {
+  profiles: IncompleteProfile[];
+  pagination: {
+    total_count: number;
+    filtered_count: number;
+    page: number;
+    per_page: number;
+    page_count: number;
+  };
+}
+
 export function useIncompleteCvProfiles({
   resourceTypeFilter,
   page = 1,
@@ -33,9 +43,11 @@ export function useIncompleteCvProfiles({
     queryFn: async () => {
       console.log('Fetching incomplete profiles:', { resourceTypeFilter, page, pageSize, searchTerm });
       
-      // Use the existing RPC function instead of the non-existent paginated one
-      const { data, error } = await supabase.rpc('get_incomplete_cv_profiles', {
+      const { data, error } = await supabase.rpc('get_incomplete_cv_profiles_paginated', {
         resource_type_filter: resourceTypeFilter || null,
+        search_term: searchTerm || null,
+        page_number: page,
+        page_size: pageSize,
       });
 
       if (error) {
@@ -43,28 +55,11 @@ export function useIncompleteCvProfiles({
         throw error;
       }
 
-      // Filter and paginate on the client side for now
-      let filteredData = (data || []) as IncompleteProfile[];
-      
-      // Apply search filter if provided
-      if (searchTerm) {
-        const searchLower = searchTerm.toLowerCase();
-        filteredData = filteredData.filter(profile => 
-          profile.first_name.toLowerCase().includes(searchLower) ||
-          profile.last_name.toLowerCase().includes(searchLower) ||
-          profile.employee_id.toLowerCase().includes(searchLower)
-        );
-      }
-
-      // Apply pagination
-      const startIndex = (page - 1) * pageSize;
-      const endIndex = startIndex + pageSize;
-      const paginatedData = filteredData.slice(startIndex, endIndex);
-
+      const response = data as PaginatedResponse;
       return {
-        profiles: paginatedData,
-        total_count: filteredData.length,
-        total_pages: Math.ceil(filteredData.length / pageSize),
+        profiles: response.profiles || [],
+        total_count: response.pagination.filtered_count,
+        total_pages: response.pagination.page_count,
       };
     },
     staleTime: 5 * 60 * 1000, // Cache for 5 minutes
