@@ -2,7 +2,7 @@
 import React from 'react';
 import DashboardLayout from '../../components/Layout/DashboardLayout';
 import { ProfileStatisticsOverview } from '../../components/admin/dashboard/ProfileStatisticsOverview';
-import { IncompleteProfilesTable } from '../../components/admin/dashboard/IncompleteProfilesTable';
+import { IncompleteProfilesTableOptimized } from '../../components/admin/dashboard/IncompleteProfilesTableOptimized';
 
 const AdminDashboard: React.FC = () => {
   return (
@@ -22,10 +22,10 @@ const AdminDashboard: React.FC = () => {
           <ProfileStatisticsOverview />
         </div>
 
-        {/* Incomplete Profiles */}
+        {/* Incomplete Profiles - Now with lazy loading and pagination */}
         <div>
           <h2 className="text-xl font-semibold mb-4">CV Completeness Details</h2>
-          <IncompleteProfilesTable />
+          <IncompleteProfilesTableOptimized />
         </div>
       </div>
     </DashboardLayout>
