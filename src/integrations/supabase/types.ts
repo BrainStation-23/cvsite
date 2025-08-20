@@ -1372,6 +1372,17 @@ export type Database = {
         }
         Returns: Json
       }
+      get_profile_completion_by_resource_type: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          completed_profiles: number
+          completion_rate: number
+          incomplete_profiles: number
+          resource_type_id: string
+          resource_type_name: string
+          total_profiles: number
+        }[]
+      }
       get_profile_counts_by_resource_type: {
         Args: Record<PropertyKey, never>
         Returns: {
