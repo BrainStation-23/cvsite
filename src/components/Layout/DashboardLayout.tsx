@@ -96,7 +96,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
         
         {/* Scrollable Navigation */}
         <div className="flex-1 min-h-0">
-          <ScrollArea className="h-full">
+          <ScrollArea className="h-full min-h-0">
             <SidebarNavigation sidebarGroups={sidebarGroups} isSidebarOpen={isSidebarOpen} />
           </ScrollArea>
         </div>
@@ -114,12 +114,12 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
       </aside>
 
       {/* Main content */}
-      <div className={`flex-1 ${isSidebarOpen ? 'ml-64' : 'ml-16'} transition-margin duration-300 ease-in-out flex flex-col`}>
+      <div className={`flex-1 ${isSidebarOpen ? 'ml-64 w-[80%]' : 'ml-16 w-[90%]'} transition-margin duration-300 ease-in-out flex flex-col`}>
         <DashboardHeader pageTitle={getPageTitle()} user={user} />
 
         {/* Content */}
-        <main className="flex-1 p-2 bg-slate-50 dark:bg-slate-900">
-          <ScrollArea className="bg-white dark:bg-slate-800 rounded-xl shadow-sm p-4 max-w-screen">
+        <main className="flex-1 p-2 bg-slate-50 dark:bg-slate-900 min-w-0">
+          <ScrollArea className="bg-white dark:bg-slate-800 rounded-xl shadow-sm p-4 w-full">
             {children}
           </ScrollArea>
         </main>

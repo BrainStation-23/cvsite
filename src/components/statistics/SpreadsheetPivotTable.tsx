@@ -101,9 +101,8 @@ export const SpreadsheetPivotTable: React.FC<SpreadsheetPivotTableProps> = ({ da
 
       {/* Table Container */}
       <div className="flex-1 min-h-0">
-        <ScrollArea className="h-full w-full">
-          <div className="min-w-max p-6">
-            <div className="rounded-lg border bg-card overflow-hidden">
+          <div className="p-6">
+            <div className="rounded-lg border bg-card overflow-x-auto">
               <Table className="text-sm">
                 <TableHeader>
                   <TableRow className="border-b-2 bg-muted/50">
@@ -113,13 +112,13 @@ export const SpreadsheetPivotTable: React.FC<SpreadsheetPivotTableProps> = ({ da
                       </div>
                     </TableHead>
                     {uniqueCols.map(col => (
-                      <TableHead key={col} className="text-center font-medium border-r min-w-24 max-w-32 px-2">
+                      <TableHead key={col} className="text-center font-medium border-r min-w-16 max-w-32 ">
                         <div className="truncate font-semibold" title={col}>
                           {col}
                         </div>
                       </TableHead>
                     ))}
-                    <TableHead className="text-center font-bold bg-primary/10 border-l-2 min-w-20 sticky right-0 z-10">
+                    <TableHead className="text-center font-bold bg-muted border-l-2 min-w-20 sticky right-0 z-10">
                       Total
                     </TableHead>
                   </TableRow>
@@ -135,7 +134,7 @@ export const SpreadsheetPivotTable: React.FC<SpreadsheetPivotTableProps> = ({ da
                       {uniqueCols.map(col => {
                         const value = dataMap.get(`${row}|${col}`) || 0;
                         return (
-                          <TableCell key={col} className={`text-center border-r px-2 ${getIntensityClass(value, maxValue)}`}>
+                          <TableCell key={col} className={`text-center border-r  ${getIntensityClass(value, maxValue)}`}>
                             <div className="font-mono text-sm font-medium py-1">
                               {value || '—'}
                             </div>
@@ -151,11 +150,11 @@ export const SpreadsheetPivotTable: React.FC<SpreadsheetPivotTableProps> = ({ da
                   ))}
                   {/* Totals row */}
                   <TableRow className="border-t-2 bg-primary/5 hover:bg-primary/10 transition-colors">
-                    <TableCell className="sticky left-0 z-10 bg-primary/10 border-r-2 font-bold">
+                    <TableCell className="sticky left-0 z-10 bg-muted border-r-2 font-bold">
                       Total
                     </TableCell>
                     {uniqueCols.map(col => (
-                      <TableCell key={col} className="text-center font-bold bg-primary/10 border-r px-2">
+                      <TableCell key={col} className="text-center font-bold bg-primary/10 border-r ">
                         <div className="font-mono font-bold text-primary">
                           {colTotalsMap.get(col) || 0}
                         </div>
@@ -171,9 +170,6 @@ export const SpreadsheetPivotTable: React.FC<SpreadsheetPivotTableProps> = ({ da
               </Table>
             </div>
           </div>
-          <ScrollBar orientation="horizontal" />
-          <ScrollBar orientation="vertical" />
-        </ScrollArea>
       </div>
     </div>
   );

@@ -94,6 +94,7 @@ export type Database = {
           is_support: boolean | null
           name: string
           non_billed: boolean | null
+          resource_type: string | null
           updated_at: string
         }
         Insert: {
@@ -103,6 +104,7 @@ export type Database = {
           is_support?: boolean | null
           name: string
           non_billed?: boolean | null
+          resource_type?: string | null
           updated_at?: string
         }
         Update: {
@@ -112,9 +114,18 @@ export type Database = {
           is_support?: boolean | null
           name?: string
           non_billed?: boolean | null
+          resource_type?: string | null
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "bill_types_resource_type_fkey"
+            columns: ["resource_type"]
+            isOneToOne: false
+            referencedRelation: "resource_types"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       cron_job_configs: {
         Row: {
@@ -1277,10 +1288,6 @@ export type Database = {
         Args: { target_user_id?: string }
         Returns: Json
       }
-      get_dashboard_analytics: {
-        Args: Record<PropertyKey, never>
-        Returns: Json
-      }
       get_employee_data: {
         Args: { profile_uuid: string }
         Returns: Json
@@ -1329,6 +1336,29 @@ export type Database = {
         Args: { profile_uuid: string }
         Returns: Json
       }
+      get_incomplete_cv_profiles: {
+        Args: { resource_type_filter?: string }
+        Returns: {
+          completion_score: number
+          employee_id: string
+          first_name: string
+          last_name: string
+          missing_sections: string[]
+          profile_id: string
+          resource_type_id: string
+          resource_type_name: string
+          total_sections: number
+        }[]
+      }
+      get_incomplete_cv_profiles_paginated: {
+        Args: {
+          page_number?: number
+          page_size?: number
+          resource_type_filter?: string
+          search_term?: string
+        }
+        Returns: Json
+      }
       get_planned_resource_data: {
         Args: {
           bill_type_filter?: string
@@ -1350,6 +1380,35 @@ export type Database = {
           start_date_to?: string
         }
         Returns: Json
+      }
+      get_profile_completion_by_resource_type: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          completed_profiles: number
+          completion_rate: number
+          incomplete_profiles: number
+          resource_type_id: string
+          resource_type_name: string
+          total_profiles: number
+        }[]
+      }
+      get_profile_completion_statistics: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          avg_completion_rate: number
+          profiles_above_50_percent: number
+          profiles_above_75_percent: number
+          resource_type_breakdown: Json
+          total_profiles: number
+        }[]
+      }
+      get_profile_counts_by_resource_type: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          profile_count: number
+          resource_type_id: string
+          resource_type_name: string
+        }[]
       }
       get_resource_count_statistics: {
         Args: {
