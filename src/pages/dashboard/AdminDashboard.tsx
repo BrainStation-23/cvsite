@@ -1,7 +1,7 @@
 
 import React from 'react';
 import DashboardLayout from '../../components/Layout/DashboardLayout';
-import { ProfileCountCards } from '../../components/admin/dashboard/ProfileCountCards';
+import { ProfileStatisticsOverview } from '../../components/admin/dashboard/ProfileStatisticsOverview';
 import { IncompleteProfilesTable } from '../../components/admin/dashboard/IncompleteProfilesTable';
 
 const AdminDashboard: React.FC = () => {
@@ -17,15 +17,14 @@ const AdminDashboard: React.FC = () => {
           </p>
         </div>
 
-        {/* Profile Count Cards */}
+        {/* Profile Statistics Overview */}
         <div>
-          <h2 className="text-xl font-semibold mb-4">Profile Statistics</h2>
-          <ProfileCountCards />
+          <ProfileStatisticsOverview />
         </div>
 
         {/* Incomplete Profiles */}
         <div>
-          <h2 className="text-xl font-semibold mb-4">CV Completeness</h2>
+          <h2 className="text-xl font-semibold mb-4">CV Completeness Details</h2>
           <IncompleteProfilesTable />
         </div>
       </div>
