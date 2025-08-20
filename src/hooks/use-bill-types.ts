@@ -1,4 +1,3 @@
-
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -26,7 +25,7 @@ export const useBillTypes = () => {
       .from('bill_types')
       .select(`
         *,
-        resource_types (
+        resource_types!bill_types_resource_type_fkey (
           id,
           name
         )

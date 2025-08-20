@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -208,7 +207,12 @@ export const BillTypeTable: React.FC = () => {
                         </Button>
                       </div>
                     ) : (
-                      <span className="font-medium">{item.name}</span>
+                      <button
+                        onClick={() => handleEdit(item)}
+                        className="text-left hover:underline font-medium"
+                      >
+                        {item.name}
+                      </button>
                     )}
                   </TableCell>
                   
@@ -238,7 +242,6 @@ export const BillTypeTable: React.FC = () => {
                           checked={item.is_billable}
                           onCheckedChange={() => handleToggle(item, 'is_billable')}
                           disabled={isUpdatingItem || editingId === item.id}
-                          size="sm"
                         />
                       </div>
                       <div className="flex items-center justify-between">
@@ -247,7 +250,6 @@ export const BillTypeTable: React.FC = () => {
                           checked={item.is_support}
                           onCheckedChange={() => handleToggle(item, 'is_support')}
                           disabled={isUpdatingItem || editingId === item.id}
-                          size="sm"
                         />
                       </div>
                       <div className="flex items-center justify-between">
@@ -256,7 +258,6 @@ export const BillTypeTable: React.FC = () => {
                           checked={item.non_billed}
                           onCheckedChange={() => handleToggle(item, 'non_billed')}
                           disabled={isUpdatingItem || editingId === item.id}
-                          size="sm"
                         />
                       </div>
                     </div>
