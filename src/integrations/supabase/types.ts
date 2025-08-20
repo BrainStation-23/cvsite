@@ -125,13 +125,6 @@ export type Database = {
             referencedRelation: "resource_types"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "fk_bill_types_resource_type"
-            columns: ["resource_type"]
-            isOneToOne: false
-            referencedRelation: "resource_types"
-            referencedColumns: ["id"]
-          },
         ]
       }
       cron_job_configs: {
@@ -1295,10 +1288,6 @@ export type Database = {
         Args: { target_user_id?: string }
         Returns: Json
       }
-      get_dashboard_analytics: {
-        Args: Record<PropertyKey, never>
-        Returns: Json
-      }
       get_employee_data: {
         Args: { profile_uuid: string }
         Returns: Json
@@ -1347,6 +1336,20 @@ export type Database = {
         Args: { profile_uuid: string }
         Returns: Json
       }
+      get_incomplete_cv_profiles: {
+        Args: { resource_type_filter?: string }
+        Returns: {
+          completion_score: number
+          employee_id: string
+          first_name: string
+          last_name: string
+          missing_sections: string[]
+          profile_id: string
+          resource_type_id: string
+          resource_type_name: string
+          total_sections: number
+        }[]
+      }
       get_planned_resource_data: {
         Args: {
           bill_type_filter?: string
@@ -1368,6 +1371,14 @@ export type Database = {
           start_date_to?: string
         }
         Returns: Json
+      }
+      get_profile_counts_by_resource_type: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          profile_count: number
+          resource_type_id: string
+          resource_type_name: string
+        }[]
       }
       get_resource_count_statistics: {
         Args: {
