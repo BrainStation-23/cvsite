@@ -10,6 +10,8 @@ export interface BillTypeItem {
   is_billable: boolean;
   is_support: boolean;
   non_billed: boolean;
+  resource_type: string | null;
+  resource_type_name?: string;
   created_at: string;
   updated_at: string;
 }
@@ -18,15 +20,26 @@ export const useBillTypes = () => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   
-  // Fetch bill types
+  // Fetch bill types with resource type information
   const fetchBillTypes = async (): Promise<BillTypeItem[]> => {
     const { data, error } = await supabase
       .from('bill_types')
-      .select('*')
+      .select(`
+        *,
+        resource_types!resource_type (
+          id,
+          name
+        )
+      `)
       .order('name');
     
     if (error) throw error;
-    return data as BillTypeItem[];
+    
+    // Transform the data to flatten the resource type information
+    return data.map(item => ({
+      ...item,
+      resource_type_name: item.resource_types?.name || null
+    })) as BillTypeItem[];
   };
   
   // Query hook
@@ -41,7 +54,13 @@ export const useBillTypes = () => {
   
   // Add bill type mutation
   const addBillTypeMutation = useMutation({
-    mutationFn: async (newItemData: { name: string; is_billable: boolean; is_support: boolean; non_billed: boolean }) => {
+    mutationFn: async (newItemData: { 
+      name: string; 
+      is_billable: boolean; 
+      is_support: boolean; 
+      non_billed: boolean;
+      resource_type: string | null;
+    }) => {
       // Check if item already exists to prevent duplicates
       const existingItems = items || [];
       const itemExists = existingItems.some(item => 
@@ -72,13 +91,15 @@ export const useBillTypes = () => {
       name, 
       is_billable,
       is_support,
-      non_billed
+      non_billed,
+      resource_type
     }: { 
       id: string; 
       name: string; 
       is_billable: boolean;
       is_support: boolean;
       non_billed: boolean;
+      resource_type: string | null;
     }) => {
       // Check if another item with the same name already exists (excluding current item)
       const existingItems = items || [];
@@ -97,6 +118,7 @@ export const useBillTypes = () => {
           is_billable,
           is_support,
           non_billed,
+          resource_type,
           updated_at: new Date().toISOString() 
         })
         .eq('id', id)
@@ -126,7 +148,13 @@ export const useBillTypes = () => {
     },
   });
   
-  const addItem = (value: { name: string; is_billable: boolean; is_support: boolean; non_billed: boolean }) => {
+  const addItem = (value: { 
+    name: string; 
+    is_billable: boolean; 
+    is_support: boolean; 
+    non_billed: boolean;
+    resource_type: string | null;
+  }) => {
     if (!value.name.trim()) return;
     
     addBillTypeMutation.mutate(value, {
@@ -156,11 +184,19 @@ export const useBillTypes = () => {
     originalName: string, 
     is_billable: boolean,
     is_support: boolean,
-    non_billed: boolean
+    non_billed: boolean,
+    resource_type: string | null
   ) => {
     if (!name.trim()) return;
     
-    updateBillTypeMutation.mutate({ id, name: name.trim(), is_billable, is_support, non_billed }, {
+    updateBillTypeMutation.mutate({ 
+      id, 
+      name: name.trim(), 
+      is_billable, 
+      is_support, 
+      non_billed,
+      resource_type
+    }, {
       onSuccess: () => {
         toast({
           title: "Bill type updated",

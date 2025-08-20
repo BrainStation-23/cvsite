@@ -4,10 +4,12 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Badge } from '@/components/ui/badge';
 import { Pencil, Trash2, Plus, Check, X } from 'lucide-react';
 import { useBillTypes, BillTypeItem } from '@/hooks/use-bill-types';
 import { ConfirmationDialog } from '@/components/ui/confirmation-dialog';
 import { useConfirmationDialog } from '@/hooks/use-confirmation-dialog';
+import ResourceTypeCombobox from '@/components/admin/user/ResourceTypeCombobox';
 
 export const BillTypeTable: React.FC = () => {
   const { items, isLoading, addItem, updateItem, removeItem, isAddingItem, isUpdatingItem, isRemovingItem } = useBillTypes();
@@ -16,10 +18,12 @@ export const BillTypeTable: React.FC = () => {
   const [editIsBillable, setEditIsBillable] = useState(false);
   const [editIsSupport, setEditIsSupport] = useState(false);
   const [editNonBilled, setEditNonBilled] = useState(false);
+  const [editResourceType, setEditResourceType] = useState<string | null>(null);
   const [newItemValue, setNewItemValue] = useState('');
   const [newIsBillable, setNewIsBillable] = useState(false);
   const [newIsSupport, setNewIsSupport] = useState(false);
   const [newNonBilled, setNewNonBilled] = useState(false);
+  const [newResourceType, setNewResourceType] = useState<string | null>(null);
   const { isOpen, config, showConfirmation, hideConfirmation, handleConfirm } = useConfirmationDialog();
 
   const handleEdit = (item: BillTypeItem) => {
@@ -28,18 +32,20 @@ export const BillTypeTable: React.FC = () => {
     setEditIsBillable(item.is_billable);
     setEditIsSupport(item.is_support || false);
     setEditNonBilled(item.non_billed || false);
+    setEditResourceType(item.resource_type || null);
   };
 
   const handleSaveEdit = () => {
     if (editValue.trim() && editingId) {
       const originalItem = items?.find(item => item.id === editingId);
       if (originalItem) {
-        updateItem(editingId, editValue.trim(), originalItem.name, editIsBillable, editIsSupport, editNonBilled);
+        updateItem(editingId, editValue.trim(), originalItem.name, editIsBillable, editIsSupport, editNonBilled, editResourceType);
         setEditingId(null);
         setEditValue('');
         setEditIsBillable(false);
         setEditIsSupport(false);
         setEditNonBilled(false);
+        setEditResourceType(null);
       }
     }
   };
@@ -50,6 +56,7 @@ export const BillTypeTable: React.FC = () => {
     setEditIsBillable(false);
     setEditIsSupport(false);
     setEditNonBilled(false);
+    setEditResourceType(null);
   };
 
   const handleDelete = (item: BillTypeItem) => {
@@ -64,24 +71,31 @@ export const BillTypeTable: React.FC = () => {
 
   const handleAddNew = () => {
     if (newItemValue.trim()) {
-      addItem({ name: newItemValue.trim(), is_billable: newIsBillable, is_support: newIsSupport, non_billed: newNonBilled });
+      addItem({ 
+        name: newItemValue.trim(), 
+        is_billable: newIsBillable, 
+        is_support: newIsSupport, 
+        non_billed: newNonBilled,
+        resource_type: newResourceType
+      });
       setNewItemValue('');
       setNewIsBillable(false);
       setNewIsSupport(false);
       setNewNonBilled(false);
+      setNewResourceType(null);
     }
   };
 
   const handleToggleBillable = (item: BillTypeItem) => {
-    updateItem(item.id, item.name, item.name, !item.is_billable, item.is_support || false, item.non_billed || false);
+    updateItem(item.id, item.name, item.name, !item.is_billable, item.is_support || false, item.non_billed || false, item.resource_type || null);
   };
 
   const handleToggleSupport = (item: BillTypeItem) => {
-    updateItem(item.id, item.name, item.name, item.is_billable, !item.is_support, item.non_billed || false);
+    updateItem(item.id, item.name, item.name, item.is_billable, !item.is_support, item.non_billed || false, item.resource_type || null);
   };
 
   const handleToggleNonBilled = (item: BillTypeItem) => {
-    updateItem(item.id, item.name, item.name, item.is_billable, item.is_support || false, !item.non_billed);
+    updateItem(item.id, item.name, item.name, item.is_billable, item.is_support || false, !item.non_billed, item.resource_type || null);
   };
 
   if (isLoading) {
@@ -91,43 +105,58 @@ export const BillTypeTable: React.FC = () => {
   return (
     <div className="space-y-4">
       {/* Add new bill type */}
-      <div className="flex gap-2 items-end">
-        <div className="flex-1">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <div className="space-y-4">
           <Input
             placeholder="Enter new bill type..."
             value={newItemValue}
             onChange={(e) => setNewItemValue(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && handleAddNew()}
           />
+          
+          <div className="w-full">
+            <ResourceTypeCombobox
+              value={newResourceType}
+              onValueChange={setNewResourceType}
+              placeholder="Select resource type..."
+            />
+          </div>
         </div>
-        <div className="flex items-center space-x-2">
-          <Switch
-            checked={newIsBillable}
-            onCheckedChange={setNewIsBillable}
-          />
-          <label className="text-sm text-gray-600">Billable</label>
+        
+        <div className="space-y-4">
+          <div className="grid grid-cols-3 gap-4">
+            <div className="flex items-center space-x-2">
+              <Switch
+                checked={newIsBillable}
+                onCheckedChange={setNewIsBillable}
+              />
+              <label className="text-sm text-gray-600">Billable</label>
+            </div>
+            <div className="flex items-center space-x-2">
+              <Switch
+                checked={newIsSupport}
+                onCheckedChange={setNewIsSupport}
+              />
+              <label className="text-sm text-gray-600">Support</label>
+            </div>
+            <div className="flex items-center space-x-2">
+              <Switch
+                checked={newNonBilled}
+                onCheckedChange={setNewNonBilled}
+              />
+              <label className="text-sm text-gray-600">Non-Billed</label>
+            </div>
+          </div>
+          
+          <Button 
+            onClick={handleAddNew}
+            disabled={!newItemValue.trim() || isAddingItem}
+            className="w-full"
+          >
+            <Plus className="h-4 w-4 mr-2" />
+            {isAddingItem ? 'Adding...' : 'Add Bill Type'}
+          </Button>
         </div>
-        <div className="flex items-center space-x-2">
-          <Switch
-            checked={newIsSupport}
-            onCheckedChange={setNewIsSupport}
-          />
-          <label className="text-sm text-gray-600">Support</label>
-        </div>
-        <div className="flex items-center space-x-2">
-          <Switch
-            checked={newNonBilled}
-            onCheckedChange={setNewNonBilled}
-          />
-          <label className="text-sm text-gray-600">Non-Billed</label>
-        </div>
-        <Button 
-          onClick={handleAddNew}
-          disabled={!newItemValue.trim() || isAddingItem}
-        >
-          <Plus className="h-4 w-4 mr-2" />
-          {isAddingItem ? 'Adding...' : 'Add'}
-        </Button>
       </div>
 
       {/* Bill types table */}
@@ -136,6 +165,7 @@ export const BillTypeTable: React.FC = () => {
           <TableHeader>
             <TableRow>
               <TableHead>Name</TableHead>
+              <TableHead>Resource Type</TableHead>
               <TableHead>Billable</TableHead>
               <TableHead>Support</TableHead>
               <TableHead>Non-Billed</TableHead>
@@ -145,7 +175,7 @@ export const BillTypeTable: React.FC = () => {
           <TableBody>
             {items?.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={5} className="text-center text-muted-foreground py-8">
+                <TableCell colSpan={6} className="text-center text-muted-foreground py-8">
                   No bill types found. Add one above to get started.
                 </TableCell>
               </TableRow>
@@ -183,6 +213,23 @@ export const BillTypeTable: React.FC = () => {
                       </div>
                     ) : (
                       <span className="font-medium">{item.name}</span>
+                    )}
+                  </TableCell>
+                  <TableCell>
+                    {editingId === item.id ? (
+                      <ResourceTypeCombobox
+                        value={editResourceType}
+                        onValueChange={setEditResourceType}
+                        placeholder="Select resource type..."
+                      />
+                    ) : (
+                      item.resource_type_name ? (
+                        <Badge variant="outline" className="text-xs">
+                          {item.resource_type_name}
+                        </Badge>
+                      ) : (
+                        <span className="text-muted-foreground text-xs">Not specified</span>
+                      )
                     )}
                   </TableCell>
                   <TableCell>
