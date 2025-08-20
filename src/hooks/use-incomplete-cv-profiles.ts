@@ -26,7 +26,7 @@ export function useIncompleteCvProfiles(resourceTypeFilter?: string) {
         throw error;
       }
 
-      return data as IncompleteProfile[];
+      return data as unknown as IncompleteProfile[];
     },
   });
 }
