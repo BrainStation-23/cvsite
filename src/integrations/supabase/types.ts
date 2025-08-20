@@ -94,6 +94,7 @@ export type Database = {
           is_support: boolean | null
           name: string
           non_billed: boolean | null
+          resource_type: string | null
           updated_at: string
         }
         Insert: {
@@ -103,6 +104,7 @@ export type Database = {
           is_support?: boolean | null
           name: string
           non_billed?: boolean | null
+          resource_type?: string | null
           updated_at?: string
         }
         Update: {
@@ -112,9 +114,25 @@ export type Database = {
           is_support?: boolean | null
           name?: string
           non_billed?: boolean | null
+          resource_type?: string | null
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "bill_types_resource_type_fkey"
+            columns: ["resource_type"]
+            isOneToOne: false
+            referencedRelation: "resource_types"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_bill_types_resource_type"
+            columns: ["resource_type"]
+            isOneToOne: false
+            referencedRelation: "resource_types"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       cron_job_configs: {
         Row: {

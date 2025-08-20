@@ -26,7 +26,7 @@ export const useBillTypes = () => {
       .from('bill_types')
       .select(`
         *,
-        resource_types!resource_type (
+        resource_types!bill_types_resource_type_fkey (
           id,
           name
         )

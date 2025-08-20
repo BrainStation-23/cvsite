@@ -43,7 +43,7 @@ const BillTypeCombobox: React.FC<BillTypeComboboxProps> = ({
         .select(`
           id, 
           name,
-          resource_types!resource_type (
+          resource_types!bill_types_resource_type_fkey (
             name
           )
         `)
@@ -69,7 +69,7 @@ const BillTypeCombobox: React.FC<BillTypeComboboxProps> = ({
           id, 
           name,
           resource_type,
-          resource_types!resource_type (
+          resource_types!bill_types_resource_type_fkey (
             name
           )
         `)
