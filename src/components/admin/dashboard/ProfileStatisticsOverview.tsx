@@ -1,9 +1,8 @@
 
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Users, CheckCircle, AlertCircle } from 'lucide-react';
-import { useProfileCountsByResourceType } from '@/hooks/use-profile-counts-by-resource-type';
-import { useProfileCompletionByResourceType } from '@/hooks/use-profile-completion-by-resource-type';
+import { Users, Target, TrendingUp, CheckCircle2 } from 'lucide-react';
+import { useProfileCompletionStatistics } from '@/hooks/use-profile-completion-statistics';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
   Tooltip,
@@ -13,33 +12,33 @@ import {
 } from '@/components/ui/tooltip';
 
 export const ProfileStatisticsOverview: React.FC = () => {
-  const { data: profileCounts, isLoading: countsLoading, error: countsError } = useProfileCountsByResourceType();
-  const { data: completionData, isLoading: completionLoading, error: completionError } = useProfileCompletionByResourceType();
+  const { data: completionStats, isLoading, error } = useProfileCompletionStatistics();
 
-  if (countsError || completionError) {
+  if (error) {
     return (
       <Card>
         <CardContent className="p-6">
           <div className="text-center text-red-600">
-            Error loading profile statistics: {countsError?.message || completionError?.message}
+            Error loading profile statistics: {error.message}
           </div>
         </CardContent>
       </Card>
     );
   }
 
-  if (countsLoading || completionLoading) {
+  if (isLoading) {
     return (
       <Card>
         <CardHeader>
           <Skeleton className="h-6 w-48" />
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-3 gap-6">
-            {[1, 2, 3].map((i) => (
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
+            {[1, 2, 3, 4].map((i) => (
               <div key={i} className="space-y-2">
-                <Skeleton className="h-4 w-20" />
+                <Skeleton className="h-4 w-24" />
                 <Skeleton className="h-8 w-16" />
+                <Skeleton className="h-3 w-20" />
               </div>
             ))}
           </div>
@@ -47,11 +46,6 @@ export const ProfileStatisticsOverview: React.FC = () => {
       </Card>
     );
   }
-
-  const totalProfiles = profileCounts?.reduce((sum, item) => sum + item.profile_count, 0) || 0;
-  const totalCompleted = completionData?.reduce((sum, item) => sum + item.completed_profiles, 0) || 0;
-  const totalIncomplete = completionData?.reduce((sum, item) => sum + item.incomplete_profiles, 0) || 0;
-  const overallCompletionRate = totalProfiles > 0 ? Math.round((totalCompleted / totalProfiles) * 100) : 0;
 
   return (
     <TooltipProvider>
@@ -63,8 +57,8 @@ export const ProfileStatisticsOverview: React.FC = () => {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-3 gap-6">
-            {/* Total Profiles with Breakdown */}
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
+            {/* Total Profiles with Resource Type Breakdown */}
             <Tooltip>
               <TooltipTrigger asChild>
                 <div className="space-y-2 cursor-help">
@@ -72,45 +66,45 @@ export const ProfileStatisticsOverview: React.FC = () => {
                     <Users className="h-4 w-4" />
                     Total Profiles
                   </div>
-                  <div className="text-2xl font-bold">{totalProfiles}</div>
+                  <div className="text-2xl font-bold">{completionStats?.total_profiles || 0}</div>
+                  <div className="text-sm text-muted-foreground">All employees</div>
                 </div>
               </TooltipTrigger>
               <TooltipContent side="bottom" className="w-64">
                 <div className="space-y-2">
                   <div className="font-medium">Breakdown by Resource Type:</div>
-                  {profileCounts?.map((item) => (
+                  {completionStats?.resource_type_breakdown?.map((item) => (
                     <div key={item.resource_type_id || 'unspecified'} className="flex justify-between text-sm">
-                      <span>{item.resource_type_name || 'Unspecified'}</span>
-                      <span className="font-medium">{item.profile_count}</span>
+                      <span>{item.resource_type_name}</span>
+                      <span className="font-medium">{item.total_profiles}</span>
                     </div>
                   ))}
                 </div>
               </TooltipContent>
             </Tooltip>
 
-            {/* Completed Profiles with Breakdown */}
+            {/* Average CV Completion Rate */}
             <Tooltip>
               <TooltipTrigger asChild>
                 <div className="space-y-2 cursor-help">
                   <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
-                    <CheckCircle className="h-4 w-4 text-green-600" />
-                    Completed CVs
+                    <TrendingUp className="h-4 w-4 text-blue-600" />
+                    Avg CV Completion
                   </div>
-                  <div className="text-2xl font-bold text-green-600">{totalCompleted}</div>
-                  <div className="text-sm text-muted-foreground">{overallCompletionRate}% complete</div>
+                  <div className="text-2xl font-bold text-blue-600">
+                    {completionStats?.avg_completion_rate || 0}%
+                  </div>
+                  <div className="text-sm text-muted-foreground">Overall average</div>
                 </div>
               </TooltipTrigger>
               <TooltipContent side="bottom" className="w-64">
                 <div className="space-y-2">
-                  <div className="font-medium">Completed by Resource Type:</div>
-                  {completionData?.map((item) => (
+                  <div className="font-medium">Average Completion by Resource Type:</div>
+                  {completionStats?.resource_type_breakdown?.map((item) => (
                     <div key={item.resource_type_id || 'unspecified'} className="space-y-1">
                       <div className="flex justify-between text-sm">
-                        <span>{item.resource_type_name || 'Unspecified'}</span>
-                        <span className="font-medium">{item.completed_profiles}/{item.total_profiles}</span>
-                      </div>
-                      <div className="text-xs text-muted-foreground">
-                        {Math.round(item.completion_rate)}% completion rate
+                        <span>{item.resource_type_name}</span>
+                        <span className="font-medium">{item.avg_completion_rate}%</span>
                       </div>
                     </div>
                   ))}
@@ -118,32 +112,52 @@ export const ProfileStatisticsOverview: React.FC = () => {
               </TooltipContent>
             </Tooltip>
 
-            {/* Incomplete Profiles with Breakdown */}
+            {/* CVs Above 50% Complete */}
             <Tooltip>
               <TooltipTrigger asChild>
                 <div className="space-y-2 cursor-help">
                   <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
-                    <AlertCircle className="h-4 w-4 text-orange-600" />
-                    Incomplete CVs
+                    <Target className="h-4 w-4 text-orange-600" />
+                    CVs &gt; 50% Complete
                   </div>
-                  <div className="text-2xl font-bold text-orange-600">{totalIncomplete}</div>
-                  <div className="text-sm text-muted-foreground">{100 - overallCompletionRate}% incomplete</div>
+                  <div className="text-2xl font-bold text-orange-600">
+                    {completionStats?.profiles_above_50_percent || 0}
+                  </div>
+                  <div className="text-sm text-muted-foreground">
+                    {completionStats?.total_profiles ? 
+                      Math.round((completionStats.profiles_above_50_percent / completionStats.total_profiles) * 100) 
+                      : 0}% of total
+                  </div>
                 </div>
               </TooltipTrigger>
-              <TooltipContent side="bottom" className="w-64">
-                <div className="space-y-2">
-                  <div className="font-medium">Incomplete by Resource Type:</div>
-                  {completionData?.map((item) => (
-                    <div key={item.resource_type_id || 'unspecified'} className="space-y-1">
-                      <div className="flex justify-between text-sm">
-                        <span>{item.resource_type_name || 'Unspecified'}</span>
-                        <span className="font-medium">{item.incomplete_profiles}/{item.total_profiles}</span>
-                      </div>
-                      <div className="text-xs text-muted-foreground">
-                        {Math.round(100 - item.completion_rate)}% incomplete
-                      </div>
-                    </div>
-                  ))}
+              <TooltipContent side="bottom" className="w-48">
+                <div className="text-sm">
+                  Profiles with more than half of their CV sections completed (4+ out of 8 sections)
+                </div>
+              </TooltipContent>
+            </Tooltip>
+
+            {/* CVs Above 75% Complete */}
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <div className="space-y-2 cursor-help">
+                  <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
+                    <CheckCircle2 className="h-4 w-4 text-green-600" />
+                    CVs &gt; 75% Complete
+                  </div>
+                  <div className="text-2xl font-bold text-green-600">
+                    {completionStats?.profiles_above_75_percent || 0}
+                  </div>
+                  <div className="text-sm text-muted-foreground">
+                    {completionStats?.total_profiles ? 
+                      Math.round((completionStats.profiles_above_75_percent / completionStats.total_profiles) * 100) 
+                      : 0}% of total
+                  </div>
+                </div>
+              </TooltipTrigger>
+              <TooltipContent side="bottom" className="w-48">
+                <div className="text-sm">
+                  Profiles with most of their CV sections completed (6+ out of 8 sections)
                 </div>
               </TooltipContent>
             </Tooltip>

@@ -1383,6 +1383,16 @@ export type Database = {
           total_profiles: number
         }[]
       }
+      get_profile_completion_statistics: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          avg_completion_rate: number
+          profiles_above_50_percent: number
+          profiles_above_75_percent: number
+          resource_type_breakdown: Json
+          total_profiles: number
+        }[]
+      }
       get_profile_counts_by_resource_type: {
         Args: Record<PropertyKey, never>
         Returns: {
