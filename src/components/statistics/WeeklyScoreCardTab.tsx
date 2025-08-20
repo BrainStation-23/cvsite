@@ -131,7 +131,7 @@ export const WeeklyScoreCardTab: React.FC = () => {
               <Table className="border-collapse border border-border">
                 <TableHeader>
                   <TableRow className="border-b border-border">
-                    <TableHead className="border-r border-border w-48 h-8 p-2 text-xs font-semibold bg-muted"></TableHead>
+                    <TableHead className="sticky left-0 z-20 border-r border-border w-48 h-8 p-2 text-xs font-semibold bg-muted"></TableHead>
                     {scoreCards.map((scoreCard) => (
                       <TableHead key={scoreCard.id} className="border-r border-border text-center h-8 p-2">
                         <div className="text-primary font-semibold text-xs">
@@ -146,8 +146,8 @@ export const WeeklyScoreCardTab: React.FC = () => {
                 </TableHeader>
                 <TableBody>
                   {/* Billable Header Row */}
-                  <TableRow className="border-b border-border bg-primary text-primary-foreground">
-                    <TableCell className="border-r border-border font-bold text-sm h-12 p-2">Billable</TableCell>
+                  <TableRow className="border-b border-border bg-primary hover:bg-primary text-primary-foreground">
+                    <TableCell className="sticky left-0 z-20 bg-primary  border-r border-border font-bold text-sm h-12 p-2">Billable</TableCell>
                     {scoreCards.map((scoreCard) => {
                       const totalBillable = scoreCard.billed_count + scoreCard.non_billed_count;
                       return (
@@ -160,7 +160,7 @@ export const WeeklyScoreCardTab: React.FC = () => {
 
                   {/* Billed Breakdown */}
                   <TableRow className="border-b border-border bg-blue-50 hover:bg-blue-200 hover:text-blue-900">
-                    <TableCell className="border-r border-border pl-6 text-blue-700 font-medium text-sm h-6 p-2">Billed</TableCell>
+                    <TableCell className="sticky left-0 z-20 bg-blue-50 border-r border-border pl-6 text-blue-700 font-medium text-sm h-6 p-2">Billed</TableCell>
                     {scoreCards.map((scoreCard) => (
                       <TableCell key={scoreCard.id} className="border-r border-border text-center font-medium text-sm h-6 p-2">
                         {scoreCard.billed_count}
@@ -169,8 +169,8 @@ export const WeeklyScoreCardTab: React.FC = () => {
                   </TableRow>
 
                   {/* Non Billed Breakdown */}
-                  <TableRow className="border-b border-border bg-blue-50 hover:bg-blue-200 hover:text-blue-900">
-                    <TableCell className="border-r border-border pl-6 text-blue-700 font-medium text-sm h-6 p-2">Non Billed</TableCell>
+                  <TableRow className="border-b border-border bg-blue-50 hover:bg-blue-50 hover:text-blue-900">
+                    <TableCell className="sticky left-0 z-20 bg-blue-50 border-r border-border pl-6 text-blue-700 font-medium text-sm h-6 p-2">Non Billed</TableCell>
                     {scoreCards.map((scoreCard) => (
                       <TableCell key={scoreCard.id} className="border-r border-border text-center font-medium text-sm h-6 p-2">
                         {scoreCard.non_billed_count}
@@ -179,8 +179,8 @@ export const WeeklyScoreCardTab: React.FC = () => {
                   </TableRow>
 
                   {/* Utilization Rate Header Row */}
-                  <TableRow className="border-b border-border bg-secondary text-secondary-foreground">
-                    <TableCell className="border-r border-border font-bold text-sm h-12 p-2">Utilization Rate</TableCell>
+                  <TableRow className="border-b border-border bg-secondary hover:bg-secondary text-secondary-foreground">
+                    <TableCell className="sticky left-0 z-20 bg-secondary border-r border-border font-bold text-sm h-12 p-2">Utilization Rate</TableCell>
                     {scoreCards.map((scoreCard) => {
                       const utilizationPercentage = (scoreCard.utilization_rate * 100).toFixed(1);
                       return (
@@ -192,8 +192,8 @@ export const WeeklyScoreCardTab: React.FC = () => {
                   </TableRow>
 
                   {/* Non Billed Breakdown Header */}
-                  <TableRow className="border-b border-border bg-orange-600 text-white">
-                    <TableCell className="border-r border-border font-bold text-sm h-12 p-2">Non Billed Breakdown</TableCell>
+                  <TableRow className="border-b border-border bg-orange-600 hover:bg-orange-600 text-white">
+                    <TableCell className="sticky left-0 z-20 bg-orange-600 border-r border-border font-bold text-sm h-12 p-2">Non Billed Breakdown</TableCell>
                     {scoreCards.map((scoreCard) => {
                       const nonBilledTotal = scoreCard.jsonb_record?.non_billed_distribution?.reduce((sum: number, item: any) => sum + item.count, 0) || 0;
                       return (
@@ -207,7 +207,7 @@ export const WeeklyScoreCardTab: React.FC = () => {
                   {/* Non Billed Distribution Items */}
                   {scoreCards[0]?.jsonb_record?.non_billed_distribution?.map((item: any, index: number) => (
                     <TableRow key={`non-billed-${index}`} className="border-b border-border bg-orange-50 hover:bg-orange-200 hover:text-orange-900">
-                      <TableCell className="border-r border-border pl-6 text-orange-700 text-sm h-6 p-2">{item.bill_type_name}</TableCell>
+                      <TableCell className="sticky left-0 z-20 bg-orange-50 border-r border-border pl-6 text-orange-700 text-sm h-6 p-2">{item.bill_type_name}</TableCell>
                       {scoreCards.map((scoreCard) => {
                         const matchingItem = scoreCard.jsonb_record?.non_billed_distribution?.find((dist: any) => dist.bill_type_name === item.bill_type_name);
                         return (
@@ -220,8 +220,8 @@ export const WeeklyScoreCardTab: React.FC = () => {
                   ))}
 
                   {/* Support Breakdown Header */}
-                  <TableRow className="border-b border-border bg-green-600 text-white">
-                    <TableCell className="border-r border-border font-bold text-sm h-12 p-2">Support Breakdown</TableCell>
+                  <TableRow className="border-b border-border bg-green-600 hover:bg-green-600 text-white">
+                    <TableCell className="sticky left-0 z-20 bg-green-600 border-r border-border font-bold text-sm h-12 p-2">Support Breakdown</TableCell>
                     {scoreCards.map((scoreCard) => {
                       const supportTotal = scoreCard.jsonb_record?.support_distribution?.reduce((sum: number, item: any) => sum + item.count, 0) || 0;
                       return (
@@ -235,7 +235,7 @@ export const WeeklyScoreCardTab: React.FC = () => {
                   {/* Support Distribution Items */}
                   {scoreCards[0]?.jsonb_record?.support_distribution?.map((item: any, index: number) => (
                     <TableRow key={`support-${index}`} className="border-b border-border bg-green-50 hover:bg-green-200 hover:text-green-900">
-                      <TableCell className="border-r border-border pl-6 text-green-700 text-sm h-6 p-2">{item.bill_type_name}</TableCell>
+                      <TableCell className="sticky left-0 z-20 bg-green-50 border-r border-border pl-6 text-green-700 text-sm h-6 p-2">{item.bill_type_name}</TableCell>
                       {scoreCards.map((scoreCard) => {
                         const matchingItem = scoreCard.jsonb_record?.support_distribution?.find((dist: any) => dist.bill_type_name === item.bill_type_name);
                         return (
@@ -248,8 +248,8 @@ export const WeeklyScoreCardTab: React.FC = () => {
                   ))}
 
                   {/* Grand Total Header Row */}
-                  <TableRow className="border-t-2 border-gray-400 bg-gray-900 text-white">
-                    <TableCell className="border-r border-border font-bold text-sm h-12 p-2">Grand Total</TableCell>
+                  <TableRow className="border-t-2 border-gray-400 bg-gray-900 hover:bg-gray-900 text-white">
+                    <TableCell className="sticky left-0 z-20 bg-gray-900 border-r border-border font-bold text-sm h-12 p-2">Grand Total</TableCell>
                     {scoreCards.map((scoreCard) => {
                       const grandTotal = scoreCard.billed_count + scoreCard.non_billed_count + 
                         (scoreCard.jsonb_record?.support_distribution?.reduce((sum: number, item: any) => sum + item.count, 0) || 0);
