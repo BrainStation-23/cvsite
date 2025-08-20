@@ -26,18 +26,23 @@ export const useBillTypes = () => {
       .from('bill_types')
       .select(`
         *,
-        resource_types!bill_types_resource_type_fkey (
+        resource_types (
           id,
           name
         )
       `)
       .order('name');
     
-    if (error) throw error;
+    if (error) {
+      console.error('Error fetching bill types:', error);
+      throw error;
+    }
     
     // Transform the data to flatten the resource type information
-    return data.map(item => ({
+    return (data || []).map(item => ({
       ...item,
+      is_support: item.is_support || false,
+      non_billed: item.non_billed || false,
       resource_type_name: item.resource_types?.name || null
     })) as BillTypeItem[];
   };

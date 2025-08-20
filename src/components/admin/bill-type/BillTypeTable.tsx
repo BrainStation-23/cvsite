@@ -15,9 +15,6 @@ export const BillTypeTable: React.FC = () => {
   const { items, isLoading, addItem, updateItem, removeItem, isAddingItem, isUpdatingItem, isRemovingItem } = useBillTypes();
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editValue, setEditValue] = useState('');
-  const [editIsBillable, setEditIsBillable] = useState(false);
-  const [editIsSupport, setEditIsSupport] = useState(false);
-  const [editNonBilled, setEditNonBilled] = useState(false);
   const [editResourceType, setEditResourceType] = useState<string | null>(null);
   const [newItemValue, setNewItemValue] = useState('');
   const [newIsBillable, setNewIsBillable] = useState(false);
@@ -29,9 +26,6 @@ export const BillTypeTable: React.FC = () => {
   const handleEdit = (item: BillTypeItem) => {
     setEditingId(item.id);
     setEditValue(item.name);
-    setEditIsBillable(item.is_billable);
-    setEditIsSupport(item.is_support || false);
-    setEditNonBilled(item.non_billed || false);
     setEditResourceType(item.resource_type || null);
   };
 
@@ -39,12 +33,17 @@ export const BillTypeTable: React.FC = () => {
     if (editValue.trim() && editingId) {
       const originalItem = items?.find(item => item.id === editingId);
       if (originalItem) {
-        updateItem(editingId, editValue.trim(), originalItem.name, editIsBillable, editIsSupport, editNonBilled, editResourceType);
+        updateItem(
+          editingId, 
+          editValue.trim(), 
+          originalItem.name, 
+          originalItem.is_billable,
+          originalItem.is_support,
+          originalItem.non_billed,
+          editResourceType
+        );
         setEditingId(null);
         setEditValue('');
-        setEditIsBillable(false);
-        setEditIsSupport(false);
-        setEditNonBilled(false);
         setEditResourceType(null);
       }
     }
@@ -53,9 +52,6 @@ export const BillTypeTable: React.FC = () => {
   const handleCancelEdit = () => {
     setEditingId(null);
     setEditValue('');
-    setEditIsBillable(false);
-    setEditIsSupport(false);
-    setEditNonBilled(false);
     setEditResourceType(null);
   };
 
@@ -86,16 +82,17 @@ export const BillTypeTable: React.FC = () => {
     }
   };
 
-  const handleToggleBillable = (item: BillTypeItem) => {
-    updateItem(item.id, item.name, item.name, !item.is_billable, item.is_support || false, item.non_billed || false, item.resource_type || null);
-  };
-
-  const handleToggleSupport = (item: BillTypeItem) => {
-    updateItem(item.id, item.name, item.name, item.is_billable, !item.is_support, item.non_billed || false, item.resource_type || null);
-  };
-
-  const handleToggleNonBilled = (item: BillTypeItem) => {
-    updateItem(item.id, item.name, item.name, item.is_billable, item.is_support || false, !item.non_billed, item.resource_type || null);
+  const handleToggle = (item: BillTypeItem, field: 'is_billable' | 'is_support' | 'non_billed') => {
+    const newValue = !item[field];
+    updateItem(
+      item.id, 
+      item.name, 
+      item.name, 
+      field === 'is_billable' ? newValue : item.is_billable,
+      field === 'is_support' ? newValue : item.is_support,
+      field === 'non_billed' ? newValue : item.non_billed,
+      item.resource_type || null
+    );
   };
 
   if (isLoading) {
@@ -103,59 +100,60 @@ export const BillTypeTable: React.FC = () => {
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       {/* Add new bill type */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <div className="space-y-4">
-          <Input
-            placeholder="Enter new bill type..."
-            value={newItemValue}
-            onChange={(e) => setNewItemValue(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && handleAddNew()}
-          />
-          
-          <div className="w-full">
+      <div className="border rounded-lg p-4 bg-muted/50">
+        <h3 className="text-lg font-semibold mb-4">Add New Bill Type</h3>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <div className="space-y-4">
+            <Input
+              placeholder="Enter bill type name..."
+              value={newItemValue}
+              onChange={(e) => setNewItemValue(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && handleAddNew()}
+            />
+            
             <ResourceTypeCombobox
               value={newResourceType}
               onValueChange={setNewResourceType}
               placeholder="Select resource type..."
             />
           </div>
-        </div>
-        
-        <div className="space-y-4">
-          <div className="grid grid-cols-3 gap-4">
-            <div className="flex items-center space-x-2">
-              <Switch
-                checked={newIsBillable}
-                onCheckedChange={setNewIsBillable}
-              />
-              <label className="text-sm text-gray-600">Billable</label>
-            </div>
-            <div className="flex items-center space-x-2">
-              <Switch
-                checked={newIsSupport}
-                onCheckedChange={setNewIsSupport}
-              />
-              <label className="text-sm text-gray-600">Support</label>
-            </div>
-            <div className="flex items-center space-x-2">
-              <Switch
-                checked={newNonBilled}
-                onCheckedChange={setNewNonBilled}
-              />
-              <label className="text-sm text-gray-600">Non-Billed</label>
-            </div>
-          </div>
           
-          <Button 
-            onClick={handleAddNew}
-            disabled={!newItemValue.trim() || isAddingItem}
-            className="w-full"
-          >
-            <Plus className="h-4 w-4 mr-2" />
-            {isAddingItem ? 'Adding...' : 'Add Bill Type'}
-          </Button>
+          <div className="space-y-4">
+            <div className="grid grid-cols-1 gap-3">
+              <div className="flex items-center justify-between">
+                <label className="text-sm font-medium">Billable</label>
+                <Switch
+                  checked={newIsBillable}
+                  onCheckedChange={setNewIsBillable}
+                />
+              </div>
+              <div className="flex items-center justify-between">
+                <label className="text-sm font-medium">Support</label>
+                <Switch
+                  checked={newIsSupport}
+                  onCheckedChange={setNewIsSupport}
+                />
+              </div>
+              <div className="flex items-center justify-between">
+                <label className="text-sm font-medium">Non-Billed</label>
+                <Switch
+                  checked={newNonBilled}
+                  onCheckedChange={setNewNonBilled}
+                />
+              </div>
+            </div>
+            
+            <Button 
+              onClick={handleAddNew}
+              disabled={!newItemValue.trim() || isAddingItem}
+              className="w-full"
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              {isAddingItem ? 'Adding...' : 'Add Bill Type'}
+            </Button>
+          </div>
         </div>
       </div>
 
@@ -166,16 +164,14 @@ export const BillTypeTable: React.FC = () => {
             <TableRow>
               <TableHead>Name</TableHead>
               <TableHead>Resource Type</TableHead>
-              <TableHead>Billable</TableHead>
-              <TableHead>Support</TableHead>
-              <TableHead>Non-Billed</TableHead>
+              <TableHead className="text-center">Properties</TableHead>
               <TableHead className="w-[100px]">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {items?.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={6} className="text-center text-muted-foreground py-8">
+                <TableCell colSpan={4} className="text-center text-muted-foreground py-8">
                   No bill types found. Add one above to get started.
                 </TableCell>
               </TableRow>
@@ -215,6 +211,7 @@ export const BillTypeTable: React.FC = () => {
                       <span className="font-medium">{item.name}</span>
                     )}
                   </TableCell>
+                  
                   <TableCell>
                     {editingId === item.id ? (
                       <ResourceTypeCombobox
@@ -232,54 +229,39 @@ export const BillTypeTable: React.FC = () => {
                       )
                     )}
                   </TableCell>
+                  
                   <TableCell>
-                    {editingId === item.id ? (
-                      <Switch
-                        checked={editIsBillable}
-                        onCheckedChange={setEditIsBillable}
-                      />
-                    ) : (
-                      <div className="flex items-center">
+                    <div className="flex flex-col gap-2">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs text-muted-foreground">Billable</span>
                         <Switch
                           checked={item.is_billable}
-                          onCheckedChange={() => handleToggleBillable(item)}
-                          disabled={isUpdatingItem}
+                          onCheckedChange={() => handleToggle(item, 'is_billable')}
+                          disabled={isUpdatingItem || editingId === item.id}
+                          size="sm"
                         />
                       </div>
-                    )}
-                  </TableCell>
-                  <TableCell>
-                    {editingId === item.id ? (
-                      <Switch
-                        checked={editIsSupport}
-                        onCheckedChange={setEditIsSupport}
-                      />
-                    ) : (
-                      <div className="flex items-center">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs text-muted-foreground">Support</span>
                         <Switch
-                          checked={item.is_support || false}
-                          onCheckedChange={() => handleToggleSupport(item)}
-                          disabled={isUpdatingItem}
+                          checked={item.is_support}
+                          onCheckedChange={() => handleToggle(item, 'is_support')}
+                          disabled={isUpdatingItem || editingId === item.id}
+                          size="sm"
                         />
                       </div>
-                    )}
-                  </TableCell>
-                  <TableCell>
-                    {editingId === item.id ? (
-                      <Switch
-                        checked={editNonBilled}
-                        onCheckedChange={setEditNonBilled}
-                      />
-                    ) : (
-                      <div className="flex items-center">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs text-muted-foreground">Non-Billed</span>
                         <Switch
-                          checked={item.non_billed || false}
-                          onCheckedChange={() => handleToggleNonBilled(item)}
-                          disabled={isUpdatingItem}
+                          checked={item.non_billed}
+                          onCheckedChange={() => handleToggle(item, 'non_billed')}
+                          disabled={isUpdatingItem || editingId === item.id}
+                          size="sm"
                         />
                       </div>
-                    )}
+                    </div>
                   </TableCell>
+                  
                   <TableCell>
                     <div className="flex gap-1">
                       <Button
@@ -287,6 +269,7 @@ export const BillTypeTable: React.FC = () => {
                         variant="ghost"
                         onClick={() => handleEdit(item)}
                         disabled={editingId === item.id || isUpdatingItem}
+                        title="Edit name and resource type"
                       >
                         <Pencil className="h-4 w-4" />
                       </Button>
@@ -295,6 +278,7 @@ export const BillTypeTable: React.FC = () => {
                         variant="ghost"
                         onClick={() => handleDelete(item)}
                         disabled={isRemovingItem || editingId === item.id}
+                        title="Delete bill type"
                       >
                         <Trash2 className="h-4 w-4" />
                       </Button>
