@@ -1,13 +1,13 @@
-
 import React, { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { TemplateStructureGuide } from './TemplateStructureGuide';
 import { useEmployeeData } from '@/hooks/use-employee-data';
 import { Button } from '@/components/ui/button';
-import { Copy, ChevronDown, ChevronRight } from 'lucide-react';
+import { Copy, ChevronDown, ChevronRight, Bot } from 'lucide-react';
 import { toast } from 'sonner';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { generateAIPrompt } from '@/utils/ai-prompt-generator';
 
 interface TemplateVariableHelperProps {
   selectedEmployeeId: string | null;
@@ -41,6 +41,12 @@ export const TemplateVariableHelper: React.FC<TemplateVariableHelperProps> = ({
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
     toast.success('Copied to clipboard');
+  };
+
+  const copyAIPrompt = () => {
+    const prompt = generateAIPrompt();
+    navigator.clipboard.writeText(prompt);
+    toast.success('AI prompt copied to clipboard! Paste it into your AI assistant along with a design reference image.');
   };
 
   const toggleGroup = (groupTitle: string) => {
@@ -144,6 +150,21 @@ export const TemplateVariableHelper: React.FC<TemplateVariableHelperProps> = ({
   const VariablesTab = () => (
     <ScrollArea className="flex-1">
       <div className="p-3 space-y-2">
+        {/* AI Prompt Button */}
+        <div className="mb-4">
+          <Button
+            onClick={copyAIPrompt}
+            className="w-full"
+            variant="outline"
+          >
+            <Bot className="h-4 w-4 mr-2" />
+            Copy AI Prompt
+          </Button>
+          <p className="text-xs text-muted-foreground mt-1 px-1">
+            Generate a prompt for AI to create CV templates with design reference
+          </p>
+        </div>
+
         {variableGroups.map((group) => (
           <div key={group.title} className="border rounded-md">
             <button
