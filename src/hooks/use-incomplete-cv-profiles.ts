@@ -1,3 +1,4 @@
+
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -55,7 +56,7 @@ export function useIncompleteCvProfiles({
         throw error;
       }
 
-      const response = data as PaginatedResponse;
+      const response = data as unknown as PaginatedResponse;
       return {
         profiles: response.profiles || [],
         total_count: response.pagination.filtered_count,
