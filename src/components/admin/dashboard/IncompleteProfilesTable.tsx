@@ -47,8 +47,8 @@ export const IncompleteProfilesTable: React.FC = () => {
             <SelectContent>
               <SelectItem value="all">All Resource Types</SelectItem>
               {resourceTypes?.map((type) => (
-                <SelectItem key={type.resource_type} value={type.resource_type}>
-                  {type.resource_type || 'Unspecified'}
+                <SelectItem key={type.resource_type_id || 'unspecified'} value={type.resource_type_id || 'unspecified'}>
+                  {type.resource_type_name || 'Unspecified'}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -80,41 +80,47 @@ export const IncompleteProfilesTable: React.FC = () => {
           </div>
         ) : (
           <div className="space-y-4">
-            {incompleteProfiles.map((profile) => (
-              <div key={profile.profile_id} className="p-4 border rounded-lg">
-                <div className="flex items-center justify-between mb-2">
-                  <div>
-                    <h4 className="font-medium">
-                      {profile.first_name} {profile.last_name}
-                    </h4>
-                    <p className="text-sm text-muted-foreground">
-                      ID: {profile.employee_id} • {profile.resource_type || 'Unspecified'}
-                    </p>
+            {incompleteProfiles.map((profile) => {
+              const completionPercentage = profile.total_sections > 0 
+                ? Math.round((profile.completion_score / profile.total_sections) * 100)
+                : 0;
+              
+              return (
+                <div key={profile.profile_id} className="p-4 border rounded-lg">
+                  <div className="flex items-center justify-between mb-2">
+                    <div>
+                      <h4 className="font-medium">
+                        {profile.first_name} {profile.last_name}
+                      </h4>
+                      <p className="text-sm text-muted-foreground">
+                        ID: {profile.employee_id} • {profile.resource_type_name || 'Unspecified'}
+                      </p>
+                    </div>
+                    <div className="text-right">
+                      <div className="text-sm font-medium">
+                        {completionPercentage}% Complete
+                      </div>
+                      <div className="text-xs text-muted-foreground">
+                        {profile.missing_count} missing sections
+                      </div>
+                    </div>
                   </div>
-                  <div className="text-right">
-                    <div className="text-sm font-medium">
-                      {Math.round(profile.completion_percentage)}% Complete
-                    </div>
-                    <div className="text-xs text-muted-foreground">
-                      {profile.missing_count} missing sections
-                    </div>
+                  
+                  <Progress 
+                    value={completionPercentage} 
+                    className="mb-3"
+                  />
+                  
+                  <div className="flex flex-wrap gap-2">
+                    {profile.missing_sections.map((section) => (
+                      <Badge key={section} variant="destructive" className="text-xs">
+                        {section.replace('_', ' ').toUpperCase()}
+                      </Badge>
+                    ))}
                   </div>
                 </div>
-                
-                <Progress 
-                  value={profile.completion_percentage} 
-                  className="mb-3"
-                />
-                
-                <div className="flex flex-wrap gap-2">
-                  {profile.missing_sections.map((section) => (
-                    <Badge key={section} variant="destructive" className="text-xs">
-                      {section.replace('_', ' ').toUpperCase()}
-                    </Badge>
-                  ))}
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </CardContent>

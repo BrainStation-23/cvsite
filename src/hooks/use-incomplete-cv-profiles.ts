@@ -7,8 +7,10 @@ interface IncompleteProfile {
   first_name: string;
   last_name: string;
   employee_id: string;
-  resource_type: string;
-  completion_percentage: number;
+  resource_type_id: string;
+  resource_type_name: string;
+  completion_score: number;
+  total_sections: number;
   missing_sections: string[];
   missing_count: number;
 }

@@ -38,7 +38,7 @@ export const ProfileCountCards: React.FC = () => {
     );
   }
 
-  const totalProfiles = profileCounts?.reduce((sum, item) => sum + item.count, 0) || 0;
+  const totalProfiles = profileCounts?.reduce((sum, item) => sum + item.profile_count, 0) || 0;
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -55,17 +55,17 @@ export const ProfileCountCards: React.FC = () => {
 
       {/* Resource Type Cards */}
       {profileCounts?.map((item) => (
-        <Card key={item.resource_type}>
+        <Card key={item.resource_type_id || 'unspecified'}>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
-              {item.resource_type || 'Unspecified'}
+              {item.resource_type_name || 'Unspecified'}
             </CardTitle>
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{item.count}</div>
+            <div className="text-2xl font-bold">{item.profile_count}</div>
             <p className="text-xs text-muted-foreground">
-              {totalProfiles > 0 ? Math.round((item.count / totalProfiles) * 100) : 0}% of total
+              {totalProfiles > 0 ? Math.round((item.profile_count / totalProfiles) * 100) : 0}% of total
             </p>
           </CardContent>
         </Card>
