@@ -13,6 +13,7 @@ import { Badge } from '@/components/ui/badge';
 import { useResourceChanges } from '@/hooks/use-resource-changes';
 import { BillTypeMultiSelect } from './BillTypeMultiSelect';
 import { SbuMultiSelect } from './SbuMultiSelect';
+import Papa from 'papaparse';
 
 export const ResourceChangesTab: React.FC = () => {
   const {
@@ -28,41 +29,47 @@ export const ResourceChangesTab: React.FC = () => {
     isLoading,
   } = useResourceChanges();
 
-  const exportToCsv = () => {
-    const csvData = [];
-    
-    // Add bill type changes
-    billTypeChanges?.forEach(change => {
-      csvData.push({
-        Type: 'Bill Type Change',
-        Date: format(new Date(change.changed_at), 'yyyy-MM-dd HH:mm:ss'),
-        Entity: change.project_name,
-        'Old Value': change.old_bill_type_name,
-        'New Value': change.new_bill_type_name,
-      });
-    });
+  const exportBillTypeChangesToCsv = () => {
+    if (!billTypeChanges || billTypeChanges.length === 0) {
+      return;
+    }
 
-    // Add SBU changes
-    sbuChanges?.forEach(change => {
-      csvData.push({
-        Type: 'SBU Change',
-        Date: format(new Date(change.changed_at), 'yyyy-MM-dd HH:mm:ss'),
-        Entity: `${change.first_name} ${change.last_name} (${change.employee_id})`,
-        'Old Value': change.old_sbu_name,
-        'New Value': change.new_sbu_name,
-      });
-    });
+    const csvData = billTypeChanges.map(change => ({
+      'Date': format(new Date(change.changed_at), 'yyyy-MM-dd HH:mm:ss'),
+      'Project': change.project_name,
+      'Old Bill Type': change.old_bill_type_name,
+      'New Bill Type': change.new_bill_type_name,
+    }));
 
-    const csv = [
-      Object.keys(csvData[0] || {}).join(','),
-      ...csvData.map(row => Object.values(row).join(','))
-    ].join('\n');
-
-    const blob = new Blob([csv], { type: 'text/csv' });
+    const csv = Papa.unparse(csvData);
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `resource-changes-${format(new Date(), 'yyyy-MM-dd')}.csv`;
+    a.download = `bill-type-changes-${format(new Date(), 'yyyy-MM-dd')}.csv`;
+    a.click();
+    window.URL.revokeObjectURL(url);
+  };
+
+  const exportSbuChangesToCsv = () => {
+    if (!sbuChanges || sbuChanges.length === 0) {
+      return;
+    }
+
+    const csvData = sbuChanges.map(change => ({
+      'Date': format(new Date(change.changed_at), 'yyyy-MM-dd HH:mm:ss'),
+      'Employee Name': `${change.first_name} ${change.last_name}`,
+      'Employee ID': change.employee_id,
+      'Old SBU': change.old_sbu_name,
+      'New SBU': change.new_sbu_name,
+    }));
+
+    const csv = Papa.unparse(csvData);
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `sbu-changes-${format(new Date(), 'yyyy-MM-dd')}.csv`;
     a.click();
     window.URL.revokeObjectURL(url);
   };
@@ -225,7 +232,12 @@ export const ResourceChangesTab: React.FC = () => {
           <CardHeader>
             <div className="flex items-center justify-between">
               <CardTitle className="text-lg">Bill Type Changes</CardTitle>
-              <Button variant="outline" size="sm" onClick={exportToCsv}>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={exportBillTypeChangesToCsv}
+                disabled={!billTypeChanges || billTypeChanges.length === 0 || billTypeChangesLoading}
+              >
                 <Download className="h-4 w-4 mr-2" />
                 Export CSV
               </Button>
@@ -278,7 +290,18 @@ export const ResourceChangesTab: React.FC = () => {
         {/* SBU Changes */}
         <Card>
           <CardHeader>
-            <CardTitle className="text-lg">SBU Changes</CardTitle>
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-lg">SBU Changes</CardTitle>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={exportSbuChangesToCsv}
+                disabled={!sbuChanges || sbuChanges.length === 0 || sbuChangesLoading}
+              >
+                <Download className="h-4 w-4 mr-2" />
+                Export CSV
+              </Button>
+            </div>
           </CardHeader>
           <CardContent>
             <div className="max-h-96 overflow-auto">
