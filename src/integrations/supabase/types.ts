@@ -1288,6 +1288,25 @@ export type Database = {
         Args: { target_user_id?: string }
         Returns: Json
       }
+      get_bill_type_changes: {
+        Args: {
+          bill_type_ids?: string[]
+          end_date_param?: string
+          project_ids?: string[]
+          start_date_param?: string
+        }
+        Returns: {
+          changed_at: string
+          created_at: string
+          id: string
+          new_bill_type_id: string
+          new_bill_type_name: string
+          old_bill_type_id: string
+          old_bill_type_name: string
+          project_id: string
+          project_name: string
+        }[]
+      }
       get_employee_data: {
         Args: { profile_uuid: string }
         Returns: Json
@@ -1335,20 +1354,6 @@ export type Database = {
       get_experiences_by_company: {
         Args: { profile_uuid: string }
         Returns: Json
-      }
-      get_incomplete_cv_profiles: {
-        Args: { resource_type_filter?: string }
-        Returns: {
-          completion_score: number
-          employee_id: string
-          first_name: string
-          last_name: string
-          missing_sections: string[]
-          profile_id: string
-          resource_type_id: string
-          resource_type_name: string
-          total_sections: number
-        }[]
       }
       get_incomplete_cv_profiles_paginated: {
         Args: {
@@ -1410,6 +1415,10 @@ export type Database = {
           resource_type_name: string
         }[]
       }
+      get_resource_changes_summary: {
+        Args: { end_date_param?: string; start_date_param?: string }
+        Returns: Json
+      }
       get_resource_count_statistics: {
         Args: {
           bill_type_filter?: string
@@ -1433,6 +1442,27 @@ export type Database = {
           start_date_filter?: string
         }
         Returns: Json
+      }
+      get_sbu_changes: {
+        Args: {
+          end_date_param?: string
+          profile_ids?: string[]
+          sbu_ids?: string[]
+          start_date_param?: string
+        }
+        Returns: {
+          changed_at: string
+          created_at: string
+          employee_id: string
+          first_name: string
+          id: string
+          last_name: string
+          new_sbu_id: string
+          new_sbu_name: string
+          old_sbu_id: string
+          old_sbu_name: string
+          profile_id: string
+        }[]
       }
       get_sbu_summary_stats: {
         Args: { sbu_filter?: string }
