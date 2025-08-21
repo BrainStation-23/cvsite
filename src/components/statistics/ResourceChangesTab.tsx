@@ -29,6 +29,36 @@ export const ResourceChangesTab: React.FC = () => {
     isLoading,
   } = useResourceChanges();
 
+  // Process bill type changes into breakdown statistics
+  const processBillTypeChanges = () => {
+    if (!billTypeChanges || billTypeChanges.length === 0) {
+      return new Map<string, number>();
+    }
+
+    const breakdown = new Map<string, number>();
+    billTypeChanges.forEach(change => {
+      const key = `${change.old_bill_type_name} → ${change.new_bill_type_name}`;
+      breakdown.set(key, (breakdown.get(key) || 0) + 1);
+    });
+
+    return breakdown;
+  };
+
+  // Process SBU changes into breakdown statistics
+  const processSbuChanges = () => {
+    if (!sbuChanges || sbuChanges.length === 0) {
+      return new Map<string, number>();
+    }
+
+    const breakdown = new Map<string, number>();
+    sbuChanges.forEach(change => {
+      const key = `${change.old_sbu_name} → ${change.new_sbu_name}`;
+      breakdown.set(key, (breakdown.get(key) || 0) + 1);
+    });
+
+    return breakdown;
+  };
+
   const exportBillTypeChangesToCsv = () => {
     if (!billTypeChanges || billTypeChanges.length === 0) {
       return;
@@ -84,6 +114,9 @@ export const ResourceChangesTab: React.FC = () => {
       </div>
     );
   }
+
+  const billTypeBreakdown = processBillTypeChanges();
+  const sbuBreakdown = processSbuChanges();
 
   return (
     <div className="space-y-6">
@@ -178,60 +211,106 @@ export const ResourceChangesTab: React.FC = () => {
         </CardContent>
       </Card>
 
-      {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      {/* Breakdown Tables */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Bill Type Changes Breakdown Table */}
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Changes</CardTitle>
+          <CardHeader>
+            <CardTitle className="text-lg">
+              Bill Type Changes ({billTypeChangesLoading ? '...' : billTypeChanges?.length || 0})
+            </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">
-              {summaryLoading ? '...' : summary?.total_changes || 0}
+            <div className="max-h-80 overflow-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Change Pattern</TableHead>
+                    <TableHead className="text-right">Count</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {billTypeChangesLoading ? (
+                    <TableRow>
+                      <TableCell colSpan={2} className="text-center">Loading breakdown...</TableCell>
+                    </TableRow>
+                  ) : billTypeBreakdown.size === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={2} className="text-center text-muted-foreground">
+                        No bill type changes found
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    Array.from(billTypeBreakdown.entries())
+                      .sort(([, a], [, b]) => b - a)
+                      .map(([change, count]) => (
+                        <TableRow key={change}>
+                          <TableCell className="font-medium">{change}</TableCell>
+                          <TableCell className="text-right">
+                            <Badge variant="secondary">{count}</Badge>
+                          </TableCell>
+                        </TableRow>
+                      ))
+                  )}
+                </TableBody>
+              </Table>
             </div>
           </CardContent>
         </Card>
 
+        {/* SBU Changes Breakdown Table */}
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Bill Type Changes</CardTitle>
+          <CardHeader>
+            <CardTitle className="text-lg">
+              SBU Changes ({sbuChangesLoading ? '...' : sbuChanges?.length || 0})
+            </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">
-              {summaryLoading ? '...' : summary?.bill_type_changes || 0}
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">SBU Changes</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {summaryLoading ? '...' : summary?.sbu_changes || 0}
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Recent Changes (7d)</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {summaryLoading ? '...' : summary?.recent_changes_7d || 0}
+            <div className="max-h-80 overflow-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Change Pattern</TableHead>
+                    <TableHead className="text-right">Count</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {sbuChangesLoading ? (
+                    <TableRow>
+                      <TableCell colSpan={2} className="text-center">Loading breakdown...</TableCell>
+                    </TableRow>
+                  ) : sbuBreakdown.size === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={2} className="text-center text-muted-foreground">
+                        No SBU changes found
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    Array.from(sbuBreakdown.entries())
+                      .sort(([, a], [, b]) => b - a)
+                      .map(([change, count]) => (
+                        <TableRow key={change}>
+                          <TableCell className="font-medium">{change}</TableCell>
+                          <TableCell className="text-right">
+                            <Badge variant="secondary">{count}</Badge>
+                          </TableCell>
+                        </TableRow>
+                      ))
+                  )}
+                </TableBody>
+              </Table>
             </div>
           </CardContent>
         </Card>
       </div>
 
-      {/* Changes Tables */}
+      {/* Changes Details Tables */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Bill Type Changes */}
+        {/* Bill Type Changes Details */}
         <Card>
           <CardHeader>
             <div className="flex items-center justify-between">
-              <CardTitle className="text-lg">Bill Type Changes</CardTitle>
+              <CardTitle className="text-lg">Bill Type Changes Details</CardTitle>
               <Button 
                 variant="outline" 
                 size="sm" 
@@ -287,11 +366,11 @@ export const ResourceChangesTab: React.FC = () => {
           </CardContent>
         </Card>
 
-        {/* SBU Changes */}
+        {/* SBU Changes Details */}
         <Card>
           <CardHeader>
             <div className="flex items-center justify-between">
-              <CardTitle className="text-lg">SBU Changes</CardTitle>
+              <CardTitle className="text-lg">SBU Changes Details</CardTitle>
               <Button 
                 variant="outline" 
                 size="sm" 
