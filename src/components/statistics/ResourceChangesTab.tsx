@@ -29,6 +29,36 @@ export const ResourceChangesTab: React.FC = () => {
     isLoading,
   } = useResourceChanges();
 
+  // Process bill type changes into breakdown statistics
+  const processBillTypeChanges = () => {
+    if (!billTypeChanges || billTypeChanges.length === 0) {
+      return new Map<string, number>();
+    }
+
+    const breakdown = new Map<string, number>();
+    billTypeChanges.forEach(change => {
+      const key = `${change.old_bill_type_name} → ${change.new_bill_type_name}`;
+      breakdown.set(key, (breakdown.get(key) || 0) + 1);
+    });
+
+    return breakdown;
+  };
+
+  // Process SBU changes into breakdown statistics
+  const processSbuChanges = () => {
+    if (!sbuChanges || sbuChanges.length === 0) {
+      return new Map<string, number>();
+    }
+
+    const breakdown = new Map<string, number>();
+    sbuChanges.forEach(change => {
+      const key = `${change.old_sbu_name} → ${change.new_sbu_name}`;
+      breakdown.set(key, (breakdown.get(key) || 0) + 1);
+    });
+
+    return breakdown;
+  };
+
   const exportBillTypeChangesToCsv = () => {
     if (!billTypeChanges || billTypeChanges.length === 0) {
       return;
@@ -84,6 +114,9 @@ export const ResourceChangesTab: React.FC = () => {
       </div>
     );
   }
+
+  const billTypeBreakdown = processBillTypeChanges();
+  const sbuBreakdown = processSbuChanges();
 
   return (
     <div className="space-y-6">
@@ -178,49 +211,61 @@ export const ResourceChangesTab: React.FC = () => {
         </CardContent>
       </Card>
 
-      {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      {/* Enhanced Summary Cards with Breakdowns */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Bill Type Changes Breakdown */}
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Changes</CardTitle>
+          <CardHeader>
+            <CardTitle className="text-lg">Bill Type Changes</CardTitle>
+            <div className="text-3xl font-bold">
+              {billTypeChangesLoading ? '...' : billTypeChanges?.length || 0}
+            </div>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">
-              {summaryLoading ? '...' : summary?.total_changes || 0}
-            </div>
+            {billTypeChangesLoading ? (
+              <div className="text-center text-muted-foreground">Loading breakdown...</div>
+            ) : billTypeBreakdown.size === 0 ? (
+              <div className="text-center text-muted-foreground">No bill type changes found</div>
+            ) : (
+              <div className="max-h-48 overflow-auto space-y-2">
+                {Array.from(billTypeBreakdown.entries())
+                  .sort(([, a], [, b]) => b - a)
+                  .map(([change, count]) => (
+                    <div key={change} className="flex items-center justify-between text-sm">
+                      <span className="font-medium">{change}</span>
+                      <Badge variant="secondary">{count}</Badge>
+                    </div>
+                  ))}
+              </div>
+            )}
           </CardContent>
         </Card>
 
+        {/* SBU Changes Breakdown */}
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Bill Type Changes</CardTitle>
+          <CardHeader>
+            <CardTitle className="text-lg">SBU Changes</CardTitle>
+            <div className="text-3xl font-bold">
+              {sbuChangesLoading ? '...' : sbuChanges?.length || 0}
+            </div>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">
-              {summaryLoading ? '...' : summary?.bill_type_changes || 0}
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">SBU Changes</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {summaryLoading ? '...' : summary?.sbu_changes || 0}
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Recent Changes (7d)</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {summaryLoading ? '...' : summary?.recent_changes_7d || 0}
-            </div>
+            {sbuChangesLoading ? (
+              <div className="text-center text-muted-foreground">Loading breakdown...</div>
+            ) : sbuBreakdown.size === 0 ? (
+              <div className="text-center text-muted-foreground">No SBU changes found</div>
+            ) : (
+              <div className="max-h-48 overflow-auto space-y-2">
+                {Array.from(sbuBreakdown.entries())
+                  .sort(([, a], [, b]) => b - a)
+                  .map(([change, count]) => (
+                    <div key={change} className="flex items-center justify-between text-sm">
+                      <span className="font-medium">{change}</span>
+                      <Badge variant="secondary">{count}</Badge>
+                    </div>
+                  ))}
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>
