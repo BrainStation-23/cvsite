@@ -18,6 +18,7 @@ import UserManagement from '@/pages/admin/UserManagement';
 import AddUser from '@/pages/admin/AddUser';
 import EditUser from '@/pages/admin/EditUser';
 import PlatformSettings from '@/pages/admin/PlatformSettings';
+import EmployeeDataManagement from './pages/admin/EmployeeDataManagement';
 import ProfileManagementSettings from '@/pages/admin/platform-settings/ProfileManagementSettings';
 import ResourcePlanningSettings from '@/pages/admin/platform-settings/ResourcePlanningSettings';
 import CVTemplateSettings from '@/pages/admin/platform-settings/CVTemplateSettings';
@@ -193,6 +194,14 @@ function App(): React.ReactElement {
                 </ProtectedRoute>
               }
             />
+             <Route 
+                path="/admin/employee-data-management" 
+                element={
+                  <ProtectedRoute allowedRoles={['admin']}>
+                    <EmployeeDataManagement />
+                  </ProtectedRoute>
+                } 
+              />
             <Route
               path="/admin/employee-data"
               element={

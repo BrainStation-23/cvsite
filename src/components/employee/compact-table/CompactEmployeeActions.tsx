@@ -13,7 +13,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Eye, Mail, MessageSquare, MoreHorizontal, Download } from 'lucide-react';
+import { Edit, Mail, MessageSquare, MoreHorizontal, Download, Eye } from 'lucide-react';
 
 interface CompactEmployeeActionsProps {
   profile: any;
@@ -21,6 +21,7 @@ interface CompactEmployeeActionsProps {
   onSendEmail: (profile: any) => void;
   onNotesClick: (profile: any) => void;
   onPDFExport: (profileId: string) => void;
+  onPreview: (profileId: string) => void;
 }
 
 const CompactEmployeeActions: React.FC<CompactEmployeeActionsProps> = ({
@@ -28,7 +29,8 @@ const CompactEmployeeActions: React.FC<CompactEmployeeActionsProps> = ({
   onViewProfile,
   onSendEmail,
   onNotesClick,
-  onPDFExport
+  onPDFExport,
+  onPreview
 }) => {
   return (
     <TooltipProvider>
@@ -42,11 +44,27 @@ const CompactEmployeeActions: React.FC<CompactEmployeeActionsProps> = ({
               onClick={() => onViewProfile(profile.id)}
               className="h-8 w-8 p-0"
             >
+              <Edit className="h-4 w-4" />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>Edit Profile</p>
+          </TooltipContent>
+        </Tooltip>
+
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button 
+              variant="ghost" 
+              size="sm"
+              onClick={() => onPreview(profile.id)}
+              className="h-8 w-8 p-0"
+            >
               <Eye className="h-4 w-4" />
             </Button>
           </TooltipTrigger>
           <TooltipContent>
-            <p>View Profile</p>
+            <p>Preview CV</p>
           </TooltipContent>
         </Tooltip>
 

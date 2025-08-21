@@ -12,7 +12,8 @@ import {
   Briefcase,
   Building2,
   CalendarDays,
-  BarChart3
+  BarChart3,
+  FolderOpen
 } from 'lucide-react';
 
 export interface NavigationItem {
@@ -65,6 +66,7 @@ export const getSidebarGroups = (
       label: 'Admin Configuration',
       items: [
         { to: '/admin/user-management', icon: Users, label: 'User Management' },
+        { to: '/admin/employee-data-management', icon: FolderOpen, label: 'Employee Data Management' },
         { 
           to: '/admin/platform-settings', 
           icon: Settings, 

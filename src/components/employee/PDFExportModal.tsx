@@ -4,9 +4,10 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
-import { Loader2, Download } from 'lucide-react';
+import { Loader2, Download, Eye } from 'lucide-react';
 import { useCVTemplates } from '@/hooks/use-cv-templates';
 import { exportCVAsPDF, ProgressDialog, ProgressStep } from '@/utils/pdf-export';
+import { openCVPreview } from '@/utils/cv-preview-utility';
 import { toast } from 'sonner';
 
 interface PDFExportModalProps {
@@ -47,6 +48,20 @@ const PDFExportModal: React.FC<PDFExportModalProps> = ({
     if (!isExporting) {
       setSelectedTemplateId('');
       onClose();
+    }
+  };
+
+  const handlePreview = async () => {
+    if (!selectedTemplateId) {
+      toast.error('Please select a CV template');
+      return;
+    }
+
+    try {
+      await openCVPreview(employeeId, selectedTemplateId);
+    } catch (error) {
+      console.error('Preview failed:', error);
+      toast.error('Failed to open preview. Please try again.');
     }
   };
 
@@ -121,6 +136,14 @@ const PDFExportModal: React.FC<PDFExportModalProps> = ({
                 disabled={isExporting}
               >
                 Cancel
+              </Button>
+              <Button 
+                variant="outline"
+                onClick={handlePreview}
+                disabled={isExporting || !selectedTemplateId || templatesLoading}
+              >
+                <Eye className="h-4 w-4 mr-2" />
+                Preview
               </Button>
               <Button 
                 onClick={handleExport}
