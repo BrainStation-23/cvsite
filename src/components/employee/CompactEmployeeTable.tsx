@@ -19,6 +19,7 @@ import CompactResourcePlanning from './compact-table/CompactResourcePlanning';
 import CompactEmployeeActions from './compact-table/CompactEmployeeActions';
 import NotesDialog from './NotesDialog';
 import PDFExportModal from './PDFExportModal';
+import CVPreviewModal from './CVPreviewModal';
 import { 
   TooltipProvider
 } from '@/components/ui/tooltip';
@@ -58,6 +59,12 @@ const CompactEmployeeTable: React.FC<CompactEmployeeTableProps> = ({
     name: string;
   } | null>(null);
 
+  const [previewModalOpen, setPreviewModalOpen] = useState(false);
+  const [selectedEmployeeForPreview, setSelectedEmployeeForPreview] = useState<{
+    id: string;
+    name: string;
+  } | null>(null);
+
   const handleNotesClick = (profile: any) => {
     setSelectedProfileForNotes({
       id: profile.id,
@@ -87,6 +94,24 @@ const CompactEmployeeTable: React.FC<CompactEmployeeTableProps> = ({
   const handleClosePDFExportModal = () => {
     setPdfExportModalOpen(false);
     setSelectedEmployeeForPDF(null);
+  };
+
+  const handlePreview = (profileId: string) => {
+    const profile = profiles.find(p => p.id === profileId);
+    if (!profile) return;
+
+    const employeeName = `${profile.first_name || profile.general_information?.first_name || 'N/A'} ${profile.last_name || profile.general_information?.last_name || ''}`.trim();
+    
+    setSelectedEmployeeForPreview({
+      id: profileId,
+      name: employeeName
+    });
+    setPreviewModalOpen(true);
+  };
+
+  const handleClosePreviewModal = () => {
+    setPreviewModalOpen(false);
+    setSelectedEmployeeForPreview(null);
   };
 
   if (isLoading && profiles.length === 0) {
@@ -160,6 +185,7 @@ const CompactEmployeeTable: React.FC<CompactEmployeeTableProps> = ({
                     onSendEmail={onSendEmail}
                     onNotesClick={handleNotesClick}
                     onPDFExport={handlePDFExport}
+                    onPreview={handlePreview}
                   />
                 </TableCell>
               </TableRow>
@@ -198,6 +224,16 @@ const CompactEmployeeTable: React.FC<CompactEmployeeTableProps> = ({
           onClose={handleClosePDFExportModal}
           employeeId={selectedEmployeeForPDF.id}
           employeeName={selectedEmployeeForPDF.name}
+        />
+      )}
+
+      {/* CV Preview Modal */}
+      {selectedEmployeeForPreview && (
+        <CVPreviewModal
+          isOpen={previewModalOpen}
+          onClose={handleClosePreviewModal}
+          employeeId={selectedEmployeeForPreview.id}
+          employeeName={selectedEmployeeForPreview.name}
         />
       )}
     </TooltipProvider>
