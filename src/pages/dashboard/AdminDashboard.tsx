@@ -22,11 +22,7 @@ const AdminDashboard: React.FC = () => {
           <ProfileStatisticsOverview />
         </div>
 
-        {/* Incomplete Profiles - Now with lazy loading and pagination */}
-        <div>
-          <h2 className="text-xl font-semibold mb-4">CV Completeness Details</h2>
-          <IncompleteProfilesTableOptimized />
-        </div>
+       
       </div>
     </DashboardLayout>
   );
