@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { TemplateStructureGuide } from './TemplateStructureGuide';
@@ -32,6 +33,7 @@ export const TemplateVariableHelper: React.FC<TemplateVariableHelperProps> = ({
   const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set([
     'General Information',
     'Technical Skills',
+    'Specialized Skills',
     'Work Experience',
     'Education',
     'Projects',
@@ -78,6 +80,19 @@ export const TemplateVariableHelper: React.FC<TemplateVariableHelperProps> = ({
         { 
           name: '{{#each employee.technicalSkills}}', 
           description: 'Loop through technical skills', 
+          type: 'array',
+          example: '{{this.name}} - {{this.proficiency}}/10'
+        },
+        { name: '{{this.name}}', description: 'Skill name (inside loop)', type: 'string' },
+        { name: '{{this.proficiency}}', description: 'Proficiency level 1-10 (inside loop)', type: 'string' },
+      ]
+    },
+    {
+      title: 'Specialized Skills',
+      variables: [
+        { 
+          name: '{{#each employee.specializedSkills}}', 
+          description: 'Loop through specialized skills', 
           type: 'array',
           example: '{{this.name}} - {{this.proficiency}}/10'
         },
