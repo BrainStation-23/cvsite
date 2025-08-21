@@ -115,6 +115,7 @@ export const UnplannedResourcesTable: React.FC<UnplannedResourcesTableProps> = (
               <TableHead>SBU</TableHead>
               <TableHead>Manager</TableHead>
               <TableHead>Expertise</TableHead>
+              <TableHead>Bill Type</TableHead>
               <TableHead>Current Engagement</TableHead>
               <TableHead>Available Capacity</TableHead>
               <TableHead>Active Assignments</TableHead>
@@ -195,6 +196,11 @@ export const UnplannedResourcesTable: React.FC<UnplannedResourcesTableProps> = (
                           {resource.expertise_type.name}
                         </Badge>
                       )}
+                    </div>
+                  </TableCell>
+
+                  <TableCell>
+                    <div className="space-y-1">
                       {resource.resource_type && (
                         <Badge variant="outline" className="text-xs">
                           {resource.resource_type.name}
