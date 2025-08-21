@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { useTemplateEngine } from '@/hooks/use-template-engine';
@@ -8,6 +7,7 @@ import { Download, Maximize, FileDown } from 'lucide-react';
 import { CVRenderer } from './CVRenderer';
 import { generateFullCVHTML } from '@/utils/cv-html-generator';
 import { exportCVAsPDF, ProgressDialog, ProgressStep } from '@/utils/pdf-export';
+import { openCVPreview } from '@/utils/cv-preview-utility';
 import { toast } from 'sonner';
 
 interface CVTemplatePreviewProps {
@@ -27,14 +27,17 @@ export const CVTemplatePreview: React.FC<CVTemplatePreviewProps> = ({
   const [progressSteps, setProgressSteps] = useState<ProgressStep[]>([]);
   const [progress, setProgress] = useState(0);
 
-  const handleFullscreen = () => {
-    if (!processedHTML) return;
+  const handleFullscreen = async () => {
+    if (!selectedEmployeeId || !templateId) {
+      toast.error('Please select an employee to preview CV');
+      return;
+    }
     
-    const newWindow = window.open('', '_blank');
-    if (newWindow) {
-      const fullHTML = generateFullCVHTML(processedHTML, 'fullscreen');
-      newWindow.document.write(fullHTML);
-      newWindow.document.close();
+    try {
+      await openCVPreview(selectedEmployeeId, templateId);
+    } catch (error) {
+      console.error('Fullscreen preview failed:', error);
+      toast.error('Failed to open fullscreen preview. Please try again.');
     }
   };
 
@@ -96,7 +99,12 @@ export const CVTemplatePreview: React.FC<CVTemplatePreviewProps> = ({
           <div className="flex gap-2">
             {processedHTML && (
               <>
-                <Button size="sm" variant="outline" onClick={handleFullscreen}>
+                <Button 
+                  size="sm" 
+                  variant="outline" 
+                  onClick={handleFullscreen}
+                  disabled={!selectedEmployeeId}
+                >
                   <Maximize className="h-3 w-3 mr-1" />
                   Fullscreen
                 </Button>
