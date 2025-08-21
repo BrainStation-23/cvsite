@@ -3,11 +3,12 @@ import React, { useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import DashboardLayout from '../../components/Layout/DashboardLayout';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { BarChart3, Table2, TrendingUp } from 'lucide-react';
+import { BarChart3, Table2, TrendingUp, History } from 'lucide-react';
 import { ResourceStatisticsHeader } from '../../components/statistics/ResourceStatisticsHeader';
 import { ResourceStatisticsOverview } from '../../components/statistics/ResourceStatisticsOverview';
 import { PivotTableContainer } from '../../components/statistics/PivotTableContainer';
 import { WeeklyScoreCardTab } from '../../components/statistics/WeeklyScoreCardTab';
+import { ResourceChangesTab } from '../../components/statistics/ResourceChangesTab';
 import { useResourceCountStatistics } from '../../hooks/use-resource-count-statistics';
 
 const ResourceCalendarStatistics: React.FC = () => {
@@ -63,6 +64,9 @@ const ResourceCalendarStatistics: React.FC = () => {
     if (activeTab === 'weekly-scorecard') {
       return 'Weekly utilization and billing analysis dashboard';
     }
+    if (activeTab === 'resource-changes') {
+      return 'Track and analyze bill type and SBU changes over time';
+    }
     
     const hasSpecificFilter = filters.sbu || filters.resourceType || filters.billType || filters.expertiseType;
     
@@ -105,7 +109,7 @@ const ResourceCalendarStatistics: React.FC = () => {
 
         {/* Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="overview" className="flex items-center gap-2">
               <BarChart3 className="h-4 w-4" />
               Overview
@@ -117,6 +121,10 @@ const ResourceCalendarStatistics: React.FC = () => {
             <TabsTrigger value="weekly-scorecard" className="flex items-center gap-2">
               <TrendingUp className="h-4 w-4" />
               Weekly Score Card
+            </TabsTrigger>
+            <TabsTrigger value="resource-changes" className="flex items-center gap-2">
+              <History className="h-4 w-4" />
+              Resource Changes
             </TabsTrigger>
           </TabsList>
 
@@ -139,6 +147,10 @@ const ResourceCalendarStatistics: React.FC = () => {
 
           <TabsContent value="weekly-scorecard" className="mt-6">
             <WeeklyScoreCardTab />
+          </TabsContent>
+
+          <TabsContent value="resource-changes" className="mt-6">
+            <ResourceChangesTab />
           </TabsContent>
         </Tabs>
       </div>

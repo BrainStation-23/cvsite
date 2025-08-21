@@ -20,6 +20,12 @@ export const generateAIPrompt = () => {
 - {{this.proficiency}} - Proficiency level 1-10
 {{/each}}
 
+### Specialized Skills (Array)
+{{#each employee.specializedSkills}}
+- {{this.name}} - Skill name
+- {{this.proficiency}} - Proficiency level 1-10
+{{/each}}
+
 ### Work Experience (Array)
 {{#each employee.experiences}}
 - {{this.companyName}} - Company name
@@ -46,6 +52,13 @@ export const generateAIPrompt = () => {
 - {{this.description}} - Project description
 - {{this.responsibility}} - Responsibilities
 - {{this.technologiesUsed}} - Technologies used (array)
+{{/each}}
+
+### Achievements (Array)
+{{#each employee.achievements}}
+- {{this.title}} - Achievement title
+- {{this.date}} - Achievement date
+- {{this.description}} - Achievement description
 {{/each}}
 
 ### Training & Certifications (Array)

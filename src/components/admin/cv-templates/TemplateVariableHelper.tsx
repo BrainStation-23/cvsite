@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { TemplateStructureGuide } from './TemplateStructureGuide';
@@ -32,9 +33,11 @@ export const TemplateVariableHelper: React.FC<TemplateVariableHelperProps> = ({
   const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set([
     'General Information',
     'Technical Skills',
+    'Specialized Skills',
     'Work Experience',
     'Education',
     'Projects',
+    'Achievements',
     'Training & Certifications'
   ]));
 
@@ -86,6 +89,19 @@ export const TemplateVariableHelper: React.FC<TemplateVariableHelperProps> = ({
       ]
     },
     {
+      title: 'Specialized Skills',
+      variables: [
+        { 
+          name: '{{#each employee.specializedSkills}}', 
+          description: 'Loop through specialized skills', 
+          type: 'array',
+          example: '{{this.name}} - {{this.proficiency}}/10'
+        },
+        { name: '{{this.name}}', description: 'Skill name (inside loop)', type: 'string' },
+        { name: '{{this.proficiency}}', description: 'Proficiency level 1-10 (inside loop)', type: 'string' },
+      ]
+    },
+    {
       title: 'Work Experience',
       variables: [
         { 
@@ -129,6 +145,19 @@ export const TemplateVariableHelper: React.FC<TemplateVariableHelperProps> = ({
         { name: '{{this.description}}', description: 'Project description (inside loop)', type: 'string' },
         { name: '{{this.responsibility}}', description: 'Responsibilities (inside loop)', type: 'string' },
         { name: '{{this.technologiesUsed}}', description: 'Technologies used (inside loop)', type: 'array' },
+      ]
+    },
+    {
+      title: 'Achievements',
+      variables: [
+        { 
+          name: '{{#each employee.achievements}}', 
+          description: 'Loop through achievements', 
+          type: 'array'
+        },
+        { name: '{{this.title}}', description: 'Achievement title (inside loop)', type: 'string' },
+        { name: '{{this.date}}', description: 'Achievement date (inside loop)', type: 'string' },
+        { name: '{{this.description}}', description: 'Achievement description (inside loop)', type: 'string' },
       ]
     },
     {
