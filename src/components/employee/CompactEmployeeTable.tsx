@@ -127,7 +127,7 @@ const CompactEmployeeTable: React.FC<CompactEmployeeTableProps> = ({
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead className="w-12">
+            <TableHead className="w-12 px-[20px]">
               <Checkbox
                 checked={isAllSelected}
                 onCheckedChange={(checked) => {
@@ -143,14 +143,14 @@ const CompactEmployeeTable: React.FC<CompactEmployeeTableProps> = ({
             <TableHead className="min-w-[120px]">Skills & Expertise</TableHead>
             <TableHead className="min-w-[150px]">Certifications</TableHead>
             <TableHead className="min-w-[200px]">Resource Planning</TableHead>
-            <TableHead className="w-20 text-right">Actions</TableHead>
+            <TableHead className="w-20 text-right pr-[20px]">Actions</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {profiles.length > 0 ? (
             profiles.map((profile) => (
               <TableRow key={profile.id} className="hover:bg-muted/50">
-                <TableCell>
+                <TableCell className="px-[20px]">
                   <Checkbox
                     checked={selectedProfiles.includes(profile.id)}
                     onCheckedChange={() => onProfileSelect(profile.id)}
@@ -168,7 +168,7 @@ const CompactEmployeeTable: React.FC<CompactEmployeeTableProps> = ({
                     specializedSkills={profile.specialized_skills || []}
                   />
                 </TableCell>
-                <TableCell className="py-4 max-w-[300px]">
+                <TableCell className="py-4 pr-[20px] max-w-[300px]">
                   <CompactTrainingSummary
                     trainings={profile.trainings || []}
                   />
@@ -178,7 +178,7 @@ const CompactEmployeeTable: React.FC<CompactEmployeeTableProps> = ({
                     resourcePlanning={profile.resource_planning}
                   />
                 </TableCell>
-                <TableCell className="py-4">
+                <TableCell className="py-4 px-[20px]">
                   <CompactEmployeeActions
                     profile={profile}
                     onViewProfile={onViewProfile}
