@@ -29,7 +29,7 @@ export async function openCVPreview(
       if (newWindow) {
         newWindow.document.write(processedHTML);
         newWindow.document.close();
-        newWindow.document.title = `CV Preview - ${employeeData.firstName} ${employeeData.lastName}`;
+        newWindow.document.title = `CV Preview - ${employeeData.first_name} ${employeeData.last_name}`;
       } else {
         throw new Error('Failed to open new window. Please check your browser settings.');
       }
