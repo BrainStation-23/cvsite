@@ -75,16 +75,22 @@ export function useIncompleteCvProfilesLegacy(resourceTypeFilter?: string) {
     queryFn: async () => {
       console.log('Fetching incomplete profiles (legacy):', { resourceTypeFilter });
       
-      const { data, error } = await supabase.rpc('get_incomplete_cv_profiles', {
-        resource_type_filter: resourceTypeFilter || null,
-      });
+      // Use a direct query since the function might not be in types yet
+      const { data, error } = await supabase
+        .rpc('get_incomplete_cv_profiles_paginated', {
+          resource_type_filter: resourceTypeFilter || null,
+          search_term: null,
+          page_number: 1,
+          page_size: 50,
+        });
 
       if (error) {
         console.error('Error fetching incomplete CV profiles:', error);
         throw error;
       }
 
-      return (data || []) as IncompleteProfile[];
+      const response = data as unknown as PaginatedResponse;
+      return response.profiles || [];
     },
     staleTime: 5 * 60 * 1000,
     gcTime: 10 * 60 * 1000,

@@ -75,7 +75,7 @@ export function useResourceChanges() {
       });
 
       if (error) throw error;
-      return data as ResourceChangesSummary;
+      return data as unknown as ResourceChangesSummary;
     },
   });
 
