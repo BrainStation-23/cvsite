@@ -54,6 +54,13 @@ export const generateAIPrompt = () => {
 - {{this.technologiesUsed}} - Technologies used (array)
 {{/each}}
 
+### Achievements (Array)
+{{#each employee.achievements}}
+- {{this.title}} - Achievement title
+- {{this.date}} - Achievement date
+- {{this.description}} - Achievement description
+{{/each}}
+
 ### Training & Certifications (Array)
 {{#each employee.trainings}}
 - {{this.title}} - Training title

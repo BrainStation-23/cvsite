@@ -37,6 +37,7 @@ export const TemplateVariableHelper: React.FC<TemplateVariableHelperProps> = ({
     'Work Experience',
     'Education',
     'Projects',
+    'Achievements',
     'Training & Certifications'
   ]));
 
@@ -144,6 +145,19 @@ export const TemplateVariableHelper: React.FC<TemplateVariableHelperProps> = ({
         { name: '{{this.description}}', description: 'Project description (inside loop)', type: 'string' },
         { name: '{{this.responsibility}}', description: 'Responsibilities (inside loop)', type: 'string' },
         { name: '{{this.technologiesUsed}}', description: 'Technologies used (inside loop)', type: 'array' },
+      ]
+    },
+    {
+      title: 'Achievements',
+      variables: [
+        { 
+          name: '{{#each employee.achievements}}', 
+          description: 'Loop through achievements', 
+          type: 'array'
+        },
+        { name: '{{this.title}}', description: 'Achievement title (inside loop)', type: 'string' },
+        { name: '{{this.date}}', description: 'Achievement date (inside loop)', type: 'string' },
+        { name: '{{this.description}}', description: 'Achievement description (inside loop)', type: 'string' },
       ]
     },
     {
