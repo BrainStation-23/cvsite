@@ -23,6 +23,8 @@ import ProfileManagementSettings from '@/pages/admin/platform-settings/ProfileMa
 import ResourcePlanningSettings from '@/pages/admin/platform-settings/ResourcePlanningSettings';
 import CVTemplateSettings from '@/pages/admin/platform-settings/CVTemplateSettings';
 import SystemConfigurationSettings from '@/pages/admin/platform-settings/SystemConfigurationSettings';
+import AuditPage from '@/pages/admin/platform-settings/AuditPage';
+import ProfileImageWarningAudit from '@/pages/admin/platform-settings/ProfileImageWarningAudit';
 import SecurityPage from '@/pages/security/SecurityPage';
 import NotFound from '@/pages/NotFound';
 import TrainingCertification from '@/pages/TrainingCertification';
@@ -355,26 +357,26 @@ function App(): React.ReactElement {
               }
             />
             <Route
-              path="/admin/projects"
+              path="/admin/platform-settings/audit"
               element={
                 <ProtectedRoute allowedRoles={['admin']}>
-                  <ProjectsManagement />
+                  <AuditPage />
                 </ProtectedRoute>
               }
             />
             <Route
-              path="/admin/Audit"
+              path="/admin/platform-settings/audit/profile-image-warnings"
               element={
                 <ProtectedRoute allowedRoles={['admin']}>
-                  Placeholder
+                  <ProfileImageWarningAudit />
                 </ProtectedRoute>
               }
             />
-             <Route
-              path="/admin/Audit/profile-Image-Warning"
+            <Route
+              path="/admin/projects"
               element={
                 <ProtectedRoute allowedRoles={['admin']}>
-                  Placeholder
+                  <ProjectsManagement />
                 </ProtectedRoute>
               }
             />
