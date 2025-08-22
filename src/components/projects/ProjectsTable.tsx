@@ -15,6 +15,9 @@ interface Project {
   is_active: boolean;
   created_at: string;
   updated_at: string;
+  // Updated fields - removed odoo_project_id and company_id
+  description?: string | null;
+  project_level?: string | null;
   // Added to handle the joined profile data
   project_manager_profile?: {
     first_name: string | null;
@@ -72,6 +75,23 @@ export const ProjectsTable: React.FC<ProjectsTableProps> = ({
     );
   };
 
+  const getProjectLevelBadge = (level: string | null | undefined) => {
+    if (!level) return <span className="text-muted-foreground">Not specified</span>;
+    
+    const levelColors: Record<string, string> = {
+      'export': 'bg-blue-100 text-blue-800',
+      'regional': 'bg-green-100 text-green-800',
+      'local': 'bg-yellow-100 text-yellow-800',
+      'investment': 'bg-purple-100 text-purple-800'
+    };
+    
+    return (
+      <Badge variant="secondary" className={levelColors[level] || 'bg-gray-100 text-gray-800'}>
+        {level}
+      </Badge>
+    );
+  };
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-32">
@@ -93,10 +113,10 @@ export const ProjectsTable: React.FC<ProjectsTableProps> = ({
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>Project Name</TableHead>
+            <TableHead>Project Details</TableHead>
             <TableHead>Client</TableHead>
             <TableHead>Project Manager</TableHead>
-            <TableHead>Project Type</TableHead>
+            <TableHead>Level & Type</TableHead>
             <TableHead>Status</TableHead>
             <TableHead className="w-[120px]">Actions</TableHead>
           </TableRow>
@@ -105,8 +125,13 @@ export const ProjectsTable: React.FC<ProjectsTableProps> = ({
           {projects.map((project) => (
             <TableRow key={project.id}>
               <TableCell>
-                <div className="flex flex-col">
+                <div className="flex flex-col space-y-1">
                   <div className="font-medium">{project.project_name}</div>
+                  {project.description && (
+                    <div className="text-sm text-muted-foreground max-w-xs truncate">
+                      {project.description}
+                    </div>
+                  )}
                   {project.budget && (
                     <div className="text-sm text-muted-foreground">
                       {formatCurrency(project.budget)}
@@ -125,11 +150,16 @@ export const ProjectsTable: React.FC<ProjectsTableProps> = ({
                 {getProjectManagerName(project)}
               </TableCell>
               <TableCell>
-                {project.project_type_data?.name ? (
-                  <Badge variant="outline">{project.project_type_data.name}</Badge>
-                ) : (
-                  <span className="text-muted-foreground">Not specified</span>
-                )}
+                <div className="flex flex-col space-y-1">
+                  {getProjectLevelBadge(project.project_level)}
+                  {project.project_type_data?.name ? (
+                    <Badge variant="outline" className="text-xs">
+                      {project.project_type_data.name}
+                    </Badge>
+                  ) : (
+                    <span className="text-xs text-muted-foreground">No type</span>
+                  )}
+                </div>
               </TableCell>
               <TableCell>
                 <Switch

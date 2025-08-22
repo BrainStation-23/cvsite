@@ -860,8 +860,10 @@ export type Database = {
           budget: number | null
           client_name: string | null
           created_at: string
+          description: string | null
           id: string
           is_active: boolean
+          project_level: string | null
           project_manager: string | null
           project_name: string
           project_type: string | null
@@ -871,8 +873,10 @@ export type Database = {
           budget?: number | null
           client_name?: string | null
           created_at?: string
+          description?: string | null
           id?: string
           is_active?: boolean
+          project_level?: string | null
           project_manager?: string | null
           project_name: string
           project_type?: string | null
@@ -882,8 +886,10 @@ export type Database = {
           budget?: number | null
           client_name?: string | null
           created_at?: string
+          description?: string | null
           id?: string
           is_active?: boolean
+          project_level?: string | null
           project_manager?: string | null
           project_name?: string
           project_type?: string | null

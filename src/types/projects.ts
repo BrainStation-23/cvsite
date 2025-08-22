@@ -8,6 +8,9 @@ export interface Project {
   is_active: boolean;
   created_at: string;
   updated_at: string;
+  // Updated fields - removed odoo_project_id and company_id
+  description?: string | null;
+  project_level?: string | null;
   project_manager_profile?: {
     first_name: string | null;
     last_name: string | null;
@@ -35,6 +38,9 @@ export interface ProjectFormData {
   project_manager: string | null;
   budget: number | null;
   is_active: boolean;
+  // Updated fields - removed company_id
+  description?: string | null;
+  project_level?: string | null;
 }
 
 export interface ProjectFilters {

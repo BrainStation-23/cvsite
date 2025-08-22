@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { Project, ProjectsResponse, ProjectFormData, ProjectFilters } from '@/types/projects';
 
@@ -33,9 +32,9 @@ export class ProjectsApiService {
       query = query.eq('is_active', true);
     }
 
-    // Apply search filter if provided
+    // Apply search filter if provided - updated to include new fields
     if (searchQuery) {
-      query = query.or(`project_name.ilike.%${searchQuery}%,client_name.ilike.%${searchQuery}%`);
+      query = query.or(`project_name.ilike.%${searchQuery}%,client_name.ilike.%${searchQuery}%,description.ilike.%${searchQuery}%,project_level.ilike.%${searchQuery}%,project_manager.ilike.%${searchQuery}%`);
     }
 
     // Apply sorting
@@ -80,7 +79,7 @@ export class ProjectsApiService {
     }
 
     if (searchQuery) {
-      countQuery = countQuery.or(`project_name.ilike.%${searchQuery}%,client_name.ilike.%${searchQuery}%`);
+      countQuery = countQuery.or(`project_name.ilike.%${searchQuery}%,client_name.ilike.%${searchQuery}%,description.ilike.%${searchQuery}%,project_level.ilike.%${searchQuery}%,project_manager.ilike.%${searchQuery}%`);
     }
 
     const { count: filteredCount } = await countQuery;
@@ -110,7 +109,9 @@ export class ProjectsApiService {
         client_name: projectData.client_name,
         project_manager: projectData.project_manager,
         budget: projectData.budget,
-        is_active: projectData.is_active
+        is_active: projectData.is_active,
+        description: projectData.description,
+        project_level: projectData.project_level
       });
 
     if (error) throw error;
@@ -123,6 +124,8 @@ export class ProjectsApiService {
     if (projectData.project_manager !== undefined) updateData.project_manager = projectData.project_manager;
     if (projectData.budget !== undefined) updateData.budget = projectData.budget;
     if (projectData.is_active !== undefined) updateData.is_active = projectData.is_active;
+    if (projectData.description !== undefined) updateData.description = projectData.description;
+    if (projectData.project_level !== undefined) updateData.project_level = projectData.project_level;
 
     const { error } = await supabase
       .from('projects_management')

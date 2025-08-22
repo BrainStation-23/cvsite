@@ -6,21 +6,36 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
+interface OdooProjectManager {
+  name: string;
+  email: string;
+}
+
 interface OdooProject {
   name: string;
-  projectValue: number;
+  description: string | null;
+  projectLevel: string | null;
   projectType: string;
-  projectManager: {
-    name: string;
-    email: string;
-  };
+  projectValue: number;
   active: boolean;
+  projectManager: OdooProjectManager | null;
 }
 
 interface OdooResponse {
   data: {
     allProjects: OdooProject[];
   };
+}
+
+interface TransformedProject {
+  projectName: string;
+  description: string | null;
+  projectLevel: string | null;
+  projectType: string;
+  projectValue: number;
+  active: boolean;
+  managerName: string;
+  managerEmail: string;
 }
 
 Deno.serve(async (req) => {
@@ -30,7 +45,7 @@ Deno.serve(async (req) => {
   }
 
   try {
-    console.log('Starting optimized Odoo projects sync...');
+    console.log('Starting Odoo projects sync...');
 
     // Initialize Supabase client
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
@@ -42,16 +57,18 @@ Deno.serve(async (req) => {
     // GraphQL query to fetch projects from Odoo
     const graphqlQuery = {
       query: `
-        query {
-          allProjects(includeArchived: true){
+        query AllProjects {
+          allProjects(includeArchived: true) {
             name
-            projectValue
+            description
+            projectLevel
             projectType
+            projectValue
+            active
             projectManager {
               name
               email
             }
-            active
           }
         }
       `
@@ -76,36 +93,44 @@ Deno.serve(async (req) => {
     const odooData: OdooResponse = await odooResponse.json();
     console.log(`Fetched ${odooData.data.allProjects.length} projects from Odoo`);
 
-    // Pre-process the data for bulk operations
-    const processedProjects = odooData.data.allProjects.map(project => ({
-      name: project.name,
-      projectValue: project.projectValue || null,
-      projectType: project.projectType || null,
-      managerEmail: project.projectManager?.email || null,
-      active: project.active
+    // Transform Odoo data to match RPC function expectations
+    const transformedProjects: TransformedProject[] = odooData.data.allProjects.map(project => ({
+      projectName: project.name,
+      description: project.description,
+      projectLevel: project.projectLevel,
+      projectType: project.projectType,
+      projectValue: project.projectValue,
+      active: project.active,
+      managerName: project.projectManager?.name || '',
+      managerEmail: project.projectManager?.email || ''
     }));
 
-    console.log(`Pre-processed ${processedProjects.length} projects, calling bulk sync function...`);
+    console.log(`Transformed ${transformedProjects.length} projects for RPC call`);
+    console.log('Sample transformed project:', JSON.stringify(transformedProjects[0], null, 2));
 
-    // Call the bulk sync RPC function
-    const { data: syncResult, error: syncError } = await supabase.rpc(
-      'bulk_sync_odoo_projects',
-      { projects_data: processedProjects }
-    );
+    // Call the RPC function directly
+    const { data: syncResult, error: syncError } = await supabase.rpc('bulk_sync_odoo_projects', {
+      projects_data: transformedProjects
+    });
 
     if (syncError) {
-      throw new Error(`Bulk sync function failed: ${syncError.message}`);
+      console.error('RPC function error:', syncError);
+      throw new Error(`RPC function failed: ${syncError.message}`);
     }
 
-    console.log('Bulk sync completed successfully:', syncResult);
+    console.log('Sync completed successfully:', syncResult);
 
     // Return the result from the RPC function
     return new Response(JSON.stringify({
       success: true,
-      message: 'Projects sync completed using bulk processing',
+      message: 'Projects sync completed',
       stats: {
         total_fetched: odooData.data.allProjects.length,
-        ...syncResult.stats
+        total_processed: syncResult?.stats?.total_processed || 0,
+        new_synced: syncResult?.stats?.inserted || 0,
+        updated: syncResult?.stats?.updated || 0,
+        skipped: syncResult?.stats?.skipped || 0,
+        errors: syncResult?.error_projects ? syncResult.error_projects.length : 0
       }
     }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },

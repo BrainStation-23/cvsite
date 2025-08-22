@@ -93,22 +93,12 @@ export const SkillCard: React.FC<SkillCardProps> = ({
             <div className="flex-1 min-w-0">
               {isEditing ? (
                 <div className="space-y-3">
-                  {skillType === 'technical' ? (
-                    <TechnicalSkillInput
+                   <TechnicalSkillInput
                       value={editedSkill.name}
                       onChange={handleNameChange}
                       placeholder="Technical skill name"
                       className="text-sm font-medium"
                     />
-                  ) : (
-                    <Input
-                      value={editedSkill.name}
-                      onChange={(e) => handleNameChange(e.target.value)}
-                      className="text-sm font-medium"
-                      placeholder="Skill name"
-                    />
-                  )}
-                  
                   <div className="flex items-center space-x-2">
                     <span className="text-sm text-gray-600 whitespace-nowrap">Proficiency:</span>
                     <div className="flex space-x-1" data-tour="skill-proficiency">
