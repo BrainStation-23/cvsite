@@ -1,4 +1,3 @@
-
 import {
   User,
   Settings,
@@ -13,7 +12,8 @@ import {
   Building2,
   CalendarDays,
   BarChart3,
-  FolderOpen
+  FolderOpen,
+  AlertTriangle
 } from 'lucide-react';
 
 export interface NavigationItem {
@@ -37,6 +37,7 @@ export const platformSettingsItems = [
   { to: '/admin/platform-settings/resources', icon: Briefcase, label: 'Resource Planning' },
   { to: '/admin/platform-settings/cv-templates', icon: FileText, label: 'CV Templates' },
   { to: '/admin/platform-settings/system', icon: Building2, label: 'System Config' },
+  { to: '/admin/platform-settings/audit', icon: AlertTriangle, label: 'Audit' },
 ];
 
 export const getResourceCalendarItems = (userRole: string): NavigationItem[] => [
