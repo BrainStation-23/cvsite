@@ -93,7 +93,7 @@ Deno.serve(async (req) => {
     const odooData: OdooResponse = await odooResponse.json();
     console.log(`Fetched ${odooData.data.allProjects.length} projects from Odoo`);
 
-    // Transform Odoo data to match RPC function expectations with null checks
+    // Transform Odoo data to match RPC function expectations
     const transformedProjects: TransformedProject[] = odooData.data.allProjects.map(project => ({
       projectName: project.name,
       description: project.description,
@@ -106,7 +106,7 @@ Deno.serve(async (req) => {
     }));
 
     console.log(`Transformed ${transformedProjects.length} projects for RPC call`);
-    console.log('Calling bulk_sync_odoo_projects RPC function...');
+    console.log('Sample transformed project:', JSON.stringify(transformedProjects[0], null, 2));
 
     // Call the RPC function directly
     const { data: syncResult, error: syncError } = await supabase.rpc('bulk_sync_odoo_projects', {
@@ -126,11 +126,11 @@ Deno.serve(async (req) => {
       message: 'Projects sync completed',
       stats: {
         total_fetched: odooData.data.allProjects.length,
-        total_processed: syncResult?.total_processed || 0,
-        new_synced: syncResult?.new_synced || 0,
-        updated: syncResult?.updated || 0,
-        skipped: syncResult?.skipped || 0,
-        errors: syncResult?.errors || 0
+        total_processed: syncResult?.stats?.total_processed || 0,
+        new_synced: syncResult?.stats?.inserted || 0,
+        updated: syncResult?.stats?.updated || 0,
+        skipped: syncResult?.stats?.skipped || 0,
+        errors: syncResult?.error_projects ? syncResult.error_projects.length : 0
       }
     }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
