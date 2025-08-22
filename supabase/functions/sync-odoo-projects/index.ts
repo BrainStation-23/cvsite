@@ -34,7 +34,7 @@ Deno.serve(async (req) => {
   }
 
   try {
-    console.log('Starting optimized Odoo projects sync...');
+    console.log('Starting Odoo projects sync...');
 
     // Initialize Supabase client
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
@@ -82,46 +82,26 @@ Deno.serve(async (req) => {
     const odooData: OdooResponse = await odooResponse.json();
     console.log(`Fetched ${odooData.data.allProjects.length} projects from Odoo`);
 
-    // Pre-process the data with proper field mapping
-    const processedProjects = odooData.data.allProjects.map(project => {
-      console.log(`Processing project: ${project.name}`, {
-        originalProjectManager: project.projectManager,
-        projectLevel: project.projectLevel,
-        projectType: project.projectType
-      });
-
-      return {
-        name: project.name,
-        description: project.description,
-        projectLevel: project.projectLevel, // Keep as text
-        projectType: project.projectType,
-        projectValue: project.projectValue || null,
-        active: project.active,
-        projectManager: project.projectManager // Keep full object with name and email
-      };
-    });
-
-    console.log(`Pre-processed ${processedProjects.length} projects, calling improved sync function...`);
-
-    // Call the new bulk sync edge function directly
+    // Pass the data directly to the RPC function - no processing here
+    console.log('Calling bulk sync RPC function...');
     const { data: syncResult, error: syncError } = await supabase.functions.invoke(
       'bulk-sync-odoo-projects-v2',
       { 
-        body: { projects_data: processedProjects }
+        body: { projects_data: odooData.data.allProjects }
       }
     );
 
     if (syncError) {
-      console.error('Sync function error:', syncError);
-      throw new Error(`Bulk sync function failed: ${syncError.message}`);
+      console.error('RPC function error:', syncError);
+      throw new Error(`Bulk sync RPC function failed: ${syncError.message}`);
     }
 
-    console.log('Bulk sync completed successfully:', syncResult);
+    console.log('Sync completed successfully:', syncResult);
 
-    // Return the result from the sync function
+    // Return the result from the RPC function
     return new Response(JSON.stringify({
       success: true,
-      message: 'Projects sync completed using improved bulk processing',
+      message: 'Projects sync completed',
       stats: {
         total_fetched: odooData.data.allProjects.length,
         ...syncResult.stats
