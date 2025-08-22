@@ -7,9 +7,11 @@ import { RefreshCw, Download } from 'lucide-react';
 
 interface SyncStats {
   total_fetched: number;
+  total_processed: number;
   new_synced: number;
   updated: number;
   skipped: number;
+  errors: number;
 }
 
 interface SyncResponse {
@@ -38,9 +40,26 @@ export const OdooSyncButton: React.FC = () => {
       const response: SyncResponse = data;
       
       if (response.success && response.stats) {
+        const { stats } = response;
+        let description = `Processed ${stats.total_processed || stats.total_fetched} projects.`;
+        
+        if (stats.new_synced > 0) {
+          description += ` New: ${stats.new_synced}`;
+        }
+        if (stats.updated > 0) {
+          description += ` Updated: ${stats.updated}`;
+        }
+        if (stats.skipped > 0) {
+          description += ` Skipped: ${stats.skipped}`;
+        }
+        if (stats.errors > 0) {
+          description += ` Errors: ${stats.errors}`;
+        }
+
         toast({
           title: 'Sync Completed Successfully',
-          description: `Fetched ${response.stats.total_fetched} projects. New: ${response.stats.new_synced}, Updated: ${response.stats.updated}, Skipped: ${response.stats.skipped}`,
+          description,
+          variant: stats.errors > 0 ? 'destructive' : 'default'
         });
       } else {
         throw new Error(response.error || 'Sync failed');

@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { Project, ProjectsResponse, ProjectFormData, ProjectFilters } from '@/types/projects';
 
@@ -33,9 +32,9 @@ export class ProjectsApiService {
       query = query.eq('is_active', true);
     }
 
-    // Apply search filter if provided - updated to exclude removed fields
+    // Apply search filter if provided - updated to include new fields
     if (searchQuery) {
-      query = query.or(`project_name.ilike.%${searchQuery}%,client_name.ilike.%${searchQuery}%,description.ilike.%${searchQuery}%,project_level.ilike.%${searchQuery}%`);
+      query = query.or(`project_name.ilike.%${searchQuery}%,client_name.ilike.%${searchQuery}%,description.ilike.%${searchQuery}%,project_level.ilike.%${searchQuery}%,project_manager.ilike.%${searchQuery}%`);
     }
 
     // Apply sorting
@@ -80,7 +79,7 @@ export class ProjectsApiService {
     }
 
     if (searchQuery) {
-      countQuery = countQuery.or(`project_name.ilike.%${searchQuery}%,client_name.ilike.%${searchQuery}%,description.ilike.%${searchQuery}%,project_level.ilike.%${searchQuery}%`);
+      countQuery = countQuery.or(`project_name.ilike.%${searchQuery}%,client_name.ilike.%${searchQuery}%,description.ilike.%${searchQuery}%,project_level.ilike.%${searchQuery}%,project_manager.ilike.%${searchQuery}%`);
     }
 
     const { count: filteredCount } = await countQuery;

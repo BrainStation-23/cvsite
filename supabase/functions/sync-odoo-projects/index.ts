@@ -43,7 +43,7 @@ Deno.serve(async (req) => {
     
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    // Corrected GraphQL query to match the actual API structure
+    // GraphQL query to fetch projects from Odoo
     const graphqlQuery = {
       query: `
         query AllProjects {
@@ -63,7 +63,7 @@ Deno.serve(async (req) => {
       `
     };
 
-    console.log('Fetching projects from Odoo GraphQL API with corrected query...');
+    console.log('Fetching projects from Odoo GraphQL API...');
 
     // Fetch projects from Odoo GraphQL API
     const odooResponse = await fetch('https://erp.brainstation-23.com/graphql', {
@@ -82,35 +82,46 @@ Deno.serve(async (req) => {
     const odooData: OdooResponse = await odooResponse.json();
     console.log(`Fetched ${odooData.data.allProjects.length} projects from Odoo`);
 
-    // Pre-process the data for bulk operations with corrected field mapping
-    const processedProjects = odooData.data.allProjects.map(project => ({
-      name: project.name,
-      description: project.description,
-      projectLevel: project.projectLevel,
-      projectType: project.projectType,
-      projectValue: project.projectValue || null,
-      active: project.active,
-      projectManager: project.projectManager
-    }));
+    // Pre-process the data with proper field mapping
+    const processedProjects = odooData.data.allProjects.map(project => {
+      console.log(`Processing project: ${project.name}`, {
+        originalProjectManager: project.projectManager,
+        projectLevel: project.projectLevel,
+        projectType: project.projectType
+      });
 
-    console.log(`Pre-processed ${processedProjects.length} projects, calling bulk sync function...`);
+      return {
+        name: project.name,
+        description: project.description,
+        projectLevel: project.projectLevel, // Keep as text
+        projectType: project.projectType,
+        projectValue: project.projectValue || null,
+        active: project.active,
+        projectManager: project.projectManager // Keep full object with name and email
+      };
+    });
 
-    // Call the bulk sync RPC function
-    const { data: syncResult, error: syncError } = await supabase.rpc(
-      'bulk_sync_odoo_projects',
-      { projects_data: processedProjects }
+    console.log(`Pre-processed ${processedProjects.length} projects, calling improved sync function...`);
+
+    // Call the new bulk sync edge function directly
+    const { data: syncResult, error: syncError } = await supabase.functions.invoke(
+      'bulk-sync-odoo-projects-v2',
+      { 
+        body: { projects_data: processedProjects }
+      }
     );
 
     if (syncError) {
+      console.error('Sync function error:', syncError);
       throw new Error(`Bulk sync function failed: ${syncError.message}`);
     }
 
     console.log('Bulk sync completed successfully:', syncResult);
 
-    // Return the result from the RPC function
+    // Return the result from the sync function
     return new Response(JSON.stringify({
       success: true,
-      message: 'Projects sync completed using bulk processing with corrected API structure',
+      message: 'Projects sync completed using improved bulk processing',
       stats: {
         total_fetched: odooData.data.allProjects.length,
         ...syncResult.stats
