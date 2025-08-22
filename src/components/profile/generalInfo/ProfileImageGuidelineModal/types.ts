@@ -1,4 +1,3 @@
-
 export interface ValidationResult {
   id: string;
   type: string;
@@ -52,4 +51,5 @@ export interface ProfileImageGuidelineModalProps {
   setDragActive: (active: boolean) => void;
   uploading: boolean;
   onValidFile: (file: File) => Promise<void>;
+  profileId?: string;
 }

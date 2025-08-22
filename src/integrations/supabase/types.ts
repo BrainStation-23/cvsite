@@ -452,6 +452,68 @@ export type Database = {
         }
         Relationships: []
       }
+      forced_image_uploads: {
+        Row: {
+          created_at: string
+          id: string
+          image_url: string | null
+          profile_id: string
+          updated_at: string
+          upload_timestamp: string
+          uploaded_by_user_id: string
+          validation_errors: Json
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          image_url?: string | null
+          profile_id: string
+          updated_at?: string
+          upload_timestamp?: string
+          uploaded_by_user_id: string
+          validation_errors?: Json
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          image_url?: string | null
+          profile_id?: string
+          updated_at?: string
+          upload_timestamp?: string
+          uploaded_by_user_id?: string
+          validation_errors?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "forced_image_uploads_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "forced_image_uploads_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "resource_availability_view"
+            referencedColumns: ["profile_id"]
+          },
+          {
+            foreignKeyName: "forced_image_uploads_uploaded_by_user_id_fkey"
+            columns: ["uploaded_by_user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "forced_image_uploads_uploaded_by_user_id_fkey"
+            columns: ["uploaded_by_user_id"]
+            isOneToOne: false
+            referencedRelation: "resource_availability_view"
+            referencedColumns: ["profile_id"]
+          },
+        ]
+      }
       general_information: {
         Row: {
           biography: string | null

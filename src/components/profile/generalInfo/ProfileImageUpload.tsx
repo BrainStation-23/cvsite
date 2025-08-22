@@ -193,6 +193,7 @@ export const ProfileImageUpload: React.FC<ProfileImageUploadProps> = ({
         setDragActive={setDragActive}
         uploading={uploading}
         onValidFile={uploadImage}
+        profileId={targetProfileId}
       />
     </div>
   );

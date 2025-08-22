@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { X } from 'lucide-react';
@@ -5,6 +6,8 @@ import GuidelineContent from './GuidelineContent';
 import ImageUploadArea from './ImageUploadArea';
 import AnalysisResultsArea from './AnalysisResultsArea';
 import { useImageAnalysis } from './hooks/useImageAnalysis';
+import { useForcedImageUploads } from '@/hooks/use-forced-image-uploads';
+import { useAuth } from '@/contexts/AuthContext';
 import { ProfileImageGuidelineModalProps } from './types';
 import { IMAGE_TYPES } from './constants';
 
@@ -15,8 +18,10 @@ const ProfileImageGuidelineModal: React.FC<ProfileImageGuidelineModalProps> = ({
   setDragActive,
   uploading,
   onValidFile,
+  profileId,
 }) => {
   const [previewImage, setPreviewImage] = useState<string | null>(null);
+  const { user } = useAuth();
   const {
     analysisResult,
     isAnalyzing,
@@ -26,6 +31,11 @@ const ProfileImageGuidelineModal: React.FC<ProfileImageGuidelineModalProps> = ({
     analyzeImage,
     resetAnalysis,
   } = useImageAnalysis();
+  
+  const { recordForcedUpload, isRecording } = useForcedImageUploads();
+
+  // Use provided profileId or fallback to auth user id
+  const targetProfileId = profileId || user?.id;
 
   // Reset state when modal opens/closes
   useEffect(() => {
@@ -69,6 +79,35 @@ const ProfileImageGuidelineModal: React.FC<ProfileImageGuidelineModalProps> = ({
     }
   };
 
+  const handleForceUpload = async () => {
+    if (!previewImage || !targetProfileId) return;
+    
+    try {
+      const response = await fetch(previewImage);
+      const blob = await response.blob();
+      const file = new File([blob], 'profile-image.jpg', { type: 'image/jpeg' });
+      
+      // Get failed validation messages
+      const failedValidations = validationResults
+        .filter(item => !item.passed)
+        .map(item => item.details);
+
+      // Upload the image first
+      await onValidFile(file);
+      
+      // Record the forced upload with validation errors
+      await recordForcedUpload({
+        profileId: targetProfileId,
+        validationErrors: failedValidations,
+        imageUrl: previewImage // This will be updated with the actual URL after upload
+      });
+      
+      onClose();
+    } catch (e) {
+      console.error('Force upload failed:', e);
+    }
+  };
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -90,7 +129,6 @@ const ProfileImageGuidelineModal: React.FC<ProfileImageGuidelineModalProps> = ({
     resetAnalysis();
   };
 
-  // Fix the type error by properly checking if analysisResult exists
   const showResults = isAnalyzing || analysisResult !== null || validationResults.length > 0 || validationProgress.length > 0;
 
   return (
@@ -123,13 +161,14 @@ const ProfileImageGuidelineModal: React.FC<ProfileImageGuidelineModalProps> = ({
               isAnalyzing={isAnalyzing}
               dragActive={dragActive}
               setDragActive={setDragActive}
-              uploading={uploading}
+              uploading={uploading || isRecording}
               error={error}
               analysisResult={analysisResult}
               validationResults={validationResults}
               handleInputChange={handleInputChange}
               onProceed={handleProceedWithUpload}
               onTryAnother={handleTryAnother}
+              onForceUpload={handleForceUpload}
             />
           </div>
 

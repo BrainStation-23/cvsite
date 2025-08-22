@@ -3,6 +3,7 @@ import React from 'react';
 import GuidelineDropzone from './GuidelineDropzone';
 import GuidelinePreview from './GuidelinePreview';
 import GuidelineAnalysisActions from './GuidelineAnalysisActions';
+import ForceUploadButton from './ForceUploadButton';
 import { ImageAnalysisResult, ValidationResult } from './types';
 
 interface ImageUploadAreaProps {
@@ -17,6 +18,7 @@ interface ImageUploadAreaProps {
   handleInputChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onProceed: () => void;
   onTryAnother: () => void;
+  onForceUpload?: () => void;
 }
 
 const ImageUploadArea: React.FC<ImageUploadAreaProps> = ({
@@ -31,7 +33,13 @@ const ImageUploadArea: React.FC<ImageUploadAreaProps> = ({
   handleInputChange,
   onProceed,
   onTryAnother,
+  onForceUpload,
 }) => {
+  const allPassed = validationResults.every(item => item.passed);
+  const failedValidations = validationResults
+    .filter(item => !item.passed)
+    .map(item => item.details);
+
   return (
     <div className="flex flex-col h-full min-h-0">
       {/* Show upload area when no image is selected */}
@@ -76,12 +84,23 @@ const ImageUploadArea: React.FC<ImageUploadAreaProps> = ({
             </div>
           )}
 
+          {/* Standard upload actions */}
           {analysisResult && (
             <GuidelineAnalysisActions
               uploading={uploading}
               onProceed={onProceed}
               onTryAnother={onTryAnother}
-              allPassed={validationResults.every(item => item.passed)}
+              allPassed={allPassed}
+            />
+          )}
+
+          {/* Force upload button - only show if analysis is complete and there are failures */}
+          {analysisResult && !allPassed && onForceUpload && (
+            <ForceUploadButton
+              onForceUpload={onForceUpload}
+              isUploading={uploading}
+              validationErrors={failedValidations}
+              disabled={false}
             />
           )}
         </div>
