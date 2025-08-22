@@ -14,6 +14,7 @@ export const useImageAnalysis = () => {
   const [validationResults, setValidationResults] = useState<ValidationResult[]>([]);
   const [validationProgress, setValidationProgress] = useState<ValidationProgress[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [originalFile, setOriginalFile] = useState<File | null>(null);
   const { toast } = useToast();
 
   const analyzeImage = async (file: File) => {
@@ -21,6 +22,7 @@ export const useImageAnalysis = () => {
       setIsAnalyzing(true);
       setError(null);
       setValidationResults([]);
+      setOriginalFile(file); // Store the original file
 
       const progressManager = new ProgressManager(setValidationProgress);
       const localResults: ValidationResult[] = [];
@@ -83,7 +85,7 @@ export const useImageAnalysis = () => {
 
       setAnalysisResult(mergedResult);
       
-      // Convert file to base64 for return
+      // Convert file to base64 for preview
       const base64 = await new Promise<string>((resolve, reject) => {
         const reader = new FileReader();
         reader.onload = () => resolve(reader.result as string);
@@ -114,6 +116,7 @@ export const useImageAnalysis = () => {
     setIsAnalyzing(false);
     setValidationResults([]);
     setValidationProgress([]);
+    setOriginalFile(null);
   }, []);
 
   return {
@@ -122,6 +125,7 @@ export const useImageAnalysis = () => {
     validationResults,
     validationProgress,
     error,
+    originalFile,
     analyzeImage,
     resetAnalysis,
   };

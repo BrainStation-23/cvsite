@@ -28,6 +28,7 @@ const ProfileImageGuidelineModal: React.FC<ProfileImageGuidelineModalProps> = ({
     validationResults,
     validationProgress,
     error,
+    originalFile,
     analyzeImage,
     resetAnalysis,
   } = useImageAnalysis();
@@ -65,14 +66,10 @@ const ProfileImageGuidelineModal: React.FC<ProfileImageGuidelineModalProps> = ({
   };
 
   const handleProceedWithUpload = async () => {
-    if (!previewImage) return;
+    if (!originalFile) return;
     
     try {
-      const response = await fetch(previewImage);
-      const blob = await response.blob();
-      const file = new File([blob], 'profile-image.jpg', { type: 'image/jpeg' });
-      
-      await onValidFile(file);
+      await onValidFile(originalFile);
       onClose();
     } catch (e) {
       console.error('Upload failed:', e);
@@ -80,26 +77,28 @@ const ProfileImageGuidelineModal: React.FC<ProfileImageGuidelineModalProps> = ({
   };
 
   const handleForceUpload = async () => {
-    if (!previewImage || !targetProfileId) return;
+    if (!originalFile || !targetProfileId) return;
     
     try {
-      const response = await fetch(previewImage);
-      const blob = await response.blob();
-      const file = new File([blob], 'profile-image.jpg', { type: 'image/jpeg' });
-      
       // Get failed validation messages
       const failedValidations = validationResults
         .filter(item => !item.passed)
         .map(item => item.details);
 
-      // Upload the image first
-      await onValidFile(file);
+      // Upload the image first using the original file
+      await onValidFile(originalFile);
       
-      // Record the forced upload with validation errors
+      // After successful upload, we need to get the actual URL
+      // The URL will be constructed based on the profileId
+      const fileExt = originalFile.name.split('.').pop();
+      const fileName = `${targetProfileId}/profile.${fileExt}`;
+      const actualImageUrl = `https://pvkzzkbwjntazemosbot.supabase.co/storage/v1/object/public/profile-images/${fileName}`;
+      
+      // Record the forced upload with validation errors and actual URL
       await recordForcedUpload({
         profileId: targetProfileId,
         validationErrors: failedValidations,
-        imageUrl: previewImage // This will be updated with the actual URL after upload
+        imageUrl: actualImageUrl
       });
       
       onClose();
