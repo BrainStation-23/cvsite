@@ -29,14 +29,17 @@ const ResourceCalendarView: React.FC = () => {
 
   const { resourcePlanningData, isLoading } = usePlannedResourcesTab();
 
-  // Calculate quick stats
-  const resourceData = resourcePlanningData?.resource_planning || [];
+  // Calculate quick stats with proper type checking
+  const resourceData = Array.isArray((resourcePlanningData as any)?.resource_planning) 
+    ? (resourcePlanningData as any).resource_planning 
+    : [];
+  
   const totalResources = resourceData.length;
-  const activeProjects = new Set(resourceData.map(r => r.project?.id).filter(Boolean)).size;
+  const activeProjects = new Set(resourceData.map((r: any) => r.project?.id).filter(Boolean)).size;
   const averageUtilization = resourceData.length > 0 
-    ? Math.round(resourceData.reduce((sum, r) => sum + (r.engagement_percentage || 0), 0) / resourceData.length)
+    ? Math.round(resourceData.reduce((sum: number, r: any) => sum + (r.engagement_percentage || 0), 0) / resourceData.length)
     : 0;
-  const availableResources = resourceData.filter(r => (r.engagement_percentage || 0) < 100).length;
+  const availableResources = resourceData.filter((r: any) => (r.engagement_percentage || 0) < 100).length;
 
   return (
     <DashboardLayout>
