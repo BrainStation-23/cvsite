@@ -195,7 +195,7 @@ export const WeeklyValidationTableRow: React.FC<WeeklyValidationTableRowProps> =
                     </Badge>
                   )}
                   {item.project.project_level && (
-                    <Badge variant="secondary" className="text-[10px] px-1.5 py-0 h-4 font-normal">
+                    <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-4 font-normal">
                       {item.project.project_level}
                     </Badge>
                   )}
