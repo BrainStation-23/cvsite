@@ -68,7 +68,7 @@ export const TechnicalSkillInput: React.FC<TechnicalSkillInputProps> = ({
   const handleInputChange = (inputValue: string) => {
     setSearchValue(inputValue);
     onChange(inputValue);
-    setOpen(inputValue.length > 0 && !isLoading);
+    setOpen(!isLoading);
   };
    const handleFocus = () => {
     setOpen(false);
