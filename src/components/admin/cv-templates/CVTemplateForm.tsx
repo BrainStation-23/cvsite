@@ -4,6 +4,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { CVTemplate } from '@/hooks/use-cv-templates';
 
@@ -14,11 +16,19 @@ interface CVTemplateFormProps {
     name: string; 
     html_template: string; 
     enabled?: boolean; 
-    is_default?: boolean; 
+    is_default?: boolean;
+    data_source_function?: string;
+    orientation?: 'portrait' | 'landscape';
   }) => void;
   template?: CVTemplate;
   isLoading?: boolean;
 }
+
+// Available RPC functions for CV data
+const AVAILABLE_DATA_SOURCES = [
+  { value: 'get_employee_data_masked', label: 'Employee Data (Masked)' },
+  { value: 'get_employee_data', label: 'Employee Data (Full)' },
+];
 
 export const CVTemplateForm: React.FC<CVTemplateFormProps> = ({
   isOpen,
@@ -31,6 +41,8 @@ export const CVTemplateForm: React.FC<CVTemplateFormProps> = ({
   const [htmlTemplate, setHtmlTemplate] = useState('');
   const [enabled, setEnabled] = useState(true);
   const [isDefault, setIsDefault] = useState(false);
+  const [dataSourceFunction, setDataSourceFunction] = useState('get_employee_data_masked');
+  const [orientation, setOrientation] = useState<'portrait' | 'landscape'>('portrait');
 
   useEffect(() => {
     if (template) {
@@ -38,11 +50,15 @@ export const CVTemplateForm: React.FC<CVTemplateFormProps> = ({
       setHtmlTemplate(template.html_template);
       setEnabled(template.enabled);
       setIsDefault(template.is_default);
+      setDataSourceFunction(template.data_source_function);
+      setOrientation(template.orientation);
     } else {
       setName('');
       setHtmlTemplate('');
       setEnabled(true);
       setIsDefault(false);
+      setDataSourceFunction('get_employee_data_masked');
+      setOrientation('portrait');
     }
   }, [template, isOpen]);
 
@@ -54,6 +70,8 @@ export const CVTemplateForm: React.FC<CVTemplateFormProps> = ({
         html_template: htmlTemplate.trim(),
         enabled,
         is_default: isDefault,
+        data_source_function: dataSourceFunction,
+        orientation,
       });
     }
   };
@@ -63,6 +81,8 @@ export const CVTemplateForm: React.FC<CVTemplateFormProps> = ({
     setHtmlTemplate('');
     setEnabled(true);
     setIsDefault(false);
+    setDataSourceFunction('get_employee_data_masked');
+    setOrientation('portrait');
     onClose();
   };
 
@@ -85,6 +105,38 @@ export const CVTemplateForm: React.FC<CVTemplateFormProps> = ({
               placeholder="Enter template name..."
               required
             />
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="data_source">Data Source</Label>
+              <Select value={dataSourceFunction} onValueChange={setDataSourceFunction}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select data source..." />
+                </SelectTrigger>
+                <SelectContent>
+                  {AVAILABLE_DATA_SOURCES.map((source) => (
+                    <SelectItem key={source.value} value={source.value}>
+                      {source.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label>Orientation</Label>
+              <RadioGroup value={orientation} onValueChange={(value: 'portrait' | 'landscape') => setOrientation(value)}>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="portrait" id="portrait" />
+                  <Label htmlFor="portrait">Portrait</Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="landscape" id="landscape" />
+                  <Label htmlFor="landscape">Landscape</Label>
+                </div>
+              </RadioGroup>
+            </div>
           </div>
 
           <div className="grid grid-cols-2 gap-4">

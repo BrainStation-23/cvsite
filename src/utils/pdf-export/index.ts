@@ -19,31 +19,27 @@ export async function exportCVAsPDF(
   const progressTracker = new ProgressTracker(onProgress);
   
   try {
-    // Step 1: Fetch employee data
+    // Step 1: Fetch template and employee data using dynamic data source
     progressTracker.startStep('fetch-employee');
-    const employeeData = await dataFetcher.fetchEmployeeData(profileId);
+    const { employeeData, templateData } = await dataFetcher.fetchAllData(profileId, templateId);
     progressTracker.completeStep('fetch-employee');
 
-    // Step 2: Fetch template data
-    progressTracker.startStep('fetch-template');
-    const templateData = await dataFetcher.fetchTemplateData(templateId);
-    progressTracker.completeStep('fetch-template');
-
-    // Step 3: Process template
+    // Step 2: Process template with dynamic configuration
     progressTracker.startStep('process-template');
     const processedHTML = cvTemplateProcessor.processTemplate(
       templateData.html_template, 
-      employeeData
+      employeeData,
+      templateData // Pass template config for orientation and other settings
     );
     progressTracker.completeStep('process-template');
 
-    // Step 4: Prepare PDF
+    // Step 3: Prepare PDF
     progressTracker.startStep('prepare-pdf');
     // Small delay to show the step
     await new Promise(resolve => setTimeout(resolve, 200));
     progressTracker.completeStep('prepare-pdf');
 
-    // Step 5-7: Generate PDF (handled by PDF engine internally)
+    // Step 4-6: Generate PDF (handled by PDF engine internally)
     progressTracker.startStep('convert-canvas');
     await new Promise(resolve => setTimeout(resolve, 300));
     progressTracker.completeStep('convert-canvas');
@@ -54,14 +50,14 @@ export async function exportCVAsPDF(
 
     progressTracker.startStep('finalize');
     await pdfEngine.generatePDF(processedHTML, {
-      filename: `${employeeData.employee_id || 'employee'}_cv`,
+      filename: filename || `${employeeData.employee_id || 'employee'}_cv`,
       includeStandardCSS: true,
       validateTemplate: true,
       pageSize: 'a4'
     });
     progressTracker.completeStep('finalize');
 
-    // Step 8: Complete
+    // Step 7: Complete
     progressTracker.startStep('complete');
     progressTracker.completeStep('complete');
 

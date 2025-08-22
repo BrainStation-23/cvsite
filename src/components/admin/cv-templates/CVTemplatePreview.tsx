@@ -1,13 +1,16 @@
-import React, { useState } from 'react';
+
+import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { useTemplateEngine } from '@/hooks/use-template-engine';
-import { useEmployeeData } from '@/hooks/use-employee-data';
+import { useCVTemplates } from '@/hooks/use-cv-templates';
 import { Button } from '@/components/ui/button';
 import { Download, Maximize, FileDown } from 'lucide-react';
 import { CVRenderer } from './CVRenderer';
 import { generateFullCVHTML } from '@/utils/cv-html-generator';
 import { exportCVAsPDF, ProgressDialog, ProgressStep } from '@/utils/pdf-export';
 import { openCVPreview } from '@/utils/cv-preview-utility';
+import { dataFetcher } from '@/utils/pdf-export/core/data-fetcher';
+import { cvTemplateProcessor } from '@/utils/pdf-export/core/template-processor';
 import { toast } from 'sonner';
 
 interface CVTemplatePreviewProps {
@@ -20,12 +23,50 @@ export const CVTemplatePreview: React.FC<CVTemplatePreviewProps> = ({
   selectedEmployeeId,
 }) => {
   const { id: templateId } = useParams<{ id: string }>();
-  const { data: employeeData, isLoading: isLoadingEmployee } = useEmployeeData(selectedEmployeeId || '', true);
+  const { templates, isLoading: templatesLoading } = useCVTemplates();
+  
+  const [employeeData, setEmployeeData] = useState(null);
+  const [isLoadingEmployee, setIsLoadingEmployee] = useState(false);
+  const [employeeError, setEmployeeError] = useState<string | null>(null);
+  
   const { processedHTML, error, isProcessing } = useTemplateEngine(htmlTemplate, employeeData);
   
   const [showProgressDialog, setShowProgressDialog] = useState(false);
   const [progressSteps, setProgressSteps] = useState<ProgressStep[]>([]);
   const [progress, setProgress] = useState(0);
+
+  // Get current template
+  const currentTemplate = templates.find(t => t.id === templateId);
+
+  // Fetch employee data using dynamic data source when employee or template changes
+  useEffect(() => {
+    const fetchEmployeeData = async () => {
+      if (!selectedEmployeeId || !currentTemplate) {
+        setEmployeeData(null);
+        return;
+      }
+
+      setIsLoadingEmployee(true);
+      setEmployeeError(null);
+
+      try {
+        // Use the same approach as other working functions
+        const fetchedEmployeeData = await dataFetcher.fetchEmployeeData(
+          selectedEmployeeId, 
+          currentTemplate.data_source_function
+        );
+        setEmployeeData(fetchedEmployeeData);
+      } catch (error) {
+        console.error('Failed to fetch employee data:', error);
+        setEmployeeError(error instanceof Error ? error.message : 'Failed to fetch employee data');
+        setEmployeeData(null);
+      } finally {
+        setIsLoadingEmployee(false);
+      }
+    };
+
+    fetchEmployeeData();
+  }, [selectedEmployeeId, currentTemplate?.data_source_function]);
 
   const handleFullscreen = async () => {
     if (!selectedEmployeeId || !templateId) {
@@ -41,19 +82,37 @@ export const CVTemplatePreview: React.FC<CVTemplatePreviewProps> = ({
     }
   };
 
-  const handleDownload = () => {
-    if (!processedHTML) return;
+  const handleDownload = async () => {
+    if (!selectedEmployeeId || !templateId) {
+      toast.error('Please select an employee to download HTML');
+      return;
+    }
     
-    const fullHTML = generateFullCVHTML(processedHTML, 'download');
-    const blob = new Blob([fullHTML], { type: 'text/html' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'cv-preview.html';
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+    try {
+      // Use dynamic data source from template
+      const { employeeData, templateData } = await dataFetcher.fetchAllData(selectedEmployeeId, templateId);
+      const processedHTML = cvTemplateProcessor.processTemplate(
+        templateData.html_template,
+        employeeData,
+        templateData
+      );
+      
+      const fullHTML = generateFullCVHTML(processedHTML, 'download');
+      const blob = new Blob([fullHTML], { type: 'text/html' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${employeeData.employee_id || 'employee'}_cv.html`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      
+      toast.success('HTML downloaded successfully');
+    } catch (error) {
+      console.error('HTML download failed:', error);
+      toast.error('Failed to download HTML. Please try again.');
+    }
   };
 
   const handlePDFDownload = async () => {
@@ -93,7 +152,7 @@ export const CVTemplatePreview: React.FC<CVTemplatePreviewProps> = ({
           <div>
             <h3 className="font-medium text-sm">CV Preview</h3>
             <p className="text-xs text-muted-foreground mt-1">
-              {selectedEmployeeId ? 'Live preview with employee data' : 'Template preview (no data)'}
+              {selectedEmployeeId ? `Live preview with employee data (${currentTemplate?.data_source_function || 'default'})` : 'Template preview (no data)'}
             </p>
           </div>
           <div className="flex gap-2">
@@ -108,7 +167,12 @@ export const CVTemplatePreview: React.FC<CVTemplatePreviewProps> = ({
                   <Maximize className="h-3 w-3 mr-1" />
                   Fullscreen
                 </Button>
-                <Button size="sm" variant="outline" onClick={handleDownload}>
+                <Button 
+                  size="sm" 
+                  variant="outline" 
+                  onClick={handleDownload}
+                  disabled={!selectedEmployeeId}
+                >
                   <Download className="h-3 w-3 mr-1" />
                   HTML
                 </Button>
@@ -128,11 +192,13 @@ export const CVTemplatePreview: React.FC<CVTemplatePreviewProps> = ({
 
         {/* Preview Content */}
         <div className="flex-1 overflow-auto bg-gray-100">
-          {isLoadingEmployee && selectedEmployeeId && (
+          {(isLoadingEmployee || templatesLoading) && selectedEmployeeId && (
             <div className="flex items-center justify-center h-full">
               <div className="text-center">
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-2"></div>
-                <p className="text-sm text-muted-foreground">Loading employee data...</p>
+                <p className="text-sm text-muted-foreground">
+                  {templatesLoading ? 'Loading template...' : 'Loading employee data...'}
+                </p>
               </div>
             </div>
           )}
@@ -146,14 +212,16 @@ export const CVTemplatePreview: React.FC<CVTemplatePreviewProps> = ({
             </div>
           )}
 
-          {error && (
+          {(error || employeeError) && (
             <div className="p-4 m-4 bg-red-50 border border-red-200 rounded-md">
-              <h4 className="text-sm font-medium text-red-800 mb-2">Template Error</h4>
-              <p className="text-sm text-red-600">{error}</p>
+              <h4 className="text-sm font-medium text-red-800 mb-2">
+                {employeeError ? 'Data Fetch Error' : 'Template Error'}
+              </h4>
+              <p className="text-sm text-red-600">{employeeError || error}</p>
             </div>
           )}
 
-          {!isLoadingEmployee && !isProcessing && !error && (
+          {!isLoadingEmployee && !templatesLoading && !isProcessing && !error && !employeeError && (
             <>
               {!selectedEmployeeId && !htmlTemplate.trim() && (
                 <div className="flex items-center justify-center h-full text-center p-8">

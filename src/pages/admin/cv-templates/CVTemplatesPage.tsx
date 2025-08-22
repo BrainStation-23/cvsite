@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Plus, Pencil, Trash2, Eye, Star } from 'lucide-react';
+import { Plus, Pencil, Trash2, Eye, Star, Database, FileText } from 'lucide-react';
 import { useCVTemplates, CVTemplate } from '@/hooks/use-cv-templates';
 import { CVTemplateForm } from '@/components/admin/cv-templates/CVTemplateForm';
 import { ConfirmationDialog } from '@/components/ui/confirmation-dialog';
@@ -71,7 +71,9 @@ const CVTemplatesPage: React.FC = () => {
     name: string; 
     html_template: string; 
     enabled?: boolean; 
-    is_default?: boolean; 
+    is_default?: boolean;
+    data_source_function?: string;
+    orientation?: 'portrait' | 'landscape';
   }) => {
     if (editingTemplate) {
       updateTemplate({ id: editingTemplate.id, ...data });
@@ -83,6 +85,17 @@ const CVTemplatesPage: React.FC = () => {
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString();
+  };
+
+  const getDataSourceLabel = (functionName: string) => {
+    switch (functionName) {
+      case 'get_employee_data_masked':
+        return 'Masked Data';
+      case 'get_employee_data':
+        return 'Full Data';
+      default:
+        return functionName;
+    }
   };
 
   if (isLoading) {
@@ -120,6 +133,8 @@ const CVTemplatesPage: React.FC = () => {
             <TableHeader>
               <TableRow>
                 <TableHead>Name</TableHead>
+                <TableHead>Data Source</TableHead>
+                <TableHead>Orientation</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead>Default</TableHead>
                 <TableHead>Last Updated</TableHead>
@@ -129,7 +144,7 @@ const CVTemplatesPage: React.FC = () => {
             <TableBody>
               {templates.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={5} className="text-center text-muted-foreground py-8">
+                  <TableCell colSpan={7} className="text-center text-muted-foreground py-8">
                     No CV templates found. Create one to get started.
                   </TableCell>
                 </TableRow>
@@ -142,6 +157,20 @@ const CVTemplatesPage: React.FC = () => {
                         {template.is_default && (
                           <Star className="h-4 w-4 text-yellow-500 fill-current" />
                         )}
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-2">
+                        <Database className="h-4 w-4 text-muted-foreground" />
+                        <span className="text-sm">{getDataSourceLabel(template.data_source_function)}</span>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-2">
+                        <FileText className="h-4 w-4 text-muted-foreground" />
+                        <Badge variant="outline" className="capitalize">
+                          {template.orientation}
+                        </Badge>
                       </div>
                     </TableCell>
                     <TableCell>

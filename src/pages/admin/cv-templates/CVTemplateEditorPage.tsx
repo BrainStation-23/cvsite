@@ -2,7 +2,11 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Save, Eye, FileText } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { ArrowLeft, Save, Eye, FileText, Database } from 'lucide-react';
 import { toast } from 'sonner';
 import DashboardLayout from '@/components/Layout/DashboardLayout';
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from '@/components/ui/resizable';
@@ -13,6 +17,12 @@ import { EXAMPLE_CV_TEMPLATE } from '@/constants/cv-template-examples';
 import { useConfirmationDialog } from '@/hooks/use-confirmation-dialog';
 import { ConfirmationDialog } from '@/components/ui/confirmation-dialog';
 
+// Available data sources
+const AVAILABLE_DATA_SOURCES = [
+  { value: 'get_employee_data_masked', label: 'Employee Data (Masked)' },
+  { value: 'get_employee_data', label: 'Employee Data (Full)' },
+];
+
 const CVTemplateEditorPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -21,6 +31,8 @@ const CVTemplateEditorPage: React.FC = () => {
   
   const [templateName, setTemplateName] = useState('');
   const [htmlTemplate, setHtmlTemplate] = useState('');
+  const [dataSourceFunction, setDataSourceFunction] = useState('get_employee_data_masked');
+  const [orientation, setOrientation] = useState<'portrait' | 'landscape'>('portrait');
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
 
   const currentTemplate = templates.find(t => t.id === id);
@@ -29,6 +41,8 @@ const CVTemplateEditorPage: React.FC = () => {
     if (currentTemplate) {
       setTemplateName(currentTemplate.name);
       setHtmlTemplate(currentTemplate.html_template);
+      setDataSourceFunction(currentTemplate.data_source_function);
+      setOrientation(currentTemplate.orientation);
     }
   }, [currentTemplate]);
 
@@ -42,6 +56,8 @@ const CVTemplateEditorPage: React.FC = () => {
       id,
       name: templateName.trim(),
       html_template: htmlTemplate.trim(),
+      data_source_function: dataSourceFunction,
+      orientation,
     });
     
     setHasUnsavedChanges(false);
@@ -98,6 +114,16 @@ const CVTemplateEditorPage: React.FC = () => {
     setHasUnsavedChanges(true);
   };
 
+  const handleDataSourceChange = (value: string) => {
+    setDataSourceFunction(value);
+    setHasUnsavedChanges(true);
+  };
+
+  const handleOrientationChange = (value: 'portrait' | 'landscape') => {
+    setOrientation(value);
+    setHasUnsavedChanges(true);
+  };
+
   if (!currentTemplate) {
     return (
       <DashboardLayout>
@@ -149,6 +175,51 @@ const CVTemplateEditorPage: React.FC = () => {
               <Save className="h-4 w-4 mr-2" />
               {isUpdating ? 'Saving...' : 'Save Template'}
             </Button>
+          </div>
+        </div>
+
+        {/* Template Configuration */}
+        <div className="p-4 border-b bg-muted/30">
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="data_source" className="flex items-center gap-2">
+                <Database className="h-4 w-4" />
+                Data Source
+              </Label>
+              <Select value={dataSourceFunction} onValueChange={handleDataSourceChange}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {AVAILABLE_DATA_SOURCES.map((source) => (
+                    <SelectItem key={source.value} value={source.value}>
+                      {source.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label className="flex items-center gap-2">
+                <FileText className="h-4 w-4" />
+                Orientation
+              </Label>
+              <RadioGroup 
+                value={orientation} 
+                onValueChange={handleOrientationChange}
+                className="flex gap-4"
+              >
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="portrait" id="portrait" />
+                  <Label htmlFor="portrait">Portrait</Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="landscape" id="landscape" />
+                  <Label htmlFor="landscape">Landscape</Label>
+                </div>
+              </RadioGroup>
+            </div>
           </div>
         </div>
 

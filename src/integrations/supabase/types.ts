@@ -160,29 +160,35 @@ export type Database = {
       cv_templates: {
         Row: {
           created_at: string
+          data_source_function: string
           enabled: boolean
           html_template: string
           id: string
           is_default: boolean
           name: string
+          orientation: string
           updated_at: string
         }
         Insert: {
           created_at?: string
+          data_source_function?: string
           enabled?: boolean
           html_template: string
           id?: string
           is_default?: boolean
           name: string
+          orientation?: string
           updated_at?: string
         }
         Update: {
           created_at?: string
+          data_source_function?: string
           enabled?: boolean
           html_template?: string
           id?: string
           is_default?: boolean
           name?: string
+          orientation?: string
           updated_at?: string
         }
         Relationships: []

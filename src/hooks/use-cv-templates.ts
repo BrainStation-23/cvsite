@@ -9,6 +9,8 @@ export interface CVTemplate {
   html_template: string;
   enabled: boolean;
   is_default: boolean;
+  data_source_function: string;
+  orientation: 'portrait' | 'landscape';
   created_at: string;
   updated_at: string;
 }
@@ -39,14 +41,18 @@ export const useCVTemplates = () => {
       name: string; 
       html_template: string; 
       enabled?: boolean; 
-      is_default?: boolean; 
+      is_default?: boolean;
+      data_source_function?: string;
+      orientation?: 'portrait' | 'landscape';
     }) => {
       const { data, error } = await supabase
         .from('cv_templates')
         .insert([{
           ...template,
           enabled: template.enabled ?? true,
-          is_default: template.is_default ?? false
+          is_default: template.is_default ?? false,
+          data_source_function: template.data_source_function ?? 'get_employee_data_masked',
+          orientation: template.orientation ?? 'portrait'
         }])
         .select()
         .single();
@@ -74,7 +80,9 @@ export const useCVTemplates = () => {
       name?: string; 
       html_template?: string; 
       enabled?: boolean; 
-      is_default?: boolean; 
+      is_default?: boolean;
+      data_source_function?: string;
+      orientation?: 'portrait' | 'landscape';
     }) => {
       const { data, error } = await supabase
         .from('cv_templates')
