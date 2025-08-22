@@ -93,6 +93,8 @@ export const ResourcePlanningTable: React.FC = () => {
     }
     // Reset form state
     setPreselectedProfileId(null);
+    //hide form
+    setShowCreateForm(false);
   };
 
   return (
