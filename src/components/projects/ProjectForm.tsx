@@ -35,7 +35,6 @@ const projectSchema = z.object({
   project_manager: z.string().optional(),
   budget: z.coerce.number().optional(),
   description: z.string().optional(),
-  company_id: z.coerce.number().optional(),
   project_level: z.string().optional(),
   is_active: z.boolean().default(true),
 });
@@ -49,7 +48,6 @@ interface Project {
   project_manager: string | null;
   budget: number | null;
   description?: string | null;
-  company_id?: number | null;
   project_level?: string | null;
   is_active: boolean;
 }
@@ -77,7 +75,6 @@ export const ProjectForm: React.FC<ProjectFormProps> = ({
       project_manager: '',
       budget: undefined,
       description: '',
-      company_id: undefined,
       project_level: '',
       is_active: true,
     },
@@ -91,7 +88,6 @@ export const ProjectForm: React.FC<ProjectFormProps> = ({
         project_manager: initialData.project_manager || '',
         budget: initialData.budget || undefined,
         description: initialData.description || '',
-        company_id: initialData.company_id || undefined,
         project_level: initialData.project_level || '',
         is_active: initialData.is_active,
       });
@@ -102,7 +98,6 @@ export const ProjectForm: React.FC<ProjectFormProps> = ({
         project_manager: '',
         budget: undefined,
         description: '',
-        company_id: undefined,
         project_level: '',
         is_active: true,
       });
@@ -116,7 +111,6 @@ export const ProjectForm: React.FC<ProjectFormProps> = ({
       project_manager: data.project_manager || null,
       budget: data.budget || null,
       description: data.description || null,
-      company_id: data.company_id || null,
       project_level: data.project_level || null,
       is_active: data.is_active,
     });
@@ -207,25 +201,6 @@ export const ProjectForm: React.FC<ProjectFormProps> = ({
                       <Input 
                         type="number" 
                         placeholder="Enter budget amount" 
-                        {...field} 
-                        value={field.value || ''}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="company_id"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Company ID</FormLabel>
-                    <FormControl>
-                      <Input 
-                        type="number" 
-                        placeholder="Enter company ID" 
                         {...field} 
                         value={field.value || ''}
                       />
