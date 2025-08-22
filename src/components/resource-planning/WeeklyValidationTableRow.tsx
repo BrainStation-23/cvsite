@@ -39,6 +39,8 @@ interface WeeklyValidationData {
     project_manager: string;
     client_name: string;
     budget: number;
+    project_level?: string;
+    project_type_name?: string;
   } | null;
 }
 
@@ -177,13 +179,25 @@ export const WeeklyValidationTableRow: React.FC<WeeklyValidationTableRowProps> =
         </TableCell>
         <TableCell className="py-1 px-2">
           {item.project ? (
-            <div className="flex flex-col">
+            <div className="flex flex-col space-y-1">
               <span className="font-medium text-xs">{item.project.project_name}</span>
               {item.project.client_name && (
                 <span className="text-xs text-muted-foreground">
                   Client: {item.project.client_name}
                 </span>
               )}
+              <div className="flex flex-wrap gap-1">
+                {item.project.project_type_name && (
+                  <Badge variant="outline" className="text-xs px-1 py-0 h-4">
+                    {item.project.project_type_name}
+                  </Badge>
+                )}
+                {item.project.project_level && (
+                  <Badge variant="outline" className="text-xs px-1 py-0 h-4">
+                    Level: {item.project.project_level}
+                  </Badge>
+                )}
+              </div>
             </div>
           ) : (
             <span className="text-muted-foreground text-xs">Not assigned</span>
