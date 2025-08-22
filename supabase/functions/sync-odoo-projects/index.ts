@@ -27,6 +27,17 @@ interface OdooResponse {
   };
 }
 
+interface TransformedProject {
+  projectName: string;
+  description: string | null;
+  projectLevel: string | null;
+  projectType: string;
+  projectValue: number;
+  active: boolean;
+  managerName: string;
+  managerEmail: string;
+}
+
 Deno.serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
@@ -82,18 +93,29 @@ Deno.serve(async (req) => {
     const odooData: OdooResponse = await odooResponse.json();
     console.log(`Fetched ${odooData.data.allProjects.length} projects from Odoo`);
 
-    // Pass the data directly to the RPC function - no processing here
-    console.log('Calling bulk sync RPC function...');
-    const { data: syncResult, error: syncError } = await supabase.functions.invoke(
-      'bulk-sync-odoo-projects-v2',
-      { 
-        body: { projects_data: odooData.data.allProjects }
-      }
-    );
+    // Transform Odoo data to match RPC function expectations
+    const transformedProjects: TransformedProject[] = odooData.data.allProjects.map(project => ({
+      projectName: project.name,
+      description: project.description,
+      projectLevel: project.projectLevel,
+      projectType: project.projectType,
+      projectValue: project.projectValue,
+      active: project.active,
+      managerName: project.projectManager.name,
+      managerEmail: project.projectManager.email
+    }));
+
+    console.log(`Transformed ${transformedProjects.length} projects for RPC call`);
+    console.log('Calling bulk_sync_odoo_projects RPC function...');
+
+    // Call the RPC function directly
+    const { data: syncResult, error: syncError } = await supabase.rpc('bulk_sync_odoo_projects', {
+      projects_data: transformedProjects
+    });
 
     if (syncError) {
       console.error('RPC function error:', syncError);
-      throw new Error(`Bulk sync RPC function failed: ${syncError.message}`);
+      throw new Error(`RPC function failed: ${syncError.message}`);
     }
 
     console.log('Sync completed successfully:', syncResult);
@@ -104,7 +126,11 @@ Deno.serve(async (req) => {
       message: 'Projects sync completed',
       stats: {
         total_fetched: odooData.data.allProjects.length,
-        ...syncResult.stats
+        total_processed: syncResult?.total_processed || 0,
+        new_synced: syncResult?.new_synced || 0,
+        updated: syncResult?.updated || 0,
+        skipped: syncResult?.skipped || 0,
+        errors: syncResult?.errors || 0
       }
     }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
