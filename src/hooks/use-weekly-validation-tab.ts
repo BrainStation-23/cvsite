@@ -1,200 +1,158 @@
-import { useState, useCallback, useMemo } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+
+import { useState, useEffect } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/hooks/use-toast';
+import { useResourcePlanningOperations } from './use-resource-planning-operations';
 
 interface AdvancedFilters {
   billTypeFilter: string | null;
-  projectSearch: string;
+  projectSearch: string | null;
   minEngagementPercentage: number | null;
   maxEngagementPercentage: number | null;
   minBillingPercentage: number | null;
   maxBillingPercentage: number | null;
-  startDateFrom: string;
-  startDateTo: string;
-  endDateFrom: string;
-  endDateTo: string;
+  startDateFrom: string | null;
+  startDateTo: string | null;
+  endDateFrom: string | null;
+  endDateTo: string | null;
 }
 
-const defaultAdvancedFilters: AdvancedFilters = {
-  billTypeFilter: null,
-  projectSearch: '',
-  minEngagementPercentage: null,
-  maxEngagementPercentage: null,
-  minBillingPercentage: null,
-  maxBillingPercentage: null,
-  startDateFrom: '',
-  startDateTo: '',
-  endDateFrom: '',
-  endDateTo: '',
-};
-
-export function useWeeklyValidationTab(isActive: boolean = true) {
-  const { toast } = useToast();
-  const queryClient = useQueryClient();
-
-  // Basic filters
+export const useWeeklyValidationTab = (isActive: boolean = true) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedSbu, setSelectedSbu] = useState<string | null>(null);
   const [selectedManager, setSelectedManager] = useState<string | null>(null);
-  const [advancedFilters, setAdvancedFilters] = useState<AdvancedFilters>(defaultAdvancedFilters);
-
-  // Pagination and sorting
   const [currentPage, setCurrentPage] = useState(1);
   const [sortBy, setSortBy] = useState('created_at');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
-  const itemsPerPage = 10;
+  const [advancedFilters, setAdvancedFilters] = useState<AdvancedFilters>({
+    billTypeFilter: null,
+    projectSearch: null,
+    minEngagementPercentage: null,
+    maxEngagementPercentage: null,
+    minBillingPercentage: null,
+    maxBillingPercentage: null,
+    startDateFrom: null,
+    startDateTo: null,
+    endDateFrom: null,
+    endDateTo: null,
+  });
 
-  // Stable filter clear functions
-  const clearBasicFilters = useCallback(() => {
-    setSearchQuery('');
-    setSelectedSbu(null);
-    setSelectedManager(null);
-    setCurrentPage(1);
-  }, []);
-
-  const clearAdvancedFilters = useCallback(() => {
-    setAdvancedFilters(defaultAdvancedFilters);
-    setCurrentPage(1);
-  }, []);
-
-  const updateAdvancedFilters = useCallback((updates: Partial<AdvancedFilters>) => {
-    setAdvancedFilters(prev => ({ ...prev, ...updates }));
-    setCurrentPage(1);
-  }, []);
+  const { updateResourcePlanning, isUpdating } = useResourcePlanningOperations();
 
   // Reset page when filters change
-  const resetPage = useCallback(() => setCurrentPage(1), []);
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, selectedSbu, selectedManager, sortBy, sortOrder, advancedFilters]);
 
-  // Memoized RPC parameters - now using UUIDs for ID-based filters
-  const rpcParams = useMemo(() => ({
+  // Add logging for sort changes
+  useEffect(() => {
+    console.log('Weekly Validation Tab - Sort state changed:', { sortBy, sortOrder });
+  }, [sortBy, sortOrder]);
+
+  const handleSort = (column: string) => {
+    console.log('Weekly Validation Tab - handleSort called:', { column, currentSortBy: sortBy, currentSortOrder: sortOrder });
+    
+    if (sortBy === column) {
+      const newOrder = sortOrder === 'asc' ? 'desc' : 'asc';
+      console.log('Weekly Validation Tab - Toggling sort order to:', newOrder);
+      setSortOrder(newOrder);
+    } else {
+      console.log('Weekly Validation Tab - Setting new sort column:', column);
+      setSortBy(column);
+      setSortOrder('asc');
+    }
+  };
+
+  const queryParams = {
     search_query: searchQuery || null,
     page_number: currentPage,
-    items_per_page: itemsPerPage,
+    items_per_page: 10,
     sort_by: sortBy,
     sort_order: sortOrder,
-    sbu_filter: selectedSbu, // Pass UUID directly
-    manager_filter: selectedManager, // Pass UUID directly
-    bill_type_filter: advancedFilters.billTypeFilter, // Pass UUID directly
-    project_search: advancedFilters.projectSearch || null,
+    sbu_filter: selectedSbu,
+    manager_filter: selectedManager,
+    bill_type_filter: advancedFilters.billTypeFilter,
+    project_search: advancedFilters.projectSearch,
     min_engagement_percentage: advancedFilters.minEngagementPercentage,
     max_engagement_percentage: advancedFilters.maxEngagementPercentage,
     min_billing_percentage: advancedFilters.minBillingPercentage,
     max_billing_percentage: advancedFilters.maxBillingPercentage,
-    start_date_from: advancedFilters.startDateFrom || null,
-    start_date_to: advancedFilters.startDateTo || null,
-    end_date_from: advancedFilters.endDateFrom || null,
-    end_date_to: advancedFilters.endDateTo || null,
-  }), [
-    searchQuery,
-    currentPage,
-    sortBy,
-    sortOrder,
-    selectedSbu,
-    selectedManager,
-    advancedFilters
-  ]);
+    start_date_from: advancedFilters.startDateFrom,
+    start_date_to: advancedFilters.startDateTo,
+    end_date_from: advancedFilters.endDateFrom,
+    end_date_to: advancedFilters.endDateTo,
+  };
 
-  // Data fetching - only enabled when tab is active
-  const { data, isLoading, error, refetch } = useQuery({
-    queryKey: ['weekly-validation-tab', rpcParams],
+  console.log('Weekly Validation Tab Query:', queryParams);
+
+  const {
+    data: weeklyValidationData,
+    isLoading,
+    error,
+    refetch,
+  } = useQuery({
+    queryKey: ['weekly-validation', queryParams],
     queryFn: async () => {
-      console.log('Weekly Validation Tab Query:', rpcParams);
-
-      const { data: rpcData, error } = await supabase.rpc('get_weekly_validation_data', rpcParams);
-
+      console.log('Weekly Validation Tab - Fetching data with params:', queryParams);
+      
+      const { data, error } = await supabase.rpc('get_weekly_validation_data', queryParams);
+      
       if (error) {
-        console.error('Weekly validation RPC call error:', error);
+        console.error('Weekly Validation Tab - RPC Error:', error);
         throw error;
       }
-
-      if (rpcData && typeof rpcData === 'object' && 'resource_planning' in rpcData) {
-        return {
-          resource_planning: (rpcData as any).resource_planning || [],
-          pagination: (rpcData as any).pagination || {
-            total_count: 0,
-            filtered_count: 0,
-            page: currentPage,
-            per_page: itemsPerPage,
-            page_count: 0
-          }
-        };
-      }
-
-      return {
-        resource_planning: [],
-        pagination: {
-          total_count: 0,
-          filtered_count: 0,
-          page: currentPage,
-          per_page: itemsPerPage,
-          page_count: 0
-        }
-      };
+      
+      console.log('Weekly Validation Tab - Received data:', data);
+      return data;
     },
-    enabled: isActive, // Only run query when tab is active
+    enabled: isActive,
   });
 
-  // Validation mutation
-  const validateMutation = useMutation({
-    mutationFn: async (resourcePlanningId: string) => {
-      const { error } = await supabase
-        .from('resource_planning')
-        .update({ weekly_validation: true })
-        .eq('id', resourcePlanningId);
+  const handleValidate = async (id: string) => {
+    console.log('Weekly Validation Tab - Validating resource:', id);
+    await updateResourcePlanning({ 
+      id, 
+      updates: { weekly_validation: true } 
+    });
+  };
 
-      if (error) throw error;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['weekly-validation-tab'] });
-      queryClient.invalidateQueries({ queryKey: ['planned-resources-tab'] });
-      toast({
-        title: 'Success',
-        description: 'Resource planning validated successfully.',
-      });
-    },
-    onError: (error: any) => {
-      console.error('Validation error:', error);
-      toast({
-        title: 'Error',
-        description: 'Failed to validate resource planning.',
-        variant: 'destructive',
-      });
-    },
-  });
+  const clearAdvancedFilters = () => {
+    setAdvancedFilters({
+      billTypeFilter: null,
+      projectSearch: null,
+      minEngagementPercentage: null,
+      maxEngagementPercentage: null,
+      minBillingPercentage: null,
+      maxBillingPercentage: null,
+      startDateFrom: null,
+      startDateTo: null,
+      endDateFrom: null,
+      endDateTo: null,
+    });
+  };
 
   return {
-    // Basic filters
     searchQuery,
     setSearchQuery,
     selectedSbu,
     setSelectedSbu,
     selectedManager,
     setSelectedManager,
-    clearBasicFilters,
-    
-    // Advanced filters
-    advancedFilters,
-    setAdvancedFilters,
-    updateAdvancedFilters,
-    clearAdvancedFilters,
-    
-    // Data and pagination
-    data: data?.resource_planning || [],
-    pagination: data?.pagination,
-    isLoading: isActive ? isLoading : false, // Only show loading when active
-    error,
-    refetch,
     currentPage,
     setCurrentPage,
-    resetPage,
     sortBy,
     setSortBy,
     sortOrder,
     setSortOrder,
-    
-    // Validation functionality
-    validateWeekly: validateMutation.mutate,
-    isValidating: validateMutation.isPending,
+    handleSort,
+    advancedFilters,
+    setAdvancedFilters,
+    clearAdvancedFilters,
+    weeklyValidationData,
+    isLoading,
+    error,
+    refetch,
+    handleValidate,
+    isValidating: isUpdating,
   };
-}
+};
