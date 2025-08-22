@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -7,6 +7,47 @@ import SbuCombobox from '@/components/admin/user/SbuCombobox';
 import { ProfileCombobox } from '@/components/admin/user/ProfileCombobox';
 import { Badge } from '@/components/ui/badge';
 import { X, Filter } from 'lucide-react';
+
+const STORAGE_KEY = 'resource-calendar/planning/basic-filters';
+
+type CacheShape = {
+  searchQuery?: string;
+  selectedSbu?: string | null;
+  selectedManager?: string | null;
+  activeTab?: string | null;
+};
+
+function isBrowser() {
+  return typeof window !== 'undefined' && typeof localStorage !== 'undefined';
+}
+
+function readCache(): CacheShape {
+  if (!isBrowser()) return {};
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    return raw ? (JSON.parse(raw) as CacheShape) : {};
+  } catch {
+    return {};
+  }
+}
+
+function writeCache(next: CacheShape) {
+  if (!isBrowser()) return;
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+  } catch {
+    // no-op
+  }
+}
+
+function clearCache() {
+  if (!isBrowser()) return;
+  try {
+    localStorage.removeItem(STORAGE_KEY);
+  } catch {
+    // no-op
+  }
+}
 
 interface ResourcePlanningFiltersProps {
   searchQuery: string;
@@ -36,6 +77,45 @@ export const ResourcePlanningFilters: React.FC<ResourcePlanningFiltersProps> = (
   const hasActiveFilters = selectedSbu || selectedManager || searchQuery;
   const isUnplannedTab = activeTab === 'unplanned';
 
+   // 1) Hydrate from cache on mount
+  useEffect(() => {
+    const cached = readCache();
+
+    if (typeof cached.searchQuery === 'string' && cached.searchQuery !== searchQuery) {
+      setSearchQuery(cached.searchQuery);
+    }
+    if (cached.selectedSbu !== undefined && cached.selectedSbu !== selectedSbu) {
+      setSelectedSbu(cached.selectedSbu ?? null);
+    }
+    if (cached.selectedManager !== undefined && cached.selectedManager !== selectedManager) {
+      setSelectedManager(cached.selectedManager ?? null);
+    }
+    // If parent uses activeTab as a controlled prop from higher up, we just store it below.
+    // If you also want to hydrate activeTab, pass a setter and do it similarly here.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // run once
+
+  // 2) Persist whenever inputs change
+  const cacheValue: CacheShape = useMemo(
+    () => ({
+      searchQuery,
+      selectedSbu,
+      selectedManager,
+      activeTab: activeTab ?? null,
+    }),
+    [searchQuery, selectedSbu, selectedManager, activeTab]
+  );
+
+  useEffect(() => {
+    writeCache(cacheValue);
+  }, [cacheValue]);
+
+  // 3) Clear cache together with UI state
+  const handleClearAll = () => {
+    clearCache();
+    clearFilters();
+  };
+
   return (
     <div className="space-y-4">
       <div className="p-4 border rounded-lg bg-muted/50">
@@ -48,7 +128,7 @@ export const ResourcePlanningFilters: React.FC<ResourcePlanningFiltersProps> = (
             <Button
               variant="ghost"
               size="sm"
-              onClick={clearFilters}
+              onClick={handleClearAll}
               className="h-7 px-2 text-xs"
             >
               Clear all

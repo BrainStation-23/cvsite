@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React , { useEffect }from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -10,6 +10,7 @@ import BillTypeCombobox from './BillTypeCombobox';
 import ProjectSearchCombobox from './ProjectSearchCombobox';
 import DatePicker from '@/components/admin/user/DatePicker';
 
+const STORAGE_KEY = 'resource-calendar/planning/advanced-filters';
 interface AdvancedFilters {
   billTypeFilter: string | null;
   projectSearch: string;
@@ -21,6 +22,71 @@ interface AdvancedFilters {
   startDateTo: string;
   endDateFrom: string;
   endDateTo: string;
+}
+
+function isBrowser() {
+  return typeof window !== 'undefined' && typeof localStorage !== 'undefined';
+}
+
+function readCache(): AdvancedFilters {
+  if (!isBrowser()) return {
+    billTypeFilter: null,
+    projectSearch: '',
+    minEngagementPercentage: null,
+    maxEngagementPercentage: null,
+    minBillingPercentage: null,
+    maxBillingPercentage: null,
+    startDateFrom: '',
+    startDateTo: '',
+    endDateFrom: '',
+    endDateTo: '',
+  };
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    return raw ? (JSON.parse(raw) as AdvancedFilters) : {
+      billTypeFilter: null,
+      projectSearch: '',
+      minEngagementPercentage: null,
+      maxEngagementPercentage: null,
+      minBillingPercentage: null,
+      maxBillingPercentage: null,
+      startDateFrom: '',
+      startDateTo: '',
+      endDateFrom: '',
+      endDateTo: '',
+    };
+  } catch {
+    return {
+      billTypeFilter: null,
+      projectSearch: '',
+      minEngagementPercentage: null,
+      maxEngagementPercentage: null,
+      minBillingPercentage: null,
+      maxBillingPercentage: null,
+      startDateFrom: '',
+      startDateTo: '',
+      endDateFrom: '',
+      endDateTo: '',
+    };
+  }
+}
+
+function writeCache(next: AdvancedFilters) {
+  if (!isBrowser()) return;
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+  } catch {
+    // no-op
+  }
+}
+
+function clearCache() {
+  if (!isBrowser()) return;
+  try {
+    localStorage.removeItem(STORAGE_KEY);
+  } catch {
+    // no-op
+  }
 }
 
 interface AdvancedResourceFiltersProps {
@@ -46,6 +112,25 @@ export const AdvancedResourceFilters: React.FC<AdvancedResourceFiltersProps> = (
   const hasActiveFilters = Object.values(filters).some(value => 
     value !== null && value !== '' && value !== undefined
   );
+
+   // Hydrate filters from localStorage
+  useEffect(() => {
+    const cachedFilters = readCache();
+    if (cachedFilters) {
+      onFiltersChange(cachedFilters);
+    }
+  }, [onFiltersChange]);
+
+  // Persist filters to localStorage whenever they change
+  useEffect(() => {
+    writeCache(filters);
+  }, [filters]);
+
+  const handleClearAll = () => {
+    clearCache();
+    onClearFilters();
+  };
+
 
   return (
     <Card className="mb-4">
@@ -171,7 +256,7 @@ export const AdvancedResourceFilters: React.FC<AdvancedResourceFiltersProps> = (
 
             {hasActiveFilters && (
               <div className="flex justify-end pt-4 border-t">
-                <Button variant="outline" onClick={onClearFilters}>
+                <Button variant="outline" onClick={handleClearAll}>
                   Clear Advanced Filters
                 </Button>
               </div>
