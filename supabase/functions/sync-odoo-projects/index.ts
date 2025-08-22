@@ -18,7 +18,7 @@ interface OdooProject {
   projectType: string;
   projectValue: number;
   active: boolean;
-  projectManager: OdooProjectManager;
+  projectManager: OdooProjectManager | null;
 }
 
 interface OdooResponse {
@@ -93,7 +93,7 @@ Deno.serve(async (req) => {
     const odooData: OdooResponse = await odooResponse.json();
     console.log(`Fetched ${odooData.data.allProjects.length} projects from Odoo`);
 
-    // Transform Odoo data to match RPC function expectations
+    // Transform Odoo data to match RPC function expectations with null checks
     const transformedProjects: TransformedProject[] = odooData.data.allProjects.map(project => ({
       projectName: project.name,
       description: project.description,
@@ -101,8 +101,8 @@ Deno.serve(async (req) => {
       projectType: project.projectType,
       projectValue: project.projectValue,
       active: project.active,
-      managerName: project.projectManager.name,
-      managerEmail: project.projectManager.email
+      managerName: project.projectManager?.name || '',
+      managerEmail: project.projectManager?.email || ''
     }));
 
     console.log(`Transformed ${transformedProjects.length} projects for RPC call`);
