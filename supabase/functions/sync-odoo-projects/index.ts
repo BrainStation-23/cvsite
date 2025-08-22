@@ -27,17 +27,6 @@ interface OdooResponse {
   };
 }
 
-interface TransformedProject {
-  projectName: string;
-  description: string | null;
-  projectLevel: string | null;
-  projectType: string;
-  projectValue: number;
-  active: boolean;
-  managerName: string;
-  managerEmail: string;
-}
-
 Deno.serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
@@ -93,44 +82,55 @@ Deno.serve(async (req) => {
     const odooData: OdooResponse = await odooResponse.json();
     console.log(`Fetched ${odooData.data.allProjects.length} projects from Odoo`);
 
-    // Transform Odoo data to match RPC function expectations with null checks
-    const transformedProjects: TransformedProject[] = odooData.data.allProjects.map(project => ({
-      projectName: project.name,
+    // Log sample data structure from Odoo
+    if (odooData.data.allProjects.length > 0) {
+      console.log('Sample Odoo project data:', JSON.stringify(odooData.data.allProjects[0], null, 2));
+    }
+
+    // Transform Odoo data to match the expected structure (already correct, just ensure proper null handling)
+    const transformedProjects = odooData.data.allProjects.map(project => ({
+      name: project.name,
       description: project.description,
       projectLevel: project.projectLevel,
       projectType: project.projectType,
       projectValue: project.projectValue,
       active: project.active,
-      managerName: project.projectManager?.name || '',
-      managerEmail: project.projectManager?.email || ''
+      projectManager: project.projectManager ? {
+        name: project.projectManager.name,
+        email: project.projectManager.email
+      } : null
     }));
 
-    console.log(`Transformed ${transformedProjects.length} projects for RPC call`);
-    console.log('Calling bulk_sync_odoo_projects RPC function...');
+    console.log(`Transformed ${transformedProjects.length} projects for bulk sync`);
+    console.log('Sample transformed data:', JSON.stringify(transformedProjects[0], null, 2));
 
-    // Call the RPC function directly
-    const { data: syncResult, error: syncError } = await supabase.rpc('bulk_sync_odoo_projects', {
-      projects_data: transformedProjects
+    console.log('Calling bulk-sync-odoo-projects function...');
+
+    // Call the bulk sync function
+    const { data: syncResult, error: syncError } = await supabase.functions.invoke('bulk-sync-odoo-projects', {
+      body: {
+        projects_data: transformedProjects
+      }
     });
 
     if (syncError) {
-      console.error('RPC function error:', syncError);
-      throw new Error(`RPC function failed: ${syncError.message}`);
+      console.error('Bulk sync function error:', syncError);
+      throw new Error(`Bulk sync function failed: ${syncError.message}`);
     }
 
-    console.log('Sync completed successfully:', syncResult);
+    console.log('Bulk sync completed successfully:', JSON.stringify(syncResult, null, 2));
 
-    // Return the result from the RPC function
+    // Return the result from the bulk sync function
     return new Response(JSON.stringify({
       success: true,
       message: 'Projects sync completed',
       stats: {
         total_fetched: odooData.data.allProjects.length,
-        total_processed: syncResult?.total_processed || 0,
-        new_synced: syncResult?.new_synced || 0,
-        updated: syncResult?.updated || 0,
-        skipped: syncResult?.skipped || 0,
-        errors: syncResult?.errors || 0
+        total_processed: syncResult?.stats?.total_processed || 0,
+        new_synced: syncResult?.stats?.new_synced || 0,
+        updated: syncResult?.stats?.updated || 0,
+        skipped: syncResult?.stats?.skipped || 0,
+        errors: syncResult?.stats?.errors || 0
       }
     }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
