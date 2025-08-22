@@ -14,7 +14,7 @@ export async function openCVPreview(
   const { openInNewTab = true } = options;
   
   try {
-    // Fetch employee and template data (now uses dynamic RPC function)
+    // First fetch template data to get the RPC function name
     const { employeeData, templateData } = await dataFetcher.fetchAllData(profileId, templateId);
     
     console.log(`Processing CV with template: ${templateData.name}, orientation: ${templateData.orientation}, data source: ${templateData.data_source_function}`);
