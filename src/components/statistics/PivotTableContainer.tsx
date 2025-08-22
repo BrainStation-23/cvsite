@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { CompactPivotControls } from './CompactPivotControls';
 import { SpreadsheetPivotTable } from './SpreadsheetPivotTable';
+import { PivotTableFilters } from './PivotTableFilters';
 import { useResourcePivotStatistics } from '@/hooks/use-resource-pivot-statistics';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table2, BarChart3 } from 'lucide-react';
@@ -13,9 +14,15 @@ interface PivotTableContainerProps {
     expertiseType?: string | null;
     sbu?: string | null;
   };
+  onFiltersChange: (filters: any) => void;
+  onClearFilters: () => void;
 }
 
-export const PivotTableContainer: React.FC<PivotTableContainerProps> = ({ filters }) => {
+export const PivotTableContainer: React.FC<PivotTableContainerProps> = ({ 
+  filters, 
+  onFiltersChange, 
+  onClearFilters 
+}) => {
   const [primaryDimension, setPrimaryDimension] = useState('sbu');
   const [secondaryDimension, setSecondaryDimension] = useState('bill_type');
 
@@ -40,9 +47,18 @@ export const PivotTableContainer: React.FC<PivotTableContainerProps> = ({ filter
   };
 
   return (
-    <div className="h-full flex flex-col">
+    <div className="h-full flex flex-col space-y-6">
+      {/* Filters Section */}
+      <div className="flex-shrink-0">
+        <PivotTableFilters
+          filters={filters}
+          onFiltersChange={onFiltersChange}
+          onClearFilters={onClearFilters}
+        />
+      </div>
+
       {/* Header Section */}
-      <div className="flex-shrink-0 mb-6">
+      <div className="flex-shrink-0">
         <Card>
           <CardHeader className="pb-4">
             <CardTitle className="flex items-center justify-between">

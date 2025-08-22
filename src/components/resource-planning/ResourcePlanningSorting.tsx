@@ -38,53 +38,106 @@ export const ResourcePlanningSorting: React.FC<ResourcePlanningSortingProps> = (
       case 'employee_id': return 'Employee ID';
       case 'engagement_percentage': return 'Engagement %';
       case 'billing_percentage': return 'Billing %';
+      case 'bill_type': return 'Bill Type';
+      case 'project': return 'Project';
+      case 'engagement_start_date': return 'Start Date';
+      case 'release_date': return 'Release Date';
       default: return column;
     }
   };
 
   return (
-    <div className="flex items-center gap-2">
+    <div className="flex flex-wrap items-center gap-2">
       <span className="text-sm font-medium">Sort by:</span>
-      <Button
-        variant="ghost"
-        size="sm"
-        onClick={() => handleSort('created_at')}
-        className="flex items-center gap-1"
-      >
-        Created Date {getSortIcon('created_at')}
-      </Button>
-      <Button
-        variant="ghost"
-        size="sm"
-        onClick={() => handleSort('profile.last_name')}
-        className="flex items-center gap-1"
-      >
-        Employee Name {getSortIcon('profile.last_name')}
-      </Button>
-      <Button
-        variant="ghost"
-        size="sm"
-        onClick={() => handleSort('employee_id')}
-        className="flex items-center gap-1"
-      >
-        Employee ID {getSortIcon('employee_id')}
-      </Button>
-      <Button
-        variant="ghost"
-        size="sm"
-        onClick={() => handleSort('engagement_percentage')}
-        className="flex items-center gap-1"
-      >
-        Engagement % {getSortIcon('engagement_percentage')}
-      </Button>
-      <Button
-        variant="ghost"
-        size="sm"
-        onClick={() => handleSort('billing_percentage')}
-        className="flex items-center gap-1"
-      >
-        Billing % {getSortIcon('billing_percentage')}
-      </Button>
+      
+      {/* Employee Information Group */}
+      <div className="flex items-center gap-1 px-2 py-1 bg-muted/50 rounded-md">
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => handleSort('profile.last_name')}
+          className="flex items-center gap-1 h-7 px-2"
+        >
+          Employee {getSortIcon('profile.last_name')}
+        </Button>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => handleSort('employee_id')}
+          className="flex items-center gap-1 h-7 px-2"
+        >
+          ID {getSortIcon('employee_id')}
+        </Button>
+      </div>
+
+      {/* Engagement Information Group */}
+      <div className="flex items-center gap-1 px-2 py-1 bg-muted/50 rounded-md">
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => handleSort('engagement_percentage')}
+          className="flex items-center gap-1 h-7 px-2"
+        >
+          Eng % {getSortIcon('engagement_percentage')}
+        </Button>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => handleSort('billing_percentage')}
+          className="flex items-center gap-1 h-7 px-2"
+        >
+          Bill % {getSortIcon('billing_percentage')}
+        </Button>
+      </div>
+
+      {/* Project Information Group */}
+      <div className="flex items-center gap-1 px-2 py-1 bg-muted/50 rounded-md">
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => handleSort('bill_type')}
+          className="flex items-center gap-1 h-7 px-2"
+        >
+          Bill Type {getSortIcon('bill_type')}
+        </Button>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => handleSort('project')}
+          className="flex items-center gap-1 h-7 px-2"
+        >
+          Project {getSortIcon('project')}
+        </Button>
+      </div>
+
+      {/* Date Information Group */}
+      <div className="flex items-center gap-1 px-2 py-1 bg-muted/50 rounded-md">
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => handleSort('engagement_start_date')}
+          className="flex items-center gap-1 h-7 px-2"
+        >
+          Start {getSortIcon('engagement_start_date')}
+        </Button>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => handleSort('release_date')}
+          className="flex items-center gap-1 h-7 px-2"
+        >
+          Release {getSortIcon('release_date')}
+        </Button>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => handleSort('created_at')}
+          className="flex items-center gap-1 h-7 px-2"
+        >
+          Created {getSortIcon('created_at')}
+        </Button>
+      </div>
+
       {sortBy && (
         <Badge variant="secondary" className="ml-2">
           {getSortLabel(sortBy)}

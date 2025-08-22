@@ -43,8 +43,27 @@ export const ResourcePlanningTableHeader: React.FC<ResourcePlanningTableHeaderPr
               </Button>
             </div>
           </TableHead>
-          <TableHead>Bill Type</TableHead>
-          <TableHead>Project</TableHead>
+          
+          <TableHead>
+            <Button
+              variant="ghost"
+              onClick={() => onSort('bill_type')}
+              className="flex items-center gap-2 p-0 h-auto font-medium justify-start"
+            >
+              Bill Type {getSortIcon('bill_type')}
+            </Button>
+          </TableHead>
+          
+          <TableHead>
+            <Button
+              variant="ghost"
+              onClick={() => onSort('project')}
+              className="flex items-center gap-2 p-0 h-auto font-medium justify-start"
+            >
+              Project {getSortIcon('project')}
+            </Button>
+          </TableHead>
+          
           <TableHead className="w-16">
             <Tooltip>
               <TooltipTrigger asChild>
@@ -61,6 +80,7 @@ export const ResourcePlanningTableHeader: React.FC<ResourcePlanningTableHeaderPr
               </TooltipContent>
             </Tooltip>
           </TableHead>
+          
           <TableHead className="w-16">
             <Tooltip>
               <TooltipTrigger asChild>
@@ -77,8 +97,27 @@ export const ResourcePlanningTableHeader: React.FC<ResourcePlanningTableHeaderPr
               </TooltipContent>
             </Tooltip>
           </TableHead>
-          <TableHead>Start Date</TableHead>
-          <TableHead>Release Date</TableHead>
+          
+          <TableHead>
+            <Button
+              variant="ghost"
+              onClick={() => onSort('engagement_start_date')}
+              className="flex items-center gap-2 p-0 h-auto font-medium justify-start"
+            >
+              Start Date {getSortIcon('engagement_start_date')}
+            </Button>
+          </TableHead>
+          
+          <TableHead>
+            <Button
+              variant="ghost"
+              onClick={() => onSort('release_date')}
+              className="flex items-center gap-2 p-0 h-auto font-medium justify-start"
+            >
+              Release Date {getSortIcon('release_date')}
+            </Button>
+          </TableHead>
+          
           <TableHead>Actions</TableHead>
         </TableRow>
       </TableHeader>

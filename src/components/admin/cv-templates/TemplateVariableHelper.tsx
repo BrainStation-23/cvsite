@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { TemplateStructureGuide } from './TemplateStructureGuide';
@@ -144,6 +143,10 @@ export const TemplateVariableHelper: React.FC<TemplateVariableHelperProps> = ({
         { name: '{{this.role}}', description: 'Role in project (inside loop)', type: 'string' },
         { name: '{{this.description}}', description: 'Project description (inside loop)', type: 'string' },
         { name: '{{this.responsibility}}', description: 'Responsibilities (inside loop)', type: 'string' },
+        { name: '{{this.startDate}}', description: 'Project start date (inside loop)', type: 'string' },
+        { name: '{{this.endDate}}', description: 'Project end date (inside loop)', type: 'string' },
+        { name: '{{this.isCurrent}}', description: 'Whether project is current/ongoing (inside loop)', type: 'string' },
+        { name: '{{this.url}}', description: 'Project URL/link (inside loop)', type: 'string' },
         { name: '{{this.technologiesUsed}}', description: 'Technologies used (inside loop)', type: 'array' },
       ]
     },

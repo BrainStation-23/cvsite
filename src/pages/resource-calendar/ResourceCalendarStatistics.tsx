@@ -19,41 +19,64 @@ const ResourceCalendarStatistics: React.FC = () => {
   // State for active tab
   const [activeTab, setActiveTab] = useState('overview');
 
-  // State for filters
-  const [filters, setFilters] = useState({
+  // Separate filter states for each tab
+  const [overviewFilters, setOverviewFilters] = useState({
     resourceType: null as string | null,
     billType: null as string | null,
     expertiseType: null as string | null,
     sbu: null as string | null,
   });
 
-  // Add state for group by dimension
+  const [pivotFilters, setPivotFilters] = useState({
+    resourceType: null as string | null,
+    billType: null as string | null,
+    expertiseType: null as string | null,
+    sbu: null as string | null,
+  });
+
+  // Add state for group by dimension (only for overview)
   const [groupBy, setGroupBy] = useState<'all' | 'sbu' | 'resourceType' | 'billType' | 'expertiseType'>('all');
 
-  // Add state for view toggles
+  // Add state for view toggles (only for overview)
   const [showCharts, setShowCharts] = useState(true);
   const [showTables, setShowTables] = useState(false);
 
-  console.log('Current filters state:', filters);
+  console.log('Current overview filters state:', overviewFilters);
+  console.log('Current pivot filters state:', pivotFilters);
   console.log('Current groupBy state:', groupBy);
 
-  // Fetch data with current filters
-  const { data: resourceCountData, isLoading: resourceCountLoading } = useResourceCountStatistics(filters);
+  // Fetch data with overview filters (only for overview tab)
+  const { data: resourceCountData, isLoading: resourceCountLoading } = useResourceCountStatistics(overviewFilters);
 
-  const handleFiltersChange = (newFilters: typeof filters) => {
-    console.log('Filters changing from:', filters, 'to:', newFilters);
-    setFilters(newFilters);
+  const handleOverviewFiltersChange = (newFilters: typeof overviewFilters) => {
+    console.log('Overview filters changing from:', overviewFilters, 'to:', newFilters);
+    setOverviewFilters(newFilters);
   };
 
-  const handleClearFilters = () => {
-    console.log('Clearing all filters');
-    setFilters({
+  const handlePivotFiltersChange = (newFilters: typeof pivotFilters) => {
+    console.log('Pivot filters changing from:', pivotFilters, 'to:', newFilters);
+    setPivotFilters(newFilters);
+  };
+
+  const handleClearOverviewFilters = () => {
+    console.log('Clearing overview filters');
+    setOverviewFilters({
       resourceType: null,
       billType: null,
       expertiseType: null,
       sbu: null,
     });
     setGroupBy('all');
+  };
+
+  const handleClearPivotFilters = () => {
+    console.log('Clearing pivot filters');
+    setPivotFilters({
+      resourceType: null,
+      billType: null,
+      expertiseType: null,
+      sbu: null,
+    });
   };
 
   // Get current grouping description
@@ -68,26 +91,26 @@ const ResourceCalendarStatistics: React.FC = () => {
       return 'Track and analyze bill type and SBU changes over time';
     }
     
-    const hasSpecificFilter = filters.sbu || filters.resourceType || filters.billType || filters.expertiseType;
+    const hasSpecificFilter = overviewFilters.sbu || overviewFilters.resourceType || overviewFilters.billType || overviewFilters.expertiseType;
     
     if (groupBy === 'sbu') {
-      return hasSpecificFilter && filters.sbu 
-        ? `SBU-focused view (${filters.sbu})` 
+      return hasSpecificFilter && overviewFilters.sbu 
+        ? `SBU-focused view (${overviewFilters.sbu})` 
         : 'SBU-focused view across all SBUs';
     }
     if (groupBy === 'resourceType') {
-      return hasSpecificFilter && filters.resourceType 
-        ? `Resource Type view (${filters.resourceType})` 
+      return hasSpecificFilter && overviewFilters.resourceType 
+        ? `Resource Type view (${overviewFilters.resourceType})` 
         : 'Resource Type view across all types';
     }
     if (groupBy === 'billType') {
-      return hasSpecificFilter && filters.billType 
-        ? `Bill Type view (${filters.billType})` 
+      return hasSpecificFilter && overviewFilters.billType 
+        ? `Bill Type view (${overviewFilters.billType})` 
         : 'Bill Type view across all bill types';
     }
     if (groupBy === 'expertiseType') {
-      return hasSpecificFilter && filters.expertiseType 
-        ? `Expertise view (${filters.expertiseType})` 
+      return hasSpecificFilter && overviewFilters.expertiseType 
+        ? `Expertise view (${overviewFilters.expertiseType})` 
         : 'Expertise view across all expertise types';
     }
     return 'Organization-wide view across all dimensions';
@@ -130,9 +153,9 @@ const ResourceCalendarStatistics: React.FC = () => {
 
           <TabsContent value="overview" className="mt-6">
             <ResourceStatisticsOverview
-              filters={filters}
-              onFiltersChange={handleFiltersChange}
-              onClearFilters={handleClearFilters}
+              filters={overviewFilters}
+              onFiltersChange={handleOverviewFiltersChange}
+              onClearFilters={handleClearOverviewFilters}
               resourceCountData={resourceCountData}
               resourceCountLoading={resourceCountLoading}
               groupBy={groupBy}
@@ -142,7 +165,11 @@ const ResourceCalendarStatistics: React.FC = () => {
           </TabsContent>
 
           <TabsContent value="pivot" className="mt-6">
-            <PivotTableContainer filters={filters} />
+            <PivotTableContainer 
+              filters={pivotFilters}
+              onFiltersChange={handlePivotFiltersChange}
+              onClearFilters={handleClearPivotFilters}
+            />
           </TabsContent>
 
           <TabsContent value="weekly-scorecard" className="mt-6">

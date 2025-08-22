@@ -1422,11 +1422,9 @@ export type Database = {
       get_resource_count_statistics: {
         Args: {
           bill_type_filter?: string
-          end_date_filter?: string
           expertise_type_filter?: string
           resource_type_filter?: string
           sbu_filter?: string
-          start_date_filter?: string
         }
         Returns: Json
       }
@@ -1470,18 +1468,6 @@ export type Database = {
           active_projects: number
           avg_engagement_percentage: number
           total_resources: number
-        }[]
-      }
-      get_section_fields: {
-        Args: { section_type_param: string }
-        Returns: {
-          default_enabled: boolean
-          default_mask_value: string
-          default_masked: boolean
-          default_order: number
-          display_label: string
-          field_name: string
-          field_type: string
         }[]
       }
       get_skill_matrix: {
