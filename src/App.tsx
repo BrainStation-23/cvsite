@@ -23,6 +23,8 @@ import ProfileManagementSettings from '@/pages/admin/platform-settings/ProfileMa
 import ResourcePlanningSettings from '@/pages/admin/platform-settings/ResourcePlanningSettings';
 import CVTemplateSettings from '@/pages/admin/platform-settings/CVTemplateSettings';
 import SystemConfigurationSettings from '@/pages/admin/platform-settings/SystemConfigurationSettings';
+import AuditPage from '@/pages/admin/platform-settings/AuditPage';
+import ProfileImageWarningAudit from '@/pages/admin/platform-settings/ProfileImageWarningAudit';
 import SecurityPage from '@/pages/security/SecurityPage';
 import NotFound from '@/pages/NotFound';
 import TrainingCertification from '@/pages/TrainingCertification';
@@ -351,6 +353,22 @@ function App(): React.ReactElement {
               element={
                 <ProtectedRoute allowedRoles={['admin']}>
                   <SystemConfigurationSettings />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/platform-settings/audit"
+              element={
+                <ProtectedRoute allowedRoles={['admin']}>
+                  <AuditPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/platform-settings/audit/profile-image-warnings"
+              element={
+                <ProtectedRoute allowedRoles={['admin']}>
+                  <ProfileImageWarningAudit />
                 </ProtectedRoute>
               }
             />
