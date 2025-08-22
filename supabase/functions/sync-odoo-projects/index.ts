@@ -7,13 +7,13 @@ const corsHeaders = {
 }
 
 interface OdooProject {
+  id: string;
   name: string;
-  projectValue: number;
+  description: string | null;
+  companyId: number;
+  projectLevel: string | null;
   projectType: string;
-  projectManager: {
-    name: string;
-    email: string;
-  };
+  projectValue: number;
   active: boolean;
 }
 
@@ -39,25 +39,25 @@ Deno.serve(async (req) => {
     
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    // GraphQL query to fetch projects from Odoo
+    // Updated GraphQL query to fetch all new fields from Odoo
     const graphqlQuery = {
       query: `
         query {
-          allProjects(includeArchived: true){
+          allProjects(includeArchived: true) {
+            id
             name
-            projectValue
+            description
+            companyId
+            projectLevel
             projectType
-            projectManager {
-              name
-              email
-            }
+            projectValue
             active
           }
         }
       `
     };
 
-    console.log('Fetching projects from Odoo GraphQL API...');
+    console.log('Fetching projects from Odoo GraphQL API with updated query...');
 
     // Fetch projects from Odoo GraphQL API
     const odooResponse = await fetch('https://erp.brainstation-23.com/graphql', {
@@ -76,12 +76,15 @@ Deno.serve(async (req) => {
     const odooData: OdooResponse = await odooResponse.json();
     console.log(`Fetched ${odooData.data.allProjects.length} projects from Odoo`);
 
-    // Pre-process the data for bulk operations
+    // Pre-process the data for bulk operations with all new fields
     const processedProjects = odooData.data.allProjects.map(project => ({
+      id: project.id,
       name: project.name,
+      description: project.description,
+      companyId: project.companyId || 0,
+      projectLevel: project.projectLevel,
+      projectType: project.projectType,
       projectValue: project.projectValue || null,
-      projectType: project.projectType || null,
-      managerEmail: project.projectManager?.email || null,
       active: project.active
     }));
 
@@ -102,7 +105,7 @@ Deno.serve(async (req) => {
     // Return the result from the RPC function
     return new Response(JSON.stringify({
       success: true,
-      message: 'Projects sync completed using bulk processing',
+      message: 'Projects sync completed using bulk processing with updated fields',
       stats: {
         total_fetched: odooData.data.allProjects.length,
         ...syncResult.stats

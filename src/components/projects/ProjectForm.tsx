@@ -1,10 +1,46 @@
 
-import React, { useState, useEffect } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
+import React, { useEffect } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import * as z from 'zod';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { ProjectManagerCombobox } from './ProjectManagerCombobox';
+import { Textarea } from '@/components/ui/textarea';
+import { Button } from '@/components/ui/button';
+import { Switch } from '@/components/ui/switch';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+
+const projectSchema = z.object({
+  project_name: z.string().min(1, 'Project name is required'),
+  client_name: z.string().optional(),
+  project_manager: z.string().optional(),
+  budget: z.coerce.number().optional(),
+  description: z.string().optional(),
+  company_id: z.coerce.number().optional(),
+  project_level: z.string().optional(),
+  is_active: z.boolean().default(true),
+});
+
+type ProjectFormData = z.infer<typeof projectSchema>;
 
 interface Project {
   id: string;
@@ -12,14 +48,16 @@ interface Project {
   client_name: string | null;
   project_manager: string | null;
   budget: number | null;
-  created_at: string;
-  updated_at: string;
+  description?: string | null;
+  company_id?: number | null;
+  project_level?: string | null;
+  is_active: boolean;
 }
 
 interface ProjectFormProps {
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
-  onSubmit: (project: Omit<Project, 'id' | 'created_at' | 'updated_at'>) => Promise<boolean>;
+  onSubmit: (data: Omit<Project, 'id' | 'created_at' | 'updated_at'>) => Promise<boolean>;
   initialData?: Project | null;
   title: string;
 }
@@ -29,132 +67,228 @@ export const ProjectForm: React.FC<ProjectFormProps> = ({
   onOpenChange,
   onSubmit,
   initialData,
-  title
+  title,
 }) => {
-  const [formData, setFormData] = useState({
-    project_name: '',
-    client_name: '',
-    project_manager: null as string | null,
-    budget: ''
+  const form = useForm<ProjectFormData>({
+    resolver: zodResolver(projectSchema),
+    defaultValues: {
+      project_name: '',
+      client_name: '',
+      project_manager: '',
+      budget: undefined,
+      description: '',
+      company_id: undefined,
+      project_level: '',
+      is_active: true,
+    },
   });
-  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Update form data when initialData changes or dialog opens
   useEffect(() => {
-    if (isOpen) {
-      setFormData({
-        project_name: initialData?.project_name || '',
-        client_name: initialData?.client_name || '',
-        project_manager: initialData?.project_manager || null,
-        budget: initialData?.budget?.toString() || ''
+    if (initialData) {
+      form.reset({
+        project_name: initialData.project_name || '',
+        client_name: initialData.client_name || '',
+        project_manager: initialData.project_manager || '',
+        budget: initialData.budget || undefined,
+        description: initialData.description || '',
+        company_id: initialData.company_id || undefined,
+        project_level: initialData.project_level || '',
+        is_active: initialData.is_active,
       });
-    }
-  }, [isOpen, initialData]);
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!formData.project_name.trim()) {
-      return;
-    }
-
-    setIsSubmitting(true);
-    
-    const projectData = {
-      project_name: formData.project_name.trim(),
-      client_name: formData.client_name.trim() || null,
-      project_manager: formData.project_manager,
-      budget: formData.budget ? parseFloat(formData.budget) : null
-    };
-
-    const success = await onSubmit(projectData);
-    
-    if (success) {
-      setFormData({
+    } else {
+      form.reset({
         project_name: '',
         client_name: '',
-        project_manager: null,
-        budget: ''
+        project_manager: '',
+        budget: undefined,
+        description: '',
+        company_id: undefined,
+        project_level: '',
+        is_active: true,
       });
-      onOpenChange(false);
     }
-    
-    setIsSubmitting(false);
+  }, [initialData, form]);
+
+  const handleSubmit = async (data: ProjectFormData) => {
+    const success = await onSubmit({
+      project_name: data.project_name,
+      client_name: data.client_name || null,
+      project_manager: data.project_manager || null,
+      budget: data.budget || null,
+      description: data.description || null,
+      company_id: data.company_id || null,
+      project_level: data.project_level || null,
+      is_active: data.is_active,
+    });
+
+    if (success) {
+      onOpenChange(false);
+      form.reset();
+    }
   };
 
-  const handleChange = (field: string, value: string | null) => {
-    setFormData(prev => ({
-      ...prev,
-      [field]: value
-    }));
-  };
+  const projectLevels = [
+    { value: 'export', label: 'Export' },
+    { value: 'regional', label: 'Regional' },
+    { value: 'local', label: 'Local' },
+    { value: 'investment', label: 'Investment' },
+  ];
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[500px]">
+      <DialogContent className="sm:max-w-[600px]">
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
         </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="project_name">Project Name *</Label>
-            <Input
-              id="project_name"
-              value={formData.project_name}
-              onChange={(e) => handleChange('project_name', e.target.value)}
-              placeholder="Enter project name"
-              required
-            />
-          </div>
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="project_name"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Project Name *</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Enter project name" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-          <div className="space-y-2">
-            <Label htmlFor="client_name">Client Name</Label>
-            <Input
-              id="client_name"
-              value={formData.client_name}
-              onChange={(e) => handleChange('client_name', e.target.value)}
-              placeholder="Enter client name"
-            />
-          </div>
+              <FormField
+                control={form.control}
+                name="client_name"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Client Name</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Enter client name" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-          <div className="space-y-2">
-            <Label htmlFor="project_manager">Project Manager</Label>
-            <ProjectManagerCombobox
-              value={formData.project_manager}
-              onValueChange={(value) => handleChange('project_manager', value)}
-              placeholder="Select project manager"
-            />
-          </div>
+              <FormField
+                control={form.control}
+                name="project_level"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Project Level</FormLabel>
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select project level" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="">No level specified</SelectItem>
+                        {projectLevels.map((level) => (
+                          <SelectItem key={level.value} value={level.value}>
+                            {level.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-          <div className="space-y-2">
-            <Label htmlFor="budget">Budget</Label>
-            <Input
-              id="budget"
-              type="number"
-              step="0.01"
-              value={formData.budget}
-              onChange={(e) => handleChange('budget', e.target.value)}
-              placeholder="Enter budget amount"
-            />
-          </div>
+              <FormField
+                control={form.control}
+                name="budget"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Budget</FormLabel>
+                    <FormControl>
+                      <Input 
+                        type="number" 
+                        placeholder="Enter budget amount" 
+                        {...field} 
+                        value={field.value || ''}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-          <div className="flex justify-end space-x-2 pt-4">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => onOpenChange(false)}
-              disabled={isSubmitting}
-            >
-              Cancel
-            </Button>
-            <Button
-              type="submit"
-              disabled={isSubmitting || !formData.project_name.trim()}
-            >
-              {isSubmitting ? 'Saving...' : 'Save Project'}
-            </Button>
-          </div>
-        </form>
+              <FormField
+                control={form.control}
+                name="company_id"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Company ID</FormLabel>
+                    <FormControl>
+                      <Input 
+                        type="number" 
+                        placeholder="Enter company ID" 
+                        {...field} 
+                        value={field.value || ''}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            <FormField
+              control={form.control}
+              name="description"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Description</FormLabel>
+                  <FormControl>
+                    <Textarea 
+                      placeholder="Enter project description"
+                      className="min-h-[80px]"
+                      {...field} 
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="is_active"
+              render={({ field }) => (
+                <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                  <div className="space-y-0.5">
+                    <FormLabel className="text-base">Active Project</FormLabel>
+                    <div className="text-sm text-muted-foreground">
+                      Enable this project for resource planning and assignments
+                    </div>
+                  </div>
+                  <FormControl>
+                    <Switch
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                    />
+                  </FormControl>
+                </FormItem>
+              )}
+            />
+
+            <div className="flex justify-end space-x-2 pt-4">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => onOpenChange(false)}
+              >
+                Cancel
+              </Button>
+              <Button type="submit" disabled={form.formState.isSubmitting}>
+                {form.formState.isSubmitting ? 'Saving...' : 'Save Project'}
+              </Button>
+            </div>
+          </form>
+        </Form>
       </DialogContent>
     </Dialog>
   );
