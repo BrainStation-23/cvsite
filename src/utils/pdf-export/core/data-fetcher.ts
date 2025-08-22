@@ -9,13 +9,31 @@ export interface FetchedData {
 }
 
 export class DataFetcher {
-  async fetchEmployeeData(profileId: string): Promise<EmployeeProfile> {
-    const { data, error } = await supabase.rpc('get_employee_data_masked', {
+  // Available RPC functions for fetching employee data
+  private static readonly AVAILABLE_RPC_FUNCTIONS = [
+    'get_employee_data_masked',
+    'get_employee_data'
+  ];
+
+  async fetchEmployeeData(profileId: string, rpcFunctionName?: string): Promise<EmployeeProfile> {
+    // Use provided RPC function name or default to masked version
+    const functionName = rpcFunctionName || 'get_employee_data_masked';
+    
+    // Validate that the RPC function is in our allowed list
+    if (!DataFetcher.AVAILABLE_RPC_FUNCTIONS.includes(functionName)) {
+      console.warn(`Unknown RPC function: ${functionName}, falling back to default`);
+      const fallbackFunction = 'get_employee_data_masked';
+      return this.fetchEmployeeData(profileId, fallbackFunction);
+    }
+
+    console.log(`Fetching employee data using RPC function: ${functionName}`);
+
+    const { data, error } = await supabase.rpc(functionName as any, {
       profile_uuid: profileId
     });
 
     if (error) {
-      console.error('Error fetching masked employee data:', error);
+      console.error(`Error fetching employee data with ${functionName}:`, error);
       throw new Error(`Failed to fetch employee data: ${error.message}`);
     }
 
@@ -56,12 +74,18 @@ export class DataFetcher {
   }
 
   async fetchAllData(profileId: string, templateId: string): Promise<FetchedData> {
-    const [employeeData, templateData] = await Promise.all([
-      this.fetchEmployeeData(profileId),
-      this.fetchTemplateData(templateId)
-    ]);
+    // First fetch template data to get the RPC function name
+    const templateData = await this.fetchTemplateData(templateId);
+    
+    // Then fetch employee data using the specified RPC function
+    const employeeData = await this.fetchEmployeeData(profileId, templateData.data_source_function);
 
     return { employeeData, templateData };
+  }
+
+  // Static method to get available RPC functions
+  static getAvailableRPCFunctions(): string[] {
+    return [...DataFetcher.AVAILABLE_RPC_FUNCTIONS];
   }
 }
 
