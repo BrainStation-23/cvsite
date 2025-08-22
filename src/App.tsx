@@ -363,6 +363,22 @@ function App(): React.ReactElement {
               }
             />
             <Route
+              path="/admin/Audit"
+              element={
+                <ProtectedRoute allowedRoles={['admin']}>
+                  Placeholder
+                </ProtectedRoute>
+              }
+            />
+             <Route
+              path="/admin/Audit/profile-Image-Warning"
+              element={
+                <ProtectedRoute allowedRoles={['admin']}>
+                  Placeholder
+                </ProtectedRoute>
+              }
+            />
+            <Route
               path="/admin/cv-templates"
               element={
                 <ProtectedRoute allowedRoles={['admin']}>
