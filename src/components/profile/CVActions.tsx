@@ -101,9 +101,6 @@ export const CVActions: React.FC<CVActionsProps> = ({ profileId }) => {
     <>
       <div className="flex items-center gap-4 p-4 bg-muted/30 rounded-lg border">
         <div className="flex-1 max-w-xs">
-          <Label htmlFor="cv-template-select" className="text-sm font-medium mb-2 block">
-            CV Template
-          </Label>
           <Select
             value={selectedTemplateId}
             onValueChange={setSelectedTemplateId}
