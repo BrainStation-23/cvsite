@@ -6,6 +6,7 @@ import { useProfileComposite } from '@/hooks/profile/use-profile-composite';
 import { useForm } from 'react-hook-form';
 import { ProfileTabs } from '@/components/profile/ProfileTabs';
 import { GeneralInfoFormData } from '@/components/profile/generalInfo/GeneralInfoTab';
+import { CVActions } from '@/components/profile/CVActions';
 import { Skill } from '@/types';
 
 const ProfilePage: React.FC = () => {
@@ -130,6 +131,16 @@ const ProfilePage: React.FC = () => {
   return (
     <DashboardLayout>
       <div className="flex flex-col h-full">
+        {/* Header with CV Actions */}
+        <div className="flex-shrink-0 space-y-4 py-4">
+          <h1 className="text-2xl font-semibold text-cvsite-navy dark:text-white">
+            My Profile
+          </h1>
+          
+          {/* CV Actions */}
+          <CVActions />
+        </div>
+
         {/* Content area - now takes full height */}
         <div className="flex-1 min-h-0 py-4">
           {isLoading ? (

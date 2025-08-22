@@ -5,6 +5,7 @@ import DashboardLayout from '../../components/Layout/DashboardLayout';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
 import { ProfileTabs } from '@/components/profile/ProfileTabs';
+import { CVActions } from '@/components/profile/CVActions';
 import { useForm } from 'react-hook-form';
 import { GeneralInfoFormData } from '@/components/profile/generalInfo/GeneralInfoTab';
 import { useAuth } from '@/contexts/AuthContext';
@@ -121,19 +122,24 @@ const ViewProfilePage: React.FC = () => {
   return (
     <DashboardLayout>
       <div className="flex flex-col h-full">
-        {/* Compact header */}
-        <div className="flex-shrink-0 flex items-center py-4 px-1 border-b border-gray-200 dark:border-gray-700">
-          <Button 
-            variant="outline" 
-            onClick={() => navigate('/admin/employee-data')}
-            className="flex items-center gap-2 mr-4"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            Back
-          </Button>
-          <h1 className="text-xl font-semibold text-cvsite-navy dark:text-white">
-            {generalInfo.firstName} {generalInfo.lastName}'s Profile
-          </h1>
+        {/* Header */}
+        <div className="flex-shrink-0 space-y-4 py-4 border-b border-gray-200 dark:border-gray-700">
+          <div className="flex items-center">
+            <Button 
+              variant="outline" 
+              onClick={() => navigate('/admin/employee-data')}
+              className="flex items-center gap-2 mr-4"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              Back
+            </Button>
+            <h1 className="text-xl font-semibold text-cvsite-navy dark:text-white">
+              {generalInfo.firstName} {generalInfo.lastName}'s Profile
+            </h1>
+          </div>
+          
+          {/* CV Actions */}
+          <CVActions profileId={profileId} />
         </div>
 
         {/* Content area - now takes full height */}
