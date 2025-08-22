@@ -178,7 +178,7 @@ export const ProjectForm: React.FC<ProjectFormProps> = ({
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="">No level specified</SelectItem>
+                        <SelectItem value="none">No level specified</SelectItem>
                         {projectLevels.map((level) => (
                           <SelectItem key={level.value} value={level.value}>
                             {level.label}
