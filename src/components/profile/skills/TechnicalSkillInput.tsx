@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Input } from '@/components/ui/input';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
@@ -39,6 +39,19 @@ export const TechnicalSkillInput: React.FC<TechnicalSkillInputProps> = ({
     fetchTechnologies();
   }, []);
 
+    const popoverRef = useRef<HTMLDivElement>(null); // Ref for detecting outside clicks
+
+  // Close the popover when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (popoverRef.current && !popoverRef.current.contains(event.target as Node)) {
+        setOpen(false); // Close on outside click
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
   // Filter technologies based on search input using the utility
   const filteredTechnologies = DeviconService.filterTechnologies(searchValue, technologies, 15);
 
@@ -57,6 +70,9 @@ export const TechnicalSkillInput: React.FC<TechnicalSkillInputProps> = ({
     onChange(inputValue);
     setOpen(inputValue.length > 0 && !isLoading);
   };
+   const handleFocus = () => {
+    setOpen(false);
+  };
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -67,7 +83,7 @@ export const TechnicalSkillInput: React.FC<TechnicalSkillInputProps> = ({
             onChange={(e) => handleInputChange(e.target.value)}
             placeholder={placeholder}
             className={cn("pr-8", className)}
-            onFocus={() => setOpen(searchValue.length > 0 && !isLoading)}
+            onFocus={handleFocus}
           />
           {isLoading ? (
             <Loader className="absolute right-2 top-2.5 h-4 w-4 text-muted-foreground animate-spin" />
