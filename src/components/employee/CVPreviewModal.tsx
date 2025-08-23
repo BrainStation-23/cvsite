@@ -4,7 +4,6 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
-import { Switch } from '@/components/ui/switch';
 import { Loader2, Eye } from 'lucide-react';
 import { useCVTemplates } from '@/hooks/use-cv-templates';
 import { openCVPreview } from '@/utils/cv-preview-utility';
@@ -25,7 +24,6 @@ const CVPreviewModal: React.FC<CVPreviewModalProps> = ({
 }) => {
   const [selectedTemplateId, setSelectedTemplateId] = useState<string>('');
   const [isPreviewing, setIsPreviewing] = useState(false);
-  const [showPageBreaks, setShowPageBreaks] = useState(false);
 
   const { templates, isLoading: templatesLoading } = useCVTemplates();
 
@@ -58,9 +56,7 @@ const CVPreviewModal: React.FC<CVPreviewModalProps> = ({
     setIsPreviewing(true);
 
     try {
-      await openCVPreview(employeeId, selectedTemplateId, { 
-        openInNewTab: true 
-      });
+      await openCVPreview(employeeId, selectedTemplateId);
       toast.success('CV preview opened in new tab!');
       handleClose();
     } catch (error) {
@@ -96,18 +92,6 @@ const CVPreviewModal: React.FC<CVPreviewModalProps> = ({
                 ))}
               </SelectContent>
             </Select>
-          </div>
-
-          <div className="flex items-center space-x-2">
-            <Switch
-              id="page-breaks"
-              checked={showPageBreaks}
-              onCheckedChange={setShowPageBreaks}
-              disabled={isPreviewing}
-            />
-            <Label htmlFor="page-breaks" className="text-sm">
-              Show page breaks (PDF preview)
-            </Label>
           </div>
           
           <div className="flex justify-end space-x-2">

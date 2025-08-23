@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { useTemplateEngine } from '@/hooks/use-template-engine';
@@ -5,8 +6,6 @@ import { useCVTemplates } from '@/hooks/use-cv-templates';
 import { Button } from '@/components/ui/button';
 import { Download, Maximize, FileDown } from 'lucide-react';
 import { CVRenderer } from './CVRenderer';
-import { CVPreviewWithPageBreaks } from './CVPreviewWithPageBreaks';
-import { PreviewModeToggle } from './PreviewModeToggle';
 import { generateFullCVHTML } from '@/utils/cv-html-generator';
 import { exportCVAsPDF, ProgressDialog, ProgressStep } from '@/utils/pdf-export';
 import { openCVPreview } from '@/utils/cv-preview-utility';
@@ -29,7 +28,6 @@ export const CVTemplatePreview: React.FC<CVTemplatePreviewProps> = ({
   const [employeeData, setEmployeeData] = useState(null);
   const [isLoadingEmployee, setIsLoadingEmployee] = useState(false);
   const [employeeError, setEmployeeError] = useState<string | null>(null);
-  const [previewMode, setPreviewMode] = useState<'continuous' | 'paginated'>('continuous');
   
   const { processedHTML, error, isProcessing } = useTemplateEngine(htmlTemplate, employeeData);
   
@@ -157,13 +155,9 @@ export const CVTemplatePreview: React.FC<CVTemplatePreviewProps> = ({
               {selectedEmployeeId ? `Live preview with employee data (${currentTemplate?.data_source_function || 'default'})` : 'Template preview (no data)'}
             </p>
           </div>
-          <div className="flex gap-2 items-center">
+          <div className="flex gap-2">
             {processedHTML && (
               <>
-                <PreviewModeToggle 
-                  mode={previewMode} 
-                  onModeChange={setPreviewMode}
-                />
                 <Button 
                   size="sm" 
                   variant="outline" 
@@ -243,18 +237,10 @@ export const CVTemplatePreview: React.FC<CVTemplatePreviewProps> = ({
 
               {(htmlTemplate.trim() || processedHTML) && processedHTML && (
                 <div className="flex items-center justify-center p-8">
-                  {previewMode === 'continuous' ? (
-                    <CVRenderer 
-                      processedHTML={processedHTML} 
-                      mode="preview" 
-                    />
-                  ) : (
-                    <CVPreviewWithPageBreaks 
-                      processedHTML={processedHTML} 
-                      mode="preview"
-                      orientation={currentTemplate?.orientation || 'portrait'}
-                    />
-                  )}
+                  <CVRenderer 
+                    processedHTML={processedHTML} 
+                    mode="preview" 
+                  />
                 </div>
               )}
             </>
