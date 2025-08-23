@@ -123,13 +123,19 @@ export const ShareCVDialog: React.FC<ShareCVDialogProps> = ({
                   </SelectTrigger>
                   <SelectContent>
                     {profilesLoading ? (
-                      <SelectItem value="" disabled>Loading profiles...</SelectItem>
-                    ) : (
-                      profiles?.map((profile) => (
+                      <div className="py-6 text-center text-sm text-muted-foreground">
+                        Loading profiles...
+                      </div>
+                    ) : profiles && profiles.length > 0 ? (
+                      profiles.map((profile) => (
                         <SelectItem key={profile.id} value={profile.id}>
                           {profile.first_name} {profile.last_name} ({profile.employee_id})
                         </SelectItem>
                       ))
+                    ) : (
+                      <div className="py-6 text-center text-sm text-muted-foreground">
+                        No profiles found
+                      </div>
                     )}
                   </SelectContent>
                 </Select>
