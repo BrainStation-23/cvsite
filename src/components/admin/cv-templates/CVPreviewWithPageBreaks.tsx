@@ -104,7 +104,7 @@ export const CVPreviewWithPageBreaks: React.FC<CVPreviewWithPageBreaksProps> = (
 
   return (
     <div className="cv-page-break-preview">
-      <style jsx>{`
+      <style>{`
         .cv-page-break-preview {
           background: #f5f5f5;
           padding: 20px;

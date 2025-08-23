@@ -19,7 +19,7 @@ export const CVRenderer: React.FC<CVRendererProps> = ({
   return (
     <div className={containerClass}>
       {pageBreakPreview && (
-        <style jsx>{`
+        <style>{`
           .cv-page-break-mode {
             /* Apply PDF-specific styles for preview */
             font-size: 12px;
