@@ -22,7 +22,7 @@ export const PublicCVPreviewPage: React.FC = () => {
       try {
         // Call the public CV preview edge function
         const response = await fetch(
-          `${supabase.supabaseUrl}/functions/v1/public-cv-preview/${token}`,
+          `https://pvkzzkbwjntazemosbot.supabase.co/functions/v1/public-cv-preview/${token}`,
           {
             method: 'GET',
             headers: {

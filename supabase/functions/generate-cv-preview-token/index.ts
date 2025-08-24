@@ -138,9 +138,9 @@ Deno.serve(async (req) => {
         )
       }
 
-      // Generate public URL
-      const baseUrl = Deno.env.get('SUPABASE_URL')?.replace('//', '//').replace('supabase.co', 'supabase.co') || ''
-      const publicUrl = `${req.url.split('/functions')[0]}/public/cv/${token}`
+      // Generate public URL using FRONTEND_BASE_URL secret
+      const frontendBaseUrl = Deno.env.get('FRONTEND_BASE_URL') || 'http://localhost:3000'
+      const publicUrl = `${frontendBaseUrl}/public/cv/${token}`
 
       return new Response(
         JSON.stringify({
