@@ -157,6 +157,70 @@ export type Database = {
         }
         Relationships: []
       }
+      cv_preview_tokens: {
+        Row: {
+          created_at: string
+          created_by: string
+          expires_at: string
+          id: string
+          is_active: boolean
+          max_usage: number | null
+          profile_id: string
+          template_id: string
+          token: string
+          updated_at: string
+          usage_count: number
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          expires_at: string
+          id?: string
+          is_active?: boolean
+          max_usage?: number | null
+          profile_id: string
+          template_id: string
+          token: string
+          updated_at?: string
+          usage_count?: number
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          expires_at?: string
+          id?: string
+          is_active?: boolean
+          max_usage?: number | null
+          profile_id?: string
+          template_id?: string
+          token?: string
+          updated_at?: string
+          usage_count?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cv_preview_tokens_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cv_preview_tokens_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "resource_availability_view"
+            referencedColumns: ["profile_id"]
+          },
+          {
+            foreignKeyName: "cv_preview_tokens_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "cv_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       cv_templates: {
         Row: {
           created_at: string
@@ -1358,6 +1422,10 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: Json
       }
+      cleanup_expired_cv_tokens: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
       export_profile_json: {
         Args: { target_user_id?: string }
         Returns: Json
@@ -1439,45 +1507,25 @@ export type Database = {
         Returns: Json
       }
       get_planned_resource_data: {
-        Args:
-          | {
-              bill_type_filter?: string
-              end_date_from?: string
-              end_date_to?: string
-              items_per_page?: number
-              manager_filter?: string
-              max_billing_percentage?: number
-              max_engagement_percentage?: number
-              min_billing_percentage?: number
-              min_engagement_percentage?: number
-              page_number?: number
-              project_search?: string
-              sbu_filter?: string
-              search_query?: string
-              sort_by?: string
-              sort_order?: string
-              start_date_from?: string
-              start_date_to?: string
-            }
-          | {
-              bill_type_filter?: string
-              end_date_from?: string
-              end_date_to?: string
-              items_per_page?: number
-              manager_filter?: string
-              max_billing_percentage?: number
-              max_engagement_percentage?: number
-              min_billing_percentage?: number
-              min_engagement_percentage?: number
-              page_number?: number
-              project_search?: string
-              sbu_filter?: string
-              search_query?: string
-              sort_by?: string
-              sort_order?: string
-              start_date_from?: string
-              start_date_to?: string
-            }
+        Args: {
+          bill_type_filter?: string
+          end_date_from?: string
+          end_date_to?: string
+          items_per_page?: number
+          manager_filter?: string
+          max_billing_percentage?: number
+          max_engagement_percentage?: number
+          min_billing_percentage?: number
+          min_engagement_percentage?: number
+          page_number?: number
+          project_search?: string
+          sbu_filter?: string
+          search_query?: string
+          sort_by?: string
+          sort_order?: string
+          start_date_from?: string
+          start_date_to?: string
+        }
         Returns: Json
       }
       get_profile_completion_by_resource_type: {
@@ -1590,45 +1638,25 @@ export type Database = {
         Returns: Json
       }
       get_weekly_validation_data: {
-        Args:
-          | {
-              bill_type_filter?: string
-              end_date_from?: string
-              end_date_to?: string
-              items_per_page?: number
-              manager_filter?: string
-              max_billing_percentage?: number
-              max_engagement_percentage?: number
-              min_billing_percentage?: number
-              min_engagement_percentage?: number
-              page_number?: number
-              project_search?: string
-              sbu_filter?: string
-              search_query?: string
-              sort_by?: string
-              sort_order?: string
-              start_date_from?: string
-              start_date_to?: string
-            }
-          | {
-              bill_type_filter?: string
-              end_date_from?: string
-              end_date_to?: string
-              items_per_page?: number
-              manager_filter?: string
-              max_billing_percentage?: number
-              max_engagement_percentage?: number
-              min_billing_percentage?: number
-              min_engagement_percentage?: number
-              page_number?: number
-              project_search?: string
-              sbu_filter?: string
-              search_query?: string
-              sort_by?: string
-              sort_order?: string
-              start_date_from?: string
-              start_date_to?: string
-            }
+        Args: {
+          bill_type_filter?: string
+          end_date_from?: string
+          end_date_to?: string
+          items_per_page?: number
+          manager_filter?: string
+          max_billing_percentage?: number
+          max_engagement_percentage?: number
+          min_billing_percentage?: number
+          min_engagement_percentage?: number
+          page_number?: number
+          project_search?: string
+          sbu_filter?: string
+          search_query?: string
+          sort_by?: string
+          sort_order?: string
+          start_date_from?: string
+          start_date_to?: string
+        }
         Returns: Json
       }
       has_any_role: {
@@ -1642,6 +1670,10 @@ export type Database = {
       import_profile_json: {
         Args: { profile_data: Json; target_user_id?: string }
         Returns: Json
+      }
+      increment_token_usage: {
+        Args: { token_value: string }
+        Returns: boolean
       }
       is_admin: {
         Args: Record<PropertyKey, never>
