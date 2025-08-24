@@ -7,9 +7,9 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { Copy, ExternalLink, Calendar, Users, Loader2 } from 'lucide-react';
-import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { useQuery } from '@tanstack/react-query';
+import { generatePublicCVLink, copyPublicCVLink, openPublicCVLink } from '@/utils/public-cv-link-utility';
 
 interface ShareCVDialogProps {
   isOpen: boolean;
@@ -52,34 +52,28 @@ export const ShareCVDialog: React.FC<ShareCVDialogProps> = ({
 
   const handleGenerateToken = async () => {
     if (!selectedProfileId) {
-      toast.error('Please select a profile');
-      return;
+      return; // Error will be shown by the utility
     }
 
     setIsGenerating(true);
     
     try {
-      const { data, error } = await supabase.functions.invoke('generate-cv-preview-token', {
-        body: {
-          profileId: selectedProfileId,
-          templateId,
-          expiresInDays,
-          maxUsage: hasUsageLimit ? maxUsage : null
-        }
+      const result = await generatePublicCVLink(selectedProfileId, templateId, {
+        expiresInDays,
+        maxUsage: hasUsageLimit ? maxUsage : null,
+        copyToClipboard: false,
+        showSuccessToast: true
       });
 
-      if (error) throw error;
-
-      setGeneratedToken({
-        token: data.token,
-        publicUrl: data.publicUrl,
-        expiresAt: data.expiresAt
-      });
-
-      toast.success('Public preview link generated successfully');
+      if (result.success && result.token && result.publicUrl && result.expiresAt) {
+        setGeneratedToken({
+          token: result.token,
+          publicUrl: result.publicUrl,
+          expiresAt: result.expiresAt
+        });
+      }
     } catch (error) {
-      console.error('Error generating token:', error);
-      toast.error('Failed to generate public preview link');
+      console.error('Error in handleGenerateToken:', error);
     } finally {
       setIsGenerating(false);
     }
@@ -87,14 +81,13 @@ export const ShareCVDialog: React.FC<ShareCVDialogProps> = ({
 
   const handleCopyLink = () => {
     if (generatedToken) {
-      navigator.clipboard.writeText(generatedToken.publicUrl);
-      toast.success('Link copied to clipboard');
+      copyPublicCVLink(generatedToken.publicUrl);
     }
   };
 
   const handleOpenPreview = () => {
     if (generatedToken) {
-      window.open(generatedToken.publicUrl, '_blank');
+      openPublicCVLink(generatedToken.publicUrl);
     }
   };
 
