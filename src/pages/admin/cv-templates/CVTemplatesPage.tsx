@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import DashboardLayout from '@/components/Layout/DashboardLayout';
@@ -5,10 +6,9 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Plus, Pencil, Trash2, Eye, Star, Database, FileText, Share } from 'lucide-react';
+import { Plus, Pencil, Trash2, Eye, Star, Database, FileText } from 'lucide-react';
 import { useCVTemplates, CVTemplate } from '@/hooks/use-cv-templates';
 import { CVTemplateForm } from '@/components/admin/cv-templates/CVTemplateForm';
-import { ShareCVDialog } from '@/components/admin/cv-templates/ShareCVDialog';
 import { ConfirmationDialog } from '@/components/ui/confirmation-dialog';
 import { useConfirmationDialog } from '@/hooks/use-confirmation-dialog';
 
@@ -27,7 +27,6 @@ const CVTemplatesPage: React.FC = () => {
 
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingTemplate, setEditingTemplate] = useState<CVTemplate | undefined>();
-  const [shareDialogTemplateId, setShareDialogTemplateId] = useState<string | null>(null);
   
   const { isOpen, config, showConfirmation, hideConfirmation, handleConfirm } = useConfirmationDialog();
 
@@ -99,10 +98,6 @@ const CVTemplatesPage: React.FC = () => {
     }
   };
 
-  const handleShare = (template: CVTemplate) => {
-    setShareDialogTemplateId(template.id);
-  };
-
   if (isLoading) {
     return (
       <DashboardLayout>
@@ -143,7 +138,7 @@ const CVTemplatesPage: React.FC = () => {
                 <TableHead>Status</TableHead>
                 <TableHead>Default</TableHead>
                 <TableHead>Last Updated</TableHead>
-                <TableHead className="w-[250px]">Actions</TableHead>
+                <TableHead className="w-[200px]">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -213,14 +208,6 @@ const CVTemplatesPage: React.FC = () => {
                         <Button
                           size="sm"
                           variant="ghost"
-                          onClick={() => handleShare(template)}
-                          title="Generate Public Link"
-                        >
-                          <Share className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="ghost"
                           onClick={() => handleEdit(template)}
                           disabled={isUpdating}
                           title="Edit"
@@ -253,15 +240,6 @@ const CVTemplatesPage: React.FC = () => {
           template={editingTemplate}
           isLoading={isCreating || isUpdating}
         />
-
-        {/* Share Dialog */}
-        {shareDialogTemplateId && (
-          <ShareCVDialog
-            isOpen={!!shareDialogTemplateId}
-            onClose={() => setShareDialogTemplateId(null)}
-            templateId={shareDialogTemplateId}
-          />
-        )}
 
         {/* Confirmation Dialog */}
         {config && (
