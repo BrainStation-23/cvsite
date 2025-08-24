@@ -6,7 +6,6 @@ import { AuthProvider } from '@/contexts/AuthContext';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import Index from '@/pages/Index';
 import Login from '@/pages/Login';
-import PublicCVPreviewPage from './pages/public/PublicCVPreviewPage';
 import Callback from '@/pages/auth/Callback';
 import FrontChannelLogout from './pages/auth/FrontChannelLogout';
 import ProfilePage from '@/pages/profile/ProfilePage';
@@ -41,7 +40,6 @@ import CVTemplateViewPage from './pages/admin/cv-templates/CVTemplateViewPage';
 import CVTemplateDocumentationPage from './pages/admin/cv-templates/CVTemplateDocumentationPage';
 import './App.css';
 
-
 // Create QueryClient instance outside component to prevent recreation
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -60,7 +58,6 @@ function App(): React.ReactElement {
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/login" element={<Login />} />
-            <Route path="/public/cv/:token" element={<PublicCVPreviewPage />} />
             <Route path="/auth/callback" element={<Callback />} />
             <Route path="/auth/logout" element={<FrontChannelLogout />} />
             <Route

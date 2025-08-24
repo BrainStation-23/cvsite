@@ -6,7 +6,6 @@ import { Eye, FileDown, Loader2 } from 'lucide-react';
 import { useCVTemplates } from '@/hooks/use-cv-templates';
 import { openCVPreview } from '@/utils/cv-preview-utility';
 import { exportCVAsPDF, ProgressDialog, ProgressStep } from '@/utils/pdf-export';
-import { PublicCVLinkGenerator } from '@/components/shared/PublicCVLinkGenerator';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 
@@ -156,16 +155,6 @@ export const CVActions: React.FC<CVActionsProps> = ({ profileId }) => {
               </>
             )}
           </Button>
-
-          <PublicCVLinkGenerator
-            profileId={targetProfileId}
-            templateId={selectedTemplateId}
-            variant="outline"
-            size="default"
-            expiresInDays={7}
-            maxUsage={null}
-            copyToClipboard={true}
-          />
         </div>
       </div>
 
