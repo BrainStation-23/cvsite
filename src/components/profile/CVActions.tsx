@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -166,7 +165,6 @@ export const CVActions: React.FC<CVActionsProps> = ({ profileId }) => {
             expiresInDays={7}
             maxUsage={null}
             copyToClipboard={true}
-            disabled={!selectedTemplateId || templatesLoading}
           />
         </div>
       </div>
