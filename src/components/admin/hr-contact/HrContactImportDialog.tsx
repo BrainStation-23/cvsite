@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Upload } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { HrContactItem, HrContactFormData } from '@/hooks/use-hr-contact-settings';
+import { HrContactItem } from '@/hooks/use-hr-contact-settings';
 import { parseHrContactCSV, validateHrContactCSVData } from '@/utils/hrContactCsvUtils';
 import HrContactCSVValidation from './HrContactCSVValidation';
 

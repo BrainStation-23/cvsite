@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Upload, Download, FileDown } from 'lucide-react';
+import { Upload, FileDown } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { exportItemsToCSV, ENTITY_NAMES } from '@/utils/resourcePlanningCsvUtils';
 import { ResourcePlanningBulkImport } from './ResourcePlanningBulkImport';

@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Upload, Download, Plus, Edit } from 'lucide-react';
+import {  Download, Plus, Edit } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { 
   parseResourcePlanningCSV, 

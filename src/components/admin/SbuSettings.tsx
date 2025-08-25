@@ -1,14 +1,13 @@
 
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { useSbuSettings } from '@/hooks/use-sbu-settings';
 import { useSbuSearch } from '@/hooks/use-sbu-search';
 import SbuAddForm from './sbu/SbuAddForm';
 import SbuSearchFilters from './sbu/SbuSearchFilters';
 import SbuTable from './sbu/SbuTable';
 import SbuPagination from './sbu/SbuPagination';
 import SbuCSVManager from './sbu/SbuCSVManager';
-import { SbuFormData, SbuItem } from '@/hooks/use-sbu-settings';
+import { SbuFormData, SbuItem, useSbuSettings } from '@/hooks/use-sbu-settings';
 
 type SortColumn = 'name' | 'sbu_head_email' | 'created_at';
 type SortOrder = 'asc' | 'desc';
