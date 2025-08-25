@@ -1,11 +1,10 @@
 
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { useHrContactSettings } from '@/hooks/use-hr-contact-settings';
 import HrContactAddForm from './hr-contact/HrContactAddForm';
 import HrContactTable from './hr-contact/HrContactTable';
 import HrContactCSVManager from './hr-contact/HrContactCSVManager';
-import { HrContactFormData, HrContactItem } from '@/hooks/use-hr-contact-settings';
+import { HrContactFormData, HrContactItem, useHrContactSettings } from '@/hooks/use-hr-contact-settings';
 
 const HrContactSettings: React.FC = () => {
   const [editingId, setEditingId] = useState<string | null>(null);

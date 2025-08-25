@@ -16,7 +16,6 @@ const UserCSVValidation: React.FC<UserCSVValidationProps> = ({
 }) => {
   const { valid, errors } = validationResult;
   const hasErrors = errors.length > 0;
-  const hasValid = valid.length > 0;
 
   // Group errors by row for better display
   const errorsByRow = errors.reduce((acc, error) => {

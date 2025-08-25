@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { X } from 'lucide-react';
 import { Spinner } from '@/components/ui/spinner';
-import { SettingItem, usePlatformSettings, SettingTableName } from '@/hooks/use-platform-settings';
+import { usePlatformSettings, SettingTableName } from '@/hooks/use-platform-settings';
 
 interface SettingCategoryProps {
   title: string;

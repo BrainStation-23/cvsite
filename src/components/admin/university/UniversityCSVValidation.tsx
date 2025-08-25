@@ -5,7 +5,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { AlertCircle, CheckCircle, X } from 'lucide-react';
-import { CSVValidationResult, CSVValidationError } from '@/utils/csvUtils';
+import { CSVValidationResult } from '@/utils/csvUtils';
 import { UniversityFormData } from '@/hooks/use-university-settings';
 
 interface UniversityCSVValidationProps {

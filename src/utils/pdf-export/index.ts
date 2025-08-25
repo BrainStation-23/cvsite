@@ -15,13 +15,20 @@ export async function exportCVAsPDF(
   options: PDFExportOptions = {}
 ): Promise<void> {
   const { filename, onProgress } = options;
-  
   const progressTracker = new ProgressTracker(onProgress);
-  
+
   try {
-    // Step 1: Fetch template and employee data using dynamic data source
+    // Step 1a: Load CV template
+    progressTracker.startStep('fetch-template');
+    const templateData = await dataFetcher.fetchTemplateData(templateId);
+    progressTracker.completeStep('fetch-template');
+
+    // Step 1b: Fetch employee data using template's data source
     progressTracker.startStep('fetch-employee');
-    const { employeeData, templateData } = await dataFetcher.fetchAllData(profileId, templateId);
+    const employeeData = await dataFetcher.fetchEmployeeData(
+      profileId,
+      templateData.data_source_function
+    );
     progressTracker.completeStep('fetch-employee');
 
     // Step 2: Process template with dynamic configuration

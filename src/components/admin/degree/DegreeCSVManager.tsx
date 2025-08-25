@@ -3,8 +3,7 @@ import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Download } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { exportDegreesToCSV } from '@/utils/degreeCsvUtils';
-import { DegreeItem } from '@/utils/degreeCsvUtils';
+import { DegreeItem ,exportDegreesToCSV} from '@/utils/degreeCsvUtils';
 import DegreeImportDialog from './DegreeImportDialog';
 
 interface DegreeCSVManagerProps {
