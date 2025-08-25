@@ -3,7 +3,7 @@ import React from 'react';
 import { TableCell, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { CheckCircle2, Edit2, CheckCircle, Copy } from 'lucide-react';
+import { CheckCircle2, Edit2, CheckCircle, Copy, Trash2 } from 'lucide-react';
 import { format } from 'date-fns';
 import { useConfirmationDialog } from '@/hooks/use-confirmation-dialog';
 import { useCompleteEngagementDialog } from '@/hooks/use-complete-engagement-dialog';
@@ -88,7 +88,7 @@ export const WeeklyValidationTableRow: React.FC<WeeklyValidationTableRowProps> =
     hideCompleteDialog, 
     handleConfirm: handleCompleteConfirm 
   } = useCompleteEngagementDialog();
-  const { updateResourcePlanning, createResourcePlanning, isUpdating, isCreating } = useResourcePlanningOperations();
+  const { updateResourcePlanning, createResourcePlanning, deleteResourcePlanning, isUpdating, isCreating, isDeleting } = useResourcePlanningOperations();
 
   const handleValidateClick = () => {
     showConfirmation({
@@ -141,6 +141,17 @@ export const WeeklyValidationTableRow: React.FC<WeeklyValidationTableRowProps> =
         };
         createResourcePlanning(duplicateData);
       }
+    });
+  };
+
+  const handleDeleteAssignment = () => {
+    showConfirmation({
+      title: 'Delete Resource Assignment',
+      description: `Are you sure you want to delete this resource assignment for ${item.profile.first_name} ${item.profile.last_name}? This action cannot be undone.`,
+      confirmText: 'Delete',
+      cancelText: 'Cancel',
+      variant: 'destructive',
+      onConfirm: () => deleteResourcePlanning(item.id)
     });
   };
 
@@ -267,6 +278,16 @@ export const WeeklyValidationTableRow: React.FC<WeeklyValidationTableRowProps> =
               title="Duplicate assignment"
             >
               <Copy className="h-3 w-3" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleDeleteAssignment}
+              disabled={isDeleting || editLoading}
+              className="h-6 w-6 p-0 text-red-600 hover:text-red-700"
+              title="Delete assignment"
+            >
+              <Trash2 className="h-3 w-3" />
             </Button>
           </div>
         </TableCell>
