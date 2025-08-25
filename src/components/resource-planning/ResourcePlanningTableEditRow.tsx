@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { TableCell, TableRow } from '@/components/ui/table';
 import { Input } from '@/components/ui/input';
@@ -164,7 +165,7 @@ export const ResourcePlanningTableEditRow: React.FC<ResourcePlanningTableEditRow
       <TableCell className="py-1 px-2">
         <div className="flex items-center gap-1">
           <Button
-            variant="primary"
+            variant="default"
             size="sm"
             onClick={onSave}
             disabled={isLoading}
