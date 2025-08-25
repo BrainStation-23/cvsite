@@ -11,7 +11,6 @@ import { ConfirmationDialog } from '@/components/ui/confirmation-dialog';
 import { CompleteEngagementDialog } from '@/components/ui/complete-engagement-dialog';
 import { WeeklyValidationTableEditRow } from './WeeklyValidationTableEditRow';
 import { useResourcePlanningOperations } from '@/hooks/use-resource-planning-operations';
-import { Checkbox } from '@/components/ui/checkbox';
 
 interface WeeklyValidationData {
   id: string;
@@ -67,10 +66,6 @@ interface WeeklyValidationTableRowProps {
   onSaveEdit: () => void;
   onEditDataChange: (data: Partial<EditFormData>) => void;
   editLoading: boolean;
-  // Bulk selection props
-  showBulkSelection?: boolean;
-  isSelected?: boolean;
-  onSelect?: (id: string, selected: boolean) => void;
 }
 
 export const WeeklyValidationTableRow: React.FC<WeeklyValidationTableRowProps> = ({ 
@@ -84,9 +79,6 @@ export const WeeklyValidationTableRow: React.FC<WeeklyValidationTableRowProps> =
   onSaveEdit,
   onEditDataChange,
   editLoading,
-  showBulkSelection = false,
-  isSelected = false,
-  onSelect,
 }) => {
   const { isOpen, config, showConfirmation, hideConfirmation, handleConfirm } = useConfirmationDialog();
   const { 
@@ -163,10 +155,6 @@ export const WeeklyValidationTableRow: React.FC<WeeklyValidationTableRowProps> =
     });
   };
 
-  const handleSelectChange = (checked: boolean) => {
-    onSelect?.(item.id, checked);
-  };
-
   // If this row is being edited, show the edit row
   if (isEditing && editData) {
     return (
@@ -177,23 +165,13 @@ export const WeeklyValidationTableRow: React.FC<WeeklyValidationTableRowProps> =
         onSave={onSaveEdit}
         onCancel={onCancelEdit}
         isLoading={editLoading}
-        showBulkSelection={showBulkSelection}
       />
     );
   }
 
   return (
     <>
-      <TableRow className={`h-10 ${isSelected ? 'bg-muted/50' : ''}`}>
-        {showBulkSelection && (
-          <TableCell className="py-1 px-2">
-            <Checkbox
-              checked={isSelected}
-              onCheckedChange={handleSelectChange}
-              aria-label={`Select ${item.profile.first_name} ${item.profile.last_name}`}
-            />
-          </TableCell>
-        )}
+      <TableRow className="h-10">
         <TableCell className="py-1 px-2">
           <div className="flex flex-col">
             <span className="font-medium text-xs">

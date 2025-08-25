@@ -20,20 +20,9 @@ interface UpdateResourcePlanningData {
   updates: Partial<ResourcePlanningData>;
 }
 
-interface BulkUpdateResourcePlanningData {
-  ids: string[];
-  updates: Partial<ResourcePlanningData>;
-}
-
 export const useResourcePlanningOperations = () => {
   const queryClient = useQueryClient();
   const { toast } = useToast();
-
-  const invalidateQueries = () => {
-    queryClient.invalidateQueries({ queryKey: ['planned-resources-tab'] });
-    queryClient.invalidateQueries({ queryKey: ['weekly-validation-tab'] });
-    queryClient.invalidateQueries({ queryKey: ['resource-calendar-data'] });
-  };
 
   const createResourcePlanning = useMutation({
     mutationFn: async (data: ResourcePlanningData) => {
@@ -47,7 +36,9 @@ export const useResourcePlanningOperations = () => {
       return result;
     },
     onSuccess: () => {
-      invalidateQueries();
+      queryClient.invalidateQueries({ queryKey: ['planned-resources-tab'] });
+      queryClient.invalidateQueries({ queryKey: ['weekly-validation-tab'] });
+      queryClient.invalidateQueries({ queryKey: ['resource-calendar-data'] });
     },
   });
 
@@ -64,7 +55,9 @@ export const useResourcePlanningOperations = () => {
       return data;
     },
     onSuccess: () => {
-      invalidateQueries();
+      queryClient.invalidateQueries({ queryKey: ['planned-resources-tab'] });
+      queryClient.invalidateQueries({ queryKey: ['weekly-validation-tab'] });
+      queryClient.invalidateQueries({ queryKey: ['resource-calendar-data'] });
     },
   });
 
@@ -78,7 +71,9 @@ export const useResourcePlanningOperations = () => {
       if (error) throw error;
     },
     onSuccess: () => {
-      invalidateQueries();
+      queryClient.invalidateQueries({ queryKey: ['planned-resources-tab'] });
+      queryClient.invalidateQueries({ queryKey: ['weekly-validation-tab'] });
+      queryClient.invalidateQueries({ queryKey: ['resource-calendar-data'] });
       toast({
         title: 'Success',
         description: 'Resource assignment deleted successfully.',
@@ -93,121 +88,12 @@ export const useResourcePlanningOperations = () => {
     },
   });
 
-  // Bulk operations
-  const bulkDeleteResourcePlanning = useMutation({
-    mutationFn: async (ids: string[]) => {
-      const { error } = await supabase
-        .from('resource_planning')
-        .delete()
-        .in('id', ids);
-
-      if (error) throw error;
-    },
-    onSuccess: (_, ids) => {
-      invalidateQueries();
-      toast({
-        title: 'Success',
-        description: `${ids.length} resource assignment${ids.length > 1 ? 's' : ''} deleted successfully.`,
-      });
-    },
-    onError: () => {
-      toast({
-        title: 'Error',
-        description: 'Failed to delete resource assignments.',
-        variant: 'destructive',
-      });
-    },
-  });
-
-  const bulkUpdateResourcePlanning = useMutation({
-    mutationFn: async ({ ids, updates }: BulkUpdateResourcePlanningData) => {
-      const { error } = await supabase
-        .from('resource_planning')
-        .update(updates)
-        .in('id', ids);
-
-      if (error) throw error;
-    },
-    onSuccess: (_, { ids }) => {
-      invalidateQueries();
-      toast({
-        title: 'Success',
-        description: `${ids.length} resource assignment${ids.length > 1 ? 's' : ''} updated successfully.`,
-      });
-    },
-    onError: () => {
-      toast({
-        title: 'Error',
-        description: 'Failed to update resource assignments.',
-        variant: 'destructive',
-      });
-    },
-  });
-
-  const bulkCompleteEngagements = useMutation({
-    mutationFn: async (ids: string[]) => {
-      const { error } = await supabase
-        .from('resource_planning')
-        .update({ engagement_complete: true })
-        .in('id', ids);
-
-      if (error) throw error;
-    },
-    onSuccess: (_, ids) => {
-      invalidateQueries();
-      toast({
-        title: 'Success',
-        description: `${ids.length} engagement${ids.length > 1 ? 's' : ''} marked as complete.`,
-      });
-    },
-    onError: () => {
-      toast({
-        title: 'Error',
-        description: 'Failed to complete engagements.',
-        variant: 'destructive',
-      });
-    },
-  });
-
-  const bulkUpdateWeeklyValidation = useMutation({
-    mutationFn: async ({ ids, validated }: { ids: string[]; validated: boolean }) => {
-      const { error } = await supabase
-        .from('resource_planning')
-        .update({ weekly_validation: validated })
-        .in('id', ids);
-
-      if (error) throw error;
-    },
-    onSuccess: (_, { ids, validated }) => {
-      invalidateQueries();
-      toast({
-        title: 'Success',
-        description: `${ids.length} item${ids.length > 1 ? 's' : ''} ${validated ? 'validated' : 'unvalidated'} successfully.`,
-      });
-    },
-    onError: () => {
-      toast({
-        title: 'Error',
-        description: 'Failed to update weekly validation.',
-        variant: 'destructive',
-      });
-    },
-  });
-
   return {
     createResourcePlanning: createResourcePlanning.mutate,
     updateResourcePlanning: updateResourcePlanning.mutate,
     deleteResourcePlanning: deleteResourcePlanning.mutate,
-    bulkDeleteResourcePlanning: bulkDeleteResourcePlanning.mutate,
-    bulkUpdateResourcePlanning: bulkUpdateResourcePlanning.mutate,
-    bulkCompleteEngagements: bulkCompleteEngagements.mutate,
-    bulkUpdateWeeklyValidation: bulkUpdateWeeklyValidation.mutate,
     isCreating: createResourcePlanning.isPending,
     isUpdating: updateResourcePlanning.isPending,
     isDeleting: deleteResourcePlanning.isPending,
-    isBulkDeleting: bulkDeleteResourcePlanning.isPending,
-    isBulkUpdating: bulkUpdateResourcePlanning.isPending,
-    isBulkCompleting: bulkCompleteEngagements.isPending,
-    isBulkValidating: bulkUpdateWeeklyValidation.isPending,
   };
 };

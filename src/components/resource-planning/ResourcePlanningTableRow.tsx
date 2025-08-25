@@ -1,17 +1,15 @@
-
 import React from 'react';
 import { TableCell, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Edit2, CheckCircle, Copy, Trash2 } from 'lucide-react';
+import { Edit2, Trash2, CheckCircle, Copy } from 'lucide-react';
 import { format } from 'date-fns';
+import { useResourcePlanningOperations } from '@/hooks/use-resource-planning-operations';
 import { useConfirmationDialog } from '@/hooks/use-confirmation-dialog';
 import { useCompleteEngagementDialog } from '@/hooks/use-complete-engagement-dialog';
 import { ConfirmationDialog } from '@/components/ui/confirmation-dialog';
 import { CompleteEngagementDialog } from '@/components/ui/complete-engagement-dialog';
 import { ResourcePlanningTableEditRow } from './ResourcePlanningTableEditRow';
-import { useResourcePlanningOperations } from '@/hooks/use-resource-planning-operations';
-import { Checkbox } from '@/components/ui/checkbox';
 
 interface ResourcePlanningData {
   id: string;
@@ -21,7 +19,6 @@ interface ResourcePlanningData {
   release_date: string;
   engagement_start_date: string;
   engagement_complete: boolean;
-  weekly_validation: boolean;
   created_at: string;
   updated_at: string;
   profile: {
@@ -65,10 +62,6 @@ interface ResourcePlanningTableRowProps {
   onSaveEdit: () => void;
   onEditDataChange: (data: Partial<EditFormData>) => void;
   editLoading: boolean;
-  // Bulk selection props
-  showBulkSelection?: boolean;
-  isSelected?: boolean;
-  onSelect?: (id: string, selected: boolean) => void;
 }
 
 export const ResourcePlanningTableRow: React.FC<ResourcePlanningTableRowProps> = ({ 
@@ -80,10 +73,8 @@ export const ResourcePlanningTableRow: React.FC<ResourcePlanningTableRowProps> =
   onSaveEdit,
   onEditDataChange,
   editLoading,
-  showBulkSelection = false,
-  isSelected = false,
-  onSelect,
 }) => {
+  const { updateResourcePlanning, deleteResourcePlanning, createResourcePlanning, isDeleting, isUpdating, isCreating } = useResourcePlanningOperations();
   const { isOpen, config, showConfirmation, hideConfirmation, handleConfirm } = useConfirmationDialog();
   const { 
     isOpen: isCompleteDialogOpen, 
@@ -92,7 +83,17 @@ export const ResourcePlanningTableRow: React.FC<ResourcePlanningTableRowProps> =
     hideCompleteDialog, 
     handleConfirm: handleCompleteConfirm 
   } = useCompleteEngagementDialog();
-  const { updateResourcePlanning, createResourcePlanning, deleteResourcePlanning, isUpdating, isCreating, isDeleting } = useResourcePlanningOperations();
+
+  const handleDeleteClick = () => {
+    showConfirmation({
+      title: 'Delete Resource Assignment',
+      description: 'Are you sure you want to delete this resource assignment? This action cannot be undone.',
+      confirmText: 'Delete',
+      cancelText: 'Cancel',
+      variant: 'destructive',
+      onConfirm: () => deleteResourcePlanning(item.id)
+    });
+  };
 
   const handleCompleteEngagement = () => {
     showCompleteDialog({
@@ -137,21 +138,6 @@ export const ResourcePlanningTableRow: React.FC<ResourcePlanningTableRowProps> =
     });
   };
 
-  const handleDeleteAssignment = () => {
-    showConfirmation({
-      title: 'Delete Resource Assignment',
-      description: `Are you sure you want to delete this resource assignment for ${item.profile.first_name} ${item.profile.last_name}? This action cannot be undone.`,
-      confirmText: 'Delete',
-      cancelText: 'Cancel',
-      variant: 'destructive',
-      onConfirm: () => deleteResourcePlanning(item.id)
-    });
-  };
-
-  const handleSelectChange = (checked: boolean) => {
-    onSelect?.(item.id, checked);
-  };
-
   // If this row is being edited, show the edit row
   if (isEditing && editData) {
     return (
@@ -162,23 +148,14 @@ export const ResourcePlanningTableRow: React.FC<ResourcePlanningTableRowProps> =
         onSave={onSaveEdit}
         onCancel={onCancelEdit}
         isLoading={editLoading}
-        showBulkSelection={showBulkSelection}
       />
     );
   }
 
+  // Otherwise show the normal read-only row
   return (
     <>
-      <TableRow className={`h-10 ${isSelected ? 'bg-muted/50' : ''}`}>
-        {showBulkSelection && (
-          <TableCell className="py-1 px-2">
-            <Checkbox
-              checked={isSelected}
-              onCheckedChange={handleSelectChange}
-              aria-label={`Select ${item.profile.first_name} ${item.profile.last_name}`}
-            />
-          </TableCell>
-        )}
+      <TableRow className="h-10">
         <TableCell className="py-1 px-2">
           <div className="flex flex-col">
             <span className="font-medium text-xs">
@@ -250,7 +227,7 @@ export const ResourcePlanningTableRow: React.FC<ResourcePlanningTableRowProps> =
               variant="ghost"
               size="sm"
               onClick={() => onStartEdit(item)}
-              disabled={editLoading || isUpdating}
+              disabled={isUpdating || editLoading}
               className="h-6 w-6 p-0"
               title="Edit assignment"
             >
@@ -279,9 +256,9 @@ export const ResourcePlanningTableRow: React.FC<ResourcePlanningTableRowProps> =
             <Button
               variant="ghost"
               size="sm"
-              onClick={handleDeleteAssignment}
+              onClick={handleDeleteClick}
               disabled={isDeleting || editLoading}
-              className="h-6 w-6 p-0 text-red-600 hover:text-red-700"
+              className="h-6 w-6 p-0"
               title="Delete assignment"
             >
               <Trash2 className="h-3 w-3" />
