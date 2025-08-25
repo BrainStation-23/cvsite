@@ -42,7 +42,10 @@ export const ResourcePlanningTableHeader: React.FC<ResourcePlanningTableHeaderPr
                 onCheckedChange={onSelectAll}
                 ref={(el) => {
                   if (el) {
-                    el.indeterminate = isIndeterminate;
+                    const input = el.querySelector('input') as HTMLInputElement;
+                    if (input) {
+                      input.indeterminate = isIndeterminate;
+                    }
                   }
                 }}
               />
