@@ -8,6 +8,10 @@ import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Loader2 } from 'lucide-react';
 import { format } from 'date-fns';
+import BillTypeCombobox from './BillTypeCombobox';
+import { ProjectCombobox } from '@/components/projects/ProjectCombobox';
+import DatePicker from '@/components/admin/user/DatePicker';
+import { Check, X } from 'lucide-react';
 
 interface ResourcePlanningData {
   id: string;
@@ -109,85 +113,86 @@ export const ResourcePlanningTableEditRow: React.FC<ResourcePlanningTableEditRow
       </TableCell>
       
       <TableCell className="py-1 px-2">
-        <Input
-          type="text"
-          value={editData?.billTypeId || ''}
-          onChange={(e) => onEditDataChange({ billTypeId: e.target.value })}
-          className="text-xs h-7"
-        />
+        <div className="w-full max-w-[150px]">
+          <BillTypeCombobox
+            value={editData?.billTypeId || null}
+            onValueChange={(value) => onEditDataChange({ billTypeId: value })}
+            placeholder="Select..."
+          />
+        </div>
       </TableCell>
       
       <TableCell className="py-1 px-2">
-        <Input
-          type="text"
-          value={editData?.projectId || ''}
-          onChange={(e) => onEditDataChange({ projectId: e.target.value })}
-          className="text-xs h-7"
-        />
+        <div className="w-full max-w-[120px]">
+          <ProjectCombobox
+            value={editData?.projectId || undefined}
+            onValueChange={(value) => onEditDataChange({ projectId: value })}
+            placeholder="Select..."
+          />
+        </div>
       </TableCell>
       
-      <TableCell className="py-1 px-2">
+      <TableCell className="py-1 px-2 w-20">
         <Input
           type="number"
+          min="1"
+          max="100"
           value={editData?.engagementPercentage || 0}
           onChange={(e) => onEditDataChange({ engagementPercentage: Number(e.target.value) })}
-          className="text-xs h-7"
+          className="w-14 h-7 text-xs px-1"
         />
       </TableCell>
       
-      <TableCell className="py-1 px-2">
+      <TableCell className="py-1 px-2 w-20">
         <Input
           type="number"
+          min="0"
+          max="100"
           value={editData?.billingPercentage || 0}
           onChange={(e) => onEditDataChange({ billingPercentage: Number(e.target.value) })}
-          className="text-xs h-7"
+          className="w-14 h-7 text-xs px-1"
         />
       </TableCell>
       
       <TableCell className="py-1 px-2">
-        <Input
-          type="date"
-          value={editData?.engagementStartDate || ''}
-          onChange={(e) => onEditDataChange({ engagementStartDate: e.target.value })}
-          className="text-xs h-7"
-        />
+        <div className="w-full max-w-[240px]">
+          <DatePicker
+            value={editData?.engagementStartDate || ''}
+            onChange={(value) => onEditDataChange({ engagementStartDate: value })}
+            placeholder="Select date"
+          />
+        </div>
       </TableCell>
       
       <TableCell className="py-1 px-2">
-        <Input
-          type="date"
-          value={editData?.releaseDate || ''}
-          onChange={(e) => onEditDataChange({ releaseDate: e.target.value })}
-          className="text-xs h-7"
-        />
+        <div className="w-full max-w-[240px]">
+          <DatePicker
+            value={editData?.releaseDate || ''}
+            onChange={(value) => onEditDataChange({ releaseDate: value })}
+            placeholder="Select date"
+          />
+        </div>
       </TableCell>
       
       <TableCell className="py-1 px-2">
         <div className="flex items-center gap-1">
           <Button
-            variant="default"
+            variant="ghost"
             size="sm"
             onClick={onSave}
             disabled={isLoading}
-            className="h-7 px-2 text-xs"
+            className="h-6 w-6 p-0"
           >
-            {isLoading ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Saving...
-              </>
-            ) : (
-              'Save'
-            )}
+            <Check className="h-3 w-3" />
           </Button>
           <Button
             variant="ghost"
             size="sm"
             onClick={onCancel}
             disabled={isLoading}
-            className="h-7 px-2 text-xs"
+            className="h-6 w-6 p-0"
           >
-            Cancel
+            <X className="h-3 w-3" />
           </Button>
         </div>
       </TableCell>
