@@ -1,8 +1,13 @@
 
 import React from 'react';
 import { createRoot } from 'react-dom/client';
-import App from './App.tsx';
+import App from './App';
 import './index.css';
+
+// Ensure React is available globally for development
+if (typeof window !== 'undefined') {
+  (window as any).React = React;
+}
 
 const container = document.getElementById("root");
 if (!container) {
@@ -10,4 +15,8 @@ if (!container) {
 }
 
 const root = createRoot(container);
-root.render(<App />);
+root.render(
+  <React.StrictMode>
+    <App />
+  </React.StrictMode>
+);

@@ -1,3 +1,4 @@
+
 import {
   User,
   Settings,
@@ -13,7 +14,11 @@ import {
   CalendarDays,
   BarChart3,
   FolderOpen,
-  AlertTriangle
+  AlertTriangle,
+  UserX,
+  List,
+  TrendingUp,
+  UserCheck
 } from 'lucide-react';
 
 export interface NavigationItem {
@@ -60,6 +65,18 @@ export const getSidebarGroups = (
         { to: `/${userRole}/dashboard`, icon: Home, label: 'Dashboard' },
         { to: `/${userRole}/profile`, icon: User, label: 'My Profile' },
         { to: `/${userRole}/security`, icon: Shield, label: 'Security' },
+      ],
+    },
+    // PIP section (available for all users)
+    {
+      label: 'PIP',
+      items: [
+        ...(userRole === 'admin' ? [
+          { to: '/admin/pip/initiate', icon: UserX, label: 'Initiate' },
+          { to: '/admin/pip/list', icon: List, label: 'PIP List' },
+          { to: '/admin/pip/dashboard', icon: TrendingUp, label: 'PIP Dashboard' },
+        ] : []),
+        { to: `/${userRole}/pip/my-situation`, icon: UserCheck, label: 'My Situation' },
       ],
     },
     // Admin Configuration group (admin only)
