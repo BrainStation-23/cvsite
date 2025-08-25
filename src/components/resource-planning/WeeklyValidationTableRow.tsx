@@ -3,6 +3,7 @@ import React from 'react';
 import { TableCell, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Checkbox } from '@/components/ui/checkbox';
 import { CheckCircle2, Edit2, CheckCircle, Copy, Trash2 } from 'lucide-react';
 import { format } from 'date-fns';
 import { useConfirmationDialog } from '@/hooks/use-confirmation-dialog';
@@ -66,6 +67,10 @@ interface WeeklyValidationTableRowProps {
   onSaveEdit: () => void;
   onEditDataChange: (data: Partial<EditFormData>) => void;
   editLoading: boolean;
+  // Bulk selection props
+  showBulkSelection?: boolean;
+  isSelected?: boolean;
+  onSelect?: (id: string, selected: boolean) => void;
 }
 
 export const WeeklyValidationTableRow: React.FC<WeeklyValidationTableRowProps> = ({ 
@@ -79,6 +84,9 @@ export const WeeklyValidationTableRow: React.FC<WeeklyValidationTableRowProps> =
   onSaveEdit,
   onEditDataChange,
   editLoading,
+  showBulkSelection = false,
+  isSelected = false,
+  onSelect,
 }) => {
   const { isOpen, config, showConfirmation, hideConfirmation, handleConfirm } = useConfirmationDialog();
   const { 
@@ -165,6 +173,9 @@ export const WeeklyValidationTableRow: React.FC<WeeklyValidationTableRowProps> =
         onSave={onSaveEdit}
         onCancel={onCancelEdit}
         isLoading={editLoading}
+        showBulkSelection={showBulkSelection}
+        isSelected={isSelected}
+        onSelect={onSelect}
       />
     );
   }
@@ -172,6 +183,15 @@ export const WeeklyValidationTableRow: React.FC<WeeklyValidationTableRowProps> =
   return (
     <>
       <TableRow className="h-10">
+        {showBulkSelection && (
+          <TableCell className="py-1 px-2">
+            <Checkbox
+              checked={isSelected}
+              onCheckedChange={(checked) => onSelect?.(item.id, !!checked)}
+            />
+          </TableCell>
+        )}
+        
         <TableCell className="py-1 px-2">
           <div className="flex flex-col">
             <span className="font-medium text-xs">
@@ -182,6 +202,7 @@ export const WeeklyValidationTableRow: React.FC<WeeklyValidationTableRowProps> =
             </span>
           </div>
         </TableCell>
+        
         <TableCell className="py-1 px-2">
           {item.bill_type ? (
             <Badge variant="secondary" className="text-xs">{item.bill_type.name}</Badge>
@@ -189,6 +210,7 @@ export const WeeklyValidationTableRow: React.FC<WeeklyValidationTableRowProps> =
             <span className="text-muted-foreground text-xs">Not specified</span>
           )}
         </TableCell>
+        
         <TableCell className="py-1 px-2">
           {item.project ? (
             <div className="space-y-1">
@@ -217,12 +239,15 @@ export const WeeklyValidationTableRow: React.FC<WeeklyValidationTableRowProps> =
             <span className="text-muted-foreground text-xs">Not assigned</span>
           )}
         </TableCell>
+        
         <TableCell className="py-1 px-2">
           <Badge variant="outline" className="text-xs">{item.engagement_percentage}%</Badge>
         </TableCell>
+        
         <TableCell className="py-1 px-2">
           <Badge variant="outline" className="text-xs">{item.billing_percentage || 0}%</Badge>
         </TableCell>
+        
         <TableCell className="py-1 px-2 text-xs">
           {item.engagement_start_date ? (
             format(new Date(item.engagement_start_date), 'MMM dd, yyyy')
@@ -230,6 +255,7 @@ export const WeeklyValidationTableRow: React.FC<WeeklyValidationTableRowProps> =
             <span className="text-muted-foreground">Not set</span>
           )}
         </TableCell>
+        
         <TableCell className="py-1 px-2 text-xs">
           {item.release_date ? (
             format(new Date(item.release_date), 'MMM dd, yyyy')
@@ -237,6 +263,7 @@ export const WeeklyValidationTableRow: React.FC<WeeklyValidationTableRowProps> =
             <span className="text-muted-foreground">Not set</span>
           )}
         </TableCell>
+        
         <TableCell className="py-1 px-2">
           <div className="flex items-center gap-1">
             <Button

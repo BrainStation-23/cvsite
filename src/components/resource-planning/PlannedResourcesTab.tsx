@@ -4,6 +4,8 @@ import { Table, TableBody } from '@/components/ui/table';
 import { ResourcePlanningTableHeader } from './ResourcePlanningTableHeader';
 import { ResourcePlanningTableRow } from './ResourcePlanningTableRow';
 import { ResourcePlanningPagination } from './ResourcePlanningPagination';
+import { BulkActionsToolbar } from './BulkActionsToolbar';
+import { useBulkSelection } from '@/hooks/use-bulk-selection';
 
 interface PlannedResourcesTabProps {
   searchQuery: string;
@@ -50,6 +52,18 @@ export const PlannedResourcesTab: React.FC<PlannedResourcesTabProps> = ({
     setSortOrder,
   } = resourcePlanningState;
 
+  // Bulk selection
+  const {
+    selectedItems,
+    selectItem,
+    selectAll,
+    clearSelection,
+    isAllSelected,
+    hasSelection,
+    isIndeterminate,
+    selectedCount
+  } = useBulkSelection(data);
+
   const handleSort = (column: string) => {
     if (sortBy === column) {
       setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
@@ -57,6 +71,22 @@ export const PlannedResourcesTab: React.FC<PlannedResourcesTabProps> = ({
       setSortBy(column);
       setSortOrder('asc');
     }
+  };
+
+  // Placeholder bulk operations
+  const handleBulkComplete = () => {
+    console.log('Bulk complete for items:', selectedItems);
+    // TODO: Implement bulk complete operation
+  };
+
+  const handleBulkDelete = () => {
+    console.log('Bulk delete for items:', selectedItems);
+    // TODO: Implement bulk delete operation
+  };
+
+  const handleBulkCopy = () => {
+    console.log('Bulk copy for items:', selectedItems);
+    // TODO: Implement bulk copy operation
   };
 
   if (isLoading) {
@@ -76,11 +106,23 @@ export const PlannedResourcesTab: React.FC<PlannedResourcesTabProps> = ({
       ) : (
         <>
           <div className="rounded-md border">
+            <BulkActionsToolbar
+              selectedCount={selectedCount}
+              onBulkComplete={handleBulkComplete}
+              onBulkDelete={handleBulkDelete}
+              onBulkCopy={handleBulkCopy}
+              onClearSelection={clearSelection}
+            />
+            
             <Table>
               <ResourcePlanningTableHeader 
                 sortBy={sortBy}
                 sortOrder={sortOrder}
                 onSort={handleSort}
+                showBulkSelection={true}
+                isAllSelected={isAllSelected}
+                isIndeterminate={isIndeterminate}
+                onSelectAll={selectAll}
               />
               <TableBody>
                 {data.map((item: any) => (
@@ -94,6 +136,9 @@ export const PlannedResourcesTab: React.FC<PlannedResourcesTabProps> = ({
                     onSaveEdit={onSaveEdit}
                     onEditDataChange={onEditDataChange}
                     editLoading={editLoading}
+                    showBulkSelection={true}
+                    isSelected={selectedItems.includes(item.id)}
+                    onSelect={selectItem}
                   />
                 ))}
               </TableBody>

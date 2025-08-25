@@ -2,6 +2,7 @@
 import React from 'react';
 import { TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
 
@@ -9,12 +10,21 @@ interface ResourcePlanningTableHeaderProps {
   sortBy: string;
   sortOrder: 'asc' | 'desc';
   onSort: (column: string) => void;
+  // Bulk selection props
+  showBulkSelection?: boolean;
+  isAllSelected?: boolean;
+  isIndeterminate?: boolean;
+  onSelectAll?: () => void;
 }
 
 export const ResourcePlanningTableHeader: React.FC<ResourcePlanningTableHeaderProps> = ({
   sortBy,
   sortOrder,
   onSort,
+  showBulkSelection = false,
+  isAllSelected = false,
+  isIndeterminate = false,
+  onSelectAll,
 }) => {
   const getSortIcon = (column: string) => {
     if (sortBy !== column) return <ArrowUpDown className="h-4 w-4" />;
@@ -25,6 +35,20 @@ export const ResourcePlanningTableHeader: React.FC<ResourcePlanningTableHeaderPr
     <TooltipProvider>
       <TableHeader>
         <TableRow>
+          {showBulkSelection && (
+            <TableHead className="w-12">
+              <Checkbox
+                checked={isAllSelected}
+                onCheckedChange={onSelectAll}
+                ref={(el) => {
+                  if (el) {
+                    el.indeterminate = isIndeterminate;
+                  }
+                }}
+              />
+            </TableHead>
+          )}
+          
           <TableHead>
             <div className="flex flex-col gap-1">
               <Button

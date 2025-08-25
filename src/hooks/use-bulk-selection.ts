@@ -25,6 +25,7 @@ export function useBulkSelection(items: any[] = []) {
 
   const isAllSelected = selectedItems.length > 0 && selectedItems.length === items.length;
   const hasSelection = selectedItems.length > 0;
+  const isIndeterminate = selectedItems.length > 0 && selectedItems.length < items.length;
 
   return {
     selectedItems,
@@ -33,6 +34,7 @@ export function useBulkSelection(items: any[] = []) {
     clearSelection,
     isAllSelected,
     hasSelection,
+    isIndeterminate,
     selectedCount: selectedItems.length
   };
 }
