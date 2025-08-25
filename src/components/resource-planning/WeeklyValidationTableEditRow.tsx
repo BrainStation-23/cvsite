@@ -1,11 +1,12 @@
+
 import React from 'react';
 import { TableCell, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import BillTypeCombobox from './BillTypeCombobox';
-import { ProjectCombobox } from '@/components/projects/ProjectCombobox';
-import DatePicker from '@/components/admin/user/DatePicker';
-import { Check, X } from 'lucide-react';
+import { Save, X } from 'lucide-react';
+import { ProfileSelect } from './ProfileSelect';
+import { BillTypeSelect } from './BillTypeSelect';
+import { ProjectSelect } from './ProjectSelect';
 
 interface WeeklyValidationData {
   id: string;
@@ -14,16 +15,11 @@ interface WeeklyValidationData {
   billing_percentage: number;
   release_date: string;
   engagement_start_date: string;
-  engagement_complete: boolean;
-  weekly_validation: boolean;
-  created_at: string;
-  updated_at: string;
   profile: {
     id: string;
     employee_id: string;
     first_name: string;
     last_name: string;
-    current_designation: string;
   };
   bill_type: {
     id: string;
@@ -32,9 +28,6 @@ interface WeeklyValidationData {
   project: {
     id: string;
     project_name: string;
-    project_manager: string;
-    client_name: string;
-    budget: number;
   } | null;
 }
 
@@ -55,6 +48,7 @@ interface WeeklyValidationTableEditRowProps {
   onSave: () => void;
   onCancel: () => void;
   isLoading: boolean;
+  showBulkSelection?: boolean;
 }
 
 export const WeeklyValidationTableEditRow: React.FC<WeeklyValidationTableEditRowProps> = ({
@@ -64,86 +58,90 @@ export const WeeklyValidationTableEditRow: React.FC<WeeklyValidationTableEditRow
   onSave,
   onCancel,
   isLoading,
+  showBulkSelection = false,
 }) => {
   return (
-    <TableRow>
+    <TableRow className="h-10 bg-muted/30">
+      {showBulkSelection && (
+        <TableCell className="py-1 px-2">
+          {/* Empty cell for bulk selection column during edit */}
+        </TableCell>
+      )}
       <TableCell className="py-1 px-2">
-        {/* Static employee display */}
-        <div className="flex flex-col">
-          <span className="font-medium text-xs">
-            {item.profile.first_name} {item.profile.last_name}
-          </span>
-          <span className="text-xs text-muted-foreground">
-            {item.profile.employee_id}
-          </span>
-        </div>
-      </TableCell>
-      <TableCell className="py-1 px-2">
-        <div className="w-full max-w-[110px]">
-          <BillTypeCombobox
-            value={editData.billTypeId}
-            onValueChange={(value) => onEditDataChange({ billTypeId: value })}
-            placeholder="Select..."
-          />
-        </div>
-      </TableCell>
-      <TableCell className="py-1 px-2">
-        <div className="w-full max-w-[120px]">
-          <ProjectCombobox
-            value={editData.projectId || undefined}
-            onValueChange={(value) => onEditDataChange({ projectId: value })}
-            placeholder="Select..."
-          />
-        </div>
-      </TableCell>
-      <TableCell className="py-1 px-2 w-20">
-        <Input
-          type="number"
-          min="1"
-          max="100"
-          value={editData.engagementPercentage}
-          onChange={(e) => onEditDataChange({ engagementPercentage: Number(e.target.value) })}
-          className="w-14 h-7 text-xs px-1"
+        <ProfileSelect
+          value={editData.profileId}
+          onChange={(value) => onEditDataChange({ profileId: value })}
+          placeholder="Select employee..."
+          disabled={isLoading}
         />
       </TableCell>
-      <TableCell className="py-1 px-2 w-20">
+      <TableCell className="py-1 px-2">
+        <BillTypeSelect
+          value={editData.billTypeId}
+          onChange={(value) => onEditDataChange({ billTypeId: value })}
+          placeholder="Select bill type..."
+          disabled={isLoading}
+        />
+      </TableCell>
+      <TableCell className="py-1 px-2">
+        <ProjectSelect
+          value={editData.projectId}
+          onChange={(value) => onEditDataChange({ projectId: value })}
+          placeholder="Select project..."
+          disabled={isLoading}
+        />
+      </TableCell>
+      <TableCell className="py-1 px-2">
         <Input
           type="number"
+          value={editData.engagementPercentage}
+          onChange={(e) => onEditDataChange({ engagementPercentage: parseInt(e.target.value) || 0 })}
           min="0"
           max="100"
-          value={editData.billingPercentage}
-          onChange={(e) => onEditDataChange({ billingPercentage: Number(e.target.value) })}
-          className="w-14 h-7 text-xs px-1"
+          className="h-7 text-xs"
+          disabled={isLoading}
         />
       </TableCell>
       <TableCell className="py-1 px-2">
-        <div className="w-full max-w-[240px]">
-          <DatePicker
-            value={editData.engagementStartDate}
-            onChange={(value) => onEditDataChange({ engagementStartDate: value })}
-            placeholder="Select date"
-          />
-        </div>
+        <Input
+          type="number"
+          value={editData.billingPercentage}
+          onChange={(e) => onEditDataChange({ billingPercentage: parseInt(e.target.value) || 0 })}
+          min="0"
+          max="100"
+          className="h-7 text-xs"
+          disabled={isLoading}
+        />
       </TableCell>
       <TableCell className="py-1 px-2">
-        <div className="w-full max-w-[240px]">
-          <DatePicker
-            value={editData.releaseDate}
-            onChange={(value) => onEditDataChange({ releaseDate: value })}
-            placeholder="Select date"
-          />
-        </div>
+        <Input
+          type="date"
+          value={editData.engagementStartDate}
+          onChange={(e) => onEditDataChange({ engagementStartDate: e.target.value })}
+          className="h-7 text-xs"
+          disabled={isLoading}
+        />
+      </TableCell>
+      <TableCell className="py-1 px-2">
+        <Input
+          type="date"
+          value={editData.releaseDate}
+          onChange={(e) => onEditDataChange({ releaseDate: e.target.value })}
+          className="h-7 text-xs"
+          disabled={isLoading}
+        />
       </TableCell>
       <TableCell className="py-1 px-2">
         <div className="flex items-center gap-1">
           <Button
-            variant="ghost"
+            variant="outline"
             size="sm"
             onClick={onSave}
             disabled={isLoading}
             className="h-6 w-6 p-0"
+            title="Save changes"
           >
-            <Check className="h-3 w-3" />
+            <Save className="h-3 w-3" />
           </Button>
           <Button
             variant="ghost"
@@ -151,6 +149,7 @@ export const WeeklyValidationTableEditRow: React.FC<WeeklyValidationTableEditRow
             onClick={onCancel}
             disabled={isLoading}
             className="h-6 w-6 p-0"
+            title="Cancel edit"
           >
             <X className="h-3 w-3" />
           </Button>
