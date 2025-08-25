@@ -6,6 +6,8 @@ import { ResourcePlanningTableRow } from './ResourcePlanningTableRow';
 import { ResourcePlanningPagination } from './ResourcePlanningPagination';
 import { BulkActionsToolbar } from './BulkActionsToolbar';
 import { useBulkSelection } from '@/hooks/use-bulk-selection';
+import { useConfirmationDialog } from '@/hooks/use-confirmation-dialog';
+import { ConfirmationDialog } from '@/components/ui/confirmation-dialog';
 
 interface PlannedResourcesTabProps {
   searchQuery: string;
@@ -50,6 +52,12 @@ export const PlannedResourcesTab: React.FC<PlannedResourcesTabProps> = ({
     setSortBy,
     sortOrder,
     setSortOrder,
+    bulkComplete,
+    bulkDelete,
+    bulkCopy,
+    isBulkCompleting,
+    isBulkDeleting,
+    isBulkCopying,
   } = resourcePlanningState;
 
   // Bulk selection
@@ -64,6 +72,9 @@ export const PlannedResourcesTab: React.FC<PlannedResourcesTabProps> = ({
     selectedCount
   } = useBulkSelection(data);
 
+  // Confirmation dialog
+  const { isOpen, config, showConfirmation, hideConfirmation, handleConfirm } = useConfirmationDialog();
+
   const handleSort = (column: string) => {
     if (sortBy === column) {
       setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
@@ -73,20 +84,46 @@ export const PlannedResourcesTab: React.FC<PlannedResourcesTabProps> = ({
     }
   };
 
-  // Placeholder bulk operations
   const handleBulkComplete = () => {
-    console.log('Bulk complete for items:', selectedItems);
-    // TODO: Implement bulk complete operation
+    showConfirmation({
+      title: 'Mark Engagements as Complete',
+      description: `Are you sure you want to mark ${selectedCount} engagement${selectedCount !== 1 ? 's' : ''} as complete? This action cannot be undone.`,
+      confirmText: 'Complete',
+      cancelText: 'Cancel',
+      variant: 'default',
+      onConfirm: () => {
+        bulkComplete(selectedItems);
+        clearSelection();
+      }
+    });
   };
 
   const handleBulkDelete = () => {
-    console.log('Bulk delete for items:', selectedItems);
-    // TODO: Implement bulk delete operation
+    showConfirmation({
+      title: 'Delete Resource Assignments',
+      description: `Are you sure you want to delete ${selectedCount} resource assignment${selectedCount !== 1 ? 's' : ''}? This action cannot be undone.`,
+      confirmText: 'Delete',
+      cancelText: 'Cancel',
+      variant: 'destructive',
+      onConfirm: () => {
+        bulkDelete(selectedItems);
+        clearSelection();
+      }
+    });
   };
 
   const handleBulkCopy = () => {
-    console.log('Bulk copy for items:', selectedItems);
-    // TODO: Implement bulk copy operation
+    showConfirmation({
+      title: 'Copy Resource Assignments',
+      description: `This will create ${selectedCount} new resource assignment${selectedCount !== 1 ? 's' : ''} with the same information. You can edit them after creation.`,
+      confirmText: 'Copy',
+      cancelText: 'Cancel',
+      variant: 'default',
+      onConfirm: () => {
+        bulkCopy(selectedItems);
+        clearSelection();
+      }
+    });
   };
 
   if (isLoading) {
@@ -154,6 +191,17 @@ export const PlannedResourcesTab: React.FC<PlannedResourcesTabProps> = ({
           )}
         </>
       )}
+
+      <ConfirmationDialog
+        isOpen={isOpen}
+        onClose={hideConfirmation}
+        onConfirm={handleConfirm}
+        title={config?.title || ''}
+        description={config?.description || ''}
+        confirmText={config?.confirmText}
+        cancelText={config?.cancelText}
+        variant={config?.variant}
+      />
     </div>
   );
 };
