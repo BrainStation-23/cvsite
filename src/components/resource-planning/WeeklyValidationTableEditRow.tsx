@@ -2,6 +2,7 @@ import React from 'react';
 import { TableCell, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Checkbox } from '@/components/ui/checkbox';
 import BillTypeCombobox from './BillTypeCombobox';
 import { ProjectCombobox } from '@/components/projects/ProjectCombobox';
 import DatePicker from '@/components/admin/user/DatePicker';
@@ -55,6 +56,10 @@ interface WeeklyValidationTableEditRowProps {
   onSave: () => void;
   onCancel: () => void;
   isLoading: boolean;
+  // Bulk selection props
+  showBulkSelection?: boolean;
+  isSelected?: boolean;
+  onSelect?: (id: string, selected: boolean) => void;
 }
 
 export const WeeklyValidationTableEditRow: React.FC<WeeklyValidationTableEditRowProps> = ({
@@ -64,9 +69,20 @@ export const WeeklyValidationTableEditRow: React.FC<WeeklyValidationTableEditRow
   onSave,
   onCancel,
   isLoading,
+  showBulkSelection = false,
+  isSelected = false,
+  onSelect,
 }) => {
   return (
     <TableRow>
+      {showBulkSelection && (
+        <TableCell className="py-1 px-2">
+          <Checkbox
+            checked={isSelected}
+            onCheckedChange={(checked) => onSelect?.(item.id, !!checked)}
+          />
+        </TableCell>
+      )}
       <TableCell className="py-1 px-2">
         {/* Static employee display */}
         <div className="flex flex-col">

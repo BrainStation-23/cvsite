@@ -3,7 +3,8 @@ import React from 'react';
 import { TableCell, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { CheckCircle2, Edit2, CheckCircle, Copy } from 'lucide-react';
+import { Checkbox } from '@/components/ui/checkbox';
+import { CheckCircle2, Edit2, CheckCircle, Copy, Trash2 } from 'lucide-react';
 import { format } from 'date-fns';
 import { useConfirmationDialog } from '@/hooks/use-confirmation-dialog';
 import { useCompleteEngagementDialog } from '@/hooks/use-complete-engagement-dialog';
@@ -66,6 +67,10 @@ interface WeeklyValidationTableRowProps {
   onSaveEdit: () => void;
   onEditDataChange: (data: Partial<EditFormData>) => void;
   editLoading: boolean;
+  // Bulk selection props
+  showBulkSelection?: boolean;
+  isSelected?: boolean;
+  onSelect?: (id: string, selected: boolean) => void;
 }
 
 export const WeeklyValidationTableRow: React.FC<WeeklyValidationTableRowProps> = ({ 
@@ -79,6 +84,9 @@ export const WeeklyValidationTableRow: React.FC<WeeklyValidationTableRowProps> =
   onSaveEdit,
   onEditDataChange,
   editLoading,
+  showBulkSelection = false,
+  isSelected = false,
+  onSelect,
 }) => {
   const { isOpen, config, showConfirmation, hideConfirmation, handleConfirm } = useConfirmationDialog();
   const { 
@@ -88,7 +96,7 @@ export const WeeklyValidationTableRow: React.FC<WeeklyValidationTableRowProps> =
     hideCompleteDialog, 
     handleConfirm: handleCompleteConfirm 
   } = useCompleteEngagementDialog();
-  const { updateResourcePlanning, createResourcePlanning, isUpdating, isCreating } = useResourcePlanningOperations();
+  const { updateResourcePlanning, createResourcePlanning, deleteResourcePlanning, isUpdating, isCreating, isDeleting } = useResourcePlanningOperations();
 
   const handleValidateClick = () => {
     showConfirmation({
@@ -144,6 +152,17 @@ export const WeeklyValidationTableRow: React.FC<WeeklyValidationTableRowProps> =
     });
   };
 
+  const handleDeleteAssignment = () => {
+    showConfirmation({
+      title: 'Delete Resource Assignment',
+      description: `Are you sure you want to delete this resource assignment for ${item.profile.first_name} ${item.profile.last_name}? This action cannot be undone.`,
+      confirmText: 'Delete',
+      cancelText: 'Cancel',
+      variant: 'destructive',
+      onConfirm: () => deleteResourcePlanning(item.id)
+    });
+  };
+
   // If this row is being edited, show the edit row
   if (isEditing && editData) {
     return (
@@ -154,6 +173,9 @@ export const WeeklyValidationTableRow: React.FC<WeeklyValidationTableRowProps> =
         onSave={onSaveEdit}
         onCancel={onCancelEdit}
         isLoading={editLoading}
+        showBulkSelection={showBulkSelection}
+        isSelected={isSelected}
+        onSelect={onSelect}
       />
     );
   }
@@ -161,6 +183,15 @@ export const WeeklyValidationTableRow: React.FC<WeeklyValidationTableRowProps> =
   return (
     <>
       <TableRow className="h-10">
+        {showBulkSelection && (
+          <TableCell className="py-1 px-2">
+            <Checkbox
+              checked={isSelected}
+              onCheckedChange={(checked) => onSelect?.(item.id, !!checked)}
+            />
+          </TableCell>
+        )}
+        
         <TableCell className="py-1 px-2">
           <div className="flex flex-col">
             <span className="font-medium text-xs">
@@ -171,6 +202,7 @@ export const WeeklyValidationTableRow: React.FC<WeeklyValidationTableRowProps> =
             </span>
           </div>
         </TableCell>
+        
         <TableCell className="py-1 px-2">
           {item.bill_type ? (
             <Badge variant="secondary" className="text-xs">{item.bill_type.name}</Badge>
@@ -178,6 +210,7 @@ export const WeeklyValidationTableRow: React.FC<WeeklyValidationTableRowProps> =
             <span className="text-muted-foreground text-xs">Not specified</span>
           )}
         </TableCell>
+        
         <TableCell className="py-1 px-2">
           {item.project ? (
             <div className="space-y-1">
@@ -206,12 +239,15 @@ export const WeeklyValidationTableRow: React.FC<WeeklyValidationTableRowProps> =
             <span className="text-muted-foreground text-xs">Not assigned</span>
           )}
         </TableCell>
+        
         <TableCell className="py-1 px-2">
           <Badge variant="outline" className="text-xs">{item.engagement_percentage}%</Badge>
         </TableCell>
+        
         <TableCell className="py-1 px-2">
           <Badge variant="outline" className="text-xs">{item.billing_percentage || 0}%</Badge>
         </TableCell>
+        
         <TableCell className="py-1 px-2 text-xs">
           {item.engagement_start_date ? (
             format(new Date(item.engagement_start_date), 'MMM dd, yyyy')
@@ -219,6 +255,7 @@ export const WeeklyValidationTableRow: React.FC<WeeklyValidationTableRowProps> =
             <span className="text-muted-foreground">Not set</span>
           )}
         </TableCell>
+        
         <TableCell className="py-1 px-2 text-xs">
           {item.release_date ? (
             format(new Date(item.release_date), 'MMM dd, yyyy')
@@ -226,6 +263,7 @@ export const WeeklyValidationTableRow: React.FC<WeeklyValidationTableRowProps> =
             <span className="text-muted-foreground">Not set</span>
           )}
         </TableCell>
+        
         <TableCell className="py-1 px-2">
           <div className="flex items-center gap-1">
             <Button
@@ -267,6 +305,16 @@ export const WeeklyValidationTableRow: React.FC<WeeklyValidationTableRowProps> =
               title="Duplicate assignment"
             >
               <Copy className="h-3 w-3" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleDeleteAssignment}
+              disabled={isDeleting || editLoading}
+              className="h-6 w-6 p-0 text-red-600 hover:text-red-700"
+              title="Delete assignment"
+            >
+              <Trash2 className="h-3 w-3" />
             </Button>
           </div>
         </TableCell>

@@ -2,7 +2,8 @@ import React from 'react';
 import { TableCell, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Edit2, Trash2, CheckCircle, Copy } from 'lucide-react';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Edit2, Trash2, CheckCircle, Copy, XCircle } from 'lucide-react';
 import { format } from 'date-fns';
 import { useResourcePlanningOperations } from '@/hooks/use-resource-planning-operations';
 import { useConfirmationDialog } from '@/hooks/use-confirmation-dialog';
@@ -19,6 +20,7 @@ interface ResourcePlanningData {
   release_date: string;
   engagement_start_date: string;
   engagement_complete: boolean;
+  weekly_validation: boolean;
   created_at: string;
   updated_at: string;
   profile: {
@@ -62,6 +64,10 @@ interface ResourcePlanningTableRowProps {
   onSaveEdit: () => void;
   onEditDataChange: (data: Partial<EditFormData>) => void;
   editLoading: boolean;
+  // Bulk selection props
+  showBulkSelection?: boolean;
+  isSelected?: boolean;
+  onSelect?: (id: string, selected: boolean) => void;
 }
 
 export const ResourcePlanningTableRow: React.FC<ResourcePlanningTableRowProps> = ({ 
@@ -73,6 +79,9 @@ export const ResourcePlanningTableRow: React.FC<ResourcePlanningTableRowProps> =
   onSaveEdit,
   onEditDataChange,
   editLoading,
+  showBulkSelection = false,
+  isSelected = false,
+  onSelect,
 }) => {
   const { updateResourcePlanning, deleteResourcePlanning, createResourcePlanning, isDeleting, isUpdating, isCreating } = useResourcePlanningOperations();
   const { isOpen, config, showConfirmation, hideConfirmation, handleConfirm } = useConfirmationDialog();
@@ -114,6 +123,22 @@ export const ResourcePlanningTableRow: React.FC<ResourcePlanningTableRowProps> =
     });
   };
 
+  const handleInvalidateAssignment = () => {
+    showConfirmation({
+      title: 'Invalidate Resource Assignment',
+      description: 'Are you sure you want to invalidate this resource assignment? This will remove its weekly validation status.',
+      confirmText: 'Invalidate',
+      cancelText: 'Cancel',
+      variant: 'default',
+      onConfirm: () => {
+        updateResourcePlanning({ 
+          id: item.id, 
+          updates: { weekly_validation: false } 
+        });
+      }
+    });
+  };
+
   const handleDuplicateAssignment = () => {
     showConfirmation({
       title: 'Duplicate Resource Assignment',
@@ -148,24 +173,47 @@ export const ResourcePlanningTableRow: React.FC<ResourcePlanningTableRowProps> =
         onSave={onSaveEdit}
         onCancel={onCancelEdit}
         isLoading={editLoading}
+        showBulkSelection={showBulkSelection}
+        isSelected={isSelected}
+        onSelect={onSelect}
       />
     );
   }
 
+  // Apply visual styling for validated rows
+  const rowClassName = `h-10 ${item.weekly_validation ? 'bg-green-50 border-l-4 border-l-green-500' : ''}`;
+
   // Otherwise show the normal read-only row
   return (
     <>
-      <TableRow className="h-10">
+      <TableRow className={rowClassName}>
+        {showBulkSelection && (
+          <TableCell className="py-1 px-2">
+            <Checkbox
+              checked={isSelected}
+              onCheckedChange={(checked) => onSelect?.(item.id, !!checked)}
+            />
+          </TableCell>
+        )}
+        
         <TableCell className="py-1 px-2">
           <div className="flex flex-col">
-            <span className="font-medium text-xs">
-              {item.profile.first_name} {item.profile.last_name}
-            </span>
+            <div className="flex items-center gap-2">
+              <span className="font-medium text-xs">
+                {item.profile.first_name} {item.profile.last_name}
+              </span>
+              {item.weekly_validation && (
+                <Badge variant="secondary" className="text-[10px] px-1.5 py-0 h-4 bg-green-100 text-green-700">
+                  Validated
+                </Badge>
+              )}
+            </div>
             <span className="text-xs text-muted-foreground">
               {item.profile.employee_id}
             </span>
           </div>
         </TableCell>
+        
         <TableCell className="py-1 px-2">
           {item.bill_type ? (
             <Badge variant="secondary" className="text-xs">{item.bill_type.name}</Badge>
@@ -173,6 +221,7 @@ export const ResourcePlanningTableRow: React.FC<ResourcePlanningTableRowProps> =
             <span className="text-muted-foreground text-xs">Not specified</span>
           )}
         </TableCell>
+        
         <TableCell className="py-1 px-2">
           {item.project ? (
             <div className="space-y-1">
@@ -201,12 +250,15 @@ export const ResourcePlanningTableRow: React.FC<ResourcePlanningTableRowProps> =
             <span className="text-muted-foreground text-xs">Not assigned</span>
           )}
         </TableCell>
+        
         <TableCell className="py-1 px-2">
           <Badge variant="outline" className="text-xs">{item.engagement_percentage}%</Badge>
         </TableCell>
+        
         <TableCell className="py-1 px-2">
           <Badge variant="outline" className="text-xs">{item.billing_percentage || 0}%</Badge>
         </TableCell>
+        
         <TableCell className="py-1 px-2 text-xs">
           {item.engagement_start_date ? (
             format(new Date(item.engagement_start_date), 'MMM dd, yyyy')
@@ -214,6 +266,7 @@ export const ResourcePlanningTableRow: React.FC<ResourcePlanningTableRowProps> =
             <span className="text-muted-foreground">Not set</span>
           )}
         </TableCell>
+        
         <TableCell className="py-1 px-2 text-xs">
           {item.release_date ? (
             format(new Date(item.release_date), 'MMM dd, yyyy')
@@ -221,6 +274,7 @@ export const ResourcePlanningTableRow: React.FC<ResourcePlanningTableRowProps> =
             <span className="text-muted-foreground">Not set</span>
           )}
         </TableCell>
+        
         <TableCell className="py-1 px-2">
           <div className="flex items-center gap-1">
             <Button
@@ -242,6 +296,21 @@ export const ResourcePlanningTableRow: React.FC<ResourcePlanningTableRowProps> =
             >
               <CheckCircle className="h-3 w-3 mr-1" />
               Complete
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleInvalidateAssignment}
+              disabled={!item.weekly_validation || isUpdating || editLoading}
+              className={`h-7 px-2 text-xs ${
+                item.weekly_validation 
+                  ? 'text-orange-700 border-orange-300 hover:bg-orange-50' 
+                  : 'text-muted-foreground border-muted'
+              }`}
+              title={item.weekly_validation ? "Invalidate assignment" : "Assignment not validated"}
+            >
+              <XCircle className="h-3 w-3 mr-1" />
+              Invalidate
             </Button>
             <Button
               variant="ghost"

@@ -1,6 +1,7 @@
 import { useState, useCallback, useMemo } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
 
 interface AdvancedFilters {
   billTypeFilter: string | null;
@@ -29,6 +30,9 @@ const defaultAdvancedFilters: AdvancedFilters = {
 };
 
 export function usePlannedResourcesTab(isActive: boolean = true) {
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+
   // Basic filters
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedSbu, setSelectedSbu] = useState<string | null>(null);
@@ -62,16 +66,16 @@ export function usePlannedResourcesTab(isActive: boolean = true) {
   // Reset page when filters change
   const resetPage = useCallback(() => setCurrentPage(1), []);
 
-  // Memoized RPC parameters - now using UUIDs for ID-based filters
+  // Memoized RPC parameters
   const rpcParams = useMemo(() => ({
     search_query: searchQuery || null,
     page_number: currentPage,
     items_per_page: itemsPerPage,
     sort_by: sortBy,
     sort_order: sortOrder,
-    sbu_filter: selectedSbu, // Pass UUID directly
-    manager_filter: selectedManager, // Pass UUID directly
-    bill_type_filter: advancedFilters.billTypeFilter, // Pass UUID directly
+    sbu_filter: selectedSbu,
+    manager_filter: selectedManager,
+    bill_type_filter: advancedFilters.billTypeFilter,
     project_search: advancedFilters.projectSearch || null,
     min_engagement_percentage: advancedFilters.minEngagementPercentage,
     max_engagement_percentage: advancedFilters.maxEngagementPercentage,
@@ -128,7 +132,143 @@ export function usePlannedResourcesTab(isActive: boolean = true) {
         }
       };
     },
-    enabled: isActive, // Only run query when tab is active
+    enabled: isActive,
+  });
+
+  // Bulk completion mutation
+  const bulkCompletionMutation = useMutation({
+    mutationFn: async (resourcePlanningIds: string[]) => {
+      const { error } = await supabase
+        .from('resource_planning')
+        .update({ engagement_complete: true })
+        .in('id', resourcePlanningIds);
+
+      if (error) throw error;
+    },
+    onSuccess: (_, resourcePlanningIds) => {
+      queryClient.invalidateQueries({ queryKey: ['planned-resources-tab'] });
+      queryClient.invalidateQueries({ queryKey: ['weekly-validation-tab'] });
+      toast({
+        title: 'Success',
+        description: `${resourcePlanningIds.length} resource assignments marked as complete.`,
+      });
+    },
+    onError: (error: any) => {
+      console.error('Bulk completion error:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to mark resource assignments as complete.',
+        variant: 'destructive',
+      });
+    },
+  });
+
+  // Bulk deletion mutation
+  const bulkDeletionMutation = useMutation({
+    mutationFn: async (resourcePlanningIds: string[]) => {
+      const { error } = await supabase
+        .from('resource_planning')
+        .delete()
+        .in('id', resourcePlanningIds);
+
+      if (error) throw error;
+    },
+    onSuccess: (_, resourcePlanningIds) => {
+      queryClient.invalidateQueries({ queryKey: ['planned-resources-tab'] });
+      queryClient.invalidateQueries({ queryKey: ['weekly-validation-tab'] });
+      toast({
+        title: 'Success',
+        description: `${resourcePlanningIds.length} resource assignments deleted successfully.`,
+      });
+    },
+    onError: (error: any) => {
+      console.error('Bulk deletion error:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to delete resource assignments.',
+        variant: 'destructive',
+      });
+    },
+  });
+
+  // Bulk invalidation mutation
+  const bulkInvalidationMutation = useMutation({
+    mutationFn: async (resourcePlanningIds: string[]) => {
+      const { error } = await supabase
+        .from('resource_planning')
+        .update({ weekly_validation: false })
+        .in('id', resourcePlanningIds);
+
+      if (error) throw error;
+    },
+    onSuccess: (_, resourcePlanningIds) => {
+      queryClient.invalidateQueries({ queryKey: ['planned-resources-tab'] });
+      queryClient.invalidateQueries({ queryKey: ['weekly-validation-tab'] });
+      toast({
+        title: 'Success',
+        description: `${resourcePlanningIds.length} resource assignments invalidated successfully.`,
+      });
+    },
+    onError: (error: any) => {
+      console.error('Bulk invalidation error:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to invalidate resource assignments.',
+        variant: 'destructive',
+      });
+    },
+  });
+
+  // Bulk copy mutation
+  const bulkCopyMutation = useMutation({
+    mutationFn: async (resourcePlanningIds: string[]) => {
+      // First fetch the original records
+      const { data: originalRecords, error: fetchError } = await supabase
+        .from('resource_planning')
+        .select('*')
+        .in('id', resourcePlanningIds);
+
+      if (fetchError) throw fetchError;
+
+      if (!originalRecords || originalRecords.length === 0) {
+        throw new Error('No records found to copy');
+      }
+
+      // Create new records based on the original ones
+      const recordsToCopy = originalRecords.map(record => ({
+        profile_id: record.profile_id,
+        project_id: record.project_id,
+        bill_type_id: record.bill_type_id,
+        engagement_percentage: record.engagement_percentage,
+        billing_percentage: record.billing_percentage,
+        engagement_start_date: record.engagement_start_date,
+        release_date: record.release_date,
+        engagement_complete: false,
+        weekly_validation: false,
+      }));
+
+      const { error: insertError } = await supabase
+        .from('resource_planning')
+        .insert(recordsToCopy);
+
+      if (insertError) throw insertError;
+    },
+    onSuccess: (_, resourcePlanningIds) => {
+      queryClient.invalidateQueries({ queryKey: ['planned-resources-tab'] });
+      queryClient.invalidateQueries({ queryKey: ['weekly-validation-tab'] });
+      toast({
+        title: 'Success',
+        description: `${resourcePlanningIds.length} resource assignments copied successfully.`,
+      });
+    },
+    onError: (error: any) => {
+      console.error('Bulk copy error:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to copy resource assignments.',
+        variant: 'destructive',
+      });
+    },
   });
 
   return {
@@ -150,7 +290,7 @@ export function usePlannedResourcesTab(isActive: boolean = true) {
     // Data and pagination
     data: data?.resource_planning || [],
     pagination: data?.pagination,
-    isLoading: isActive ? isLoading : false, // Only show loading when active
+    isLoading: isActive ? isLoading : false,
     error,
     refetch,
     currentPage,
@@ -160,5 +300,15 @@ export function usePlannedResourcesTab(isActive: boolean = true) {
     setSortBy,
     sortOrder,
     setSortOrder,
+    
+    // Bulk operations
+    bulkComplete: bulkCompletionMutation.mutate,
+    bulkDelete: bulkDeletionMutation.mutate,
+    bulkInvalidate: bulkInvalidationMutation.mutate,
+    bulkCopy: bulkCopyMutation.mutate,
+    isBulkCompleting: bulkCompletionMutation.isPending,
+    isBulkDeleting: bulkDeletionMutation.isPending,
+    isBulkInvalidating: bulkInvalidationMutation.isPending,
+    isBulkCopying: bulkCopyMutation.isPending,
   };
 }
