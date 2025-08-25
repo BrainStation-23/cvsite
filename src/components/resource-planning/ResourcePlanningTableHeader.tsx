@@ -40,10 +40,7 @@ export const ResourcePlanningTableHeader: React.FC<ResourcePlanningTableHeaderPr
             <Checkbox
               checked={isAllSelected}
               ref={(ref) => {
-                if (ref) {
-                  const checkbox = ref as HTMLInputElement;
-                  checkbox.indeterminate = isIndeterminate;
-                }
+                if (ref) ref.indeterminate = isIndeterminate;
               }}
               onCheckedChange={(checked) => onSelectAll?.(checked as boolean)}
               aria-label="Select all"
