@@ -1,12 +1,12 @@
 import React from 'react';
 import { TableCell, TableRow } from '@/components/ui/table';
-import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
-import BillTypeCombobox from './BillTypeCombobox';
-import { ProjectCombobox } from '@/components/projects/ProjectCombobox';
-import DatePicker from '@/components/admin/user/DatePicker';
-import { Check, X } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
+import { format } from 'date-fns';
 
 interface ResourcePlanningData {
   id: string;
@@ -16,6 +16,7 @@ interface ResourcePlanningData {
   release_date: string;
   engagement_start_date: string;
   engagement_complete: boolean;
+  weekly_validation: boolean;
   created_at: string;
   updated_at: string;
   profile: {
@@ -35,7 +36,9 @@ interface ResourcePlanningData {
     project_manager: string;
     client_name: string;
     budget: number;
-  };
+    project_level?: string;
+    project_type_name?: string;
+  } | null;
 }
 
 interface EditFormData {
@@ -50,7 +53,7 @@ interface EditFormData {
 
 interface ResourcePlanningTableEditRowProps {
   item: ResourcePlanningData;
-  editData: EditFormData;
+  editData: EditFormData | null;
   onEditDataChange: (data: Partial<EditFormData>) => void;
   onSave: () => void;
   onCancel: () => void;
@@ -72,8 +75,11 @@ export const ResourcePlanningTableEditRow: React.FC<ResourcePlanningTableEditRow
   isSelected = false,
   onSelect,
 }) => {
+  // Apply visual styling for validated rows (same as the regular row)
+  const rowClassName = `h-10 ${item.weekly_validation ? 'bg-green-50 border-l-4 border-l-green-500' : ''}`;
+
   return (
-    <TableRow>
+    <TableRow className={rowClassName}>
       {showBulkSelection && (
         <TableCell className="py-1 px-2">
           <Checkbox
@@ -82,92 +88,105 @@ export const ResourcePlanningTableEditRow: React.FC<ResourcePlanningTableEditRow
           />
         </TableCell>
       )}
+      
       <TableCell className="py-1 px-2">
-        {/* Static employee display */}
         <div className="flex flex-col">
-          <span className="font-medium text-xs">
-            {item.profile.first_name} {item.profile.last_name}
-          </span>
+          <div className="flex items-center gap-2">
+            <span className="font-medium text-xs">
+              {item.profile.first_name} {item.profile.last_name}
+            </span>
+            {item.weekly_validation && (
+              <Badge variant="secondary" className="text-[10px] px-1.5 py-0 h-4 bg-green-100 text-green-700">
+                Validated
+              </Badge>
+            )}
+          </div>
           <span className="text-xs text-muted-foreground">
             {item.profile.employee_id}
           </span>
         </div>
       </TableCell>
+      
       <TableCell className="py-1 px-2">
-        <div className="w-full max-w-[150px]">
-          <BillTypeCombobox
-            value={editData.billTypeId}
-            onValueChange={(value) => onEditDataChange({ billTypeId: value })}
-            placeholder="Select..."
-          />
-        </div>
+        <Input
+          type="text"
+          value={editData?.billTypeId || ''}
+          onChange={(e) => onEditDataChange({ billTypeId: e.target.value })}
+          className="text-xs h-7"
+        />
       </TableCell>
+      
       <TableCell className="py-1 px-2">
-        <div className="w-full max-w-[120px]">
-          <ProjectCombobox
-            value={editData.projectId || undefined}
-            onValueChange={(value) => onEditDataChange({ projectId: value })}
-            placeholder="Select..."
-          />
-        </div>
+        <Input
+          type="text"
+          value={editData?.projectId || ''}
+          onChange={(e) => onEditDataChange({ projectId: e.target.value })}
+          className="text-xs h-7"
+        />
       </TableCell>
-      <TableCell className="py-1 px-2 w-20">
+      
+      <TableCell className="py-1 px-2">
         <Input
           type="number"
-          min="1"
-          max="100"
-          value={editData.engagementPercentage}
+          value={editData?.engagementPercentage || 0}
           onChange={(e) => onEditDataChange({ engagementPercentage: Number(e.target.value) })}
-          className="w-14 h-7 text-xs px-1"
+          className="text-xs h-7"
         />
       </TableCell>
-      <TableCell className="py-1 px-2 w-20">
+      
+      <TableCell className="py-1 px-2">
         <Input
           type="number"
-          min="0"
-          max="100"
-          value={editData.billingPercentage}
+          value={editData?.billingPercentage || 0}
           onChange={(e) => onEditDataChange({ billingPercentage: Number(e.target.value) })}
-          className="w-14 h-7 text-xs px-1"
+          className="text-xs h-7"
         />
       </TableCell>
+      
       <TableCell className="py-1 px-2">
-        <div className="w-full max-w-[240px]">
-          <DatePicker
-            value={editData.engagementStartDate}
-            onChange={(value) => onEditDataChange({ engagementStartDate: value })}
-            placeholder="Select date"
-          />
-        </div>
+        <Input
+          type="date"
+          value={editData?.engagementStartDate || ''}
+          onChange={(e) => onEditDataChange({ engagementStartDate: e.target.value })}
+          className="text-xs h-7"
+        />
       </TableCell>
+      
       <TableCell className="py-1 px-2">
-        <div className="w-full max-w-[240px]">
-          <DatePicker
-            value={editData.releaseDate}
-            onChange={(value) => onEditDataChange({ releaseDate: value })}
-            placeholder="Select date"
-          />
-        </div>
+        <Input
+          type="date"
+          value={editData?.releaseDate || ''}
+          onChange={(e) => onEditDataChange({ releaseDate: e.target.value })}
+          className="text-xs h-7"
+        />
       </TableCell>
+      
       <TableCell className="py-1 px-2">
         <div className="flex items-center gap-1">
           <Button
-            variant="ghost"
+            variant="primary"
             size="sm"
             onClick={onSave}
             disabled={isLoading}
-            className="h-6 w-6 p-0"
+            className="h-7 px-2 text-xs"
           >
-            <Check className="h-3 w-3" />
+            {isLoading ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Saving...
+              </>
+            ) : (
+              'Save'
+            )}
           </Button>
           <Button
             variant="ghost"
             size="sm"
             onClick={onCancel}
             disabled={isLoading}
-            className="h-6 w-6 p-0"
+            className="h-7 px-2 text-xs"
           >
-            <X className="h-3 w-3" />
+            Cancel
           </Button>
         </div>
       </TableCell>

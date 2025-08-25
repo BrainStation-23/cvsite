@@ -1,4 +1,3 @@
-
 import { useState, useCallback, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -192,6 +191,34 @@ export function usePlannedResourcesTab(isActive: boolean = true) {
     },
   });
 
+  // Bulk invalidation mutation
+  const bulkInvalidationMutation = useMutation({
+    mutationFn: async (resourcePlanningIds: string[]) => {
+      const { error } = await supabase
+        .from('resource_planning')
+        .update({ weekly_validation: false })
+        .in('id', resourcePlanningIds);
+
+      if (error) throw error;
+    },
+    onSuccess: (_, resourcePlanningIds) => {
+      queryClient.invalidateQueries({ queryKey: ['planned-resources-tab'] });
+      queryClient.invalidateQueries({ queryKey: ['weekly-validation-tab'] });
+      toast({
+        title: 'Success',
+        description: `${resourcePlanningIds.length} resource assignments invalidated successfully.`,
+      });
+    },
+    onError: (error: any) => {
+      console.error('Bulk invalidation error:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to invalidate resource assignments.',
+        variant: 'destructive',
+      });
+    },
+  });
+
   // Bulk copy mutation
   const bulkCopyMutation = useMutation({
     mutationFn: async (resourcePlanningIds: string[]) => {
@@ -277,9 +304,11 @@ export function usePlannedResourcesTab(isActive: boolean = true) {
     // Bulk operations
     bulkComplete: bulkCompletionMutation.mutate,
     bulkDelete: bulkDeletionMutation.mutate,
+    bulkInvalidate: bulkInvalidationMutation.mutate,
     bulkCopy: bulkCopyMutation.mutate,
     isBulkCompleting: bulkCompletionMutation.isPending,
     isBulkDeleting: bulkDeletionMutation.isPending,
+    isBulkInvalidating: bulkInvalidationMutation.isPending,
     isBulkCopying: bulkCopyMutation.isPending,
   };
 }

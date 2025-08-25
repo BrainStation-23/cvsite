@@ -1,4 +1,3 @@
-
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -61,6 +60,36 @@ export const useResourcePlanningOperations = () => {
     },
   });
 
+  const invalidateResourcePlanning = useMutation({
+    mutationFn: async (id: string) => {
+      const { data, error } = await supabase
+        .from('resource_planning')
+        .update({ weekly_validation: false })
+        .eq('id', id)
+        .select()
+        .single();
+
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['planned-resources-tab'] });
+      queryClient.invalidateQueries({ queryKey: ['weekly-validation-tab'] });
+      queryClient.invalidateQueries({ queryKey: ['resource-calendar-data'] });
+      toast({
+        title: 'Success',
+        description: 'Resource assignment invalidated successfully.',
+      });
+    },
+    onError: () => {
+      toast({
+        title: 'Error',
+        description: 'Failed to invalidate resource assignment.',
+        variant: 'destructive',
+      });
+    },
+  });
+
   const deleteResourcePlanning = useMutation({
     mutationFn: async (id: string) => {
       const { error } = await supabase
@@ -91,9 +120,11 @@ export const useResourcePlanningOperations = () => {
   return {
     createResourcePlanning: createResourcePlanning.mutate,
     updateResourcePlanning: updateResourcePlanning.mutate,
+    invalidateResourcePlanning: invalidateResourcePlanning.mutate,
     deleteResourcePlanning: deleteResourcePlanning.mutate,
     isCreating: createResourcePlanning.isPending,
     isUpdating: updateResourcePlanning.isPending,
+    isInvalidating: invalidateResourcePlanning.isPending,
     isDeleting: deleteResourcePlanning.isPending,
   };
 };

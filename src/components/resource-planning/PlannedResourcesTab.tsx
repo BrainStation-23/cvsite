@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Table, TableBody } from '@/components/ui/table';
 import { ResourcePlanningTableHeader } from './ResourcePlanningTableHeader';
@@ -54,9 +53,11 @@ export const PlannedResourcesTab: React.FC<PlannedResourcesTabProps> = ({
     setSortOrder,
     bulkComplete,
     bulkDelete,
+    bulkInvalidate,
     bulkCopy,
     isBulkCompleting,
     isBulkDeleting,
+    isBulkInvalidating,
     isBulkCopying,
   } = resourcePlanningState;
 
@@ -112,6 +113,42 @@ export const PlannedResourcesTab: React.FC<PlannedResourcesTabProps> = ({
     });
   };
 
+  const handleBulkInvalidate = () => {
+    const validatedCount = selectedItems.filter(id => {
+      const item = data.find(d => d.id === id);
+      return item?.weekly_validation === true;
+    }).length;
+
+    if (validatedCount === 0) {
+      showConfirmation({
+        title: 'No Validated Assignments',
+        description: 'None of the selected assignments are currently validated.',
+        confirmText: 'OK',
+        cancelText: '',
+        variant: 'default',
+        onConfirm: () => {}
+      });
+      return;
+    }
+
+    showConfirmation({
+      title: 'Invalidate Resource Assignments',
+      description: `Are you sure you want to invalidate ${validatedCount} validated resource assignment${validatedCount !== 1 ? 's' : ''}? This will remove their weekly validation status.`,
+      confirmText: 'Invalidate',
+      cancelText: 'Cancel',
+      variant: 'default',
+      onConfirm: () => {
+        // Only invalidate the ones that are currently validated
+        const validatedIds = selectedItems.filter(id => {
+          const item = data.find(d => d.id === id);
+          return item?.weekly_validation === true;
+        });
+        bulkInvalidate(validatedIds);
+        clearSelection();
+      }
+    });
+  };
+
   const handleBulkCopy = () => {
     showConfirmation({
       title: 'Copy Resource Assignments',
@@ -134,6 +171,12 @@ export const PlannedResourcesTab: React.FC<PlannedResourcesTabProps> = ({
     );
   }
 
+  // Check if any selected items are validated to show the invalidate button
+  const hasValidatedSelection = selectedItems.some(id => {
+    const item = data.find(d => d.id === id);
+    return item?.weekly_validation === true;
+  });
+
   return (
     <div className="space-y-4">
       {data.length === 0 ? (
@@ -147,8 +190,10 @@ export const PlannedResourcesTab: React.FC<PlannedResourcesTabProps> = ({
               selectedCount={selectedCount}
               onBulkComplete={handleBulkComplete}
               onBulkDelete={handleBulkDelete}
+              onBulkInvalidate={handleBulkInvalidate}
               onBulkCopy={handleBulkCopy}
               onClearSelection={clearSelection}
+              showInvalidate={hasValidatedSelection}
             />
             
             <Table>
