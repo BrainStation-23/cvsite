@@ -38,6 +38,10 @@ import CVTemplatesPage from './pages/admin/cv-templates/CVTemplatesPage';
 import CVTemplateEditorPage from './pages/admin/cv-templates/CVTemplateEditorPage';
 import CVTemplateViewPage from './pages/admin/cv-templates/CVTemplateViewPage';
 import CVTemplateDocumentationPage from './pages/admin/cv-templates/CVTemplateDocumentationPage';
+import PIPInitiate from '@/pages/pip/PIPInitiate';
+import PIPList from '@/pages/pip/PIPList';
+import PIPDashboard from '@/pages/pip/PIPDashboard';
+import MySituation from '@/pages/pip/MySituation';
 import './App.css';
 
 // Create QueryClient instance outside component to prevent recreation
@@ -164,6 +168,60 @@ function App(): React.ReactElement {
                 </ProtectedRoute>
               }
             />
+            
+            {/* PIP Routes */}
+            {/* Admin-only PIP routes */}
+            <Route
+              path="/admin/pip/initiate"
+              element={
+                <ProtectedRoute allowedRoles={['admin']}>
+                  <PIPInitiate />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/pip/list"
+              element={
+                <ProtectedRoute allowedRoles={['admin']}>
+                  <PIPList />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/pip/dashboard"
+              element={
+                <ProtectedRoute allowedRoles={['admin']}>
+                  <PIPDashboard />
+                </ProtectedRoute>
+              }
+            />
+            
+            {/* My Situation - available for all roles */}
+            <Route
+              path="/admin/pip/my-situation"
+              element={
+                <ProtectedRoute allowedRoles={['admin']}>
+                  <MySituation />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/manager/pip/my-situation"
+              element={
+                <ProtectedRoute allowedRoles={['manager']}>
+                  <MySituation />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/employee/pip/my-situation"
+              element={
+                <ProtectedRoute allowedRoles={['employee']}>
+                  <MySituation />
+                </ProtectedRoute>
+              }
+            />
+
             <Route
               path="/admin/users"
               element={
