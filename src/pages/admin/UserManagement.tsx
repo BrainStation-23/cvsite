@@ -145,6 +145,10 @@ const UserManagement: React.FC = () => {
     }
   };
 
+  const handleRefreshUsersFromSync = () => {
+    fetchUsers();
+  };
+
   return (
     <DashboardLayout>
       <div className="flex justify-between items-center mb-6">
@@ -266,6 +270,8 @@ const UserManagement: React.FC = () => {
         isOpen={isSyncResultDialogOpen}
         onOpenChange={setIsSyncResultDialogOpen}
         syncResult={lastSyncResult}
+        onBulkUpload={bulkUpload}
+        onRefreshUsers={handleRefreshUsersFromSync}
       />
     </DashboardLayout>
   );
