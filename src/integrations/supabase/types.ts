@@ -1385,14 +1385,6 @@ export type Database = {
           project_name: string
         }[]
       }
-      get_employee_data: {
-        Args: { profile_uuid: string }
-        Returns: Json
-      }
-      get_employee_data_masked: {
-        Args: { profile_uuid: string }
-        Returns: Json
-      }
       get_employee_profiles: {
         Args: {
           achievement_filter?: string

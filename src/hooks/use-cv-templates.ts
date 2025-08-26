@@ -1,4 +1,3 @@
-
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -11,6 +10,13 @@ export interface CVTemplate {
   is_default: boolean;
   data_source_function: string;
   orientation: 'portrait' | 'landscape';
+  technical_skills_limit: number;
+  specialized_skills_limit: number;
+  experiences_limit: number;
+  education_limit: number;
+  trainings_limit: number;
+  achievements_limit: number;
+  projects_limit: number;
   created_at: string;
   updated_at: string;
 }
@@ -44,6 +50,13 @@ export const useCVTemplates = () => {
       is_default?: boolean;
       data_source_function?: string;
       orientation?: 'portrait' | 'landscape';
+      technical_skills_limit?: number;
+      specialized_skills_limit?: number;
+      experiences_limit?: number;
+      education_limit?: number;
+      trainings_limit?: number;
+      achievements_limit?: number;
+      projects_limit?: number;
     }) => {
       const { data, error } = await supabase
         .from('cv_templates')
@@ -52,7 +65,14 @@ export const useCVTemplates = () => {
           enabled: template.enabled ?? true,
           is_default: template.is_default ?? false,
           data_source_function: template.data_source_function ?? 'get_employee_data_masked',
-          orientation: template.orientation ?? 'portrait'
+          orientation: template.orientation ?? 'portrait',
+          technical_skills_limit: template.technical_skills_limit ?? 5,
+          specialized_skills_limit: template.specialized_skills_limit ?? 5,
+          experiences_limit: template.experiences_limit ?? 5,
+          education_limit: template.education_limit ?? 5,
+          trainings_limit: template.trainings_limit ?? 5,
+          achievements_limit: template.achievements_limit ?? 5,
+          projects_limit: template.projects_limit ?? 5,
         }])
         .select()
         .single();
@@ -83,6 +103,13 @@ export const useCVTemplates = () => {
       is_default?: boolean;
       data_source_function?: string;
       orientation?: 'portrait' | 'landscape';
+      technical_skills_limit?: number;
+      specialized_skills_limit?: number;
+      experiences_limit?: number;
+      education_limit?: number;
+      trainings_limit?: number;
+      achievements_limit?: number;
+      projects_limit?: number;
     }) => {
       const { data, error } = await supabase
         .from('cv_templates')
