@@ -45,7 +45,13 @@ export class EnhancedProjectsApiService {
     }
 
     console.log('Enhanced search_projects RPC response:', data);
-    return data as ProjectsResponse;
+    
+    // Proper type conversion with validation
+    if (!data || typeof data !== 'object') {
+      throw new Error('Invalid response from search_projects function');
+    }
+    
+    return data as unknown as ProjectsResponse;
   }
 
   // Get unique project types for filtering
@@ -158,5 +164,30 @@ export class EnhancedProjectsApiService {
       }
       throw error;
     }
+  }
+
+  // Bulk sync projects from Odoo
+  static async bulkSyncOdooProjects(projectsData: any[]): Promise<any> {
+    const { data, error } = await supabase.rpc('bulk_sync_odoo_projects', {
+      projects_data: projectsData
+    });
+
+    if (error) {
+      console.error('Bulk sync error:', error);
+      throw error;
+    }
+
+    return data as unknown as {
+      stats: {
+        total_processed: number;
+        inserted: number;
+        updated: number;
+        skipped: number;
+      };
+      error_projects: Array<{
+        projectName: string;
+        error: string;
+      }>;
+    };
   }
 }
