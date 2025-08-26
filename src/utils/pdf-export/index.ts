@@ -50,7 +50,7 @@ export async function exportCVAsPDF(
 
     progressTracker.startStep('finalize');
     await pdfEngine.generatePDF(processedHTML, {
-      filename: filename || `${employeeData.employee_id || 'employee'}_cv`,
+      filename: `${employeeData.employee_id}_cv`,
       includeStandardCSS: true,
       validateTemplate: true,
       pageSize: 'a4'
