@@ -1676,9 +1676,17 @@ export type Database = {
       }
       search_projects: {
         Args: {
+          budget_max?: number
+          budget_min?: number
+          created_after?: string
+          created_before?: string
           items_per_page?: number
           page_number?: number
+          project_level_filter?: string
+          project_manager_filter?: string
+          project_type_filter?: string
           search_query?: string
+          show_inactive_projects?: boolean
           sort_by?: string
           sort_order?: string
         }
