@@ -13,7 +13,7 @@ export async function exportCVAsPDF(
   templateId: string,
   options: PDFExportOptions = {}
 ): Promise<void> {
-  const { filename, onProgress } = options;
+  const { onProgress } = options;
   const progressTracker = new ProgressTracker(onProgress);
 
   try {
@@ -50,7 +50,7 @@ export async function exportCVAsPDF(
 
     progressTracker.startStep('finalize');
     await pdfEngine.generatePDF(processedHTML, {
-      filename: `${employeeData.employee_id}_cv`,
+      filename: `${employeeData.employee_id}_CV`,
       includeStandardCSS: true,
       validateTemplate: true,
       pageSize: 'a4'

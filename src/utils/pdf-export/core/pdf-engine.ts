@@ -68,7 +68,6 @@ export class PDFEngine {
       includeStandardCSS = true,
       validateTemplate = true,
       pageSize = 'a4',
-      margin = 15
     } = options;
 
     // Validate template if requested
