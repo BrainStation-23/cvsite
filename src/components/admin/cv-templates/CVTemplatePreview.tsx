@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { useTemplateEngine } from '@/hooks/use-template-engine';
@@ -38,10 +37,10 @@ export const CVTemplatePreview: React.FC<CVTemplatePreviewProps> = ({
   // Get current template
   const currentTemplate = templates.find(t => t.id === templateId);
 
-  // Fetch employee data using dynamic data source when employee or template changes
+  // Fetch employee data using fetchAllData to apply template limits
   useEffect(() => {
     const fetchEmployeeData = async () => {
-      if (!selectedEmployeeId || !currentTemplate) {
+      if (!selectedEmployeeId || !templateId) {
         setEmployeeData(null);
         return;
       }
@@ -50,10 +49,10 @@ export const CVTemplatePreview: React.FC<CVTemplatePreviewProps> = ({
       setEmployeeError(null);
 
       try {
-        // Use the same approach as other working functions
-        const fetchedEmployeeData = await dataFetcher.fetchEmployeeData(
+        // Use fetchAllData to automatically apply template limits
+        const { employeeData: fetchedEmployeeData } = await dataFetcher.fetchAllData(
           selectedEmployeeId, 
-          currentTemplate.data_source_function
+          templateId
         );
         setEmployeeData(fetchedEmployeeData);
       } catch (error) {
@@ -66,7 +65,7 @@ export const CVTemplatePreview: React.FC<CVTemplatePreviewProps> = ({
     };
 
     fetchEmployeeData();
-  }, [selectedEmployeeId, currentTemplate?.data_source_function]);
+  }, [selectedEmployeeId, templateId]);
 
   const handleFullscreen = async () => {
     if (!selectedEmployeeId || !templateId) {
