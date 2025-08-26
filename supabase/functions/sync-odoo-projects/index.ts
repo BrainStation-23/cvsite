@@ -27,17 +27,6 @@ interface OdooResponse {
   };
 }
 
-interface TransformedProject {
-  projectName: string;
-  description: string | null;
-  projectLevel: string | null;
-  projectType: string;
-  projectValue: number;
-  active: boolean;
-  managerName: string;
-  managerEmail: string;
-}
-
 Deno.serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
@@ -45,7 +34,7 @@ Deno.serve(async (req) => {
   }
 
   try {
-    console.log('Starting Odoo projects sync...');
+    console.log('Starting enhanced Odoo projects sync...');
 
     // Initialize Supabase client
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
@@ -93,9 +82,10 @@ Deno.serve(async (req) => {
     const odooData: OdooResponse = await odooResponse.json();
     console.log(`Fetched ${odooData.data.allProjects.length} projects from Odoo`);
 
-    // Transform Odoo data to match RPC function expectations
-    const transformedProjects: TransformedProject[] = odooData.data.allProjects.map(project => ({
+    // Convert data to JSONB format for the new RPC function
+    const projectsJsonb = odooData.data.allProjects.map(project => ({
       projectName: project.name,
+      clientName: '', // Not available in Odoo data, keeping empty
       description: project.description,
       projectLevel: project.projectLevel,
       projectType: project.projectType,
@@ -105,25 +95,25 @@ Deno.serve(async (req) => {
       managerEmail: project.projectManager?.email || ''
     }));
 
-    console.log(`Transformed ${transformedProjects.length} projects for RPC call`);
-    console.log('Sample transformed project:', JSON.stringify(transformedProjects[0], null, 2));
+    console.log(`Prepared ${projectsJsonb.length} projects for bulk sync`);
+    console.log('Sample project data:', JSON.stringify(projectsJsonb[0], null, 2));
 
-    // Call the RPC function directly
+    // Call the enhanced bulk sync RPC function
     const { data: syncResult, error: syncError } = await supabase.rpc('bulk_sync_odoo_projects', {
-      projects_data: transformedProjects
+      projects_data: projectsJsonb
     });
 
     if (syncError) {
-      console.error('RPC function error:', syncError);
-      throw new Error(`RPC function failed: ${syncError.message}`);
+      console.error('Bulk sync RPC function error:', syncError);
+      throw new Error(`Bulk sync RPC function failed: ${syncError.message}`);
     }
 
-    console.log('Sync completed successfully:', syncResult);
+    console.log('Enhanced bulk sync completed successfully:', syncResult);
 
-    // Return the result from the RPC function
+    // Return enhanced response with detailed statistics
     return new Response(JSON.stringify({
       success: true,
-      message: 'Projects sync completed',
+      message: 'Enhanced projects sync completed successfully',
       stats: {
         total_fetched: odooData.data.allProjects.length,
         total_processed: syncResult?.stats?.total_processed || 0,
@@ -131,18 +121,19 @@ Deno.serve(async (req) => {
         updated: syncResult?.stats?.updated || 0,
         skipped: syncResult?.stats?.skipped || 0,
         errors: syncResult?.error_projects ? syncResult.error_projects.length : 0
-      }
+      },
+      error_details: syncResult?.error_projects || []
     }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       status: 200
     });
 
   } catch (error) {
-    console.error('Sync error:', error);
+    console.error('Enhanced sync error:', error);
     
     return new Response(JSON.stringify({
       success: false,
-      error: error.message || 'Unknown error occurred'
+      error: error.message || 'Unknown error occurred during enhanced sync'
     }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       status: 500

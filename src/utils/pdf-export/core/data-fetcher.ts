@@ -2,6 +2,7 @@
 import { supabase } from '@/integrations/supabase/client';
 import { EmployeeProfile } from '@/hooks/types/employee-profiles';
 import { CVTemplate } from '@/hooks/use-cv-templates';
+import { EmployeeDataLimits } from '@/hooks/use-employee-data';
 
 export interface FetchedData {
   employeeData: EmployeeProfile;
@@ -15,7 +16,11 @@ export class DataFetcher {
     'get_employee_data'
   ];
 
-  async fetchEmployeeData(profileId: string, rpcFunctionName?: string): Promise<EmployeeProfile> {
+  async fetchEmployeeData(
+    profileId: string, 
+    rpcFunctionName?: string, 
+    limits?: EmployeeDataLimits
+  ): Promise<EmployeeProfile> {
     // Use provided RPC function name or default to masked version
     const functionName = rpcFunctionName || 'get_employee_data_masked';
     
@@ -23,14 +28,25 @@ export class DataFetcher {
     if (!DataFetcher.AVAILABLE_RPC_FUNCTIONS.includes(functionName)) {
       console.warn(`Unknown RPC function: ${functionName}, falling back to default`);
       const fallbackFunction = 'get_employee_data_masked';
-      return this.fetchEmployeeData(profileId, fallbackFunction);
+      return this.fetchEmployeeData(profileId, fallbackFunction, limits);
     }
 
     console.log(`Fetching employee data using RPC function: ${functionName}`);
 
-    const { data, error } = await supabase.rpc(functionName as any, {
-      profile_uuid: profileId
-    });
+    const rpcParams = {
+      profile_uuid: profileId,
+      ...(limits && {
+        technical_skills_limit: limits.technical_skills_limit || 5,
+        specialized_skills_limit: limits.specialized_skills_limit || 5,
+        experiences_limit: limits.experiences_limit || 5,
+        education_limit: limits.education_limit || 5,
+        trainings_limit: limits.trainings_limit || 5,
+        achievements_limit: limits.achievements_limit || 5,
+        projects_limit: limits.projects_limit || 5,
+      })
+    };
+
+    const { data, error } = await supabase.rpc(functionName as any, rpcParams);
 
     if (error) {
       console.error(`Error fetching employee data with ${functionName}:`, error);
@@ -74,11 +90,26 @@ export class DataFetcher {
   }
 
   async fetchAllData(profileId: string, templateId: string): Promise<FetchedData> {
-    // First fetch template data to get the RPC function name
+    // First fetch template data to get the RPC function name and limits
     const templateData = await this.fetchTemplateData(templateId);
     
-    // Then fetch employee data using the specified RPC function
-    const employeeData = await this.fetchEmployeeData(profileId, templateData.data_source_function);
+    // Create limits object from template data
+    const limits: EmployeeDataLimits = {
+      technical_skills_limit: templateData.technical_skills_limit,
+      specialized_skills_limit: templateData.specialized_skills_limit,
+      experiences_limit: templateData.experiences_limit,
+      education_limit: templateData.education_limit,
+      trainings_limit: templateData.trainings_limit,
+      achievements_limit: templateData.achievements_limit,
+      projects_limit: templateData.projects_limit,
+    };
+    
+    // Then fetch employee data using the specified RPC function and limits
+    const employeeData = await this.fetchEmployeeData(
+      profileId, 
+      templateData.data_source_function,
+      limits
+    );
 
     return { employeeData, templateData };
   }

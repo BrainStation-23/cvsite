@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -13,6 +12,7 @@ import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from '@/componen
 import { useCVTemplates } from '@/hooks/use-cv-templates';
 import { CVTemplateHTMLEditor } from '@/components/admin/cv-templates/CVTemplateHTMLEditor';
 import { TemplateVariableHelper } from '@/components/admin/cv-templates/TemplateVariableHelper';
+import { LimitConfigurationSection } from '@/components/admin/cv-templates/LimitConfigurationSection';
 import { EXAMPLE_CV_TEMPLATE } from '@/constants/cv-template-examples';
 import { useConfirmationDialog } from '@/hooks/use-confirmation-dialog';
 import { ConfirmationDialog } from '@/components/ui/confirmation-dialog';
@@ -33,6 +33,15 @@ const CVTemplateEditorPage: React.FC = () => {
   const [htmlTemplate, setHtmlTemplate] = useState('');
   const [dataSourceFunction, setDataSourceFunction] = useState('get_employee_data_masked');
   const [orientation, setOrientation] = useState<'portrait' | 'landscape'>('portrait');
+  const [limits, setLimits] = useState({
+    technicalSkillsLimit: 5,
+    specializedSkillsLimit: 5,
+    experiencesLimit: 5,
+    educationLimit: 5,
+    trainingsLimit: 5,
+    achievementsLimit: 5,
+    projectsLimit: 5,
+  });
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
 
   const currentTemplate = templates.find(t => t.id === id);
@@ -43,6 +52,15 @@ const CVTemplateEditorPage: React.FC = () => {
       setHtmlTemplate(currentTemplate.html_template);
       setDataSourceFunction(currentTemplate.data_source_function);
       setOrientation(currentTemplate.orientation);
+      setLimits({
+        technicalSkillsLimit: currentTemplate.technical_skills_limit,
+        specializedSkillsLimit: currentTemplate.specialized_skills_limit,
+        experiencesLimit: currentTemplate.experiences_limit,
+        educationLimit: currentTemplate.education_limit,
+        trainingsLimit: currentTemplate.trainings_limit,
+        achievementsLimit: currentTemplate.achievements_limit,
+        projectsLimit: currentTemplate.projects_limit,
+      });
     }
   }, [currentTemplate]);
 
@@ -58,10 +76,25 @@ const CVTemplateEditorPage: React.FC = () => {
       html_template: htmlTemplate.trim(),
       data_source_function: dataSourceFunction,
       orientation,
+      technical_skills_limit: limits.technicalSkillsLimit,
+      specialized_skills_limit: limits.specializedSkillsLimit,
+      experiences_limit: limits.experiencesLimit,
+      education_limit: limits.educationLimit,
+      trainings_limit: limits.trainingsLimit,
+      achievements_limit: limits.achievementsLimit,
+      projects_limit: limits.projectsLimit,
     });
     
     setHasUnsavedChanges(false);
     toast.success('Template saved successfully');
+  };
+
+  const handleLimitChange = (field: string, value: number) => {
+    setLimits(prev => ({
+      ...prev,
+      [field]: value
+    }));
+    setHasUnsavedChanges(true);
   };
 
   const handleBack = () => {
@@ -179,7 +212,7 @@ const CVTemplateEditorPage: React.FC = () => {
         </div>
 
         {/* Template Configuration */}
-        <div className="p-4 border-b bg-muted/30">
+        <div className="p-4 border-b bg-muted/30 space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="data_source" className="flex items-center gap-2">
@@ -221,6 +254,13 @@ const CVTemplateEditorPage: React.FC = () => {
               </RadioGroup>
             </div>
           </div>
+
+          {/* Data Limits Configuration */}
+          <LimitConfigurationSection
+            limits={limits}
+            onLimitChange={handleLimitChange}
+            disabled={isUpdating}
+          />
         </div>
 
         {/* Main Content - Two Panel Layout */}

@@ -1,8 +1,8 @@
 
 import React, { useState } from 'react';
 import DashboardLayout from '../../components/Layout/DashboardLayout';
-import { useProjectsManagement } from '@/hooks/use-projects-management';
-import { ProjectsSearchControls } from '@/components/projects/ProjectsSearchControls';
+import { useEnhancedProjectsManagement } from '@/hooks/use-enhanced-projects-management';
+import { EnhancedProjectsSearchControls } from '@/components/projects/EnhancedProjectsSearchControls';
 import { ProjectsTable } from '@/components/projects/ProjectsTable';
 import { ProjectsPagination } from '@/components/projects/ProjectsPagination';
 import { ProjectForm } from '@/components/projects/ProjectForm';
@@ -19,6 +19,17 @@ interface Project {
   is_active: boolean;
   created_at: string;
   updated_at: string;
+  description?: string | null;
+  project_level?: string | null;
+  project_manager_profile?: {
+    first_name: string | null;
+    last_name: string | null;
+    employee_id: string | null;
+  } | null;
+  project_type_data?: {
+    name: string;
+  } | null;
+  relevance_score?: number;
 }
 
 const ProjectsManagement: React.FC = () => {
@@ -32,14 +43,21 @@ const ProjectsManagement: React.FC = () => {
     setCurrentPage,
     itemsPerPage,
     setItemsPerPage,
+    sortBy,
+    setSortBy,
+    sortOrder,
+    setSortOrder,
     showInactiveProjects,
     setShowInactiveProjects,
+    advancedFilters,
+    setAdvancedFilters,
+    clearAdvancedFilters,
     createProject,
     updateProject,
     deleteProject,
     toggleProjectStatus,
     refetch
-  } = useProjectsManagement();
+  } = useEnhancedProjectsManagement();
 
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
@@ -99,12 +117,17 @@ const ProjectsManagement: React.FC = () => {
     <DashboardLayout>
       <div className="space-y-6">
         <div className="flex justify-between items-center">
-          <h1 className="text-2xl font-bold text-foreground">Projects Management</h1>
+          <div>
+            <h1 className="text-2xl font-bold text-foreground">Projects Management</h1>
+            <p className="text-muted-foreground">
+              Manage projects with enhanced search and filtering capabilities
+            </p>
+          </div>
           <OdooSyncButton />
         </div>
         
         <div className="bg-card rounded-lg border p-6 space-y-6">
-          <ProjectsSearchControls
+          <EnhancedProjectsSearchControls
             searchQuery={searchQuery}
             onSearchChange={setSearchQuery}
             itemsPerPage={itemsPerPage}
@@ -112,6 +135,13 @@ const ProjectsManagement: React.FC = () => {
             showInactiveProjects={showInactiveProjects}
             onShowInactiveProjectsChange={setShowInactiveProjects}
             onAddProject={handleAddProject}
+            advancedFilters={advancedFilters}
+            onAdvancedFiltersChange={setAdvancedFilters}
+            onClearAdvancedFilters={clearAdvancedFilters}
+            sortBy={sortBy}
+            onSortByChange={setSortBy}
+            sortOrder={sortOrder}
+            onSortOrderChange={setSortOrder}
           />
 
           <ProjectsTable

@@ -1,4 +1,3 @@
-
 import { dataFetcher } from './core/data-fetcher';
 import { cvTemplateProcessor } from './core/template-processor';
 import { pdfEngine } from './core/pdf-engine';
@@ -18,17 +17,11 @@ export async function exportCVAsPDF(
   const progressTracker = new ProgressTracker(onProgress);
 
   try {
-    // Step 1a: Load CV template
+    // Step 1: Fetch template and employee data with limits
     progressTracker.startStep('fetch-template');
-    const templateData = await dataFetcher.fetchTemplateData(templateId);
-    progressTracker.completeStep('fetch-template');
-
-    // Step 1b: Fetch employee data using template's data source
     progressTracker.startStep('fetch-employee');
-    const employeeData = await dataFetcher.fetchEmployeeData(
-      profileId,
-      templateData.data_source_function
-    );
+    const { employeeData, templateData } = await dataFetcher.fetchAllData(profileId, templateId);
+    progressTracker.completeStep('fetch-template');
     progressTracker.completeStep('fetch-employee');
 
     // Step 2: Process template with dynamic configuration

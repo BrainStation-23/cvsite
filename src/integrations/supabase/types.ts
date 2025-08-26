@@ -159,36 +159,57 @@ export type Database = {
       }
       cv_templates: {
         Row: {
+          achievements_limit: number | null
           created_at: string
           data_source_function: string
+          education_limit: number | null
           enabled: boolean
+          experiences_limit: number | null
           html_template: string
           id: string
           is_default: boolean
           name: string
           orientation: string
+          projects_limit: number | null
+          specialized_skills_limit: number | null
+          technical_skills_limit: number | null
+          trainings_limit: number | null
           updated_at: string
         }
         Insert: {
+          achievements_limit?: number | null
           created_at?: string
           data_source_function?: string
+          education_limit?: number | null
           enabled?: boolean
+          experiences_limit?: number | null
           html_template: string
           id?: string
           is_default?: boolean
           name: string
           orientation?: string
+          projects_limit?: number | null
+          specialized_skills_limit?: number | null
+          technical_skills_limit?: number | null
+          trainings_limit?: number | null
           updated_at?: string
         }
         Update: {
+          achievements_limit?: number | null
           created_at?: string
           data_source_function?: string
+          education_limit?: number | null
           enabled?: boolean
+          experiences_limit?: number | null
           html_template?: string
           id?: string
           is_default?: boolean
           name?: string
           orientation?: string
+          projects_limit?: number | null
+          specialized_skills_limit?: number | null
+          technical_skills_limit?: number | null
+          trainings_limit?: number | null
           updated_at?: string
         }
         Relationships: []
@@ -1358,6 +1379,10 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: Json
       }
+      cleanup_expired_cv_tokens: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
       export_profile_json: {
         Args: { target_user_id?: string }
         Returns: Json
@@ -1382,11 +1407,29 @@ export type Database = {
         }[]
       }
       get_employee_data: {
-        Args: { profile_uuid: string }
+        Args: {
+          achievements_limit?: number
+          education_limit?: number
+          experiences_limit?: number
+          profile_uuid: string
+          projects_limit?: number
+          specialized_skills_limit?: number
+          technical_skills_limit?: number
+          trainings_limit?: number
+        }
         Returns: Json
       }
       get_employee_data_masked: {
-        Args: { profile_uuid: string }
+        Args: {
+          achievements_limit?: number
+          education_limit?: number
+          experiences_limit?: number
+          profile_uuid: string
+          projects_limit?: number
+          specialized_skills_limit?: number
+          technical_skills_limit?: number
+          trainings_limit?: number
+        }
         Returns: Json
       }
       get_employee_profiles: {
@@ -1439,45 +1482,25 @@ export type Database = {
         Returns: Json
       }
       get_planned_resource_data: {
-        Args:
-          | {
-              bill_type_filter?: string
-              end_date_from?: string
-              end_date_to?: string
-              items_per_page?: number
-              manager_filter?: string
-              max_billing_percentage?: number
-              max_engagement_percentage?: number
-              min_billing_percentage?: number
-              min_engagement_percentage?: number
-              page_number?: number
-              project_search?: string
-              sbu_filter?: string
-              search_query?: string
-              sort_by?: string
-              sort_order?: string
-              start_date_from?: string
-              start_date_to?: string
-            }
-          | {
-              bill_type_filter?: string
-              end_date_from?: string
-              end_date_to?: string
-              items_per_page?: number
-              manager_filter?: string
-              max_billing_percentage?: number
-              max_engagement_percentage?: number
-              min_billing_percentage?: number
-              min_engagement_percentage?: number
-              page_number?: number
-              project_search?: string
-              sbu_filter?: string
-              search_query?: string
-              sort_by?: string
-              sort_order?: string
-              start_date_from?: string
-              start_date_to?: string
-            }
+        Args: {
+          bill_type_filter?: string
+          end_date_from?: string
+          end_date_to?: string
+          items_per_page?: number
+          manager_filter?: string
+          max_billing_percentage?: number
+          max_engagement_percentage?: number
+          min_billing_percentage?: number
+          min_engagement_percentage?: number
+          page_number?: number
+          project_search?: string
+          sbu_filter?: string
+          search_query?: string
+          sort_by?: string
+          sort_order?: string
+          start_date_from?: string
+          start_date_to?: string
+        }
         Returns: Json
       }
       get_profile_completion_by_resource_type: {
@@ -1590,45 +1613,25 @@ export type Database = {
         Returns: Json
       }
       get_weekly_validation_data: {
-        Args:
-          | {
-              bill_type_filter?: string
-              end_date_from?: string
-              end_date_to?: string
-              items_per_page?: number
-              manager_filter?: string
-              max_billing_percentage?: number
-              max_engagement_percentage?: number
-              min_billing_percentage?: number
-              min_engagement_percentage?: number
-              page_number?: number
-              project_search?: string
-              sbu_filter?: string
-              search_query?: string
-              sort_by?: string
-              sort_order?: string
-              start_date_from?: string
-              start_date_to?: string
-            }
-          | {
-              bill_type_filter?: string
-              end_date_from?: string
-              end_date_to?: string
-              items_per_page?: number
-              manager_filter?: string
-              max_billing_percentage?: number
-              max_engagement_percentage?: number
-              min_billing_percentage?: number
-              min_engagement_percentage?: number
-              page_number?: number
-              project_search?: string
-              sbu_filter?: string
-              search_query?: string
-              sort_by?: string
-              sort_order?: string
-              start_date_from?: string
-              start_date_to?: string
-            }
+        Args: {
+          bill_type_filter?: string
+          end_date_from?: string
+          end_date_to?: string
+          items_per_page?: number
+          manager_filter?: string
+          max_billing_percentage?: number
+          max_engagement_percentage?: number
+          min_billing_percentage?: number
+          min_engagement_percentage?: number
+          page_number?: number
+          project_search?: string
+          sbu_filter?: string
+          search_query?: string
+          sort_by?: string
+          sort_order?: string
+          start_date_from?: string
+          start_date_to?: string
+        }
         Returns: Json
       }
       has_any_role: {
@@ -1712,9 +1715,17 @@ export type Database = {
       }
       search_projects: {
         Args: {
+          budget_max?: number
+          budget_min?: number
+          created_after?: string
+          created_before?: string
           items_per_page?: number
           page_number?: number
+          project_level_filter?: string
+          project_manager_filter?: string
+          project_type_filter?: string
           search_query?: string
+          show_inactive_projects?: boolean
           sort_by?: string
           sort_order?: string
         }
