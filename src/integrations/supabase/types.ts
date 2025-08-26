@@ -159,36 +159,57 @@ export type Database = {
       }
       cv_templates: {
         Row: {
+          achievements_limit: number | null
           created_at: string
           data_source_function: string
+          education_limit: number | null
           enabled: boolean
+          experiences_limit: number | null
           html_template: string
           id: string
           is_default: boolean
           name: string
           orientation: string
+          projects_limit: number | null
+          specialized_skills_limit: number | null
+          technical_skills_limit: number | null
+          trainings_limit: number | null
           updated_at: string
         }
         Insert: {
+          achievements_limit?: number | null
           created_at?: string
           data_source_function?: string
+          education_limit?: number | null
           enabled?: boolean
+          experiences_limit?: number | null
           html_template: string
           id?: string
           is_default?: boolean
           name: string
           orientation?: string
+          projects_limit?: number | null
+          specialized_skills_limit?: number | null
+          technical_skills_limit?: number | null
+          trainings_limit?: number | null
           updated_at?: string
         }
         Update: {
+          achievements_limit?: number | null
           created_at?: string
           data_source_function?: string
+          education_limit?: number | null
           enabled?: boolean
+          experiences_limit?: number | null
           html_template?: string
           id?: string
           is_default?: boolean
           name?: string
           orientation?: string
+          projects_limit?: number | null
+          specialized_skills_limit?: number | null
+          technical_skills_limit?: number | null
+          trainings_limit?: number | null
           updated_at?: string
         }
         Relationships: []
@@ -1384,6 +1405,32 @@ export type Database = {
           project_id: string
           project_name: string
         }[]
+      }
+      get_employee_data: {
+        Args: {
+          achievements_limit?: number
+          education_limit?: number
+          experiences_limit?: number
+          profile_uuid: string
+          projects_limit?: number
+          specialized_skills_limit?: number
+          technical_skills_limit?: number
+          trainings_limit?: number
+        }
+        Returns: Json
+      }
+      get_employee_data_masked: {
+        Args: {
+          achievements_limit?: number
+          education_limit?: number
+          experiences_limit?: number
+          profile_uuid: string
+          projects_limit?: number
+          specialized_skills_limit?: number
+          technical_skills_limit?: number
+          trainings_limit?: number
+        }
+        Returns: Json
       }
       get_employee_profiles: {
         Args: {
