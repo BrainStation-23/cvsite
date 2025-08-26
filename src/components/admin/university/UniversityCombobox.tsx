@@ -90,12 +90,16 @@ export const UniversityCombobox: React.FC<UniversityComboboxProps> = ({
               {isLoading ? "Loading universities..." : "No university found."}
             </CommandEmpty>
             <CommandGroup>
-              {universities.map((university) => (
+              {universities.filter(university => university.name && university.name.trim() !== '').map((university) => (
                 <CommandItem
                   key={university.id}
                   value={university.name}
                   onSelect={(currentValue) => {
-                    onValueChange(currentValue === value ? "" : currentValue);
+                    if (currentValue === value) {
+                      onValueChange('');
+                    } else {
+                      onValueChange(currentValue);
+                    }
                     setOpen(false);
                   }}
                   className={itemClasses}
