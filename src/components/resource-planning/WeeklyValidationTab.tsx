@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Table, TableBody } from '@/components/ui/table';
 import { ResourcePlanningTableHeader } from './ResourcePlanningTableHeader';
@@ -175,7 +174,13 @@ export const WeeklyValidationTab: React.FC<WeeklyValidationTabProps> = ({
                 showBulkSelection={true}
                 isAllSelected={isAllSelected}
                 isIndeterminate={isIndeterminate}
-                onSelectAll={selectAll}
+                onSelectAll={(checked) => {
+                  if (checked === true) {
+                    selectAll();
+                  } else {
+                    clearSelection();
+                  }
+                }}
               />
               <TableBody>
                 {data.map((item: any) => (

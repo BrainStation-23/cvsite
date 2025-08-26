@@ -204,7 +204,13 @@ export const PlannedResourcesTab: React.FC<PlannedResourcesTabProps> = ({
                 showBulkSelection={true}
                 isAllSelected={isAllSelected}
                 isIndeterminate={isIndeterminate}
-                onSelectAll={selectAll}
+                onSelectAll={(checked) => {
+                  if (checked === true) {
+                    selectAll();
+                  } else {
+                    clearSelection();
+                  }
+                }}
               />
               <TableBody>
                 {data.map((item: any) => (
