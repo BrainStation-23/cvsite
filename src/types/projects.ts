@@ -8,7 +8,7 @@ export interface Project {
   is_active: boolean;
   created_at: string;
   updated_at: string;
-  // Updated fields - removed odoo_project_id and company_id
+  // Enhanced fields from RPC function
   description?: string | null;
   project_level?: string | null;
   project_manager_profile?: {
@@ -19,6 +19,7 @@ export interface Project {
   project_type_data?: {
     name: string;
   } | null;
+  relevance_score?: number;
 }
 
 export interface ProjectsResponse {
@@ -38,11 +39,11 @@ export interface ProjectFormData {
   project_manager: string | null;
   budget: number | null;
   is_active: boolean;
-  // Updated fields - removed company_id
   description?: string | null;
   project_level?: string | null;
 }
 
+// Enhanced filter interface for the new RPC function
 export interface ProjectFilters {
   searchQuery: string;
   currentPage: number;
@@ -50,4 +51,27 @@ export interface ProjectFilters {
   sortBy: string;
   sortOrder: 'asc' | 'desc';
   showInactiveProjects: boolean;
+  // Advanced filters
+  projectTypeFilter?: string | null;
+  projectLevelFilter?: string | null;
+  budgetMin?: number | null;
+  budgetMax?: number | null;
+  projectManagerFilter?: string | null;
+  createdAfter?: string | null;
+  createdBefore?: string | null;
+}
+
+// Advanced filters interface for UI components
+export interface AdvancedProjectFilters {
+  projectType?: string | null;
+  projectLevel?: string | null;
+  budgetRange?: {
+    min?: number | null;
+    max?: number | null;
+  } | null;
+  projectManager?: string | null;
+  dateRange?: {
+    start?: string | null;
+    end?: string | null;
+  } | null;
 }
