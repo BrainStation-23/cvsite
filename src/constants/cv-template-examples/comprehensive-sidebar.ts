@@ -10,7 +10,7 @@ export const COMPREHENSIVE_SIDEBAR_TEMPLATE = `<!DOCTYPE html>
     <style>
         body {
             font-family: 'Roboto', sans-serif;
-            line-height: 1.6;
+            line-height: 1.5;
             margin: 0;
             padding: 0;
             color: #333;
@@ -20,14 +20,27 @@ export const COMPREHENSIVE_SIDEBAR_TEMPLATE = `<!DOCTYPE html>
             align-items: flex-start;
             min-height: 100vh;
         }
+        /* Never break words across lines/pages */
+        body, p, li, h1, h2, h3, h4, .cv-item, .timeline-content, .project-details p {
+            hyphens: none;
+            word-break: keep-all;      /* keep words intact */
+            overflow-wrap: normal;     /* don't insert breaks within words */
+            -ms-hyphens: none;
+            -moz-hyphens: none;
+            -webkit-hyphens: none;
+        }
 
+        .main-content p{
+            line-height: 15px;
+            text-align: justify;
+            color: #375471;
+        }
         .cv-container {
             display: grid;
-            grid-template-columns: 350px 1fr;
-            max-width: 1200px;
+            grid-template-columns: 300px 1fr;
+            max-width: 794px;
             width: 100%;
             background: white;
-            border-radius: 12px;
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
             overflow: hidden;
             margin: 0 auto;
@@ -36,14 +49,16 @@ export const COMPREHENSIVE_SIDEBAR_TEMPLATE = `<!DOCTYPE html>
         }
 
         .sidebar {
-            background-color: #2c3e50;
+            background-color: #3b5669;
             color: white;
-            padding: 40px 30px;
+            height: 100%;
+            padding: 30px 30px;
         }
 
         .main-content {
-            padding: 2em 2em;
+            padding: 30px 15px;
             background-color: #ffffff;
+            max-width: 495px;
         }
 
         .profile-img {
@@ -61,7 +76,7 @@ export const COMPREHENSIVE_SIDEBAR_TEMPLATE = `<!DOCTYPE html>
 
         .sidebar-header {
             text-align: center;
-            margin-bottom: 30px;
+            margin-bottom: 10px;
         }
 
         .sidebar-header h1 {
@@ -73,7 +88,7 @@ export const COMPREHENSIVE_SIDEBAR_TEMPLATE = `<!DOCTYPE html>
         .sidebar-header h2 {
             font-size: 1.4em;
             margin: 5px 0 0;
-            color: #bdc3c7;
+            color: #01b0f1;
             font-weight: 400;
         }
 
@@ -85,9 +100,9 @@ export const COMPREHENSIVE_SIDEBAR_TEMPLATE = `<!DOCTYPE html>
         }
 
         .sidebar .cv-section {
-            margin-bottom: 30px;
             border-bottom: 1px solid #34495e;
-            padding-bottom: 20px;
+            padding-bottom: 10px;
+            margin-bottom: 10px;
         }
 
         .sidebar .cv-section:last-of-type {
@@ -98,31 +113,27 @@ export const COMPREHENSIVE_SIDEBAR_TEMPLATE = `<!DOCTYPE html>
         .cv-section-header {
             page-break-after: avoid;
             page-break-inside: avoid;
-            margin-bottom: 10px;
             font-weight: bold;
         }
 
         .sidebar .cv-section-header {
             font-size: 1.4em;
-            color: #3498db;
-            margin-bottom: 15px;
+            color: #01b0f1;
+            margin-bottom: 10px;
             text-align: left;
-            border-bottom: 2px solid #3498db;
-            padding-bottom: 5px;
         }
 
         .main-content .cv-section-header {
-            color: #2c3e50;
-            border-bottom: 3px solid #3498db;
-            padding-bottom: 10px;
-            margin-bottom: 25px;
-            font-size: 2em;
+            color: #01b0f1;
+            margin-bottom: 15px;
+            font-size: 1.4em;
             font-weight: 500;
         }
 
         .cv-section-content {
             orphans: 3;
             widows: 3;
+            font-size: .8rem;
         }
 
         /* CV Item Styling */
@@ -133,7 +144,7 @@ export const COMPREHENSIVE_SIDEBAR_TEMPLATE = `<!DOCTYPE html>
         }
 
         .sidebar .cv-item {
-            margin-bottom: 15px;
+            margin-bottom: 5px;
         }
 
         .main-content .cv-item {
@@ -183,6 +194,16 @@ export const COMPREHENSIVE_SIDEBAR_TEMPLATE = `<!DOCTYPE html>
             height: 100%;
         }
 
+        .training-header {
+            display: inline-block;
+        }
+        
+        .training-title:not(:last-child)::after {
+            content: " | ";
+            margin-left: 5px; 
+            margin-right: 5px;
+        }
+
         /* English Skills Star Rating */
         .english-skill-item {
             display: flex;
@@ -223,7 +244,7 @@ export const COMPREHENSIVE_SIDEBAR_TEMPLATE = `<!DOCTYPE html>
 
         .timeline-item {
             position: relative;
-            margin-bottom: 35px;
+            margin-bottom: 10px !important;
             display: grid;
             grid-template-columns: 120px auto;
             gap: 30px;
@@ -235,11 +256,10 @@ export const COMPREHENSIVE_SIDEBAR_TEMPLATE = `<!DOCTYPE html>
         }
 
         .timeline-date {
-            font-style: italic;
-            color: #7f8c8d;
-            font-size: 0.95em;
+            font-weight: bold;
+            color: #3e50a5;
             text-align: right;
-            padding-top: 3px;
+            padding-top: 4px;
         }
 
         .timeline-content {
@@ -250,11 +270,11 @@ export const COMPREHENSIVE_SIDEBAR_TEMPLATE = `<!DOCTYPE html>
         .timeline-content::before {
             content: '';
             position: absolute;
-            top: 8px;
+            top: -6px;
             left: 6px;
-            bottom: -35px;
+            bottom: -56px;
             width: 3px;
-            background-color: #bdc3c7;
+            background-color: #58718f;
         }
 
         .timeline-item:last-child .timeline-content::before {
@@ -269,14 +289,13 @@ export const COMPREHENSIVE_SIDEBAR_TEMPLATE = `<!DOCTYPE html>
             width: 15px;
             height: 15px;
             border-radius: 50%;
-            background-color: #fff;
-            border: 3px solid #3498db;
+            background-color: #58718f;
             z-index: 1;
         }
 
         .timeline-content h3 {
             margin: 0 0 5px 0;
-            color: #2c3e50;
+            color: #3e50a5;
             font-size: 1.0em;
             font-weight: 600;
             line-height: 1.2;
@@ -284,6 +303,7 @@ export const COMPREHENSIVE_SIDEBAR_TEMPLATE = `<!DOCTYPE html>
 
         .timeline-content p {
             margin: 5px 0 0;
+            color: #3e50a5;
             font-size: 0.9em;
             color: #555;
         }
@@ -293,57 +313,119 @@ export const COMPREHENSIVE_SIDEBAR_TEMPLATE = `<!DOCTYPE html>
             counter-reset: project-counter;
         }
 
-        .project-item h3 {
+        .project-item h2 {
             counter-increment: project-counter;
-            margin-bottom: 10px;
-            color: #3498db;
+            margin-bottom: 10px;  
         }
 
-        .project-item h3::before {
+        .project-item h2::before {
             content: counter(project-counter) ". ";
-            color: #3498db;
             font-weight: bold;
+        }
+        .projects-list .project-item{
+            margin-bottom: 15px;
         }
 
         .project-details p {
             margin: 8px 0;
             padding-left: 1.1em;
         }
-
+        /* Allow URLs to wrap so they don't blow up the layout */
+        .project-details p a,
+        .project-details p[style*="overflow-wrap"] a {
+            word-break: break-all;     /* or: overflow-wrap: anywhere; */
+            overflow-wrap: anywhere;
+        }
         .technologies-used {
             font-style: italic;
             color: #555;
             font-size: 0.9em;
         }
-
-        /* Print-specific styles */
-        @media print {
-            .cv-container {
-                max-width: none;
-                margin: 0;
-                padding: 15mm;
-                box-shadow: none;
-                border-radius: 0;
-                grid-template-columns: 300px 1fr;
-            }
-            
-            .cv-section {
-                margin-bottom: 15px;
-            }
-            
-            .cv-item {
-                margin-bottom: 10px;
-            }
-            
-            .sidebar {
-                padding: 20px 15px;
-            }
-            
-            .main-content {
-                padding: 20px 15px;
-            }
+        .project-container .cv-item{
+            padding-left: 10px;
         }
+
+        .cv-page-break-before {
+        page-break-before: always; /* Forces a page break before this element */
+        }
+        
+        .cv-page-break-after {
+        page-break-after: always; /* Forces a page break after this element */
+        }
+        
+        .cv-page-break-avoid {
+        page-break-inside: avoid; /* Prevents page breaks inside this element */
+        }
+        
+        .cv-page-break-auto {
+        page-break-inside: auto; /* Allows page breaks inside this element */
+        }
+        
+        @page {
+        size: A4;
+        margin: 18mm 16mm;
+        }
+        @media print {
+        .cv-page-break-before {
+        page-break-before: always; /* Forces a page break before this element */
+        }
+        
+        .cv-page-break-after {
+        page-break-after: always; /* Forces a page break after this element */
+        }
+        
+        .cv-page-break-avoid {
+        page-break-inside: avoid; /* Prevents page breaks inside this element */
+        }
+        
+        .cv-page-break-auto {
+        page-break-inside: auto; /* Allows page breaks inside this element */
+        }
+        .project-item{
+                    display: block;
+        page-break-inside: avoid;
+        }
+        .cv-container { display: block; } /* replaces grid during print */
+        /* keep items as blocks */
+        .projects-list { display: block; }
+        .project-item { display: block; break-inside: avoid; page-break-inside: avoid; }
+        }
+
+
+
     </style>
+
+    <script>
+        (function () {
+            // Match your printed page height in CSS pixels.
+            // With width ~794px for A4, height is ~1123px at 96dpi.
+            const PAGE_HEIGHT = 1123;      // tune if your scale differs
+            const PAGE_TOP_MARGIN = 0;     // if you have extra top offsets, add here
+            let currentPageBottom = PAGE_HEIGHT;
+    
+            const items = document.querySelectorAll('.project-item');
+            items.forEach((el) => {
+                const r = el.getBoundingClientRect();
+                // Use pageY offset (scrollY) because getBoundingClientRect is viewport-relative
+                const top = r.top + window.scrollY;
+                const bottom = r.bottom + window.scrollY;
+    
+                // If the item would cross the current page bottom, force a break before it
+                if (bottom > currentPageBottom) {
+                el.classList.add('cv-page-break-before');
+                // move the page window
+                const itemHeight = r.height;
+                currentPageBottom = Math.ceil(top + PAGE_HEIGHT);
+                // Safety: if the item itself is taller than a page, let it split (remove class)
+                if (itemHeight > PAGE_HEIGHT) {
+                    el.classList.remove('cv-page-break-before');
+                }
+                }
+            });
+            })();
+    </script>
+
+
 </head>
 
 <body>
@@ -359,8 +441,8 @@ export const COMPREHENSIVE_SIDEBAR_TEMPLATE = `<!DOCTYPE html>
                 </div>
             </div>
 
-            <div class="cv-section cv-page-break-avoid" data-section="skills">
-                <h3 class="cv-section-header">Technical Skills</h3>
+            <div class="cv-section cv-page-break-auto" data-section="skills">
+                <h3 class="cv-section-header">TECHNICAL SKILLS</h3>
                 <div class="cv-section-content">
                     <ul class="cv-item-group">
                         {{#each employee.technicalSkills}}
@@ -377,8 +459,26 @@ export const COMPREHENSIVE_SIDEBAR_TEMPLATE = `<!DOCTYPE html>
                 </div>
             </div>
 
+            <div class="cv-section cv-page-break-avoid" data-section="education">
+                <h3 class="cv-section-header">EDUCATION</h3>
+                <div class="cv-section-content">
+                    <ul class="cv-item-group">
+                        {{#each employee.education}}
+                        <li class="cv-item" data-item="education">
+                            <div class="cv-item-content">
+                                <strong class="cv-item-header">{{this.degree}}</strong><br>
+                                {{this.university}}<br>
+                                Group: {{this.department}}<br>
+                                Passing Year: {{this.endDate}}
+                            </div>
+                        </li>
+                        {{/each}}
+                    </ul>
+                </div>
+            </div>
+
             <div class="cv-section cv-page-break-avoid" data-section="languages">
-                <h3 class="cv-section-header">English Skills</h3>
+                <h3 class="cv-section-header">ENGLISH SKILL</h3>
                 <div class="cv-section-content">
                     <div class="english-skills cv-item-group">
                         <div class="cv-item english-skill-item" data-item="language-skill">
@@ -425,35 +525,47 @@ export const COMPREHENSIVE_SIDEBAR_TEMPLATE = `<!DOCTYPE html>
                 </div>
             </div>
 
-            <div class="cv-section cv-page-break-avoid" data-section="education">
-                <h3 class="cv-section-header">Education</h3>
+            <div class="cv-section cv-page-break-before profressional-skill-container" data-section="skills">
+                <h3 class="cv-section-header">PROFESSIONAL SKILLS</h3>
                 <div class="cv-section-content">
                     <ul class="cv-item-group">
-                        {{#each employee.education}}
-                        <li class="cv-item" data-item="education">
-                            <div class="cv-item-content">
-                                <strong class="cv-item-header">{{this.degree}}</strong><br>
-                                {{this.university}}<br>
-                                Group: {{this.department}}<br>
-                                Passing Year: {{this.endDate | formatDate 'YYYY'}}
+                        {{#each employee.specializedSkills}}
+                        <li class="cv-item" data-item="skill">
+                            <div class="cv-item-content skill-item">
+                                <span>{{this.name}} - {{this.proficiency}}/10</span>
+                                <div class="skill-bar-container">
+                                    <div class="skill-bar" style="width: {{this.proficiency}}0%;"></div>
+                                </div>
                             </div>
                         </li>
                         {{/each}}
                     </ul>
                 </div>
             </div>
+
+            <div class="cv-section cv-page-break-avoid" data-section="training">
+                <h2 class="cv-section-header">Training</h2>
+                <div class="cv-section-content">
+                    <h3 class="training-header">
+                        {{#each employee.trainings}}
+                        <span class="training-title">{{this.title}}</span>
+                        {{/each}}
+                    </h3>
+                </div>
+            </div>
+
         </div>
 
         <div class="main-content">
             <div class="cv-section cv-page-break-avoid" data-section="summary">
-                <h2 class="cv-section-header">Biography</h2>
+                <h2 class="cv-section-header">BIOGRAPHY</h2>
                 <div class="cv-section-content">
                     <p>{{employee.biography}}</p>
                 </div>
             </div>
 
-            <div class="cv-section cv-page-break-before" data-section="experience">
-                <h2 class="cv-section-header">Experience</h2>
+            <div class="cv-section cv-page-break-avoid" data-section="experience">
+                <h2 class="cv-section-header">EXPERIENCE</h2>
                 <div class="cv-section-content">
                     <div class="experience-timeline cv-item-group">
                         {{#each employee.experiences}}
@@ -469,17 +581,36 @@ export const COMPREHENSIVE_SIDEBAR_TEMPLATE = `<!DOCTYPE html>
                 </div>
             </div>
 
-            <div class="cv-section cv-page-break-before" data-section="projects">
-                <h2 class="cv-section-header">Projects</h2>
+            <div class="cv-section project-container" data-section="projects">
+                <h2 class="cv-section-header">PROJECTS</h2>
                 <div class="cv-section-content">
                     <div class="projects-list cv-item-group">
                         {{#each employee.projects}}
                         <div class="cv-item project-item" data-item="project">
-                            <h3 class="cv-item-header">{{this.name}}</h3>
+                            <h2 class="cv-section-header">{{this.name}}</h2>
                             <div class="project-details cv-item-content">
-                                <p><strong class="technologies-used">Technology Used:</strong> {{this.technologiesUsed}}</p>
+                                <p><strong>Technology Used:</strong> {{this.technologiesUsed}}</p>
                                 <p><strong>Technical Responsibility:</strong> {{this.responsibility}}</p>
+                                <p><strong>Project Duration:</strong> {{this.startDate}} - {{this.endDate}}</p>
                                 <p><strong>Short Description:</strong> {{this.description}}</p>
+                                <p style="text-align:left; overflow-wrap: break-word;"><strong>Link:</strong> <a href="{{this.url}}" target="_blank">{{this.url}}</a></p>
+                            </div>
+                        </div>
+                        {{/each}}
+                    </div>
+                </div>
+            </div>
+
+            <div class="cv-section cv-page-break-avoid project-container" data-section="projects">
+                <h2 class="cv-section-header">ACHIEVEMENTS</h2>
+                <div class="cv-section-content">
+                    <div class="projects-list cv-item-group">
+                        {{#each employee.achievements}}
+                        <div class="cv-item" data-item="achievements">
+                            <div class="cv-item-content">
+                                <p> {{this.title}}</p>
+                                <p>{{this.date}}</p>
+                                <p>{{this.description}}</p>
                             </div>
                         </div>
                         {{/each}}
@@ -489,5 +620,4 @@ export const COMPREHENSIVE_SIDEBAR_TEMPLATE = `<!DOCTYPE html>
         </div>
     </div>
 </body>
-
 </html>`;
