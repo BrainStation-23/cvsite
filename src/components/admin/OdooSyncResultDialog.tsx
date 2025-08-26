@@ -10,8 +10,10 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Button } from '@/components/ui/button';
-import { CheckCircle, XCircle, AlertTriangle, Download } from 'lucide-react';
+import { Checkbox } from '@/components/ui/checkbox';
+import { CheckCircle, XCircle, AlertTriangle, Download, UserPlus, Users } from 'lucide-react';
 import Papa from 'papaparse';
+import { useOdooSyncBulkCreate } from '@/hooks/use-odoo-sync-bulk-create';
 
 interface SyncStats {
   total_processed: number;
@@ -47,16 +49,37 @@ interface OdooSyncResultDialogProps {
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
   syncResult: SyncResult | null;
+  onBulkUpload?: (file: File) => Promise<boolean>;
+  onRefreshUsers?: () => void;
 }
 
 export const OdooSyncResultDialog: React.FC<OdooSyncResultDialogProps> = ({
   isOpen,
   onOpenChange,
-  syncResult
+  syncResult,
+  onBulkUpload,
+  onRefreshUsers
 }) => {
   if (!syncResult) return null;
 
   const { stats, not_found_employees, error_employees } = syncResult;
+
+  const bulkCreateHook = useOdooSyncBulkCreate({
+    employees: not_found_employees,
+    onBulkUpload: onBulkUpload || (async () => false),
+    onSuccess: onRefreshUsers
+  });
+
+  const {
+    selectedEmployees,
+    toggleEmployee,
+    selectAll,
+    selectNone,
+    createSelectedUsers,
+    isCreating,
+    hasSelection,
+    selectedCount
+  } = bulkCreateHook;
 
   const downloadNotFoundEmployeesCSV = () => {
     if (!not_found_employees || not_found_employees.length === 0) return;
@@ -138,20 +161,72 @@ export const OdooSyncResultDialog: React.FC<OdooSyncResultDialogProps> = ({
                   <AlertTriangle className="h-4 w-4 text-orange-500" />
                   Employees Not Found in Database ({not_found_employees.length})
                 </h4>
-                <Button 
-                  variant="outline" 
-                  size="sm"
-                  onClick={downloadNotFoundEmployeesCSV}
-                  className="flex items-center gap-2"
-                >
-                  <Download className="h-4 w-4" />
-                  Download CSV for Bulk Create
-                </Button>
+                <div className="flex items-center gap-2">
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={downloadNotFoundEmployeesCSV}
+                    className="flex items-center gap-2"
+                  >
+                    <Download className="h-4 w-4" />
+                    Download CSV
+                  </Button>
+                  {onBulkUpload && (
+                    <Button 
+                      variant="default" 
+                      size="sm"
+                      onClick={createSelectedUsers}
+                      disabled={!hasSelection || isCreating}
+                      className="flex items-center gap-2"
+                    >
+                      <UserPlus className="h-4 w-4" />
+                      {isCreating ? 'Creating...' : `Create Selected (${selectedCount})`}
+                    </Button>
+                  )}
+                </div>
               </div>
+
+              {/* Selection Controls */}
+              {onBulkUpload && (
+                <div className="flex items-center gap-4 mb-3 p-3 bg-gray-50 rounded-md">
+                  <div className="flex items-center gap-2">
+                    <Checkbox
+                      id="select-all"
+                      checked={selectedEmployees.size === not_found_employees.length && not_found_employees.length > 0}
+                      onCheckedChange={(checked) => checked ? selectAll() : selectNone()}
+                    />
+                    <label htmlFor="select-all" className="text-sm font-medium cursor-pointer">
+                      Select All ({not_found_employees.length})
+                    </label>
+                  </div>
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    onClick={selectNone}
+                    disabled={selectedEmployees.size === 0}
+                  >
+                    Clear Selection
+                  </Button>
+                  {hasSelection && (
+                    <div className="flex items-center gap-1 text-sm text-blue-600">
+                      <Users className="h-4 w-4" />
+                      {selectedCount} selected
+                    </div>
+                  )}
+                </div>
+              )}
+
               <ScrollArea className="h-64 border rounded-md p-3">
                 <div className="space-y-2">
                   {not_found_employees.map((employee, index) => (
-                    <div key={index} className="flex items-center justify-between p-3 bg-orange-50 rounded">
+                    <div key={index} className="flex items-center gap-3 p-3 bg-orange-50 rounded">
+                      {onBulkUpload && (
+                        <Checkbox
+                          id={`employee-${employee.employeeId}`}
+                          checked={selectedEmployees.has(employee.employeeId)}
+                          onCheckedChange={() => toggleEmployee(employee.employeeId)}
+                        />
+                      )}
                       <div className="flex-1">
                         <div className="font-medium">{employee.employeeId}</div>
                         <div className="text-sm text-gray-600">{employee.name}</div>
