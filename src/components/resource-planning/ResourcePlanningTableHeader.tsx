@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
@@ -14,7 +13,7 @@ interface ResourcePlanningTableHeaderProps {
   showBulkSelection?: boolean;
   isAllSelected?: boolean;
   isIndeterminate?: boolean;
-  onSelectAll?: () => void;
+  onSelectAll?: (checked: boolean | 'indeterminate') => void;
 }
 
 export const ResourcePlanningTableHeader: React.FC<ResourcePlanningTableHeaderProps> = ({

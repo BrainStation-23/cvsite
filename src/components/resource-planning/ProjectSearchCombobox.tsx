@@ -112,10 +112,31 @@ const ProjectSearchCombobox: React.FC<ProjectSearchComboboxProps> = ({
           {selectedProject ? (
             <div className="flex items-center justify-between w-full">
               <span className="truncate">{selectedProject.project_name}</span>
-              <X 
-                className="ml-2 h-4 w-4 shrink-0 opacity-50 hover:opacity-100" 
+              <span
+                className="ml-2 inline-flex h-6 w-6 items-center justify-center rounded hover:bg-muted/70 text-muted-foreground hover:text-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring cursor-pointer"
                 onClick={handleClear}
-              />
+                onMouseDown={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                }}
+                onPointerDown={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    onValueChange(null);
+                  }
+                }}
+                aria-label="Clear selection"
+                role="button"
+                tabIndex={0}
+                title="Clear selection"
+              >
+                <X className="h-4 w-4" />
+              </span>
             </div>
           ) : (
             placeholder
