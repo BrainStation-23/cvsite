@@ -49,55 +49,78 @@ export const PIPStatusTimeline: React.FC<PIPStatusTimelineProps> = ({
   };
 
   return (
-    <Card>
-      <CardContent className="p-6">
-        <div className="flex items-center justify-between mb-6">
-          <h3 className="text-lg font-semibold">PIP Progress Timeline</h3>
-          <div className="flex items-center gap-4 text-sm text-muted-foreground">
-            <span>Start: {formatDate(startDate)}</span>
-            {midDate && <span>Mid Review: {formatDate(midDate)}</span>}
-            <span>End: {formatDate(endDate)}</span>
-          </div>
-        </div>
+    <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+      {/* Timeline Card */}
+      <div className="lg:col-span-3">
+        <Card>
+          <CardContent className="p-6">
+            <h3 className="text-lg font-semibold mb-6">PIP Progress Timeline</h3>
 
-        <div className="relative">
-          {/* Progress Line */}
-          <div className="absolute top-6 left-6 w-0.5 h-full bg-gray-200"></div>
-          
-          {/* Current Progress Line */}
-          <div 
-            className="absolute top-6 left-6 w-0.5 bg-blue-500 transition-all duration-500"
-            style={{ 
-              height: `${(currentStepIndex / (statusSteps.length - 1)) * 100}%` 
-            }}
-          ></div>
+            <div className="relative">
+              {/* Vertical Progress Line */}
+              <div className="absolute left-6 top-0 w-0.5 h-full bg-gray-200"></div>
+              
+              {/* Current Progress Line */}
+              <div 
+                className="absolute left-6 top-0 w-0.5 bg-blue-500 transition-all duration-500"
+                style={{ 
+                  height: `${(currentStepIndex / Math.max(statusSteps.length - 1, 1)) * 100}%` 
+                }}
+              ></div>
 
-          {/* Steps */}
-          <div className="space-y-6">
-            {statusSteps.map((step, index) => (
-              <div key={step.key} className="flex items-start gap-4">
-                <div className={`relative z-10 rounded-full p-2 ${getStatusColor(index)}`}>
-                  {getStatusIcon(index)}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2">
-                    <h4 className="font-medium">{step.label}</h4>
-                    {index === currentStepIndex && (
-                      <Badge variant="default" className="text-xs">Current</Badge>
-                    )}
-                    {index < currentStepIndex && (
-                      <Badge variant="secondary" className="text-xs">Completed</Badge>
-                    )}
+              {/* Steps */}
+              <div className="space-y-8">
+                {statusSteps.map((step, index) => (
+                  <div key={step.key} className="flex items-start gap-4">
+                    <div className={`relative z-10 rounded-full p-2 ${getStatusColor(index)}`}>
+                      {getStatusIcon(index)}
+                    </div>
+                    <div className="flex-1 min-w-0 pt-1">
+                      <div className="flex items-center gap-2 mb-1">
+                        <h4 className="font-medium">{step.label}</h4>
+                        {index === currentStepIndex && (
+                          <Badge variant="default" className="text-xs">Current</Badge>
+                        )}
+                        {index < currentStepIndex && (
+                          <Badge variant="secondary" className="text-xs">Completed</Badge>
+                        )}
+                      </div>
+                      <p className="text-sm text-muted-foreground">
+                        {step.description}
+                      </p>
+                    </div>
                   </div>
-                  <p className="text-sm text-muted-foreground mt-1">
-                    {step.description}
-                  </p>
-                </div>
+                ))}
               </div>
-            ))}
-          </div>
-        </div>
-      </CardContent>
-    </Card>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Dates Card */}
+      <div>
+        <Card>
+          <CardContent className="p-6">
+            <h3 className="text-lg font-semibold mb-4">Important Dates</h3>
+            <div className="space-y-4">
+              <div>
+                <div className="text-sm font-medium text-muted-foreground">Start Date</div>
+                <div className="text-sm">{formatDate(startDate)}</div>
+              </div>
+              {midDate && (
+                <div>
+                  <div className="text-sm font-medium text-muted-foreground">Mid Review</div>
+                  <div className="text-sm">{formatDate(midDate)}</div>
+                </div>
+              )}
+              <div>
+                <div className="text-sm font-medium text-muted-foreground">End Date</div>
+                <div className="text-sm">{formatDate(endDate)}</div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    </div>
   );
 };
