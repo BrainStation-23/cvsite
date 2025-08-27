@@ -2,16 +2,19 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import DashboardLayout from '../../components/Layout/DashboardLayout';
-import { List } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { UserPlus, Users } from 'lucide-react';
 import { PIPListFilters } from '@/components/pip/PIPListFilters';
 import { PIPListTable } from '@/components/pip/PIPListTable';
-import { PIPDeleteDialog } from '@/components/pip/PIPDeleteDialog';
 import { usePIPManagement } from '@/hooks/use-pip-management';
+import { PIPEditDialog } from '@/components/pip/PIPEditDialog';
+import { PIPDeleteDialog } from '@/components/pip/PIPDeleteDialog';
 import { PIP } from '@/types/pip';
 
 const PIPList: React.FC = () => {
   const navigate = useNavigate();
-  const [pipToDelete, setPipToDelete] = useState<PIP | null>(null);
+  const [selectedPIPForEdit, setSelectedPIPForEdit] = useState<PIP | null>(null);
+  const [selectedPIPForDelete, setSelectedPIPForDelete] = useState<PIP | null>(null);
   
   const {
     pips,
@@ -28,42 +31,50 @@ const PIPList: React.FC = () => {
     updateSearchParams({ page });
   };
 
+  const handleInitiatePIP = () => {
+    navigate('/admin/pip/initiate');
+  };
+
   const handleEditPIP = (pip: PIP) => {
-    navigate(`/admin/pip/edit/${pip.pip_id}`);
+    // Navigate to PM Review page instead of edit page
+    navigate(`/admin/pip/pm-review/${pip.pip_id}`);
   };
 
   const handleDeletePIP = (pip: PIP) => {
-    setPipToDelete(pip);
+    setSelectedPIPForDelete(pip);
   };
 
   const handleViewPIP = (pip: PIP) => {
-    navigate(`/admin/pip/view/${pip.pip_id}`);
+    navigate(`/admin/pip/pm-review/${pip.pip_id}`);
   };
 
-  const confirmDelete = () => {
-    if (pipToDelete) {
-      deletePIP(pipToDelete.pip_id);
-      setPipToDelete(null);
+  const confirmDeletePIP = () => {
+    if (selectedPIPForDelete) {
+      deletePIP(selectedPIPForDelete.pip_id);
+      setSelectedPIPForDelete(null);
     }
-  };
-
-  const cancelDelete = () => {
-    setPipToDelete(null);
   };
 
   return (
     <DashboardLayout>
       <div className="space-y-6">
-        <div className="flex items-center gap-4">
-          <List className="h-8 w-8 text-cvsite-teal" />
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-              PIP List
-            </h1>
-            <p className="text-muted-foreground">
-              View and manage all Performance Improvement Plans
-            </p>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <Users className="h-8 w-8 text-cvsite-teal" />
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+                Performance Improvement Plans
+              </h1>
+              <p className="text-muted-foreground">
+                Manage and track performance improvement plans for employees
+              </p>
+            </div>
           </div>
+          
+          <Button onClick={handleInitiatePIP} className="flex items-center gap-2">
+            <UserPlus className="h-4 w-4" />
+            Initiate New PIP
+          </Button>
         </div>
 
         {/* Filters */}
@@ -100,14 +111,25 @@ const PIPList: React.FC = () => {
           isDeleting={isDeleting}
         />
 
-        {/* Delete Confirmation Dialog */}
-        <PIPDeleteDialog
-          isOpen={!!pipToDelete}
-          pip={pipToDelete}
-          onConfirm={confirmDelete}
-          onCancel={cancelDelete}
-          isDeleting={isDeleting}
-        />
+        {/* Edit Dialog */}
+        {selectedPIPForEdit && (
+          <PIPEditDialog
+            pip={selectedPIPForEdit}
+            isOpen={!!selectedPIPForEdit}
+            onClose={() => setSelectedPIPForEdit(null)}
+          />
+        )}
+
+        {/* Delete Dialog */}
+        {selectedPIPForDelete && (
+          <PIPDeleteDialog
+            pip={selectedPIPForDelete}
+            isOpen={!!selectedPIPForDelete}
+            onClose={() => setSelectedPIPForDelete(null)}
+            onConfirm={confirmDeletePIP}
+            isDeleting={isDeleting}
+          />
+        )}
       </div>
     </DashboardLayout>
   );
