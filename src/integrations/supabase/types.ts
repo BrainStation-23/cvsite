@@ -1552,6 +1552,10 @@ export type Database = {
         }
         Returns: Json
       }
+      get_pip_profile_details: {
+        Args: { target_profile_id: string }
+        Returns: Json
+      }
       get_planned_resource_data: {
         Args: {
           bill_type_filter?: string
