@@ -11,6 +11,7 @@ import { PIPFeedbackDisplay } from '@/components/pip/admin/PIPFeedbackDisplay';
 import { ResourcePlanningOverview } from '@/components/pip/ResourcePlanningOverview';
 import { AdminActionsPanel } from '@/components/pip/admin/AdminActionsPanel';
 import { Skeleton } from '@/components/ui/skeleton';
+import DashboardLayout from '@/components/Layout/DashboardLayout';
 
 const AdminPIPView: React.FC = () => {
   const { pipId } = useParams<{ pipId: string }>();
@@ -20,7 +21,8 @@ const AdminPIPView: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div className="space-y-6">
+      <DashboardLayout>
+        <div className="space-y-6">
         <div className="flex items-center gap-4">
           <Skeleton className="h-10 w-10" />
           <Skeleton className="h-8 w-48" />
@@ -33,11 +35,14 @@ const AdminPIPView: React.FC = () => {
           </div>
         </div>
       </div>
+      </DashboardLayout>
+      
     );
   }
 
   if (error || !pipDetails) {
     return (
+      <DashboardLayout>
       <div className="space-y-6">
         <div className="flex items-center gap-4">
           <Button
@@ -57,6 +62,7 @@ const AdminPIPView: React.FC = () => {
           </p>
         </div>
       </div>
+      </DashboardLayout>
     );
   }
 
@@ -64,6 +70,7 @@ const AdminPIPView: React.FC = () => {
   const fullName = `${profile.first_name || ''} ${profile.last_name || ''}`.trim() || 'Unknown Employee';
 
   return (
+    <DashboardLayout>
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
@@ -71,7 +78,7 @@ const AdminPIPView: React.FC = () => {
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => navigate('/admin/pip')}
+            onClick={() => navigate('/admin/pip/list')}
             className="flex items-center gap-2"
           >
             <ArrowLeft className="h-4 w-4" />
@@ -151,6 +158,7 @@ const AdminPIPView: React.FC = () => {
         </div>
       </div>
     </div>
+    </DashboardLayout>
   );
 };
 
