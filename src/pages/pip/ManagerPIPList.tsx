@@ -1,15 +1,18 @@
 
-import React, { useState } from 'react';
+import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import DashboardLayout from '../../components/Layout/DashboardLayout';
-import { UserCheck } from 'lucide-react';
-import { PIPListFilters } from '@/components/pip/PIPListFilters';
+import { UserCheck, AlertCircle } from 'lucide-react';
 import { PIPListTable } from '@/components/pip/PIPListTable';
+import { ManagerPIPFilters } from '@/components/pip/ManagerPIPFilters';
 import { usePIPManagement } from '@/hooks/use-pip-management';
+import { useAuth } from '@/contexts/AuthContext';
 import { PIP } from '@/types/pip';
+import { Card, CardContent } from '@/components/ui/card';
 
 const ManagerPIPList: React.FC = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
   
   const {
     pips,
@@ -17,8 +20,19 @@ const ManagerPIPList: React.FC = () => {
     isLoading,
     searchParams,
     updateSearchParams,
-    clearFilters,
   } = usePIPManagement();
+
+  // Auto-filter PIPs for the current manager on component mount
+  useEffect(() => {
+    if (user?.id) {
+      console.log('Setting manager filter for user:', user.id);
+      updateSearchParams({
+        managerFilter: user.id,
+        statusFilter: 'pm_feedback', // Only show PIPs that need PM feedback
+        page: 1
+      });
+    }
+  }, [user?.id, updateSearchParams]);
 
   const handlePageChange = (page: number) => {
     updateSearchParams({ page });
@@ -32,10 +46,29 @@ const ManagerPIPList: React.FC = () => {
     navigate(`/manager/pip/view/${pip.pip_id}`);
   };
 
-  // Filter PIPs that need PM feedback or are in PM review status
-  const relevantPips = pips.filter(pip => 
-    pip.status === 'pm_feedback' || pip.status === 'hr_review'
-  );
+  // Filter PIPs that are assigned to the current manager and in the appropriate status
+  const relevantPips = pips.filter(pip => {
+    // Check if PIP is assigned to current manager
+    const isAssignedToManager = pip.manager_id === user?.id;
+    
+    // Check status based on current filter
+    const statusFilter = searchParams.statusFilter;
+    let statusMatch = true;
+    
+    if (statusFilter === 'pm_feedback') {
+      statusMatch = pip.status === 'pm_feedback';
+    } else if (statusFilter === 'hr_review') {
+      statusMatch = pip.status === 'hr_review';
+    }
+    // If statusFilter is null or 'all', show all statuses
+    
+    return isAssignedToManager && statusMatch;
+  });
+
+  console.log('Current search params:', searchParams);
+  console.log('All PIPs:', pips);
+  console.log('Filtered PIPs for manager:', relevantPips);
+  console.log('Current user ID:', user?.id);
 
   return (
     <DashboardLayout>
@@ -47,45 +80,49 @@ const ManagerPIPList: React.FC = () => {
               PM Review
             </h1>
             <p className="text-muted-foreground">
-              Review and provide feedback on Performance Improvement Plans assigned to you
+              Review and provide feedback on Performance Improvement Plans for your team members
             </p>
           </div>
         </div>
 
-        {/* Filters */}
-        <PIPListFilters
+        {/* Simplified Filters for Managers */}
+        <ManagerPIPFilters
           searchQuery={searchParams.searchQuery || ''}
           onSearchQueryChange={(value) => updateSearchParams({ searchQuery: value })}
-          sbuFilter={searchParams.sbuFilter || null}
-          onSbuFilterChange={(value) => updateSearchParams({ sbuFilter: value })}
-          expertiseFilter={searchParams.expertiseFilter || null}
-          onExpertiseFilterChange={(value) => updateSearchParams({ expertiseFilter: value })}
-          managerFilter={searchParams.managerFilter || null}
-          onManagerFilterChange={(value) => updateSearchParams({ managerFilter: value })}
-          designationFilter={searchParams.designationFilter || null}
-          onDesignationFilterChange={(value) => updateSearchParams({ designationFilter: value })}
           statusFilter={searchParams.statusFilter || null}
           onStatusFilterChange={(value) => updateSearchParams({ statusFilter: value })}
-          sortBy={searchParams.sortBy || 'created_at'}
-          onSortByChange={(value) => updateSearchParams({ sortBy: value })}
-          sortOrder={searchParams.sortOrder || 'desc'}
-          onSortOrderChange={(value) => updateSearchParams({ sortOrder: value })}
-          onClearFilters={clearFilters}
           isLoading={isLoading}
         />
 
+        {/* Show message if no PIPs are assigned */}
+        {!isLoading && relevantPips.length === 0 && (
+          <Card>
+            <CardContent className="p-8 text-center">
+              <AlertCircle className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+              <h3 className="text-lg font-semibold text-muted-foreground mb-2">
+                No PIPs Assigned for Review
+              </h3>
+              <p className="text-muted-foreground">
+                You don't have any Performance Improvement Plans assigned for review at this time.
+              </p>
+            </CardContent>
+          </Card>
+        )}
+
         {/* Results Table */}
-        <PIPListTable
-          pips={relevantPips}
-          pagination={pagination}
-          isLoading={isLoading}
-          onPageChange={handlePageChange}
-          onEditPIP={handlePMReview}
-          onDeletePIP={() => {}} // Managers can't delete PIPs
-          onViewPIP={handleViewPIP}
-          isDeleting={false}
-          showActions={false} // Don't show delete actions for managers
-        />
+        {(relevantPips.length > 0 || isLoading) && (
+          <PIPListTable
+            pips={relevantPips}
+            pagination={pagination}
+            isLoading={isLoading}
+            onPageChange={handlePageChange}
+            onEditPIP={handlePMReview}
+            onDeletePIP={() => {}} // Managers can't delete PIPs
+            onViewPIP={handleViewPIP}
+            isDeleting={false}
+            showActions={false} // Don't show delete actions for managers
+          />
+        )}
       </div>
     </DashboardLayout>
   );
