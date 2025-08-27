@@ -1658,7 +1658,7 @@ export type Database = {
         }[]
       }
       get_profile_details_for_pip: {
-        Args: { profile_id: string }
+        Args: { input_profile_id: string }
         Returns: {
           current_designation: string
           employee_id: string

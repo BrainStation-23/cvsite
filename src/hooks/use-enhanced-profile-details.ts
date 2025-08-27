@@ -31,7 +31,7 @@ export function useEnhancedProfileDetails(profileId: string | null) {
 
       // Call the new RPC function to get profile details for PIP initiation
       const { data, error } = await supabase.rpc('get_profile_details_for_pip', {
-        profile_id: profileId // Use profile_id parameter instead of pip_id
+        input_profile_id: profileId // Use profile_id parameter instead of pip_id
       });
 
       if (error) {
