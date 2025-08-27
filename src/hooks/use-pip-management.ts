@@ -60,7 +60,7 @@ export function usePIPManagement() {
         throw error;
       }
 
-      return data as PIPSearchResult;
+      return data as unknown as PIPSearchResult;
     },
   });
 
