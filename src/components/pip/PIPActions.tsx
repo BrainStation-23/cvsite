@@ -2,12 +2,11 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { MoreHorizontal, Edit, Trash2, Eye } from 'lucide-react';
+import { MoreHorizontal, Trash2, Eye } from 'lucide-react';
 import { PIP } from '@/types/pip';
 
 interface PIPActionsProps {
   pip: PIP;
-  onEdit: (pip: PIP) => void;
   onDelete: (pip: PIP) => void;
   onView: (pip: PIP) => void;
   isDeleting?: boolean;
@@ -15,7 +14,6 @@ interface PIPActionsProps {
 
 export const PIPActions: React.FC<PIPActionsProps> = ({
   pip,
-  onEdit,
   onDelete,
   onView,
   isDeleting = false
@@ -36,10 +34,6 @@ export const PIPActions: React.FC<PIPActionsProps> = ({
         <DropdownMenuItem onClick={() => onView(pip)}>
           <Eye className="mr-2 h-4 w-4" />
           View Details
-        </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => onEdit(pip)}>
-          <Edit className="mr-2 h-4 w-4" />
-          Edit PIP
         </DropdownMenuItem>
         <DropdownMenuItem 
           onClick={() => onDelete(pip)}

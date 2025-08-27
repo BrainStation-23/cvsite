@@ -135,7 +135,11 @@ export const EmployeeProfileSummary: React.FC<EmployeeProfileSummaryProps> = ({
         <Button
           variant="outline"
           size="sm"
-          onClick={() => navigate(`/employee/profile?id=${profile.id}`)}
+          onClick={() => {
+            navigate(`/employee/profile/${profile.id}`)
+
+          }
+        }
           className="w-full flex items-center gap-2"
         >
           <ExternalLink className="h-4 w-4" />

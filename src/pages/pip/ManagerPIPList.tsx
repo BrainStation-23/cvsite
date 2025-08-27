@@ -16,9 +16,7 @@ const ManagerPIPList: React.FC = () => {
     pips,
     pagination,
     isLoading,
-    searchParams,
     updateSearchParams,
-    clearFilters,
   } = usePIPManagement();
 
   // Set manager filter to current user on component mount
