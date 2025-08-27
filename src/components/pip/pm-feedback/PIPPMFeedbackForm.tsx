@@ -59,7 +59,7 @@ export const PIPPMFeedbackForm: React.FC<PIPPMFeedbackFormProps> = ({
                      watchedBehavioralGapExample.length >= 10;
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
       <SkillGapsSection
         skillAreas={watchedSkillAreas}
         skillGapDescription={watchedSkillGapDescription}
@@ -88,14 +88,19 @@ export const PIPPMFeedbackForm: React.FC<PIPPMFeedbackFormProps> = ({
         }}
       />
 
-      <div className="flex justify-end gap-4">
-        <Button
-          type="submit"
-          disabled={!isFormValid || isSubmitting}
-          className="min-w-[120px]"
-        >
-          {isSubmitting ? 'Submitting...' : (isEditing ? 'Update Feedback' : 'Submit Feedback')}
-        </Button>
+      <div className="sticky bottom-0 bg-background border-t p-4 -mx-6 -mb-6">
+        <div className="flex justify-between items-center">
+          <div className="text-sm text-muted-foreground">
+            {isFormValid ? '✓ All sections completed' : 'Please complete all required sections'}
+          </div>
+          <Button
+            type="submit"
+            disabled={!isFormValid || isSubmitting}
+            size="lg"
+          >
+            {isSubmitting ? 'Saving...' : (isEditing ? 'Update Feedback' : 'Save Feedback')}
+          </Button>
+        </div>
       </div>
     </form>
   );
