@@ -713,7 +713,7 @@ export type Database = {
           overall_feedback: string | null
           profile_id: string
           start_date: string
-          status: string
+          status: Database["public"]["Enums"]["pip_status_enum"]
           updated_at: string
         }
         Insert: {
@@ -726,7 +726,7 @@ export type Database = {
           overall_feedback?: string | null
           profile_id: string
           start_date: string
-          status?: string
+          status?: Database["public"]["Enums"]["pip_status_enum"]
           updated_at?: string
         }
         Update: {
@@ -739,7 +739,7 @@ export type Database = {
           overall_feedback?: string | null
           profile_id?: string
           start_date?: string
-          status?: string
+          status?: Database["public"]["Enums"]["pip_status_enum"]
           updated_at?: string
         }
         Relationships: [
@@ -1844,7 +1844,13 @@ export type Database = {
       }
     }
     Enums: {
-      [_ in never]: never
+      pip_status_enum:
+        | "hr_initiation"
+        | "pm_feedback"
+        | "hr_review"
+        | "ld_goal_setting"
+        | "mid_review"
+        | "final_review"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1971,6 +1977,15 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      pip_status_enum: [
+        "hr_initiation",
+        "pm_feedback",
+        "hr_review",
+        "ld_goal_setting",
+        "mid_review",
+        "final_review",
+      ],
+    },
   },
 } as const
