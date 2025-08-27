@@ -56,28 +56,29 @@ export const PIPStatusTimeline: React.FC<PIPStatusTimelineProps> = ({
           <CardContent className="p-6">
             <h3 className="text-lg font-semibold mb-6">PIP Progress Timeline</h3>
 
+            {/* Horizontal Timeline */}
             <div className="relative">
-              {/* Vertical Progress Line */}
-              <div className="absolute left-6 top-0 w-0.5 h-full bg-gray-200"></div>
+              {/* Horizontal Progress Line */}
+              <div className="absolute top-8 left-0 w-full h-0.5 bg-gray-200"></div>
               
               {/* Current Progress Line */}
               <div 
-                className="absolute left-6 top-0 w-0.5 bg-blue-500 transition-all duration-500"
+                className="absolute top-8 left-0 h-0.5 bg-blue-500 transition-all duration-500"
                 style={{ 
-                  height: `${(currentStepIndex / Math.max(statusSteps.length - 1, 1)) * 100}%` 
+                  width: `${(currentStepIndex / Math.max(statusSteps.length - 1, 1)) * 100}%` 
                 }}
               ></div>
 
               {/* Steps */}
-              <div className="space-y-8">
+              <div className="flex justify-between">
                 {statusSteps.map((step, index) => (
-                  <div key={step.key} className="flex items-start gap-4">
-                    <div className={`relative z-10 rounded-full p-2 ${getStatusColor(index)}`}>
+                  <div key={step.key} className="flex flex-col items-center text-center max-w-24">
+                    <div className={`relative z-10 rounded-full p-2 mb-3 ${getStatusColor(index)}`}>
                       {getStatusIcon(index)}
                     </div>
-                    <div className="flex-1 min-w-0 pt-1">
-                      <div className="flex items-center gap-2 mb-1">
-                        <h4 className="font-medium">{step.label}</h4>
+                    <div className="space-y-1">
+                      <div className="flex flex-col items-center gap-1">
+                        <h4 className="font-medium text-sm leading-tight">{step.label}</h4>
                         {index === currentStepIndex && (
                           <Badge variant="default" className="text-xs">Current</Badge>
                         )}
@@ -85,7 +86,7 @@ export const PIPStatusTimeline: React.FC<PIPStatusTimelineProps> = ({
                           <Badge variant="secondary" className="text-xs">Completed</Badge>
                         )}
                       </div>
-                      <p className="text-sm text-muted-foreground">
+                      <p className="text-xs text-muted-foreground leading-tight">
                         {step.description}
                       </p>
                     </div>
