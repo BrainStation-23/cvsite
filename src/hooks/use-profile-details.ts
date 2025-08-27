@@ -18,7 +18,7 @@ export function useProfileDetails(profileId: string | null) {
           employee_id,
           sbu:sbus(name),
           expertise_type:expertise_types(name),
-          manager_profile:profiles!profiles_manager_fkey(
+          manager_profile:profiles!manager(
             id,
             first_name,
             last_name,
