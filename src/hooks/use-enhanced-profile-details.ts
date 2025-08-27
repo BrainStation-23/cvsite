@@ -29,10 +29,9 @@ export function useEnhancedProfileDetails(profileId: string | null) {
 
       console.log('Fetching profile details for:', profileId);
 
-      // Call the RPC function to get comprehensive profile details
-      // Note: This RPC function uses profile_id parameter, not pip_id
-      const { data, error } = await supabase.rpc('get_pip_profile_details', {
-        pip_id: profileId // This should be the correct parameter name based on the function
+      // Call the new RPC function to get profile details for PIP initiation
+      const { data, error } = await supabase.rpc('get_profile_details_for_pip', {
+        profile_id: profileId // Use profile_id parameter instead of pip_id
       });
 
       if (error) {
@@ -40,16 +39,10 @@ export function useEnhancedProfileDetails(profileId: string | null) {
         throw error;
       }
 
-      if (!data) return null;
+      if (!data || data.length === 0) return null;
 
-      // Cast the data to our expected type - first to unknown, then to our interface
-      const profileData = data as unknown as RPCProfileResponse;
-
-      // Check if the RPC function returned an error
-      if (profileData.error) {
-        console.error('RPC function error:', profileData.error, profileData.details);
-        throw new Error(profileData.error);
-      }
+      // The RPC function returns an array, so we take the first element
+      const profileData = data[0] as RPCProfileResponse;
 
       console.log('Profile data received:', profileData);
 

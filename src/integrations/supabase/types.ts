@@ -1657,6 +1657,23 @@ export type Database = {
           resource_type_name: string
         }[]
       }
+      get_profile_details_for_pip: {
+        Args: { profile_id: string }
+        Returns: {
+          current_designation: string
+          employee_id: string
+          expertise_name: string
+          first_name: string
+          id: string
+          last_name: string
+          manager_id: string
+          manager_name: string
+          profile_image: string
+          resource_planning: Json
+          sbu_name: string
+          total_utilization: number
+        }[]
+      }
       get_resource_changes_summary: {
         Args: { end_date_param?: string; start_date_param?: string }
         Returns: Json
