@@ -5,9 +5,9 @@ import { supabase } from '@/integrations/supabase/client';
 export interface SbuItem {
   id: string;
   name: string;
-  sbu_head_email: string;
-  sbu_head_name: string;
-  is_department: boolean;
+  sbu_head_email: string | null;
+  sbu_head_name: string | null;
+  is_department: boolean | null;
   created_at: string;
   updated_at: string;
 }
@@ -43,11 +43,11 @@ export const useSbuSearch = (params: SbuSearchParams = {}) => {
   return useQuery({
     queryKey: ['sbu-search', searchQuery, page, perPage, sortBy, sortOrder],
     queryFn: async (): Promise<SbuSearchResult> => {
-      let query = supabase.from('sbus').select('id, name, sbu_head_email, sbu_head_name, is_department, created_at, updated_at', { count: 'exact' });
+      let query = supabase.from('sbus').select('*', { count: 'exact' });
       
       // Apply search filter
       if (searchQuery) {
-        query = query.or(`name.ilike.%${searchQuery}%,sbu_head_email.ilike.%${searchQuery}%`);
+        query = query.or(`name.ilike.%${searchQuery}%,sbu_head_email.ilike.%${searchQuery}%,sbu_head_name.ilike.%${searchQuery}%`);
       }
       
       // Get total count for pagination
@@ -58,7 +58,7 @@ export const useSbuSearch = (params: SbuSearchParams = {}) => {
       // Get filtered count
       let countQuery = supabase.from('sbus').select('*', { count: 'exact', head: true });
       if (searchQuery) {
-        countQuery = countQuery.or(`name.ilike.%${searchQuery}%,sbu_head_email.ilike.%${searchQuery}%`);
+        countQuery = countQuery.or(`name.ilike.%${searchQuery}%,sbu_head_email.ilike.%${searchQuery}%,sbu_head_name.ilike.%${searchQuery}%`);
       }
       const { count: filteredCount } = await countQuery;
       

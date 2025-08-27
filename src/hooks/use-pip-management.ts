@@ -7,9 +7,9 @@ import { PIP, PIPFormData } from '@/types/pip';
 
 interface PIPSearchParams {
   searchQuery?: string;
-  sbuFilter?: string;
-  expertiseFilter?: string;
-  managerFilter?: string;
+  sbuFilter?: string; // UUID as string
+  expertiseFilter?: string; // UUID as string  
+  managerFilter?: string; // UUID as string
   designationFilter?: string;
   statusFilter?: string;
   page?: number;
@@ -148,6 +148,15 @@ export function usePIPManagement() {
     }));
   };
 
+  const clearFilters = () => {
+    setSearchParams({
+      page: 1,
+      itemsPerPage: 10,
+      sortBy: 'created_at',
+      sortOrder: 'desc'
+    });
+  };
+
   return {
     pips: pipsData?.pips || [],
     pagination: pipsData?.pagination,
@@ -155,6 +164,7 @@ export function usePIPManagement() {
     error,
     searchParams,
     updateSearchParams,
+    clearFilters,
     createPIP: createPIPMutation.mutate,
     updatePIP: updatePIPMutation.mutate,
     deletePIP: deletePIPMutation.mutate,

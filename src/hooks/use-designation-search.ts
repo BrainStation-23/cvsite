@@ -15,7 +15,7 @@ export interface DesignationSearchParams {
   perPage?: number;
   sortBy?: 'name' | 'created_at';
   sortOrder?: 'asc' | 'desc';
-  ensureDesignations?: string[]; // Add this to ensure specific designations are included
+  ensureDesignations?: string[]; // Ensure specific designations are included
 }
 
 export interface DesignationSearchResult {
@@ -33,7 +33,7 @@ export const useDesignationSearch = (params: DesignationSearchParams = {}) => {
   const {
     searchQuery = null,
     page = 1,
-    perPage = 50,
+    perPage = 10,
     sortBy = 'name',
     sortOrder = 'asc',
     ensureDesignations = []
@@ -42,92 +42,45 @@ export const useDesignationSearch = (params: DesignationSearchParams = {}) => {
   return useQuery({
     queryKey: ['designation-search', searchQuery, page, perPage, sortBy, sortOrder, ensureDesignations],
     queryFn: async (): Promise<DesignationSearchResult> => {
-      console.log('=== Designation Search Query ===');
-      console.log('Search query:', searchQuery);
-      console.log('Ensure designations:', ensureDesignations);
-
-      // First, get the main query results
-      let query = supabase
-        .from('designations')
-        .select('*', { count: 'exact' });
-
-      // Apply search filter
+      let query = supabase.from('designations').select('*', { count: 'exact' });
+      
+      // Apply search filter or ensure specific designations are included
       if (searchQuery) {
         query = query.ilike('name', `%${searchQuery}%`);
+      } else if (ensureDesignations.length > 0) {
+        // If no search but we need to ensure specific designations, include them
+        query = query.or(`name.in.(${ensureDesignations.map(d => `"${d}"`).join(',')})`);
       }
-
-      // Apply sorting
-      query = query.order(sortBy, { ascending: sortOrder === 'asc' });
-
-      // Apply pagination
-      const from = (page - 1) * perPage;
-      const to = from + perPage - 1;
-      query = query.range(from, to);
-
-      const { data, error, count } = await query;
-
-      if (error) throw error;
-
-      let mainResults = data || [];
-      console.log('Main results count:', mainResults.length);
-
-      // If we have designations to ensure, fetch them separately
-      let ensuredDesignations: DesignationItem[] = [];
-      if (ensureDesignations.length > 0) {
-        console.log('Fetching ensured designations...');
-        const { data: ensuredData, error: ensuredError } = await supabase
-          .from('designations')
-          .select('*')
-          .in('name', ensureDesignations);
-
-        if (ensuredError) {
-          console.error('Error fetching ensured designations:', ensuredError);
-        } else {
-          ensuredDesignations = ensuredData || [];
-          console.log('Ensured designations found:', ensuredDesignations.length);
-        }
-      }
-
-      // Merge results, avoiding duplicates
-      const mainResultNames = new Set(mainResults.map(d => d.name));
-      const additionalDesignations = ensuredDesignations.filter(d => !mainResultNames.has(d.name));
       
-      // If we have additional designations to include, we need to make room
-      let finalResults: DesignationItem[] = [];
-      if (additionalDesignations.length > 0) {
-        // Add ensured designations first (they take priority)
-        finalResults = [...ensuredDesignations];
-        
-        // Then add main results up to the limit, avoiding duplicates
-        const remainingSlots = perPage - ensuredDesignations.length;
-        const remainingMainResults = mainResults.slice(0, Math.max(0, remainingSlots));
-        finalResults = [...finalResults, ...remainingMainResults];
-        
-        console.log('Final results with ensured designations:', finalResults.length);
-      } else {
-        finalResults = mainResults;
-      }
-
-      // Get total count for unfiltered data
+      // Get total count for pagination
       const { count: totalCount } = await supabase
         .from('designations')
         .select('*', { count: 'exact', head: true });
-
-      const filteredCount = count || 0;
-      const pageCount = Math.ceil(filteredCount / perPage);
-
-      console.log('Total designations in DB:', totalCount);
-      console.log('Filtered count:', filteredCount);
-      console.log('Returning designations:', finalResults.length);
-
+      
+      // Get filtered count
+      let countQuery = supabase.from('designations').select('*', { count: 'exact', head: true });
+      if (searchQuery) {
+        countQuery = countQuery.ilike('name', `%${searchQuery}%`);
+      }
+      const { count: filteredCount } = await countQuery;
+      
+      // Apply sorting and pagination
+      query = query
+        .order(sortBy, { ascending: sortOrder === 'asc' })
+        .range((page - 1) * perPage, page * perPage - 1);
+      
+      const { data, error } = await query;
+      
+      if (error) throw error;
+      
       return {
-        designations: finalResults,
+        designations: data || [],
         pagination: {
           total_count: totalCount || 0,
-          filtered_count: filteredCount,
+          filtered_count: filteredCount || 0,
           page,
           per_page: perPage,
-          page_count: pageCount
+          page_count: Math.ceil((filteredCount || 0) / perPage)
         }
       };
     },
