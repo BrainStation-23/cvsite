@@ -1,6 +1,5 @@
 
 import html2pdf from 'html2pdf.js';
-import { STANDARD_CV_CSS } from '@/constants/cv-template-standards';
 import { templateValidator } from '@/utils/template-validator';
 
 interface PDFEngineOptions {
@@ -40,77 +39,25 @@ export class PDFEngine {
     };
   }
 
-  private injectStandardCSS(htmlContent: string): string {
-    // Check if standard CSS is already included
-    if (htmlContent.includes('cv-container') && htmlContent.includes('<style>')) {
-      return htmlContent;
-    }
 
-    // Find the head tag or create one
-    const headMatch = htmlContent.match(/<head[^>]*>/i);
-    if (headMatch) {
-      return htmlContent.replace(
-        headMatch[0],
-        `${headMatch[0]}\n<style>\n${STANDARD_CV_CSS}\n</style>`
-      );
-    }
-
-    // If no head tag, add style at the beginning
-    return `<style>\n${STANDARD_CV_CSS}\n</style>\n${htmlContent}`;
-  }
-
-  private optimizeForPDF(htmlContent: string): string {
-    let optimized = htmlContent;
-
-    // Ensure proper page break handling
-    optimized = optimized.replace(
-      /<div class="cv-section"/g,
-      '<div class="cv-section cv-page-break-avoid"'
-    );
-
-    // Add page break opportunities between major sections
-    optimized = optimized.replace(
-      /<\/section>\s*<section/g,
-      '</section>\n<div class="cv-page-break-auto"></div>\n<section'
-    );
-
-    return optimized;
-  }
 
   private async generatePDFWithPuppeteer(
     htmlContent: string, 
-    options: PDFEngineOptions = {}
   ): Promise<Blob> {
-    const { filename = 'cv-export', puppeteerOptions = {} } = options;
+
     
     console.log('Attempting PDF generation with Puppeteer service...');
     
-    // Default Puppeteer options
-    const defaultPuppeteerOptions = {
-      format: 'A4',
-      printBackground: true,
-      margin: {
-        top: '0.5in',
-        right: '0.5in',
-        bottom: '0.5in',
-        left: '0.5in'
-      },
-      ...puppeteerOptions
-    };
 
-    // Create request body with HTML content and options
-    const requestBody = JSON.stringify({
-      html: htmlContent,
-      options: defaultPuppeteerOptions
-    });
+
 
     const response = await fetch(this.serviceConfig.url, {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json',
+        'Content-Type': 'text/html',
         'Accept': 'application/pdf'
       },
-      body: requestBody,
+      body: htmlContent,
       signal: AbortSignal.timeout(this.serviceConfig.timeout)
     });
 
@@ -204,7 +151,7 @@ export class PDFEngine {
     retryCount: number = 0
   ): Promise<Blob> {
     try {
-      return await this.generatePDFWithPuppeteer(htmlContent, options);
+      return await this.generatePDFWithPuppeteer(htmlContent);
     } catch (error) {
       console.warn(`Puppeteer attempt ${retryCount + 1} failed:`, error);
       
@@ -239,12 +186,6 @@ export class PDFEngine {
     // Process HTML content
     let processedHTML = htmlContent;
     
-    if (includeStandardCSS) {
-      processedHTML = this.injectStandardCSS(processedHTML);
-    }
-    
-    processedHTML = this.optimizeForPDF(processedHTML);
-
     // Try Puppeteer service first, fallback to html2pdf if it fails
     try {
       const pdfBlob = await this.attemptPuppeteerWithRetry(processedHTML, options);
