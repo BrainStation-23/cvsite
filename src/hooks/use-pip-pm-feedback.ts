@@ -15,7 +15,7 @@ export function usePIPPMFeedback(pipId: string | null) {
       if (!pipId) throw new Error('PIP ID is required');
 
       const { data, error } = await supabase.rpc('get_pip_profile_details', {
-        pip_id: pipId
+        input_pip_id: pipId
       });
 
       if (error) {

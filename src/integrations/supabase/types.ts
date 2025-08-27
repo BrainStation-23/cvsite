@@ -1603,7 +1603,7 @@ export type Database = {
         Returns: Json
       }
       get_pip_profile_details: {
-        Args: { pip_id: string }
+        Args: { input_pip_id: string }
         Returns: Json
       }
       get_planned_resource_data: {
