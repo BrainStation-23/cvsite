@@ -15,6 +15,7 @@ import { PIPFormData } from '@/types/pip';
 import { EmployeeProfileCard } from './EmployeeProfileCard';
 import { ResourcePlanningOverview } from './ResourcePlanningOverview';
 import { AlertTriangle, CheckCircle, Clock } from 'lucide-react';
+import { addMonths, addDays, differenceInDays } from 'date-fns';
 
 const pipFormSchema = z.object({
   profile_id: z.string().min(1, 'Employee is required'),
@@ -47,6 +48,8 @@ type PIPFormValues = z.infer<typeof pipFormSchema>;
 
 export const PIPInitiationForm: React.FC = () => {
   const [selectedProfileId, setSelectedProfileId] = useState<string | null>(null);
+  const [hasSetMidDate, setHasSetMidDate] = useState(false);
+  const [hasSetEndDate, setHasSetEndDate] = useState(false);
   const { data: profileDetails, isLoading: isLoadingProfile } = useEnhancedProfileDetails(selectedProfileId);
   const { createPIP, isCreating } = usePIPManagement();
 
@@ -69,6 +72,9 @@ export const PIPInitiationForm: React.FC = () => {
   });
 
   const watchedOverallFeedback = watch('overall_feedback');
+  const watchedStartDate = watch('start_date');
+  const watchedMidDate = watch('mid_date');
+  const watchedEndDate = watch('end_date');
 
   useEffect(() => {
     if (selectedProfileId) {
@@ -77,6 +83,38 @@ export const PIPInitiationForm: React.FC = () => {
       setValue('profile_id', '');
     }
   }, [selectedProfileId, setValue]);
+
+  // Auto-set dates when start date changes (only if mid/end dates haven't been manually set)
+  useEffect(() => {
+    if (watchedStartDate && !hasSetMidDate && !hasSetEndDate) {
+      const startDate = new Date(watchedStartDate);
+      
+      // Set end date to 1 month from start date
+      const endDate = addMonths(startDate, 1);
+      setValue('end_date', endDate.toISOString().split('T')[0]);
+      
+      // Set mid date to the middle of start and end date
+      const daysDifference = differenceInDays(endDate, startDate);
+      const midDate = addDays(startDate, Math.floor(daysDifference / 2));
+      setValue('mid_date', midDate.toISOString().split('T')[0]);
+    }
+  }, [watchedStartDate, hasSetMidDate, hasSetEndDate, setValue]);
+
+  // Track when mid date is manually changed
+  const handleMidDateChange = (date: string) => {
+    setValue('mid_date', date);
+    if (date) {
+      setHasSetMidDate(true);
+    }
+  };
+
+  // Track when end date is manually changed
+  const handleEndDateChange = (date: string) => {
+    setValue('end_date', date);
+    if (date) {
+      setHasSetEndDate(true);
+    }
+  };
 
   const onSubmit = (data: PIPFormValues) => {
     const formData: PIPFormData = {
@@ -91,8 +129,17 @@ export const PIPInitiationForm: React.FC = () => {
       onSuccess: () => {
         reset();
         setSelectedProfileId(null);
+        setHasSetMidDate(false);
+        setHasSetEndDate(false);
       }
     });
+  };
+
+  const handleResetForm = () => {
+    reset();
+    setSelectedProfileId(null);
+    setHasSetMidDate(false);
+    setHasSetEndDate(false);
   };
 
   const getFormCompletionStatus = () => {
@@ -180,7 +227,7 @@ export const PIPInitiationForm: React.FC = () => {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-lg">
-              <div className={`w-3 h-3 rounded-full ${(watch('start_date') && watch('end_date')) ? 'bg-green-500' : 'bg-gray-300'}`} />
+              <div className={`w-3 h-3 rounded-full ${(watchedStartDate && watchedEndDate) ? 'bg-green-500' : 'bg-gray-300'}`} />
               Step 2: Configure Timeline
             </CardTitle>
           </CardHeader>
@@ -192,7 +239,7 @@ export const PIPInitiationForm: React.FC = () => {
                   Start Date *
                 </Label>
                 <DatePicker
-                  value={watch('start_date')}
+                  value={watchedStartDate}
                   onChange={(date) => setValue('start_date', date)}
                   placeholder="Select start date"
                 />
@@ -210,8 +257,8 @@ export const PIPInitiationForm: React.FC = () => {
                   Mid Review Date
                 </Label>
                 <DatePicker
-                  value={watch('mid_date')}
-                  onChange={(date) => setValue('mid_date', date)}
+                  value={watchedMidDate}
+                  onChange={handleMidDateChange}
                   placeholder="Select mid review date"
                 />
                 {errors.mid_date && (
@@ -228,8 +275,8 @@ export const PIPInitiationForm: React.FC = () => {
                   End Date *
                 </Label>
                 <DatePicker
-                  value={watch('end_date')}
-                  onChange={(date) => setValue('end_date', date)}
+                  value={watchedEndDate}
+                  onChange={handleEndDateChange}
                   placeholder="Select end date"
                 />
                 {errors.end_date && (
@@ -247,7 +294,7 @@ export const PIPInitiationForm: React.FC = () => {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-lg">
-              <div className={`w-3 h-3 rounded-full ${(watch('overall_feedback')?.length >= 10) ? 'bg-green-500' : 'bg-gray-300'}`} />
+              <div className={`w-3 h-3 rounded-full ${(watchedOverallFeedback?.length >= 10) ? 'bg-green-500' : 'bg-gray-300'}`} />
               Step 3: Performance Feedback
             </CardTitle>
           </CardHeader>
@@ -284,10 +331,7 @@ export const PIPInitiationForm: React.FC = () => {
               <Button
                 type="button"
                 variant="outline"
-                onClick={() => {
-                  reset();
-                  setSelectedProfileId(null);
-                }}
+                onClick={handleResetForm}
                 className="flex-1"
               >
                 Reset Form
