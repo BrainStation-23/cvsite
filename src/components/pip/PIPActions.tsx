@@ -3,7 +3,16 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { MoreHorizontal, Eye, Edit, Trash2 } from 'lucide-react';
-import { PIP } from '@/hooks/use-pips';
+
+// Define PIP interface locally since we don't have access to the use-pips hook
+export interface PIP {
+  id: string;
+  employee_id: string;
+  status: string;
+  created_at: string;
+  updated_at: string;
+  [key: string]: any; // Allow for additional properties
+}
 
 export interface PIPActionsProps {
   pip: PIP;
