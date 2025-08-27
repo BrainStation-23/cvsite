@@ -135,9 +135,18 @@ export function usePIPForm({ initialData, onSubmit }: UsePIPFormOptions) {
 
   const getFormCompletionStatus = () => {
     const steps = [
-      { name: 'Employee Selected', completed: !!selectedProfileId },
-      { name: 'Dates Set', completed: watchedStartDate && watchedEndDate },
-      { name: 'Feedback Added', completed: watchedOverallFeedback?.length >= 10 }
+      { 
+        name: 'Employee Selected', 
+        completed: Boolean(selectedProfileId) 
+      },
+      { 
+        name: 'Dates Set', 
+        completed: Boolean(watchedStartDate && watchedEndDate) 
+      },
+      { 
+        name: 'Feedback Added', 
+        completed: Boolean(watchedOverallFeedback && watchedOverallFeedback.length >= 10) 
+      }
     ];
     const completedSteps = steps.filter(step => step.completed).length;
     return { steps, completedSteps, total: steps.length };
