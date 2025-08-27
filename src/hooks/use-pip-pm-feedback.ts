@@ -28,7 +28,7 @@ export function usePIPPMFeedback(pipId: string | null) {
     enabled: !!pipId,
   });
 
-  // Create PM feedback mutation
+  // Create PM feedback mutation - using raw SQL since table types aren't generated yet
   const createPMFeedbackMutation = useMutation({
     mutationFn: async (formData: PIPPMFeedbackFormData) => {
       if (!pipId) throw new Error('PIP ID is required');
@@ -36,20 +36,18 @@ export function usePIPPMFeedback(pipId: string | null) {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('User not authenticated');
 
+      // Use raw SQL query since pip_pm_feedback table isn't in generated types yet
       const { data, error } = await supabase
-        .from('pip_pm_feedback')
-        .insert({
-          pip_id: pipId,
-          skill_areas: formData.skill_areas,
-          skill_gap_description: formData.skill_gap_description,
-          skill_gap_example: formData.skill_gap_example,
-          behavioral_areas: formData.behavioral_areas,
-          behavioral_gap_description: formData.behavioral_gap_description,
-          behavioral_gap_example: formData.behavioral_gap_example,
-          created_by: user.id
-        })
-        .select()
-        .single();
+        .rpc('insert_pip_pm_feedback', {
+          p_pip_id: pipId,
+          p_skill_areas: formData.skill_areas,
+          p_skill_gap_description: formData.skill_gap_description,
+          p_skill_gap_example: formData.skill_gap_example,
+          p_behavioral_areas: formData.behavioral_areas,
+          p_behavioral_gap_description: formData.behavioral_gap_description,
+          p_behavioral_gap_example: formData.behavioral_gap_example,
+          p_created_by: user.id
+        });
 
       if (error) throw error;
       return data;
@@ -68,11 +66,15 @@ export function usePIPPMFeedback(pipId: string | null) {
   const updatePMFeedbackMutation = useMutation({
     mutationFn: async ({ id, updates }: { id: string; updates: Partial<PIPPMFeedbackFormData> }) => {
       const { data, error } = await supabase
-        .from('pip_pm_feedback')
-        .update(updates)
-        .eq('id', id)
-        .select()
-        .single();
+        .rpc('update_pip_pm_feedback', {
+          p_feedback_id: id,
+          p_skill_areas: updates.skill_areas,
+          p_skill_gap_description: updates.skill_gap_description,
+          p_skill_gap_example: updates.skill_gap_example,
+          p_behavioral_areas: updates.behavioral_areas,
+          p_behavioral_gap_description: updates.behavioral_gap_description,
+          p_behavioral_gap_example: updates.behavioral_gap_example
+        });
 
       if (error) throw error;
       return data;
@@ -89,7 +91,7 @@ export function usePIPPMFeedback(pipId: string | null) {
 
   // Update PIP status mutation
   const updatePIPStatusMutation = useMutation({
-    mutationFn: async (newStatus: string) => {
+    mutationFn: async (newStatus: 'hr_initiation' | 'pm_feedback' | 'hr_review' | 'ld_goal_setting' | 'mid_review' | 'final_review') => {
       if (!pipId) throw new Error('PIP ID is required');
 
       const { data, error } = await supabase
