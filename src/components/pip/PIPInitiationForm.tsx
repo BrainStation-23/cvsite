@@ -66,9 +66,14 @@ export const PIPInitiationForm: React.FC<PIPInitiationFormProps> = ({
     getFormCompletionStatus,
   } = pipForm;
 
+  // Use enhanced profile details hook for the selected profile
+  const { data: selectedProfileDetails, isLoading: isLoadingSelectedProfile } = useEnhancedProfileDetails(
+    selectedProfileId
+  );
+
   const { steps, completedSteps, total } = getFormCompletionStatus();
   const isSubmitting = isCreating || isUpdating;
-  const isFormValid = !isLoadingProfile && completedSteps >= total;
+  const isFormValid = !isLoadingProfile && !isLoadingSelectedProfile && completedSteps >= total;
 
   return (
     <div className="max-w-6xl mx-auto space-y-6">
@@ -88,11 +93,19 @@ export const PIPInitiationForm: React.FC<PIPInitiationFormProps> = ({
           disabled={isEditing}
         />
 
-        {/* Employee Profile Display */}
-        {profileDetails && (
+        {/* Employee Profile Display - Show for both editing and new creation when profile is selected */}
+        {((isEditing && profileDetails) || (!isEditing && selectedProfileDetails)) && (
           <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-            <EmployeeProfileCard profile={profileDetails} />
-            <ResourcePlanningOverview resourcePlanning={profileDetails.resource_planning} />
+            <EmployeeProfileCard 
+              profile={isEditing ? profileDetails! : selectedProfileDetails!} 
+            />
+            <ResourcePlanningOverview 
+              resourcePlanning={
+                isEditing 
+                  ? profileDetails!.resource_planning 
+                  : selectedProfileDetails!.resource_planning
+              } 
+            />
           </div>
         )}
 
