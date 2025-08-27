@@ -1,60 +1,32 @@
 
 import React from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { PIP } from '@/types/pip';
 import { PIPActions } from './PIPActions';
 
+interface PaginationInfo {
+  total_count: number;
+  filtered_count: number;
+  page: number;
+  per_page: number;
+  page_count: number;
+}
+
 interface PIPListTableProps {
   pips: PIP[];
-  pagination?: {
-    total_count: number;
-    filtered_count: number;
-    page: number;
-    per_page: number;
-    page_count: number;
-  };
+  pagination?: PaginationInfo;
   isLoading: boolean;
   onPageChange: (page: number) => void;
   onEditPIP: (pip: PIP) => void;
   onDeletePIP: (pip: PIP) => void;
   onViewPIP: (pip: PIP) => void;
-  isDeleting?: boolean;
+  isDeleting: boolean;
+  showActions?: boolean;
 }
-
-const getStatusLabel = (status: string) => {
-  const statusLabels: Record<string, string> = {
-    'hr_initiation': 'HR Initiation',
-    'pm_feedback': 'PM Feedback',
-    'hr_review': 'HR Review',
-    'ld_goal_setting': 'L&D Goal Setting',
-    'mid_review': 'Mid Review',
-    'final_review': 'Final Review',
-  };
-  return statusLabels[status] || status;
-};
-
-const getStatusBadgeVariant = (status: string) => {
-  switch (status) {
-    case 'hr_initiation':
-      return 'outline';
-    case 'pm_feedback':
-      return 'secondary';
-    case 'hr_review':
-      return 'default';
-    case 'ld_goal_setting':
-      return 'secondary';
-    case 'mid_review':
-      return 'default';
-    case 'final_review':
-      return 'destructive';
-    default:
-      return 'outline';
-  }
-};
 
 export const PIPListTable: React.FC<PIPListTableProps> = ({
   pips,
@@ -64,97 +36,153 @@ export const PIPListTable: React.FC<PIPListTableProps> = ({
   onEditPIP,
   onDeletePIP,
   onViewPIP,
-  isDeleting = false
+  isDeleting,
+  showActions = true
 }) => {
   if (isLoading) {
     return (
-      <div className="rounded-md border">
-        <div className="p-8 text-center">
-          <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-cvsite-teal"></div>
-          <p className="mt-2 text-muted-foreground">Loading PIPs...</p>
-        </div>
-      </div>
+      <Card>
+        <CardContent className="p-6">
+          <div className="flex items-center justify-center h-32">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+          </div>
+        </CardContent>
+      </Card>
     );
   }
 
-  if (!pips.length) {
+  if (pips.length === 0) {
     return (
-      <div className="rounded-md border">
-        <div className="p-8 text-center">
-          <p className="text-muted-foreground">No Performance Improvement Plans found.</p>
-        </div>
-      </div>
+      <Card>
+        <CardContent className="p-6">
+          <div className="text-center py-8">
+            <p className="text-muted-foreground">No PIPs found matching your criteria.</p>
+          </div>
+        </CardContent>
+      </Card>
     );
   }
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'hr_initiation':
+        return 'bg-yellow-100 text-yellow-800';
+      case 'pm_feedback':
+        return 'bg-blue-100 text-blue-800';
+      case 'hr_review':
+        return 'bg-purple-100 text-purple-800';
+      case 'ld_goal_setting':
+        return 'bg-orange-100 text-orange-800';
+      case 'mid_review':
+        return 'bg-indigo-100 text-indigo-800';
+      case 'final_review':
+        return 'bg-green-100 text-green-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
+    }
+  };
+
+  const formatStatus = (status: string) => {
+    return status.replace('_', ' ').toUpperCase();
+  };
 
   return (
     <div className="space-y-4">
-      <div className="rounded-md border">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Employee</TableHead>
-              <TableHead>Designation</TableHead>
-              <TableHead>SBU</TableHead>
-              <TableHead>Manager</TableHead>
-              <TableHead>Start Date</TableHead>
-              <TableHead>End Date</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead className="w-12">Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
+      <Card>
+        <CardHeader>
+          <CardTitle>
+            Performance Improvement Plans
+            {pagination && (
+              <span className="text-sm font-normal text-muted-foreground ml-2">
+                ({pagination.filtered_count} of {pagination.total_count} total)
+              </span>
+            )}
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
             {pips.map((pip) => (
-              <TableRow key={pip.pip_id}>
-                <TableCell>
-                  <div className="flex items-center space-x-3">
-                    <Avatar className="h-8 w-8">
-                      <AvatarImage src={pip.profile_image || ''} alt={pip.employee_name} />
+              <div key={pip.pip_id} className="border rounded-lg p-4 hover:bg-muted/50 transition-colors">
+                <div className="flex items-start justify-between">
+                  <div className="flex items-start space-x-4">
+                    <Avatar className="h-12 w-12">
+                      <AvatarImage 
+                        src={pip.profile_image || ''} 
+                        alt={pip.employee_name}
+                      />
                       <AvatarFallback>
                         {pip.employee_name.split(' ').map(n => n[0]).join('')}
                       </AvatarFallback>
                     </Avatar>
-                    <div>
-                      <div className="font-medium">{pip.employee_name}</div>
-                      <div className="text-sm text-muted-foreground">{pip.employee_id}</div>
+                    
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-2">
+                        <h3 className="font-semibold">{pip.employee_name}</h3>
+                        <Badge variant="outline">{pip.employee_id}</Badge>
+                      </div>
+                      
+                      {pip.designation && (
+                        <p className="text-sm text-muted-foreground">{pip.designation}</p>
+                      )}
+                      
+                      <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                        {pip.sbu_name && <span>SBU: {pip.sbu_name}</span>}
+                        {pip.expertise_name && <span>Expertise: {pip.expertise_name}</span>}
+                        {pip.manager_name && <span>Manager: {pip.manager_name}</span>}
+                      </div>
+                      
+                      <div className="flex items-center gap-2">
+                        <Badge className={getStatusColor(pip.status)}>
+                          {formatStatus(pip.status)}
+                        </Badge>
+                        <span className="text-xs text-muted-foreground">
+                          Created: {new Date(pip.created_at).toLocaleDateString()}
+                        </span>
+                      </div>
                     </div>
                   </div>
-                </TableCell>
-                <TableCell>{pip.designation || '-'}</TableCell>
-                <TableCell>{pip.sbu_name || '-'}</TableCell>
-                <TableCell>{pip.manager_name || '-'}</TableCell>
-                <TableCell>{new Date(pip.start_date).toLocaleDateString()}</TableCell>
-                <TableCell>{new Date(pip.end_date).toLocaleDateString()}</TableCell>
-                <TableCell>
-                  <Badge variant={getStatusBadgeVariant(pip.status)}>
-                    {getStatusLabel(pip.status)}
-                  </Badge>
-                </TableCell>
-                <TableCell>
-                  <PIPActions
-                    pip={pip}
-                    onEdit={onEditPIP}
-                    onDelete={onDeletePIP}
-                    onView={onViewPIP}
-                    isDeleting={isDeleting}
-                  />
-                </TableCell>
-              </TableRow>
+                  
+                  {showActions && (
+                    <PIPActions
+                      pip={pip}
+                      onEdit={onEditPIP}
+                      onDelete={onDeletePIP}
+                      onView={onViewPIP}
+                      isDeleting={isDeleting}
+                    />
+                  )}
+                  
+                  {!showActions && (
+                    <div className="flex gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => onViewPIP(pip)}
+                      >
+                        View Details
+                      </Button>
+                      <Button
+                        size="sm"
+                        onClick={() => onEditPIP(pip)}
+                      >
+                        Review
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              </div>
             ))}
-          </TableBody>
-        </Table>
-      </div>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Pagination */}
       {pagination && pagination.page_count > 1 && (
         <div className="flex items-center justify-between">
           <div className="text-sm text-muted-foreground">
-            Showing {((pagination.page - 1) * pagination.per_page) + 1} to{' '}
-            {Math.min(pagination.page * pagination.per_page, pagination.filtered_count)} of{' '}
-            {pagination.filtered_count} PIPs
+            Page {pagination.page} of {pagination.page_count}
           </div>
-          
-          <div className="flex items-center gap-2">
+          <div className="flex items-center space-x-2">
             <Button
               variant="outline"
               size="sm"
@@ -164,11 +192,6 @@ export const PIPListTable: React.FC<PIPListTableProps> = ({
               <ChevronLeft className="h-4 w-4" />
               Previous
             </Button>
-            
-            <span className="text-sm">
-              Page {pagination.page} of {pagination.page_count}
-            </span>
-            
             <Button
               variant="outline"
               size="sm"
