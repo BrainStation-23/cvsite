@@ -139,7 +139,7 @@ const AdminPIPView: React.FC = () => {
             finalReview={pip.final_review}
             pmFeedback={pm_feedback}
           />
-          <ResourcePlanningOverview resourcePlanning={pipDetails.profile?.resource_planning || []} />
+          <ResourcePlanningOverview resourcePlanning={profile.resource_planning || []} />
         </div>
 
         {/* Right Column - Employee & Actions */}

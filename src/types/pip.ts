@@ -76,6 +76,7 @@ export interface PIPDetailsResponse {
     profile_image: string | null;
     current_designation: string | null;
     biography: string | null;
+    resource_planning: ResourcePlanningItem[];
   };
   sbu: {
     id: string;
