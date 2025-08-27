@@ -7,13 +7,11 @@ import { UserPlus, Users } from 'lucide-react';
 import { PIPListFilters } from '@/components/pip/PIPListFilters';
 import { PIPListTable } from '@/components/pip/PIPListTable';
 import { usePIPManagement } from '@/hooks/use-pip-management';
-import { PIPEditDialog } from '@/components/pip/PIPEditDialog';
 import { PIPDeleteDialog } from '@/components/pip/PIPDeleteDialog';
 import { PIP } from '@/types/pip';
 
 const PIPList: React.FC = () => {
   const navigate = useNavigate();
-  const [selectedPIPForEdit, setSelectedPIPForEdit] = useState<PIP | null>(null);
   const [selectedPIPForDelete, setSelectedPIPForDelete] = useState<PIP | null>(null);
   
   const {
@@ -111,21 +109,12 @@ const PIPList: React.FC = () => {
           isDeleting={isDeleting}
         />
 
-        {/* Edit Dialog */}
-        {selectedPIPForEdit && (
-          <PIPEditDialog
-            pip={selectedPIPForEdit}
-            isOpen={!!selectedPIPForEdit}
-            onClose={() => setSelectedPIPForEdit(null)}
-          />
-        )}
-
         {/* Delete Dialog */}
         {selectedPIPForDelete && (
           <PIPDeleteDialog
             pip={selectedPIPForDelete}
             isOpen={!!selectedPIPForDelete}
-            onClose={() => setSelectedPIPForDelete(null)}
+            onCancel={() => setSelectedPIPForDelete(null)}
             onConfirm={confirmDeletePIP}
             isDeleting={isDeleting}
           />
