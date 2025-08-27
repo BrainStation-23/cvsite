@@ -19,11 +19,12 @@ export function useProfileDetails(profileId: string | null) {
           sbu:sbus(name),
           expertise_type:expertise_types(name),
           manager_profile:profiles!profiles_manager_fkey(
+            id,
             first_name,
             last_name,
             general_information(first_name, last_name)
           ),
-          general_information(current_designation)
+          general_information(current_designation, profile_image)
         `)
         .eq('id', profileId)
         .single();
@@ -45,12 +46,16 @@ export function useProfileDetails(profileId: string | null) {
         first_name: data.first_name,
         last_name: data.last_name,
         employee_id: data.employee_id,
+        profile_image: data.general_information?.profile_image || null,
         sbu_name: data.sbu?.name || null,
         expertise_name: data.expertise_type?.name || null,
         manager_name: managerProfile 
           ? `${managerProfile.general_information?.first_name || managerProfile.first_name || ''} ${managerProfile.general_information?.last_name || managerProfile.last_name || ''}`.trim()
           : null,
+        manager_id: managerProfile?.id || null,
         current_designation: data.general_information?.current_designation || null,
+        resource_planning: [], // Empty array as this hook doesn't fetch resource planning
+        total_utilization: 0, // Default to 0 as this hook doesn't calculate utilization
       };
     },
     enabled: !!profileId,
