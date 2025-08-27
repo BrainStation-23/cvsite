@@ -35,6 +35,11 @@ export function useProfileDetails(profileId: string | null) {
 
       if (!data) return null;
 
+      // Handle manager profile data - it should be a single object, not an array
+      const managerProfile = Array.isArray(data.manager_profile) 
+        ? data.manager_profile[0] 
+        : data.manager_profile;
+
       return {
         id: data.id,
         first_name: data.first_name,
@@ -42,8 +47,8 @@ export function useProfileDetails(profileId: string | null) {
         employee_id: data.employee_id,
         sbu_name: data.sbu?.name || null,
         expertise_name: data.expertise_type?.name || null,
-        manager_name: data.manager_profile 
-          ? `${data.manager_profile.general_information?.first_name || data.manager_profile.first_name || ''} ${data.manager_profile.general_information?.last_name || data.manager_profile.last_name || ''}`.trim()
+        manager_name: managerProfile 
+          ? `${managerProfile.general_information?.first_name || managerProfile.first_name || ''} ${managerProfile.general_information?.last_name || managerProfile.last_name || ''}`.trim()
           : null,
         current_designation: data.general_information?.current_designation || null,
       };
