@@ -192,7 +192,7 @@ function App(): React.ReactElement {
                 </ProtectedRoute>
               }
             />
-            <Route path="/admin/pip/edit/:pipId" element={
+            <Route path="/admin/pip/view/:pipId" element={
               <ProtectedRoute allowedRoles={['admin']}>
                   <AdminPIPView />
               </ProtectedRoute>
