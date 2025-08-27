@@ -31,6 +31,15 @@ interface PIPListFiltersProps {
   isLoading?: boolean;
 }
 
+const PIP_STATUS_OPTIONS = [
+  { value: 'hr_initiation', label: 'HR Initiation' },
+  { value: 'pm_feedback', label: 'PM Feedback' },
+  { value: 'hr_review', label: 'HR Review' },
+  { value: 'ld_goal_setting', label: 'L&D Goal Setting' },
+  { value: 'mid_review', label: 'Mid Review' },
+  { value: 'final_review', label: 'Final Review' },
+];
+
 export const PIPListFilters: React.FC<PIPListFiltersProps> = ({
   searchQuery,
   onSearchQueryChange,
@@ -136,9 +145,11 @@ export const PIPListFilters: React.FC<PIPListFiltersProps> = ({
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Statuses</SelectItem>
-                <SelectItem value="active">Active</SelectItem>
-                <SelectItem value="completed">Completed</SelectItem>
-                <SelectItem value="cancelled">Cancelled</SelectItem>
+                {PIP_STATUS_OPTIONS.map((status) => (
+                  <SelectItem key={status.value} value={status.value}>
+                    {status.label}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>

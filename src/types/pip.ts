@@ -7,7 +7,7 @@ export interface PIP {
   mid_date: string | null;
   end_date: string;
   final_review: string | null;
-  status: 'active' | 'completed' | 'cancelled';
+  status: 'hr_initiation' | 'pm_feedback' | 'hr_review' | 'ld_goal_setting' | 'mid_review' | 'final_review';
   created_at: string;
   updated_at: string;
   employee_name: string;

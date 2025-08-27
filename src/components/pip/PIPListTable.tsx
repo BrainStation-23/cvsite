@@ -25,13 +25,31 @@ interface PIPListTableProps {
   isDeleting?: boolean;
 }
 
+const getStatusLabel = (status: string) => {
+  const statusLabels: Record<string, string> = {
+    'hr_initiation': 'HR Initiation',
+    'pm_feedback': 'PM Feedback',
+    'hr_review': 'HR Review',
+    'ld_goal_setting': 'L&D Goal Setting',
+    'mid_review': 'Mid Review',
+    'final_review': 'Final Review',
+  };
+  return statusLabels[status] || status;
+};
+
 const getStatusBadgeVariant = (status: string) => {
   switch (status) {
-    case 'active':
-      return 'default';
-    case 'completed':
+    case 'hr_initiation':
+      return 'outline';
+    case 'pm_feedback':
       return 'secondary';
-    case 'cancelled':
+    case 'hr_review':
+      return 'default';
+    case 'ld_goal_setting':
+      return 'secondary';
+    case 'mid_review':
+      return 'default';
+    case 'final_review':
       return 'destructive';
     default:
       return 'outline';
@@ -109,7 +127,7 @@ export const PIPListTable: React.FC<PIPListTableProps> = ({
                 <TableCell>{new Date(pip.end_date).toLocaleDateString()}</TableCell>
                 <TableCell>
                   <Badge variant={getStatusBadgeVariant(pip.status)}>
-                    {pip.status.charAt(0).toUpperCase() + pip.status.slice(1)}
+                    {getStatusLabel(pip.status)}
                   </Badge>
                 </TableCell>
                 <TableCell>
