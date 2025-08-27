@@ -30,7 +30,6 @@ export const PIPDeleteDialog: React.FC<PIPDeleteDialogProps> = ({
       confirmText={isDeleting ? "Deleting..." : "Delete PIP"}
       cancelText="Cancel"
       variant="destructive"
-      isLoading={isDeleting}
     />
   );
 };
