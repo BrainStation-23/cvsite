@@ -41,8 +41,8 @@ export function useEnhancedProfileDetails(profileId: string | null) {
 
       if (!data) return null;
 
-      // Cast the data to our expected type
-      const profileData = data as RPCProfileResponse;
+      // Cast the data to our expected type - first to unknown, then to our interface
+      const profileData = data as unknown as RPCProfileResponse;
 
       // Check if the RPC function returned an error
       if (profileData.error) {
