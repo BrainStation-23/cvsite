@@ -1,15 +1,16 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import DashboardLayout from '../../components/Layout/DashboardLayout';
 import { UserCheck } from 'lucide-react';
-import { PIPListFilters } from '@/components/pip/PIPListFilters';
 import { PIPListTable } from '@/components/pip/PIPListTable';
 import { usePIPManagement } from '@/hooks/use-pip-management';
+import { useAuth } from '@/contexts/AuthContext';
 import { PIP } from '@/types/pip';
 
 const ManagerPIPList: React.FC = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
   
   const {
     pips,
@@ -19,6 +20,16 @@ const ManagerPIPList: React.FC = () => {
     updateSearchParams,
     clearFilters,
   } = usePIPManagement();
+
+  // Set manager filter to current user on component mount
+  React.useEffect(() => {
+    if (user?.id) {
+      updateSearchParams({ 
+        managerFilter: user.id,
+        page: 1 
+      });
+    }
+  }, [user?.id, updateSearchParams]);
 
   const handlePageChange = (page: number) => {
     updateSearchParams({ page });
@@ -47,32 +58,10 @@ const ManagerPIPList: React.FC = () => {
               PM Review
             </h1>
             <p className="text-muted-foreground">
-              Review and provide feedback on Performance Improvement Plans assigned to you
+              Review and provide feedback on Performance Improvement Plans for your team members
             </p>
           </div>
         </div>
-
-        {/* Filters */}
-        <PIPListFilters
-          searchQuery={searchParams.searchQuery || ''}
-          onSearchQueryChange={(value) => updateSearchParams({ searchQuery: value })}
-          sbuFilter={searchParams.sbuFilter || null}
-          onSbuFilterChange={(value) => updateSearchParams({ sbuFilter: value })}
-          expertiseFilter={searchParams.expertiseFilter || null}
-          onExpertiseFilterChange={(value) => updateSearchParams({ expertiseFilter: value })}
-          managerFilter={searchParams.managerFilter || null}
-          onManagerFilterChange={(value) => updateSearchParams({ managerFilter: value })}
-          designationFilter={searchParams.designationFilter || null}
-          onDesignationFilterChange={(value) => updateSearchParams({ designationFilter: value })}
-          statusFilter={searchParams.statusFilter || null}
-          onStatusFilterChange={(value) => updateSearchParams({ statusFilter: value })}
-          sortBy={searchParams.sortBy || 'created_at'}
-          onSortByChange={(value) => updateSearchParams({ sortBy: value })}
-          sortOrder={searchParams.sortOrder || 'desc'}
-          onSortOrderChange={(value) => updateSearchParams({ sortOrder: value })}
-          onClearFilters={clearFilters}
-          isLoading={isLoading}
-        />
 
         {/* Results Table */}
         <PIPListTable
