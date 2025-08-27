@@ -438,17 +438,6 @@ const VerticalEmployeeSearchSidebar: React.FC<VerticalEmployeeSearchSidebarProps
               onAdvancedFilters={onAdvancedFilters}
               isLoading={isLoading}
             />
-
-            <CollapsibleFilterSection
-              title="Profile Status"
-              icon="user-check"
-              defaultOpen={false}
-              type="status"
-              completionStatus={completionStatus}
-              setCompletionStatus={setCompletionStatus}
-              onAdvancedFilters={onAdvancedFilters}
-              isLoading={isLoading}
-            />
           </div>
         </div>
       </div>

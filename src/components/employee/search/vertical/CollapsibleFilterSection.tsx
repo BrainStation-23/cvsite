@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { SelectContent, SelectItem } from '@/components/ui/select';
 import { 
   ChevronDown, 
   ChevronUp, 
@@ -22,7 +21,6 @@ import SkillTagsInput from '../SkillTagsInput';
 import TechnologyTagsInput from '../TechnologyTagsInput';
 import GraduationYearRangeControl from '../GraduationYearRangeControl';
 import FloatingLabelInput from './FloatingLabelInput';
-import ThemedSelect from './ThemedSelect';
 import ThemedTagsInput from './ThemedTagsInput';
 import ThemedCombobox from './ThemedCombobox';
 
@@ -108,7 +106,6 @@ const CollapsibleFilterSection: React.FC<CollapsibleFilterSectionProps> = ({
   setAchievementInput,
   onProjectFilter,
   onAchievementFilter,
-  completionStatus,
   setCompletionStatus,
   onAdvancedFilters,
   isLoading
@@ -130,7 +127,6 @@ const CollapsibleFilterSection: React.FC<CollapsibleFilterSectionProps> = ({
       case 'professional': return 'border-blue-200 bg-blue-50/20 dark:bg-blue-900/10 text-blue-700 dark:text-blue-300';
       case 'education': return 'border-green-200 bg-green-50/20 dark:bg-green-900/10 text-green-700 dark:text-green-300';
       case 'projects': return 'border-purple-200 bg-purple-50/20 dark:bg-purple-900/10 text-purple-700 dark:text-purple-300';
-      case 'status': return 'border-orange-200 bg-orange-50/20 dark:bg-orange-900/10 text-orange-700 dark:text-orange-300';
       default: return 'border-gray-200 bg-gray-50/20 dark:bg-gray-900/10 text-gray-700 dark:text-gray-300';
     }
   };
@@ -140,7 +136,6 @@ const CollapsibleFilterSection: React.FC<CollapsibleFilterSectionProps> = ({
       case 'professional': return 'blue';
       case 'education': return 'green';
       case 'projects': return 'purple';
-      case 'status': return 'orange';
       default: return 'gray';
     }
   };
@@ -423,28 +418,6 @@ const CollapsibleFilterSection: React.FC<CollapsibleFilterSectionProps> = ({
             />
           </div>
         );
-
-      case 'status':
-        return (
-          <div className="space-y-4">
-            <ThemedSelect
-              label="Profile completion status"
-              theme={theme}
-              icon={<UserCheck className="h-4 w-4" />}
-              value={completionStatus}
-              onValueChange={handleCompletionStatusChange}
-              placeholder="Select completion level..."
-            >
-              <SelectItem value="all">All Profiles</SelectItem>
-              <SelectItem value="complete">Complete Profiles</SelectItem>
-              <SelectItem value="incomplete">Incomplete Profiles</SelectItem>
-              <SelectItem value="no-skills">Missing Skills</SelectItem>
-              <SelectItem value="no-experience">Missing Experience</SelectItem>
-              <SelectItem value="no-education">Missing Education</SelectItem>
-            </ThemedSelect>
-          </div>
-        );
-
       default:
         return null;
     }
