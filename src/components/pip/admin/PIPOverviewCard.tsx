@@ -104,10 +104,6 @@ export const PIPOverviewCard: React.FC<PIPOverviewCardProps> = ({ pip }) => {
                 {daysRemaining > 0 ? daysRemaining : 0}
               </p>
             </div>
-            <div className="text-right">
-              <p className="text-sm text-muted-foreground">PIP ID</p>
-              <p className="font-mono text-sm">{pip.id.slice(0, 8)}...</p>
-            </div>
           </div>
         </div>
 

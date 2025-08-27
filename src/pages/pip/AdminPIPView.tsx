@@ -91,34 +91,6 @@ const AdminPIPView: React.FC = () => {
             </p>
           </div>
         </div>
-        
-        <div className="flex items-center gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => navigate(`/admin/pip/edit/${pipId}`)}
-            className="flex items-center gap-2"
-          >
-            <Edit className="h-4 w-4" />
-            Edit PIP
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            className="flex items-center gap-2"
-          >
-            <FileText className="h-4 w-4" />
-            Export Report
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            className="flex items-center gap-2"
-          >
-            <Mail className="h-4 w-4" />
-            Send Email
-          </Button>
-        </div>
       </div>
 
       {/* Status Timeline */}

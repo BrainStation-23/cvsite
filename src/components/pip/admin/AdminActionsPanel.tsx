@@ -240,31 +240,6 @@ export const AdminActionsPanel: React.FC<AdminActionsPanelProps> = ({
             )}
           </CardContent>
         </Card>
-
-        {/* Status Info */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base">Status Information</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-muted-foreground">Current Status:</span>
-                <Badge variant="secondary">{getStatusLabel(status)}</Badge>
-              </div>
-              {nextStatus && (
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-muted-foreground">Next Status:</span>
-                  <Badge variant="outline">{getStatusLabel(nextStatus)}</Badge>
-                </div>
-              )}
-              <div className="text-xs text-muted-foreground">
-                <p>PIP ID: {pipId.slice(0, 8)}...</p>
-                <p>Profile ID: {profileId.slice(0, 8)}...</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
       </div>
 
       <ConfirmationDialog
