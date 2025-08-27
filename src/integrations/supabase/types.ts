@@ -773,6 +773,56 @@ export type Database = {
           },
         ]
       }
+      pip_pm_feedback: {
+        Row: {
+          behavioral_areas: string[] | null
+          behavioral_gap_description: string | null
+          behavioral_gap_example: string | null
+          created_at: string
+          created_by: string
+          id: string
+          pip_id: string
+          skill_areas: string[] | null
+          skill_gap_description: string | null
+          skill_gap_example: string | null
+          updated_at: string
+        }
+        Insert: {
+          behavioral_areas?: string[] | null
+          behavioral_gap_description?: string | null
+          behavioral_gap_example?: string | null
+          created_at?: string
+          created_by: string
+          id?: string
+          pip_id: string
+          skill_areas?: string[] | null
+          skill_gap_description?: string | null
+          skill_gap_example?: string | null
+          updated_at?: string
+        }
+        Update: {
+          behavioral_areas?: string[] | null
+          behavioral_gap_description?: string | null
+          behavioral_gap_example?: string | null
+          created_at?: string
+          created_by?: string
+          id?: string
+          pip_id?: string
+          skill_areas?: string[] | null
+          skill_gap_description?: string | null
+          skill_gap_example?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pip_pm_feedback_pip_id_fkey"
+            columns: ["pip_id"]
+            isOneToOne: false
+            referencedRelation: "performance_improvement_plans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           career_start_date: string | null
@@ -1553,7 +1603,7 @@ export type Database = {
         Returns: Json
       }
       get_pip_profile_details: {
-        Args: { target_profile_id: string }
+        Args: { pip_id: string }
         Returns: Json
       }
       get_planned_resource_data: {
