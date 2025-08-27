@@ -42,7 +42,9 @@ export const SbuMultiSelect: React.FC<SbuMultiSelectProps> = ({
 
       const { data, error } = await query.limit(50);
       if (error) throw error;
-      return data as Sbu[];
+      
+      // Filter out any SBUs with empty or null names
+      return (data as Sbu[]).filter(sbu => sbu.name && sbu.name.trim() !== '');
     },
   });
 

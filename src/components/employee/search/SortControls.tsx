@@ -28,13 +28,16 @@ const SortControls: React.FC<SortControlsProps> = ({
     onSortChange(column, order);
   };
 
+  // Ensure we have a valid default value
+  const currentValue = sortBy && sortOrder ? `${sortBy}-${sortOrder}` : 'last_name-asc';
+
   return (
     <div className="flex items-center gap-4">
       <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
         Sort By
       </label>
       <Select
-        value={`${sortBy}-${sortOrder}`}
+        value={currentValue}
         onValueChange={handleSortChange}
       >
         <SelectTrigger className="w-48">
