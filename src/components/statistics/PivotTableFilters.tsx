@@ -24,13 +24,15 @@ export const PivotTableFilters: React.FC<PivotTableFiltersProps> = ({
   onFiltersChange,
   onClearFilters
 }) => {
-  const hasActiveFilter = Object.values(filters).some(value => value !== null && value !== undefined);
+  const hasActiveFilter = Object.values(filters).some(value => value !== null && value !== undefined && value !== '');
 
   const updateFilter = (key: string, value: any) => {
     console.log(`Updating pivot filter ${key} to:`, value);
+    // Convert empty strings to null to avoid SelectItem value issues
+    const filterValue = value === '' ? null : value;
     onFiltersChange({
       ...filters,
-      [key]: value
+      [key]: filterValue
     });
   };
 
@@ -60,7 +62,7 @@ export const PivotTableFilters: React.FC<PivotTableFiltersProps> = ({
           <div className="space-y-2">
             <label className="text-sm font-medium">SBU</label>
             <SbuCombobox
-              value={filters.sbu}
+              value={filters.sbu || ''}
               onValueChange={(value) => updateFilter('sbu', value)}
               placeholder="Filter by SBU..."
             />
@@ -69,7 +71,7 @@ export const PivotTableFilters: React.FC<PivotTableFiltersProps> = ({
           <div className="space-y-2">
             <label className="text-sm font-medium">Resource Type</label>
             <ResourceTypeCombobox
-              value={filters.resourceType}
+              value={filters.resourceType || ''}
               onValueChange={(value) => updateFilter('resourceType', value)}
               placeholder="Filter by type..."
             />
@@ -78,7 +80,7 @@ export const PivotTableFilters: React.FC<PivotTableFiltersProps> = ({
           <div className="space-y-2">
             <label className="text-sm font-medium">Bill Type</label>
             <BillTypeCombobox
-              value={filters.billType}
+              value={filters.billType || ''}
               onValueChange={(value) => updateFilter('billType', value)}
               placeholder="Filter by bill type..."
             />
@@ -87,7 +89,7 @@ export const PivotTableFilters: React.FC<PivotTableFiltersProps> = ({
           <div className="space-y-2">
             <label className="text-sm font-medium">Expertise</label>
             <ExpertiseCombobox
-              value={filters.expertiseType}
+              value={filters.expertiseType || ''}
               onValueChange={(value) => updateFilter('expertiseType', value)}
               placeholder="Filter by expertise..."
             />
@@ -100,22 +102,22 @@ export const PivotTableFilters: React.FC<PivotTableFiltersProps> = ({
             <div className="text-sm text-muted-foreground">
               <span className="font-medium text-foreground">Active filters:</span>
               <div className="mt-1 flex flex-wrap gap-2">
-                {filters.sbu && (
+                {filters.sbu && filters.sbu !== '' && (
                   <span className="inline-flex items-center px-2 py-1 rounded-md bg-primary/10 text-primary text-xs">
                     SBU: {filters.sbu}
                   </span>
                 )}
-                {filters.resourceType && (
+                {filters.resourceType && filters.resourceType !== '' && (
                   <span className="inline-flex items-center px-2 py-1 rounded-md bg-primary/10 text-primary text-xs">
                     Type: {filters.resourceType}
                   </span>
                 )}
-                {filters.billType && (
+                {filters.billType && filters.billType !== '' && (
                   <span className="inline-flex items-center px-2 py-1 rounded-md bg-primary/10 text-primary text-xs">
                     Bill: {filters.billType}
                   </span>
                 )}
-                {filters.expertiseType && (
+                {filters.expertiseType && filters.expertiseType !== '' && (
                   <span className="inline-flex items-center px-2 py-1 rounded-md bg-primary/10 text-primary text-xs">
                     Expertise: {filters.expertiseType}
                   </span>

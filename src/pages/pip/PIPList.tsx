@@ -1,10 +1,56 @@
 
-import React from 'react';
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import DashboardLayout from '../../components/Layout/DashboardLayout';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { List } from 'lucide-react';
+import { PIPListFilters } from '@/components/pip/PIPListFilters';
+import { PIPListTable } from '@/components/pip/PIPListTable';
+import { PIPDeleteDialog } from '@/components/pip/PIPDeleteDialog';
+import { usePIPManagement } from '@/hooks/use-pip-management';
+import { PIP } from '@/types/pip';
 
 const PIPList: React.FC = () => {
+  const navigate = useNavigate();
+  const [pipToDelete, setPipToDelete] = useState<PIP | null>(null);
+  
+  const {
+    pips,
+    pagination,
+    isLoading,
+    searchParams,
+    updateSearchParams,
+    clearFilters,
+    deletePIP,
+    isDeleting,
+  } = usePIPManagement();
+
+  const handlePageChange = (page: number) => {
+    updateSearchParams({ page });
+  };
+
+  const handleEditPIP = (pip: PIP) => {
+    navigate(`/admin/pip/edit/${pip.pip_id}`);
+  };
+
+  const handleDeletePIP = (pip: PIP) => {
+    setPipToDelete(pip);
+  };
+
+  const handleViewPIP = (pip: PIP) => {
+    navigate(`/admin/pip/view/${pip.pip_id}`);
+  };
+
+  const confirmDelete = () => {
+    if (pipToDelete) {
+      deletePIP(pipToDelete.pip_id);
+      setPipToDelete(null);
+    }
+  };
+
+  const cancelDelete = () => {
+    setPipToDelete(null);
+  };
+
   return (
     <DashboardLayout>
       <div className="space-y-6">
@@ -20,19 +66,48 @@ const PIPList: React.FC = () => {
           </div>
         </div>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Active PIP Cases</CardTitle>
-            <CardDescription>
-              This page will display a list of all PIP cases
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <p className="text-muted-foreground">
-              Placeholder content for PIP list functionality
-            </p>
-          </CardContent>
-        </Card>
+        {/* Filters */}
+        <PIPListFilters
+          searchQuery={searchParams.searchQuery || ''}
+          onSearchQueryChange={(value) => updateSearchParams({ searchQuery: value })}
+          sbuFilter={searchParams.sbuFilter || null}
+          onSbuFilterChange={(value) => updateSearchParams({ sbuFilter: value })}
+          expertiseFilter={searchParams.expertiseFilter || null}
+          onExpertiseFilterChange={(value) => updateSearchParams({ expertiseFilter: value })}
+          managerFilter={searchParams.managerFilter || null}
+          onManagerFilterChange={(value) => updateSearchParams({ managerFilter: value })}
+          designationFilter={searchParams.designationFilter || null}
+          onDesignationFilterChange={(value) => updateSearchParams({ designationFilter: value })}
+          statusFilter={searchParams.statusFilter || null}
+          onStatusFilterChange={(value) => updateSearchParams({ statusFilter: value })}
+          sortBy={searchParams.sortBy || 'created_at'}
+          onSortByChange={(value) => updateSearchParams({ sortBy: value })}
+          sortOrder={searchParams.sortOrder || 'desc'}
+          onSortOrderChange={(value) => updateSearchParams({ sortOrder: value })}
+          onClearFilters={clearFilters}
+          isLoading={isLoading}
+        />
+
+        {/* Results Table */}
+        <PIPListTable
+          pips={pips}
+          pagination={pagination}
+          isLoading={isLoading}
+          onPageChange={handlePageChange}
+          onEditPIP={handleEditPIP}
+          onDeletePIP={handleDeletePIP}
+          onViewPIP={handleViewPIP}
+          isDeleting={isDeleting}
+        />
+
+        {/* Delete Confirmation Dialog */}
+        <PIPDeleteDialog
+          isOpen={!!pipToDelete}
+          pip={pipToDelete}
+          onConfirm={confirmDelete}
+          onCancel={cancelDelete}
+          isDeleting={isDeleting}
+        />
       </div>
     </DashboardLayout>
   );

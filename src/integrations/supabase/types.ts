@@ -702,6 +702,127 @@ export type Database = {
           },
         ]
       }
+      performance_improvement_plans: {
+        Row: {
+          created_at: string
+          created_by: string
+          end_date: string
+          final_review: string | null
+          id: string
+          mid_date: string | null
+          overall_feedback: string | null
+          profile_id: string
+          start_date: string
+          status: Database["public"]["Enums"]["pip_status_enum"]
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          end_date: string
+          final_review?: string | null
+          id?: string
+          mid_date?: string | null
+          overall_feedback?: string | null
+          profile_id: string
+          start_date: string
+          status?: Database["public"]["Enums"]["pip_status_enum"]
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          end_date?: string
+          final_review?: string | null
+          id?: string
+          mid_date?: string | null
+          overall_feedback?: string | null
+          profile_id?: string
+          start_date?: string
+          status?: Database["public"]["Enums"]["pip_status_enum"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "performance_improvement_plans_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "performance_improvement_plans_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "resource_availability_view"
+            referencedColumns: ["profile_id"]
+          },
+          {
+            foreignKeyName: "performance_improvement_plans_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "performance_improvement_plans_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "resource_availability_view"
+            referencedColumns: ["profile_id"]
+          },
+        ]
+      }
+      pip_pm_feedback: {
+        Row: {
+          behavioral_areas: string[] | null
+          behavioral_gap_description: string | null
+          behavioral_gap_example: string | null
+          created_at: string
+          created_by: string
+          id: string
+          pip_id: string
+          skill_areas: string[] | null
+          skill_gap_description: string | null
+          skill_gap_example: string | null
+          updated_at: string
+        }
+        Insert: {
+          behavioral_areas?: string[] | null
+          behavioral_gap_description?: string | null
+          behavioral_gap_example?: string | null
+          created_at?: string
+          created_by: string
+          id?: string
+          pip_id: string
+          skill_areas?: string[] | null
+          skill_gap_description?: string | null
+          skill_gap_example?: string | null
+          updated_at?: string
+        }
+        Update: {
+          behavioral_areas?: string[] | null
+          behavioral_gap_description?: string | null
+          behavioral_gap_example?: string | null
+          created_at?: string
+          created_by?: string
+          id?: string
+          pip_id?: string
+          skill_areas?: string[] | null
+          skill_gap_description?: string | null
+          skill_gap_example?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pip_pm_feedback_pip_id_fkey"
+            columns: ["pip_id"]
+            isOneToOne: false
+            referencedRelation: "performance_improvement_plans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           career_start_date: string | null
@@ -1481,6 +1602,10 @@ export type Database = {
         }
         Returns: Json
       }
+      get_pip_profile_details: {
+        Args: { input_pip_id: string }
+        Returns: Json
+      }
       get_planned_resource_data: {
         Args: {
           bill_type_filter?: string
@@ -1530,6 +1655,23 @@ export type Database = {
           profile_count: number
           resource_type_id: string
           resource_type_name: string
+        }[]
+      }
+      get_profile_details_for_pip: {
+        Args: { input_profile_id: string }
+        Returns: {
+          current_designation: string
+          employee_id: string
+          expertise_name: string
+          first_name: string
+          id: string
+          last_name: string
+          manager_id: string
+          manager_name: string
+          profile_image: string
+          resource_planning: Json
+          sbu_name: string
+          total_utilization: number
         }[]
       }
       get_resource_changes_summary: {
@@ -1646,6 +1788,19 @@ export type Database = {
         Args: { profile_data: Json; target_user_id?: string }
         Returns: Json
       }
+      insert_pip_pm_feedback: {
+        Args: {
+          p_behavioral_areas: string[]
+          p_behavioral_gap_description: string
+          p_behavioral_gap_example: string
+          p_created_by: string
+          p_pip_id: string
+          p_skill_areas: string[]
+          p_skill_gap_description: string
+          p_skill_gap_example: string
+        }
+        Returns: string
+      }
       is_admin: {
         Args: Record<PropertyKey, never>
         Returns: boolean
@@ -1713,6 +1868,21 @@ export type Database = {
         }
         Returns: Json
       }
+      search_pips: {
+        Args: {
+          designation_filter?: string
+          expertise_filter?: string
+          items_per_page?: number
+          manager_filter?: string
+          page_number?: number
+          sbu_filter?: string
+          search_query?: string
+          sort_by?: string
+          sort_order?: string
+          status_filter?: string
+        }
+        Returns: Json
+      }
       search_projects: {
         Args: {
           budget_max?: number
@@ -1752,9 +1922,27 @@ export type Database = {
         }
         Returns: Json
       }
+      update_pip_pm_feedback: {
+        Args: {
+          p_behavioral_areas?: string[]
+          p_behavioral_gap_description?: string
+          p_behavioral_gap_example?: string
+          p_feedback_id: string
+          p_skill_areas?: string[]
+          p_skill_gap_description?: string
+          p_skill_gap_example?: string
+        }
+        Returns: string
+      }
     }
     Enums: {
-      [_ in never]: never
+      pip_status_enum:
+        | "hr_initiation"
+        | "pm_feedback"
+        | "hr_review"
+        | "ld_goal_setting"
+        | "mid_review"
+        | "final_review"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1881,6 +2069,15 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      pip_status_enum: [
+        "hr_initiation",
+        "pm_feedback",
+        "hr_review",
+        "ld_goal_setting",
+        "mid_review",
+        "final_review",
+      ],
+    },
   },
 } as const

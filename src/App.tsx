@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -42,7 +43,11 @@ import PIPInitiate from '@/pages/pip/PIPInitiate';
 import PIPList from '@/pages/pip/PIPList';
 import PIPDashboard from '@/pages/pip/PIPDashboard';
 import MySituation from '@/pages/pip/MySituation';
+import PIPPMReview from '@/pages/pip/PIPPMReview';
+import ManagerPIPList from '@/pages/pip/ManagerPIPList';
+import ManagerPMReview from '@/pages/pip/ManagerPMReview';
 import './App.css';
+import AdminPIPView from './pages/pip/AdminPIPView';
 
 // Create QueryClient instance outside component to prevent recreation
 const queryClient = new QueryClient({
@@ -187,11 +192,42 @@ function App(): React.ReactElement {
                 </ProtectedRoute>
               }
             />
+            <Route path="/admin/pip/view/:pipId" element={
+              <ProtectedRoute allowedRoles={['admin']}>
+                  <AdminPIPView />
+              </ProtectedRoute>
+            } />
             <Route
               path="/admin/pip/dashboard"
               element={
                 <ProtectedRoute allowedRoles={['admin']}>
                   <PIPDashboard />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/pip/pm-review/:pipId"
+              element={
+                <ProtectedRoute allowedRoles={['admin']}>
+                  <PIPPMReview />
+                </ProtectedRoute>
+              }
+            />
+
+            {/* Manager PIP routes */}
+            <Route
+              path="/manager/pip/pm-review"
+              element={
+                <ProtectedRoute allowedRoles={['manager']}>
+                  <ManagerPIPList />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/manager/pip/pm-review/:pipId"
+              element={
+                <ProtectedRoute allowedRoles={['manager']}>
+                  <ManagerPMReview />
                 </ProtectedRoute>
               }
             />

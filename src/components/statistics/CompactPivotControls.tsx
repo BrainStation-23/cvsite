@@ -63,7 +63,7 @@ export const CompactPivotControls: React.FC<CompactPivotControlsProps> = ({
             <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
               Rows
             </label>
-            <Select value={primaryDimension} onValueChange={onPrimaryDimensionChange}>
+            <Select value={primaryDimension || 'sbu'} onValueChange={onPrimaryDimensionChange}>
               <SelectTrigger className="h-9">
                 <SelectValue />
               </SelectTrigger>
@@ -96,7 +96,7 @@ export const CompactPivotControls: React.FC<CompactPivotControlsProps> = ({
             <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
               Columns
             </label>
-            <Select value={secondaryDimension} onValueChange={onSecondaryDimensionChange}>
+            <Select value={secondaryDimension || 'bill_type'} onValueChange={onSecondaryDimensionChange}>
               <SelectTrigger className="h-9">
                 <SelectValue />
               </SelectTrigger>

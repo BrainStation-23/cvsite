@@ -18,7 +18,7 @@ const ThemedSelect: React.FC<ThemedSelectProps> = ({
   label,
   theme = 'gray',
   icon,
-  value,
+  value = '',
   onValueChange,
   placeholder,
   children
@@ -77,7 +77,7 @@ const ThemedSelect: React.FC<ThemedSelectProps> = ({
             </label>
           )}
           
-          <Select value={value} onValueChange={onValueChange}>
+          <Select value={value || ''} onValueChange={onValueChange}>
             <SelectTrigger className={cn(
               'border-0 bg-transparent p-0 focus:ring-0 h-auto shadow-none',
               hasValue ? 'pt-4 pb-0' : 'py-1'

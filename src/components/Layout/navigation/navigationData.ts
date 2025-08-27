@@ -76,6 +76,9 @@ export const getSidebarGroups = (
           { to: '/admin/pip/list', icon: List, label: 'PIP List' },
           { to: '/admin/pip/dashboard', icon: TrendingUp, label: 'PIP Dashboard' },
         ] : []),
+        ...(userRole === 'manager' ? [
+          { to: '/manager/pip/pm-review', icon: UserCheck, label: 'PM Review' },
+        ] : []),
         { to: `/${userRole}/pip/my-situation`, icon: UserCheck, label: 'My Situation' },
       ],
     },

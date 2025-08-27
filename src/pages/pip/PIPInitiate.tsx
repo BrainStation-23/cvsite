@@ -1,8 +1,8 @@
 
 import React from 'react';
 import DashboardLayout from '../../components/Layout/DashboardLayout';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { UserX } from 'lucide-react';
+import { PIPInitiationForm } from '@/components/pip/PIPInitiationForm';
 
 const PIPInitiate: React.FC = () => {
   return (
@@ -20,19 +20,7 @@ const PIPInitiate: React.FC = () => {
           </div>
         </div>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>PIP Initiation</CardTitle>
-            <CardDescription>
-              This page will allow administrators to initiate Performance Improvement Plans
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <p className="text-muted-foreground">
-              Placeholder content for PIP initiation functionality
-            </p>
-          </CardContent>
-        </Card>
+        <PIPInitiationForm />
       </div>
     </DashboardLayout>
   );

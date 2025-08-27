@@ -42,7 +42,9 @@ export const BillTypeMultiSelect: React.FC<BillTypeMultiSelectProps> = ({
 
       const { data, error } = await query.limit(50);
       if (error) throw error;
-      return data as BillType[];
+      
+      // Filter out any bill types with empty or null names
+      return (data as BillType[]).filter(bt => bt.name && bt.name.trim() !== '');
     },
   });
 

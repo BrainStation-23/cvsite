@@ -24,7 +24,7 @@ const ProfileStatusSection: React.FC<ProfileStatusSectionProps> = ({
       <CardContent>
         <div className="space-y-1">
           <Label className="text-xs font-medium text-orange-700 dark:text-orange-300">Completion Status</Label>
-          <Select value={completionStatus} onValueChange={onCompletionStatusChange}>
+          <Select value={completionStatus || 'all'} onValueChange={onCompletionStatusChange}>
             <SelectTrigger className="text-xs h-7 w-full">
               <SelectValue placeholder="Select status" />
             </SelectTrigger>
