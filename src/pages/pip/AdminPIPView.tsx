@@ -124,9 +124,6 @@ const AdminPIPView: React.FC = () => {
       {/* Status Timeline */}
       <PIPStatusTimeline 
         status={pip.status}
-        startDate={pip.start_date}
-        midDate={pip.mid_date}
-        endDate={pip.end_date}
       />
 
       {/* Main Content Grid */}

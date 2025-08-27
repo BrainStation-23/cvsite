@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -6,9 +5,6 @@ import { CheckCircle, Circle, Clock } from 'lucide-react';
 
 interface PIPStatusTimelineProps {
   status: string;
-  startDate: string;
-  midDate?: string | null;
-  endDate: string;
 }
 
 const statusSteps = [
@@ -22,9 +18,6 @@ const statusSteps = [
 
 export const PIPStatusTimeline: React.FC<PIPStatusTimelineProps> = ({
   status,
-  startDate,
-  midDate,
-  endDate
 }) => {
   const currentStepIndex = statusSteps.findIndex(step => step.key === status);
   
@@ -49,9 +42,9 @@ export const PIPStatusTimeline: React.FC<PIPStatusTimelineProps> = ({
   };
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+    <div className="gap-6">
       {/* Timeline Card */}
-      <div className="lg:col-span-3">
+      <div>
         <Card>
           <CardContent className="p-6">
             <h3 className="text-lg font-semibold mb-6">PIP Progress Timeline</h3>
@@ -92,31 +85,6 @@ export const PIPStatusTimeline: React.FC<PIPStatusTimelineProps> = ({
                     </div>
                   </div>
                 ))}
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Dates Card */}
-      <div>
-        <Card>
-          <CardContent className="p-6">
-            <h3 className="text-lg font-semibold mb-4">Important Dates</h3>
-            <div className="space-y-4">
-              <div>
-                <div className="text-sm font-medium text-muted-foreground">Start Date</div>
-                <div className="text-sm">{formatDate(startDate)}</div>
-              </div>
-              {midDate && (
-                <div>
-                  <div className="text-sm font-medium text-muted-foreground">Mid Review</div>
-                  <div className="text-sm">{formatDate(midDate)}</div>
-                </div>
-              )}
-              <div>
-                <div className="text-sm font-medium text-muted-foreground">End Date</div>
-                <div className="text-sm">{formatDate(endDate)}</div>
               </div>
             </div>
           </CardContent>
