@@ -31,13 +31,30 @@ export interface PIPFormData {
   final_review?: string;
 }
 
+export interface ResourcePlanningItem {
+  id: string;
+  project_name: string | null;
+  client_name: string | null;
+  project_manager: string | null;
+  engagement_percentage: number;
+  billing_percentage: number;
+  bill_type_name: string | null;
+  engagement_start_date: string;
+  release_date: string | null;
+  is_current: boolean;
+}
+
 export interface ProfileDetails {
   id: string;
   first_name: string | null;
   last_name: string | null;
   employee_id: string | null;
+  profile_image: string | null;
   sbu_name: string | null;
   expertise_name: string | null;
   manager_name: string | null;
+  manager_id: string | null;
   current_designation: string | null;
+  resource_planning: ResourcePlanningItem[];
+  total_utilization: number;
 }
