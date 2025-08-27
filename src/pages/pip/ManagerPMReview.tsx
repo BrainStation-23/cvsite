@@ -69,6 +69,7 @@ const ManagerPMReview: React.FC = () => {
 
   const { pip, profile, sbu, expertise, manager, pm_feedback } = pipDetails;
   const isEditing = !!pm_feedback;
+  const isEditable = pip.status === 'pm_feedback';
   
   // Calculate progress
   const currentFormData = formData || pm_feedback;
@@ -81,7 +82,7 @@ const ManagerPMReview: React.FC = () => {
                                    currentFormData?.behavioral_gap_example?.length >= 10;
   
   const isFormValid = skillSectionComplete && behavioralSectionComplete;
-  const canSubmitToHR = pm_feedback && isFormValid;
+  const canSubmitToHR = pm_feedback && isFormValid && isEditable;
 
   return (
     <DashboardLayout>
@@ -101,7 +102,10 @@ const ManagerPMReview: React.FC = () => {
               Project Manager Feedback
             </h2>
             <p className="text-muted-foreground">
-              Provide detailed feedback on technical skills and behavioral aspects for this PIP employee.
+              {isEditable 
+                ? 'Provide detailed feedback on technical skills and behavioral aspects for this PIP employee.'
+                : 'Review the submitted feedback for this PIP employee.'
+              }
             </p>
           </div>
 
@@ -125,6 +129,7 @@ const ManagerPMReview: React.FC = () => {
               onSubmit={handleSubmitFeedback}
               isSubmitting={isCreating || isUpdating}
               isEditing={isEditing}
+              isReadOnly={!isEditable}
             />
           </div>
         </div>

@@ -22,13 +22,15 @@ interface PIPPMFeedbackFormProps {
   onSubmit: (data: PIPPMFeedbackFormData) => void;
   isSubmitting?: boolean;
   isEditing?: boolean;
+  isReadOnly?: boolean;
 }
 
 export const PIPPMFeedbackForm: React.FC<PIPPMFeedbackFormProps> = ({
   initialData,
   onSubmit,
   isSubmitting = false,
-  isEditing = false
+  isEditing = false,
+  isReadOnly = false
 }) => {
   const form = useForm<PIPPMFeedbackFormData>({
     resolver: zodResolver(pmFeedbackSchema),
@@ -72,6 +74,7 @@ export const PIPPMFeedbackForm: React.FC<PIPPMFeedbackFormProps> = ({
           skill_gap_description: errors.skill_gap_description?.message,
           skill_gap_example: errors.skill_gap_example?.message,
         }}
+        isReadOnly={isReadOnly}
       />
 
       <BehavioralSection
@@ -86,22 +89,31 @@ export const PIPPMFeedbackForm: React.FC<PIPPMFeedbackFormProps> = ({
           behavioral_gap_description: errors.behavioral_gap_description?.message,
           behavioral_gap_example: errors.behavioral_gap_example?.message,
         }}
+        isReadOnly={isReadOnly}
       />
 
-      <div className="sticky bottom-0 bg-background border-t p-4 -mx-6 -mb-6">
-        <div className="flex justify-between items-center">
-          <div className="text-sm text-muted-foreground">
-            {isFormValid ? '✓ All sections completed' : 'Please complete all required sections'}
+      {!isReadOnly && (
+        <div className="sticky bottom-0 bg-background border-t p-4 -mx-6 -mb-6">
+          <div className="flex justify-between items-center">
+            <div className="text-sm text-muted-foreground">
+              {isFormValid ? '✓ All sections completed' : 'Please complete all required sections'}
+            </div>
+            <Button
+              type="submit"
+              disabled={!isFormValid || isSubmitting}
+              size="lg"
+            >
+              {isSubmitting ? 'Saving...' : (isEditing ? 'Update Feedback' : 'Save Feedback')}
+            </Button>
           </div>
-          <Button
-            type="submit"
-            disabled={!isFormValid || isSubmitting}
-            size="lg"
-          >
-            {isSubmitting ? 'Saving...' : (isEditing ? 'Update Feedback' : 'Save Feedback')}
-          </Button>
         </div>
-      </div>
+      )}
+
+      {isReadOnly && initialData && (
+        <div className="text-center text-muted-foreground text-sm py-4 border-t">
+          Feedback submitted and can no longer be edited
+        </div>
+      )}
     </form>
   );
 };

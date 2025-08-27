@@ -18,6 +18,7 @@ interface SkillGapsSectionProps {
     skill_gap_description?: string;
     skill_gap_example?: string;
   };
+  isReadOnly?: boolean;
 }
 
 const SKILL_AREA_OPTIONS = [
@@ -38,9 +39,12 @@ export const SkillGapsSection: React.FC<SkillGapsSectionProps> = ({
   onSkillAreasChange,
   onSkillGapDescriptionChange,
   onSkillGapExampleChange,
-  errors
+  errors,
+  isReadOnly = false
 }) => {
   const handleSkillAreaChange = (area: string, checked: boolean) => {
+    if (isReadOnly) return;
+    
     if (checked) {
       onSkillAreasChange([...skillAreas, area]);
     } else {
@@ -51,14 +55,17 @@ export const SkillGapsSection: React.FC<SkillGapsSectionProps> = ({
   const isComplete = skillAreas.length > 0 && skillGapDescription.length > 0 && skillGapExample.length > 0;
 
   return (
-    <Card>
+    <Card className={isReadOnly ? 'opacity-75' : ''}>
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-lg">
           <div className={`w-3 h-3 rounded-full ${isComplete ? 'bg-green-500' : 'bg-gray-300'}`} />
           Section 1: Technical / Functional Skill Gaps
         </CardTitle>
         <p className="text-sm text-muted-foreground">
-          Select the relevant skill area(s), add examples of actual gaps observed, and mention how the gap impacted work.
+          {isReadOnly 
+            ? 'Review the selected skill areas and examples of gaps observed.'
+            : 'Select the relevant skill area(s), add examples of actual gaps observed, and mention how the gap impacted work.'
+          }
         </p>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -71,17 +78,18 @@ export const SkillGapsSection: React.FC<SkillGapsSectionProps> = ({
                   id={`skill-${area}`}
                   checked={skillAreas.includes(area)}
                   onCheckedChange={(checked) => handleSkillAreaChange(area, checked as boolean)}
+                  disabled={isReadOnly}
                 />
                 <Label
                   htmlFor={`skill-${area}`}
-                  className="text-sm font-normal cursor-pointer"
+                  className={`text-sm font-normal ${!isReadOnly ? 'cursor-pointer' : 'cursor-default'} ${isReadOnly && !skillAreas.includes(area) ? 'text-muted-foreground' : ''}`}
                 >
                   {area}
                 </Label>
               </div>
             ))}
           </div>
-          {errors?.skill_areas && (
+          {!isReadOnly && errors?.skill_areas && (
             <p className="text-sm text-destructive flex items-center gap-1">
               <AlertTriangle className="h-4 w-4" />
               {errors.skill_areas}
@@ -97,10 +105,12 @@ export const SkillGapsSection: React.FC<SkillGapsSectionProps> = ({
             id="skill_gap_description"
             value={skillGapDescription}
             onChange={(e) => onSkillGapDescriptionChange(e.target.value)}
-            placeholder="Describe the specific skill gaps observed..."
-            className="min-h-[100px]"
+            placeholder={isReadOnly ? '' : 'Describe the specific skill gaps observed...'}
+            className={`min-h-[100px] ${isReadOnly ? 'bg-muted text-muted-foreground cursor-default' : ''}`}
+            readOnly={isReadOnly}
+            disabled={isReadOnly}
           />
-          {errors?.skill_gap_description && (
+          {!isReadOnly && errors?.skill_gap_description && (
             <p className="text-sm text-destructive flex items-center gap-1">
               <AlertTriangle className="h-4 w-4" />
               {errors.skill_gap_description}
@@ -116,10 +126,12 @@ export const SkillGapsSection: React.FC<SkillGapsSectionProps> = ({
             id="skill_gap_example"
             value={skillGapExample}
             onChange={(e) => onSkillGapExampleChange(e.target.value)}
-            placeholder="e.g., In QA, missed multiple critical test cases leading to production bugs; In Sales, unable to explain product features during client demo; In HR, delayed payroll due to errors in data entry."
-            className="min-h-[100px]"
+            placeholder={isReadOnly ? '' : 'e.g., In QA, missed multiple critical test cases leading to production bugs; In Sales, unable to explain product features during client demo; In HR, delayed payroll due to errors in data entry.'}
+            className={`min-h-[100px] ${isReadOnly ? 'bg-muted text-muted-foreground cursor-default' : ''}`}
+            readOnly={isReadOnly}
+            disabled={isReadOnly}
           />
-          {errors?.skill_gap_example && (
+          {!isReadOnly && errors?.skill_gap_example && (
             <p className="text-sm text-destructive flex items-center gap-1">
               <AlertTriangle className="h-4 w-4" />
               {errors.skill_gap_example}

@@ -18,6 +18,7 @@ interface BehavioralSectionProps {
     behavioral_gap_description?: string;
     behavioral_gap_example?: string;
   };
+  isReadOnly?: boolean;
 }
 
 const BEHAVIORAL_AREA_OPTIONS = [
@@ -38,9 +39,12 @@ export const BehavioralSection: React.FC<BehavioralSectionProps> = ({
   onBehavioralAreasChange,
   onBehavioralGapDescriptionChange,
   onBehavioralGapExampleChange,
-  errors
+  errors,
+  isReadOnly = false
 }) => {
   const handleBehavioralAreaChange = (area: string, checked: boolean) => {
+    if (isReadOnly) return;
+    
     if (checked) {
       onBehavioralAreasChange([...behavioralAreas, area]);
     } else {
@@ -51,14 +55,17 @@ export const BehavioralSection: React.FC<BehavioralSectionProps> = ({
   const isComplete = behavioralAreas.length > 0 && behavioralGapDescription.length > 0 && behavioralGapExample.length > 0;
 
   return (
-    <Card>
+    <Card className={isReadOnly ? 'opacity-75' : ''}>
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-lg">
           <div className={`w-3 h-3 rounded-full ${isComplete ? 'bg-green-500' : 'bg-gray-300'}`} />
           Section 2: Soft Skills & Behavioral Aspects
         </CardTitle>
         <p className="text-sm text-muted-foreground">
-          Select the behavioral area(s) where improvement is needed and give specific work-related examples.
+          {isReadOnly 
+            ? 'Review the selected behavioral areas and specific work-related examples.'
+            : 'Select the behavioral area(s) where improvement is needed and give specific work-related examples.'
+          }
         </p>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -71,17 +78,18 @@ export const BehavioralSection: React.FC<BehavioralSectionProps> = ({
                   id={`behavioral-${area}`}
                   checked={behavioralAreas.includes(area)}
                   onCheckedChange={(checked) => handleBehavioralAreaChange(area, checked as boolean)}
+                  disabled={isReadOnly}
                 />
                 <Label
                   htmlFor={`behavioral-${area}`}
-                  className="text-sm font-normal cursor-pointer"
+                  className={`text-sm font-normal ${!isReadOnly ? 'cursor-pointer' : 'cursor-default'} ${isReadOnly && !behavioralAreas.includes(area) ? 'text-muted-foreground' : ''}`}
                 >
                   {area}
                 </Label>
               </div>
             ))}
           </div>
-          {errors?.behavioral_areas && (
+          {!isReadOnly && errors?.behavioral_areas && (
             <p className="text-sm text-destructive flex items-center gap-1">
               <AlertTriangle className="h-4 w-4" />
               {errors.behavioral_areas}
@@ -97,10 +105,12 @@ export const BehavioralSection: React.FC<BehavioralSectionProps> = ({
             id="behavioral_gap_description"
             value={behavioralGapDescription}
             onChange={(e) => onBehavioralGapDescriptionChange(e.target.value)}
-            placeholder="Describe the specific behavioral gaps observed..."
-            className="min-h-[100px]"
+            placeholder={isReadOnly ? '' : 'Describe the specific behavioral gaps observed...'}
+            className={`min-h-[100px] ${isReadOnly ? 'bg-muted text-muted-foreground cursor-default' : ''}`}
+            readOnly={isReadOnly}
+            disabled={isReadOnly}
           />
-          {errors?.behavioral_gap_description && (
+          {!isReadOnly && errors?.behavioral_gap_description && (
             <p className="text-sm text-destructive flex items-center gap-1">
               <AlertTriangle className="h-4 w-4" />
               {errors.behavioral_gap_description}
@@ -116,10 +126,12 @@ export const BehavioralSection: React.FC<BehavioralSectionProps> = ({
             id="behavioral_gap_example"
             value={behavioralGapExample}
             onChange={(e) => onBehavioralGapExampleChange(e.target.value)}
-            placeholder="e.g., Often misses deadlines without prior communication; Avoids collaboration during sprint meetings; Hesitates to take ownership of assigned tasks."
-            className="min-h-[100px]"
+            placeholder={isReadOnly ? '' : 'e.g., Often misses deadlines without prior communication; Avoids collaboration during sprint meetings; Hesitates to take ownership of assigned tasks.'}
+            className={`min-h-[100px] ${isReadOnly ? 'bg-muted text-muted-foreground cursor-default' : ''}`}
+            readOnly={isReadOnly}
+            disabled={isReadOnly}
           />
-          {errors?.behavioral_gap_example && (
+          {!isReadOnly && errors?.behavioral_gap_example && (
             <p className="text-sm text-destructive flex items-center gap-1">
               <AlertTriangle className="h-4 w-4" />
               {errors.behavioral_gap_example}
