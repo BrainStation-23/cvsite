@@ -1,3 +1,4 @@
+
 import { dataFetcher } from './core/data-fetcher';
 import { cvTemplateProcessor } from './core/template-processor';
 import { pdfEngine } from './core/pdf-engine';
@@ -39,25 +40,37 @@ export async function exportCVAsPDF(
     await new Promise(resolve => setTimeout(resolve, 200));
     progressTracker.completeStep('prepare-pdf');
 
-    // Step 4-6: Generate PDF (handled by PDF engine internally)
-    progressTracker.startStep('convert-canvas');
-    await new Promise(resolve => setTimeout(resolve, 300));
-    progressTracker.completeStep('convert-canvas');
+    // Step 4: Generate PDF with Puppeteer (with fallback handling)
+    progressTracker.startStep('puppeteer-service');
+    
+    try {
+      await pdfEngine.generatePDF(processedHTML, {
+        filename: `${employeeData.employee_id}_CV`,
+        includeStandardCSS: true,
+        validateTemplate: true,
+        pageSize: 'a4'
+      });
+      
+      progressTracker.completeStep('puppeteer-service');
+    } catch (error) {
+      // Check if error indicates fallback was used
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      if (errorMessage.includes('Falling back') || errorMessage.includes('fallback')) {
+        progressTracker.enableFallbackMode();
+        progressTracker.startStep('fallback-pdf');
+        // PDF generation already completed in the fallback, just mark as complete
+        progressTracker.completeStep('fallback-pdf');
+      } else {
+        throw error;
+      }
+    }
 
-    progressTracker.startStep('generate-pdf');
-    await new Promise(resolve => setTimeout(resolve, 300));
-    progressTracker.completeStep('generate-pdf');
-
+    // Step 5: Finalize
     progressTracker.startStep('finalize');
-    await pdfEngine.generatePDF(processedHTML, {
-      filename: `${employeeData.employee_id}_CV`,
-      includeStandardCSS: true,
-      validateTemplate: true,
-      pageSize: 'a4'
-    });
+    await new Promise(resolve => setTimeout(resolve, 300));
     progressTracker.completeStep('finalize');
 
-    // Step 7: Complete
+    // Step 6: Complete
     progressTracker.startStep('complete');
     progressTracker.completeStep('complete');
 
