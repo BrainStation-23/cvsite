@@ -702,6 +702,77 @@ export type Database = {
           },
         ]
       }
+      performance_improvement_plans: {
+        Row: {
+          created_at: string
+          created_by: string
+          end_date: string
+          final_review: string | null
+          id: string
+          mid_date: string | null
+          overall_feedback: string | null
+          profile_id: string
+          start_date: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          end_date: string
+          final_review?: string | null
+          id?: string
+          mid_date?: string | null
+          overall_feedback?: string | null
+          profile_id: string
+          start_date: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          end_date?: string
+          final_review?: string | null
+          id?: string
+          mid_date?: string | null
+          overall_feedback?: string | null
+          profile_id?: string
+          start_date?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "performance_improvement_plans_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "performance_improvement_plans_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "resource_availability_view"
+            referencedColumns: ["profile_id"]
+          },
+          {
+            foreignKeyName: "performance_improvement_plans_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "performance_improvement_plans_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "resource_availability_view"
+            referencedColumns: ["profile_id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           career_start_date: string | null
@@ -1710,6 +1781,21 @@ export type Database = {
           search_query?: string
           sort_by?: string
           sort_order?: string
+        }
+        Returns: Json
+      }
+      search_pips: {
+        Args: {
+          designation_filter?: string
+          expertise_filter?: string
+          items_per_page?: number
+          manager_filter?: string
+          page_number?: number
+          sbu_filter?: string
+          search_query?: string
+          sort_by?: string
+          sort_order?: string
+          status_filter?: string
         }
         Returns: Json
       }

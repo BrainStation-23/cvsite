@@ -1,8 +1,8 @@
 
 import React from 'react';
 import DashboardLayout from '../../components/Layout/DashboardLayout';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { List } from 'lucide-react';
+import { PIPListTable } from '@/components/pip/PIPListTable';
 
 const PIPList: React.FC = () => {
   return (
@@ -20,19 +20,7 @@ const PIPList: React.FC = () => {
           </div>
         </div>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Active PIP Cases</CardTitle>
-            <CardDescription>
-              This page will display a list of all PIP cases
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <p className="text-muted-foreground">
-              Placeholder content for PIP list functionality
-            </p>
-          </CardContent>
-        </Card>
+        <PIPListTable />
       </div>
     </DashboardLayout>
   );
