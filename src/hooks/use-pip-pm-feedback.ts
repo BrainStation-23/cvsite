@@ -23,7 +23,8 @@ export function usePIPPMFeedback(pipId: string | null) {
         throw error;
       }
 
-      return data as PIPDetailsResponse;
+      // Cast the RPC response to the expected type
+      return data as unknown as PIPDetailsResponse;
     },
     enabled: !!pipId,
   });

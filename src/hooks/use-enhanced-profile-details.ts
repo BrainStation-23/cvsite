@@ -30,8 +30,9 @@ export function useEnhancedProfileDetails(profileId: string | null) {
       console.log('Fetching profile details for:', profileId);
 
       // Call the RPC function to get comprehensive profile details
+      // Note: This RPC function uses profile_id parameter, not pip_id
       const { data, error } = await supabase.rpc('get_pip_profile_details', {
-        target_profile_id: profileId
+        pip_id: profileId // This should be the correct parameter name based on the function
       });
 
       if (error) {
