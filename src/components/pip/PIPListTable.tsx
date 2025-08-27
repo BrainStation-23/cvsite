@@ -26,6 +26,7 @@ interface PIPListTableProps {
   onViewPIP: (pip: PIP) => void;
   isDeleting: boolean;
   showActions?: boolean;
+  showViewButton?: boolean;
 }
 
 export const PIPListTable: React.FC<PIPListTableProps> = ({
@@ -37,7 +38,8 @@ export const PIPListTable: React.FC<PIPListTableProps> = ({
   onDeletePIP,
   onViewPIP,
   isDeleting,
-  showActions = true
+  showActions = true,
+  showViewButton = true
 }) => {
   if (isLoading) {
     return (
@@ -154,13 +156,15 @@ export const PIPListTable: React.FC<PIPListTableProps> = ({
                   
                   {!showActions && (
                     <div className="flex gap-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => onViewPIP(pip)}
-                      >
-                        View Details
-                      </Button>
+                      {showViewButton && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => onViewPIP(pip)}
+                        >
+                          View Details
+                        </Button>
+                      )}
                       <Button
                         size="sm"
                         onClick={() => onEditPIP(pip)}

@@ -39,10 +39,6 @@ const ManagerPIPList: React.FC = () => {
     navigate(`/manager/pip/pm-review/${pip.pip_id}`);
   };
 
-  const handleViewPIP = (pip: PIP) => {
-    navigate(`/manager/pip/view/${pip.pip_id}`);
-  };
-
   // Filter PIPs that need PM feedback or are in PM review status
   const relevantPips = pips.filter(pip => 
     pip.status === 'pm_feedback' || pip.status === 'hr_review'
@@ -71,9 +67,10 @@ const ManagerPIPList: React.FC = () => {
           onPageChange={handlePageChange}
           onEditPIP={handlePMReview}
           onDeletePIP={() => {}} // Managers can't delete PIPs
-          onViewPIP={handleViewPIP}
+          onViewPIP={() => {}} // Managers don't need view functionality
           isDeleting={false}
           showActions={false} // Don't show delete actions for managers
+          showViewButton={false} // Hide view details button for managers
         />
       </div>
     </DashboardLayout>
