@@ -1771,6 +1771,19 @@ export type Database = {
         Args: { profile_data: Json; target_user_id?: string }
         Returns: Json
       }
+      insert_pip_pm_feedback: {
+        Args: {
+          p_behavioral_areas: string[]
+          p_behavioral_gap_description: string
+          p_behavioral_gap_example: string
+          p_created_by: string
+          p_pip_id: string
+          p_skill_areas: string[]
+          p_skill_gap_description: string
+          p_skill_gap_example: string
+        }
+        Returns: string
+      }
       is_admin: {
         Args: Record<PropertyKey, never>
         Returns: boolean
@@ -1891,6 +1904,18 @@ export type Database = {
           type_filter?: string
         }
         Returns: Json
+      }
+      update_pip_pm_feedback: {
+        Args: {
+          p_behavioral_areas?: string[]
+          p_behavioral_gap_description?: string
+          p_behavioral_gap_example?: string
+          p_feedback_id: string
+          p_skill_areas?: string[]
+          p_skill_gap_description?: string
+          p_skill_gap_example?: string
+        }
+        Returns: string
       }
     }
     Enums: {

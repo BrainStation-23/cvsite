@@ -28,7 +28,7 @@ export function usePIPPMFeedback(pipId: string | null) {
     enabled: !!pipId,
   });
 
-  // Create PM feedback mutation - using raw SQL since table types aren't generated yet
+  // Create PM feedback mutation
   const createPMFeedbackMutation = useMutation({
     mutationFn: async (formData: PIPPMFeedbackFormData) => {
       if (!pipId) throw new Error('PIP ID is required');
@@ -36,7 +36,6 @@ export function usePIPPMFeedback(pipId: string | null) {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('User not authenticated');
 
-      // Use raw SQL query since pip_pm_feedback table isn't in generated types yet
       const { data, error } = await supabase
         .rpc('insert_pip_pm_feedback', {
           p_pip_id: pipId,
