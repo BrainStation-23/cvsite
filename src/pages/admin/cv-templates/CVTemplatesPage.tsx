@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Plus, Pencil, Trash2, Eye, Star, Database, FileText } from 'lucide-react';
+import { Plus, Pencil, Trash2, Eye, Star, Database, FileText, Copy } from 'lucide-react';
 import { useCVTemplates, CVTemplate } from '@/hooks/use-cv-templates';
 import { CVTemplateForm } from '@/components/admin/cv-templates/CVTemplateForm';
 import { ConfirmationDialog } from '@/components/ui/confirmation-dialog';
@@ -20,9 +20,11 @@ const CVTemplatesPage: React.FC = () => {
     createTemplate, 
     updateTemplate, 
     deleteTemplate, 
+    duplicateTemplate,
     isCreating, 
     isUpdating, 
-    isDeleting 
+    isDeleting,
+    isDuplicating
   } = useCVTemplates();
 
   const [isFormOpen, setIsFormOpen] = useState(false);
@@ -47,6 +49,10 @@ const CVTemplatesPage: React.FC = () => {
       variant: 'destructive',
       onConfirm: () => deleteTemplate(template.id)
     });
+  };
+
+  const handleDuplicate = (template: CVTemplate) => {
+    duplicateTemplate(template.id);
   };
 
   const handlePreview = (template: CVTemplate) => {
@@ -138,7 +144,7 @@ const CVTemplatesPage: React.FC = () => {
                 <TableHead>Status</TableHead>
                 <TableHead>Default</TableHead>
                 <TableHead>Last Updated</TableHead>
-                <TableHead className="w-[200px]">Actions</TableHead>
+                <TableHead className="w-[250px]">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -213,6 +219,15 @@ const CVTemplatesPage: React.FC = () => {
                           title="Edit"
                         >
                           <Pencil className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => handleDuplicate(template)}
+                          disabled={isDuplicating}
+                          title="Duplicate"
+                        >
+                          <Copy className="h-4 w-4" />
                         </Button>
                         <Button
                           size="sm"
