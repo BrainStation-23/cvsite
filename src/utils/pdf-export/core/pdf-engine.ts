@@ -1,6 +1,5 @@
 
 import html2pdf from 'html2pdf.js';
-import { STANDARD_CV_CSS } from '@/constants/cv-template-standards';
 import { templateValidator } from '@/utils/template-validator';
 
 interface PDFEngineOptions {
@@ -9,44 +8,80 @@ interface PDFEngineOptions {
   validateTemplate?: boolean;
   pageSize?: 'a4' | 'letter';
   margin?: number;
+  puppeteerOptions?: {
+    format?: string;
+    printBackground?: boolean;
+    margin?: {
+      top?: string;
+      right?: string;
+      bottom?: string;
+      left?: string;
+    };
+  };
+}
+
+interface PuppeteerServiceConfig {
+  url: string;
+  timeout: number;
+  retryCount: number;
+  fallbackEnabled: boolean;
 }
 
 export class PDFEngine {
-  private injectStandardCSS(htmlContent: string): string {
-    // Check if standard CSS is already included
-    if (htmlContent.includes('cv-container') && htmlContent.includes('<style>')) {
-      return htmlContent;
-    }
+  private serviceConfig: PuppeteerServiceConfig;
 
-    // Find the head tag or create one
-    const headMatch = htmlContent.match(/<head[^>]*>/i);
-    if (headMatch) {
-      return htmlContent.replace(
-        headMatch[0],
-        `${headMatch[0]}\n<style>\n${STANDARD_CV_CSS}\n</style>`
-      );
-    }
-
-    // If no head tag, add style at the beginning
-    return `<style>\n${STANDARD_CV_CSS}\n</style>\n${htmlContent}`;
+  constructor() {
+    this.serviceConfig = {
+      url: import.meta.env.VITE_PUPPETEER_SERVICE_URL || 'https://puppeteer.brainstation-23.xyz',
+      timeout: parseInt(import.meta.env.VITE_PUPPETEER_TIMEOUT || '30000'),
+      retryCount: parseInt(import.meta.env.VITE_PUPPETEER_RETRY_COUNT || '1'),
+      fallbackEnabled: import.meta.env.VITE_PDF_FALLBACK_ENABLED !== 'false'
+    };
   }
 
-  private optimizeForPDF(htmlContent: string): string {
-    let optimized = htmlContent;
 
-    // Ensure proper page break handling
-    optimized = optimized.replace(
-      /<div class="cv-section"/g,
-      '<div class="cv-section cv-page-break-avoid"'
-    );
 
-    // Add page break opportunities between major sections
-    optimized = optimized.replace(
-      /<\/section>\s*<section/g,
-      '</section>\n<div class="cv-page-break-auto"></div>\n<section'
-    );
+  private async generatePDFWithPuppeteer(
+    htmlContent: string, 
+  ): Promise<Blob> {
 
-    return optimized;
+    
+    console.log('Attempting PDF generation with Puppeteer service...');
+    
+
+
+
+    const response = await fetch(this.serviceConfig.url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'text/html',
+        'Accept': 'application/pdf'
+      },
+      body: htmlContent,
+      signal: AbortSignal.timeout(this.serviceConfig.timeout)
+    });
+
+    if (!response.ok) {
+      throw new Error(`Puppeteer service error: ${response.status} ${response.statusText}`);
+    }
+
+    const contentType = response.headers.get('content-type');
+    if (!contentType?.includes('application/pdf')) {
+      throw new Error(`Unexpected response type: ${contentType}. Expected application/pdf`);
+    }
+
+    return await response.blob();
+  }
+
+  private downloadBlob(blob: Blob, filename: string): void {
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${filename}.pdf`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
   }
 
   private getPageSize(pageSize: 'a4' | 'letter') {
@@ -59,33 +94,16 @@ export class PDFEngine {
     }
   }
 
-  async generatePDF(
+  private async generatePDFWithHtml2PDF(
     htmlContent: string, 
     options: PDFEngineOptions = {}
   ): Promise<void> {
     const {
       filename = 'cv-export',
-      includeStandardCSS = true,
-      validateTemplate = true,
       pageSize = 'a4',
     } = options;
 
-    // Validate template if requested
-    if (validateTemplate) {
-      const validationResult = templateValidator.validate(htmlContent);
-      if (!validationResult.isValid) {
-        console.warn('Template validation failed:', validationResult.errors);
-      }
-    }
-
-    // Process HTML content
-    let processedHTML = htmlContent;
-    
-    if (includeStandardCSS) {
-      processedHTML = this.injectStandardCSS(processedHTML);
-    }
-    
-    processedHTML = this.optimizeForPDF(processedHTML);
+    console.log('Generating PDF with html2pdf fallback...');
 
     // Configure PDF options
     const [width, height] = this.getPageSize(pageSize);
@@ -122,9 +140,73 @@ export class PDFEngine {
 
     // Generate PDF
     await html2pdf()
-      .from(processedHTML)
+      .from(htmlContent)
       .set(opt)
       .save();
+  }
+
+  private async attemptPuppeteerWithRetry(
+    htmlContent: string, 
+    options: PDFEngineOptions,
+    retryCount: number = 0
+  ): Promise<Blob> {
+    try {
+      return await this.generatePDFWithPuppeteer(htmlContent);
+    } catch (error) {
+      console.warn(`Puppeteer attempt ${retryCount + 1} failed:`, error);
+      
+      if (retryCount < this.serviceConfig.retryCount) {
+        console.log(`Retrying Puppeteer service (attempt ${retryCount + 2}/${this.serviceConfig.retryCount + 1})...`);
+        await new Promise(resolve => setTimeout(resolve, 1000)); // 1 second delay
+        return this.attemptPuppeteerWithRetry(htmlContent, options, retryCount + 1);
+      }
+      
+      throw error;
+    }
+  }
+
+  async generatePDF(
+    htmlContent: string, 
+    options: PDFEngineOptions = {}
+  ): Promise<void> {
+    const {
+      filename = 'cv-export',
+      includeStandardCSS = true,
+      validateTemplate = true,
+    } = options;
+
+    // Validate template if requested
+    if (validateTemplate) {
+      const validationResult = templateValidator.validate(htmlContent);
+      if (!validationResult.isValid) {
+        console.warn('Template validation failed:', validationResult.errors);
+      }
+    }
+
+    // Process HTML content
+    let processedHTML = htmlContent;
+    
+    // Try Puppeteer service first, fallback to html2pdf if it fails
+    try {
+      const pdfBlob = await this.attemptPuppeteerWithRetry(processedHTML, options);
+      this.downloadBlob(pdfBlob, filename);
+      console.log('PDF generated successfully with Puppeteer service');
+    } catch (puppeteerError) {
+      console.error('Puppeteer service failed:', puppeteerError);
+      
+      if (this.serviceConfig.fallbackEnabled) {
+        console.log('Falling back to html2pdf...');
+        try {
+          await this.generatePDFWithHtml2PDF(processedHTML, options);
+          console.log('PDF generated successfully with html2pdf fallback');
+        } catch (fallbackError) {
+          console.error('Fallback method also failed:', fallbackError);
+          throw new Error(`Both PDF generation methods failed. Puppeteer: ${puppeteerError instanceof Error ? puppeteerError.message : 'Unknown error'}. Fallback: ${fallbackError instanceof Error ? fallbackError.message : 'Unknown error'}`);
+        }
+      } else {
+        throw new Error(`PDF generation failed: ${puppeteerError instanceof Error ? puppeteerError.message : 'Unknown error'}`);
+      }
+    }
   }
 }
 
