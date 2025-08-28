@@ -3,7 +3,7 @@ import { useParams } from 'react-router-dom';
 import { useTemplateEngine } from '@/hooks/use-template-engine';
 import { useCVTemplates } from '@/hooks/use-cv-templates';
 import { Button } from '@/components/ui/button';
-import { Download, Maximize, FileDown } from 'lucide-react';
+import { Download, Maximize, FileDown, Printer } from 'lucide-react';
 import { CVRenderer } from './CVRenderer';
 import { generateFullCVHTML } from '@/utils/cv-html-generator';
 import { exportCVAsPDF, ProgressDialog, ProgressStep } from '@/utils/pdf-export';
@@ -78,6 +78,20 @@ export const CVTemplatePreview: React.FC<CVTemplatePreviewProps> = ({
     } catch (error) {
       console.error('Fullscreen preview failed:', error);
       toast.error('Failed to open fullscreen preview. Please try again.');
+    }
+  };
+
+  const handlePrint = () => {
+    if (!selectedEmployeeId) {
+      toast.error('Please select an employee to print CV');
+      return;
+    }
+    
+    try {
+      window.print();
+    } catch (error) {
+      console.error('Print failed:', error);
+      toast.error('Failed to open print dialog. Please try again.');
     }
   };
 
@@ -165,6 +179,15 @@ export const CVTemplatePreview: React.FC<CVTemplatePreviewProps> = ({
                 >
                   <Maximize className="h-3 w-3 mr-1" />
                   Fullscreen
+                </Button>
+                <Button 
+                  size="sm" 
+                  variant="outline" 
+                  onClick={handlePrint}
+                  disabled={!selectedEmployeeId}
+                >
+                  <Printer className="h-3 w-3 mr-1" />
+                  Print
                 </Button>
                 <Button 
                   size="sm" 

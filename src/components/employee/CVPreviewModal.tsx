@@ -4,7 +4,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
-import { Loader2, Eye } from 'lucide-react';
+import { Loader2, Eye, Printer } from 'lucide-react';
 import { useCVTemplates } from '@/hooks/use-cv-templates';
 import { openCVPreview } from '@/utils/cv-preview-utility';
 import { toast } from 'sonner';
@@ -67,6 +67,29 @@ const CVPreviewModal: React.FC<CVPreviewModalProps> = ({
     }
   };
 
+  const handlePrintPreview = async () => {
+    if (!selectedTemplateId) {
+      toast.error('Please select a CV template');
+      return;
+    }
+
+    setIsPreviewing(true);
+
+    try {
+      await openCVPreview(employeeId, selectedTemplateId);
+      // Small delay to ensure the new tab loads, then trigger print
+      setTimeout(() => {
+        toast.success('CV preview opened - use Ctrl+P or the print button to print!');
+      }, 1000);
+      handleClose();
+    } catch (error) {
+      console.error('Print preview failed:', error);
+      toast.error('Failed to open print preview. Please try again.');
+    } finally {
+      setIsPreviewing(false);
+    }
+  };
+
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
       <DialogContent className="sm:max-w-md">
@@ -103,6 +126,23 @@ const CVPreviewModal: React.FC<CVPreviewModalProps> = ({
               Cancel
             </Button>
             <Button 
+              variant="outline"
+              onClick={handlePrintPreview}
+              disabled={isPreviewing || !selectedTemplateId || templatesLoading}
+            >
+              {isPreviewing ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Opening...
+                </>
+              ) : (
+                <>
+                  <Printer className="h-4 w-4 mr-2" />
+                  Print
+                </>
+              )}
+            </Button>
+            <Button 
               onClick={handlePreview}
               disabled={isPreviewing || !selectedTemplateId || templatesLoading}
             >
@@ -114,7 +154,7 @@ const CVPreviewModal: React.FC<CVPreviewModalProps> = ({
               ) : (
                 <>
                   <Eye className="h-4 w-4 mr-2" />
-                  Open Preview
+                  Preview
                 </>
               )}
             </Button>
