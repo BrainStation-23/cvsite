@@ -169,15 +169,7 @@ export const CVTemplatePreview: React.FC<CVTemplatePreviewProps> = ({
           <div className="flex gap-2">
             {processedHTML && (
               <>
-                <Button 
-                  size="sm" 
-                  variant="outline" 
-                  onClick={handlePrint}
-                  disabled={!selectedEmployeeId}
-                >
-                  <Printer className="h-3 w-3 mr-1" />
-                  Print
-                </Button>
+          
                 <Button 
                   size="sm" 
                   variant="outline" 
