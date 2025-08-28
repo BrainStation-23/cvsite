@@ -1,8 +1,9 @@
 
 import { dataFetcher } from './core/data-fetcher';
-import { cvTemplateProcessor } from './core/template-processor';
+import { TemplateProcessor } from '../template-processor';
 import { pdfEngine } from './core/pdf-engine';
 import { ProgressTracker, ProgressCallback } from './core/progress-tracker';
+import { mapEmployeeData } from '../template-data-mapper';
 
 export interface PDFExportOptions {
   filename?: string;
@@ -27,9 +28,11 @@ export async function exportCVAsPDF(
 
     // Step 2: Process template with dynamic configuration
     progressTracker.startStep('process-template');
-    const processedHTML = cvTemplateProcessor.processTemplate(
+    const processor = new TemplateProcessor();
+    const mappedData = mapEmployeeData(employeeData);
+    const processedHTML = processor.processForCV(
       templateData.html_template, 
-      employeeData,
+      mappedData,
       templateData // Pass template config for orientation and other settings
     );
     progressTracker.completeStep('process-template');
