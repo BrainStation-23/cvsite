@@ -3,13 +3,14 @@ import { useParams } from 'react-router-dom';
 import { useTemplateEngine } from '@/hooks/use-template-engine';
 import { useCVTemplates } from '@/hooks/use-cv-templates';
 import { Button } from '@/components/ui/button';
-import { Download, Maximize, FileDown } from 'lucide-react';
+import { Download, Maximize, FileDown, Printer } from 'lucide-react';
 import { CVRenderer } from './CVRenderer';
 import { generateFullCVHTML } from '@/utils/cv-html-generator';
 import { exportCVAsPDF, ProgressDialog, ProgressStep } from '@/utils/pdf-export';
 import { openCVPreview } from '@/utils/cv-preview-utility';
 import { dataFetcher } from '@/utils/pdf-export/core/data-fetcher';
-import { cvTemplateProcessor } from '@/utils/pdf-export/core/template-processor';
+import { TemplateProcessor } from '@/utils/template-processor';
+import { mapEmployeeData } from '@/utils/template-data-mapper';
 import { toast } from 'sonner';
 
 interface CVTemplatePreviewProps {
@@ -90,14 +91,15 @@ export const CVTemplatePreview: React.FC<CVTemplatePreviewProps> = ({
     try {
       // Use dynamic data source from template
       const { employeeData, templateData } = await dataFetcher.fetchAllData(selectedEmployeeId, templateId);
-      const processedHTML = cvTemplateProcessor.processTemplate(
+      const processor = new TemplateProcessor({ debugMode: false });
+      const mappedData = mapEmployeeData(employeeData);
+      const processedHTML = processor.processForCV(
         templateData.html_template,
-        employeeData,
+        mappedData,
         templateData
       );
       
-      const fullHTML = generateFullCVHTML(processedHTML, 'download');
-      const blob = new Blob([fullHTML], { type: 'text/html' });
+      const blob = new Blob([processedHTML], { type: 'text/html' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
@@ -112,6 +114,16 @@ export const CVTemplatePreview: React.FC<CVTemplatePreviewProps> = ({
       console.error('HTML download failed:', error);
       toast.error('Failed to download HTML. Please try again.');
     }
+  };
+
+  const handlePrint = () => {
+    if (!selectedEmployeeId || !templateId) {
+      toast.error('Please select an employee to print CV');
+      return;
+    }
+
+    // Create a new window with the CV content for printing
+    handleFullscreen(); // This opens the CV in a new tab which includes the print functionality
   };
 
   const handlePDFDownload = async () => {
@@ -157,6 +169,15 @@ export const CVTemplatePreview: React.FC<CVTemplatePreviewProps> = ({
           <div className="flex gap-2">
             {processedHTML && (
               <>
+                <Button 
+                  size="sm" 
+                  variant="outline" 
+                  onClick={handlePrint}
+                  disabled={!selectedEmployeeId}
+                >
+                  <Printer className="h-3 w-3 mr-1" />
+                  Print
+                </Button>
                 <Button 
                   size="sm" 
                   variant="outline" 

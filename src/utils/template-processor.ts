@@ -1,6 +1,7 @@
 
 import { MappedEmployeeData } from './template-data-mapper';
 import { applyUtilityFilter } from './template-utilities';
+import { generateFullCVHTML } from './cv-html-generator';
 
 interface TemplateProcessorOptions {
   debugMode?: boolean;
@@ -124,6 +125,62 @@ export class TemplateProcessor {
     return template;
   }
 
+  private applyOrientationStyles(html: string, orientation: 'portrait' | 'landscape'): string {
+    // Add orientation-specific CSS classes or styles
+    const orientationClass = `cv-${orientation}`;
+    
+    // If there's a body tag, add the orientation class
+    if (html.includes('<body')) {
+      html = html.replace(
+        /<body([^>]*)>/,
+        `<body$1 class="${orientationClass}">`
+      );
+    } else {
+      // If no body tag, wrap content in a div with orientation class
+      html = `<div class="${orientationClass}">${html}</div>`;
+    }
+    
+    // Add orientation-specific CSS
+    const orientationCSS = orientation === 'landscape' 
+      ? `
+        <style>
+          .cv-landscape {
+            width: 100%;
+            max-width: 297mm;
+            min-height: 210mm;
+          }
+          @media print {
+            .cv-landscape {
+              page-orientation: landscape;
+            }
+          }
+        </style>
+      `
+      : `
+        <style>
+          .cv-portrait {
+            width: 100%;
+            max-width: 210mm;
+            min-height: 297mm;
+          }
+          @media print {
+            .cv-portrait {
+              page-orientation: portrait;
+            }
+          }
+        </style>
+      `;
+    
+    // Insert CSS before closing head tag or at the beginning
+    if (html.includes('</head>')) {
+      html = html.replace('</head>', `${orientationCSS}</head>`);
+    } else {
+      html = orientationCSS + html;
+    }
+    
+    return html;
+  }
+
   process(template: string, data: MappedEmployeeData): string {
     if (!template) return '';
 
@@ -145,5 +202,17 @@ export class TemplateProcessor {
       this.log('Template processing error', error);
       throw new Error(`Template processing failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
+  }
+
+  processForCV(htmlTemplate: string, employeeData: any, templateConfig?: { orientation?: 'portrait' | 'landscape' }): string {
+    const processed = this.process(htmlTemplate, employeeData);
+    
+    // Apply orientation-specific styling if template config is provided
+    let processedHTML = processed;
+    if (templateConfig?.orientation) {
+      processedHTML = this.applyOrientationStyles(processedHTML, templateConfig.orientation);
+    }
+    
+    return generateFullCVHTML(processedHTML, 'download');
   }
 }

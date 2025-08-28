@@ -1,6 +1,7 @@
 
 import { dataFetcher } from './pdf-export/core/data-fetcher';
-import { cvTemplateProcessor } from './pdf-export/core/template-processor';
+import { TemplateProcessor } from './template-processor';
+import { mapEmployeeData } from './template-data-mapper';
 
 export interface CVPreviewOptions {
   openInNewTab?: boolean;
@@ -20,9 +21,11 @@ export async function openCVPreview(
     console.log(`Processing CV with template: ${templateData.name}, orientation: ${templateData.orientation}, data source: ${templateData.data_source_function}`);
     
     // Process the template with employee data and template configuration
-    const processedHTML = cvTemplateProcessor.processTemplate(
+    const processor = new TemplateProcessor({ debugMode: false });
+    const mappedData = mapEmployeeData(employeeData);
+    const processedHTML = processor.processForCV(
       templateData.html_template,
-      employeeData,
+      mappedData,
       templateData // Pass template config for orientation handling
     );
     
