@@ -53,7 +53,6 @@ export function usePlannedResourcesExport() {
           const pagination = (rpcData as any).pagination;
           
           console.log(`Page ${currentPage}: Retrieved ${pageResources.length} resources`);
-          console.log('Sample resource data:', pageResources[0]); // Debug: Log first resource to see structure
           allResources = [...allResources, ...pageResources];
           
           // Check if we have more pages
@@ -79,22 +78,20 @@ export function usePlannedResourcesExport() {
       
       console.log(`Total retrieved: ${allResources.length} planned resources across ${currentPage} pages`);
       
-      // Convert the data to CSV format - updated field mapping to match actual response structure
+      // Convert the data to CSV format - mapping nested response structure correctly
       const csvData = allResources.map(resource => {
-        console.log('Processing resource:', resource); // Debug: Log each resource structure
-        
         return {
-          'Employee ID': resource.employee_id || resource.profile_employee_id || '',
-          'Employee Name': resource.employee_name || resource.profile_name || `${resource.profile_first_name || ''} ${resource.profile_last_name || ''}`.trim() || '',
-          'SBU': resource.sbu_name || resource.profile_sbu_name || '',
-          'Project Name': resource.project_name || '',
-          'Client Name': resource.client_name || '',
-          'Project Manager': resource.project_manager || resource.project_manager_name || '',
-          'Bill Type': resource.bill_type_name || resource.bill_type || '',
+          'Employee ID': resource.profile?.employee_id || '',
+          'Employee Name': `${resource.profile?.first_name || ''} ${resource.profile?.last_name || ''}`.trim() || '',
+          'SBU': '', // SBU info not available in this response structure
+          'Project Name': resource.project?.project_name || '',
+          'Client Name': resource.project?.client_name || '',
+          'Project Manager': resource.project?.project_manager || '',
+          'Bill Type': resource.bill_type?.name || '',
           'Engagement %': resource.engagement_percentage || '',
           'Billing %': resource.billing_percentage || '',
-          'Start Date': resource.engagement_start_date || resource.start_date || '',
-          'Release Date': resource.release_date || resource.end_date || '',
+          'Start Date': resource.engagement_start_date || '',
+          'Release Date': resource.release_date || '',
           'Weekly Validation': resource.weekly_validation ? 'Yes' : 'No',
           'Created At': resource.created_at ? new Date(resource.created_at).toLocaleDateString() : ''
         };
