@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -7,73 +8,38 @@ import { PlannedResourcesTab } from './PlannedResourcesTab';
 import { WeeklyValidationTab } from './WeeklyValidationTab';
 import { ResourcePlanningForm } from './ResourcePlanningForm';
 import { ResourcePlanningExportButton } from './ResourcePlanningExportButton';
-import { useResourcePlanningSearch } from '@/hooks/use-resource-planning-search';
-import { useResourcePlanningInlineEdit } from '@/hooks/use-resource-planning-inline-edit';
 import { ResourcePlanningSearchControls } from './ResourcePlanningSearchControls';
-import { useResourcePlanningOperations } from '@/hooks/use-resource-planning-operations';
-import { useResourcePlanningState } from '@/hooks/use-resource-planning-state';
+import { useResourcePlanningState } from './hooks/useResourcePlanningState';
+import { useInlineEdit } from './hooks/useInlineEdit';
 
 export const ResourcePlanningTable: React.FC = () => {
   const [activeTab, setActiveTab] = useState('planned');
-  const [showForm, setShowForm] = useState(false);
-  const [editingItem, setEditingItem] = useState<any>(null);
+  const [searchQuery, setSearchQuery] = useState('');
 
   const {
-    searchQuery,
-    setSearchQuery,
-    selectedSbu,
-    setSelectedSbu,
-    selectedManager,
-    setSelectedManager,
-  } = useResourcePlanningSearch();
+    preselectedProfileId,
+    editingItem,
+    handleCreatePlan,
+    handleCreateNewAssignment,
+    handleEditAssignment,
+    handleFormSuccess,
+    handleFormCancel,
+  } = useResourcePlanningState();
 
   const {
     editingItemId,
     editData,
-    editLoading,
     startEdit,
     cancelEdit,
     saveEdit,
-    setEditData,
-  } = useResourcePlanningInlineEdit();
+    updateEditData,
+    isLoading: editLoading,
+  } = useInlineEdit();
 
-  const {
-    createResourcePlanning,
-    updateResourcePlanning,
-    invalidateResourcePlanning,
-    deleteResourcePlanning,
-    isCreating,
-    isUpdating,
-    isInvalidating,
-    isDeleting,
-  } = useResourcePlanningOperations();
-
-  const {
-    data,
-    pagination,
-    isLoading,
-    currentPage,
-    setCurrentPage,
-    sortBy,
-    setSortBy,
-    sortOrder,
-    setSortOrder,
-    refetch
-  } = useResourcePlanningState(searchQuery, selectedSbu, selectedManager);
-
-  const handleCreateNewAssignment = () => {
-    setEditingItem(null);
-    setShowForm(true);
-  };
-
-  const handleEditAssignment = (item: any) => {
-    setEditingItem(item);
-    setShowForm(true);
-  };
+  const showForm = preselectedProfileId !== null || editingItem !== null;
 
   const handleCloseForm = () => {
-    setShowForm(false);
-    setEditingItem(null);
+    handleFormCancel();
   };
 
   return (
@@ -81,10 +47,6 @@ export const ResourcePlanningTable: React.FC = () => {
       <ResourcePlanningSearchControls
         searchQuery={searchQuery}
         setSearchQuery={setSearchQuery}
-        selectedSbu={selectedSbu}
-        setSelectedSbu={setSelectedSbu}
-        selectedManager={selectedManager}
-        setSelectedManager={setSelectedManager}
       />
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -110,28 +72,28 @@ export const ResourcePlanningTable: React.FC = () => {
                 <TabsContent value="planned" className="mt-4">
                   <PlannedResourcesTab
                     searchQuery={searchQuery}
-                    selectedSbu={selectedSbu}
-                    selectedManager={selectedManager}
+                    selectedSbu={null}
+                    selectedManager={null}
                     onCreateNewAssignment={handleCreateNewAssignment}
                     onEditAssignment={handleEditAssignment}
                     resourcePlanningState={{
-                      data,
-                      pagination,
-                      isLoading,
-                      currentPage,
-                      setCurrentPage,
-                      sortBy,
-                      setSortBy,
-                      sortOrder,
-                      setSortOrder,
-                      refetch
+                      data: [],
+                      pagination: null,
+                      isLoading: false,
+                      currentPage: 1,
+                      setCurrentPage: () => {},
+                      sortBy: 'created_at',
+                      setSortBy: () => {},
+                      sortOrder: 'desc',
+                      setSortOrder: () => {},
+                      refetch: () => {},
                     }}
                     editingItemId={editingItemId}
                     editData={editData}
                     onStartEdit={startEdit}
                     onCancelEdit={cancelEdit}
                     onSaveEdit={saveEdit}
-                    onEditDataChange={setEditData}
+                    onEditDataChange={updateEditData}
                     editLoading={editLoading}
                   />
                 </TabsContent>
@@ -139,8 +101,37 @@ export const ResourcePlanningTable: React.FC = () => {
                 <TabsContent value="validation" className="mt-4">
                   <WeeklyValidationTab
                     searchQuery={searchQuery}
-                    selectedSbu={selectedSbu}
-                    selectedManager={selectedManager}
+                    selectedSbu={null}
+                    selectedManager={null}
+                    resourcePlanningState={{
+                      data: [],
+                      pagination: null,
+                      isLoading: false,
+                      currentPage: 1,
+                      setCurrentPage: () => {},
+                      sortBy: 'created_at',
+                      setSortBy: () => {},
+                      sortOrder: 'desc',
+                      setSortOrder: () => {},
+                      refetch: () => {},
+                      validateWeekly: () => {},
+                      isValidating: false,
+                      bulkValidate: () => {},
+                      bulkComplete: () => {},
+                      bulkDelete: () => {},
+                      bulkCopy: () => {},
+                      isBulkValidating: false,
+                      isBulkCompleting: false,
+                      isBulkDeleting: false,
+                      isBulkCopying: false,
+                    }}
+                    editingItemId={editingItemId}
+                    editData={editData}
+                    onStartEdit={startEdit}
+                    onCancelEdit={cancelEdit}
+                    onSaveEdit={saveEdit}
+                    onEditDataChange={updateEditData}
+                    editLoading={editLoading}
                   />
                 </TabsContent>
               </Tabs>
@@ -149,11 +140,12 @@ export const ResourcePlanningTable: React.FC = () => {
         </div>
 
         <div className="lg:col-span-1">
-          <ResourcePlanningForm 
-            isOpen={showForm}
-            onClose={handleCloseForm}
-            editingItem={editingItem}
-          />
+          {showForm && (
+            <ResourcePlanningForm 
+              preselectedProfileId={preselectedProfileId}
+              onSuccess={handleFormSuccess}
+            />
+          )}
         </div>
       </div>
     </div>
