@@ -11,11 +11,9 @@ export const ENHANCED_BASIC_TEMPLATE = `<div class="cv-container">
       
       {{#ifNotEmpty employee.email}}
         <p class="contact-info">Email: {{employee.email}}</p>
-      {{/ifNotEmpty}}
-      
-      {{#unless employee.email}}
+      {{else}}
         <p class="contact-info">Email: Available upon request</p>
-      {{/unless}}
+      {{/ifNotEmpty}}
     </div>
   </section>
   
