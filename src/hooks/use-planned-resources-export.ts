@@ -12,16 +12,62 @@ export function usePlannedResourcesExport() {
     try {
       setIsExporting(true);
       
-      console.log('Starting planned resources export...');
+      console.log('Starting planned resources export using pagination...');
       
-      const { data, error } = await supabase.rpc('export_planned_resources').range(0, 10000);
+      let allResources: any[] = [];
+      let currentPage = 1;
+      const itemsPerPage = 1000; // Use a large page size for efficiency
+      let hasMorePages = true;
       
-      if (error) {
-        console.error('Export RPC error:', error);
-        throw error;
+      // Iterate through all pages to get all data
+      while (hasMorePages) {
+        console.log(`Fetching page ${currentPage}...`);
+        
+        const { data: rpcData, error } = await supabase.rpc('get_planned_resource_data', {
+          search_query: null,
+          page_number: currentPage,
+          items_per_page: itemsPerPage,
+          sort_by: 'created_at',
+          sort_order: 'desc',
+          sbu_filter: null,
+          manager_filter: null,
+          bill_type_filter: null,
+          project_search: null,
+          min_engagement_percentage: null,
+          max_engagement_percentage: null,
+          min_billing_percentage: null,
+          max_billing_percentage: null,
+          start_date_from: null,
+          start_date_to: null,
+          end_date_from: null,
+          end_date_to: null,
+        });
+        
+        if (error) {
+          console.error('Export RPC error:', error);
+          throw error;
+        }
+        
+        if (rpcData && typeof rpcData === 'object' && 'resource_planning' in rpcData) {
+          const pageResources = (rpcData as any).resource_planning || [];
+          const pagination = (rpcData as any).pagination;
+          
+          console.log(`Page ${currentPage}: Retrieved ${pageResources.length} resources`);
+          allResources = [...allResources, ...pageResources];
+          
+          // Check if we have more pages
+          if (pagination && currentPage < pagination.page_count) {
+            currentPage++;
+          } else {
+            hasMorePages = false;
+          }
+        } else {
+          console.warn('Unexpected RPC response structure:', rpcData);
+          hasMorePages = false;
+        }
       }
       
-      if (!data || data.length === 0) {
+      if (allResources.length === 0) {
         toast({
           title: "No Data",
           description: "No planned resources found to export.",
@@ -30,24 +76,29 @@ export function usePlannedResourcesExport() {
         return;
       }
       
-      console.log(`Exporting ${data.length} planned resources`);
+      console.log(`Total retrieved: ${allResources.length} planned resources across ${currentPage} pages`);
       
-      // Convert the data to CSV format
-      const csvData = data.map(resource => ({
-        'Employee ID': resource.employee_id,
-        'Employee Name': resource.employee_name,
-        'SBU': resource.sbu_name,
-        'Project Name': resource.project_name,
-        'Client Name': resource.client_name,
-        'Project Manager': resource.project_manager,
-        'Bill Type': resource.bill_type_name,
-        'Engagement %': resource.engagement_percentage,
-        'Billing %': resource.billing_percentage,
-        'Start Date': resource.engagement_start_date,
-        'Release Date': resource.release_date,
-        'Weekly Validation': resource.weekly_validation ? 'Yes' : 'No',
-        'Created At': new Date(resource.created_at).toLocaleDateString()
-      }));
+      // Convert the data to CSV format - mapping nested response structure correctly
+      const csvData = allResources.map(resource => {
+        return {
+          'Employee ID': resource.profile?.employee_id || '',
+          'Employee Name': `${resource.profile?.first_name || ''} ${resource.profile?.last_name || ''}`.trim() || '',
+          'SBU': resource.sbu?.name || '',
+          'Project Name': resource.project?.project_name || '',
+          'Client Name': resource.project?.client_name || '',
+          'Project Manager': resource.project?.project_manager || '',
+          'Bill Type': resource.bill_type?.name || '',
+          'Engagement %': resource.engagement_percentage || '',
+          'Billing %': resource.billing_percentage || '',
+          'Start Date': resource.engagement_start_date || '',
+          'Release Date': resource.release_date || '',
+          'Weekly Validation': resource.weekly_validation ? 'Yes' : 'No',
+          'Created At': resource.created_at ? new Date(resource.created_at).toLocaleDateString() : ''
+        };
+      });
+      
+      console.log(`Converting ${csvData.length} records to CSV`);
+      console.log('Sample CSV data:', csvData[0]); // Debug: Log first CSV record
       
       // Generate CSV using papaparse
       const csv = Papa.unparse(csvData);
@@ -67,7 +118,7 @@ export function usePlannedResourcesExport() {
         
         toast({
           title: "Export Successful",
-          description: `Successfully exported ${data.length} planned resources to CSV.`,
+          description: `Successfully exported ${allResources.length} planned resources to CSV.`,
           variant: "default"
         });
       }
