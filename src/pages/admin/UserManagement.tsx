@@ -33,6 +33,12 @@ const UserManagement: React.FC = () => {
     filterRole,
     sortBy,
     sortOrder,
+    filterSbuId,
+    filterManagerId,
+    filterResourceTypeId,
+    filterExpertiseId,
+    filterTotalYears,
+    filterCompanyYears,
     setSelectedUser,
     fetchUsers,
     handlePageChange,
@@ -68,6 +74,54 @@ const UserManagement: React.FC = () => {
     fetchUsers({
       sortColumn: column,
       sortDirection: order
+    });
+  };
+
+  const handleFilterSbuId = (sbuId: string | null) => {
+    fetchUsers({
+      page: 1,
+      sbuId
+    });
+  };
+
+  const handleFilterManagerId = (managerId: string | null) => {
+    fetchUsers({
+      page: 1,
+      managerId
+    });
+  };
+
+  const handleFilterResourceTypeId = (resourceTypeId: string | null) => {
+    fetchUsers({
+      page: 1,
+      resourceTypeId
+    });
+  };
+
+  const handleFilterExpertiseId = (expertiseId: string | null) => {
+    fetchUsers({
+      page: 1,
+      expertiseId
+    });
+  };
+
+  const handleFilterTotalYears = (years: [number, number]) => {
+    fetchUsers({
+      page: 1,
+      totalYears: years
+    });
+  };
+
+  const handleFilterCompanyYears = (years: [number, number]) => {
+    fetchUsers({
+      page: 1,
+      companyYears: years
+    });
+  };
+
+  const handleApplyAdvancedFilters = () => {
+    fetchUsers({
+      page: 1
     });
   };
 
@@ -131,14 +185,13 @@ const UserManagement: React.FC = () => {
   };
 
   const handleBulkDeleteComplete = () => {
-    fetchUsers(); // Refresh the user list after bulk delete
+    fetchUsers();
   };
 
   const handleOdooSync = async () => {
     try {
       await syncEmployees();
       setIsSyncResultDialogOpen(true);
-      // Refresh the user list after sync
       fetchUsers();
     } catch (error) {
       // Error is already handled by the hook
@@ -206,7 +259,20 @@ const UserManagement: React.FC = () => {
         currentRole={filterRole} 
         sortBy={sortBy} 
         sortOrder={sortOrder} 
-        isLoading={isLoading} 
+        isLoading={isLoading}
+        filterSbuId={filterSbuId}
+        onFilterSbuId={handleFilterSbuId}
+        filterManagerId={filterManagerId}
+        onFilterManagerId={handleFilterManagerId}
+        filterResourceTypeId={filterResourceTypeId}
+        onFilterResourceTypeId={handleFilterResourceTypeId}
+        filterExpertiseId={filterExpertiseId}
+        onFilterExpertiseId={handleFilterExpertiseId}
+        filterTotalYears={filterTotalYears}
+        onFilterTotalYears={handleFilterTotalYears}
+        filterCompanyYears={filterCompanyYears}
+        onFilterCompanyYears={handleFilterCompanyYears}
+        onApplyAdvancedFilters={handleApplyAdvancedFilters}
       />
       
       <UserList 

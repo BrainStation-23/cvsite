@@ -18,7 +18,19 @@ export function useUserListing(state: ReturnType<typeof import('./use-user-state
     sortBy,
     setSortBy,
     sortOrder,
-    setSortOrder
+    setSortOrder,
+    filterSbuId,
+    setFilterSbuId,
+    filterManagerId,
+    setFilterManagerId,
+    filterResourceTypeId,
+    setFilterResourceTypeId,
+    filterExpertiseId,
+    setFilterExpertiseId,
+    filterTotalYears,
+    setFilterTotalYears,
+    filterCompanyYears,
+    setFilterCompanyYears
   } = state;
   
   // Fetch users
@@ -29,6 +41,12 @@ export function useUserListing(state: ReturnType<typeof import('./use-user-state
     role?: UserRole | null;
     sortColumn?: SortColumn;
     sortDirection?: SortOrder;
+    sbuId?: string | null;
+    managerId?: string | null;
+    resourceTypeId?: string | null;
+    expertiseId?: string | null;
+    totalYears?: [number, number] | null;
+    companyYears?: [number, number] | null;
   } = {}) => {
     const {
       page = state.pagination.page,
@@ -36,7 +54,13 @@ export function useUserListing(state: ReturnType<typeof import('./use-user-state
       search = searchQuery,
       role = filterRole,
       sortColumn = sortBy,
-      sortDirection = sortOrder
+      sortDirection = sortOrder,
+      sbuId = filterSbuId,
+      managerId = filterManagerId,
+      resourceTypeId = filterResourceTypeId,
+      expertiseId = filterExpertiseId,
+      totalYears = filterTotalYears,
+      companyYears = filterCompanyYears
     } = options;
     
     setIsLoading(true);
@@ -45,6 +69,14 @@ export function useUserListing(state: ReturnType<typeof import('./use-user-state
       const { data, error } = await supabase.rpc('list_users', {
         search_query: search || null,
         filter_role: role || null,
+        filter_sbu_id: sbuId || null,
+        filter_manager_id: managerId || null,
+        filter_resource_type_id: resourceTypeId || null,
+        filter_expertise_id: expertiseId || null,
+        filter_min_total_years: totalYears ? totalYears[0] : null,
+        filter_max_total_years: totalYears ? totalYears[1] : null,
+        filter_min_company_years: companyYears ? companyYears[0] : null,
+        filter_max_company_years: companyYears ? companyYears[1] : null,
         page_number: page,
         items_per_page: perPage,
         sort_by: sortColumn,
@@ -97,6 +129,12 @@ export function useUserListing(state: ReturnType<typeof import('./use-user-state
       setFilterRole(role);
       setSortBy(sortColumn);
       setSortOrder(sortDirection);
+      setFilterSbuId(sbuId);
+      setFilterManagerId(managerId);
+      setFilterResourceTypeId(resourceTypeId);
+      setFilterExpertiseId(expertiseId);
+      if (totalYears) setFilterTotalYears(totalYears);
+      if (companyYears) setFilterCompanyYears(companyYears);
     } catch (error) {
       console.error('Error fetching users:', error);
       toast({
@@ -121,7 +159,13 @@ export function useUserListing(state: ReturnType<typeof import('./use-user-state
       search: null,
       role: null,
       sortColumn: 'created_at',
-      sortDirection: 'desc'
+      sortDirection: 'desc',
+      sbuId: null,
+      managerId: null,
+      resourceTypeId: null,
+      expertiseId: null,
+      totalYears: [0, 50],
+      companyYears: [0, 30]
     });
   };
 

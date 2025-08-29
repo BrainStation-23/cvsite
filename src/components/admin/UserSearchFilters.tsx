@@ -12,6 +12,7 @@ import {
 import { Search, X } from 'lucide-react';
 import { UserRole } from '@/types';
 import { SortColumn, SortOrder } from '@/hooks/use-user-management';
+import UserAdvancedFilters from './UserAdvancedFilters';
 
 interface UserSearchFiltersProps {
   onSearch: (query: string | null) => void;
@@ -23,6 +24,21 @@ interface UserSearchFiltersProps {
   sortBy: SortColumn;
   sortOrder: SortOrder;
   isLoading: boolean;
+  
+  // Advanced filters
+  filterSbuId: string | null;
+  onFilterSbuId: (sbuId: string | null) => void;
+  filterManagerId: string | null;
+  onFilterManagerId: (managerId: string | null) => void;
+  filterResourceTypeId: string | null;
+  onFilterResourceTypeId: (resourceTypeId: string | null) => void;
+  filterExpertiseId: string | null;
+  onFilterExpertiseId: (expertiseId: string | null) => void;
+  filterTotalYears: [number, number];
+  onFilterTotalYears: (years: [number, number]) => void;
+  filterCompanyYears: [number, number];
+  onFilterCompanyYears: (years: [number, number]) => void;
+  onApplyAdvancedFilters: () => void;
 }
 
 const UserSearchFilters: React.FC<UserSearchFiltersProps> = ({
@@ -34,7 +50,20 @@ const UserSearchFilters: React.FC<UserSearchFiltersProps> = ({
   currentRole,
   sortBy,
   sortOrder,
-  isLoading
+  isLoading,
+  filterSbuId,
+  onFilterSbuId,
+  filterManagerId,
+  onFilterManagerId,
+  filterResourceTypeId,
+  onFilterResourceTypeId,
+  filterExpertiseId,
+  onFilterExpertiseId,
+  filterTotalYears,
+  onFilterTotalYears,
+  filterCompanyYears,
+  onFilterCompanyYears,
+  onApplyAdvancedFilters
 }) => {
   const [searchInput, setSearchInput] = useState(searchQuery || '');
 
@@ -47,6 +76,21 @@ const UserSearchFilters: React.FC<UserSearchFiltersProps> = ({
     const [column, order] = value.split('-') as [SortColumn, SortOrder];
     onSortChange(column, order);
   };
+
+  const handleResetAdvanced = () => {
+    onFilterSbuId(null);
+    onFilterManagerId(null);
+    onFilterResourceTypeId(null);
+    onFilterExpertiseId(null);
+    onFilterTotalYears([0, 50]);
+    onFilterCompanyYears([0, 30]);
+    onApplyAdvancedFilters();
+  };
+
+  const hasAnyFilters = searchQuery || currentRole || filterSbuId || filterManagerId || 
+    filterResourceTypeId || filterExpertiseId || filterTotalYears[0] > 0 || 
+    filterTotalYears[1] < 50 || filterCompanyYears[0] > 0 || filterCompanyYears[1] < 30 ||
+    sortBy !== 'created_at' || sortOrder !== 'desc';
 
   return (
     <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow mb-4 space-y-4">
@@ -130,12 +174,30 @@ const UserSearchFilters: React.FC<UserSearchFiltersProps> = ({
             variant="outline" 
             onClick={onReset}
             className="w-full"
-            disabled={!searchQuery && !currentRole && sortBy === 'created_at' && sortOrder === 'desc'}
+            disabled={!hasAnyFilters}
           >
-            Reset Filters
+            Reset All Filters
           </Button>
         </div>
       </div>
+
+      <UserAdvancedFilters
+        filterSbuId={filterSbuId}
+        onFilterSbuId={onFilterSbuId}
+        filterManagerId={filterManagerId}
+        onFilterManagerId={onFilterManagerId}
+        filterResourceTypeId={filterResourceTypeId}
+        onFilterResourceTypeId={onFilterResourceTypeId}
+        filterExpertiseId={filterExpertiseId}
+        onFilterExpertiseId={onFilterExpertiseId}
+        filterTotalYears={filterTotalYears}
+        onFilterTotalYears={onFilterTotalYears}
+        filterCompanyYears={filterCompanyYears}
+        onFilterCompanyYears={onFilterCompanyYears}
+        onApplyFilters={onApplyAdvancedFilters}
+        onResetAdvanced={handleResetAdvanced}
+        isLoading={isLoading}
+      />
     </div>
   );
 };
