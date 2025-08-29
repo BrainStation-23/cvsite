@@ -14,7 +14,7 @@ export function usePlannedResourcesExport() {
       
       console.log('Starting planned resources export...');
       
-      const { data, error } = await supabase.rpc('export_planned_resources');
+      const { data, error } = await supabase.rpc('export_planned_resources').range(0, 10000);
       
       if (error) {
         console.error('Export RPC error:', error);
