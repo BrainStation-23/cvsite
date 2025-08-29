@@ -1504,6 +1504,24 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: undefined
       }
+      export_planned_resources: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          bill_type_name: string
+          billing_percentage: number
+          client_name: string
+          created_at: string
+          employee_id: string
+          employee_name: string
+          engagement_percentage: number
+          engagement_start_date: string
+          project_manager: string
+          project_name: string
+          release_date: string
+          sbu_name: string
+          weekly_validation: boolean
+        }[]
+      }
       export_profile_json: {
         Args: { target_user_id?: string }
         Returns: Json
