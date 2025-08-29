@@ -29,7 +29,6 @@ import ProfileImageWarningAudit from '@/pages/admin/platform-settings/ProfileIma
 import SecurityPage from '@/pages/security/SecurityPage';
 import NotFound from '@/pages/NotFound';
 import TrainingCertification from '@/pages/TrainingCertification';
-import ResourcePlanning from '@/pages/ResourcePlanning';
 import ResourceCalendar from '@/pages/ResourceCalendar';
 import ResourceCalendarView from '@/pages/resource-calendar/ResourceCalendarView';
 import ResourceCalendarStatistics from '@/pages/resource-calendar/ResourceCalendarStatistics';
@@ -334,7 +333,7 @@ function App(): React.ReactElement {
               path="/admin/resource-planning"
               element={
                 <ProtectedRoute allowedRoles={['admin', 'manager']}>
-                  <ResourcePlanning />
+                  <ResourceCalendarPlanning />
                 </ProtectedRoute>
               }
             />
@@ -342,7 +341,7 @@ function App(): React.ReactElement {
               path="/manager/resource-planning"
               element={
                 <ProtectedRoute allowedRoles={['manager', 'admin']}>
-                  <ResourcePlanning />
+                  <ResourceCalendarPlanning />
                 </ProtectedRoute>
               }
             />

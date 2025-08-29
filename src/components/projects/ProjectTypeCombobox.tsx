@@ -1,79 +1,48 @@
+
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Check, ChevronsUpDown, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { useResourceTypeSearch } from '@/hooks/use-resource-type-search';
 import { useQuery } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
+import { EnhancedProjectsApiService } from '@/services/enhanced-projects-api';
 
-interface ResourceTypeComboboxProps {
-  value: string | null;
+interface ProjectTypeComboboxProps {
+  value?: string | null;
   onValueChange: (value: string | null) => void;
   placeholder?: string;
   disabled?: boolean;
 }
 
-const ResourceTypeCombobox: React.FC<ResourceTypeComboboxProps> = ({
+export const ProjectTypeCombobox: React.FC<ProjectTypeComboboxProps> = ({
   value,
   onValueChange,
-  placeholder = "Select resource type...",
-  disabled = false
+  placeholder = "Select project type...",
+  disabled = false,
 }) => {
   const [open, setOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  
-  // Fetch selected resource type separately to ensure it's always available
-  const { data: selectedResourceType } = useQuery({
-    queryKey: ['selected-resource-type', value],
-    queryFn: async () => {
-      if (!value) return null;
-      
-      const { data, error } = await supabase
-        .from('resource_types')
-        .select('*')
-        .eq('id', value)
-        .single();
-      
-      if (error) throw error;
-      return data;
-    },
-    enabled: !!value,
+
+  const { data: projectTypes, isLoading } = useQuery({
+    queryKey: ['project-types'],
+    queryFn: () => EnhancedProjectsApiService.getProjectTypes(),
   });
 
-  const { data: searchResult, isLoading } = useResourceTypeSearch({
-    searchQuery: searchQuery || null,
-    page: 1,
-    perPage: 50
-  });
+  const selectedType = projectTypes?.find(type => type.id === value);
 
-  const resourceTypes = searchResult?.resourceTypes || [];
-  
-  // Combine search results with selected resource type to ensure it's always available
-  const allResourceTypes = React.useMemo(() => {
-    const combinedResourceTypes = [...resourceTypes];
-    
-    // Add selected resource type if it's not already in the search results
-    if (selectedResourceType && !resourceTypes.some(rt => rt.id === selectedResourceType.id)) {
-      combinedResourceTypes.unshift(selectedResourceType);
-    }
-    
-    // Remove duplicates based on id
-    const uniqueResourceTypes = combinedResourceTypes.filter((resourceType, index, self) => 
-      index === self.findIndex(rt => rt.id === resourceType.id)
-    );
-    
-    return uniqueResourceTypes;
-  }, [resourceTypes, selectedResourceType]);
+  const filteredTypes = projectTypes?.filter(type =>
+    type.name.toLowerCase().includes(searchQuery.toLowerCase())
+  ) || [];
 
-  const handleSelect = (resourceTypeId: string) => {
-    if (resourceTypeId === value) {
+  const handleSelect = (typeId: string) => {
+    if (typeId === value) {
       onValueChange(null);
     } else {
-      onValueChange(resourceTypeId);
+      onValueChange(typeId);
     }
     setOpen(false);
+    setSearchQuery('');
   };
 
   const handleClear = (e: React.MouseEvent) => {
@@ -98,9 +67,9 @@ const ResourceTypeCombobox: React.FC<ResourceTypeComboboxProps> = ({
           className="w-full justify-between"
           disabled={disabled}
         >
-          {selectedResourceType ? (
+          {selectedType ? (
             <div className="flex items-center justify-between w-full">
-              <span className="truncate">{selectedResourceType.name}</span>
+              <span className="truncate">{selectedType.name}</span>
               <span
                 className="ml-2 inline-flex h-6 w-6 items-center justify-center rounded hover:bg-muted/70 text-muted-foreground hover:text-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring cursor-pointer"
                 onClick={handleClear}
@@ -128,36 +97,37 @@ const ResourceTypeCombobox: React.FC<ResourceTypeComboboxProps> = ({
               </span>
             </div>
           ) : (
-            placeholder
+            <span className="text-muted-foreground">{placeholder}</span>
           )}
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-full p-0">
+      <PopoverContent className="w-full p-0" align="start">
         <Command shouldFilter={false}>
-          <CommandInput 
-            placeholder="Search resource type..." 
+          <CommandInput
+            placeholder="Search project types..."
             value={searchQuery}
             onValueChange={setSearchQuery}
           />
           <CommandList>
             <CommandEmpty>
-              {isLoading ? "Loading..." : "No resource type found."}
+              {isLoading ? 'Loading project types...' : 'No project types found.'}
             </CommandEmpty>
             <CommandGroup>
-              {allResourceTypes.map((resourceType) => (
+              {filteredTypes.map((type) => (
                 <CommandItem
-                  key={resourceType.id}
-                  value={resourceType.id}
-                  onSelect={() => handleSelect(resourceType.id)}
+                  key={type.id}
+                  value={type.id}
+                  onSelect={() => handleSelect(type.id)}
+                  className="cursor-pointer"
                 >
                   <Check
                     className={cn(
-                      "mr-2 h-4 w-4",
-                      value === resourceType.id ? "opacity-100" : "opacity-0"
+                      'mr-2 h-4 w-4',
+                      value === type.id ? 'opacity-100' : 'opacity-0'
                     )}
                   />
-                  <span>{resourceType.name}</span>
+                  {type.name}
                 </CommandItem>
               ))}
             </CommandGroup>
@@ -167,5 +137,3 @@ const ResourceTypeCombobox: React.FC<ResourceTypeComboboxProps> = ({
     </Popover>
   );
 };
-
-export default ResourceTypeCombobox;
