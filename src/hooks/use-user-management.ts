@@ -1,3 +1,4 @@
+
 import { useUserState } from './user-management/use-user-state';
 import { useUserListing } from './user-management/use-user-listing';
 import { useUserCreation } from './user-management/use-user-creation';
@@ -101,6 +102,14 @@ export function useUserManagement({
     sortBy: state.sortBy,
     sortOrder: state.sortOrder,
     setSelectedUser: state.setSelectedUser,
+    
+    // New advanced filter states
+    filterSbuId: state.filterSbuId,
+    filterManagerId: state.filterManagerId,
+    filterResourceTypeId: state.filterResourceTypeId,
+    filterExpertiseId: state.filterExpertiseId,
+    filterTotalYears: state.filterTotalYears,
+    filterCompanyYears: state.filterCompanyYears,
     
     // Methods from sub-hooks (listing)
     fetchUsers: listing.fetchUsers,

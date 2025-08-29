@@ -16,10 +16,20 @@ export function useUserState() {
     perPage: 10,
     pageCount: 0
   });
+  
+  // Basic filters
   const [searchQuery, setSearchQuery] = useState<string | null>(null);
   const [filterRole, setFilterRole] = useState<UserRole | null>(null);
   const [sortBy, setSortBy] = useState<SortColumn>('created_at');
   const [sortOrder, setSortOrder] = useState<SortOrder>('desc');
+  
+  // New advanced filters
+  const [filterSbuId, setFilterSbuId] = useState<string | null>(null);
+  const [filterManagerId, setFilterManagerId] = useState<string | null>(null);
+  const [filterResourceTypeId, setFilterResourceTypeId] = useState<string | null>(null);
+  const [filterExpertiseId, setFilterExpertiseId] = useState<string | null>(null);
+  const [filterTotalYears, setFilterTotalYears] = useState<[number, number]>([0, 50]);
+  const [filterCompanyYears, setFilterCompanyYears] = useState<[number, number]>([0, 30]);
   
   return {
     users,
@@ -41,6 +51,18 @@ export function useUserState() {
     sortBy,
     setSortBy,
     sortOrder,
-    setSortOrder
+    setSortOrder,
+    filterSbuId,
+    setFilterSbuId,
+    filterManagerId,
+    setFilterManagerId,
+    filterResourceTypeId,
+    setFilterResourceTypeId,
+    filterExpertiseId,
+    setFilterExpertiseId,
+    filterTotalYears,
+    setFilterTotalYears,
+    filterCompanyYears,
+    setFilterCompanyYears
   };
 }
