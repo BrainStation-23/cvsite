@@ -94,6 +94,58 @@ export const useCVTemplates = () => {
     },
   });
 
+  const duplicateTemplateMutation = useMutation({
+    mutationFn: async (templateId: string) => {
+      // First fetch the template to duplicate
+      const { data: originalTemplate, error: fetchError } = await supabase
+        .from('cv_templates')
+        .select('*')
+        .eq('id', templateId)
+        .single();
+
+      if (fetchError) {
+        console.error('Error fetching template to duplicate:', fetchError);
+        throw fetchError;
+      }
+
+      // Create a new template with copied data
+      const { data, error } = await supabase
+        .from('cv_templates')
+        .insert([{
+          name: `${originalTemplate.name} (Copy)`,
+          html_template: originalTemplate.html_template,
+          enabled: originalTemplate.enabled,
+          is_default: false, // Never duplicate as default
+          data_source_function: originalTemplate.data_source_function,
+          orientation: originalTemplate.orientation,
+          technical_skills_limit: originalTemplate.technical_skills_limit,
+          specialized_skills_limit: originalTemplate.specialized_skills_limit,
+          experiences_limit: originalTemplate.experiences_limit,
+          education_limit: originalTemplate.education_limit,
+          trainings_limit: originalTemplate.trainings_limit,
+          achievements_limit: originalTemplate.achievements_limit,
+          projects_limit: originalTemplate.projects_limit,
+        }])
+        .select()
+        .single();
+
+      if (error) {
+        console.error('Error duplicating CV template:', error);
+        throw error;
+      }
+
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['cv-templates'] });
+      toast.success('CV template duplicated successfully');
+    },
+    onError: (error) => {
+      console.error('Error duplicating CV template:', error);
+      toast.error('Failed to duplicate CV template');
+    },
+  });
+
   const updateTemplateMutation = useMutation({
     mutationFn: async ({ id, ...updates }: { 
       id: string; 
@@ -163,8 +215,10 @@ export const useCVTemplates = () => {
     createTemplate: createTemplateMutation.mutate,
     updateTemplate: updateTemplateMutation.mutate,
     deleteTemplate: deleteTemplateMutation.mutate,
+    duplicateTemplate: duplicateTemplateMutation.mutate,
     isCreating: createTemplateMutation.isPending,
     isUpdating: updateTemplateMutation.isPending,
     isDeleting: deleteTemplateMutation.isPending,
+    isDuplicating: duplicateTemplateMutation.isPending,
   };
 };

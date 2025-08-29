@@ -26,6 +26,13 @@ export class TemplateProcessor {
     }, obj);
   }
 
+  private hasContent(value: any): boolean {
+    if (value === null || value === undefined || value === '') return false;
+    if (Array.isArray(value)) return value.length > 0;
+    if (typeof value === 'string') return value.trim().length > 0;
+    return true;
+  }
+
   private processVariable(template: string, data: MappedEmployeeData): string {
     // Handle variables with filters: {{employee.firstName | capitalize}}
     return template.replace(/\{\{employee\.([^}|\s]+)(\s*\|\s*([^}]+))?\}\}/g, (match, path, filterPart, filter) => {
@@ -42,7 +49,7 @@ export class TemplateProcessor {
 
   private processLoopVariable(template: string, item: any, index: number): string {
     // Handle {{this.property}} and {{this.property | filter}}
-    return template.replace(/\{\{this\.([^}|\s]+)(\s*\|\s*([^}]+))?\}\}/g, (match, property, filterPart, filter) => {
+    let processed = template.replace(/\{\{this\.([^}|\s]+)(\s*\|\s*([^}]+))?\}\}/g, (match, property, filterPart, filter) => {
       let value = item[property];
       
       // Handle special cases
@@ -63,6 +70,61 @@ export class TemplateProcessor {
       
       return String(value || '');
     });
+
+    // Process conditionals within loop context (this. prefixed)
+    processed = this.processLoopConditionals(processed, item);
+
+    return processed;
+  }
+
+  private processLoopConditionals(template: string, item: any): string {
+    // Handle {{#if this.property}} ... {{else}} ... {{/if}}
+    template = template.replace(
+      /\{\{#if this\.([^}]+)\}\}([\s\S]*?)(?:\{\{else\}\}([\s\S]*?))?\{\{\/if\}\}/g,
+      (match, path, ifContent, elseContent = '') => {
+        const value = this.getValue(item, path);
+        this.log(`Processing loop conditional: this.${path}`, { value, hasValue: !!value });
+        
+        return value ? ifContent : elseContent;
+      }
+    );
+
+    // Handle {{#unless this.property}} ... {{else}} ... {{/unless}}
+    template = template.replace(
+      /\{\{#unless this\.([^}]+)\}\}([\s\S]*?)(?:\{\{else\}\}([\s\S]*?))?\{\{\/unless\}\}/g,
+      (match, path, unlessContent, elseContent = '') => {
+        const value = this.getValue(item, path);
+        this.log(`Processing loop unless conditional: this.${path}`, { value, hasValue: !!value });
+        
+        return !value ? unlessContent : elseContent;
+      }
+    );
+
+    // Handle {{#ifNotEmpty this.property}} ... {{else}} ... {{/ifNotEmpty}}
+    template = template.replace(
+      /\{\{#ifNotEmpty this\.([^}]+)\}\}([\s\S]*?)(?:\{\{else\}\}([\s\S]*?))?\{\{\/ifNotEmpty\}\}/g,
+      (match, path, ifContent, elseContent = '') => {
+        const value = this.getValue(item, path);
+        const hasContent = this.hasContent(value);
+        this.log(`Processing loop ifNotEmpty conditional: this.${path}`, { value, hasContent });
+        
+        return hasContent ? ifContent : elseContent;
+      }
+    );
+
+    // Handle {{#hasContent this.property}} ... {{else}} ... {{/hasContent}}
+    template = template.replace(
+      /\{\{#hasContent this\.([^}]+)\}\}([\s\S]*?)(?:\{\{else\}\}([\s\S]*?))?\{\{\/hasContent\}\}/g,
+      (match, path, ifContent, elseContent = '') => {
+        const value = this.getValue(item, path);
+        const hasContent = this.hasContent(value);
+        this.log(`Processing loop hasContent conditional: this.${path}`, { value, hasContent });
+        
+        return hasContent ? ifContent : elseContent;
+      }
+    );
+
+    return template;
   }
 
   private processLoops(template: string, data: MappedEmployeeData): string {
@@ -85,25 +147,49 @@ export class TemplateProcessor {
   }
 
   private processConditionals(template: string, data: MappedEmployeeData): string {
-    // Handle {{#if employee.property}} ... {{/if}}
+    // Handle {{#if employee.property}} ... {{else}} ... {{/if}}
     template = template.replace(
-      /\{\{#if employee\.([^}]+)\}\}([\s\S]*?)\{\{\/if\}\}/g,
-      (match, path, content) => {
+      /\{\{#if employee\.([^}]+)\}\}([\s\S]*?)(?:\{\{else\}\}([\s\S]*?))?\{\{\/if\}\}/g,
+      (match, path, ifContent, elseContent = '') => {
         const value = this.getValue(data, path);
         this.log(`Processing conditional: employee.${path}`, { value, hasValue: !!value });
         
-        return value ? content : '';
+        return value ? ifContent : elseContent;
       }
     );
 
-    // Handle {{#unless employee.property}} ... {{/unless}}
+    // Handle {{#unless employee.property}} ... {{else}} ... {{/unless}}
     template = template.replace(
-      /\{\{#unless employee\.([^}]+)\}\}([\s\S]*?)\{\{\/unless\}\}/g,
-      (match, path, content) => {
+      /\{\{#unless employee\.([^}]+)\}\}([\s\S]*?)(?:\{\{else\}\}([\s\S]*?))?\{\{\/unless\}\}/g,
+      (match, path, unlessContent, elseContent = '') => {
         const value = this.getValue(data, path);
         this.log(`Processing unless conditional: employee.${path}`, { value, hasValue: !!value });
         
-        return !value ? content : '';
+        return !value ? unlessContent : elseContent;
+      }
+    );
+
+    // Handle {{#ifNotEmpty employee.property}} ... {{else}} ... {{/ifNotEmpty}}
+    template = template.replace(
+      /\{\{#ifNotEmpty employee\.([^}]+)\}\}([\s\S]*?)(?:\{\{else\}\}([\s\S]*?))?\{\{\/ifNotEmpty\}\}/g,
+      (match, path, ifContent, elseContent = '') => {
+        const value = this.getValue(data, path);
+        const hasContent = this.hasContent(value);
+        this.log(`Processing ifNotEmpty conditional: employee.${path}`, { value, hasContent });
+        
+        return hasContent ? ifContent : elseContent;
+      }
+    );
+
+    // Handle {{#hasContent employee.property}} ... {{else}} ... {{/hasContent}}
+    template = template.replace(
+      /\{\{#hasContent employee\.([^}]+)\}\}([\s\S]*?)(?:\{\{else\}\}([\s\S]*?))?\{\{\/hasContent\}\}/g,
+      (match, path, ifContent, elseContent = '') => {
+        const value = this.getValue(data, path);
+        const hasContent = this.hasContent(value);
+        this.log(`Processing hasContent conditional: employee.${path}`, { value, hasContent });
+        
+        return hasContent ? ifContent : elseContent;
       }
     );
 
@@ -111,14 +197,14 @@ export class TemplateProcessor {
   }
 
   private processHelpers(template: string, data: MappedEmployeeData): string {
-    // Handle {{#ifEquals employee.property "value"}} ... {{/ifEquals}}
+    // Handle {{#ifEquals employee.property "value"}} ... {{else}} ... {{/ifEquals}}
     template = template.replace(
-      /\{\{#ifEquals employee\.([^}]+) "([^"]+)"\}\}([\s\S]*?)\{\{\/ifEquals\}\}/g,
-      (match, path, compareValue, content) => {
+      /\{\{#ifEquals employee\.([^}]+) "([^"]+)"\}\}([\s\S]*?)(?:\{\{else\}\}([\s\S]*?))?\{\{\/ifEquals\}\}/g,
+      (match, path, compareValue, ifContent, elseContent = '') => {
         const value = this.getValue(data, path);
         this.log(`Processing ifEquals: employee.${path} === "${compareValue}"`, { value, compareValue, matches: value === compareValue });
         
-        return String(value) === compareValue ? content : '';
+        return String(value) === compareValue ? ifContent : elseContent;
       }
     );
 
@@ -189,10 +275,11 @@ export class TemplateProcessor {
     try {
       let processed = template;
 
-      // Process in order of complexity
+      // CRITICAL: Process loops FIRST, then conditionals
+      // This ensures that conditionals within loops work correctly
+      processed = this.processLoops(processed, data);
       processed = this.processConditionals(processed, data);
       processed = this.processHelpers(processed, data);
-      processed = this.processLoops(processed, data);
       processed = this.processVariable(processed, data);
 
       this.log('Template processing completed', { processedLength: processed.length });
