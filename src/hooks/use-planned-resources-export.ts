@@ -12,19 +12,62 @@ export function usePlannedResourcesExport() {
     try {
       setIsExporting(true);
       
-      console.log('Starting planned resources export...');
+      console.log('Starting planned resources export using pagination...');
       
-      // Use a high limit to ensure we get all rows (Supabase default is 1000)
-      const { data, error } = await supabase
-        .rpc('export_planned_resources')
-        .limit(10000); // Set explicit high limit
+      let allResources: any[] = [];
+      let currentPage = 1;
+      const itemsPerPage = 1000; // Use a large page size for efficiency
+      let hasMorePages = true;
       
-      if (error) {
-        console.error('Export RPC error:', error);
-        throw error;
+      // Iterate through all pages to get all data
+      while (hasMorePages) {
+        console.log(`Fetching page ${currentPage}...`);
+        
+        const { data: rpcData, error } = await supabase.rpc('get_planned_resource_data', {
+          search_query: null,
+          page_number: currentPage,
+          items_per_page: itemsPerPage,
+          sort_by: 'created_at',
+          sort_order: 'desc',
+          sbu_filter: null,
+          manager_filter: null,
+          bill_type_filter: null,
+          project_search: null,
+          min_engagement_percentage: null,
+          max_engagement_percentage: null,
+          min_billing_percentage: null,
+          max_billing_percentage: null,
+          start_date_from: null,
+          start_date_to: null,
+          end_date_from: null,
+          end_date_to: null,
+        });
+        
+        if (error) {
+          console.error('Export RPC error:', error);
+          throw error;
+        }
+        
+        if (rpcData && typeof rpcData === 'object' && 'resource_planning' in rpcData) {
+          const pageResources = (rpcData as any).resource_planning || [];
+          const pagination = (rpcData as any).pagination;
+          
+          console.log(`Page ${currentPage}: Retrieved ${pageResources.length} resources`);
+          allResources = [...allResources, ...pageResources];
+          
+          // Check if we have more pages
+          if (pagination && currentPage < pagination.page_count) {
+            currentPage++;
+          } else {
+            hasMorePages = false;
+          }
+        } else {
+          console.warn('Unexpected RPC response structure:', rpcData);
+          hasMorePages = false;
+        }
       }
       
-      if (!data || data.length === 0) {
+      if (allResources.length === 0) {
         toast({
           title: "No Data",
           description: "No planned resources found to export.",
@@ -33,20 +76,10 @@ export function usePlannedResourcesExport() {
         return;
       }
       
-      console.log(`Retrieved ${data.length} planned resources from RPC`);
-      
-      // Check if we might be hitting the limit
-      if (data.length === 10000) {
-        console.warn('Retrieved exactly 10000 rows - might be hitting the limit!');
-        toast({
-          title: "Warning",
-          description: `Retrieved ${data.length} rows. If you expect more, the export might be incomplete.`,
-          variant: "default"
-        });
-      }
+      console.log(`Total retrieved: ${allResources.length} planned resources across ${currentPage} pages`);
       
       // Convert the data to CSV format
-      const csvData = data.map(resource => ({
+      const csvData = allResources.map(resource => ({
         'Employee ID': resource.employee_id,
         'Employee Name': resource.employee_name,
         'SBU': resource.sbu_name,
@@ -82,7 +115,7 @@ export function usePlannedResourcesExport() {
         
         toast({
           title: "Export Successful",
-          description: `Successfully exported ${data.length} planned resources to CSV.`,
+          description: `Successfully exported ${allResources.length} planned resources to CSV.`,
           variant: "default"
         });
       }
