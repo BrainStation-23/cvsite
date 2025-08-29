@@ -93,7 +93,7 @@ Deno.serve(async (req) => {
       .flat() // Flatten the nested arrays
       .filter(employee => 
         employee.employeeId && 
-        employee.user?.email // Only process employees with email
+        employee.workEmail // Only process employees with email
       )
       .map(employee => ({
         employeeId: employee.employeeId,
