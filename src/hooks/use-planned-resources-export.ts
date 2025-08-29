@@ -14,7 +14,10 @@ export function usePlannedResourcesExport() {
       
       console.log('Starting planned resources export...');
       
-      const { data, error } = await supabase.rpc('export_planned_resources');
+      // Use a high limit to ensure we get all rows (Supabase default is 1000)
+      const { data, error } = await supabase
+        .rpc('export_planned_resources')
+        .limit(10000); // Set explicit high limit
       
       if (error) {
         console.error('Export RPC error:', error);
@@ -30,7 +33,17 @@ export function usePlannedResourcesExport() {
         return;
       }
       
-      console.log(`Exporting ${data.length} planned resources`);
+      console.log(`Retrieved ${data.length} planned resources from RPC`);
+      
+      // Check if we might be hitting the limit
+      if (data.length === 10000) {
+        console.warn('Retrieved exactly 10000 rows - might be hitting the limit!');
+        toast({
+          title: "Warning",
+          description: `Retrieved ${data.length} rows. If you expect more, the export might be incomplete.`,
+          variant: "default"
+        });
+      }
       
       // Convert the data to CSV format
       const csvData = data.map(resource => ({
@@ -48,6 +61,8 @@ export function usePlannedResourcesExport() {
         'Weekly Validation': resource.weekly_validation ? 'Yes' : 'No',
         'Created At': new Date(resource.created_at).toLocaleDateString()
       }));
+      
+      console.log(`Converting ${csvData.length} records to CSV`);
       
       // Generate CSV using papaparse
       const csv = Papa.unparse(csvData);
