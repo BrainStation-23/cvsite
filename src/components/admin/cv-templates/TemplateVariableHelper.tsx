@@ -1,13 +1,15 @@
+
 import React, { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { TemplateStructureGuide } from './TemplateStructureGuide';
 import { useEmployeeData } from '@/hooks/use-employee-data';
 import { Button } from '@/components/ui/button';
-import { Copy, ChevronDown, ChevronRight, Bot } from 'lucide-react';
+import { Copy, ChevronDown, ChevronRight, Bot, FileText } from 'lucide-react';
 import { toast } from 'sonner';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { generateAIPrompt } from '@/utils/ai-prompt-generator';
+import { ENHANCED_BASIC_TEMPLATE } from '@/constants/cv-template-examples/enhanced-basic';
 
 interface TemplateVariableHelperProps {
   selectedEmployeeId: string | null;
@@ -51,6 +53,13 @@ export const TemplateVariableHelper: React.FC<TemplateVariableHelperProps> = ({
     toast.success('AI prompt copied to clipboard! Paste it into your AI assistant along with a design reference image.');
   };
 
+  const insertEnhancedTemplate = () => {
+    if (onInsertExample) {
+      onInsertExample(ENHANCED_BASIC_TEMPLATE);
+      toast.success('Enhanced template inserted with null handling examples');
+    }
+  };
+
   const toggleGroup = (groupTitle: string) => {
     const newExpanded = new Set(expandedGroups);
     if (newExpanded.has(groupTitle)) {
@@ -67,11 +76,11 @@ export const TemplateVariableHelper: React.FC<TemplateVariableHelperProps> = ({
       variables: [
         { name: '{{employee.firstName}}', description: 'First name', type: 'string' },
         { name: '{{employee.lastName}}', description: 'Last name', type: 'string' },
-        { name: '{{employee.email}}', description: 'Email address', type: 'string' },
+        { name: '{{employee.email}}', description: 'Email address (may be null)', type: 'string' },
         { name: '{{employee.employeeId}}', description: 'Employee ID', type: 'string' },
-        { name: '{{employee.biography}}', description: 'Biography', type: 'string' },
-        { name: '{{employee.currentDesignation}}', description: 'Current designation', type: 'string' },
-        { name: '{{employee.profileImage}}', description: 'Profile image URL', type: 'string' },
+        { name: '{{employee.biography}}', description: 'Biography (may be null)', type: 'string' },
+        { name: '{{employee.currentDesignation}}', description: 'Current designation (may be null)', type: 'string' },
+        { name: '{{employee.profileImage}}', description: 'Profile image URL (may be null)', type: 'string' },
       ]
     },
     {
@@ -79,7 +88,7 @@ export const TemplateVariableHelper: React.FC<TemplateVariableHelperProps> = ({
       variables: [
         { 
           name: '{{#each employee.technicalSkills}}', 
-          description: 'Loop through technical skills', 
+          description: 'Loop through technical skills (array may be empty)', 
           type: 'array',
           example: '{{this.name}} - {{this.proficiency}}/10'
         },
@@ -92,7 +101,7 @@ export const TemplateVariableHelper: React.FC<TemplateVariableHelperProps> = ({
       variables: [
         { 
           name: '{{#each employee.specializedSkills}}', 
-          description: 'Loop through specialized skills', 
+          description: 'Loop through specialized skills (array may be empty)', 
           type: 'array',
           example: '{{this.name}} - {{this.proficiency}}/10'
         },
@@ -105,14 +114,14 @@ export const TemplateVariableHelper: React.FC<TemplateVariableHelperProps> = ({
       variables: [
         { 
           name: '{{#each employee.experiences}}', 
-          description: 'Loop through work experiences', 
+          description: 'Loop through work experiences (array may be empty)', 
           type: 'array'
         },
         { name: '{{this.companyName}}', description: 'Company name (inside loop)', type: 'string' },
         { name: '{{this.designation}}', description: 'Job title (inside loop)', type: 'string' },
         { name: '{{this.startDate}}', description: 'Start date (inside loop)', type: 'string' },
-        { name: '{{this.endDate}}', description: 'End date (inside loop)', type: 'string' },
-        { name: '{{this.description}}', description: 'Job description (inside loop)', type: 'string' },
+        { name: '{{this.endDate}}', description: 'End date (inside loop, may be empty for current jobs)', type: 'string' },
+        { name: '{{this.description}}', description: 'Job description (inside loop, may be empty)', type: 'string' },
       ]
     },
     {
@@ -120,15 +129,15 @@ export const TemplateVariableHelper: React.FC<TemplateVariableHelperProps> = ({
       variables: [
         { 
           name: '{{#each employee.education}}', 
-          description: 'Loop through education', 
+          description: 'Loop through education (array may be empty)', 
           type: 'array'
         },
         { name: '{{this.university}}', description: 'University name (inside loop)', type: 'string' },
         { name: '{{this.degree}}', description: 'Degree (inside loop)', type: 'string' },
         { name: '{{this.department}}', description: 'Department (inside loop)', type: 'string' },
         { name: '{{this.startDate}}', description: 'Start date (inside loop)', type: 'string' },
-        { name: '{{this.endDate}}', description: 'End date (inside loop)', type: 'string' },
-        { name: '{{this.gpa}}', description: 'GPA (inside loop)', type: 'string' },
+        { name: '{{this.endDate}}', description: 'End date (inside loop, may be empty for current studies)', type: 'string' },
+        { name: '{{this.gpa}}', description: 'GPA (inside loop, may be empty)', type: 'string' },
       ]
     },
     {
@@ -136,18 +145,18 @@ export const TemplateVariableHelper: React.FC<TemplateVariableHelperProps> = ({
       variables: [
         { 
           name: '{{#each employee.projects}}', 
-          description: 'Loop through projects', 
+          description: 'Loop through projects (array may be empty)', 
           type: 'array'
         },
         { name: '{{this.name}}', description: 'Project name (inside loop)', type: 'string' },
-        { name: '{{this.role}}', description: 'Role in project (inside loop)', type: 'string' },
-        { name: '{{this.description}}', description: 'Project description (inside loop)', type: 'string' },
-        { name: '{{this.responsibility}}', description: 'Responsibilities (inside loop)', type: 'string' },
+        { name: '{{this.role}}', description: 'Role in project (inside loop, may be empty)', type: 'string' },
+        { name: '{{this.description}}', description: 'Project description (inside loop, may be empty)', type: 'string' },
+        { name: '{{this.responsibility}}', description: 'Responsibilities (inside loop, may be empty)', type: 'string' },
         { name: '{{this.startDate}}', description: 'Project start date (inside loop)', type: 'string' },
-        { name: '{{this.endDate}}', description: 'Project end date (inside loop)', type: 'string' },
+        { name: '{{this.endDate}}', description: 'Project end date (inside loop, may be empty for ongoing)', type: 'string' },
         { name: '{{this.isCurrent}}', description: 'Whether project is current/ongoing (inside loop)', type: 'string' },
-        { name: '{{this.url}}', description: 'Project URL/link (inside loop)', type: 'string' },
-        { name: '{{this.technologiesUsed}}', description: 'Technologies used (inside loop)', type: 'array' },
+        { name: '{{this.url}}', description: 'Project URL/link (inside loop, may be empty)', type: 'string' },
+        { name: '{{this.technologiesUsed}}', description: 'Technologies used (inside loop, array may be empty)', type: 'array' },
       ]
     },
     {
@@ -155,12 +164,12 @@ export const TemplateVariableHelper: React.FC<TemplateVariableHelperProps> = ({
       variables: [
         { 
           name: '{{#each employee.achievements}}', 
-          description: 'Loop through achievements', 
+          description: 'Loop through achievements (array may be empty)', 
           type: 'array'
         },
         { name: '{{this.title}}', description: 'Achievement title (inside loop)', type: 'string' },
-        { name: '{{this.date}}', description: 'Achievement date (inside loop)', type: 'string' },
-        { name: '{{this.description}}', description: 'Achievement description (inside loop)', type: 'string' },
+        { name: '{{this.date}}', description: 'Achievement date (inside loop, may be empty)', type: 'string' },
+        { name: '{{this.description}}', description: 'Achievement description (inside loop, may be empty)', type: 'string' },
       ]
     },
     {
@@ -168,13 +177,13 @@ export const TemplateVariableHelper: React.FC<TemplateVariableHelperProps> = ({
       variables: [
         { 
           name: '{{#each employee.trainings}}', 
-          description: 'Loop through trainings', 
+          description: 'Loop through trainings (array may be empty)', 
           type: 'array'
         },
         { name: '{{this.title}}', description: 'Training title (inside loop)', type: 'string' },
-        { name: '{{this.provider}}', description: 'Training provider (inside loop)', type: 'string' },
-        { name: '{{this.certificationDate}}', description: 'Certification date (inside loop)', type: 'string' },
-        { name: '{{this.certificateUrl}}', description: 'Certificate URL (inside loop)', type: 'string' },
+        { name: '{{this.provider}}', description: 'Training provider (inside loop, may be empty)', type: 'string' },
+        { name: '{{this.certificationDate}}', description: 'Certification date (inside loop, may be empty)', type: 'string' },
+        { name: '{{this.certificateUrl}}', description: 'Certificate URL (inside loop, may be empty)', type: 'string' },
       ]
     }
   ];
@@ -182,8 +191,8 @@ export const TemplateVariableHelper: React.FC<TemplateVariableHelperProps> = ({
   const VariablesTab = () => (
     <ScrollArea className="flex-1">
       <div className="p-3 space-y-2">
-        {/* AI Prompt Button */}
-        <div className="mb-4">
+        {/* Action Buttons */}
+        <div className="mb-4 space-y-2">
           <Button
             onClick={copyAIPrompt}
             className="w-full"
@@ -192,9 +201,32 @@ export const TemplateVariableHelper: React.FC<TemplateVariableHelperProps> = ({
             <Bot className="h-4 w-4 mr-2" />
             Copy AI Prompt
           </Button>
-          <p className="text-xs text-muted-foreground mt-1 px-1">
-            Generate a prompt for AI to create CV templates with design reference
+          
+          {onInsertExample && (
+            <Button
+              onClick={insertEnhancedTemplate}
+              className="w-full"
+              variant="outline"
+            >
+              <FileText className="h-4 w-4 mr-2" />
+              Insert Enhanced Template
+            </Button>
+          )}
+          
+          <p className="text-xs text-muted-foreground px-1">
+            Generate AI prompts or use the enhanced template with proper null handling
           </p>
+        </div>
+
+        {/* Null Handling Info */}
+        <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-md">
+          <h4 className="text-sm font-medium text-blue-800 mb-2">Null Handling</h4>
+          <ul className="text-xs text-blue-600 space-y-1">
+            <li>• Use <code>{{'{'}#ifNotEmpty{'}'}}</code> to check if content exists</li>
+            <li>• Use <code>{{'{'}#unless{'}'}}</code> for fallback content</li>
+            <li>• Use filters like <code>| defaultValue:"fallback"</code></li>
+            <li>• Arrays automatically return empty if null</li>
+          </ul>
         </div>
 
         {variableGroups.map((group) => (

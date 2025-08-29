@@ -5,6 +5,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { StructureSection } from '@/components/admin/cv-templates/documentation/StructureSection';
 import { ExamplesSection } from '@/components/admin/cv-templates/documentation/ExamplesSection';
 import { ValidationSection } from '@/components/admin/cv-templates/documentation/ValidationSection';
+import { ConditionalRenderingSection } from '@/components/admin/cv-templates/documentation/ConditionalRenderingSection';
 
 const CVTemplateDocumentationPage: React.FC = () => {
   return (
@@ -20,14 +21,19 @@ const CVTemplateDocumentationPage: React.FC = () => {
         </div>
 
         <Tabs defaultValue="structure" className="w-full">
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="structure">HTML Structure</TabsTrigger>
+            <TabsTrigger value="conditionals">Conditional Rendering</TabsTrigger>
             <TabsTrigger value="examples">Examples</TabsTrigger>
             <TabsTrigger value="validation">Validation</TabsTrigger>
           </TabsList>
 
           <TabsContent value="structure" className="space-y-4">
             <StructureSection />
+          </TabsContent>
+
+          <TabsContent value="conditionals" className="space-y-4">
+            <ConditionalRenderingSection />
           </TabsContent>
 
           <TabsContent value="examples" className="space-y-4">

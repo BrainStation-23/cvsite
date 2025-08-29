@@ -24,7 +24,7 @@ export interface MappedEmployeeData {
     companyName: string;
     designation: string;
     startDate: string;
-    endDate: string | null;
+    endDate: string;
     isCurrent: boolean;
     description: string;
   }>;
@@ -43,11 +43,11 @@ export interface MappedEmployeeData {
     name: string;
     role: string;
     startDate: string;
-    endDate: string | null;
+    endDate: string;
     isCurrent: boolean;
     description: string;
     technologiesUsed: string[];
-    url: string | null;
+    url: string;
     displayOrder: number;
     responsibility: string;
   }>;
@@ -66,6 +66,16 @@ export interface MappedEmployeeData {
     description: string;
   }>;
 }
+
+const safeString = (value: any): string => {
+  if (value === null || value === undefined) return '';
+  return String(value);
+};
+
+const safeArray = (value: any): any[] => {
+  if (!Array.isArray(value)) return [];
+  return value;
+};
 
 export const mapEmployeeData = (rawData: any): MappedEmployeeData => {
   if (!rawData) {
@@ -88,79 +98,79 @@ export const mapEmployeeData = (rawData: any): MappedEmployeeData => {
   }
 
   return {
-    firstName: rawData.first_name || rawData.general_information?.first_name || '',
-    lastName: rawData.last_name || rawData.general_information?.last_name || '',
-    email: rawData.email || '',
-    employeeId: rawData.employee_id || '',
-    biography: rawData.biography || rawData.general_information?.biography || '',
-    currentDesignation: rawData.current_designation || rawData.general_information?.current_designation || '',
-    profileImage: rawData.profile_image || rawData.general_information?.profile_image || '',
+    firstName: safeString(rawData.first_name || rawData.general_information?.first_name),
+    lastName: safeString(rawData.last_name || rawData.general_information?.last_name),
+    email: safeString(rawData.email),
+    employeeId: safeString(rawData.employee_id),
+    biography: safeString(rawData.biography || rawData.general_information?.biography),
+    currentDesignation: safeString(rawData.current_designation || rawData.general_information?.current_designation),
+    profileImage: safeString(rawData.profile_image || rawData.general_information?.profile_image),
     
-    technicalSkills: (rawData.technical_skills || []).map((skill: any) => ({
-      id: skill.id || '',
-      name: skill.name || '',
+    technicalSkills: safeArray(rawData.technical_skills).map((skill: any) => ({
+      id: safeString(skill.id),
+      name: safeString(skill.name),
       proficiency: skill.proficiency || 0,
       priority: skill.priority || 0
     })),
     
-    specializedSkills: (rawData.specialized_skills || []).map((skill: any) => ({
-      id: skill.id || '',
-      name: skill.name || '',
+    specializedSkills: safeArray(rawData.specialized_skills).map((skill: any) => ({
+      id: safeString(skill.id),
+      name: safeString(skill.name),
       proficiency: skill.proficiency || 0,
       priority: skill.priority || 0
     })),
     
-    experiences: (rawData.experiences || []).map((exp: any) => ({
-      id: exp.id || '',
-      companyName: exp.company_name || '',
-      designation: exp.designation || '',
-      startDate: exp.start_date || '',
-      endDate: exp.end_date,
+    experiences: safeArray(rawData.experiences).map((exp: any) => ({
+      id: safeString(exp.id),
+      companyName: safeString(exp.company_name),
+      designation: safeString(exp.designation),
+      startDate: safeString(exp.start_date),
+      endDate: safeString(exp.end_date),
       isCurrent: exp.is_current || false,
-      description: exp.description || ''
+      description: safeString(exp.description)
     })),
     
-    education: (rawData.education || []).map((edu: any) => ({
-      id: edu.id || '',
-      university: edu.university || '',
-      degree: edu.degree || '',
-      department: edu.department || '',
-      startDate: edu.start_date || '',
-      endDate: edu.end_date || '',
+    education: safeArray(rawData.education).map((edu: any) => ({
+      id: safeString(edu.id),
+      university: safeString(edu.university),
+      degree: safeString(edu.degree),
+      department: safeString(edu.department),
+      startDate: safeString(edu.start_date),
+      endDate: safeString(edu.end_date),
       isCurrent: edu.is_current || false,
-      gpa: edu.gpa || ''
+      gpa: safeString(edu.gpa)
     })),
     
-    projects: (rawData.projects || []).map((proj: any) => ({
-      id: proj.id || '',
-      name: proj.name || '',
-      role: proj.role || '',
-      startDate: proj.start_date || '',
-      endDate: proj.end_date,
+    projects: safeArray(rawData.projects).map((proj: any) => ({
+      id: safeString(proj.id),
+      name: safeString(proj.name),
+      role: safeString(proj.role),
+      startDate: safeString(proj.start_date),
+      endDate: safeString(proj.end_date),
       isCurrent: proj.is_current || false,
-      description: proj.description || '',
+      description: safeString(proj.description),
       technologiesUsed: Array.isArray(proj.technologies_used) 
-        ? proj.technologies_used 
-        : (proj.technologies_used ? proj.technologies_used.split(',').map((t: string) => t.trim()) : []),
-      url: proj.url,
+        ? proj.technologies_used.map(safeString)
+        : (proj.technologies_used ? safeString(proj.technologies_used).split(',').map((t: string) => t.trim()) : []),
+      url: safeString(proj.url),
       displayOrder: proj.display_order || 0,
-      responsibility: proj.responsibility || ''
+      responsibility: safeString(proj.responsibility)
     })),
     
-    trainings: (rawData.trainings || []).map((training: any) => ({
-      id: training.id || '',
-      title: training.title || '',
-      provider: training.provider || '',
-      certificationDate: training.certification_date || '',
-      description: training.description || '',
-      certificateUrl: training.certificate_url || ''
+    trainings: safeArray(rawData.trainings).map((training: any) => ({
+      id: safeString(training.id),
+      title: safeString(training.title),
+      provider: safeString(training.provider),
+      certificationDate: safeString(training.certification_date),
+      description: safeString(training.description),
+      certificateUrl: safeString(training.certificate_url)
     })),
     
-    achievements: (rawData.achievements || []).map((achievement: any) => ({
-      id: achievement.id || '',
-      title: achievement.title || '',
-      date: achievement.date || '',
-      description: achievement.description || ''
+    achievements: safeArray(rawData.achievements).map((achievement: any) => ({
+      id: safeString(achievement.id),
+      title: safeString(achievement.title),
+      date: safeString(achievement.date),
+      description: safeString(achievement.description)
     }))
   };
 };

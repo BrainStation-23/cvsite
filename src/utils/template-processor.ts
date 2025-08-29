@@ -26,6 +26,13 @@ export class TemplateProcessor {
     }, obj);
   }
 
+  private hasContent(value: any): boolean {
+    if (value === null || value === undefined || value === '') return false;
+    if (Array.isArray(value)) return value.length > 0;
+    if (typeof value === 'string') return value.trim().length > 0;
+    return true;
+  }
+
   private processVariable(template: string, data: MappedEmployeeData): string {
     // Handle variables with filters: {{employee.firstName | capitalize}}
     return template.replace(/\{\{employee\.([^}|\s]+)(\s*\|\s*([^}]+))?\}\}/g, (match, path, filterPart, filter) => {
@@ -104,6 +111,30 @@ export class TemplateProcessor {
         this.log(`Processing unless conditional: employee.${path}`, { value, hasValue: !!value });
         
         return !value ? content : '';
+      }
+    );
+
+    // Handle {{#ifNotEmpty employee.property}} ... {{/ifNotEmpty}}
+    template = template.replace(
+      /\{\{#ifNotEmpty employee\.([^}]+)\}\}([\s\S]*?)\{\{\/ifNotEmpty\}\}/g,
+      (match, path, content) => {
+        const value = this.getValue(data, path);
+        const hasContent = this.hasContent(value);
+        this.log(`Processing ifNotEmpty conditional: employee.${path}`, { value, hasContent });
+        
+        return hasContent ? content : '';
+      }
+    );
+
+    // Handle {{#hasContent employee.property}} ... {{/hasContent}}
+    template = template.replace(
+      /\{\{#hasContent employee\.([^}]+)\}\}([\s\S]*?)\{\{\/hasContent\}\}/g,
+      (match, path, content) => {
+        const value = this.getValue(data, path);
+        const hasContent = this.hasContent(value);
+        this.log(`Processing hasContent conditional: employee.${path}`, { value, hasContent });
+        
+        return hasContent ? content : '';
       }
     );
 

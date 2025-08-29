@@ -48,6 +48,13 @@ export const templateUtilities = {
     if (proficiency >= 5) return 'Intermediate';
     if (proficiency >= 3) return 'Beginner';
     return 'Novice';
+  },
+
+  defaultValue: (value: any, defaultVal: string): string => {
+    if (value === null || value === undefined || value === '') {
+      return defaultVal;
+    }
+    return String(value);
   }
 };
 
@@ -68,6 +75,8 @@ export const applyUtilityFilter = (value: any, filter: string, args?: string[]):
       return templateUtilities.capitalize(value);
     case 'formatProficiency':
       return templateUtilities.formatProficiency(value);
+    case 'defaultValue':
+      return templateUtilities.defaultValue(value, allArgs[0] || '');
     default:
       return String(value || '');
   }
