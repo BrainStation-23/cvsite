@@ -83,7 +83,7 @@ export function usePlannedResourcesExport() {
         return {
           'Employee ID': resource.profile?.employee_id || '',
           'Employee Name': `${resource.profile?.first_name || ''} ${resource.profile?.last_name || ''}`.trim() || '',
-          'SBU': '', // SBU info not available in this response structure
+          'SBU': resource.sbu?.name || '',
           'Project Name': resource.project?.project_name || '',
           'Client Name': resource.project?.client_name || '',
           'Project Manager': resource.project?.project_manager || '',
