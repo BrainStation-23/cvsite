@@ -222,9 +222,9 @@ export const TemplateVariableHelper: React.FC<TemplateVariableHelperProps> = ({
         <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-md">
           <h4 className="text-sm font-medium text-blue-800 mb-2">Null Handling</h4>
           <ul className="text-xs text-blue-600 space-y-1">
-            <li>• Use <code>{{'{'}#ifNotEmpty{'}'}}</code> to check if content exists</li>
-            <li>• Use <code>{{'{'}#unless{'}'}}</code> for fallback content</li>
-            <li>• Use filters like <code>| defaultValue:"fallback"</code></li>
+            <li>• Use <code>{'{{#ifNotEmpty}}'}</code> to check if content exists</li>
+            <li>• Use <code>{'{{#unless}}'}</code> for fallback content</li>
+            <li>• Use filters like <code>{'| defaultValue:"fallback"'}</code></li>
             <li>• Arrays automatically return empty if null</li>
           </ul>
         </div>
