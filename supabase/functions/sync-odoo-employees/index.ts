@@ -8,14 +8,12 @@ const corsHeaders = {
 
 interface OdooEmployee {
   employeeId: string;
+  name: string | null;
+  workEmail : string | null;
   joiningDate: string | null;
   careerStartDate: string | null;
   dateOfBirth: string | null;
   sbu: {
-    name: string;
-  } | null;
-  user: {
-    email: string;
     name: string;
   } | null;
   parent: {
@@ -53,14 +51,12 @@ Deno.serve(async (req) => {
         query AllEmployees {
           allEmployees {
             employeeId
+            name
+            workEmail
             joiningDate
             careerStartDate
             dateOfBirth
             sbu {
-              name
-            }
-            user {
-              email
               name
             }
             parent {
@@ -97,12 +93,12 @@ Deno.serve(async (req) => {
       .flat() // Flatten the nested arrays
       .filter(employee => 
         employee.employeeId && 
-        employee.user?.email // Only process employees with email
+        employee.workEmail // Only process employees with email
       )
       .map(employee => ({
         employeeId: employee.employeeId,
-        email: employee.user?.email,
-        name: employee.user?.name || '',
+        email: employee.workEmail,
+        name: employee.name || '',
         managerEmail: employee.parent?.user?.email || null,
         sbuName: employee.sbu?.name || null,
         joiningDate: employee.joiningDate || null,
