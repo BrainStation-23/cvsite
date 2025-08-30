@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Pencil, Trash2, Check, X } from 'lucide-react';
 import { BillTypeItem } from '@/hooks/use-bill-types';
 import ResourceTypeCombobox from '@/components/admin/user/ResourceTypeCombobox';
+import { ColorPicker } from '@/components/ui/color-picker';
 
 interface BillTypeCardProps {
   item: BillTypeItem;
@@ -18,7 +19,8 @@ interface BillTypeCardProps {
     is_billable: boolean,
     is_support: boolean,
     non_billed: boolean,
-    resource_type: string | null
+    resource_type: string | null,
+    color_code: string
   ) => void;
   onDelete: (item: BillTypeItem) => void;
   isUpdating: boolean;
@@ -33,11 +35,13 @@ export const BillTypeCard: React.FC<BillTypeCardProps> = ({
   const [isEditing, setIsEditing] = useState(false);
   const [editName, setEditName] = useState(item.name);
   const [editResourceType, setEditResourceType] = useState<string | null>(item.resource_type || null);
+  const [editColorCode, setEditColorCode] = useState(item.color_code || '#FFFFFF');
 
   const handleStartEdit = () => {
     setIsEditing(true);
     setEditName(item.name);
     setEditResourceType(item.resource_type || null);
+    setEditColorCode(item.color_code || '#FFFFFF');
   };
 
   const handleSaveEdit = () => {
@@ -49,7 +53,8 @@ export const BillTypeCard: React.FC<BillTypeCardProps> = ({
         item.is_billable,
         item.is_support,
         item.non_billed,
-        editResourceType
+        editResourceType,
+        editColorCode
       );
       setIsEditing(false);
     }
@@ -59,6 +64,7 @@ export const BillTypeCard: React.FC<BillTypeCardProps> = ({
     setIsEditing(false);
     setEditName(item.name);
     setEditResourceType(item.resource_type || null);
+    setEditColorCode(item.color_code || '#FFFFFF');
   };
 
   const handleToggle = (field: 'is_billable' | 'is_support' | 'non_billed') => {
@@ -70,7 +76,8 @@ export const BillTypeCard: React.FC<BillTypeCardProps> = ({
       field === 'is_billable' ? newValue : item.is_billable,
       field === 'is_support' ? newValue : item.is_support,
       field === 'non_billed' ? newValue : item.non_billed,
-      item.resource_type || null
+      item.resource_type || null,
+      item.color_code || '#FFFFFF'
     );
   };
 
@@ -97,6 +104,14 @@ export const BillTypeCard: React.FC<BillTypeCardProps> = ({
                   onValueChange={setEditResourceType}
                   placeholder="Select resource type..."
                 />
+                <div>
+                  <label className="text-sm font-medium mb-2 block">Color</label>
+                  <ColorPicker
+                    value={editColorCode}
+                    onChange={setEditColorCode}
+                    disabled={isUpdating}
+                  />
+                </div>
                 <div className="flex gap-2">
                   <Button size="sm" onClick={handleSaveEdit} disabled={isUpdating || !editName.trim()}>
                     <Check className="h-4 w-4" />
@@ -108,13 +123,20 @@ export const BillTypeCard: React.FC<BillTypeCardProps> = ({
               </div>
             ) : (
               <div>
-                <button
-                  onClick={handleStartEdit}
-                  className="text-left hover:underline font-semibold text-lg text-foreground mb-1 block"
-                  disabled={isUpdating}
-                >
-                  {item.name}
-                </button>
+                <div className="flex items-center gap-3 mb-2">
+                  <div
+                    className="w-4 h-4 rounded border border-gray-300"
+                    style={{ backgroundColor: item.color_code }}
+                    title={`Color: ${item.color_code}`}
+                  />
+                  <button
+                    onClick={handleStartEdit}
+                    className="text-left hover:underline font-semibold text-lg text-foreground"
+                    disabled={isUpdating}
+                  >
+                    {item.name}
+                  </button>
+                </div>
                 {item.resource_type_name ? (
                   <Badge variant="outline" className="text-xs">
                     {item.resource_type_name}
