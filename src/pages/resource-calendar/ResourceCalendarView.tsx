@@ -7,16 +7,43 @@ import {ArrowLeft } from 'lucide-react';
 import ResourceCalendarViewComponent from '../../components/calendar/ResourceCalendarViewComponent';
 import { ResourceCalendarFilters } from '../../components/calendar/ResourceCalendarFilters';
 
+interface AdvancedFilters {
+  billTypeFilter: string | null;
+  projectSearch: string;
+  minEngagementPercentage: number | null;
+  maxEngagementPercentage: number | null;
+  minBillingPercentage: number | null;
+  maxBillingPercentage: number | null;
+  startDateFrom: string;
+  startDateTo: string;
+  endDateFrom: string;
+  endDateTo: string;
+}
+
 const ResourceCalendarView: React.FC = () => {
   const location = useLocation();
   const isAdmin = location.pathname.includes('/admin/');
   const baseUrl = isAdmin ? '/admin/resource-calendar' : '/manager/resource-calendar';
 
-  // Filter states
+  // Basic filter states
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedSbu, setSelectedSbu] = useState<string | null>(null);
   const [selectedManager, setSelectedManager] = useState<string | null>(null);
   const [showUnplanned, setShowUnplanned] = useState(false);
+
+  // Advanced filter states
+  const [advancedFilters, setAdvancedFilters] = useState<AdvancedFilters>({
+    billTypeFilter: null,
+    projectSearch: '',
+    minEngagementPercentage: null,
+    maxEngagementPercentage: null,
+    minBillingPercentage: null,
+    maxBillingPercentage: null,
+    startDateFrom: '',
+    startDateTo: '',
+    endDateFrom: '',
+    endDateTo: '',
+  });
 
   const clearFilters = () => {
     setSearchQuery('');
@@ -25,6 +52,20 @@ const ResourceCalendarView: React.FC = () => {
     setShowUnplanned(false);
   };
 
+  const clearAdvancedFilters = () => {
+    setAdvancedFilters({
+      billTypeFilter: null,
+      projectSearch: '',
+      minEngagementPercentage: null,
+      maxEngagementPercentage: null,
+      minBillingPercentage: null,
+      maxBillingPercentage: null,
+      startDateFrom: '',
+      startDateTo: '',
+      endDateFrom: '',
+      endDateTo: '',
+    });
+  };
 
   return (
     <DashboardLayout>
@@ -47,7 +88,6 @@ const ResourceCalendarView: React.FC = () => {
           </div>
         </div>
 
-
         {/* Search and Filters */}
         <ResourceCalendarFilters
           searchQuery={searchQuery}
@@ -59,6 +99,9 @@ const ResourceCalendarView: React.FC = () => {
           showUnplanned={showUnplanned}
           onShowUnplannedChange={setShowUnplanned}
           onClearFilters={clearFilters}
+          advancedFilters={advancedFilters}
+          onAdvancedFiltersChange={setAdvancedFilters}
+          onClearAdvancedFilters={clearAdvancedFilters}
         />
 
         {/* Main Calendar */}
@@ -67,6 +110,7 @@ const ResourceCalendarView: React.FC = () => {
           selectedSbu={selectedSbu}
           selectedManager={selectedManager}
           showUnplanned={showUnplanned}
+          advancedFilters={advancedFilters}
         />
       </div>
     </DashboardLayout>

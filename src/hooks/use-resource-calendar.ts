@@ -1,7 +1,7 @@
 
 import { useState, useMemo } from 'react';
 import { useResourceCalendarData } from './use-resource-calendar-data';
-import { startOfMonth, endOfMonth, eachDayOfInterval, format, isSameDay, parseISO, startOfQuarter, endOfQuarter } from 'date-fns';
+import { startOfMonth, endOfMonth, eachDayOfInterval, parseISO } from 'date-fns';
 
 export type CalendarViewType = 'month' | 'quarter';
 
@@ -25,23 +25,38 @@ export interface CalendarDay {
   overAllocatedResources: number;
 }
 
+interface AdvancedFilters {
+  billTypeFilter?: string | null;
+  projectSearch?: string | null;
+  minEngagementPercentage?: number | null;
+  maxEngagementPercentage?: number | null;
+  minBillingPercentage?: number | null;
+  maxBillingPercentage?: number | null;
+  startDateFrom?: string | null;
+  startDateTo?: string | null;
+  endDateFrom?: string | null;
+  endDateTo?: string | null;
+}
+
 export function useResourceCalendar(
   searchQuery: string,
   selectedSbu: string | null,
   selectedManager: string | null,
-  showUnplanned: boolean
+  showUnplanned: boolean,
+  advancedFilters: AdvancedFilters = {}
 ) {
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [currentView, setCurrentView] = useState<CalendarViewType>('quarter');
   
-  // Get calendar data using the new dedicated hook
+  // Get calendar data using the updated hook with advanced filters
   const { data: resourceData, isLoading, error } = useResourceCalendarData(
     searchQuery,
     selectedSbu,
     selectedManager,
     currentMonth,
-    currentView
+    currentView,
+    advancedFilters
   );
 
   // Convert resource planning data to calendar format

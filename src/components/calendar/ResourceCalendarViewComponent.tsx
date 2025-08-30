@@ -3,11 +3,25 @@ import React from 'react';
 import { useResourceCalendar } from '@/hooks/use-resource-calendar';
 import { CalendarQuarterView } from './CalendarQuarterView';
 
+interface AdvancedFilters {
+  billTypeFilter: string | null;
+  projectSearch: string;
+  minEngagementPercentage: number | null;
+  maxEngagementPercentage: number | null;
+  minBillingPercentage: number | null;
+  maxBillingPercentage: number | null;
+  startDateFrom: string;
+  startDateTo: string;
+  endDateFrom: string;
+  endDateTo: string;
+}
+
 interface ResourceCalendarViewProps {
   searchQuery: string;
   selectedSbu: string | null;
   selectedManager: string | null;
   showUnplanned: boolean;
+  advancedFilters: AdvancedFilters;
 }
 
 const ResourceCalendarView: React.FC<ResourceCalendarViewProps> = ({
@@ -15,6 +29,7 @@ const ResourceCalendarView: React.FC<ResourceCalendarViewProps> = ({
   selectedSbu,
   selectedManager,
   showUnplanned,
+  advancedFilters,
 }) => {
   const {
     currentMonth,
@@ -22,7 +37,13 @@ const ResourceCalendarView: React.FC<ResourceCalendarViewProps> = ({
     setSelectedDate,
     calendarData,
     isLoading,
-  } = useResourceCalendar(searchQuery, selectedSbu, selectedManager, showUnplanned);
+  } = useResourceCalendar(
+    searchQuery, 
+    selectedSbu, 
+    selectedManager, 
+    showUnplanned,
+    advancedFilters
+  );
 
   if (isLoading) {
     return (
@@ -35,16 +56,15 @@ const ResourceCalendarView: React.FC<ResourceCalendarViewProps> = ({
     );
   }
 
-
   const renderCalendarContent = () => {
     return (
-          <CalendarQuarterView
-            currentDate={currentMonth}
-            calendarData={calendarData}
-            selectedDate={selectedDate}
-            onDateSelect={setSelectedDate}
-          />
-        );
+      <CalendarQuarterView
+        currentDate={currentMonth}
+        calendarData={calendarData}
+        selectedDate={selectedDate}
+        onDateSelect={setSelectedDate}
+      />
+    );
   };
 
   return (
