@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
@@ -30,7 +29,10 @@ export const BillTypeCards: React.FC = () => {
     non_billed: boolean;
     resource_type: string | null;
   }) => {
-    addItem(value);
+    addItem({
+      ...value,
+      color_code: '#FFFFFF' // Add default color_code
+    });
   };
 
   if (isLoading) {

@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -207,7 +206,6 @@ export const BillTypeTable: React.FC = () => {
         confirmText="Delete"
         cancelText="Cancel"
         variant="destructive"
-        isLoading={isRemovingItem}
       />
     </div>
   );
