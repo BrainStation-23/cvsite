@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { BillTypeTable } from './bill-type/BillTypeTable';
+import { BillTypeTable } from './bill-type/BillTypeGrid';
 
 const BillTypeSettings: React.FC = () => {
   return (
