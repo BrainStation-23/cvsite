@@ -1,3 +1,4 @@
+
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -11,6 +12,7 @@ export interface BillTypeItem {
   non_billed: boolean;
   resource_type: string | null;
   resource_type_name?: string;
+  color_code: string;
   created_at: string;
   updated_at: string;
 }
@@ -42,6 +44,7 @@ export const useBillTypes = () => {
       ...item,
       is_support: item.is_support || false,
       non_billed: item.non_billed || false,
+      color_code: item.color_code || '#FFFFFF',
       resource_type_name: item.resource_types?.name || null
     })) as BillTypeItem[];
   };
@@ -64,6 +67,7 @@ export const useBillTypes = () => {
       is_support: boolean; 
       non_billed: boolean;
       resource_type: string | null;
+      color_code: string;
     }) => {
       // Check if item already exists to prevent duplicates
       const existingItems = items || [];
@@ -96,7 +100,8 @@ export const useBillTypes = () => {
       is_billable,
       is_support,
       non_billed,
-      resource_type
+      resource_type,
+      color_code
     }: { 
       id: string; 
       name: string; 
@@ -104,6 +109,7 @@ export const useBillTypes = () => {
       is_support: boolean;
       non_billed: boolean;
       resource_type: string | null;
+      color_code: string;
     }) => {
       // Check if another item with the same name already exists (excluding current item)
       const existingItems = items || [];
@@ -123,6 +129,7 @@ export const useBillTypes = () => {
           is_support,
           non_billed,
           resource_type,
+          color_code,
           updated_at: new Date().toISOString() 
         })
         .eq('id', id)
@@ -158,6 +165,7 @@ export const useBillTypes = () => {
     is_support: boolean; 
     non_billed: boolean;
     resource_type: string | null;
+    color_code: string;
   }) => {
     if (!value.name.trim()) return;
     
@@ -189,7 +197,8 @@ export const useBillTypes = () => {
     is_billable: boolean,
     is_support: boolean,
     non_billed: boolean,
-    resource_type: string | null
+    resource_type: string | null,
+    color_code: string
   ) => {
     if (!name.trim()) return;
     
@@ -199,7 +208,8 @@ export const useBillTypes = () => {
       is_billable, 
       is_support, 
       non_billed,
-      resource_type
+      resource_type,
+      color_code
     }, {
       onSuccess: () => {
         toast({

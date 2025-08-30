@@ -1,7 +1,6 @@
-
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { startOfQuarter, endOfQuarter, startOfMonth, endOfMonth } from 'date-fns';
+import { startOfMonth, endOfMonth, addMonths } from 'date-fns';
 
 interface ResourceCalendarData {
   id: string;
@@ -33,17 +32,31 @@ interface ResourceCalendarData {
   } | null;
 }
 
+interface AdvancedFilters {
+  billTypeFilter?: string | null;
+  projectSearch?: string | null;
+  minEngagementPercentage?: number | null;
+  maxEngagementPercentage?: number | null;
+  minBillingPercentage?: number | null;
+  maxBillingPercentage?: number | null;
+  startDateFrom?: string | null;
+  startDateTo?: string | null;
+  endDateFrom?: string | null;
+  endDateTo?: string | null;
+}
+
 export function useResourceCalendarData(
   searchQuery: string,
   selectedSbu: string | null,
   selectedManager: string | null,
-  currentDate: Date,
-  viewType: 'month' | 'quarter' = 'quarter'
+  startingMonth: Date,
+  viewType: 'month' | 'timeline' = 'timeline',
+  advancedFilters: AdvancedFilters = {}
 ) {
-  // Calculate date range based on view type
-  const dateRange = viewType === 'quarter' 
-    ? { start: startOfQuarter(currentDate), end: endOfQuarter(currentDate) }
-    : { start: startOfMonth(currentDate), end: endOfMonth(currentDate) };
+  // Calculate date range - for timeline view, we'll get a broader range from the parent
+  const dateRange = viewType === 'timeline' 
+    ? { start: startOfMonth(startingMonth), end: endOfMonth(addMonths(startingMonth, 5)) } // Get 6 months of data for flexibility
+    : { start: startOfMonth(startingMonth), end: endOfMonth(startingMonth) };
 
   const { data: resourceData, isLoading, error } = useQuery({
     queryKey: [
@@ -53,18 +66,20 @@ export function useResourceCalendarData(
       selectedManager, 
       dateRange.start.toISOString(), 
       dateRange.end.toISOString(),
-      viewType
+      viewType,
+      advancedFilters
     ],
     queryFn: async () => {
-      console.log('Fetching calendar data:', {
+      console.log('Fetching calendar data with advanced filters:', {
         searchQuery,
         selectedSbu,
         selectedManager,
         dateRange,
-        viewType
+        viewType,
+        advancedFilters
       });
 
-      // Use the planned resource data function for calendar view
+      // Use the planned resource data function for calendar view with advanced filters
       const { data: rpcData, error } = await supabase.rpc('get_planned_resource_data', {
         search_query: searchQuery || null,
         page_number: 1,
@@ -73,16 +88,16 @@ export function useResourceCalendarData(
         sort_order: 'desc',
         sbu_filter: selectedSbu,
         manager_filter: selectedManager,
-        bill_type_filter: null,
-        project_search: null,
-        min_engagement_percentage: null,
-        max_engagement_percentage: null,
-        min_billing_percentage: null,
-        max_billing_percentage: null,
-        start_date_from: dateRange.start.toISOString().split('T')[0],
-        start_date_to: dateRange.end.toISOString().split('T')[0],
-        end_date_from: null,
-        end_date_to: null,
+        bill_type_filter: advancedFilters.billTypeFilter || null,
+        project_search: advancedFilters.projectSearch || null,
+        min_engagement_percentage: advancedFilters.minEngagementPercentage || null,
+        max_engagement_percentage: advancedFilters.maxEngagementPercentage || null,
+        min_billing_percentage: advancedFilters.minBillingPercentage || null,
+        max_billing_percentage: advancedFilters.maxBillingPercentage || null,
+        start_date_from: advancedFilters.startDateFrom || dateRange.start.toISOString().split('T')[0],
+        start_date_to: advancedFilters.startDateTo || dateRange.end.toISOString().split('T')[0],
+        end_date_from: advancedFilters.endDateFrom || null,
+        end_date_to: advancedFilters.endDateTo || null,
       });
 
       if (error) {

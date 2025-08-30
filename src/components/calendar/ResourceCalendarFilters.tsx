@@ -1,6 +1,20 @@
 
 import React from 'react';
 import { ResourcePlanningFilters } from '@/components/resource-planning/ResourcePlanningFilters';
+import { AdvancedResourceFilters } from '@/components/resource-planning/AdvancedResourceFilters';
+
+interface AdvancedFilters {
+  billTypeFilter: string | null;
+  projectSearch: string;
+  minEngagementPercentage: number | null;
+  maxEngagementPercentage: number | null;
+  minBillingPercentage: number | null;
+  maxBillingPercentage: number | null;
+  startDateFrom: string;
+  startDateTo: string;
+  endDateFrom: string;
+  endDateTo: string;
+}
 
 interface ResourceCalendarFiltersProps {
   searchQuery: string;
@@ -12,6 +26,9 @@ interface ResourceCalendarFiltersProps {
   showUnplanned: boolean;
   onShowUnplannedChange: (show: boolean) => void;
   onClearFilters: () => void;
+  advancedFilters: AdvancedFilters;
+  onAdvancedFiltersChange: (filters: AdvancedFilters) => void;
+  onClearAdvancedFilters: () => void;
 }
 
 export const ResourceCalendarFilters: React.FC<ResourceCalendarFiltersProps> = ({
@@ -24,6 +41,9 @@ export const ResourceCalendarFilters: React.FC<ResourceCalendarFiltersProps> = (
   showUnplanned,
   onShowUnplannedChange,
   onClearFilters,
+  advancedFilters,
+  onAdvancedFiltersChange,
+  onClearAdvancedFilters,
 }) => {
   return (
     <div className="space-y-4">
@@ -35,6 +55,12 @@ export const ResourceCalendarFilters: React.FC<ResourceCalendarFiltersProps> = (
         selectedManager={selectedManager}
         setSelectedManager={onManagerChange}
         clearFilters={onClearFilters}
+      />
+      
+      <AdvancedResourceFilters
+        filters={advancedFilters}
+        onFiltersChange={onAdvancedFiltersChange}
+        onClearFilters={onClearAdvancedFilters}
       />
     </div>
   );

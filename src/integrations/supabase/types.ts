@@ -88,6 +88,7 @@ export type Database = {
       }
       bill_types: {
         Row: {
+          color_code: string
           created_at: string
           id: string
           is_billable: boolean
@@ -98,6 +99,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          color_code?: string
           created_at?: string
           id?: string
           is_billable?: boolean
@@ -108,6 +110,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          color_code?: string
           created_at?: string
           id?: string
           is_billable?: boolean
