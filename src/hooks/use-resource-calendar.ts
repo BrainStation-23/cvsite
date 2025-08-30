@@ -1,9 +1,9 @@
 
 import { useState, useMemo } from 'react';
 import { useResourceCalendarData } from './use-resource-calendar-data';
-import { startOfMonth, endOfMonth, eachDayOfInterval, parseISO } from 'date-fns';
+import { startOfMonth, endOfMonth, eachDayOfInterval, parseISO, addMonths } from 'date-fns';
 
-export type CalendarViewType = 'month' | 'quarter';
+export type CalendarViewType = 'month' | 'timeline';
 
 export interface CalendarResource {
   id: string;
@@ -45,16 +45,24 @@ export function useResourceCalendar(
   showUnplanned: boolean,
   advancedFilters: AdvancedFilters = {}
 ) {
-  const [currentMonth, setCurrentMonth] = useState(new Date());
+  const [startingMonth, setStartingMonth] = useState(new Date());
+  const [monthsToShow, setMonthsToShow] = useState(3);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
-  const [currentView, setCurrentView] = useState<CalendarViewType>('quarter');
+  const [currentView, setCurrentView] = useState<CalendarViewType>('timeline');
   
+  // Calculate the date range based on starting month and number of months to show
+  const dateRange = useMemo(() => {
+    const start = startOfMonth(startingMonth);
+    const end = endOfMonth(addMonths(start, monthsToShow - 1));
+    return { start, end };
+  }, [startingMonth, monthsToShow]);
+
   // Get calendar data using the updated hook with advanced filters
   const { data: resourceData, isLoading, error } = useResourceCalendarData(
     searchQuery,
     selectedSbu,
     selectedManager,
-    currentMonth,
+    dateRange.start,
     currentView,
     advancedFilters
   );
@@ -99,15 +107,15 @@ export function useResourceCalendar(
 
   // Generate calendar days based on current view (for month view)
   const calendarDays = useMemo(() => {
-    if (currentView === 'quarter') {
-      // For quarter view, we don't need daily breakdown
+    if (currentView === 'timeline') {
+      // For timeline view, we don't need daily breakdown
       return [];
     }
 
     let start: Date, end: Date;
     
-    start = startOfMonth(currentMonth);
-    end = endOfMonth(currentMonth);
+    start = startOfMonth(startingMonth);
+    end = endOfMonth(startingMonth);
     
     const days = eachDayOfInterval({ start, end });
 
@@ -143,23 +151,36 @@ export function useResourceCalendar(
         overAllocatedResources,
       };
     });
-  }, [currentMonth, calendarData, currentView]);
+  }, [startingMonth, calendarData, currentView]);
 
   const goToPreviousMonth = () => {
-    setCurrentMonth(prev => new Date(prev.getFullYear(), prev.getMonth() - 1, 1));
+    setStartingMonth(prev => addMonths(prev, -1));
   };
 
   const goToNextMonth = () => {
-    setCurrentMonth(prev => new Date(prev.getFullYear(), prev.getMonth() + 1, 1));
+    setStartingMonth(prev => addMonths(prev, 1));
   };
 
   const goToToday = () => {
-    setCurrentMonth(new Date());
+    setStartingMonth(new Date());
     setSelectedDate(new Date());
   };
 
+  const increaseMonths = () => {
+    if (monthsToShow < 6) {
+      setMonthsToShow(prev => prev + 1);
+    }
+  };
+
+  const decreaseMonths = () => {
+    if (monthsToShow > 1) {
+      setMonthsToShow(prev => prev - 1);
+    }
+  };
+
   return {
-    currentMonth,
+    startingMonth,
+    monthsToShow,
     selectedDate,
     setSelectedDate,
     currentView,
@@ -168,8 +189,11 @@ export function useResourceCalendar(
     calendarData,
     isLoading,
     error,
+    dateRange,
     goToPreviousMonth,
     goToNextMonth,
     goToToday,
+    increaseMonths,
+    decreaseMonths,
   };
 }

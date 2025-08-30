@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { useResourceCalendar } from '@/hooks/use-resource-calendar';
-import { CalendarQuarterView } from './CalendarQuarterView';
+import { CalendarTimelineView } from './CalendarTimelineView';
 
 interface AdvancedFilters {
   billTypeFilter: string | null;
@@ -32,11 +32,16 @@ const ResourceCalendarView: React.FC<ResourceCalendarViewProps> = ({
   advancedFilters,
 }) => {
   const {
-    currentMonth,
+    startingMonth,
+    monthsToShow,
     selectedDate,
     setSelectedDate,
     calendarData,
     isLoading,
+    goToPreviousMonth,
+    goToNextMonth,
+    increaseMonths,
+    decreaseMonths,
   } = useResourceCalendar(
     searchQuery, 
     selectedSbu, 
@@ -58,11 +63,16 @@ const ResourceCalendarView: React.FC<ResourceCalendarViewProps> = ({
 
   const renderCalendarContent = () => {
     return (
-      <CalendarQuarterView
-        currentDate={currentMonth}
+      <CalendarTimelineView
+        startingMonth={startingMonth}
+        monthsToShow={monthsToShow}
         calendarData={calendarData}
         selectedDate={selectedDate}
         onDateSelect={setSelectedDate}
+        onPreviousMonth={goToPreviousMonth}
+        onNextMonth={goToNextMonth}
+        onIncreaseMonths={increaseMonths}
+        onDecreaseMonths={decreaseMonths}
       />
     );
   };

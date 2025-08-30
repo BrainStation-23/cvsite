@@ -1,7 +1,6 @@
-
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { startOfQuarter, endOfQuarter, startOfMonth, endOfMonth } from 'date-fns';
+import { startOfMonth, endOfMonth, addMonths } from 'date-fns';
 
 interface ResourceCalendarData {
   id: string;
@@ -50,14 +49,14 @@ export function useResourceCalendarData(
   searchQuery: string,
   selectedSbu: string | null,
   selectedManager: string | null,
-  currentDate: Date,
-  viewType: 'month' | 'quarter' = 'quarter',
+  startingMonth: Date,
+  viewType: 'month' | 'timeline' = 'timeline',
   advancedFilters: AdvancedFilters = {}
 ) {
-  // Calculate date range based on view type
-  const dateRange = viewType === 'quarter' 
-    ? { start: startOfQuarter(currentDate), end: endOfQuarter(currentDate) }
-    : { start: startOfMonth(currentDate), end: endOfMonth(currentDate) };
+  // Calculate date range - for timeline view, we'll get a broader range from the parent
+  const dateRange = viewType === 'timeline' 
+    ? { start: startOfMonth(startingMonth), end: endOfMonth(addMonths(startingMonth, 5)) } // Get 6 months of data for flexibility
+    : { start: startOfMonth(startingMonth), end: endOfMonth(startingMonth) };
 
   const { data: resourceData, isLoading, error } = useQuery({
     queryKey: [
