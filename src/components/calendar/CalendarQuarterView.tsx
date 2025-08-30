@@ -1,7 +1,7 @@
 
 import React, { useState, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { format, startOfQuarter, endOfQuarter, eachMonthOfInterval, startOfMonth, endOfMonth, isWithinInterval } from 'date-fns';
+import {  startOfQuarter, endOfQuarter, eachMonthOfInterval } from 'date-fns';
 import { Users } from 'lucide-react';
 import type { CalendarResource } from '@/hooks/use-resource-calendar';
 import { QuarterHeader } from './quarter-view/QuarterHeader';
@@ -30,13 +30,11 @@ interface CalendarQuarterViewProps {
   onDateSelect: (date: Date) => void;
 }
 
-const RESOURCES_PER_PAGE = 10;
+const RESOURCES_PER_PAGE = 100;
 
 export const CalendarQuarterView: React.FC<CalendarQuarterViewProps> = ({
   currentDate,
   calendarData,
-  selectedDate,
-  onDateSelect,
 }) => {
   const [currentPage, setCurrentPage] = useState(1);
   
