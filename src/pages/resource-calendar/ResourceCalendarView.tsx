@@ -2,12 +2,10 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import DashboardLayout from '../../components/Layout/DashboardLayout';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { CalendarDays, Users, Clock, TrendingUp, ArrowLeft } from 'lucide-react';
-import ResourceCalendarViewComponent from '../../components/calendar/ResourceCalendarView';
+import {ArrowLeft } from 'lucide-react';
+import ResourceCalendarViewComponent from '../../components/calendar/ResourceCalendarViewComponent';
 import { ResourceCalendarFilters } from '../../components/calendar/ResourceCalendarFilters';
-import { usePlannedResourcesTab } from '../../hooks/use-planned-resources-tab';
 
 const ResourceCalendarView: React.FC = () => {
   const location = useLocation();
@@ -27,15 +25,6 @@ const ResourceCalendarView: React.FC = () => {
     setShowUnplanned(false);
   };
 
-  const { data: resourceData, isLoading } = usePlannedResourcesTab();
-
-  // Calculate quick stats
-  const totalResources = resourceData?.length || 0;
-  const activeProjects = new Set(resourceData?.map(r => r.project?.id).filter(Boolean)).size;
-  const averageUtilization = resourceData?.length > 0 
-    ? Math.round(resourceData.reduce((sum, r) => sum + (r.engagement_percentage || 0), 0) / resourceData.length)
-    : 0;
-  const availableResources = resourceData?.filter(r => (r.engagement_percentage || 0) < 100).length || 0;
 
   return (
     <DashboardLayout>
