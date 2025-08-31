@@ -15,6 +15,8 @@ interface ResourceAssignmentFormProps {
   setBillTypeId: (value: string | null) => void;
   projectId: string | null;
   setProjectId: (value: string | null) => void;
+  forecastedProject: string;
+  setForecastedProject: (value: string) => void;
   engagementPercentage: number;
   setEngagementPercentage: (value: number) => void;
   billingPercentage: number;
@@ -34,6 +36,8 @@ export const ResourceAssignmentForm: React.FC<ResourceAssignmentFormProps> = ({
   setBillTypeId,
   projectId,
   setProjectId,
+  forecastedProject,
+  setForecastedProject,
   engagementPercentage,
   setEngagementPercentage,
   billingPercentage,
@@ -102,6 +106,18 @@ export const ResourceAssignmentForm: React.FC<ResourceAssignmentFormProps> = ({
             value={projectId}
             onValueChange={setProjectId}
             placeholder="Select project..."
+          />
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="forecastedProject" className="text-sm font-medium">Forecasted Project</Label>
+          <Input
+            id="forecastedProject"
+            type="text"
+            value={forecastedProject}
+            onChange={(e) => setForecastedProject(e.target.value)}
+            placeholder="Enter forecasted project..."
+            className="h-9"
           />
         </div>
 

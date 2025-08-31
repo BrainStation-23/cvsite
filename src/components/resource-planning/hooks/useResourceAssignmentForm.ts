@@ -8,6 +8,7 @@ interface ResourcePlanningData {
   billing_percentage: number;
   release_date: string;
   engagement_start_date: string;
+  forecasted_project: string | null;
   bill_type: {
     id: string;
     name: string;
@@ -22,6 +23,7 @@ interface FormState {
   profileId: string | null;
   billTypeId: string | null;
   projectId: string | null;
+  forecastedProject: string;
   engagementPercentage: number;
   billingPercentage: number;
   releaseDate: string;
@@ -32,6 +34,7 @@ type FormAction =
   | { type: 'SET_PROFILE_ID'; payload: string | null }
   | { type: 'SET_BILL_TYPE_ID'; payload: string | null }
   | { type: 'SET_PROJECT_ID'; payload: string | null }
+  | { type: 'SET_FORECASTED_PROJECT'; payload: string }
   | { type: 'SET_ENGAGEMENT_PERCENTAGE'; payload: number }
   | { type: 'SET_BILLING_PERCENTAGE'; payload: number }
   | { type: 'SET_RELEASE_DATE'; payload: string }
@@ -43,6 +46,7 @@ const initialState: FormState = {
   profileId: null,
   billTypeId: null,
   projectId: null,
+  forecastedProject: '',
   engagementPercentage: 100,
   billingPercentage: 0,
   releaseDate: '',
@@ -56,7 +60,11 @@ function formReducer(state: FormState, action: FormAction): FormState {
     case 'SET_BILL_TYPE_ID':
       return { ...state, billTypeId: action.payload };
     case 'SET_PROJECT_ID':
-      return { ...state, projectId: action.payload };
+      // When project is selected, clear forecasted project
+      return { ...state, projectId: action.payload, forecastedProject: action.payload ? '' : state.forecastedProject };
+    case 'SET_FORECASTED_PROJECT':
+      // When forecasted project is typed, clear project selection
+      return { ...state, forecastedProject: action.payload, projectId: action.payload ? null : state.projectId };
     case 'SET_ENGAGEMENT_PERCENTAGE':
       return { ...state, engagementPercentage: action.payload };
     case 'SET_BILLING_PERCENTAGE':
@@ -96,6 +104,7 @@ export const useResourceAssignmentForm = ({
           profileId: item.profile_id,
           billTypeId: item.bill_type?.id || null,
           projectId: item.project?.id || null,
+          forecastedProject: item.forecasted_project || '',
           engagementPercentage: item.engagement_percentage,
           billingPercentage: item.billing_percentage || 0,
           releaseDate: item.release_date || '',
@@ -123,6 +132,10 @@ export const useResourceAssignmentForm = ({
 
   const setProjectId = useCallback((value: string | null) => {
     dispatch({ type: 'SET_PROJECT_ID', payload: value });
+  }, []);
+
+  const setForecastedProject = useCallback((value: string) => {
+    dispatch({ type: 'SET_FORECASTED_PROJECT', payload: value });
   }, []);
 
   const setEngagementPercentage = useCallback((value: number) => {
@@ -156,6 +169,7 @@ export const useResourceAssignmentForm = ({
     profile_id: state.profileId!,
     bill_type_id: state.billTypeId || undefined,
     project_id: state.projectId || undefined,
+    forecasted_project: state.forecastedProject || undefined,
     engagement_percentage: state.engagementPercentage,
     billing_percentage: state.billingPercentage,
     release_date: state.releaseDate || undefined,
@@ -169,6 +183,8 @@ export const useResourceAssignmentForm = ({
     setBillTypeId,
     projectId: state.projectId,
     setProjectId,
+    forecastedProject: state.forecastedProject,
+    setForecastedProject,
     engagementPercentage: state.engagementPercentage,
     setEngagementPercentage,
     billingPercentage: state.billingPercentage,
