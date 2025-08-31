@@ -3,7 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { startOfMonth, endOfMonth, addMonths } from 'date-fns';
 
-interface ResourceCalendarData {
+export interface ResourceCalendarData {
   id: string;
   profile_id: string;
   engagement_percentage: number;
