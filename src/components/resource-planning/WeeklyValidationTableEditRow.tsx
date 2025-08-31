@@ -76,6 +76,22 @@ export const WeeklyValidationTableEditRow: React.FC<WeeklyValidationTableEditRow
   isSelected = false,
   onSelect,
 }) => {
+  // Handle project selection with mutual exclusivity
+  const handleProjectChange = (value: string | null) => {
+    onEditDataChange({ 
+      projectId: value,
+      forecastedProject: value ? null : editData.forecastedProject
+    });
+  };
+
+  // Handle forecasted project input with mutual exclusivity
+  const handleForecastedProjectChange = (value: string) => {
+    onEditDataChange({ 
+      forecastedProject: value,
+      projectId: value ? null : editData.projectId
+    });
+  };
+
   return (
     <TableRow>
       {showBulkSelection && (
@@ -110,7 +126,7 @@ export const WeeklyValidationTableEditRow: React.FC<WeeklyValidationTableEditRow
         <div className="w-full max-w-[120px]">
           <ProjectCombobox
             value={editData.projectId || undefined}
-            onValueChange={(value) => onEditDataChange({ projectId: value })}
+            onValueChange={handleProjectChange}
             placeholder="Select..."
           />
         </div>
@@ -120,7 +136,7 @@ export const WeeklyValidationTableEditRow: React.FC<WeeklyValidationTableEditRow
           <Input
             type="text"
             value={editData.forecastedProject || ''}
-            onChange={(e) => onEditDataChange({ forecastedProject: e.target.value })}
+            onChange={(e) => handleForecastedProjectChange(e.target.value)}
             placeholder="Enter project..."
             className="h-7 text-xs px-2"
           />
