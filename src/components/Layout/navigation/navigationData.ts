@@ -1,7 +1,6 @@
 
 import {
   User,
-  Settings,
   Users,
   Home,
   Shield,
@@ -18,7 +17,8 @@ import {
   UserX,
   List,
   TrendingUp,
-  UserCheck
+  UserCheck,
+  Search
 } from 'lucide-react';
 
 export interface NavigationItem {
@@ -36,27 +36,8 @@ export interface NavigationGroup {
   items: NavigationItem[];
 }
 
-// Platform settings sub-menu items
-export const platformSettingsItems = [
-  { to: '/admin/platform-settings/profile', icon: GraduationCap, label: 'Profile Management' },
-  { to: '/admin/platform-settings/resources', icon: Briefcase, label: 'Resource Planning' },
-  { to: '/admin/platform-settings/cv-templates', icon: FileText, label: 'CV Templates' },
-  { to: '/admin/platform-settings/system', icon: Building2, label: 'System Config' },
-  { to: '/admin/platform-settings/audit', icon: AlertTriangle, label: 'Audit' },
-];
-
-export const getResourceCalendarItems = (userRole: string): NavigationItem[] => [
-  { to: `/${userRole}/resource-calendar/planning`, icon: Calendar, label: 'Planning' },
-  { to: `/${userRole}/resource-calendar/calendar`, icon: CalendarDays, label: 'Calendar View' },
-  { to: `/${userRole}/resource-calendar/statistics`, icon: BarChart3, label: 'Statistics' },
-];
-
 export const getSidebarGroups = (
   userRole: string,
-  isPlatformSettingsOpen: boolean,
-  isResourceCalendarOpen: boolean,
-  togglePlatformSettings: () => void,
-  toggleResourceCalendar: () => void
 ): NavigationGroup[] => {
   const groups: NavigationGroup[] = [
     {
@@ -67,6 +48,26 @@ export const getSidebarGroups = (
         { to: `/${userRole}/security`, icon: Shield, label: 'Security' },
       ],
     },
+
+    // CV Database group (admin/manager)
+    (userRole === 'admin' || userRole === 'manager') && {
+      label: 'CV Database',
+      items: [
+        { to: `/${userRole}/employee-data`, icon: Search, label: 'CV Search' },
+        { to: `/${userRole}/training-certification`, icon: FileText, label: 'Training and Certification' },
+      ],
+    },
+
+        // CV Database group (admin/manager)
+    (userRole === 'admin' || userRole === 'manager') && {
+      label: 'Resource Calendar',
+      items: [
+          { to: `/${userRole}/resource-calendar/planning`, icon: Calendar, label: 'Planning' },
+          { to: `/${userRole}/resource-calendar/calendar`, icon: CalendarDays, label: 'Calendar View' },
+          { to: `/${userRole}/resource-calendar/statistics`, icon: BarChart3, label: 'Statistics' },
+      ],
+    },
+
     // PIP section (available for all users)
     {
       label: 'PIP',
@@ -82,48 +83,32 @@ export const getSidebarGroups = (
         { to: `/${userRole}/pip/my-situation`, icon: UserCheck, label: 'My Situation' },
       ],
     },
+
+
     // Admin Configuration group (admin only)
     userRole === 'admin' && {
       label: 'Admin Configuration',
       items: [
         { to: '/admin/user-management', icon: Users, label: 'User Management' },
         { to: '/admin/employee-data-management', icon: FolderOpen, label: 'Employee Data Management' },
-        { 
-          to: '/admin/platform-settings', 
-          icon: Settings, 
-          label: 'Platform Settings',
-          hasSubmenu: true,
-          submenuItems: platformSettingsItems,
-          isExpanded: isPlatformSettingsOpen,
-          onToggle: togglePlatformSettings
-        },
-        { to: '/admin/projects', icon: Database, label: 'Projects' }
-      ],
-    },
-    // Employee Database group (admin/manager)
-    (userRole === 'admin' || userRole === 'manager') && {
-      label: 'Employee Database',
-      items: [
-        { to: `/${userRole}/employee-data`, icon: Database, label: 'Employee Data' },
-        { to: `/${userRole}/training-certification`, icon: FileText, label: 'Training and Certification' },
-        { 
-          to: `/${userRole}/resource-calendar`, 
-          icon: CalendarDays, 
-          label: 'Resource Calendar',
-          hasSubmenu: true,
-          submenuItems: getResourceCalendarItems(userRole),
-          isExpanded: isResourceCalendarOpen,
-          onToggle: toggleResourceCalendar
-        }
-      ],
-    },
-    // Admin only: CV Templates (not grouped)
-    userRole === 'admin' && {
-      label: null,
-      items: [
+        { to: '/admin/projects', icon: Database, label: 'Projects' },
         { to: '/admin/cv-templates', icon: FileText, label: 'CV Templates' },
       ],
     },
+
+
+    // Platform Settings(admin only)
+    userRole === 'admin' && {
+      label: 'Platform Settings',
+      items: [
+          { to: '/admin/platform-settings/profile', icon: GraduationCap, label: 'Profile Management' },
+          { to: '/admin/platform-settings/resources', icon: Briefcase, label: 'Resource Planning' },
+          { to: '/admin/platform-settings/cv-templates', icon: FileText, label: 'CV Templates' },
+          { to: '/admin/platform-settings/system', icon: Building2, label: 'System Config' },
+          { to: '/admin/platform-settings/audit', icon: AlertTriangle, label: 'Audit' },
+      ],
+    },
+
   ].filter(Boolean) as NavigationGroup[];
 
   return groups;

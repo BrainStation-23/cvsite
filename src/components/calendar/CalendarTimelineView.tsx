@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { eachMonthOfInterval, addMonths, startOfMonth, endOfMonth } from 'date-fns';
 import { Users } from 'lucide-react';
 import type { CalendarResource } from '@/hooks/use-resource-calendar';
+import type { ResourceCalendarData } from '@/hooks/use-resource-calendar-data';
 import { TimelineHeader } from './timeline-view/TimelineHeader';
 import { ResourceRow } from './timeline-view/ResourceRow';
 import { PaginationControls } from './timeline-view/PaginationControls';
@@ -74,7 +75,18 @@ export const CalendarTimelineView: React.FC<CalendarTimelineViewProps> = ({
       }
       
       const resourceData = resourceMap.get(key)!;
-      const projectName = resource.projectName || 'Unassigned';
+      
+      // Determine project name with priority logic:
+      // 1. If forecasted_project exists, use it (highest priority)
+      // 2. If project exists, use it
+      // 3. Otherwise, use 'Unassigned'
+      let projectName = 'Unassigned';
+      
+      if (resource.forecastedProject && resource.forecastedProject.trim()) {
+        projectName = resource.forecastedProject.trim();
+      } else if (resource.projectName && resource.projectName.trim()) {
+        projectName = resource.projectName.trim();
+      }
       
       // Check if this project already exists for this resource
       const existingProject = resourceData.projects.find(p => p.name === projectName);
@@ -94,7 +106,8 @@ export const CalendarTimelineView: React.FC<CalendarTimelineViewProps> = ({
       uniqueResources: result.length,
       sampleResource: result[0] ? {
         name: result[0].profileName,
-        projectCount: result[0].projects.length
+        projectCount: result[0].projects.length,
+        sampleProjects: result[0].projects.map(p => p.name)
       } : null
     });
 

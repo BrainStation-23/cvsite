@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
@@ -87,6 +88,16 @@ export const ResourcePlanningTableHeader: React.FC<ResourcePlanningTableHeaderPr
               className="flex items-center gap-2 p-0 h-auto font-medium justify-start"
             >
               Project {getSortIcon('project')}
+            </Button>
+          </TableHead>
+          
+          <TableHead>
+            <Button
+              variant="ghost"
+              onClick={() => onSort('forecasted_project')}
+              className="flex items-center gap-2 p-0 h-auto font-medium justify-start"
+            >
+              Forecasted Project {getSortIcon('forecasted_project')}
             </Button>
           </TableHead>
           

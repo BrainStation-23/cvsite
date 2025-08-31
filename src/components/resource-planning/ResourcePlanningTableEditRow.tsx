@@ -19,6 +19,7 @@ interface ResourcePlanningData {
   engagement_start_date: string;
   engagement_complete: boolean;
   weekly_validation: boolean;
+  forecasted_project: string | null;
   created_at: string;
   updated_at: string;
   profile: {
@@ -51,6 +52,7 @@ interface EditFormData {
   billingPercentage: number;
   releaseDate: string;
   engagementStartDate: string;
+  forecastedProject: string | null;
 }
 
 interface ResourcePlanningTableEditRowProps {
@@ -79,6 +81,22 @@ export const ResourcePlanningTableEditRow: React.FC<ResourcePlanningTableEditRow
 }) => {
   // Apply visual styling for validated rows (same as the regular row)
   const rowClassName = `h-10 ${item.weekly_validation ? 'bg-green-50 border-l-4 border-l-green-500' : ''}`;
+
+  // Handle project selection with mutual exclusivity
+  const handleProjectChange = (value: string | null) => {
+    onEditDataChange({ 
+      projectId: value,
+      forecastedProject: value ? null : editData?.forecastedProject || null
+    });
+  };
+
+  // Handle forecasted project input with mutual exclusivity
+  const handleForecastedProjectChange = (value: string) => {
+    onEditDataChange({ 
+      forecastedProject: value,
+      projectId: value ? null : editData?.projectId || null
+    });
+  };
 
   return (
     <TableRow className={rowClassName}>
@@ -123,8 +141,20 @@ export const ResourcePlanningTableEditRow: React.FC<ResourcePlanningTableEditRow
         <div className="w-full max-w-[120px]">
           <ProjectCombobox
             value={editData?.projectId || undefined}
-            onValueChange={(value) => onEditDataChange({ projectId: value })}
+            onValueChange={handleProjectChange}
             placeholder="Select..."
+          />
+        </div>
+      </TableCell>
+      
+      <TableCell className="py-1 px-2">
+        <div className="w-full max-w-[140px]">
+          <Input
+            type="text"
+            value={editData?.forecastedProject || ''}
+            onChange={(e) => handleForecastedProjectChange(e.target.value)}
+            placeholder="Enter project..."
+            className="h-7 text-xs px-2"
           />
         </div>
       </TableCell>

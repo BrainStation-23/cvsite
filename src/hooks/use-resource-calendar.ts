@@ -14,6 +14,7 @@ export interface CalendarResource {
   engagementStartDate: string;
   releaseDate: string | null;
   projectName: string | null;
+  forecastedProject: string | null;
   billTypeName: string | null;
 }
 
@@ -94,6 +95,7 @@ export function useResourceCalendar(
         engagementStartDate: resource.engagement_start_date || '',
         releaseDate: resource.release_date,
         projectName: resource.project?.project_name || null,
+        forecastedProject: resource.forecasted_project || null,
         billTypeName: resource.bill_type?.name || null,
       }));
 
