@@ -61,13 +61,13 @@ export const useInlineEdit = () => {
     if (!editingItemId || !editData) return;
 
     const updateData = {
-      bill_type_id: editData.billTypeId || undefined,
-      project_id: editData.projectId || undefined,
+      bill_type_id: editData.billTypeId,
+      project_id: editData.projectId,
       engagement_percentage: editData.engagementPercentage,
       billing_percentage: editData.billingPercentage,
       release_date: editData.releaseDate || undefined,
       engagement_start_date: editData.engagementStartDate || undefined,
-      forecasted_project: editData.forecastedProject || undefined,
+      forecasted_project: editData.forecastedProject,
     };
 
     updateResourcePlanning(
