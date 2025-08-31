@@ -1,3 +1,4 @@
+
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -12,6 +13,7 @@ interface ResourcePlanningData {
   release_date?: string;
   engagement_complete?: boolean;
   weekly_validation?: boolean;
+  forecasted_project?: string;
 }
 
 interface UpdateResourcePlanningData {
