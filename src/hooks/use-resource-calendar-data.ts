@@ -1,3 +1,4 @@
+
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { startOfMonth, endOfMonth, addMonths } from 'date-fns';
@@ -10,6 +11,7 @@ interface ResourceCalendarData {
   release_date: string;
   engagement_start_date: string;
   engagement_complete: boolean;
+  forecasted_project: string | null;
   created_at: string;
   updated_at: string;
   profile: {
