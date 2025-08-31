@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { TableCell, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
@@ -21,6 +22,7 @@ interface ResourcePlanningData {
   engagement_start_date: string;
   engagement_complete: boolean;
   weekly_validation: boolean;
+  forecasted_project: string | null;
   created_at: string;
   updated_at: string;
   profile: {
@@ -53,6 +55,7 @@ interface EditFormData {
   billingPercentage: number;
   releaseDate: string;
   engagementStartDate: string;
+  forecastedProject: string | null;
 }
 
 interface ResourcePlanningTableRowProps {
@@ -155,6 +158,7 @@ export const ResourcePlanningTableRow: React.FC<ResourcePlanningTableRowProps> =
           billing_percentage: item.billing_percentage,
           engagement_start_date: item.engagement_start_date,
           release_date: item.release_date,
+          forecasted_project: item.forecasted_project,
           engagement_complete: false,
           weekly_validation: false,
         };
@@ -248,6 +252,14 @@ export const ResourcePlanningTableRow: React.FC<ResourcePlanningTableRowProps> =
             </div>
           ) : (
             <span className="text-muted-foreground text-xs">Not assigned</span>
+          )}
+        </TableCell>
+        
+        <TableCell className="py-1 px-2">
+          {item.forecasted_project ? (
+            <span className="text-xs">{item.forecasted_project}</span>
+          ) : (
+            <span className="text-muted-foreground text-xs">Not specified</span>
           )}
         </TableCell>
         

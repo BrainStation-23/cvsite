@@ -1,4 +1,5 @@
 
+
 import React from 'react';
 import { TableCell, TableRow } from '@/components/ui/table';
 import { Input } from '@/components/ui/input';
@@ -19,6 +20,7 @@ interface ResourcePlanningData {
   engagement_start_date: string;
   engagement_complete: boolean;
   weekly_validation: boolean;
+  forecasted_project: string | null;
   created_at: string;
   updated_at: string;
   profile: {
@@ -51,6 +53,7 @@ interface EditFormData {
   billingPercentage: number;
   releaseDate: string;
   engagementStartDate: string;
+  forecastedProject: string | null;
 }
 
 interface ResourcePlanningTableEditRowProps {
@@ -125,6 +128,18 @@ export const ResourcePlanningTableEditRow: React.FC<ResourcePlanningTableEditRow
             value={editData?.projectId || undefined}
             onValueChange={(value) => onEditDataChange({ projectId: value })}
             placeholder="Select..."
+          />
+        </div>
+      </TableCell>
+      
+      <TableCell className="py-1 px-2">
+        <div className="w-full max-w-[140px]">
+          <Input
+            type="text"
+            value={editData?.forecastedProject || ''}
+            onChange={(e) => onEditDataChange({ forecastedProject: e.target.value })}
+            placeholder="Enter project..."
+            className="h-7 text-xs px-2"
           />
         </div>
       </TableCell>

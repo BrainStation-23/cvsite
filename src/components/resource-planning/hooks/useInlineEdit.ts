@@ -1,3 +1,4 @@
+
 import { useState, useCallback } from 'react';
 import { useResourcePlanningOperations } from '@/hooks/use-resource-planning-operations';
 import { useToast } from '@/hooks/use-toast';
@@ -9,6 +10,7 @@ interface ResourcePlanningData {
   billing_percentage: number;
   release_date: string;
   engagement_start_date: string;
+  forecasted_project: string | null;
   bill_type: {
     id: string;
     name: string;
@@ -27,6 +29,7 @@ interface EditFormData {
   billingPercentage: number;
   releaseDate: string;
   engagementStartDate: string;
+  forecastedProject: string | null;
 }
 
 export const useInlineEdit = () => {
@@ -45,6 +48,7 @@ export const useInlineEdit = () => {
       billingPercentage: item.billing_percentage || 0,
       releaseDate: item.release_date || '',
       engagementStartDate: item.engagement_start_date || '',
+      forecastedProject: item.forecasted_project || null,
     });
   }, []);
 
@@ -63,6 +67,7 @@ export const useInlineEdit = () => {
       billing_percentage: editData.billingPercentage,
       release_date: editData.releaseDate || undefined,
       engagement_start_date: editData.engagementStartDate || undefined,
+      forecasted_project: editData.forecastedProject || undefined,
     };
 
     updateResourcePlanning(
