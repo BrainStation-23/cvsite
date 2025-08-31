@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { eachMonthOfInterval, addMonths, startOfMonth, endOfMonth } from 'date-fns';
 import { Users } from 'lucide-react';
 import type { CalendarResource } from '@/hooks/use-resource-calendar';
+import type { ResourceCalendarData } from '@/hooks/use-resource-calendar-data';
 import { TimelineHeader } from './timeline-view/TimelineHeader';
 import { ResourceRow } from './timeline-view/ResourceRow';
 import { PaginationControls } from './timeline-view/PaginationControls';
