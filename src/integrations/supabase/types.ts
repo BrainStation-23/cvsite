@@ -1110,6 +1110,7 @@ export type Database = {
           engagement_complete: boolean
           engagement_percentage: number | null
           engagement_start_date: string | null
+          forecasted_project: string | null
           id: string
           profile_id: string
           project_id: string | null
@@ -1124,6 +1125,7 @@ export type Database = {
           engagement_complete?: boolean
           engagement_percentage?: number | null
           engagement_start_date?: string | null
+          forecasted_project?: string | null
           id?: string
           profile_id: string
           project_id?: string | null
@@ -1138,6 +1140,7 @@ export type Database = {
           engagement_complete?: boolean
           engagement_percentage?: number | null
           engagement_start_date?: string | null
+          forecasted_project?: string | null
           id?: string
           profile_id?: string
           project_id?: string | null
@@ -1147,17 +1150,31 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "fk_resource_planning_project"
-            columns: ["project_id"]
-            isOneToOne: false
-            referencedRelation: "projects_management"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "resource_planning_bill_type_id_fkey"
             columns: ["bill_type_id"]
             isOneToOne: false
             referencedRelation: "bill_types"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "resource_planning_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "resource_planning_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "resource_availability_view"
+            referencedColumns: ["profile_id"]
+          },
+          {
+            foreignKeyName: "resource_planning_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects_management"
             referencedColumns: ["id"]
           },
         ]
@@ -1208,7 +1225,22 @@ export type Database = {
           old_sbu_id?: string | null
           profile_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "sbu_change_history_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sbu_change_history_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "resource_availability_view"
+            referencedColumns: ["profile_id"]
+          },
+        ]
       }
       sbus: {
         Row: {
