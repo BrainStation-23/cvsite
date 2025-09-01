@@ -54,6 +54,7 @@ export const CalendarTimelineView: React.FC<CalendarTimelineViewProps> = ({
   const {
     selectedProjects,
     modalState,
+    confirmationState,
     handleSelectProject,
     clearSelection,
     handleEditProject,
@@ -62,6 +63,7 @@ export const CalendarTimelineView: React.FC<CalendarTimelineViewProps> = ({
     handleCreateEngagement,
     handleSaveEngagement,
     closeModal,
+    closeConfirmation,
     isLoading,
   } = useInteractiveTimeline();
 
@@ -149,13 +151,37 @@ export const CalendarTimelineView: React.FC<CalendarTimelineViewProps> = ({
 
     console.log('Drag ended:', { active: active.data.current, over: over.data.current });
     
-    // Handle the drag and drop logic here
-    // This would involve updating the engagement dates based on the drop location
+    const activeData = active.data.current;
+    const overData = over.data.current;
+
+    // Handle project bar drag to empty zone
+    if (activeData?.type === 'project' && overData?.type === 'empty-zone') {
+      console.log('Moving project to new position:', {
+        project: activeData.project.name,
+        fromResource: activeData.resourceId,
+        toResource: overData.resourceId,
+        month: overData.month,
+        zoneType: overData.zoneType,
+      });
+      
+      // Here you would implement the actual date/resource change logic
+      toast({
+        title: 'Project Moved',
+        description: `${activeData.project.name} moved to new position.`,
+      });
+    }
+  };
+
+  const handleGlobalClick = (e: React.MouseEvent) => {
+    // Clear selection when clicking empty areas
+    if (e.target === e.currentTarget) {
+      clearSelection();
+    }
   };
 
   return (
     <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-      <div className="space-y-6">
+      <div className="space-y-6" onClick={handleGlobalClick}>
         <TimelineHeader 
           timelineStart={timelineStart}
           timelineEnd={timelineEnd}
@@ -174,22 +200,25 @@ export const CalendarTimelineView: React.FC<CalendarTimelineViewProps> = ({
                 <Users className="h-5 w-5" />
                 <span>Interactive Resource Timeline</span>
               </div>
-              {selectedProjects.size > 0 && (
-                <div className="text-sm text-muted-foreground">
-                  {selectedProjects.size} selected • 
-                  <button 
-                    onClick={clearSelection}
-                    className="ml-2 text-primary hover:underline"
-                  >
-                    Clear selection
-                  </button>
-                </div>
-              )}
+              <div className="flex items-center space-x-4">
+                {selectedProjects.size > 0 && (
+                  <div className="text-sm text-muted-foreground flex items-center space-x-2">
+                    <span>{selectedProjects.size} selected</span>
+                    <button 
+                      onClick={clearSelection}
+                      className="text-primary hover:underline"
+                    >
+                      Clear selection
+                    </button>
+                    <span className="text-xs">• Press Delete to remove selected</span>
+                  </div>
+                )}
+              </div>
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="overflow-x-auto">
-              <div className="space-y-4">
+              <div className="space-y-0">
                 {paginatedResources.length === 0 ? (
                   <EmptyResourcesState />
                 ) : (
@@ -229,6 +258,14 @@ export const CalendarTimelineView: React.FC<CalendarTimelineViewProps> = ({
           preselectedResourceId={modalState.preselectedResourceId}
           preselectedStartDate={modalState.preselectedStartDate}
           mode={modalState.mode}
+        />
+
+        <ConfirmationDialog
+          isOpen={confirmationState.isOpen}
+          onClose={closeConfirmation}
+          onConfirm={confirmationState.onConfirm}
+          title={confirmationState.title}
+          message={confirmationState.message}
         />
       </div>
 

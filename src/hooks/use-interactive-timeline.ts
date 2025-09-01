@@ -24,6 +24,13 @@ interface EngagementData {
   releaseDate?: string;
 }
 
+interface ConfirmationState {
+  isOpen: boolean;
+  title: string;
+  message: string;
+  onConfirm: () => void;
+}
+
 export const useInteractiveTimeline = () => {
   const [selectedProjects, setSelectedProjects] = useState<Set<string>>(new Set());
   const [modalState, setModalState] = useState<{
@@ -35,6 +42,13 @@ export const useInteractiveTimeline = () => {
   }>({
     isOpen: false,
     mode: 'create',
+  });
+
+  const [confirmationState, setConfirmationState] = useState<ConfirmationState>({
+    isOpen: false,
+    title: '',
+    message: '',
+    onConfirm: () => {},
   });
 
   const { 
@@ -67,7 +81,7 @@ export const useInteractiveTimeline = () => {
 
   const handleEditProject = useCallback((resourceId: string, projectIndex: number) => {
     // In a real implementation, you'd need to get the actual engagement data
-    // For now, we'll open the modal in edit mode
+    // For now, we'll open the modal in edit mode with placeholder data
     setModalState({
       isOpen: true,
       mode: 'edit',
@@ -80,7 +94,7 @@ export const useInteractiveTimeline = () => {
   }, []);
 
   const handleDuplicateProject = useCallback((resourceId: string, projectIndex: number) => {
-    // Similar to edit, but create a new engagement with the same data
+    // Create a new engagement with the same data as the selected one
     setModalState({
       isOpen: true,
       mode: 'create',
@@ -97,15 +111,21 @@ export const useInteractiveTimeline = () => {
   }, [toast]);
 
   const handleDeleteProject = useCallback((resourceId: string, projectIndex: number) => {
-    // In a real implementation, you'd need the actual engagement ID
-    // For now, we'll show a confirmation
-    if (confirm('Are you sure you want to delete this assignment?')) {
-      // deleteResourcePlanning(engagementId);
-      toast({
-        title: 'Assignment Deleted',
-        description: 'The resource assignment has been removed.',
-      });
-    }
+    setConfirmationState({
+      isOpen: true,
+      title: 'Delete Assignment',
+      message: 'Are you sure you want to delete this resource assignment? This action cannot be undone.',
+      onConfirm: () => {
+        // In a real implementation, you'd need the actual engagement ID
+        // For now, we'll simulate the deletion
+        console.log('Deleting project:', { resourceId, projectIndex });
+        toast({
+          title: 'Assignment Deleted',
+          description: 'The resource assignment has been removed.',
+        });
+        setConfirmationState(prev => ({ ...prev, isOpen: false }));
+      },
+    });
   }, [toast]);
 
   const handleCreateEngagement = useCallback((startDate: Date, resourceId: string) => {
@@ -158,9 +178,53 @@ export const useInteractiveTimeline = () => {
     setModalState({ isOpen: false, mode: 'create' });
   }, []);
 
+  const closeConfirmation = useCallback(() => {
+    setConfirmationState(prev => ({ ...prev, isOpen: false }));
+  }, []);
+
+  // Handle keyboard shortcuts
+  const handleKeyDown = useCallback((event: KeyboardEvent) => {
+    // Only handle shortcuts when not in a modal or input field
+    if (modalState.isOpen || confirmationState.isOpen) return;
+    if (event.target instanceof HTMLInputElement || event.target instanceof HTMLTextAreaElement) return;
+
+    switch (event.key) {
+      case 'Escape':
+        clearSelection();
+        break;
+      case 'Delete':
+        if (selectedProjects.size > 0) {
+          const projectKeys = Array.from(selectedProjects);
+          setConfirmationState({
+            isOpen: true,
+            title: 'Delete Selected Assignments',
+            message: `Are you sure you want to delete ${projectKeys.length} selected assignment(s)? This action cannot be undone.`,
+            onConfirm: () => {
+              // Handle bulk deletion
+              console.log('Deleting selected projects:', projectKeys);
+              toast({
+                title: 'Assignments Deleted',
+                description: `${projectKeys.length} assignment(s) have been removed.`,
+              });
+              clearSelection();
+              setConfirmationState(prev => ({ ...prev, isOpen: false }));
+            },
+          });
+        }
+        break;
+    }
+  }, [selectedProjects, modalState.isOpen, confirmationState.isOpen, clearSelection, toast]);
+
+  // Set up keyboard event listener
+  React.useEffect(() => {
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [handleKeyDown]);
+
   return {
     selectedProjects,
     modalState,
+    confirmationState,
     handleSelectProject,
     clearSelection,
     handleEditProject,
@@ -169,6 +233,7 @@ export const useInteractiveTimeline = () => {
     handleCreateEngagement,
     handleSaveEngagement,
     closeModal,
+    closeConfirmation,
     isLoading: isCreating || isUpdating || isDeleting,
   };
 };

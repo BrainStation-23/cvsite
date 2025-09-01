@@ -3,37 +3,49 @@ import React, { useState } from 'react';
 import { useDroppable } from '@dnd-kit/core';
 import { Plus } from 'lucide-react';
 
-interface InteractiveEmptySpaceProps {
+interface InteractiveEmptyZoneProps {
   month: Date;
   resourceId: string;
+  zoneType: 'above' | 'below';
+  zoneIndex: number;
   onCreateEngagement: (startDate: Date, resourceId: string) => void;
 }
 
-export const InteractiveEmptySpace: React.FC<InteractiveEmptySpaceProps> = ({
+export const InteractiveEmptyZone: React.FC<InteractiveEmptyZoneProps> = ({
   month,
   resourceId,
+  zoneType,
+  zoneIndex,
   onCreateEngagement,
 }) => {
   const [isHovered, setIsHovered] = useState(false);
 
-  const dropId = `empty-${resourceId}-${month.toISOString()}`;
+  const dropId = `empty-zone-${resourceId}-${month.toISOString()}-${zoneType}-${zoneIndex}`;
   const { isOver, setNodeRef } = useDroppable({
     id: dropId,
     data: {
-      type: 'empty-space',
+      type: 'empty-zone',
       month,
       resourceId,
+      zoneType,
+      zoneIndex,
     },
   });
+
+  const topPosition = zoneType === 'above' ? `${zoneIndex * 35}px` : `${(zoneIndex + 1) * 35}px`;
 
   return (
     <div
       ref={setNodeRef}
-      className={`absolute inset-0 transition-all duration-200 cursor-pointer z-10 ${
-        isOver ? 'bg-primary/10 border-2 border-primary border-dashed rounded' : ''
+      className={`absolute left-0 right-0 transition-all duration-200 cursor-pointer z-10 ${
+        isOver ? 'bg-primary/10 border-2 border-primary border-dashed' : ''
       } ${
-        isHovered ? 'bg-muted/10' : ''
+        isHovered ? 'bg-muted/20' : ''
       }`}
+      style={{
+        top: topPosition,
+        height: '20px',
+      }}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       onClick={(e) => {
@@ -51,9 +63,9 @@ export const InteractiveEmptySpace: React.FC<InteractiveEmptySpaceProps> = ({
       }}
     >
       {(isHovered || isOver) && (
-        <div className="absolute top-2 right-2">
-          <div className="bg-primary text-primary-foreground rounded-full p-1.5 shadow-lg z-50 animate-in fade-in-0 scale-in-95 duration-200">
-            <Plus className="h-4 w-4" />
+        <div className="absolute right-2 top-1/2 transform -translate-y-1/2">
+          <div className="bg-primary/80 text-primary-foreground rounded-full p-1 shadow-md z-50">
+            <Plus className="h-3 w-3" />
           </div>
         </div>
       )}
