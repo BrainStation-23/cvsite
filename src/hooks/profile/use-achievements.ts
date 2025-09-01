@@ -21,7 +21,7 @@ const mapToAchievement = (data: AchievementDB): Achievement => ({
   id: data.id,
   title: data.title,
   description: data.description,
-  date: new Date(data.date)
+  date: data.date
 });
 
 // Map from application model to database format
@@ -29,7 +29,7 @@ const mapToAchievementDB = (achievement: Omit<Achievement, 'id'>, profileId: str
   profile_id: profileId,
   title: achievement.title,
   description: achievement.description,
-  date: achievement.date.toISOString().split('T')[0]
+  date: achievement.date
 });
 
 export function useAchievements(profileId?: string) {
@@ -127,7 +127,7 @@ export function useAchievements(profileId?: string) {
       
       if (achievement.title) dbData.title = achievement.title;
       if (achievement.description !== undefined) dbData.description = achievement.description;
-      if (achievement.date) dbData.date = achievement.date.toISOString().split('T')[0];
+      if (achievement.date) dbData.date = achievement.date;
       
       dbData.updated_at = new Date().toISOString();
       
