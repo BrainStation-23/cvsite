@@ -1,14 +1,17 @@
+
 import React, { useState, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { eachMonthOfInterval, addMonths, startOfMonth, endOfMonth } from 'date-fns';
 import { Users } from 'lucide-react';
 import { DndContext, DragOverlay, closestCenter } from '@dnd-kit/core';
+import { useToast } from '@/hooks/use-toast';
 import type { CalendarResource } from '@/hooks/use-resource-calendar';
 import { TimelineHeader } from './timeline-view/TimelineHeader';
 import { InteractiveResourceRow } from './timeline-view/InteractiveResourceRow';
 import { PaginationControls } from './timeline-view/PaginationControls';
 import { EmptyResourcesState } from './timeline-view/EmptyResourcesState';
 import { EngagementModal } from './timeline-view/EngagementModal';
+import { ConfirmationDialog } from './timeline-view/ConfirmationDialog';
 import { useInteractiveTimeline } from '@/hooks/use-interactive-timeline';
 
 interface Project {
@@ -50,6 +53,7 @@ export const CalendarTimelineView: React.FC<CalendarTimelineViewProps> = ({
   onDecreaseMonths,
 }) => {
   const [currentPage, setCurrentPage] = useState(1);
+  const { toast } = useToast();
   
   const {
     selectedProjects,
