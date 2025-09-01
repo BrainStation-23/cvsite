@@ -1,17 +1,14 @@
-
 import React, { useState, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { eachMonthOfInterval, addMonths, startOfMonth, endOfMonth } from 'date-fns';
 import { Users } from 'lucide-react';
 import { DndContext, DragOverlay, closestCenter } from '@dnd-kit/core';
-import { useToast } from '@/hooks/use-toast';
 import type { CalendarResource } from '@/hooks/use-resource-calendar';
 import { TimelineHeader } from './timeline-view/TimelineHeader';
 import { InteractiveResourceRow } from './timeline-view/InteractiveResourceRow';
 import { PaginationControls } from './timeline-view/PaginationControls';
 import { EmptyResourcesState } from './timeline-view/EmptyResourcesState';
 import { EngagementModal } from './timeline-view/EngagementModal';
-import { ConfirmationDialog } from './timeline-view/ConfirmationDialog';
 import { useInteractiveTimeline } from '@/hooks/use-interactive-timeline';
 
 interface Project {
@@ -53,12 +50,10 @@ export const CalendarTimelineView: React.FC<CalendarTimelineViewProps> = ({
   onDecreaseMonths,
 }) => {
   const [currentPage, setCurrentPage] = useState(1);
-  const { toast } = useToast();
   
   const {
     selectedProjects,
     modalState,
-    confirmationState,
     handleSelectProject,
     clearSelection,
     handleEditProject,
@@ -67,7 +62,6 @@ export const CalendarTimelineView: React.FC<CalendarTimelineViewProps> = ({
     handleCreateEngagement,
     handleSaveEngagement,
     closeModal,
-    closeConfirmation,
     isLoading,
   } = useInteractiveTimeline();
 
@@ -155,37 +149,13 @@ export const CalendarTimelineView: React.FC<CalendarTimelineViewProps> = ({
 
     console.log('Drag ended:', { active: active.data.current, over: over.data.current });
     
-    const activeData = active.data.current;
-    const overData = over.data.current;
-
-    // Handle project bar drag to empty zone
-    if (activeData?.type === 'project' && overData?.type === 'empty-zone') {
-      console.log('Moving project to new position:', {
-        project: activeData.project.name,
-        fromResource: activeData.resourceId,
-        toResource: overData.resourceId,
-        month: overData.month,
-        zoneType: overData.zoneType,
-      });
-      
-      // Here you would implement the actual date/resource change logic
-      toast({
-        title: 'Project Moved',
-        description: `${activeData.project.name} moved to new position.`,
-      });
-    }
-  };
-
-  const handleGlobalClick = (e: React.MouseEvent) => {
-    // Clear selection when clicking empty areas
-    if (e.target === e.currentTarget) {
-      clearSelection();
-    }
+    // Handle the drag and drop logic here
+    // This would involve updating the engagement dates based on the drop location
   };
 
   return (
     <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-      <div className="space-y-6" onClick={handleGlobalClick}>
+      <div className="space-y-6">
         <TimelineHeader 
           timelineStart={timelineStart}
           timelineEnd={timelineEnd}
@@ -204,25 +174,22 @@ export const CalendarTimelineView: React.FC<CalendarTimelineViewProps> = ({
                 <Users className="h-5 w-5" />
                 <span>Interactive Resource Timeline</span>
               </div>
-              <div className="flex items-center space-x-4">
-                {selectedProjects.size > 0 && (
-                  <div className="text-sm text-muted-foreground flex items-center space-x-2">
-                    <span>{selectedProjects.size} selected</span>
-                    <button 
-                      onClick={clearSelection}
-                      className="text-primary hover:underline"
-                    >
-                      Clear selection
-                    </button>
-                    <span className="text-xs">• Press Delete to remove selected</span>
-                  </div>
-                )}
-              </div>
+              {selectedProjects.size > 0 && (
+                <div className="text-sm text-muted-foreground">
+                  {selectedProjects.size} selected • 
+                  <button 
+                    onClick={clearSelection}
+                    className="ml-2 text-primary hover:underline"
+                  >
+                    Clear selection
+                  </button>
+                </div>
+              )}
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="overflow-x-auto">
-              <div className="space-y-0">
+              <div className="space-y-4">
                 {paginatedResources.length === 0 ? (
                   <EmptyResourcesState />
                 ) : (
@@ -262,14 +229,6 @@ export const CalendarTimelineView: React.FC<CalendarTimelineViewProps> = ({
           preselectedResourceId={modalState.preselectedResourceId}
           preselectedStartDate={modalState.preselectedStartDate}
           mode={modalState.mode}
-        />
-
-        <ConfirmationDialog
-          isOpen={confirmationState.isOpen}
-          onClose={closeConfirmation}
-          onConfirm={confirmationState.onConfirm}
-          title={confirmationState.title}
-          message={confirmationState.message}
         />
       </div>
 

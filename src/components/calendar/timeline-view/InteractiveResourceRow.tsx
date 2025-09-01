@@ -2,7 +2,6 @@
 import React, { useState } from 'react';
 import { InteractiveProjectBar } from './InteractiveProjectBar';
 import { InteractiveEmptySpace } from './InteractiveEmptySpace';
-import { InteractiveEmptyZone } from './InteractiveEmptyZone';
 
 interface Project {
   id?: string;
@@ -46,25 +45,15 @@ export const InteractiveResourceRow: React.FC<InteractiveResourceRowProps> = ({
   const getProjectKey = (resourceId: string, projectIndex: number) => 
     `${resourceId}-${projectIndex}`;
 
-  // Calculate total height including empty zones
-  const totalProjects = resource.projects.length;
-  const emptyZonesCount = Math.max(2, totalProjects + 1); // At least 2 empty zones, or one more than projects
-  const rowHeight = Math.max(120, emptyZonesCount * 35 + 40); // Minimum height with padding
-
   return (
     <div 
       className="grid gap-0 py-4 border-b border-border/50"
       style={{ gridTemplateColumns: `250px repeat(${months.length}, 1fr)` }}
     >
       {/* Employee Info */}
-      <div className="pr-4 flex flex-col justify-start">
+      <div className="pr-4">
         <div className="text-sm font-medium">{resource.profileName}</div>
         <div className="text-xs text-muted-foreground">{resource.employeeId}</div>
-        {resource.projects.length > 0 && (
-          <div className="text-xs text-muted-foreground mt-1">
-            {resource.projects.length} assignment{resource.projects.length !== 1 ? 's' : ''}
-          </div>
-        )}
       </div>
 
       {/* Month Columns */}
@@ -76,35 +65,23 @@ export const InteractiveResourceRow: React.FC<InteractiveResourceRowProps> = ({
           <div 
             key={monthKey}
             className="relative border-l border-border/30 group" 
-            style={{ height: `${rowHeight}px` }}
+            style={{ height: `${Math.max(resource.projects.length * 35, 40)}px` }}
             onMouseEnter={() => setHoveredMonth(monthKey)}
             onMouseLeave={() => setHoveredMonth(null)}
           >
-            {/* Background empty space for overall month interaction */}
+            {/* Empty space for creating new engagements */}
             <InteractiveEmptySpace
               month={month}
               resourceId={resource.profileId}
               onCreateEngagement={onCreateEngagement}
             />
 
-            {/* Empty interaction zones above and below projects */}
-            {Array.from({ length: emptyZonesCount }).map((_, zoneIndex) => (
-              <InteractiveEmptyZone
-                key={`zone-${zoneIndex}`}
-                month={month}
-                resourceId={resource.profileId}
-                zoneType={zoneIndex <= totalProjects ? 'above' : 'below'}
-                zoneIndex={zoneIndex}
-                onCreateEngagement={onCreateEngagement}
-              />
-            ))}
-
             {/* Project bars */}
             <div className="absolute inset-0 p-1 pointer-events-none">
               {resource.projects.map((project, idx) => {
                 const projectKey = getProjectKey(resource.profileId, idx);
                 return (
-                  <div key={`project-${idx}`} className="pointer-events-auto">
+                  <div key={idx} className="pointer-events-auto">
                     <InteractiveProjectBar
                       project={project}
                       month={month}
@@ -121,11 +98,6 @@ export const InteractiveResourceRow: React.FC<InteractiveResourceRowProps> = ({
                 );
               })}
             </div>
-
-            {/* Visual feedback overlay */}
-            {isHovered && resource.projects.length === 0 && (
-              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-primary/5 to-transparent pointer-events-none" />
-            )}
           </div>
         );
       })}

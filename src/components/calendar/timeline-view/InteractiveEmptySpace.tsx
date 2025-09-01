@@ -29,31 +29,19 @@ export const InteractiveEmptySpace: React.FC<InteractiveEmptySpaceProps> = ({
   return (
     <div
       ref={setNodeRef}
-      className={`absolute inset-0 transition-all duration-200 cursor-pointer z-10 ${
-        isOver ? 'bg-primary/10 border-2 border-primary border-dashed rounded' : ''
+      className={`absolute inset-0 transition-all duration-200 ${
+        isOver ? 'bg-primary/10 border-2 border-primary border-dashed' : ''
       } ${
-        isHovered ? 'bg-muted/10' : ''
+        isHovered ? 'bg-muted/30' : ''
       }`}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
-      onClick={(e) => {
-        e.stopPropagation();
-        onCreateEngagement(month, resourceId);
-      }}
-      role="button"
-      tabIndex={0}
-      aria-label={`Add new engagement for ${month.toLocaleDateString()}`}
-      onKeyDown={(e) => {
-        if (e.key === 'Enter' || e.key === ' ') {
-          e.preventDefault();
-          onCreateEngagement(month, resourceId);
-        }
-      }}
+      onClick={() => onCreateEngagement(month, resourceId)}
     >
       {(isHovered || isOver) && (
-        <div className="absolute top-2 right-2">
-          <div className="bg-primary text-primary-foreground rounded-full p-1.5 shadow-lg z-50 animate-in fade-in-0 scale-in-95 duration-200">
-            <Plus className="h-4 w-4" />
+        <div className="absolute inset-0 flex items-center justify-center">
+          <div className="bg-primary/20 rounded-full p-2">
+            <Plus className="h-4 w-4 text-primary" />
           </div>
         </div>
       )}
