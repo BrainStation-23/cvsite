@@ -24,6 +24,7 @@ export interface ResourceCalendarData {
   bill_type: {
     id: string;
     name: string;
+    color_code:string;
   } | null;
   project: {
     id: string;

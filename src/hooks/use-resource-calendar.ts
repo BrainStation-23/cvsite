@@ -3,7 +3,7 @@ import { useState, useMemo } from 'react';
 import { useResourceCalendarData } from './use-resource-calendar-data';
 import { startOfMonth, endOfMonth, eachDayOfInterval, parseISO, addMonths } from 'date-fns';
 
-export type CalendarViewType = 'month' | 'timeline';
+export type CalendarViewType = 'timeline';
 
 export interface CalendarResource {
   id: string;
@@ -16,6 +16,7 @@ export interface CalendarResource {
   projectName: string | null;
   forecastedProject: string | null;
   billTypeName: string | null;
+  billTypeColorCode: string | null;
 }
 
 export interface CalendarDay {
@@ -97,6 +98,7 @@ export function useResourceCalendar(
         projectName: resource.project?.project_name || null,
         forecastedProject: resource.forecasted_project || null,
         billTypeName: resource.bill_type?.name || null,
+        billTypeColorCode: resource.bill_type?.color_code || null,
       }));
 
     console.log('Processed calendar data:', {
