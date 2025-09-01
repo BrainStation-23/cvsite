@@ -25,10 +25,10 @@ const mapToTraining = (data: TrainingDB): Training => ({
   title: data.title,
   provider: data.provider,
   description: data.description || '',
-  date: new Date(data.certification_date),
+  date: data.certification_date,
   certificateUrl: data.certificate_url,
   isRenewable: data.is_renewable || false,
-  expiryDate: data.expiry_date ? new Date(data.expiry_date) : undefined
+  expiryDate: data.expiry_date ?? undefined
 });
 
 // Map from application model to database format
@@ -37,10 +37,10 @@ const mapToTrainingDB = (training: Omit<Training, 'id'>, profileId: string) => (
   title: training.title,
   provider: training.provider,
   description: training.description || null,
-  certification_date: training.date.toISOString().split('T')[0],
+  certification_date: training.date,
   certificate_url: training.certificateUrl || null,
   is_renewable: training.isRenewable || false,
-  expiry_date: training.expiryDate ? training.expiryDate.toISOString().split('T')[0] : null
+  expiry_date: training.expiryDate ?? null
 });
 
 export function useTraining(profileId?: string) {
@@ -139,11 +139,11 @@ export function useTraining(profileId?: string) {
       if (training.title) dbData.title = training.title;
       if (training.provider) dbData.provider = training.provider;
       if (training.description !== undefined) dbData.description = training.description;
-      if (training.date) dbData.certification_date = training.date.toISOString().split('T')[0];
+      if (training.date) dbData.certification_date = training.date;
       if (training.certificateUrl !== undefined) dbData.certificate_url = training.certificateUrl;
       if (training.isRenewable !== undefined) dbData.is_renewable = training.isRenewable;
       if (training.expiryDate !== undefined) {
-        dbData.expiry_date = training.expiryDate ? training.expiryDate.toISOString().split('T')[0] : null;
+        dbData.expiry_date = training.expiryDate ? training.expiryDate : null;
       }
       
       dbData.updated_at = new Date().toISOString();

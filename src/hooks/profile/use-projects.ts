@@ -29,8 +29,8 @@ const mapToProject = (data: ProjectDB): Project => ({
   role: data.role,
   description: data.description,
   responsibility: data.responsibility || '',
-  startDate: new Date(data.start_date),
-  endDate: data.end_date ? new Date(data.end_date) : undefined,
+  startDate: data.start_date,
+  endDate: data.end_date,
   isCurrent: data.is_current || false,
   technologiesUsed: data.technologies_used || [],
   url: data.url
@@ -43,8 +43,8 @@ const mapToProjectDB = (project: Omit<Project, 'id'>, profileId: string) => ({
   role: project.role,
   description: project.description,
   responsibility: project.responsibility || null,
-  start_date: project.startDate.toISOString().split('T')[0],
-  end_date: project.endDate ? project.endDate.toISOString().split('T')[0] : null,
+  start_date: project.startDate,
+  end_date: project.endDate,
   is_current: project.isCurrent || false,
   technologies_used: project.technologiesUsed,
   url: project.url || null
@@ -173,10 +173,10 @@ export function useProjects(profileId?: string) {
         updateData.responsibility = project.responsibility;
       }
       if (project.startDate !== undefined) {
-        updateData.start_date = project.startDate.toISOString().split('T')[0];
+        updateData.start_date = project.startDate;
       }
       if (project.endDate !== undefined) {
-        updateData.end_date = project.endDate ? project.endDate.toISOString().split('T')[0] : null;
+        updateData.end_date = project.endDate;
       }
       if (project.isCurrent !== undefined) {
         updateData.is_current = project.isCurrent;

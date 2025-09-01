@@ -25,8 +25,8 @@ const mapToExperience = (data: ExperienceDB): Experience => ({
   companyName: data.company_name,
   designation: data.designation || '',
   description: data.description || '',
-  startDate: new Date(data.start_date),
-  endDate: data.end_date ? new Date(data.end_date) : undefined,
+  startDate: new Date(data.start_date).toISOString(),
+  endDate: data.end_date ? new Date(data.end_date).toISOString() : undefined,
   isCurrent: data.is_current || false
 });
 
@@ -36,8 +36,8 @@ const mapToExperienceDB = (exp: Omit<Experience, 'id'>, profileId: string) => ({
   company_name: exp.companyName,
   designation: exp.designation,
   description: exp.description,
-  start_date: exp.startDate.toISOString().split('T')[0],
-  end_date: exp.endDate ? exp.endDate.toISOString().split('T')[0] : null,
+  start_date: exp.startDate,
+  end_date: exp.endDate ?? null,
   is_current: exp.isCurrent || false
 });
 
@@ -164,10 +164,10 @@ export function useExperience(profileId?: string) {
         dbData.designation = experience.designation;
       }
       if (experience.description !== undefined) dbData.description = experience.description;
-      if (experience.startDate) dbData.start_date = experience.startDate.toISOString().split('T')[0];
+      if (experience.startDate) dbData.start_date = experience.startDate;
       
       if (experience.endDate) {
-        dbData.end_date = experience.endDate.toISOString().split('T')[0];
+        dbData.end_date = experience.endDate;
       } else if (experience.endDate === null || experience.endDate === undefined) {
         dbData.end_date = null;
       }
