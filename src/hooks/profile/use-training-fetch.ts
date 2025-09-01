@@ -1,55 +1,48 @@
 
 import { useState, useEffect } from 'react';
-import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/lib/supabase';
 import { Training } from '@/types';
 
-export function useTrainingFetch(profileId: string) {
-  const { toast } = useToast();
+export const useTrainingFetch = (profileId: string) => {
+  const [training, setTraining] = useState<Training[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [trainings, setTrainings] = useState<Training[]>([]);
+  const [error, setError] = useState<string | null>(null);
 
-  const fetchTrainings = async () => {
-    if (!profileId) return;
+  useEffect(() => {
+    const fetchTraining = async () => {
+      try {
+        setIsLoading(true);
+        const { data, error } = await supabase
+          .from('training')
+          .select('*')
+          .eq('profile_id', profileId)
+          .order('date', { ascending: false });
 
-    try {
-      const { data: trainingData, error: trainingError } = await supabase
-        .from('trainings')
-        .select('*')
-        .eq('profile_id', profileId)
-        .order('certification_date', { ascending: false });
+        if (error) throw error;
 
-      if (trainingError) throw trainingError;
-
-      if (trainingData) {
-        setTrainings(trainingData.map(training => ({
+        const formattedTraining = data?.map(training => ({
           id: training.id,
           title: training.title,
           provider: training.provider,
-          description: training.description || '',
-          date: new Date(training.certification_date),
-          certificateUrl: training.certificate_url
-        })));
-      }
-    } catch (error) {
-      console.error('Error fetching trainings:', error);
-      toast({
-        title: 'Error',
-        description: 'Failed to load trainings',
-        variant: 'destructive'
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
+          description: training.description,
+          date: training.date, // Keep as string
+          certificateUrl: training.certificate_url || '',
+          isRenewable: training.is_renewable || false,
+          expiryDate: training.expiry_date // Keep as string
+        })) || [];
 
-  useEffect(() => {
-    fetchTrainings();
+        setTraining(formattedTraining);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'An error occurred');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    if (profileId) {
+      fetchTraining();
+    }
   }, [profileId]);
 
-  return {
-    isLoading,
-    trainings,
-    refetch: fetchTrainings
-  };
-}
+  return { training, isLoading, error };
+};

@@ -1,53 +1,44 @@
 
 import { useState, useEffect } from 'react';
-import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/lib/supabase';
 import { Achievement } from '@/types';
 
-export function useAchievementsFetch(profileId: string) {
-  const { toast } = useToast();
-  const [isLoading, setIsLoading] = useState(true);
+export const useAchievementsFetch = (profileId: string) => {
   const [achievements, setAchievements] = useState<Achievement[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const fetchAchievements = async () => {
-    if (!profileId) return;
+  useEffect(() => {
+    const fetchAchievements = async () => {
+      try {
+        setIsLoading(true);
+        const { data, error } = await supabase
+          .from('achievements')
+          .select('*')
+          .eq('profile_id', profileId)
+          .order('date', { ascending: false });
 
-    try {
-      const { data: achievementData, error: achievementError } = await supabase
-        .from('achievements')
-        .select('*')
-        .eq('profile_id', profileId)
-        .order('date', { ascending: false });
+        if (error) throw error;
 
-      if (achievementError) throw achievementError;
-
-      if (achievementData) {
-        setAchievements(achievementData.map(achievement => ({
+        const formattedAchievements = data?.map(achievement => ({
           id: achievement.id,
           title: achievement.title,
           description: achievement.description,
-          date: new Date(achievement.date)
-        })));
-      }
-    } catch (error) {
-      console.error('Error fetching achievements:', error);
-      toast({
-        title: 'Error',
-        description: 'Failed to load achievements',
-        variant: 'destructive'
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
+          date: achievement.date // Keep as string since it comes from database as string
+        })) || [];
 
-  useEffect(() => {
-    fetchAchievements();
+        setAchievements(formattedAchievements);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'An error occurred');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    if (profileId) {
+      fetchAchievements();
+    }
   }, [profileId]);
 
-  return {
-    isLoading,
-    achievements,
-    refetch: fetchAchievements
-  };
-}
+  return { achievements, isLoading, error };
+};

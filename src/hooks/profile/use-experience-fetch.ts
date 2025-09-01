@@ -1,59 +1,47 @@
 
 import { useState, useEffect } from 'react';
-import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/lib/supabase';
 import { Experience } from '@/types';
 
-export function useExperienceFetch(profileId: string) {
-  const { toast } = useToast();
+export const useExperienceFetch = (profileId: string) => {
+  const [experience, setExperience] = useState<Experience[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [experiences, setExperiences] = useState<Experience[]>([]);
-
-  const fetchExperiences = async () => {
-    if (!profileId) {
-      setIsLoading(false);
-      return;
-    }
-
-    try {
-      const { data: expData, error: expError } = await supabase
-        .from('experiences')
-        .select('*')
-        .eq('profile_id', profileId)
-        .order('start_date', { ascending: false });
-
-      if (expError) throw expError;
-
-      if (expData) {
-        setExperiences(expData.map(exp => ({
-          id: exp.id,
-          companyName: exp.company_name,
-          designation: exp.designation || '',
-          description: exp.description || '',
-          startDate: new Date(exp.start_date),
-          endDate: exp.end_date ? new Date(exp.end_date) : undefined,
-          isCurrent: exp.is_current || false
-        })));
-      }
-    } catch (error) {
-      console.error('Error fetching experiences:', error);
-      toast({
-        title: 'Error',
-        description: 'Failed to load experiences',
-        variant: 'destructive'
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    fetchExperiences();
+    const fetchExperience = async () => {
+      try {
+        setIsLoading(true);
+        const { data, error } = await supabase
+          .from('experience')
+          .select('*')
+          .eq('profile_id', profileId)
+          .order('start_date', { ascending: false });
+
+        if (error) throw error;
+
+        const formattedExperience = data?.map(exp => ({
+          id: exp.id,
+          companyName: exp.company_name,
+          designation: exp.designation,
+          description: exp.description,
+          startDate: exp.start_date, // Keep as string
+          endDate: exp.end_date, // Keep as string
+          isCurrent: exp.is_current
+        })) || [];
+
+        setExperience(formattedExperience);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'An error occurred');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    if (profileId) {
+      fetchExperience();
+    }
   }, [profileId]);
 
-  return {
-    isLoading,
-    experiences,
-    refetch: fetchExperiences
-  };
-}
+  return { experience, isLoading, error };
+};
