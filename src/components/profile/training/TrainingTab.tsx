@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -9,7 +8,7 @@ import { TrainingList } from './TrainingList';
 import { TrainingTourButton } from './TrainingTourButton';
 
 interface TrainingTabProps {
-  training: Training[];
+  trainings: Training[];
   isEditing: boolean;
   isSaving: boolean;
   onSave: (training: Omit<Training, 'id'>) => Promise<boolean>;
@@ -18,7 +17,7 @@ interface TrainingTabProps {
 }
 
 export const TrainingTab: React.FC<TrainingTabProps> = ({
-  training,
+  trainings,
   isEditing,
   isSaving,
   onSave,
@@ -26,24 +25,16 @@ export const TrainingTab: React.FC<TrainingTabProps> = ({
   onDelete
 }) => {
   const [isAdding, setIsAdding] = useState(false);
-  const [editingTraining, setEditingTraining] = useState<Training | null>(null);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [date, setDate] = useState<Date | undefined>(new Date());
 
   const handleStartAddNew = () => {
     setIsAdding(true);
-    setEditingTraining(null);
+    setDate(new Date());
   };
 
   const handleCancelAdd = () => {
     setIsAdding(false);
-  };
-
-  const handleStartEdit = (training: Training) => {
-    setEditingTraining(training);
-    setIsAdding(false);
-  };
-
-  const handleCancelEdit = () => {
-    setEditingTraining(null);
   };
 
   const handleSaveNew = async (data: Omit<Training, 'id'>) => {
@@ -51,25 +42,25 @@ export const TrainingTab: React.FC<TrainingTabProps> = ({
     if (success) {
       setIsAdding(false);
     }
-    return success;
+  };
+
+  const handleStartEdit = (training: Training) => {
+    setEditingId(training.id);
+    setDate(training.date);
+  };
+
+  const handleCancelEdit = () => {
+    setEditingId(null);
   };
 
   const handleSaveEdit = async (data: Omit<Training, 'id'>) => {
-    if (!editingTraining) return false;
+    if (!editingId) return;
     
-    const success = await onUpdate(editingTraining.id, data);
+    const success = await onUpdate(editingId, data);
     if (success) {
-      setEditingTraining(null);
+      setEditingId(null);
     }
-    return success;
   };
-
-  const handleDelete = async (id: string) => {
-    await onDelete(id);
-  };
-
-  const showForm = isAdding || editingTraining;
-  const showAddButton = isEditing && !showForm;
 
   return (
     <Card>
@@ -79,7 +70,7 @@ export const TrainingTab: React.FC<TrainingTabProps> = ({
             <CardTitle>Training & Certifications</CardTitle>
             <TrainingTourButton />
           </div>
-          {showAddButton && (
+          {isEditing && !isAdding && !editingId && (
             <Button variant="outline" onClick={handleStartAddNew} data-tour="add-training-button">
               <PlusCircle className="mr-2 h-4 w-4" />
               Add Training
@@ -88,22 +79,43 @@ export const TrainingTab: React.FC<TrainingTabProps> = ({
         </div>
       </CardHeader>
       <CardContent>
-        {showForm && (
-          <div className="mb-6">
+        {isAdding && (
+          <div className="mb-6 border rounded-md p-4 bg-gray-50 dark:bg-gray-800">
             <TrainingForm
-              initialData={editingTraining || undefined}
+              onSubmit={handleSaveNew}
+              onCancel={handleCancelAdd}
               isSaving={isSaving}
-              onSave={editingTraining ? handleSaveEdit : handleSaveNew}
-              onCancel={editingTraining ? handleCancelEdit : handleCancelAdd}
+              date={date}
+              setDate={setDate}
+              isNew={true}
+            />
+          </div>
+        )}
+        
+        {editingId && (
+          <div className="mb-6 border rounded-md p-4 bg-gray-50 dark:bg-gray-800">
+            <TrainingForm
+              initialData={{
+                title: trainings.find(t => t.id === editingId)?.title || '',
+                provider: trainings.find(t => t.id === editingId)?.provider || '',
+                description: trainings.find(t => t.id === editingId)?.description || '',
+                date: trainings.find(t => t.id === editingId)?.date || new Date(),
+                certificateUrl: trainings.find(t => t.id === editingId)?.certificateUrl || ''
+              }}
+              onSubmit={handleSaveEdit}
+              onCancel={handleCancelEdit}
+              isSaving={isSaving}
+              date={date}
+              setDate={setDate}
             />
           </div>
         )}
         
         <TrainingList
-          training={training}
+          trainings={trainings}
           isEditing={isEditing}
           onEdit={handleStartEdit}
-          onDelete={handleDelete}
+          onDelete={onDelete}
         />
       </CardContent>
     </Card>

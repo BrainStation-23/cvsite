@@ -26,6 +26,7 @@ interface ExperienceTabProps {
 }
 
 export const ExperienceTab: React.FC<ExperienceTabProps> = ({
+  experiences,
   isEditing,
   isSaving,
   profileId,
@@ -44,7 +45,7 @@ export const ExperienceTab: React.FC<ExperienceTabProps> = ({
       companyName: '',
       designation: '',
       description: '',
-      startDate: format(new Date(), 'yyyy-MM-dd'),
+      startDate: new Date(),
       isCurrent: false
     }
   });
@@ -54,7 +55,7 @@ export const ExperienceTab: React.FC<ExperienceTabProps> = ({
       companyName: '',
       designation: '',
       description: '',
-      startDate: format(new Date(), 'yyyy-MM-dd'),
+      startDate: new Date(),
       isCurrent: false
     }
   });
@@ -69,7 +70,7 @@ export const ExperienceTab: React.FC<ExperienceTabProps> = ({
       companyName: '',
       designation: '',
       description: '',
-      startDate: format(new Date(), 'yyyy-MM-dd'),
+      startDate: new Date(),
       isCurrent: false
     });
   };
@@ -77,8 +78,8 @@ export const ExperienceTab: React.FC<ExperienceTabProps> = ({
   const handleEditExperience = (experience: Experience) => {
     setEditingExperience(experience);
     setIsAdding(false);
-    setStartDate(new Date(experience.startDate));
-    setEndDate(new Date(experience.endDate));
+    setStartDate(experience.startDate);
+    setEndDate(experience.endDate);
     setIsCurrent(experience.isCurrent || false);
     
     editForm.reset({
@@ -100,8 +101,8 @@ export const ExperienceTab: React.FC<ExperienceTabProps> = ({
   };
 
   const handleSaveNew = async (data: Omit<Experience, 'id'>) => {
-    data.startDate = startDate.toISOString() ;
-    data.endDate = isCurrent ? undefined : endDate.toISOString();
+    data.startDate = startDate || new Date();
+    data.endDate = isCurrent ? undefined : endDate;
     data.isCurrent = isCurrent;
     
     const success = await onSave(data);
@@ -113,8 +114,8 @@ export const ExperienceTab: React.FC<ExperienceTabProps> = ({
   const handleSaveEdit = async (data: Omit<Experience, 'id'>) => {
     if (!editingExperience) return;
     
-    data.startDate = startDate.toISOString();
-    data.endDate = isCurrent ? undefined : endDate.toISOString();
+    data.startDate = startDate || new Date();
+    data.endDate = isCurrent ? undefined : endDate;
     data.isCurrent = isCurrent;
     
     const success = await onUpdate(editingExperience.id, data);

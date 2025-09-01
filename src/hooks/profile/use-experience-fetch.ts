@@ -1,47 +1,59 @@
 
 import { useState, useEffect } from 'react';
-import { supabase } from '@/lib/supabase';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
 import { Experience } from '@/types';
 
-export const useExperienceFetch = (profileId: string) => {
-  const [experience, setExperience] = useState<Experience[]>([]);
+export function useExperienceFetch(profileId: string) {
+  const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [experiences, setExperiences] = useState<Experience[]>([]);
 
-  useEffect(() => {
-    const fetchExperience = async () => {
-      try {
-        setIsLoading(true);
-        const { data, error } = await supabase
-          .from('experience')
-          .select('*')
-          .eq('profile_id', profileId)
-          .order('start_date', { ascending: false });
+  const fetchExperiences = async () => {
+    if (!profileId) {
+      setIsLoading(false);
+      return;
+    }
 
-        if (error) throw error;
+    try {
+      const { data: expData, error: expError } = await supabase
+        .from('experiences')
+        .select('*')
+        .eq('profile_id', profileId)
+        .order('start_date', { ascending: false });
 
-        const formattedExperience = data?.map(exp => ({
+      if (expError) throw expError;
+
+      if (expData) {
+        setExperiences(expData.map(exp => ({
           id: exp.id,
           companyName: exp.company_name,
-          designation: exp.designation,
-          description: exp.description,
-          startDate: exp.start_date, // Keep as string
-          endDate: exp.end_date, // Keep as string
-          isCurrent: exp.is_current
-        })) || [];
-
-        setExperience(formattedExperience);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'An error occurred');
-      } finally {
-        setIsLoading(false);
+          designation: exp.designation || '',
+          description: exp.description || '',
+          startDate: new Date(exp.start_date),
+          endDate: exp.end_date ? new Date(exp.end_date) : undefined,
+          isCurrent: exp.is_current || false
+        })));
       }
-    };
-
-    if (profileId) {
-      fetchExperience();
+    } catch (error) {
+      console.error('Error fetching experiences:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to load experiences',
+        variant: 'destructive'
+      });
+    } finally {
+      setIsLoading(false);
     }
+  };
+
+  useEffect(() => {
+    fetchExperiences();
   }, [profileId]);
 
-  return { experience, isLoading, error };
-};
+  return {
+    isLoading,
+    experiences,
+    refetch: fetchExperiences
+  };
+}

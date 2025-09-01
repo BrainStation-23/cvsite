@@ -1,107 +1,123 @@
 
 import React from 'react';
-import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Calendar, ExternalLink, Edit, Trash2 } from 'lucide-react';
+import { Pencil, Trash2, ExternalLink } from 'lucide-react';
+import { AccordionContent, AccordionTrigger } from '@/components/ui/accordion';
 import { Project } from '@/types';
-import { templateUtilities } from '@/utils/template-utilities';
+import { format } from 'date-fns';
+import { useConfirmationDialog } from '@/hooks/use-confirmation-dialog';
+import { ConfirmationDialog } from '@/components/ui/confirmation-dialog';
 
 interface ProjectDisplayProps {
   project: Project;
   isEditing: boolean;
-  onEdit: (project: Project) => void;
-  onDelete: (id: string) => void;
+  onEdit: () => void;
+  onDelete: () => void;
+  children?: React.ReactNode;
 }
 
 export const ProjectDisplay: React.FC<ProjectDisplayProps> = ({
   project,
   isEditing,
   onEdit,
-  onDelete
+  onDelete,
+  children
 }) => {
-  const formatDateRange = (startDate: string, endDate?: string, isCurrent?: boolean) => {
-    if (!startDate) return '';
-    return templateUtilities.formatDateRange(startDate, endDate || null, isCurrent);
+  const {
+    isOpen,
+    config,
+    showConfirmation,
+    hideConfirmation,
+    handleConfirm
+  } = useConfirmationDialog();
+
+  const handleDelete = () => {
+    showConfirmation({
+      title: 'Delete Project',
+      description: 'Are you sure you want to delete this project? This action cannot be undone.',
+      confirmText: 'Delete',
+      cancelText: 'Cancel',
+      variant: 'destructive',
+      onConfirm: onDelete
+    });
+  };
+
+  // Helper function to format date for display
+  const formatDateForDisplay = (date: Date) => {
+    return format(date, 'MMM yyyy');
   };
 
   return (
-    <Card className="hover:shadow-md transition-shadow">
-      <CardContent className="p-6">
-        <div className="flex justify-between items-start mb-4">
-          <div className="flex-1">
-            <div className="flex items-center gap-2 mb-2">
-              <h3 className="text-lg font-semibold">{project.name}</h3>
-              {project.url && (
-                <a
-                  href={project.url}
-                  target="_blank"
+    <>
+      <AccordionTrigger className="hover:no-underline">
+        <div className="flex items-center w-full">
+          {children}
+          <div className="flex-1 flex flex-col md:flex-row md:items-center justify-between pr-4">
+            <div className="font-medium">{project.name} - {project.role}</div>
+            <div className="text-muted-foreground text-sm mt-1 md:mt-0">
+              {formatDateForDisplay(project.startDate)} - {project.isCurrent ? 'Present' : project.endDate ? formatDateForDisplay(project.endDate) : ''}
+            </div>
+          </div>
+        </div>
+      </AccordionTrigger>
+      <AccordionContent>
+        <div className="mt-2 space-y-4">
+          <div>
+            <div 
+              className="text-sm text-muted-foreground prose prose-sm max-w-none dark:prose-invert"
+              dangerouslySetInnerHTML={{ __html: project.description }}
+            />
+            
+            {project.technologiesUsed && project.technologiesUsed.length > 0 && (
+              <div className="mt-3">
+                <h4 className="text-sm font-medium">Technologies:</h4>
+                <div className="flex flex-wrap gap-1 mt-1">
+                  {project.technologiesUsed.map((tech) => (
+                    <span key={tech} className="bg-gray-200 dark:bg-gray-700 px-2 py-0.5 rounded-md text-xs">
+                      {tech}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+            
+            {project.url && (
+              <div className="mt-3">
+                <a 
+                  href={project.url} 
+                  target="_blank" 
                   rel="noopener noreferrer"
-                  className="text-primary hover:text-primary/80"
+                  className="text-cvsite-teal flex items-center text-sm hover:underline"
                 >
-                  <ExternalLink className="h-4 w-4" />
+                  View Project <ExternalLink className="h-3 w-3 ml-1" />
                 </a>
-              )}
-            </div>
-            <p className="text-muted-foreground font-medium mb-2">{project.role}</p>
-            <div className="flex items-center gap-2 text-sm text-muted-foreground mb-3">
-              <Calendar className="h-4 w-4" />
-              <span>
-                {formatDateRange(project.startDate, project.endDate, project.isCurrent)}
-              </span>
-            </div>
+              </div>
+            )}
           </div>
           
           {isEditing && (
-            <div className="flex gap-2">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => onEdit(project)}
-              >
-                <Edit className="h-4 w-4" />
+            <div className="flex justify-end space-x-2">
+              <Button variant="outline" size="sm" onClick={onEdit}>
+                <Pencil className="h-4 w-4 mr-2" /> Edit
               </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => onDelete(project.id)}
-                className="text-destructive hover:text-destructive"
-              >
-                <Trash2 className="h-4 w-4" />
+              <Button variant="destructive" size="sm" onClick={handleDelete}>
+                <Trash2 className="h-4 w-4 mr-2" /> Delete
               </Button>
             </div>
           )}
         </div>
+      </AccordionContent>
 
-        <div className="space-y-4">
-          <div>
-            <h4 className="font-medium mb-2">Description</h4>
-            <p className="text-sm text-muted-foreground leading-relaxed">
-              {project.description}
-            </p>
-          </div>
-
-          <div>
-            <h4 className="font-medium mb-2">Key Responsibilities</h4>
-            <p className="text-sm text-muted-foreground leading-relaxed">
-              {project.responsibility}
-            </p>
-          </div>
-
-          {project.technologiesUsed && project.technologiesUsed.length > 0 && (
-            <div>
-              <h4 className="font-medium mb-2">Technologies Used</h4>
-              <div className="flex flex-wrap gap-1">
-                {project.technologiesUsed.map((tech, index) => (
-                  <Badge key={index} variant="secondary" className="text-xs">
-                    {tech}
-                  </Badge>
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
-      </CardContent>
-    </Card>
+      <ConfirmationDialog
+        isOpen={isOpen}
+        onClose={hideConfirmation}
+        onConfirm={handleConfirm}
+        title={config?.title || ''}
+        description={config?.description || ''}
+        confirmText={config?.confirmText}
+        cancelText={config?.cancelText}
+        variant={config?.variant}
+      />
+    </>
   );
 };

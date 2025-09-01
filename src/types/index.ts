@@ -27,8 +27,8 @@ export interface Experience {
   companyName: string;
   designation: string;
   description?: string;
-  startDate: string;
-  endDate?: string;
+  startDate: Date;
+  endDate?: Date;
   isCurrent?: boolean;
 }
 
@@ -37,8 +37,8 @@ export interface Education {
   university: string;
   degree?: string;
   department?: string;
-  startDate: string;
-  endDate?: string;
+  startDate: Date;
+  endDate?: Date;
   isCurrent?: boolean;
   gpa?: string;
 }
@@ -48,16 +48,16 @@ export interface Training {
   title: string;
   provider: string;
   description?: string;
-  date: string;
+  date: Date;
   certificateUrl?: string;
   isRenewable?: boolean;
-  expiryDate?: string;
+  expiryDate?: Date;
 }
 
 export interface Achievement {
   id: string;
   title: string;
-  date: string;
+  date: Date;
   description: string;
 }
 
@@ -66,8 +66,8 @@ export interface Project {
   name: string;
   role: string;
   description: string;
-  startDate: string;
-  endDate?: string;
+  startDate: Date;
+  endDate?: Date;
   isCurrent?: boolean;
   technologiesUsed?: string[];
   url?: string;

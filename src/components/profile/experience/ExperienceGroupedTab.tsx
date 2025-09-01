@@ -1,126 +1,133 @@
 
-import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { PlusCircle, X } from 'lucide-react';
+import { PlusCircle } from 'lucide-react';
+import { CompanyExperienceCard } from './CompanyExperienceCard';
+import { useExperienceGrouped } from '@/hooks/profile/use-experience-grouped';
 import { Experience } from '@/types';
-import { ExperienceForm } from './ExperienceForm';
-import { ExperienceGroupedList } from './ExperienceGroupedList';
 import { ExperienceTourButton } from './ExperienceTourButton';
+import { useConfirmationDialog } from '@/hooks/use-confirmation-dialog';
+import { ConfirmationDialog } from '@/components/ui/confirmation-dialog';
 
 interface ExperienceGroupedTabProps {
-  experience: Experience[];
   isEditing: boolean;
   isSaving: boolean;
-  onSave: (experience: Omit<Experience, 'id'>) => Promise<boolean>;
-  onUpdate: (id: string, experience: Partial<Experience>) => Promise<boolean>;
-  onDelete: (id: string) => Promise<boolean>;
+  profileId?: string;
+  onAddNew?: () => void;
+  onEditExperience?: (experience: any) => void;
+  onDeleteExperience?: (id: string) => Promise<boolean>;
 }
 
 export const ExperienceGroupedTab: React.FC<ExperienceGroupedTabProps> = ({
-  experience,
   isEditing,
   isSaving,
-  onSave,
-  onUpdate,
-  onDelete
+  profileId,
+  onAddNew,
+  onEditExperience,
+  onDeleteExperience
 }) => {
-  const [isAdding, setIsAdding] = useState(false);
-  const [editingExperience, setEditingExperience] = useState<Experience | null>(null);
+  const { groupedExperiences, isLoading, formatDuration, refetch } = useExperienceGrouped(profileId);
+  const {
+    isOpen,
+    config,
+    showConfirmation,
+    hideConfirmation,
+    handleConfirm
+  } = useConfirmationDialog();
 
-  const handleStartAddNew = () => {
-    setIsAdding(true);
-    setEditingExperience(null);
+  const handleEditPosition = (position: any) => {
+    // Convert position data to Experience format for editing
+    const experience: Experience = {
+      id: position.id,
+      companyName: groupedExperiences.find(comp => 
+        comp.positions.some(pos => pos.id === position.id)
+      )?.company_name || '',
+      designation: position.designation,
+      description: position.description || '',
+      startDate: new Date(position.start_date),
+      endDate: position.end_date ? new Date(position.end_date) : undefined,
+      isCurrent: position.is_current
+    };
+    onEditExperience?.(experience);
   };
 
-  const handleCancelAdd = () => {
-    setIsAdding(false);
+  const handleDeletePosition = async (positionId: string) => {
+    showConfirmation({
+      title: 'Delete Experience',
+      description: 'Are you sure you want to delete this work experience? This action cannot be undone.',
+      confirmText: 'Delete',
+      cancelText: 'Cancel',
+      variant: 'destructive',
+      onConfirm: async () => {
+        const success = await onDeleteExperience?.(positionId);
+        if (success) {
+          refetch();
+        }
+        return success || false;
+      }
+    });
   };
 
-  const handleStartEdit = (experience: Experience) => {
-    setEditingExperience(experience);
-    setIsAdding(false);
-  };
-
-  const handleCancelEdit = () => {
-    setEditingExperience(null);
-  };
-
-  const handleSaveNew = async (data: Omit<Experience, 'id'>) => {
-    const success = await onSave(data);
-    if (success) {
-      setIsAdding(false);
-    }
-    return success;
-  };
-
-  const handleSaveEdit = async (data: Omit<Experience, 'id'>) => {
-    if (!editingExperience) return false;
-    
-    const success = await onUpdate(editingExperience.id, data);
-    if (success) {
-      setEditingExperience(null);
-    }
-    return success;
-  };
-
-  const handleDelete = async (id: string) => {
-    await onDelete(id);
-  };
-
-  const showForm = isAdding || editingExperience;
-  const showAddButton = isEditing && !showForm;
+  if (isLoading) {
+    return (
+      <Card>
+        <CardContent className="flex justify-center items-center h-32">
+          <p>Loading experience information...</p>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
-    <Card>
-      <CardHeader>
-        <div className="flex justify-between items-center">
-          <div className="flex items-center space-x-2">
-            <CardTitle>Experience</CardTitle>
-            <ExperienceTourButton />
-          </div>
-          {showAddButton && (
-            <Button variant="outline" onClick={handleStartAddNew} data-tour="add-experience-button">
-              <PlusCircle className="mr-2 h-4 w-4" />
-              Add Experience
-            </Button>
-          )}
-        </div>
-      </CardHeader>
-      <CardContent>
-        {showForm && (
-          <div className="mb-6 border rounded-md p-4 bg-gray-50 dark:bg-gray-800">
-            <div className="flex justify-between mb-4">
-              <h3 className="text-lg font-medium">
-                {editingExperience ? 'Edit Experience' : 'Add New Experience'}
-              </h3>
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                onClick={editingExperience ? handleCancelEdit : handleCancelAdd}
-              >
-                <X className="h-4 w-4" />
-              </Button>
+    <>
+      <Card>
+        <CardHeader>
+          <div className="flex justify-between items-center">
+            <div className="flex items-center space-x-2">
+              <CardTitle>Work Experience</CardTitle>
+              <ExperienceTourButton />
             </div>
-            
-            <ExperienceForm
-              initialData={editingExperience || undefined}
-              isSaving={isSaving}
-              onSave={editingExperience ? handleSaveEdit : handleSaveNew}
-              onCancel={editingExperience ? handleCancelEdit : handleCancelAdd}
-            />
+            {isEditing && (
+              <Button variant="outline" onClick={onAddNew} data-tour="add-experience-button">
+                <PlusCircle className="mr-2 h-4 w-4" />
+                Add Experience
+              </Button>
+            )}
           </div>
-        )}
-        
-        <div data-tour="experience-empty-state">
-          <ExperienceGroupedList
-            experience={experience}
-            isEditing={isEditing}
-            onEdit={handleStartEdit}
-            onDelete={handleDelete}
-          />
-        </div>
-      </CardContent>
-    </Card>
+        </CardHeader>
+        <CardContent>
+          {groupedExperiences.length > 0 ? (
+            <div className="space-y-6">
+              {groupedExperiences.map((companyData, index) => (
+                <CompanyExperienceCard
+                  key={`${companyData.company_name}-${index}`}
+                  companyData={companyData}
+                  isEditing={isEditing}
+                  formatDuration={formatDuration}
+                  onEditPosition={handleEditPosition}
+                  onDeletePosition={handleDeletePosition}
+                />
+              ))}
+            </div>
+          ) : (
+            <div className="text-center text-gray-500 dark:text-gray-400 py-8" data-tour="experience-empty-state">
+              No work experience added yet. 
+              {isEditing && ' Click "Add Experience" to add your work history.'}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      <ConfirmationDialog
+        isOpen={isOpen}
+        onClose={hideConfirmation}
+        onConfirm={handleConfirm}
+        title={config?.title || ''}
+        description={config?.description || ''}
+        confirmText={config?.confirmText}
+        cancelText={config?.cancelText}
+        variant={config?.variant}
+      />
+    </>
   );
 };

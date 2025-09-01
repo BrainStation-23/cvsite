@@ -34,7 +34,7 @@ export const AchievementsTab: React.FC<AchievementsTabProps> = ({
     defaultValues: {
       title: '',
       description: '',
-      date: new Date().toISOString().split('T')[0]
+      date: new Date()
     }
   });
 
@@ -42,7 +42,7 @@ export const AchievementsTab: React.FC<AchievementsTabProps> = ({
     defaultValues: {
       title: '',
       description: '',
-      date: new Date().toISOString().split('T')[0]
+      date: new Date()
     }
   });
 
@@ -52,7 +52,7 @@ export const AchievementsTab: React.FC<AchievementsTabProps> = ({
     addForm.reset({
       title: '',
       description: '',
-      date: new Date().toISOString().split('T')[0]
+      date: new Date()
     });
   };
 
@@ -61,7 +61,7 @@ export const AchievementsTab: React.FC<AchievementsTabProps> = ({
   };
 
   const handleSaveNew = async (data: Omit<Achievement, 'id'>) => {
-    data.date = date ? date.toISOString().split('T')[0] : new Date().toISOString().split('T')[0];
+    data.date = date || new Date();
     
     const success = await onSave(data);
     if (success) {
@@ -71,15 +71,12 @@ export const AchievementsTab: React.FC<AchievementsTabProps> = ({
 
   const handleStartEdit = (achievement: Achievement) => {
     setEditingId(achievement.id);
-    const achievementDate = typeof achievement.date === 'string' 
-      ? new Date(achievement.date) 
-      : achievement.date;
-    setDate(achievementDate);
+    setDate(achievement.date);
     
     editForm.reset({
       title: achievement.title,
       description: achievement.description,
-      date: typeof achievement.date === 'string' ? achievement.date : achievement.date.toISOString().split('T')[0]
+      date: achievement.date
     });
   };
 
@@ -90,7 +87,7 @@ export const AchievementsTab: React.FC<AchievementsTabProps> = ({
   const handleSaveEdit = async (data: Omit<Achievement, 'id'>) => {
     if (!editingId) return;
     
-    data.date = date ? date.toISOString().split('T')[0] : new Date().toISOString().split('T')[0];
+    data.date = date || new Date();
     
     const success = await onUpdate(editingId, data);
     if (success) {

@@ -1,50 +1,60 @@
 
 import { useState, useEffect } from 'react';
-import { supabase } from '@/lib/supabase';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
 import { Project } from '@/types';
 
-export const useProjectsFetch = (profileId: string) => {
-  const [projects, setProjects] = useState<Project[]>([]);
+export function useProjectsFetch(profileId: string) {
+  const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [projects, setProjects] = useState<Project[]>([]);
 
-  useEffect(() => {
-    const fetchProjects = async () => {
-      try {
-        setIsLoading(true);
-        const { data, error } = await supabase
-          .from('projects')
-          .select('*')
-          .eq('profile_id', profileId)
-          .order('start_date', { ascending: false });
+  const fetchProjects = async () => {
+    if (!profileId) return;
 
-        if (error) throw error;
+    try {
+      const { data: projectData, error: projectError } = await supabase
+        .from('projects')
+        .select('*')
+        .eq('profile_id', profileId)
+        .order('display_order', { ascending: true })
+        .order('start_date', { ascending: false });
 
-        const formattedProjects = data?.map(project => ({
+      if (projectError) throw projectError;
+
+      if (projectData) {
+        setProjects(projectData.map(project => ({
           id: project.id,
           name: project.name,
           role: project.role,
           description: project.description,
-          responsibility: project.responsibility,
-          startDate: project.start_date, // Keep as string
-          endDate: project.end_date, // Keep as string
-          isCurrent: project.is_current,
+          responsibility: project.responsibility || '',
+          startDate: new Date(project.start_date),
+          endDate: project.end_date ? new Date(project.end_date) : undefined,
+          isCurrent: project.is_current || false,
           technologiesUsed: project.technologies_used || [],
-          url: project.url || ''
-        })) || [];
-
-        setProjects(formattedProjects);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'An error occurred');
-      } finally {
-        setIsLoading(false);
+          url: project.url
+        })));
       }
-    };
-
-    if (profileId) {
-      fetchProjects();
+    } catch (error) {
+      console.error('Error fetching projects:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to load projects',
+        variant: 'destructive'
+      });
+    } finally {
+      setIsLoading(false);
     }
+  };
+
+  useEffect(() => {
+    fetchProjects();
   }, [profileId]);
 
-  return { projects, isLoading, error };
-};
+  return {
+    isLoading,
+    projects,
+    refetch: fetchProjects
+  };
+}

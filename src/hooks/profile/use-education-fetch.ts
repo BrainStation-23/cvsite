@@ -1,48 +1,57 @@
 
 import { useState, useEffect } from 'react';
-import { supabase } from '@/lib/supabase';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
 import { Education } from '@/types';
 
-export const useEducationFetch = (profileId: string) => {
-  const [education, setEducation] = useState<Education[]>([]);
+export function useEducationFetch(profileId: string) {
+  const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [education, setEducation] = useState<Education[]>([]);
 
-  useEffect(() => {
-    const fetchEducation = async () => {
-      try {
-        setIsLoading(true);
-        const { data, error } = await supabase
-          .from('education')
-          .select('*')
-          .eq('profile_id', profileId)
-          .order('start_date', { ascending: false });
+  const fetchEducation = async () => {
+    if (!profileId) return;
 
-        if (error) throw error;
+    try {
+      const { data: eduData, error: eduError } = await supabase
+        .from('education')
+        .select('*')
+        .eq('profile_id', profileId)
+        .order('start_date', { ascending: false });
 
-        const formattedEducation = data?.map(edu => ({
+      if (eduError) throw eduError;
+
+      if (eduData) {
+        setEducation(eduData.map(edu => ({
           id: edu.id,
           university: edu.university,
-          degree: edu.degree,
-          department: edu.department,
-          gpa: edu.gpa,
-          startDate: edu.start_date, // Keep as string
-          endDate: edu.end_date, // Keep as string
-          isCurrent: edu.is_current
-        })) || [];
-
-        setEducation(formattedEducation);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'An error occurred');
-      } finally {
-        setIsLoading(false);
+          degree: edu.degree || '',
+          department: edu.department || undefined,
+          gpa: edu.gpa || undefined,
+          startDate: new Date(edu.start_date),
+          endDate: edu.end_date ? new Date(edu.end_date) : undefined,
+          isCurrent: edu.is_current || false
+        })));
       }
-    };
-
-    if (profileId) {
-      fetchEducation();
+    } catch (error) {
+      console.error('Error fetching education:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to load education',
+        variant: 'destructive'
+      });
+    } finally {
+      setIsLoading(false);
     }
+  };
+
+  useEffect(() => {
+    fetchEducation();
   }, [profileId]);
 
-  return { education, isLoading, error };
-};
+  return {
+    isLoading,
+    education,
+    refetch: fetchEducation
+  };
+}
