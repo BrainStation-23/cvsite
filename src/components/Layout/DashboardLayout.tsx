@@ -70,11 +70,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
   };
 
   const sidebarGroups = getSidebarGroups(
-    user?.role || '',
-    isPlatformSettingsOpen,
-    isResourceCalendarOpen,
-    togglePlatformSettings,
-    toggleResourceCalendar
+    user?.role || ''
   );
 
   return (

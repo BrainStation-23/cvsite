@@ -24,6 +24,7 @@ export interface ResourceCalendarData {
   bill_type: {
     id: string;
     name: string;
+    color_code:string;
   } | null;
   project: {
     id: string;
@@ -81,6 +82,21 @@ export function useResourceCalendarData(
         advancedFilters
       });
 
+      // For timeline view, don't restrict dates unless advanced filters are provided
+      // This ensures all overlapping engagements are returned
+      let startDateParam = null;
+      let endDateParam = null;
+      
+      if (viewType === 'timeline') {
+        // Only use advanced filter dates for timeline view
+        startDateParam = advancedFilters.startDateFrom || null;
+        endDateParam = advancedFilters.startDateTo || null;
+      } else {
+        // For month view, use the calculated date range
+        startDateParam = advancedFilters.startDateFrom || dateRange.start.toISOString().split('T')[0];
+        endDateParam = advancedFilters.startDateTo || dateRange.end.toISOString().split('T')[0];
+      }
+
       // Use the planned resource data function for calendar view with advanced filters
       const { data: rpcData, error } = await supabase.rpc('get_planned_resource_data', {
         search_query: searchQuery || null,
@@ -96,8 +112,8 @@ export function useResourceCalendarData(
         max_engagement_percentage: advancedFilters.maxEngagementPercentage || null,
         min_billing_percentage: advancedFilters.minBillingPercentage || null,
         max_billing_percentage: advancedFilters.maxBillingPercentage || null,
-        start_date_from: advancedFilters.startDateFrom || dateRange.start.toISOString().split('T')[0],
-        start_date_to: advancedFilters.startDateTo || dateRange.end.toISOString().split('T')[0],
+        start_date_from: startDateParam,
+        start_date_to: endDateParam,
         end_date_from: advancedFilters.endDateFrom || null,
         end_date_to: advancedFilters.endDateTo || null,
       });
@@ -127,7 +143,8 @@ export function useResourceCalendarData(
 
         console.log(`Filtered ${filteredResources.length} resources from ${allResources.length} total for date range:`, {
           start: dateRange.start.toISOString(),
-          end: dateRange.end.toISOString()
+          end: dateRange.end.toISOString(),
+          viewType
         });
 
         return filteredResources;

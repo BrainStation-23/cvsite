@@ -4,7 +4,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { eachMonthOfInterval, addMonths, startOfMonth, endOfMonth } from 'date-fns';
 import { Users } from 'lucide-react';
 import type { CalendarResource } from '@/hooks/use-resource-calendar';
-import type { ResourceCalendarData } from '@/hooks/use-resource-calendar-data';
 import { TimelineHeader } from './timeline-view/TimelineHeader';
 import { ResourceRow } from './timeline-view/ResourceRow';
 import { PaginationControls } from './timeline-view/PaginationControls';
@@ -22,6 +21,7 @@ interface ResourceData {
   profileName: string;
   employeeId: string;
   projects: Project[];
+  billTypeColorCode: string;
 }
 
 interface CalendarTimelineViewProps {
@@ -70,7 +70,8 @@ export const CalendarTimelineView: React.FC<CalendarTimelineViewProps> = ({
           profileId: resource.profileId,
           profileName: resource.profileName,
           employeeId: resource.employeeId,
-          projects: []
+          projects: [],
+          billTypeColorCode: resource.billTypeColorCode
         });
       }
       

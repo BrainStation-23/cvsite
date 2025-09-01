@@ -10,6 +10,7 @@ interface Project {
 }
 
 interface ResourceData {
+  billTypeColorCode: string;
   profileId: string;
   profileName: string;
   employeeId: string;
@@ -47,6 +48,7 @@ export const ResourceRow: React.FC<ResourceRowProps> = ({ resource, months }) =>
                 project={project}
                 month={month}
                 index={idx}
+                colorCode={resource.billTypeColorCode}
               />
             ))}
           </div>

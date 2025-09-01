@@ -13,9 +13,10 @@ interface ProjectBarProps {
   project: Project;
   month: Date;
   index: number;
+  colorCode: string;
 }
 
-export const ProjectBar: React.FC<ProjectBarProps> = ({ project, month, index }) => {
+export const ProjectBar: React.FC<ProjectBarProps> = ({ project, month, index, colorCode }) => {
   // Helper function to calculate project bar position and width for a month
   const getProjectBarStyle = (project: Project, month: Date) => {
     if (!project.startDate) return null;
@@ -48,25 +49,7 @@ export const ProjectBar: React.FC<ProjectBarProps> = ({ project, month, index })
     };
   };
 
-  const getProjectColor = (projectName: string) => {
-    const colors = [
-      'hsl(var(--primary))',
-      'hsl(220, 70%, 50%)',
-      'hsl(280, 70%, 50%)',
-      'hsl(340, 70%, 50%)',
-      'hsl(40, 70%, 50%)',
-      'hsl(160, 70%, 50%)',
-      'hsl(200, 70%, 50%)',
-      'hsl(320, 70%, 50%)',
-    ];
-    
-    const hash = projectName.split('').reduce((a, b) => {
-      a = ((a << 5) - a) + b.charCodeAt(0);
-      return a & a;
-    }, 0);
-    
-    return colors[Math.abs(hash) % colors.length];
-  };
+
 
   const barStyle = getProjectBarStyle(project, month);
   if (!barStyle) return null;
@@ -76,7 +59,7 @@ export const ProjectBar: React.FC<ProjectBarProps> = ({ project, month, index })
       className="absolute rounded text-xs text-white flex items-center justify-center overflow-hidden shadow-sm"
       style={{
         ...barStyle,
-        backgroundColor: getProjectColor(project.name),
+        backgroundColor: colorCode,
         top: `${index * 30}px`,
         height: '24px',
         fontSize: '10px',
