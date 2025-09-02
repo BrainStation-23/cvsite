@@ -2,10 +2,12 @@ import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { PlusCircle } from 'lucide-react';
+import { useForm } from 'react-hook-form';
 import { Training } from '@/types';
 import { TrainingForm } from './TrainingForm';
-import { TrainingList } from './TrainingList';
-import { TrainingTourButton } from './TrainingTourButton';
+import { TrainingsList } from './TrainingsList';
+import { TrainingsTourButton } from './TrainingsTourButton';
+import { formatDateToString, parseStringToDate } from '@/utils/date-helpers';
 
 interface TrainingTabProps {
   trainings: Training[];
@@ -28,9 +30,36 @@ export const TrainingTab: React.FC<TrainingTabProps> = ({
   const [editingId, setEditingId] = useState<string | null>(null);
   const [date, setDate] = useState<Date | undefined>(new Date());
 
+  const addForm = useForm<Omit<Training, 'id'>>({
+    defaultValues: {
+      title: '',
+      provider: '',
+      description: '',
+      date: formatDateToString(new Date()),
+      certificateUrl: ''
+    }
+  });
+
+  const editForm = useForm<Omit<Training, 'id'>>({
+    defaultValues: {
+      title: '',
+      provider: '',
+      description: '',
+      date: formatDateToString(new Date()),
+      certificateUrl: ''
+    }
+  });
+
   const handleStartAddNew = () => {
     setIsAdding(true);
     setDate(new Date());
+    addForm.reset({
+      title: '',
+      provider: '',
+      description: '',
+      date: formatDateToString(new Date()),
+      certificateUrl: ''
+    });
   };
 
   const handleCancelAdd = () => {
@@ -46,7 +75,15 @@ export const TrainingTab: React.FC<TrainingTabProps> = ({
 
   const handleStartEdit = (training: Training) => {
     setEditingId(training.id);
-    setDate(training.date);
+    setDate(parseStringToDate(training.date));
+    
+    editForm.reset({
+      title: training.title,
+      provider: training.provider,
+      description: training.description || '',
+      date: training.date,
+      certificateUrl: training.certificateUrl || ''
+    });
   };
 
   const handleCancelEdit = () => {
@@ -67,8 +104,8 @@ export const TrainingTab: React.FC<TrainingTabProps> = ({
       <CardHeader>
         <div className="flex justify-between items-center">
           <div className="flex items-center space-x-2">
-            <CardTitle>Training & Certifications</CardTitle>
-            <TrainingTourButton />
+            <CardTitle>Training & Certification</CardTitle>
+            <TrainingsTourButton />
           </div>
           {isEditing && !isAdding && !editingId && (
             <Button variant="outline" onClick={handleStartAddNew} data-tour="add-training-button">
@@ -82,12 +119,11 @@ export const TrainingTab: React.FC<TrainingTabProps> = ({
         {isAdding && (
           <div className="mb-6 border rounded-md p-4 bg-gray-50 dark:bg-gray-800">
             <TrainingForm
-              onSubmit={handleSaveNew}
-              onCancel={handleCancelAdd}
+              initialData={addForm.getValues()}
+              form={addForm}
               isSaving={isSaving}
-              date={date}
-              setDate={setDate}
-              isNew={true}
+              onSave={handleSaveNew}
+              onCancel={handleCancelAdd}
             />
           </div>
         )}
@@ -95,23 +131,16 @@ export const TrainingTab: React.FC<TrainingTabProps> = ({
         {editingId && (
           <div className="mb-6 border rounded-md p-4 bg-gray-50 dark:bg-gray-800">
             <TrainingForm
-              initialData={{
-                title: trainings.find(t => t.id === editingId)?.title || '',
-                provider: trainings.find(t => t.id === editingId)?.provider || '',
-                description: trainings.find(t => t.id === editingId)?.description || '',
-                date: trainings.find(t => t.id === editingId)?.date || new Date(),
-                certificateUrl: trainings.find(t => t.id === editingId)?.certificateUrl || ''
-              }}
-              onSubmit={handleSaveEdit}
-              onCancel={handleCancelEdit}
+              initialData={trainings.find(training => training.id === editingId)}
+              form={editForm}
               isSaving={isSaving}
-              date={date}
-              setDate={setDate}
+              onSave={handleSaveEdit}
+              onCancel={handleCancelEdit}
             />
           </div>
         )}
         
-        <TrainingList
+        <TrainingsList
           trainings={trainings}
           isEditing={isEditing}
           onEdit={handleStartEdit}

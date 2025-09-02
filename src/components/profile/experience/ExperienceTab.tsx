@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -14,6 +15,7 @@ import { DesignationCombobox } from '@/components/admin/designation/DesignationC
 import { ExperienceGroupedTab } from './ExperienceGroupedTab';
 import { RichTextEditor } from '@/components/ui/rich-text-editor';
 import { ExperienceFormTourButton } from './ExperienceFormTourButton';
+import { formatDateToString, parseStringToDate } from '@/utils/date-helpers';
 
 interface ExperienceTabProps {
   experiences: Experience[];
@@ -45,7 +47,7 @@ export const ExperienceTab: React.FC<ExperienceTabProps> = ({
       companyName: '',
       designation: '',
       description: '',
-      startDate: new Date(),
+      startDate: formatDateToString(new Date()),
       isCurrent: false
     }
   });
@@ -55,7 +57,7 @@ export const ExperienceTab: React.FC<ExperienceTabProps> = ({
       companyName: '',
       designation: '',
       description: '',
-      startDate: new Date(),
+      startDate: formatDateToString(new Date()),
       isCurrent: false
     }
   });
@@ -70,7 +72,7 @@ export const ExperienceTab: React.FC<ExperienceTabProps> = ({
       companyName: '',
       designation: '',
       description: '',
-      startDate: new Date(),
+      startDate: formatDateToString(new Date()),
       isCurrent: false
     });
   };
@@ -78,8 +80,8 @@ export const ExperienceTab: React.FC<ExperienceTabProps> = ({
   const handleEditExperience = (experience: Experience) => {
     setEditingExperience(experience);
     setIsAdding(false);
-    setStartDate(experience.startDate);
-    setEndDate(experience.endDate);
+    setStartDate(parseStringToDate(experience.startDate));
+    setEndDate(parseStringToDate(experience.endDate));
     setIsCurrent(experience.isCurrent || false);
     
     editForm.reset({
@@ -101,8 +103,8 @@ export const ExperienceTab: React.FC<ExperienceTabProps> = ({
   };
 
   const handleSaveNew = async (data: Omit<Experience, 'id'>) => {
-    data.startDate = startDate || new Date();
-    data.endDate = isCurrent ? undefined : endDate;
+    data.startDate = formatDateToString(startDate || new Date());
+    data.endDate = isCurrent ? undefined : formatDateToString(endDate);
     data.isCurrent = isCurrent;
     
     const success = await onSave(data);
@@ -114,8 +116,8 @@ export const ExperienceTab: React.FC<ExperienceTabProps> = ({
   const handleSaveEdit = async (data: Omit<Experience, 'id'>) => {
     if (!editingExperience) return;
     
-    data.startDate = startDate || new Date();
-    data.endDate = isCurrent ? undefined : endDate;
+    data.startDate = formatDateToString(startDate || new Date());
+    data.endDate = isCurrent ? undefined : formatDateToString(endDate);
     data.isCurrent = isCurrent;
     
     const success = await onUpdate(editingExperience.id, data);

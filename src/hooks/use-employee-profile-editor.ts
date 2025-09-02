@@ -1,8 +1,10 @@
+
 import { useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { Skill, Experience, Education, Training, Achievement, Project } from '@/types';
+import { formatDateToString } from '@/utils/date-helpers';
 
 export function useEmployeeProfileEditor(profileId: string) {
   const { user } = useAuth();
@@ -233,8 +235,8 @@ export function useEmployeeProfileEditor(profileId: string) {
           company_name: experience.companyName,
           designation: experience.designation,
           description: experience.description,
-          start_date: experience.startDate.toISOString().split('T')[0],
-          end_date: experience.endDate ? experience.endDate.toISOString().split('T')[0] : null,
+          start_date: experience.startDate,
+          end_date: experience.endDate,
           is_current: experience.isCurrent
         });
       
@@ -270,8 +272,8 @@ export function useEmployeeProfileEditor(profileId: string) {
       if (experience.companyName) updateData.company_name = experience.companyName;
       if (experience.designation !== undefined) updateData.designation = experience.designation;
       if (experience.description !== undefined) updateData.description = experience.description;
-      if (experience.startDate) updateData.start_date = experience.startDate.toISOString().split('T')[0];
-      if (experience.endDate !== undefined) updateData.end_date = experience.endDate ? experience.endDate.toISOString().split('T')[0] : null;
+      if (experience.startDate) updateData.start_date = experience.startDate;
+      if (experience.endDate !== undefined) updateData.end_date = experience.endDate;
       if (experience.isCurrent !== undefined) updateData.is_current = experience.isCurrent;
       
       const { error } = await supabase
@@ -345,8 +347,8 @@ export function useEmployeeProfileEditor(profileId: string) {
           degree: education.degree,
           department: education.department,
           gpa: education.gpa,
-          start_date: education.startDate.toISOString().split('T')[0],
-          end_date: education.endDate ? education.endDate.toISOString().split('T')[0] : null,
+          start_date: education.startDate,
+          end_date: education.endDate,
           is_current: education.isCurrent
         });
       
@@ -383,8 +385,8 @@ export function useEmployeeProfileEditor(profileId: string) {
       if (education.degree !== undefined) updateData.degree = education.degree;
       if (education.department !== undefined) updateData.department = education.department;
       if (education.gpa !== undefined) updateData.gpa = education.gpa;
-      if (education.startDate) updateData.start_date = education.startDate.toISOString().split('T')[0];
-      if (education.endDate !== undefined) updateData.end_date = education.endDate ? education.endDate.toISOString().split('T')[0] : null;
+      if (education.startDate) updateData.start_date = education.startDate;
+      if (education.endDate !== undefined) updateData.end_date = education.endDate;
       if (education.isCurrent !== undefined) updateData.is_current = education.isCurrent;
       
       const { error } = await supabase
@@ -457,7 +459,7 @@ export function useEmployeeProfileEditor(profileId: string) {
           title: training.title,
           provider: training.provider,
           description: training.description,
-          certification_date: training.date.toISOString().split('T')[0],
+          certification_date: training.date,
           certificate_url: training.certificateUrl
         });
       
@@ -493,7 +495,7 @@ export function useEmployeeProfileEditor(profileId: string) {
       if (training.title) updateData.title = training.title;
       if (training.provider) updateData.provider = training.provider;
       if (training.description !== undefined) updateData.description = training.description;
-      if (training.date) updateData.certification_date = training.date.toISOString().split('T')[0];
+      if (training.date) updateData.certification_date = training.date;
       if (training.certificateUrl !== undefined) updateData.certificate_url = training.certificateUrl;
       
       const { error } = await supabase
@@ -564,7 +566,7 @@ export function useEmployeeProfileEditor(profileId: string) {
           profile_id: profileId,
           title: achievement.title,
           description: achievement.description,
-          date: achievement.date.toISOString().split('T')[0]
+          date: achievement.date
         });
       
       if (error) throw error;
@@ -598,7 +600,7 @@ export function useEmployeeProfileEditor(profileId: string) {
       
       if (achievement.title) updateData.title = achievement.title;
       if (achievement.description !== undefined) updateData.description = achievement.description;
-      if (achievement.date) updateData.date = achievement.date.toISOString().split('T')[0];
+      if (achievement.date) updateData.date = achievement.date;
       
       const { error } = await supabase
         .from('achievements')
@@ -670,8 +672,8 @@ export function useEmployeeProfileEditor(profileId: string) {
           role: project.role,
           description: project.description,
           responsibility: project.responsibility,
-          start_date: project.startDate.toISOString().split('T')[0],
-          end_date: project.endDate ? project.endDate.toISOString().split('T')[0] : null,
+          start_date: project.startDate,
+          end_date: project.endDate,
           is_current: project.isCurrent,
           technologies_used: project.technologiesUsed,
           url: project.url
@@ -710,8 +712,8 @@ export function useEmployeeProfileEditor(profileId: string) {
       if (project.role) updateData.role = project.role;
       if (project.description !== undefined) updateData.description = project.description;
       if (project.responsibility !== undefined) updateData.responsibility = project.responsibility;
-      if (project.startDate) updateData.start_date = project.startDate.toISOString().split('T')[0];
-      if (project.endDate !== undefined) updateData.end_date = project.endDate ? project.endDate.toISOString().split('T')[0] : null;
+      if (project.startDate) updateData.start_date = project.startDate;
+      if (project.endDate !== undefined) updateData.end_date = project.endDate;
       if (project.isCurrent !== undefined) updateData.is_current = project.isCurrent;
       if (project.technologiesUsed !== undefined) updateData.technologies_used = project.technologiesUsed;
       if (project.url !== undefined) updateData.url = project.url;
