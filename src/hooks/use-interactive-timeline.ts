@@ -1,17 +1,7 @@
-
 import { useState, useCallback } from 'react';
 import { useResourcePlanningOperations } from './use-resource-planning-operations';
 import { useToast } from '@/hooks/use-toast';
 import { format, startOfMonth, endOfMonth } from 'date-fns';
-
-interface Project {
-  id?: string;
-  name: string;
-  startDate: string;
-  endDate: string | null;
-  engagementPercentage: number;
-  isForecasted?: boolean;
-}
 
 interface EngagementData {
   id?: string;
@@ -23,10 +13,32 @@ interface EngagementData {
   billingPercentage?: number;
   engagementStartDate: string;
   releaseDate?: string;
+  isForecasted?: boolean;
 }
 
+// Legacy Project interface for backward compatibility
+interface Project {
+  id?: string;
+  name: string;
+  startDate: string;
+  endDate: string | null;
+  engagementPercentage: number;
+  isForecasted?: boolean;
+}
+
+// Convert Project to EngagementData for backward compatibility
+const projectToEngagementData = (project: Project, profileId: string): EngagementData => ({
+  id: project.id,
+  profileId,
+  forecastedProject: project.name,
+  engagementPercentage: project.engagementPercentage,
+  engagementStartDate: project.startDate,
+  releaseDate: project.endDate || undefined,
+  isForecasted: project.isForecasted,
+});
+
 export const useInteractiveTimeline = () => {
-  const [selectedProjects, setSelectedProjects] = useState<Set<string>>(new Set());
+  const [selectedEngagements, setSelectedEngagements] = useState<Set<string>>(new Set());
   const [modalState, setModalState] = useState<{
     isOpen: boolean;
     mode: 'create' | 'edit';
@@ -49,31 +61,28 @@ export const useInteractiveTimeline = () => {
 
   const { toast } = useToast();
 
-  const handleSelectProject = useCallback((resourceId: string, projectIndex: number) => {
-    const projectKey = `${resourceId}-${projectIndex}`;
-    setSelectedProjects(prev => {
+  const handleSelectEngagement = useCallback((resourceId: string, engagementIndex: number) => {
+    const engagementKey = `${resourceId}-${engagementIndex}`;
+    setSelectedEngagements(prev => {
       const newSet = new Set(prev);
-      if (newSet.has(projectKey)) {
-        newSet.delete(projectKey);
+      if (newSet.has(engagementKey)) {
+        newSet.delete(engagementKey);
       } else {
-        newSet.add(projectKey);
+        newSet.add(engagementKey);
       }
       return newSet;
     });
   }, []);
 
   const clearSelection = useCallback(() => {
-    setSelectedProjects(new Set());
+    setSelectedEngagements(new Set());
   }, []);
 
-  const handleEditProject = useCallback((resourceId: string, projectIndex: number, project: Project) => {
-    console.log('Editing project:', { resourceId, projectIndex, project });
-    
-    // Only allow editing of forecasted projects
-    if (!project.isForecasted) {
+  const handleEditEngagement = useCallback((resourceId: string, engagementIndex: number, engagement: EngagementData) => {
+    if (!engagement.isForecasted) {
       toast({
         title: 'Cannot Edit',
-        description: 'Only forecasted projects can be edited.',
+        description: 'Only forecasted assignments can be edited.',
         variant: 'destructive',
       });
       return;
@@ -82,30 +91,24 @@ export const useInteractiveTimeline = () => {
     setModalState({
       isOpen: true,
       mode: 'edit',
-      data: {
-        id: project.id,
-        profileId: resourceId,
-        forecastedProject: project.name,
-        engagementPercentage: project.engagementPercentage,
-        engagementStartDate: project.startDate,
-        releaseDate: project.endDate || undefined,
-      },
+      data: engagement,
     });
   }, [toast]);
 
-  const handleDuplicateProject = useCallback(async (resourceId: string, projectIndex: number, project: Project) => {
+  const handleDuplicateEngagement = useCallback(async (resourceId: string, engagementIndex: number, engagement: EngagementData) => {
     try {
-      // Calculate next month dates
       const nextMonth = new Date();
       nextMonth.setMonth(nextMonth.getMonth() + 1);
       const nextMonthStart = startOfMonth(nextMonth);
       const nextMonthEnd = endOfMonth(nextMonth);
       
-      // Create planning data for next month
       const planningData = {
-        profile_id: resourceId,
-        forecasted_project: project.name,
-        engagement_percentage: project.engagementPercentage,
+        profile_id: engagement.profileId,
+        project_id: engagement.projectId,
+        bill_type_id: engagement.billTypeId,
+        forecasted_project: engagement.forecastedProject,
+        engagement_percentage: engagement.engagementPercentage,
+        billing_percentage: engagement.billingPercentage,
         engagement_start_date: format(nextMonthStart, 'yyyy-MM-dd'),
         release_date: format(nextMonthEnd, 'yyyy-MM-dd'),
       };
@@ -113,34 +116,33 @@ export const useInteractiveTimeline = () => {
       await createResourcePlanning(planningData);
       
       toast({
-        title: 'Forecast Duplicated',
-        description: `Successfully created forecast for ${format(nextMonth, 'MMMM yyyy')}.`,
+        title: 'Assignment Duplicated',
+        description: `Successfully created assignment for ${format(nextMonth, 'MMMM yyyy')}.`,
       });
     } catch (error) {
       toast({
         title: 'Error',
-        description: 'Failed to duplicate forecast. Please try again.',
+        description: 'Failed to duplicate assignment. Please try again.',
         variant: 'destructive',
       });
     }
   }, [createResourcePlanning, toast]);
 
-  const handleDeleteProject = useCallback((resourceId: string, projectIndex: number, project: Project) => {
-    if (!project.isForecasted) {
+  const handleDeleteEngagement = useCallback((resourceId: string, engagementIndex: number, engagement: EngagementData) => {
+    if (!engagement.isForecasted) {
       toast({
         title: 'Cannot Delete',
-        description: 'Only forecasted projects can be deleted.',
+        description: 'Only forecasted assignments can be deleted.',
         variant: 'destructive',
       });
       return;
     }
 
-    // Use custom confirmation dialog
     const confirmed = confirm('Are you sure you want to delete this forecasted assignment?');
-    if (confirmed && project.id) {
-      deleteResourcePlanning(project.id);
+    if (confirmed && engagement.id) {
+      deleteResourcePlanning(engagement.id);
       toast({
-        title: 'Forecast Deleted',
+        title: 'Assignment Deleted',
         description: 'The forecasted assignment has been removed.',
       });
     }
@@ -196,17 +198,39 @@ export const useInteractiveTimeline = () => {
     setModalState({ isOpen: false, mode: 'create' });
   }, []);
 
+  // Backward compatibility wrapper functions
+  const handleEditProject = useCallback((resourceId: string, projectIndex: number, project: Project) => {
+    const engagement = projectToEngagementData(project, resourceId);
+    handleEditEngagement(resourceId, projectIndex, engagement);
+  }, [handleEditEngagement]);
+
+  const handleDuplicateProject = useCallback(async (resourceId: string, projectIndex: number, project: Project) => {
+    const engagement = projectToEngagementData(project, resourceId);
+    await handleDuplicateEngagement(resourceId, projectIndex, engagement);
+  }, [handleDuplicateEngagement]);
+
+  const handleDeleteProject = useCallback((resourceId: string, projectIndex: number, project: Project) => {
+    const engagement = projectToEngagementData(project, resourceId);
+    handleDeleteEngagement(resourceId, projectIndex, engagement);
+  }, [handleDeleteEngagement]);
+
   return {
-    selectedProjects,
+    selectedEngagements,
     modalState,
-    handleSelectProject,
+    handleSelectEngagement,
     clearSelection,
-    handleEditProject,
-    handleDuplicateProject,
-    handleDeleteProject,
+    handleEditEngagement,
+    handleDuplicateEngagement,
+    handleDeleteEngagement,
     handleCreateEngagement,
     handleSaveEngagement,
     closeModal,
     isLoading: isCreating || isUpdating || isDeleting,
+    // Backward compatibility aliases
+    selectedProjects: selectedEngagements,
+    handleSelectProject: handleSelectEngagement,
+    handleEditProject,
+    handleDuplicateProject,
+    handleDeleteProject,
   };
 };
