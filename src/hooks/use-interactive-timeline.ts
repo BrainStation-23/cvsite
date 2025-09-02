@@ -11,6 +11,7 @@ interface Project {
   endDate: string | null;
   engagementPercentage: number;
   isForecasted?: boolean;
+  billTypeId?: string;
 }
 
 interface EngagementData {
@@ -85,6 +86,7 @@ export const useInteractiveTimeline = () => {
       data: {
         id: project.id,
         profileId: resourceId,
+        billTypeId: project.billTypeId,
         forecastedProject: project.name,
         engagementPercentage: project.engagementPercentage,
         engagementStartDate: project.startDate,
@@ -108,6 +110,7 @@ export const useInteractiveTimeline = () => {
         engagement_percentage: project.engagementPercentage,
         engagement_start_date: format(nextMonthStart, 'yyyy-MM-dd'),
         release_date: format(nextMonthEnd, 'yyyy-MM-dd'),
+        bill_type_id: project.billTypeId,
       };
 
       await createResourcePlanning(planningData);
