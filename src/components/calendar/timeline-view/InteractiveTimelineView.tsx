@@ -1,5 +1,6 @@
 
 import React from 'react';
+import { DndContext } from '@dnd-kit/core';
 import { InteractiveResourceRow } from './InteractiveResourceRow';
 import { EngagementModal } from './EngagementModal';
 import { useInteractiveTimeline } from '@/hooks/use-interactive-timeline';
@@ -46,38 +47,40 @@ export const InteractiveTimelineView: React.FC<InteractiveTimelineViewProps> = (
 
   return (
     <>
-      <div className="space-y-0">
-        {/* Timeline Header */}
-        <div 
-          className="grid gap-0 py-2 bg-muted/30 border-b-2 border-border sticky top-0 z-20"
-          style={{ gridTemplateColumns: `250px repeat(${months.length}, 1fr)` }}
-        >
-          <div className="pr-4 font-medium text-sm">Employee</div>
-          {months.map((month) => (
-            <div 
-              key={month.toISOString()}
-              className="text-center text-sm font-medium border-l border-border/30 py-2"
-            >
-              {month.toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}
-            </div>
+      <DndContext>
+        <div className="space-y-0">
+          {/* Timeline Header */}
+          <div 
+            className="grid gap-0 py-2 bg-muted/30 border-b-2 border-border sticky top-0 z-20"
+            style={{ gridTemplateColumns: `250px repeat(${months.length}, 1fr)` }}
+          >
+            <div className="pr-4 font-medium text-sm">Employee</div>
+            {months.map((month) => (
+              <div 
+                key={month.toISOString()}
+                className="text-center text-sm font-medium border-l border-border/30 py-2"
+              >
+                {month.toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}
+              </div>
+            ))}
+          </div>
+
+          {/* Resource Rows */}
+          {resources.map((resource) => (
+            <InteractiveResourceRow
+              key={resource.profileId}
+              resource={resource}
+              months={months}
+              selectedProjects={selectedProjects}
+              onSelectProject={handleSelectProject}
+              onEditProject={handleEditProject}
+              onDuplicateProject={handleDuplicateProject}
+              onDeleteProject={handleDeleteProject}
+              onCreateEngagement={handleCreateEngagement}
+            />
           ))}
         </div>
-
-        {/* Resource Rows */}
-        {resources.map((resource) => (
-          <InteractiveResourceRow
-            key={resource.profileId}
-            resource={resource}
-            months={months}
-            selectedProjects={selectedProjects}
-            onSelectProject={handleSelectProject}
-            onEditProject={handleEditProject}
-            onDuplicateProject={handleDuplicateProject}
-            onDeleteProject={handleDeleteProject}
-            onCreateEngagement={handleCreateEngagement}
-          />
-        ))}
-      </div>
+      </DndContext>
 
       {/* Engagement Modal */}
       <EngagementModal
