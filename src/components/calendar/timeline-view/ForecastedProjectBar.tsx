@@ -1,10 +1,9 @@
 
 import React, { useState, useCallback } from 'react';
 import { startOfMonth, endOfMonth, isWithinInterval } from 'date-fns';
-import { useDraggable } from '@dnd-kit/core';
 import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuTrigger } from '@/components/ui/context-menu';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { Copy, Edit, Trash2, GripHorizontal } from 'lucide-react';
+import { Copy, Edit, Trash2 } from 'lucide-react';
 
 interface ForecastedProject {
   name: string;
@@ -39,17 +38,6 @@ export const ForecastedProjectBar: React.FC<ForecastedProjectBarProps> = ({
   onSelect,
 }) => {
   const [isHovered, setIsHovered] = useState(false);
-
-  const dragId = `forecasted-${resourceId}-${index}`;
-  const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
-    id: dragId,
-    data: {
-      type: 'forecasted-project',
-      project,
-      resourceId,
-      index,
-    },
-  });
 
   // Use useCallback for better performance
   const handleMouseEnter = useCallback(() => {
@@ -108,13 +96,10 @@ export const ForecastedProjectBar: React.FC<ForecastedProjectBarProps> = ({
           <Tooltip>
             <TooltipTrigger asChild>
               <div
-                ref={setNodeRef}
                 className={`absolute rounded text-xs text-white flex items-center justify-between overflow-hidden shadow-sm cursor-pointer transition-all duration-200 border-2 border-dashed ${
                   isSelected ? 'ring-2 ring-white shadow-lg' : ''
                 } ${
                   isHovered ? 'shadow-lg scale-105' : ''
-                } ${
-                  isDragging ? 'opacity-50' : ''
                 }`}
                 style={{
                   ...barStyle,
@@ -129,15 +114,8 @@ export const ForecastedProjectBar: React.FC<ForecastedProjectBarProps> = ({
                 onClick={handleClick}
                 onMouseEnter={handleMouseEnter}
                 onMouseLeave={handleMouseLeave}
-                {...attributes}
               >
                 <span className="truncate px-2 flex-1 italic">{project.name}</span>
-                <div 
-                  className="px-1 hover:bg-black/20 rounded cursor-grab active:cursor-grabbing"
-                  {...listeners}
-                >
-                  <GripHorizontal className="h-3 w-3" />
-                </div>
               </div>
             </TooltipTrigger>
             <TooltipContent>
@@ -147,7 +125,7 @@ export const ForecastedProjectBar: React.FC<ForecastedProjectBarProps> = ({
                 <div>Start: {project.startDate}</div>
                 {project.endDate && <div>End: {project.endDate}</div>}
                 <div className="text-muted-foreground mt-1">
-                  Click to edit • Ctrl+Click to select • Right-click for options
+                  Click to edit • Ctrl+Click to select • Right-click for menu
                 </div>
               </div>
             </TooltipContent>

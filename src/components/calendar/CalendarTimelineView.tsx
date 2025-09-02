@@ -3,7 +3,7 @@ import React, { useState, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { eachMonthOfInterval, addMonths, startOfMonth, endOfMonth } from 'date-fns';
 import { Users } from 'lucide-react';
-import { DndContext, DragOverlay, closestCenter } from '@dnd-kit/core';
+
 import type { CalendarResource } from '@/hooks/use-resource-calendar';
 import { TimelineHeader } from './timeline-view/TimelineHeader';
 import { InteractiveResourceRow } from './timeline-view/InteractiveResourceRow';
@@ -174,99 +174,83 @@ export const CalendarTimelineView: React.FC<CalendarTimelineViewProps> = ({
     setCurrentPage(1);
   }, [allResources.length]);
 
-  const handleDragEnd = (event: any) => {
-    const { active, over } = event;
-    
-    if (!over) return;
-
-    console.log('Drag ended:', { active: active.data.current, over: over.data.current });
-    
-    // Handle the drag and drop logic here
-    // This would involve updating the engagement dates based on the drop location
-  };
 
   return (
-    <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-      <div className="space-y-6">
-        <TimelineHeader 
-          timelineStart={timelineStart}
-          timelineEnd={timelineEnd}
-          months={months}
-          monthsToShow={monthsToShow}
-          onPreviousMonth={onPreviousMonth}
-          onNextMonth={onNextMonth}
-          onIncreaseMonths={onIncreaseMonths}
-          onDecreaseMonths={onDecreaseMonths}
-        />
+    <div className="space-y-6">
+      <TimelineHeader 
+        timelineStart={timelineStart}
+        timelineEnd={timelineEnd}
+        months={months}
+        monthsToShow={monthsToShow}
+        onPreviousMonth={onPreviousMonth}
+        onNextMonth={onNextMonth}
+        onIncreaseMonths={onIncreaseMonths}
+        onDecreaseMonths={onDecreaseMonths}
+      />
 
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center justify-between">
-              <div className="flex items-center space-x-2">
-                <Users className="h-5 w-5" />
-                <span>Interactive Resource Timeline</span>
-              </div>
-              {selectedProjects.size > 0 && (
-                <div className="text-sm text-muted-foreground">
-                  {selectedProjects.size} selected • 
-                  <button 
-                    onClick={clearSelection}
-                    className="ml-2 text-primary hover:underline"
-                  >
-                    Clear selection
-                  </button>
-                </div>
-              )}
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="overflow-x-auto">
-              <div className="space-y-4">
-                {paginatedResources.length === 0 ? (
-                  <EmptyResourcesState />
-                ) : (
-                  paginatedResources.map((resource) => (
-                    <InteractiveResourceRow
-                      key={resource.profileId}
-                      resource={resource}
-                      months={months}
-                      selectedProjects={selectedProjects}
-                      onSelectProject={handleSelectProject}
-                      onEditProject={handleEditProject}
-                      onDuplicateProject={handleDuplicateProject}
-                      onDeleteProject={handleDeleteProject}
-                      onCreateEngagement={handleCreateEngagement}
-                    />
-                  ))
-                )}
-              </div>
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center justify-between">
+            <div className="flex items-center space-x-2">
+              <Users className="h-5 w-5" />
+              <span>Interactive Resource Timeline</span>
             </div>
+            {selectedProjects.size > 0 && (
+              <div className="text-sm text-muted-foreground">
+                {selectedProjects.size} selected • 
+                <button 
+                  onClick={clearSelection}
+                  className="ml-2 text-primary hover:underline"
+                >
+                  Clear selection
+                </button>
+              </div>
+            )}
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="overflow-x-auto">
+            <div className="space-y-4">
+              {paginatedResources.length === 0 ? (
+                <EmptyResourcesState />
+              ) : (
+                paginatedResources.map((resource) => (
+                  <InteractiveResourceRow
+                    key={resource.profileId}
+                    resource={resource}
+                    months={months}
+                    selectedProjects={selectedProjects}
+                    onSelectProject={handleSelectProject}
+                    onEditProject={handleEditProject}
+                    onDuplicateProject={handleDuplicateProject}
+                    onDeleteProject={handleDeleteProject}
+                    onCreateEngagement={handleCreateEngagement}
+                  />
+                ))
+              )}
+            </div>
+          </div>
 
-            <PaginationControls
-              currentPage={currentPage}
-              totalPages={totalPages}
-              startIndex={startIndex}
-              endIndex={endIndex}
-              totalResources={allResources.length}
-              onPageChange={setCurrentPage}
-            />
-          </CardContent>
-        </Card>
+          <PaginationControls
+            currentPage={currentPage}
+            totalPages={totalPages}
+            startIndex={startIndex}
+            endIndex={endIndex}
+            totalResources={allResources.length}
+            onPageChange={setCurrentPage}
+          />
+        </CardContent>
+      </Card>
 
-        <EngagementModal
-          isOpen={modalState.isOpen}
-          onClose={closeModal}
-          onSave={handleSaveEngagement}
-          initialData={modalState.data}
-          preselectedResourceId={modalState.preselectedResourceId}
-          preselectedStartDate={modalState.preselectedStartDate}
-          mode={modalState.mode}
-        />
-      </div>
-
-      <DragOverlay>
-        {/* Drag overlay content would go here */}
-      </DragOverlay>
-    </DndContext>
+      <EngagementModal
+        isOpen={modalState.isOpen}
+        onClose={closeModal}
+        onSave={handleSaveEngagement}
+        initialData={modalState.data}
+        preselectedResourceId={modalState.preselectedResourceId}
+        preselectedStartDate={modalState.preselectedStartDate}
+        mode={modalState.mode}
+      />
+    </div>
   );
 };
