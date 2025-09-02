@@ -4,10 +4,11 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ProfileCombobox } from '@/components/admin/user/ProfileCombobox';
 import BillTypeCombobox from '@/components/resource-planning/BillTypeCombobox';
-import { format, startOfMonth, endOfMonth } from 'date-fns';
+import ProjectSearchCombobox from '@/components/resource-planning/ProjectSearchCombobox';
+import DatePicker from '@/components/admin/user/DatePicker';
+import { format } from 'date-fns';
 
 interface EngagementData {
   id?: string;
@@ -40,90 +41,38 @@ export const EngagementModal: React.FC<EngagementModalProps> = ({
   preselectedStartDate,
   mode,
 }) => {
-  const currentDate = new Date();
-  const currentMonth = currentDate.getMonth() + 1; // getMonth() returns 0-11
-  const currentYear = currentDate.getFullYear();
-
-  const [selectedMonth, setSelectedMonth] = useState<number>(currentMonth);
-  const [selectedYear, setSelectedYear] = useState<number>(currentYear);
   const [formData, setFormData] = useState<EngagementData>({
     profileId: preselectedResourceId || '',
-    engagementPercentage: 0, // Hidden, set to 0
-    billingPercentage: 0, // Hidden, set to 0
-    engagementStartDate: '',
-    forecastedProject: '',
+    engagementPercentage: 100,
+    billingPercentage: 0,
+    engagementStartDate: preselectedStartDate ? format(preselectedStartDate, 'yyyy-MM-dd') : '',
     ...initialData,
   });
 
-  // Generate month options
-  const months = [
-    { value: 1, label: 'January' },
-    { value: 2, label: 'February' },
-    { value: 3, label: 'March' },
-    { value: 4, label: 'April' },
-    { value: 5, label: 'May' },
-    { value: 6, label: 'June' },
-    { value: 7, label: 'July' },
-    { value: 8, label: 'August' },
-    { value: 9, label: 'September' },
-    { value: 10, label: 'October' },
-    { value: 11, label: 'November' },
-    { value: 12, label: 'December' },
-  ];
-
-  // Generate year options (current year ± 2 years)
-  const years = [];
-  for (let year = currentYear - 2; year <= currentYear + 2; year++) {
-    years.push(year);
-  }
-
   useEffect(() => {
     if (isOpen) {
-      // Set default values when modal opens
-      const defaultMonth = preselectedStartDate ? preselectedStartDate.getMonth() + 1 : currentMonth;
-      const defaultYear = preselectedStartDate ? preselectedStartDate.getFullYear() : currentYear;
-      
-      setSelectedMonth(defaultMonth);
-      setSelectedYear(defaultYear);
       setFormData({
         profileId: preselectedResourceId || '',
-        engagementPercentage: 0,
+        engagementPercentage: 100,
         billingPercentage: 0,
-        engagementStartDate: '',
-        forecastedProject: '',
+        engagementStartDate: preselectedStartDate ? format(preselectedStartDate, 'yyyy-MM-dd') : '',
         ...initialData,
       });
     }
-  }, [isOpen, initialData, preselectedResourceId, preselectedStartDate, currentMonth, currentYear]);
+  }, [isOpen, initialData, preselectedResourceId, preselectedStartDate]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
-    // Calculate start and end dates based on selected month/year
-    const startDate = startOfMonth(new Date(selectedYear, selectedMonth - 1, 1));
-    const endDate = endOfMonth(new Date(selectedYear, selectedMonth - 1, 1));
-    
-    const submissionData: EngagementData = {
-      ...formData,
-      engagementStartDate: format(startDate, 'yyyy-MM-dd'),
-      releaseDate: format(endDate, 'yyyy-MM-dd'),
-      engagementPercentage: 0, // Set to 0 as per requirements
-      billingPercentage: 0, // Set to 0 as per requirements
-    };
-    
-    onSave(submissionData);
+    onSave(formData);
   };
 
   const handleClose = () => {
     onClose();
-    setSelectedMonth(currentMonth);
-    setSelectedYear(currentYear);
     setFormData({
       profileId: '',
-      engagementPercentage: 0,
+      engagementPercentage: 100,
       billingPercentage: 0,
       engagementStartDate: '',
-      forecastedProject: '',
     });
   };
 
@@ -132,7 +81,7 @@ export const EngagementModal: React.FC<EngagementModalProps> = ({
       <DialogContent className="max-w-md">
         <DialogHeader>
           <DialogTitle>
-            {mode === 'create' ? 'Create Forecasted Assignment' : 'Edit Forecasted Assignment'}
+            {mode === 'create' ? 'Create New Assignment' : 'Edit Assignment'}
           </DialogTitle>
         </DialogHeader>
 
@@ -148,6 +97,31 @@ export const EngagementModal: React.FC<EngagementModalProps> = ({
             />
           </div>
 
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="engagement">Engagement % *</Label>
+              <Input
+                type="number"
+                min="1"
+                max="100"
+                value={formData.engagementPercentage}
+                onChange={(e) => setFormData(prev => ({ ...prev, engagementPercentage: Number(e.target.value) }))}
+                required
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="billing">Billing %</Label>
+              <Input
+                type="number"
+                min="0"
+                max="100"
+                value={formData.billingPercentage || 0}
+                onChange={(e) => setFormData(prev => ({ ...prev, billingPercentage: Number(e.target.value) }))}
+              />
+            </div>
+          </div>
+
           <div className="space-y-2">
             <Label htmlFor="billType">Bill Type</Label>
             <BillTypeCombobox
@@ -158,52 +132,40 @@ export const EngagementModal: React.FC<EngagementModalProps> = ({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="forecastedProject">Forecasted Project *</Label>
+            <Label htmlFor="project">Project</Label>
+            <ProjectSearchCombobox
+              value={formData.projectId || null}
+              onValueChange={(value) => setFormData(prev => ({ ...prev, projectId: value || undefined }))}
+              placeholder="Select project..."
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="forecastedProject">Forecasted Project</Label>
             <Input
               value={formData.forecastedProject || ''}
               onChange={(e) => setFormData(prev => ({ ...prev, forecastedProject: e.target.value }))}
-              placeholder="Enter forecasted project name..."
-              required
+              placeholder="Enter forecasted project..."
             />
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="month">Month *</Label>
-              <Select
-                value={selectedMonth.toString()}
-                onValueChange={(value) => setSelectedMonth(parseInt(value))}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select month" />
-                </SelectTrigger>
-                <SelectContent>
-                  {months.map((month) => (
-                    <SelectItem key={month.value} value={month.value.toString()}>
-                      {month.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <Label htmlFor="startDate">Start Date *</Label>
+              <DatePicker
+                value={formData.engagementStartDate}
+                onChange={(value) => setFormData(prev => ({ ...prev, engagementStartDate: value }))}
+                placeholder="Select start date"
+              />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="year">Year *</Label>
-              <Select
-                value={selectedYear.toString()}
-                onValueChange={(value) => setSelectedYear(parseInt(value))}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select year" />
-                </SelectTrigger>
-                <SelectContent>
-                  {years.map((year) => (
-                    <SelectItem key={year} value={year.toString()}>
-                      {year}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <Label htmlFor="releaseDate">Release Date</Label>
+              <DatePicker
+                value={formData.releaseDate || ''}
+                onChange={(value) => setFormData(prev => ({ ...prev, releaseDate: value }))}
+                placeholder="Select release date"
+              />
             </div>
           </div>
 
@@ -211,10 +173,7 @@ export const EngagementModal: React.FC<EngagementModalProps> = ({
             <Button type="button" variant="outline" onClick={handleClose}>
               Cancel
             </Button>
-            <Button 
-              type="submit" 
-              disabled={!formData.profileId || !formData.forecastedProject || !selectedMonth || !selectedYear}
-            >
+            <Button type="submit" disabled={!formData.profileId || !formData.engagementStartDate}>
               {mode === 'create' ? 'Create' : 'Update'} Assignment
             </Button>
           </div>
