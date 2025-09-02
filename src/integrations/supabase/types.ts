@@ -1008,6 +1008,7 @@ export type Database = {
           description: string | null
           id: string
           is_active: boolean
+          project_bill_type: string | null
           project_level: string | null
           project_manager: string | null
           project_name: string
@@ -1021,6 +1022,7 @@ export type Database = {
           description?: string | null
           id?: string
           is_active?: boolean
+          project_bill_type?: string | null
           project_level?: string | null
           project_manager?: string | null
           project_name: string
@@ -1034,6 +1036,7 @@ export type Database = {
           description?: string | null
           id?: string
           is_active?: boolean
+          project_bill_type?: string | null
           project_level?: string | null
           project_manager?: string | null
           project_name?: string

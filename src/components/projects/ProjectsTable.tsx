@@ -15,16 +15,14 @@ interface Project {
   is_active: boolean;
   created_at: string;
   updated_at: string;
-  // Updated fields - removed odoo_project_id and company_id
   description?: string | null;
   project_level?: string | null;
-  // Added to handle the joined profile data
+  project_bill_type?: string | null;
   project_manager_profile?: {
     first_name: string | null;
     last_name: string | null;
     employee_id: string | null;
   } | null;
-  // Added to handle project type data
   project_type_data?: {
     name: string;
   } | null;
@@ -152,6 +150,9 @@ export const ProjectsTable: React.FC<ProjectsTableProps> = ({
               <TableCell>
                 <div className="flex flex-col space-y-1">
                   {getProjectLevelBadge(project.project_level)}
+                  <Badge variant="secondary" className="text-xs">
+                      {project.project_bill_type}
+                    </Badge>
                   {project.project_type_data?.name ? (
                     <Badge variant="outline" className="text-xs">
                       {project.project_type_data.name}
