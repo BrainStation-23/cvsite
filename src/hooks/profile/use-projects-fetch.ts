@@ -29,8 +29,8 @@ export function useProjectsFetch(profileId: string) {
           role: project.role,
           description: project.description,
           responsibility: project.responsibility || '',
-          startDate: new Date(project.start_date),
-          endDate: project.end_date ? new Date(project.end_date) : undefined,
+          startDate: project.start_date,
+          endDate: project.end_date ?? undefined,
           isCurrent: project.is_current || false,
           technologiesUsed: project.technologies_used || [],
           url: project.url

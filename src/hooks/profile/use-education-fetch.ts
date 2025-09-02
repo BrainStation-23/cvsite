@@ -28,8 +28,8 @@ export function useEducationFetch(profileId: string) {
           degree: edu.degree || '',
           department: edu.department || undefined,
           gpa: edu.gpa || undefined,
-          startDate: new Date(edu.start_date),
-          endDate: edu.end_date ? new Date(edu.end_date) : undefined,
+          startDate: edu.start_date,
+          endDate: edu.end_date ?? undefined,
           isCurrent: edu.is_current || false
         })));
       }

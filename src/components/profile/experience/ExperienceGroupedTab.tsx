@@ -44,8 +44,8 @@ export const ExperienceGroupedTab: React.FC<ExperienceGroupedTabProps> = ({
       )?.company_name || '',
       designation: position.designation,
       description: position.description || '',
-      startDate: new Date(position.start_date),
-      endDate: position.end_date ? new Date(position.end_date) : undefined,
+      startDate: position.start_date,
+      endDate: position.end_date ?? undefined,
       isCurrent: position.is_current
     };
     onEditExperience?.(experience);
