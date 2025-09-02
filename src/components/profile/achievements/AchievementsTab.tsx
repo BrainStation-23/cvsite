@@ -34,7 +34,7 @@ export const AchievementsTab: React.FC<AchievementsTabProps> = ({
     defaultValues: {
       title: '',
       description: '',
-      date: new Date()
+      date: new Date().toISOString()
     }
   });
 
@@ -42,7 +42,7 @@ export const AchievementsTab: React.FC<AchievementsTabProps> = ({
     defaultValues: {
       title: '',
       description: '',
-      date: new Date()
+      date: new Date().toISOString()
     }
   });
 
@@ -52,7 +52,7 @@ export const AchievementsTab: React.FC<AchievementsTabProps> = ({
     addForm.reset({
       title: '',
       description: '',
-      date: new Date()
+      date: new Date().toISOString()
     });
   };
 
@@ -61,7 +61,7 @@ export const AchievementsTab: React.FC<AchievementsTabProps> = ({
   };
 
   const handleSaveNew = async (data: Omit<Achievement, 'id'>) => {
-    data.date = date || new Date();
+    data.date = (date || new Date()).toISOString();
     
     const success = await onSave(data);
     if (success) {
@@ -71,12 +71,12 @@ export const AchievementsTab: React.FC<AchievementsTabProps> = ({
 
   const handleStartEdit = (achievement: Achievement) => {
     setEditingId(achievement.id);
-    setDate(typeof achievement.date === 'string' ? new Date(achievement.date) : achievement.date);
+    setDate(new Date(achievement.date));
     
     editForm.reset({
       title: achievement.title,
       description: achievement.description,
-      date: typeof achievement.date === 'string' ? new Date(achievement.date) : achievement.date
+      date: achievement.date
     });
   };
 
@@ -87,7 +87,7 @@ export const AchievementsTab: React.FC<AchievementsTabProps> = ({
   const handleSaveEdit = async (data: Omit<Achievement, 'id'>) => {
     if (!editingId) return;
     
-    data.date = date || new Date();
+    data.date = (date || new Date()).toISOString();
     
     const success = await onUpdate(editingId, data);
     if (success) {

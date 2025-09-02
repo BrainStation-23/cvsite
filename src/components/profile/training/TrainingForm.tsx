@@ -47,7 +47,7 @@ export const TrainingForm: React.FC<TrainingFormProps> = ({
       title: '',
       provider: '',
       description: '',
-      date: new Date(),
+      date: new Date().toISOString(),
       certificateUrl: '',
       isRenewable: false,
       expiryDate: undefined
@@ -55,9 +55,9 @@ export const TrainingForm: React.FC<TrainingFormProps> = ({
   });
 
   const handleSubmit = async (data: Omit<Training, 'id'>) => {
-    data.date = date || new Date();
+    data.date = (date || new Date()).toISOString();
     data.isRenewable = isRenewable;
-    data.expiryDate = expiryDate;
+    data.expiryDate = expiryDate ? expiryDate.toISOString() : undefined;
     await onSubmit(data);
   };
 

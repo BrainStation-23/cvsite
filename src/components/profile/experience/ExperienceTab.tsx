@@ -45,7 +45,7 @@ export const ExperienceTab: React.FC<ExperienceTabProps> = ({
       companyName: '',
       designation: '',
       description: '',
-      startDate: new Date(),
+      startDate: new Date().toISOString(),
       isCurrent: false
     }
   });
@@ -55,7 +55,7 @@ export const ExperienceTab: React.FC<ExperienceTabProps> = ({
       companyName: '',
       designation: '',
       description: '',
-      startDate: new Date(),
+      startDate: new Date().toISOString(),
       isCurrent: false
     }
   });
@@ -70,7 +70,7 @@ export const ExperienceTab: React.FC<ExperienceTabProps> = ({
       companyName: '',
       designation: '',
       description: '',
-      startDate: new Date(),
+      startDate: new Date().toISOString(),
       isCurrent: false
     });
   };
@@ -78,16 +78,8 @@ export const ExperienceTab: React.FC<ExperienceTabProps> = ({
   const handleEditExperience = (experience: Experience) => {
     setEditingExperience(experience);
     setIsAdding(false);
-    setStartDate(
-      typeof experience.startDate === 'string'
-        ? new Date(experience.startDate)
-        : experience.startDate
-    );
-    setEndDate(
-      typeof experience.endDate === 'string'
-        ? new Date(experience.endDate)
-        : experience.endDate
-    );
+    setStartDate(experience.startDate ? new Date(experience.startDate) : undefined);
+    setEndDate(experience.endDate ? new Date(experience.endDate) : undefined);
     setIsCurrent(experience.isCurrent || false);
     
     editForm.reset({
@@ -109,8 +101,8 @@ export const ExperienceTab: React.FC<ExperienceTabProps> = ({
   };
 
   const handleSaveNew = async (data: Omit<Experience, 'id'>) => {
-    data.startDate = startDate || new Date();
-    data.endDate = isCurrent ? undefined : endDate;
+    data.startDate = (startDate || new Date()).toISOString();
+    data.endDate = isCurrent ? undefined : endDate ? endDate.toISOString() : undefined;
     data.isCurrent = isCurrent;
     
     const success = await onSave(data);
@@ -122,8 +114,8 @@ export const ExperienceTab: React.FC<ExperienceTabProps> = ({
   const handleSaveEdit = async (data: Omit<Experience, 'id'>) => {
     if (!editingExperience) return;
     
-    data.startDate = startDate || new Date();
-    data.endDate = isCurrent ? undefined : endDate;
+    data.startDate = (startDate || new Date()).toISOString();
+    data.endDate = isCurrent ? undefined : endDate ? endDate.toISOString() : undefined;
     data.isCurrent = isCurrent;
     
     const success = await onUpdate(editingExperience.id, data);
