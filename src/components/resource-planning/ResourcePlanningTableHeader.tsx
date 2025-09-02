@@ -63,10 +63,10 @@ export const ResourcePlanningTableHeader: React.FC<ResourcePlanningTableHeaderPr
               </Button>
               <Button
                 variant="ghost"
-                onClick={() => onSort('profile_employee_id')}
+                onClick={() => onSort('employee_id')}
                 className="flex items-center gap-1 p-0 h-auto text-xs text-muted-foreground justify-start"
               >
-                By ID {getSortIcon('profile_employee_id')}
+                By ID {getSortIcon('employee_id')}
               </Button>
             </div>
           </TableHead>
