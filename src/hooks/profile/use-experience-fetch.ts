@@ -30,8 +30,8 @@ export function useExperienceFetch(profileId: string) {
           companyName: exp.company_name,
           designation: exp.designation || '',
           description: exp.description || '',
-          startDate: new Date(exp.start_date),
-          endDate: exp.end_date ? new Date(exp.end_date) : undefined,
+          startDate: exp.start_date,
+          endDate: exp.end_date || undefined,
           isCurrent: exp.is_current || false
         })));
       }

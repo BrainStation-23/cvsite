@@ -27,7 +27,7 @@ export function useTrainingFetch(profileId: string) {
           title: training.title,
           provider: training.provider,
           description: training.description || '',
-          date: new Date(training.certification_date),
+          date: training.certification_date,
           certificateUrl: training.certificate_url
         })));
       }
