@@ -1,126 +1,214 @@
 
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
+import { useState, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
 import { Achievement } from '@/types';
 
-export const useAchievements = (profileId: string) => {
-  const queryClient = useQueryClient();
-  const { toast } = useToast();
+// Type for database achievement record format
+type AchievementDB = {
+  id: string;
+  profile_id: string;
+  title: string;
+  description: string;
+  date: string;
+  created_at: string;
+  updated_at: string;
+};
 
-  const { data: achievements = [], isLoading } = useQuery({
-    queryKey: ['achievements', profileId],
-    queryFn: async () => {
+// Map from database format to application model
+const mapToAchievement = (data: AchievementDB): Achievement => ({
+  id: data.id,
+  title: data.title,
+  description: data.description,
+  date: data.date
+});
+
+// Map from application model to database format
+const mapToAchievementDB = (achievement: Omit<Achievement, 'id'>, profileId: string) => ({
+  profile_id: profileId,
+  title: achievement.title,
+  description: achievement.description,
+  date: achievement.date
+});
+
+export function useAchievements(profileId?: string) {
+  const { user } = useAuth();
+  const { toast } = useToast();
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
+  const [achievements, setAchievements] = useState<Achievement[]>([]);
+
+  // Use provided profileId or fallback to auth user id
+  const targetProfileId = profileId || user?.id;
+
+  // Fetch achievements
+  const fetchAchievements = async () => {
+    if (!targetProfileId) return;
+    
+    try {
+      setIsLoading(true);
       const { data, error } = await supabase
         .from('achievements')
         .select('*')
-        .eq('profile_id', profileId)
+        .eq('profile_id', targetProfileId)
         .order('date', { ascending: false });
-
+      
       if (error) throw error;
-      return data as Achievement[];
-    },
-    enabled: !!profileId
-  });
+      
+      if (data) {
+        // Map database records to application model format
+        const mappedData = data.map(mapToAchievement);
+        setAchievements(mappedData);
+      }
+    } catch (error) {
+      console.error('Error fetching achievements:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to load achievement information',
+        variant: 'destructive'
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
-  const createAchievement = useMutation({
-    mutationFn: async (newAchievement: Omit<Achievement, 'id'>) => {
+  // Save achievement
+  const saveAchievement = async (achievement: Omit<Achievement, 'id'>) => {
+    if (!targetProfileId) return false;
+    
+    try {
+      setIsSaving(true);
+      
+      // Convert to database format
+      const dbData = mapToAchievementDB(achievement, targetProfileId);
+      
       const { data, error } = await supabase
         .from('achievements')
-        .insert({
-          profile_id: profileId,
-          title: newAchievement.title,
-          description: newAchievement.description,
-          date: newAchievement.date instanceof Date ? newAchievement.date.toISOString().split('T')[0] : newAchievement.date,
-        })
-        .select()
-        .single();
-
+        .insert(dbData)
+        .select();
+      
       if (error) throw error;
-      return data;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['achievements', profileId] });
+      
+      // Update local state with the new achievement entry
+      if (data && data.length > 0) {
+        const newAchievement = mapToAchievement(data[0] as AchievementDB);
+        setAchievements(prev => [...prev, newAchievement]);
+      }
+      
       toast({
         title: 'Success',
-        description: 'Achievement added successfully',
+        description: 'Achievement has been added',
       });
-    },
-    onError: () => {
+      
+      return true;
+    } catch (error) {
+      console.error('Error saving achievement:', error);
       toast({
         title: 'Error',
         description: 'Failed to add achievement',
-        variant: 'destructive',
+        variant: 'destructive'
       });
-    },
-  });
+      return false;
+    } finally {
+      setIsSaving(false);
+    }
+  };
 
-  const updateAchievement = useMutation({
-    mutationFn: async ({ id, updates }: { id: string; updates: Partial<Omit<Achievement, 'id'>> }) => {
-      const updateData: any = { ...updates };
-      if (updateData.date) {
-        updateData.date = updateData.date instanceof Date ? updateData.date.toISOString().split('T')[0] : updateData.date;
-      }
-
-      const { data, error } = await supabase
+  // Update achievement
+  const updateAchievement = async (id: string, achievement: Partial<Achievement>) => {
+    if (!targetProfileId) return false;
+    
+    try {
+      setIsSaving(true);
+      
+      // Convert partial achievement data to database format
+      const dbData: Partial<AchievementDB> = {};
+      
+      if (achievement.title) dbData.title = achievement.title;
+      if (achievement.description !== undefined) dbData.description = achievement.description;
+      if (achievement.date) dbData.date = achievement.date;
+      
+      dbData.updated_at = new Date().toISOString();
+      
+      const { error } = await supabase
         .from('achievements')
-        .update(updateData)
+        .update(dbData)
         .eq('id', id)
-        .select()
-        .single();
-
+        .eq('profile_id', targetProfileId);
+      
       if (error) throw error;
-      return data;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['achievements', profileId] });
+      
+      // Update local state
+      setAchievements(prev => 
+        prev.map(item => item.id === id ? { ...item, ...achievement } : item)
+      );
+      
       toast({
         title: 'Success',
-        description: 'Achievement updated successfully',
+        description: 'Achievement has been updated',
       });
-    },
-    onError: () => {
+      
+      return true;
+    } catch (error) {
+      console.error('Error updating achievement:', error);
       toast({
         title: 'Error',
         description: 'Failed to update achievement',
-        variant: 'destructive',
+        variant: 'destructive'
       });
-    },
-  });
+      return false;
+    } finally {
+      setIsSaving(false);
+    }
+  };
 
-  const deleteAchievement = useMutation({
-    mutationFn: async (id: string) => {
+  // Delete achievement
+  const deleteAchievement = async (id: string) => {
+    if (!targetProfileId) return false;
+    
+    try {
       const { error } = await supabase
         .from('achievements')
         .delete()
-        .eq('id', id);
-
+        .eq('id', id)
+        .eq('profile_id', targetProfileId);
+      
       if (error) throw error;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['achievements', profileId] });
+      
+      // Update local state
+      setAchievements(prev => prev.filter(item => item.id !== id));
+      
       toast({
         title: 'Success',
-        description: 'Achievement deleted successfully',
+        description: 'Achievement has been removed',
       });
-    },
-    onError: () => {
+      
+      return true;
+    } catch (error) {
+      console.error('Error deleting achievement:', error);
       toast({
         title: 'Error',
-        description: 'Failed to delete achievement',
-        variant: 'destructive',
+        description: 'Failed to remove achievement',
+        variant: 'destructive'
       });
-    },
-  });
+      return false;
+    }
+  };
+
+  // Load achievements data
+  useEffect(() => {
+    if (targetProfileId) {
+      fetchAchievements();
+    }
+  }, [targetProfileId]);
 
   return {
     achievements,
     isLoading,
-    createAchievement,
+    isSaving,
+    saveAchievement,
     updateAchievement,
-    deleteAchievement,
-    isCreating: createAchievement.isPending,
-    isUpdating: updateAchievement.isPending,
-    isDeleting: deleteAchievement.isPending,
+    deleteAchievement
   };
-};
+}

@@ -1,5 +1,5 @@
 
-import React, { useState, useCallback } from 'react';
+import React, { useState } from 'react';
 import { startOfMonth, endOfMonth, isWithinInterval } from 'date-fns';
 import { useDraggable } from '@dnd-kit/core';
 import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuTrigger } from '@/components/ui/context-menu';
@@ -51,24 +51,6 @@ export const ForecastedProjectBar: React.FC<ForecastedProjectBarProps> = ({
     },
   });
 
-  // Use useCallback for better performance
-  const handleMouseEnter = useCallback(() => {
-    setIsHovered(true);
-  }, []);
-
-  const handleMouseLeave = useCallback(() => {
-    setIsHovered(false);
-  }, []);
-
-  const handleClick = useCallback((e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (e.ctrlKey || e.metaKey) {
-      onSelect();
-    } else {
-      onEdit();
-    }
-  }, [onSelect, onEdit]);
-
   const getProjectBarStyle = (project: ForecastedProject, month: Date) => {
     if (!project.startDate) return null;
     
@@ -112,7 +94,7 @@ export const ForecastedProjectBar: React.FC<ForecastedProjectBarProps> = ({
                 className={`absolute rounded text-xs text-white flex items-center justify-between overflow-hidden shadow-sm cursor-pointer transition-all duration-200 border-2 border-dashed ${
                   isSelected ? 'ring-2 ring-white shadow-lg' : ''
                 } ${
-                  isHovered ? 'shadow-lg scale-105' : ''
+                  isHovered ? 'shadow-lg scale-105 z-10' : ''
                 } ${
                   isDragging ? 'opacity-50' : ''
                 }`}
@@ -123,12 +105,18 @@ export const ForecastedProjectBar: React.FC<ForecastedProjectBarProps> = ({
                   top: `${index * 30}px`,
                   height: '24px',
                   fontSize: '10px',
-                  fontWeight: '500',
-                  zIndex: 20 // Higher z-index for project bars
+                  fontWeight: '500'
                 }}
-                onClick={handleClick}
-                onMouseEnter={handleMouseEnter}
-                onMouseLeave={handleMouseLeave}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  if (e.ctrlKey || e.metaKey) {
+                    onSelect();
+                  } else {
+                    onEdit();
+                  }
+                }}
+                onMouseEnter={() => setIsHovered(true)}
+                onMouseLeave={() => setIsHovered(false)}
                 {...attributes}
               >
                 <span className="truncate px-2 flex-1 italic">{project.name}</span>

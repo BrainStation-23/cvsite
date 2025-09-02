@@ -1,138 +1,269 @@
 
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
+import { useState, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
 import { Experience } from '@/types';
 
-export const useExperience = (profileId: string) => {
-  const queryClient = useQueryClient();
+// Type for database experience record format
+type ExperienceDB = {
+  id: string;
+  profile_id: string;
+  company_name: string;
+  designation?: string;
+  description?: string;
+  start_date: string;
+  end_date?: string;
+  is_current?: boolean;
+  created_at: string;
+  updated_at: string;
+};
+
+// Map from database format to application model
+const mapToExperience = (data: ExperienceDB): Experience => ({
+  id: data.id,
+  companyName: data.company_name,
+  designation: data.designation || '',
+  description: data.description || '',
+  startDate: data.start_date,
+  endDate: data.end_date,
+  isCurrent: data.is_current || false
+});
+
+// Map from application model to database format
+const mapToExperienceDB = (exp: Omit<Experience, 'id'>, profileId: string) => ({
+  profile_id: profileId,
+  company_name: exp.companyName,
+  designation: exp.designation,
+  description: exp.description,
+  start_date: exp.startDate,
+  end_date: exp.endDate,
+  is_current: exp.isCurrent || false
+});
+
+export function useExperience(profileId?: string) {
+  const { user } = useAuth();
   const { toast } = useToast();
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
+  const [experiences, setExperiences] = useState<Experience[]>([]);
 
-  const { data: experience = [], isLoading } = useQuery({
-    queryKey: ['experience', profileId],
-    queryFn: async () => {
+  // Use provided profileId or fallback to auth user id
+  const targetProfileId = profileId || user?.id;
+
+  // Fetch experiences
+  const fetchExperiences = async () => {
+    if (!targetProfileId) {
+      setIsLoading(false);
+      return;
+    }
+    
+    try {
+      setIsLoading(true);
+      console.log('Fetching experiences for profile:', targetProfileId);
       const { data, error } = await supabase
-        .from('experience')
+        .from('experiences')
         .select('*')
-        .eq('profile_id', profileId)
+        .eq('profile_id', targetProfileId)
         .order('start_date', { ascending: false });
-
+      
       if (error) throw error;
-      return data as Experience[];
-    },
-    enabled: !!profileId
-  });
+      
+      if (data) {
+        // Map database records to application model format
+        const mappedData = data.map(mapToExperience);
+        console.log('Fetched experiences:', mappedData);
+        setExperiences(mappedData);
+      }
+    } catch (error) {
+      console.error('Error fetching experiences:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to load experience information',
+        variant: 'destructive'
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
-  const createExperience = useMutation({
-    mutationFn: async (newExperience: Omit<Experience, 'id'>) => {
+  // Save experience - only allow if editing own profile or admin/manager
+  const saveExperience = async (experience: Omit<Experience, 'id'>) => {
+    if (!targetProfileId) return false;
+    
+    // Check if user can edit this profile
+    if (targetProfileId !== user?.id && user?.role !== 'admin' && user?.role !== 'manager') {
+      toast({
+        title: 'Permission Denied',
+        description: 'You do not have permission to edit this profile',
+        variant: 'destructive'
+      });
+      return false;
+    }
+    
+    try {
+      setIsSaving(true);
+      
+      // Convert to database format
+      const dbData = mapToExperienceDB(experience, targetProfileId);
+      
       const { data, error } = await supabase
-        .from('experience')
-        .insert({
-          profile_id: profileId,
-          company_name: newExperience.companyName,
-          designation: newExperience.designation,
-          description: newExperience.description,
-          start_date: newExperience.startDate instanceof Date ? newExperience.startDate.toISOString().split('T')[0] : newExperience.startDate,
-          end_date: newExperience.endDate ? (newExperience.endDate instanceof Date ? newExperience.endDate.toISOString().split('T')[0] : newExperience.endDate) : null,
-          is_current: newExperience.isCurrent,
-        })
-        .select()
-        .single();
-
+        .from('experiences')
+        .insert(dbData)
+        .select();
+      
       if (error) throw error;
-      return data;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['experience', profileId] });
+      
+      // Update local state with the new experience entry
+      if (data && data.length > 0) {
+        const newExperience = mapToExperience(data[0] as ExperienceDB);
+        setExperiences(prev => [...prev, newExperience]);
+      }
+      
       toast({
         title: 'Success',
-        description: 'Experience added successfully',
+        description: 'Experience has been added',
       });
-    },
-    onError: () => {
+      
+      return true;
+    } catch (error) {
+      console.error('Error saving experience:', error);
       toast({
         title: 'Error',
         description: 'Failed to add experience',
-        variant: 'destructive',
+        variant: 'destructive'
       });
-    },
-  });
+      return false;
+    } finally {
+      setIsSaving(false);
+    }
+  };
 
-  const updateExperience = useMutation({
-    mutationFn: async ({ id, updates }: { id: string; updates: Partial<Omit<Experience, 'id'>> }) => {
-      const updateData: any = { ...updates };
-      if (updateData.startDate) {
-        updateData.start_date = updateData.startDate instanceof Date ? updateData.startDate.toISOString().split('T')[0] : updateData.startDate;
-        delete updateData.startDate;
+  // Update experience - only allow if editing own profile or admin/manager
+  const updateExperience = async (id: string, experience: Partial<Experience>) => {
+    if (!targetProfileId) return false;
+    
+    // Check if user can edit this profile
+    if (targetProfileId !== user?.id && user?.role !== 'admin' && user?.role !== 'manager') {
+      toast({
+        title: 'Permission Denied',
+        description: 'You do not have permission to edit this profile',
+        variant: 'destructive'
+      });
+      return false;
+    }
+    
+    try {
+      setIsSaving(true);
+      
+      // Convert partial experience data to database format
+      const dbData: Partial<ExperienceDB> = {};
+      
+      if (experience.companyName) dbData.company_name = experience.companyName;
+      if (experience.designation !== undefined) {
+        dbData.designation = experience.designation;
       }
-      if (updateData.endDate) {
-        updateData.end_date = updateData.endDate instanceof Date ? updateData.endDate.toISOString().split('T')[0] : updateData.endDate;
-        delete updateData.endDate;
+      if (experience.description !== undefined) dbData.description = experience.description;
+      if (experience.startDate) dbData.start_date = experience.startDate;
+      
+      if (experience.endDate) {
+        dbData.end_date = experience.endDate;
+      } else if (experience.endDate === null || experience.endDate === undefined) {
+        dbData.end_date = null;
       }
-      if (updateData.companyName) {
-        updateData.company_name = updateData.companyName;
-        delete updateData.companyName;
-      }
-
-      const { data, error } = await supabase
-        .from('experience')
-        .update(updateData)
+      
+      if (experience.isCurrent !== undefined) dbData.is_current = experience.isCurrent;
+      
+      dbData.updated_at = new Date().toISOString();
+      
+      const { error } = await supabase
+        .from('experiences')
+        .update(dbData)
         .eq('id', id)
-        .select()
-        .single();
-
+        .eq('profile_id', targetProfileId);
+      
       if (error) throw error;
-      return data;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['experience', profileId] });
+      
+      // Update local state
+      setExperiences(prev => 
+        prev.map(exp => exp.id === id ? { ...exp, ...experience } : exp)
+      );
+      
       toast({
         title: 'Success',
-        description: 'Experience updated successfully',
+        description: 'Experience has been updated',
       });
-    },
-    onError: () => {
+      
+      return true;
+    } catch (error) {
+      console.error('Error updating experience:', error);
       toast({
         title: 'Error',
         description: 'Failed to update experience',
-        variant: 'destructive',
+        variant: 'destructive'
       });
-    },
-  });
+      return false;
+    } finally {
+      setIsSaving(false);
+    }
+  };
 
-  const deleteExperience = useMutation({
-    mutationFn: async (id: string) => {
+  // Delete experience - only allow if editing own profile or admin/manager
+  const deleteExperience = async (id: string) => {
+    if (!targetProfileId) return false;
+    
+    // Check if user can edit this profile
+    if (targetProfileId !== user?.id && user?.role !== 'admin' && user?.role !== 'manager') {
+      toast({
+        title: 'Permission Denied',
+        description: 'You do not have permission to edit this profile',
+        variant: 'destructive'
+      });
+      return false;
+    }
+    
+    try {
       const { error } = await supabase
-        .from('experience')
+        .from('experiences')
         .delete()
-        .eq('id', id);
-
+        .eq('id', id)
+        .eq('profile_id', targetProfileId);
+      
       if (error) throw error;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['experience', profileId] });
+      
+      // Update local state
+      setExperiences(prev => prev.filter(exp => exp.id !== id));
+      
       toast({
         title: 'Success',
-        description: 'Experience deleted successfully',
+        description: 'Experience has been removed',
       });
-    },
-    onError: () => {
+      
+      return true;
+    } catch (error) {
+      console.error('Error deleting experience:', error);
       toast({
         title: 'Error',
-        description: 'Failed to delete experience',
-        variant: 'destructive',
+        description: 'Failed to remove experience',
+        variant: 'destructive'
       });
-    },
-  });
+      return false;
+    }
+  };
+
+  // Load experiences data
+  useEffect(() => {
+    if (targetProfileId) {
+      fetchExperiences();
+    }
+  }, [targetProfileId]);
 
   return {
-    experience,
+    experiences,
     isLoading,
-    createExperience,
+    isSaving,
+    saveExperience,
     updateExperience,
-    deleteExperience,
-    isCreating: createExperience.isPending,
-    isUpdating: updateExperience.isPending,
-    isDeleting: deleteExperience.isPending,
+    deleteExperience
   };
-};
+}

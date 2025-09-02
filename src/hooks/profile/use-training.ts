@@ -1,142 +1,231 @@
-
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
+import { useState, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
 import { Training } from '@/types';
 
-export const useTraining = (profileId: string) => {
-  const queryClient = useQueryClient();
+// Type for database training record format
+type TrainingDB = {
+  id: string;
+  profile_id: string;
+  title: string;
+  provider: string;
+  description?: string;
+  certification_date: string;
+  certificate_url?: string;
+  is_renewable: boolean;
+  expiry_date?: string;
+  created_at: string;
+  updated_at: string;
+};
+
+// Map from database format to application model
+const mapToTraining = (data: TrainingDB): Training => ({
+  id: data.id,
+  title: data.title,
+  provider: data.provider,
+  description: data.description || '',
+  date: data.certification_date,
+  certificateUrl: data.certificate_url,
+  isRenewable: data.is_renewable || false,
+  expiryDate: data.expiry_date ? data.expiry_date : undefined
+});
+
+// Map from application model to database format
+const mapToTrainingDB = (training: Omit<Training, 'id'>, profileId: string) => ({
+  profile_id: profileId,
+  title: training.title,
+  provider: training.provider,
+  description: training.description || null,
+  certification_date: training.date,
+  certificate_url: training.certificateUrl || null,
+  is_renewable: training.isRenewable || false,
+  expiry_date: training.expiryDate ? training.expiryDate : null
+});
+
+export function useTraining(profileId?: string) {
+  const { user } = useAuth();
   const { toast } = useToast();
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
+  const [trainings, setTrainings] = useState<Training[]>([]);
 
-  const { data: training = [], isLoading } = useQuery({
-    queryKey: ['training', profileId],
-    queryFn: async () => {
+  // Use provided profileId or fallback to auth user id
+  const targetProfileId = profileId || user?.id;
+
+  // Fetch trainings
+  const fetchTrainings = async () => {
+    if (!targetProfileId) return;
+    
+    try {
+      setIsLoading(true);
       const { data, error } = await supabase
-        .from('training')
+        .from('trainings')
         .select('*')
-        .eq('profile_id', profileId)
-        .order('date', { ascending: false });
-
+        .eq('profile_id', targetProfileId)
+        .order('certification_date', { ascending: false });
+      
       if (error) throw error;
-      return data as Training[];
-    },
-    enabled: !!profileId
-  });
+      
+      if (data) {
+        // Map database records to application model format
+        const mappedData = data.map(mapToTraining);
+        setTrainings(mappedData);
+      }
+    } catch (error) {
+      console.error('Error fetching trainings:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to load training information',
+        variant: 'destructive'
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
-  const createTraining = useMutation({
-    mutationFn: async (newTraining: Omit<Training, 'id'>) => {
+  // Save training
+  const saveTraining = async (training: Omit<Training, 'id'>) => {
+    if (!targetProfileId) return false;
+    
+    try {
+      setIsSaving(true);
+      
+      // Convert to database format
+      const dbData = mapToTrainingDB(training, targetProfileId);
+      
       const { data, error } = await supabase
-        .from('training')
-        .insert({
-          profile_id: profileId,
-          title: newTraining.title,
-          provider: newTraining.provider,
-          description: newTraining.description || '',
-          date: newTraining.date instanceof Date ? newTraining.date.toISOString().split('T')[0] : newTraining.date,
-          certificate_url: newTraining.certificateUrl || '',
-          is_renewable: newTraining.isRenewable || false,
-          expiry_date: newTraining.expiryDate ? (newTraining.expiryDate instanceof Date ? newTraining.expiryDate.toISOString().split('T')[0] : newTraining.expiryDate) : null,
-        })
-        .select()
-        .single();
-
+        .from('trainings')
+        .insert(dbData)
+        .select();
+      
       if (error) throw error;
-      return data;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['training', profileId] });
+      
+      // Update local state with the new training entry
+      if (data && data.length > 0) {
+        const newTraining = mapToTraining(data[0] as TrainingDB);
+        setTrainings(prev => [...prev, newTraining]);
+      }
+      
       toast({
         title: 'Success',
-        description: 'Training added successfully',
+        description: 'Training has been added',
       });
-    },
-    onError: () => {
+      
+      return true;
+    } catch (error) {
+      console.error('Error saving training:', error);
       toast({
         title: 'Error',
         description: 'Failed to add training',
-        variant: 'destructive',
+        variant: 'destructive'
       });
-    },
-  });
+      return false;
+    } finally {
+      setIsSaving(false);
+    }
+  };
 
-  const updateTraining = useMutation({
-    mutationFn: async ({ id, updates }: { id: string; updates: Partial<Omit<Training, 'id'>> }) => {
-      const updateData: any = { ...updates };
-      if (updateData.date) {
-        updateData.date = updateData.date instanceof Date ? updateData.date.toISOString().split('T')[0] : updateData.date;
+  // Update training
+  const updateTraining = async (id: string, training: Partial<Training>) => {
+    if (!targetProfileId) return false;
+    
+    try {
+      setIsSaving(true);
+      
+      // Convert partial training data to database format
+      const dbData: Partial<TrainingDB> = {};
+      
+      if (training.title) dbData.title = training.title;
+      if (training.provider) dbData.provider = training.provider;
+      if (training.description !== undefined) dbData.description = training.description;
+      if (training.date) dbData.certification_date = training.date;
+      if (training.certificateUrl !== undefined) dbData.certificate_url = training.certificateUrl;
+      if (training.isRenewable !== undefined) dbData.is_renewable = training.isRenewable;
+      if (training.expiryDate !== undefined) {
+        dbData.expiry_date = training.expiryDate ? training.expiryDate : null;
       }
-      if (updateData.expiryDate) {
-        updateData.expiry_date = updateData.expiryDate instanceof Date ? updateData.expiryDate.toISOString().split('T')[0] : updateData.expiryDate;
-        delete updateData.expiryDate;
-      }
-      if (updateData.certificateUrl !== undefined) {
-        updateData.certificate_url = updateData.certificateUrl;
-        delete updateData.certificateUrl;
-      }
-      if (updateData.isRenewable !== undefined) {
-        updateData.is_renewable = updateData.isRenewable;
-        delete updateData.isRenewable;
-      }
-
-      const { data, error } = await supabase
-        .from('training')
-        .update(updateData)
+      
+      dbData.updated_at = new Date().toISOString();
+      
+      const { error } = await supabase
+        .from('trainings')
+        .update(dbData)
         .eq('id', id)
-        .select()
-        .single();
-
+        .eq('profile_id', targetProfileId);
+      
       if (error) throw error;
-      return data;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['training', profileId] });
+      
+      // Update local state
+      setTrainings(prev => 
+        prev.map(item => item.id === id ? { ...item, ...training } : item)
+      );
+      
       toast({
         title: 'Success',
-        description: 'Training updated successfully',
+        description: 'Training has been updated',
       });
-    },
-    onError: () => {
+      
+      return true;
+    } catch (error) {
+      console.error('Error updating training:', error);
       toast({
         title: 'Error',
         description: 'Failed to update training',
-        variant: 'destructive',
+        variant: 'destructive'
       });
-    },
-  });
+      return false;
+    } finally {
+      setIsSaving(false);
+    }
+  };
 
-  const deleteTraining = useMutation({
-    mutationFn: async (id: string) => {
+  // Delete training
+  const deleteTraining = async (id: string) => {
+    if (!targetProfileId) return false;
+    
+    try {
       const { error } = await supabase
-        .from('training')
+        .from('trainings')
         .delete()
-        .eq('id', id);
-
+        .eq('id', id)
+        .eq('profile_id', targetProfileId);
+      
       if (error) throw error;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['training', profileId] });
+      
+      // Update local state
+      setTrainings(prev => prev.filter(item => item.id !== id));
+      
       toast({
         title: 'Success',
-        description: 'Training deleted successfully',
+        description: 'Training has been removed',
       });
-    },
-    onError: () => {
+      
+      return true;
+    } catch (error) {
+      console.error('Error deleting training:', error);
       toast({
         title: 'Error',
-        description: 'Failed to delete training',
-        variant: 'destructive',
+        description: 'Failed to remove training',
+        variant: 'destructive'
       });
-    },
-  });
+      return false;
+    }
+  };
+
+  // Load trainings data
+  useEffect(() => {
+    if (targetProfileId) {
+      fetchTrainings();
+    }
+  }, [targetProfileId]);
 
   return {
-    training,
+    trainings,
     isLoading,
-    createTraining,
+    isSaving,
+    saveTraining,
     updateTraining,
-    deleteTraining,
-    isCreating: createTraining.isPending,
-    isUpdating: updateTraining.isPending,
-    isDeleting: deleteTraining.isPending,
+    deleteTraining
   };
-};
+}
