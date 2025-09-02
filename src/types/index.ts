@@ -27,8 +27,8 @@ export interface Experience {
   companyName: string;
   designation: string;
   description?: string;
-  startDate: string;
-  endDate?: string;
+  startDate: string | Date;
+  endDate?: string | Date;
   isCurrent?: boolean;
 }
 

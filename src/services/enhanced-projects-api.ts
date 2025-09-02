@@ -1,6 +1,6 @@
 
 import { supabase } from '@/integrations/supabase/client';
-import { Project, ProjectsResponse, ProjectFilters, AdvancedProjectFilters } from '@/types/projects';
+import {  ProjectsResponse, ProjectFilters } from '@/types/projects';
 
 export class EnhancedProjectsApiService {
   // Use the new search_projects RPC function with enhanced filtering

@@ -15,6 +15,7 @@ interface OdooProject {
   name: string;
   description: string | null;
   projectLevel: string | null;
+  projectBillType: string | null;
   projectType: string;
   projectValue: number;
   active: boolean;
@@ -52,6 +53,7 @@ Deno.serve(async (req) => {
             description
             projectLevel
             projectType
+            projectBillType
             projectValue
             active
             projectManager {
@@ -89,6 +91,7 @@ Deno.serve(async (req) => {
       description: project.description,
       projectLevel: project.projectLevel,
       projectType: project.projectType,
+      projectBillType: project.projectBillType,
       projectValue: project.projectValue,
       active: project.active,
       managerName: project.projectManager?.name || '',

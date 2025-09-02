@@ -1008,6 +1008,7 @@ export type Database = {
           description: string | null
           id: string
           is_active: boolean
+          project_bill_type: string | null
           project_level: string | null
           project_manager: string | null
           project_name: string
@@ -1021,6 +1022,7 @@ export type Database = {
           description?: string | null
           id?: string
           is_active?: boolean
+          project_bill_type?: string | null
           project_level?: string | null
           project_manager?: string | null
           project_name: string
@@ -1034,6 +1036,7 @@ export type Database = {
           description?: string | null
           id?: string
           is_active?: boolean
+          project_bill_type?: string | null
           project_level?: string | null
           project_manager?: string | null
           project_name?: string
@@ -1517,6 +1520,136 @@ export type Database = {
         }
         Relationships: []
       }
+      resource_planning_enriched_view: {
+        Row: {
+          bill_type_color_code: string | null
+          bill_type_id: string | null
+          bill_type_is_billable: boolean | null
+          bill_type_is_support: boolean | null
+          bill_type_name: string | null
+          bill_type_non_billed: boolean | null
+          billing_percentage: number | null
+          client_name: string | null
+          created_at: string | null
+          current_designation: string | null
+          engagement_complete: boolean | null
+          engagement_percentage: number | null
+          engagement_start_date: string | null
+          first_name: string | null
+          forecasted_project: string | null
+          full_name: string | null
+          id: string | null
+          last_name: string | null
+          manager_display_first_name: string | null
+          manager_display_last_name: string | null
+          manager_employee_id: string | null
+          manager_first_name: string | null
+          manager_full_name: string | null
+          manager_last_name: string | null
+          profile_email: string | null
+          profile_employee_id: string | null
+          profile_first_name: string | null
+          profile_id: string | null
+          profile_image: string | null
+          profile_last_name: string | null
+          profile_manager_id: string | null
+          profile_sbu_id: string | null
+          project_bill_type: string | null
+          project_budget: number | null
+          project_description: string | null
+          project_id: string | null
+          project_is_active: boolean | null
+          project_level: string | null
+          project_manager_display_first_name: string | null
+          project_manager_display_last_name: string | null
+          project_manager_employee_id: string | null
+          project_manager_first_name: string | null
+          project_manager_full_name: string | null
+          project_manager_id: string | null
+          project_manager_last_name: string | null
+          project_name: string | null
+          project_type_name: string | null
+          release_date: string | null
+          sbu_head_email: string | null
+          sbu_head_name: string | null
+          sbu_name: string | null
+          search_text: string | null
+          updated_at: string | null
+          weekly_validation: boolean | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "general_information_current_designation_fkey"
+            columns: ["current_designation"]
+            isOneToOne: false
+            referencedRelation: "designations"
+            referencedColumns: ["name"]
+          },
+          {
+            foreignKeyName: "profiles_manager_fkey"
+            columns: ["profile_manager_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "profiles_manager_fkey"
+            columns: ["profile_manager_id"]
+            isOneToOne: false
+            referencedRelation: "resource_availability_view"
+            referencedColumns: ["profile_id"]
+          },
+          {
+            foreignKeyName: "profiles_sbu_id_fkey"
+            columns: ["profile_sbu_id"]
+            isOneToOne: false
+            referencedRelation: "sbus"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "projects_management_project_manager_fkey"
+            columns: ["project_manager_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "projects_management_project_manager_fkey"
+            columns: ["project_manager_id"]
+            isOneToOne: false
+            referencedRelation: "resource_availability_view"
+            referencedColumns: ["profile_id"]
+          },
+          {
+            foreignKeyName: "resource_planning_bill_type_id_fkey"
+            columns: ["bill_type_id"]
+            isOneToOne: false
+            referencedRelation: "bill_types"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "resource_planning_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "resource_planning_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "resource_availability_view"
+            referencedColumns: ["profile_id"]
+          },
+          {
+            foreignKeyName: "resource_planning_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects_management"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
       bulk_sync_odoo_employees: {
@@ -1653,6 +1786,8 @@ export type Database = {
           min_billing_percentage?: number
           min_engagement_percentage?: number
           page_number?: number
+          project_bill_type_filter?: string
+          project_level_filter?: string
           project_search?: string
           sbu_filter?: string
           search_query?: string
@@ -1801,6 +1936,8 @@ export type Database = {
           min_billing_percentage?: number
           min_engagement_percentage?: number
           page_number?: number
+          project_bill_type_filter?: string
+          project_level_filter?: string
           project_search?: string
           sbu_filter?: string
           search_query?: string

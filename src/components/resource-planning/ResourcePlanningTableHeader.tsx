@@ -56,10 +56,10 @@ export const ResourcePlanningTableHeader: React.FC<ResourcePlanningTableHeaderPr
             <div className="flex flex-col gap-1">
               <Button
                 variant="ghost"
-                onClick={() => onSort('profile.last_name')}
+                onClick={() => onSort('last_name')}
                 className="flex items-center gap-2 p-0 h-auto font-medium justify-start"
               >
-                Employee {getSortIcon('profile.last_name')}
+                Employee {getSortIcon('last_name')}
               </Button>
               <Button
                 variant="ghost"
@@ -74,21 +74,37 @@ export const ResourcePlanningTableHeader: React.FC<ResourcePlanningTableHeaderPr
           <TableHead>
             <Button
               variant="ghost"
-              onClick={() => onSort('bill_type')}
+              onClick={() => onSort('bill_type_name')}
               className="flex items-center gap-2 p-0 h-auto font-medium justify-start"
             >
-              Bill Type {getSortIcon('bill_type')}
+              Bill Type {getSortIcon('bill_type_name')}
             </Button>
           </TableHead>
           
           <TableHead>
-            <Button
-              variant="ghost"
-              onClick={() => onSort('project')}
-              className="flex items-center gap-2 p-0 h-auto font-medium justify-start"
-            >
-              Project {getSortIcon('project')}
-            </Button>
+            <div className="flex flex-col gap-1">
+              <Button
+                variant="ghost"
+                onClick={() => onSort('project_name')}
+                className="flex items-center gap-2 p-0 h-auto font-medium justify-start"
+              >
+                Project {getSortIcon('project_name')}
+              </Button>
+              <Button
+                variant="ghost"
+                onClick={() => onSort('project_level')}
+                className="flex items-center gap-2 p-0 h-auto font-medium justify-start"
+              >
+                Project Level {getSortIcon('project_level')}
+              </Button>
+              <Button
+                variant="ghost"
+                onClick={() => onSort('project_bill_type')}
+                className="flex items-center gap-2 p-0 h-auto font-medium justify-start"
+              >
+                Project Bill Type {getSortIcon('project_bill_type')}
+              </Button>
+            </div>
           </TableHead>
           
           <TableHead>

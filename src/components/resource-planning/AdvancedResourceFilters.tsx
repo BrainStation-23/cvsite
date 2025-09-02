@@ -11,6 +11,7 @@ import ProjectSearchCombobox from './ProjectSearchCombobox';
 import DatePicker from '@/components/admin/user/DatePicker';
 
 const STORAGE_KEY = 'resource-calendar/planning/advanced-filters';
+
 interface AdvancedFilters {
   billTypeFilter: string | null;
   projectSearch: string;
@@ -22,6 +23,8 @@ interface AdvancedFilters {
   startDateTo: string;
   endDateFrom: string;
   endDateTo: string;
+  projectLevelFilter: string | null;
+  projectBillTypeFilter: string | null;
 }
 
 function isBrowser() {
@@ -40,6 +43,8 @@ function readCache(): AdvancedFilters {
     startDateTo: '',
     endDateFrom: '',
     endDateTo: '',
+    projectLevelFilter: null,
+    projectBillTypeFilter: null,
   };
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
@@ -54,6 +59,8 @@ function readCache(): AdvancedFilters {
       startDateTo: '',
       endDateFrom: '',
       endDateTo: '',
+      projectLevelFilter: null,
+      projectBillTypeFilter: null,
     };
   } catch {
     return {
@@ -67,6 +74,8 @@ function readCache(): AdvancedFilters {
       startDateTo: '',
       endDateFrom: '',
       endDateTo: '',
+      projectLevelFilter: null,
+      projectBillTypeFilter: null,
     };
   }
 }
@@ -131,7 +140,6 @@ export const AdvancedResourceFilters: React.FC<AdvancedResourceFiltersProps> = (
     onClearFilters();
   };
 
-
   return (
     <Card className="mb-4">
       <Collapsible open={isOpen} onOpenChange={setIsOpen}>
@@ -170,6 +178,28 @@ export const AdvancedResourceFilters: React.FC<AdvancedResourceFiltersProps> = (
                   value={filters.projectSearch}
                   onValueChange={(value) => updateFilter('projectSearch', value || '')}
                   placeholder="Search projects..."
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="project-level-filter">Project Level</Label>
+                <Input
+                  id="project-level-filter"
+                  type="text"
+                  placeholder="Enter project level..."
+                  value={filters.projectLevelFilter || ''}
+                  onChange={(e) => updateFilter('projectLevelFilter', e.target.value || null)}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="project-bill-type-filter">Project Bill Type</Label>
+                <Input
+                  id="project-bill-type-filter"
+                  type="text"
+                  placeholder="Enter project bill type..."
+                  value={filters.projectBillTypeFilter || ''}
+                  onChange={(e) => updateFilter('projectBillTypeFilter', e.target.value || null)}
                 />
               </div>
 

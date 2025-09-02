@@ -21,6 +21,7 @@ interface Project {
   updated_at: string;
   description?: string | null;
   project_level?: string | null;
+  project_bill_type?: string | null;
   project_manager_profile?: {
     first_name: string | null;
     last_name: string | null;
