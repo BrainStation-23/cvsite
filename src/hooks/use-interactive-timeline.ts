@@ -10,6 +10,7 @@ interface Project {
   startDate: string;
   endDate: string | null;
   engagementPercentage: number;
+  isForecasted?: boolean;
 }
 
 interface EngagementData {
@@ -65,20 +66,34 @@ export const useInteractiveTimeline = () => {
     setSelectedProjects(new Set());
   }, []);
 
-  const handleEditProject = useCallback((resourceId: string, projectIndex: number) => {
+  const handleEditProject = useCallback((resourceId: string, projectIndex: number, project: Project) => {
+    console.log('Editing project:', { resourceId, projectIndex, project });
+    
     // Only allow editing of forecasted projects
+    if (!project.isForecasted) {
+      toast({
+        title: 'Cannot Edit',
+        description: 'Only forecasted projects can be edited.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
     setModalState({
       isOpen: true,
       mode: 'edit',
       data: {
+        id: project.id,
         profileId: resourceId,
-        engagementPercentage: 0, // Set to 0 as per requirements
-        engagementStartDate: format(new Date(), 'yyyy-MM-dd'),
+        forecastedProject: project.name,
+        engagementPercentage: project.engagementPercentage,
+        engagementStartDate: project.startDate,
+        releaseDate: project.endDate || undefined,
       },
     });
-  }, []);
+  }, [toast]);
 
-  const handleDuplicateProject = useCallback((resourceId: string, projectIndex: number) => {
+  const handleDuplicateProject = useCallback((resourceId: string, projectIndex: number, project: Project) => {
     // Create a new forecasted project for the next month
     const nextMonth = new Date();
     nextMonth.setMonth(nextMonth.getMonth() + 1);
@@ -88,7 +103,8 @@ export const useInteractiveTimeline = () => {
       mode: 'create',
       data: {
         profileId: resourceId,
-        engagementPercentage: 0, // Set to 0 as per requirements
+        forecastedProject: project.name,
+        engagementPercentage: project.engagementPercentage,
         engagementStartDate: format(startOfMonth(nextMonth), 'yyyy-MM-dd'),
       },
     });
@@ -98,17 +114,26 @@ export const useInteractiveTimeline = () => {
     });
   }, [toast]);
 
-  const handleDeleteProject = useCallback((resourceId: string, projectIndex: number) => {
+  const handleDeleteProject = useCallback((resourceId: string, projectIndex: number, project: Project) => {
+    if (!project.isForecasted) {
+      toast({
+        title: 'Cannot Delete',
+        description: 'Only forecasted projects can be deleted.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
     // Use custom confirmation dialog
     const confirmed = confirm('Are you sure you want to delete this forecasted assignment?');
-    if (confirmed) {
-      // In a real implementation, you'd need the actual engagement ID
+    if (confirmed && project.id) {
+      deleteResourcePlanning(project.id);
       toast({
         title: 'Forecast Deleted',
         description: 'The forecasted assignment has been removed.',
       });
     }
-  }, [toast]);
+  }, [toast, deleteResourcePlanning]);
 
   const handleCreateEngagement = useCallback((startDate: Date, resourceId: string) => {
     const monthStart = startOfMonth(startDate);
