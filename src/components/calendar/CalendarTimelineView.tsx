@@ -18,7 +18,6 @@ interface Project {
   endDate: string | null;
   engagementPercentage: number;
   isForecasted?: boolean;
-  billTypeId?: string;
 }
 
 interface ResourceData {
@@ -27,7 +26,6 @@ interface ResourceData {
   employeeId: string;
   projects: Project[];
   billTypeColorCode: string;
-  billTypeId: string | null;
 }
 
 interface CalendarTimelineViewProps {
@@ -91,8 +89,7 @@ export const CalendarTimelineView: React.FC<CalendarTimelineViewProps> = ({
           profileName: resource.profileName,
           employeeId: resource.employeeId,
           projects: [],
-          billTypeColorCode: resource.billTypeColorCode,
-          billTypeId: resource.billTypeId
+          billTypeColorCode: resource.billTypeColorCode
         });
       }
       
@@ -111,8 +108,7 @@ export const CalendarTimelineView: React.FC<CalendarTimelineViewProps> = ({
             startDate: resource.engagementStartDate || '',
             endDate: resource.releaseDate,
             engagementPercentage: resource.engagementPercentage || 0,
-            isForecasted: false,
-            billTypeId: resource.billTypeId
+            isForecasted: false
           });
         }
       }
@@ -130,8 +126,7 @@ export const CalendarTimelineView: React.FC<CalendarTimelineViewProps> = ({
             startDate: resource.engagementStartDate || '',
             endDate: resource.releaseDate,
             engagementPercentage: resource.engagementPercentage || 0,
-            isForecasted: true,
-            billTypeId: resource.billTypeId
+            isForecasted: true
           });
         }
       }
@@ -148,8 +143,7 @@ export const CalendarTimelineView: React.FC<CalendarTimelineViewProps> = ({
             startDate: resource.engagementStartDate || '',
             endDate: resource.releaseDate,
             engagementPercentage: resource.engagementPercentage || 0,
-            isForecasted: false,
-            billTypeId: resource.billTypeId
+            isForecasted: false
           });
         }
       }
