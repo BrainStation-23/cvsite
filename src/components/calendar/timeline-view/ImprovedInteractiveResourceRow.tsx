@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { ForecastedProjectBar } from './ForecastedProjectBar';
 import { ActualProjectBar } from './ActualProjectBar';
@@ -51,12 +50,8 @@ export const ImprovedInteractiveResourceRow: React.FC<ImprovedInteractiveResourc
   const actualProjects = resource.projects.filter(p => !p.isForecasted);
   const forecastedProjects = resource.projects.filter(p => p.isForecasted);
 
-  // Calculate row height based on max projects in any month
-  const maxProjectsPerMonth = Math.max(
-    actualProjects.length + forecastedProjects.length + 2, // +2 for empty forecast slots
-    4 // Minimum height for 4 slots
-  );
-  const rowHeight = Math.max(maxProjectsPerMonth * 35, 140);
+  // Fixed row height for consistency
+  const rowHeight = 160;
 
   return (
     <div 
@@ -64,7 +59,7 @@ export const ImprovedInteractiveResourceRow: React.FC<ImprovedInteractiveResourc
       style={{ gridTemplateColumns: `250px repeat(${months.length}, 1fr)` }}
     >
       {/* Employee Info */}
-      <div className="pr-4">
+      <div className="pr-4 flex flex-col justify-center">
         <div className="text-sm font-medium">{resource.profileName}</div>
         <div className="text-xs text-muted-foreground">{resource.employeeId}</div>
       </div>
@@ -84,29 +79,29 @@ export const ImprovedInteractiveResourceRow: React.FC<ImprovedInteractiveResourc
           >
             {/* Background zones */}
             <div className="absolute inset-0">
-              {/* Actual projects zone (top half) */}
+              {/* Actual projects zone (top 60%) */}
               <div 
-                className="absolute top-0 left-0 right-0 bg-muted/10 border-b border-dashed border-muted-foreground/20"
+                className="absolute top-0 left-0 right-0 bg-muted/5 border-b border-dashed border-muted-foreground/20"
                 style={{ height: `${rowHeight * 0.6}px` }}
               >
                 {isHovered && actualProjects.length === 0 && (
                   <div className="absolute inset-0 flex items-center justify-center">
                     <span className="text-xs text-muted-foreground bg-background/80 px-2 py-1 rounded">
-                      Actual Projects Zone
+                      Actual Projects (Read-only)
                     </span>
                   </div>
                 )}
               </div>
               
-              {/* Forecasted projects zone (bottom half) */}
+              {/* Forecasted projects zone (bottom 40%) */}
               <div 
-                className="absolute bottom-0 left-0 right-0 bg-primary/5"
+                className="absolute bottom-0 left-0 right-0 bg-primary/5 border-t border-dashed border-primary/20"
                 style={{ height: `${rowHeight * 0.4}px` }}
               >
                 {isHovered && forecastedProjects.length === 0 && (
                   <div className="absolute inset-0 flex items-center justify-center">
-                    <span className="text-xs text-muted-foreground bg-background/80 px-2 py-1 rounded">
-                      Forecasted Projects Zone
+                    <span className="text-xs text-primary/70 bg-background/80 px-2 py-1 rounded">
+                      Forecasted Projects (Click to add)
                     </span>
                   </div>
                 )}
@@ -114,9 +109,12 @@ export const ImprovedInteractiveResourceRow: React.FC<ImprovedInteractiveResourc
             </div>
 
             {/* Actual project bars (read-only) */}
-            <div className="absolute inset-0 p-1 pointer-events-none">
+            <div 
+              className="absolute inset-0 p-1"
+              style={{ height: `${rowHeight * 0.6}px` }}
+            >
               {actualProjects.map((project, idx) => (
-                <div key={`actual-${idx}`} className="pointer-events-auto">
+                <div key={`actual-${idx}`}>
                   <ActualProjectBar
                     project={project}
                     month={month}
@@ -128,20 +126,21 @@ export const ImprovedInteractiveResourceRow: React.FC<ImprovedInteractiveResourc
               ))}
             </div>
 
-            {/* Forecasted project bars (interactive) */}
+            {/* Forecasted project bars and slots */}
             <div 
-              className="absolute p-1 pointer-events-none"
+              className="absolute p-1"
               style={{ 
                 top: `${rowHeight * 0.6}px`,
                 left: 0,
                 right: 0,
-                bottom: 0
+                height: `${rowHeight * 0.4}px`
               }}
             >
+              {/* Existing forecasted projects */}
               {forecastedProjects.map((project, idx) => {
                 const projectKey = getProjectKey(resource.profileId, actualProjects.length + idx);
                 return (
-                  <div key={`forecasted-${idx}`} className="pointer-events-auto">
+                  <div key={`forecasted-${idx}`}>
                     <ForecastedProjectBar
                       project={project}
                       month={month}
@@ -158,17 +157,21 @@ export const ImprovedInteractiveResourceRow: React.FC<ImprovedInteractiveResourc
                 );
               })}
 
-              {/* Empty forecast slots */}
-              {Array.from({ length: 2 - forecastedProjects.length }, (_, slotIdx) => (
-                <ForecastSlot
-                  key={`slot-${slotIdx}`}
-                  month={month}
-                  resourceId={resource.profileId}
-                  onCreateForecast={onCreateForecast}
-                  isEmpty={true}
-                  slotIndex={forecastedProjects.length + slotIdx}
-                />
-              ))}
+              {/* Always show 2 forecast slots per month */}
+              {Array.from({ length: 2 }, (_, slotIdx) => {
+                // Only show the slot if there's no forecasted project in this position
+                const hasProjectInSlot = forecastedProjects.length > slotIdx;
+                return (
+                  <ForecastSlot
+                    key={`slot-${slotIdx}`}
+                    month={month}
+                    resourceId={resource.profileId}
+                    onCreateForecast={onCreateForecast}
+                    isEmpty={!hasProjectInSlot}
+                    slotIndex={slotIdx}
+                  />
+                );
+              })}
             </div>
           </div>
         );
