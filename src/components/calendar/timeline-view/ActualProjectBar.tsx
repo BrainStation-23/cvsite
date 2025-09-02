@@ -1,10 +1,13 @@
 
 import React, { useState } from 'react';
 import { startOfMonth, endOfMonth, isWithinInterval } from 'date-fns';
+import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuTrigger } from '@/components/ui/context-menu';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { Lock, Info } from 'lucide-react';
+import { Trash2 } from 'lucide-react';
+import { useResourcePlanningOperations } from '@/hooks/use-resource-planning-operations';
 
 interface ActualProject {
+  id?: string;
   name: string;
   startDate: string;
   endDate: string | null;
@@ -24,9 +27,21 @@ export const ActualProjectBar: React.FC<ActualProjectBarProps> = ({
   month,
   index,
   colorCode,
-  resourceId,
 }) => {
   const [isHovered, setIsHovered] = useState(false);
+  const { deleteResourcePlanning } = useResourcePlanningOperations();
+
+  const handleDelete = () => {
+    if (!project.id) {
+      console.warn('Cannot delete project without ID');
+      return;
+    }
+    
+    const confirmed = confirm('Are you sure you want to delete this assignment?');
+    if (confirmed) {
+      deleteResourcePlanning(project.id);
+    }
+  };
 
   const getProjectBarStyle = (project: ActualProject, month: Date) => {
     if (!project.startDate) return null;
@@ -62,45 +77,51 @@ export const ActualProjectBar: React.FC<ActualProjectBarProps> = ({
 
   return (
     <TooltipProvider>
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <div
-            className={`absolute rounded text-xs text-white flex items-center justify-between overflow-hidden shadow-sm cursor-default transition-all duration-200 ${
-              isHovered ? 'shadow-md' : ''
-            }`}
-            style={{
-              ...barStyle,
-              backgroundColor: `${colorCode}`, // Muted for actual projects
-              top: `${index * 30}px`,
-              height: '24px',
-              fontSize: '10px',
-              fontWeight: '400',
-              opacity: 1
-            }}
-            onMouseEnter={() => setIsHovered(true)}
-            onMouseLeave={() => setIsHovered(false)}
-          >
-            <span className="truncate px-2 flex-1">{project.name}</span>
-            <div className="px-1">
-              <Lock className="h-3 w-3 opacity-60" />
-            </div>
-          </div>
-        </TooltipTrigger>
-        <TooltipContent>
-          <div className="text-xs">
-            <div className="font-medium flex items-center gap-1">
-              <Info className="h-3 w-3" />
-              {project.name} (Actual)
-            </div>
-            <div>Engagement: {project.engagementPercentage}%</div>
-            <div>Start: {project.startDate}</div>
-            {project.endDate && <div>End: {project.endDate}</div>}
-            <div className="text-muted-foreground mt-1">
-              Read-only actual project assignment
-            </div>
-          </div>
-        </TooltipContent>
-      </Tooltip>
+      <ContextMenu>
+        <ContextMenuTrigger asChild>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <div
+                className={`absolute rounded text-xs text-white flex items-center overflow-hidden shadow-sm cursor-pointer transition-all duration-200 ${
+                  isHovered ? 'shadow-lg scale-105' : ''
+                }`}
+                style={{
+                  ...barStyle,
+                  backgroundColor: colorCode,
+                  top: `${index * 30}px`,
+                  height: '24px',
+                  fontSize: '10px',
+                  fontWeight: '500',
+                  zIndex: 10
+                }}
+                onMouseEnter={() => setIsHovered(true)}
+                onMouseLeave={() => setIsHovered(false)}
+              >
+                <span className="truncate px-2 flex-1">{project.name}</span>
+              </div>
+            </TooltipTrigger>
+            <TooltipContent>
+              <div className="text-xs">
+                <div className="font-medium">{project.name}</div>
+                <div>Engagement: {project.engagementPercentage}%</div>
+                <div>Start: {project.startDate}</div>
+                {project.endDate && <div>End: {project.endDate}</div>}
+                <div className="text-muted-foreground mt-1">
+                  Right-click for options
+                </div>
+              </div>
+            </TooltipContent>
+          </Tooltip>
+        </ContextMenuTrigger>
+        <ContextMenuContent>
+          {project.id && (
+            <ContextMenuItem onClick={handleDelete} className="text-destructive">
+              <Trash2 className="mr-2 h-4 w-4" />
+              Delete Assignment
+            </ContextMenuItem>
+          )}
+        </ContextMenuContent>
+      </ContextMenu>
     </TooltipProvider>
   );
 };

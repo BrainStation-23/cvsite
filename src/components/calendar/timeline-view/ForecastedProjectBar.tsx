@@ -1,12 +1,12 @@
 
 import React, { useState, useCallback } from 'react';
 import { startOfMonth, endOfMonth, isWithinInterval } from 'date-fns';
-import { useDraggable } from '@dnd-kit/core';
 import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuTrigger } from '@/components/ui/context-menu';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { Copy, Edit, Trash2, GripHorizontal } from 'lucide-react';
+import { Copy, Edit, Trash2 } from 'lucide-react';
 
 interface ForecastedProject {
+  id?: string;
   name: string;
   startDate: string;
   endDate: string | null;
@@ -31,7 +31,6 @@ export const ForecastedProjectBar: React.FC<ForecastedProjectBarProps> = ({
   month,
   index,
   colorCode,
-  resourceId,
   onEdit,
   onDuplicate,
   onDelete,
@@ -40,18 +39,6 @@ export const ForecastedProjectBar: React.FC<ForecastedProjectBarProps> = ({
 }) => {
   const [isHovered, setIsHovered] = useState(false);
 
-  const dragId = `forecasted-${resourceId}-${index}`;
-  const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
-    id: dragId,
-    data: {
-      type: 'forecasted-project',
-      project,
-      resourceId,
-      index,
-    },
-  });
-
-  // Use useCallback for better performance
   const handleMouseEnter = useCallback(() => {
     setIsHovered(true);
   }, []);
@@ -108,36 +95,26 @@ export const ForecastedProjectBar: React.FC<ForecastedProjectBarProps> = ({
           <Tooltip>
             <TooltipTrigger asChild>
               <div
-                ref={setNodeRef}
                 className={`absolute rounded text-xs text-white flex items-center justify-between overflow-hidden shadow-sm cursor-pointer transition-all duration-200 border-2 border-dashed ${
                   isSelected ? 'ring-2 ring-white shadow-lg' : ''
                 } ${
                   isHovered ? 'shadow-lg scale-105' : ''
-                } ${
-                  isDragging ? 'opacity-50' : ''
                 }`}
                 style={{
                   ...barStyle,
-                  backgroundColor: `${colorCode}E6`, // Slightly transparent for forecasted
+                  backgroundColor: `${colorCode}E6`,
                   borderColor: colorCode,
                   top: `${index * 30}px`,
                   height: '24px',
                   fontSize: '10px',
                   fontWeight: '500',
-                  zIndex: 20 // Higher z-index for project bars
+                  zIndex: 20
                 }}
                 onClick={handleClick}
                 onMouseEnter={handleMouseEnter}
                 onMouseLeave={handleMouseLeave}
-                {...attributes}
               >
                 <span className="truncate px-2 flex-1 italic">{project.name}</span>
-                <div 
-                  className="px-1 hover:bg-black/20 rounded cursor-grab active:cursor-grabbing"
-                  {...listeners}
-                >
-                  <GripHorizontal className="h-3 w-3" />
-                </div>
               </div>
             </TooltipTrigger>
             <TooltipContent>
