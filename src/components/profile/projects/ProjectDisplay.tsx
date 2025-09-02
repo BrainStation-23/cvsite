@@ -43,8 +43,8 @@ export const ProjectDisplay: React.FC<ProjectDisplayProps> = ({
   };
 
   // Helper function to format date for display
-  const formatDateForDisplay = (date: Date) => {
-    return format(date, 'MMM yyyy');
+  const formatDateForDisplay = (date: string | Date) => {
+    return format(new Date(date), 'MMM yyyy');
   };
 
   return (

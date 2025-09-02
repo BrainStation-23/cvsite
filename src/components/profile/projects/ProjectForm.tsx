@@ -29,9 +29,11 @@ export const ProjectForm: React.FC<ProjectFormProps> = ({
   onCancel
 }) => {
   const [startDate, setStartDate] = useState<Date | undefined>(
-    project?.startDate || new Date()
+    project?.startDate ? new Date(project.startDate) : new Date()
   );
-  const [endDate, setEndDate] = useState<Date | undefined>(project?.endDate);
+  const [endDate, setEndDate] = useState<Date | undefined>(
+    project?.endDate ? new Date(project.endDate) : undefined
+  );
   const [isCurrent, setIsCurrent] = useState(project?.isCurrent || false);
   const [techInput, setTechInput] = useState<string>('');
   const [technologies, setTechnologies] = useState<string[]>(

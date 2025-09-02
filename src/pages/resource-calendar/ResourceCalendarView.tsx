@@ -18,6 +18,8 @@ interface AdvancedFilters {
   startDateTo: string;
   endDateFrom: string;
   endDateTo: string;
+  projectLevelFilter: string | null;
+  projectBillTypeFilter: string | null;
 }
 
 const ResourceCalendarView: React.FC = () => {
@@ -43,6 +45,8 @@ const ResourceCalendarView: React.FC = () => {
     startDateTo: '',
     endDateFrom: '',
     endDateTo: '',
+    projectLevelFilter: null,
+    projectBillTypeFilter: null,
   });
 
   const clearFilters = () => {
@@ -64,6 +68,8 @@ const ResourceCalendarView: React.FC = () => {
       startDateTo: '',
       endDateFrom: '',
       endDateTo: '',
+      projectLevelFilter: null,
+      projectBillTypeFilter: null,
     });
   };
 
