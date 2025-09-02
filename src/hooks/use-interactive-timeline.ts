@@ -2,7 +2,7 @@
 import { useState, useCallback } from 'react';
 import { useResourcePlanningOperations } from './use-resource-planning-operations';
 import { useToast } from '@/hooks/use-toast';
-import { format, startOfMonth } from 'date-fns';
+import { format, startOfMonth, endOfMonth } from 'date-fns';
 
 interface Project {
   id?: string;
@@ -93,26 +93,37 @@ export const useInteractiveTimeline = () => {
     });
   }, [toast]);
 
-  const handleDuplicateProject = useCallback((resourceId: string, projectIndex: number, project: Project) => {
-    // Create a new forecasted project for the next month
-    const nextMonth = new Date();
-    nextMonth.setMonth(nextMonth.getMonth() + 1);
-    
-    setModalState({
-      isOpen: true,
-      mode: 'create',
-      data: {
-        profileId: resourceId,
-        forecastedProject: project.name,
-        engagementPercentage: project.engagementPercentage,
-        engagementStartDate: format(startOfMonth(nextMonth), 'yyyy-MM-dd'),
-      },
-    });
-    toast({
-      title: 'Duplicating Forecast',
-      description: 'Creating a new forecast for the next month.',
-    });
-  }, [toast]);
+  const handleDuplicateProject = useCallback(async (resourceId: string, projectIndex: number, project: Project) => {
+    try {
+      // Calculate next month dates
+      const nextMonth = new Date();
+      nextMonth.setMonth(nextMonth.getMonth() + 1);
+      const nextMonthStart = startOfMonth(nextMonth);
+      const nextMonthEnd = endOfMonth(nextMonth);
+      
+      // Create planning data for next month
+      const planningData = {
+        profile_id: resourceId,
+        forecasted_project: project.name,
+        engagement_percentage: project.engagementPercentage,
+        engagement_start_date: format(nextMonthStart, 'yyyy-MM-dd'),
+        release_date: format(nextMonthEnd, 'yyyy-MM-dd'),
+      };
+
+      await createResourcePlanning(planningData);
+      
+      toast({
+        title: 'Forecast Duplicated',
+        description: `Successfully created forecast for ${format(nextMonth, 'MMMM yyyy')}.`,
+      });
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: 'Failed to duplicate forecast. Please try again.',
+        variant: 'destructive',
+      });
+    }
+  }, [createResourcePlanning, toast]);
 
   const handleDeleteProject = useCallback((resourceId: string, projectIndex: number, project: Project) => {
     if (!project.isForecasted) {
