@@ -1,4 +1,3 @@
-
 import { useState, useCallback, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -15,6 +14,8 @@ interface AdvancedFilters {
   startDateTo: string;
   endDateFrom: string;
   endDateTo: string;
+  projectLevelFilter: string | null;
+  projectBillTypeFilter: string | null;
 }
 
 const defaultAdvancedFilters: AdvancedFilters = {
@@ -28,6 +29,8 @@ const defaultAdvancedFilters: AdvancedFilters = {
   startDateTo: '',
   endDateFrom: '',
   endDateTo: '',
+  projectLevelFilter: null,
+  projectBillTypeFilter: null,
 };
 
 export function useWeeklyValidationTab(isActive: boolean = true) {
@@ -67,16 +70,16 @@ export function useWeeklyValidationTab(isActive: boolean = true) {
   // Reset page when filters change
   const resetPage = useCallback(() => setCurrentPage(1), []);
 
-  // Memoized RPC parameters - now using UUIDs for ID-based filters
+  // Memoized RPC parameters with new project-level filters
   const rpcParams = useMemo(() => ({
     search_query: searchQuery || null,
     page_number: currentPage,
     items_per_page: itemsPerPage,
     sort_by: sortBy,
     sort_order: sortOrder,
-    sbu_filter: selectedSbu, // Pass UUID directly
-    manager_filter: selectedManager, // Pass UUID directly
-    bill_type_filter: advancedFilters.billTypeFilter, // Pass UUID directly
+    sbu_filter: selectedSbu,
+    manager_filter: selectedManager,
+    bill_type_filter: advancedFilters.billTypeFilter,
     project_search: advancedFilters.projectSearch || null,
     min_engagement_percentage: advancedFilters.minEngagementPercentage,
     max_engagement_percentage: advancedFilters.maxEngagementPercentage,
@@ -86,6 +89,8 @@ export function useWeeklyValidationTab(isActive: boolean = true) {
     start_date_to: advancedFilters.startDateTo || null,
     end_date_from: advancedFilters.endDateFrom || null,
     end_date_to: advancedFilters.endDateTo || null,
+    project_level_filter: advancedFilters.projectLevelFilter,
+    project_bill_type_filter: advancedFilters.projectBillTypeFilter,
   }), [
     searchQuery,
     currentPage,
@@ -133,7 +138,7 @@ export function useWeeklyValidationTab(isActive: boolean = true) {
         }
       };
     },
-    enabled: isActive, // Only run query when tab is active
+    enabled: isActive,
   });
 
   // Validation mutation
@@ -319,7 +324,7 @@ export function useWeeklyValidationTab(isActive: boolean = true) {
     // Data and pagination
     data: data?.resource_planning || [],
     pagination: data?.pagination,
-    isLoading: isActive ? isLoading : false, // Only show loading when active
+    isLoading: isActive ? isLoading : false,
     error,
     refetch,
     currentPage,

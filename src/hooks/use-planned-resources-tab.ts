@@ -1,3 +1,4 @@
+
 import { useState, useCallback, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -14,6 +15,8 @@ interface AdvancedFilters {
   startDateTo: string;
   endDateFrom: string;
   endDateTo: string;
+  projectLevelFilter: string | null;
+  projectBillTypeFilter: string | null;
 }
 
 const defaultAdvancedFilters: AdvancedFilters = {
@@ -27,6 +30,8 @@ const defaultAdvancedFilters: AdvancedFilters = {
   startDateTo: '',
   endDateFrom: '',
   endDateTo: '',
+  projectLevelFilter: null,
+  projectBillTypeFilter: null,
 };
 
 export function usePlannedResourcesTab(isActive: boolean = true) {
@@ -66,7 +71,7 @@ export function usePlannedResourcesTab(isActive: boolean = true) {
   // Reset page when filters change
   const resetPage = useCallback(() => setCurrentPage(1), []);
 
-  // Memoized RPC parameters
+  // Memoized RPC parameters with new project-level filters
   const rpcParams = useMemo(() => ({
     search_query: searchQuery || null,
     page_number: currentPage,
@@ -85,6 +90,8 @@ export function usePlannedResourcesTab(isActive: boolean = true) {
     start_date_to: advancedFilters.startDateTo || null,
     end_date_from: advancedFilters.endDateFrom || null,
     end_date_to: advancedFilters.endDateTo || null,
+    project_level_filter: advancedFilters.projectLevelFilter,
+    project_bill_type_filter: advancedFilters.projectBillTypeFilter,
   }), [
     searchQuery,
     currentPage,

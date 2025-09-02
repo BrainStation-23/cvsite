@@ -24,7 +24,7 @@ export interface ResourceCalendarData {
   bill_type: {
     id: string;
     name: string;
-    color_code:string;
+    color_code: string;
   } | null;
   project: {
     id: string;
@@ -32,6 +32,8 @@ export interface ResourceCalendarData {
     project_manager: string;
     client_name: string;
     budget: number;
+    project_level: string | null;
+    project_bill_type: string | null;
   } | null;
 }
 
@@ -46,6 +48,8 @@ interface AdvancedFilters {
   startDateTo?: string | null;
   endDateFrom?: string | null;
   endDateTo?: string | null;
+  projectLevelFilter?: string | null;
+  projectBillTypeFilter?: string | null;
 }
 
 export function useResourceCalendarData(
@@ -58,7 +62,7 @@ export function useResourceCalendarData(
 ) {
   // Calculate date range - for timeline view, we'll get a broader range from the parent
   const dateRange = viewType === 'timeline' 
-    ? { start: startOfMonth(startingMonth), end: endOfMonth(addMonths(startingMonth, 5)) } // Get 6 months of data for flexibility
+    ? { start: startOfMonth(startingMonth), end: endOfMonth(addMonths(startingMonth, 5)) }
     : { start: startOfMonth(startingMonth), end: endOfMonth(startingMonth) };
 
   const { data: resourceData, isLoading, error } = useQuery({
@@ -83,25 +87,22 @@ export function useResourceCalendarData(
       });
 
       // For timeline view, don't restrict dates unless advanced filters are provided
-      // This ensures all overlapping engagements are returned
       let startDateParam = null;
       let endDateParam = null;
       
       if (viewType === 'timeline') {
-        // Only use advanced filter dates for timeline view
         startDateParam = advancedFilters.startDateFrom || null;
         endDateParam = advancedFilters.startDateTo || null;
       } else {
-        // For month view, use the calculated date range
         startDateParam = advancedFilters.startDateFrom || dateRange.start.toISOString().split('T')[0];
         endDateParam = advancedFilters.startDateTo || dateRange.end.toISOString().split('T')[0];
       }
 
-      // Use the planned resource data function for calendar view with advanced filters
+      // Use the planned resource data function for calendar view with advanced filters including new project-level filters
       const { data: rpcData, error } = await supabase.rpc('get_planned_resource_data', {
         search_query: searchQuery || null,
         page_number: 1,
-        items_per_page: 1000, // High limit to get all records
+        items_per_page: 1000,
         sort_by: 'created_at',
         sort_order: 'desc',
         sbu_filter: selectedSbu,
@@ -116,6 +117,8 @@ export function useResourceCalendarData(
         start_date_to: endDateParam,
         end_date_from: advancedFilters.endDateFrom || null,
         end_date_to: advancedFilters.endDateTo || null,
+        project_level_filter: advancedFilters.projectLevelFilter || null,
+        project_bill_type_filter: advancedFilters.projectBillTypeFilter || null,
       });
 
       if (error) {
