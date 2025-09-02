@@ -66,44 +66,46 @@ export const useInteractiveTimeline = () => {
   }, []);
 
   const handleEditProject = useCallback((resourceId: string, projectIndex: number) => {
-    // In a real implementation, you'd need to get the actual engagement data
-    // For now, we'll open the modal in edit mode
+    // Only allow editing of forecasted projects
     setModalState({
       isOpen: true,
       mode: 'edit',
       data: {
         profileId: resourceId,
-        engagementPercentage: 100,
+        engagementPercentage: 0, // Set to 0 as per requirements
         engagementStartDate: format(new Date(), 'yyyy-MM-dd'),
       },
     });
   }, []);
 
   const handleDuplicateProject = useCallback((resourceId: string, projectIndex: number) => {
-    // Similar to edit, but create a new engagement with the same data
+    // Create a new forecasted project for the next month
+    const nextMonth = new Date();
+    nextMonth.setMonth(nextMonth.getMonth() + 1);
+    
     setModalState({
       isOpen: true,
       mode: 'create',
       data: {
         profileId: resourceId,
-        engagementPercentage: 100,
-        engagementStartDate: format(new Date(), 'yyyy-MM-dd'),
+        engagementPercentage: 0, // Set to 0 as per requirements
+        engagementStartDate: format(startOfMonth(nextMonth), 'yyyy-MM-dd'),
       },
     });
     toast({
-      title: 'Duplicating Assignment',
-      description: 'Creating a new assignment with the same data.',
+      title: 'Duplicating Forecast',
+      description: 'Creating a new forecast for the next month.',
     });
   }, [toast]);
 
   const handleDeleteProject = useCallback((resourceId: string, projectIndex: number) => {
-    // In a real implementation, you'd need the actual engagement ID
-    // For now, we'll show a confirmation
-    if (confirm('Are you sure you want to delete this assignment?')) {
-      // deleteResourcePlanning(engagementId);
+    // Use custom confirmation dialog
+    const confirmed = confirm('Are you sure you want to delete this forecasted assignment?');
+    if (confirmed) {
+      // In a real implementation, you'd need the actual engagement ID
       toast({
-        title: 'Assignment Deleted',
-        description: 'The resource assignment has been removed.',
+        title: 'Forecast Deleted',
+        description: 'The forecasted assignment has been removed.',
       });
     }
   }, [toast]);
