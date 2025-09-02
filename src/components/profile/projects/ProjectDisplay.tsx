@@ -55,7 +55,7 @@ export const ProjectDisplay: React.FC<ProjectDisplayProps> = ({
           <div className="flex-1 flex flex-col md:flex-row md:items-center justify-between pr-4">
             <div className="font-medium">{project.name} - {project.role}</div>
             <div className="text-muted-foreground text-sm mt-1 md:mt-0">
-              {formatDateForDisplay(project.startDate)} - {project.isCurrent ? 'Present' : project.endDate ? formatDateForDisplay(project.endDate) : ''}
+              {formatDateForDisplay(new Date(project.startDate))} - {project.isCurrent ? 'Present' : project.endDate ? formatDateForDisplay(new Date(project.endDate)) : ''}
             </div>
           </div>
         </div>

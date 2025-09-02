@@ -71,12 +71,12 @@ export const AchievementsTab: React.FC<AchievementsTabProps> = ({
 
   const handleStartEdit = (achievement: Achievement) => {
     setEditingId(achievement.id);
-    setDate(achievement.date);
+    setDate(typeof achievement.date === 'string' ? new Date(achievement.date) : achievement.date);
     
     editForm.reset({
       title: achievement.title,
       description: achievement.description,
-      date: achievement.date
+      date: typeof achievement.date === 'string' ? new Date(achievement.date) : achievement.date
     });
   };
 

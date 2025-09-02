@@ -27,10 +27,15 @@ export const EducationForm: React.FC<EducationFormProps> = ({
   onSave,
   onCancel
 }) => {
+  const parseDate = (date: string | Date | undefined): Date | undefined => {
+    if (!date) return undefined;
+    return typeof date === 'string' ? new Date(date) : date;
+  };
+
   const [startDate, setStartDate] = useState<Date | undefined>(
-    initialData?.startDate || new Date()
+    parseDate(initialData?.startDate) || new Date()
   );
-  const [endDate, setEndDate] = useState<Date | undefined>(initialData?.endDate);
+  const [endDate, setEndDate] = useState<Date | undefined>(parseDate(initialData?.endDate));
   const [isCurrent, setIsCurrent] = useState(initialData?.isCurrent || false);
 
   const form = useForm<Omit<Education, 'id'>>({

@@ -33,6 +33,10 @@ export const TrainingForm: React.FC<TrainingFormProps> = ({
 }) => {
   const [expiryDate, setExpiryDate] = React.useState<Date | undefined>(
     initialData?.expiryDate
+      ? typeof initialData.expiryDate === 'string'
+        ? new Date(initialData.expiryDate)
+        : initialData.expiryDate
+      : undefined
   );
   const [isRenewable, setIsRenewable] = React.useState<boolean>(
     initialData?.isRenewable || false
