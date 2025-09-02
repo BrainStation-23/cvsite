@@ -94,6 +94,26 @@ export const ResourcePlanningTableHeader: React.FC<ResourcePlanningTableHeaderPr
           <TableHead>
             <Button
               variant="ghost"
+              onClick={() => onSort('project_level')}
+              className="flex items-center gap-2 p-0 h-auto font-medium justify-start"
+            >
+              Project Level {getSortIcon('project_level')}
+            </Button>
+          </TableHead>
+          
+          <TableHead>
+            <Button
+              variant="ghost"
+              onClick={() => onSort('project_bill_type')}
+              className="flex items-center gap-2 p-0 h-auto font-medium justify-start"
+            >
+              Project Bill Type {getSortIcon('project_bill_type')}
+            </Button>
+          </TableHead>
+          
+          <TableHead>
+            <Button
+              variant="ghost"
               onClick={() => onSort('forecasted_project')}
               className="flex items-center gap-2 p-0 h-auto font-medium justify-start"
             >

@@ -14,6 +14,8 @@ interface AdvancedFilters {
   startDateTo: string;
   endDateFrom: string;
   endDateTo: string;
+  projectLevelFilter: string | null;
+  projectBillTypeFilter: string | null;
 }
 
 interface ResourceCalendarFiltersProps {
