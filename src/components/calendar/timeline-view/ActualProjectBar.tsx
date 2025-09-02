@@ -70,12 +70,12 @@ export const ActualProjectBar: React.FC<ActualProjectBarProps> = ({
             }`}
             style={{
               ...barStyle,
-              backgroundColor: `${colorCode}99`, // Muted for actual projects
+              backgroundColor: `${colorCode}`, // Muted for actual projects
               top: `${index * 30}px`,
               height: '24px',
               fontSize: '10px',
               fontWeight: '400',
-              opacity: 0.7
+              opacity: 1
             }}
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}
