@@ -17,6 +17,7 @@ export interface CalendarResource {
   forecastedProject: string | null;
   billTypeName: string | null;
   billTypeColorCode: string | null;
+  billTypeId: string | null;
 }
 
 export interface CalendarDay {
@@ -99,6 +100,7 @@ export function useResourceCalendar(
         forecastedProject: resource.forecasted_project || null,
         billTypeName: resource.bill_type?.name || null,
         billTypeColorCode: resource.bill_type?.color_code || null,
+        billTypeId: resource.bill_type?.id || null,
       }));
 
     console.log('Processed calendar data:', {

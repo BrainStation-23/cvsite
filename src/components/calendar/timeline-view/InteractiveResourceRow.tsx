@@ -9,6 +9,7 @@ interface Project {
   endDate: string | null;
   engagementPercentage: number;
   isForecasted?: boolean;
+  billTypeId?: string;
 }
 
 interface ResourceData {
