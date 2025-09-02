@@ -46,7 +46,7 @@ export const TrainingTab: React.FC<TrainingTabProps> = ({
 
   const handleStartEdit = (training: Training) => {
     setEditingId(training.id);
-    setDate(training.date);
+    setDate(new Date(training.date));
   };
 
   const handleCancelEdit = () => {
@@ -99,7 +99,7 @@ export const TrainingTab: React.FC<TrainingTabProps> = ({
                 title: trainings.find(t => t.id === editingId)?.title || '',
                 provider: trainings.find(t => t.id === editingId)?.provider || '',
                 description: trainings.find(t => t.id === editingId)?.description || '',
-                date: trainings.find(t => t.id === editingId)?.date || new Date(),
+                date: trainings.find(t => t.id === editingId)?.date || new Date().toISOString(),
                 certificateUrl: trainings.find(t => t.id === editingId)?.certificateUrl || ''
               }}
               onSubmit={handleSaveEdit}

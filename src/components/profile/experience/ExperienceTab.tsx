@@ -78,8 +78,16 @@ export const ExperienceTab: React.FC<ExperienceTabProps> = ({
   const handleEditExperience = (experience: Experience) => {
     setEditingExperience(experience);
     setIsAdding(false);
-    setStartDate(experience.startDate);
-    setEndDate(experience.endDate);
+    setStartDate(
+      typeof experience.startDate === 'string'
+        ? new Date(experience.startDate)
+        : experience.startDate
+    );
+    setEndDate(
+      typeof experience.endDate === 'string'
+        ? new Date(experience.endDate)
+        : experience.endDate
+    );
     setIsCurrent(experience.isCurrent || false);
     
     editForm.reset({
