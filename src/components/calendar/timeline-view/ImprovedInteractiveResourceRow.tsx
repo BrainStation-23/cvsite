@@ -46,9 +46,16 @@ export const ImprovedInteractiveResourceRow: React.FC<ImprovedInteractiveResourc
   const getProjectKey = (resourceId: string, projectIndex: number) => 
     `${resourceId}-${projectIndex}`;
 
-  // Separate projects into actual and forecasted
+  // Separate projects based on isForecasted property
   const actualProjects = resource.projects.filter(p => !p.isForecasted);
   const forecastedProjects = resource.projects.filter(p => p.isForecasted);
+
+  console.log(`Resource ${resource.profileName}:`, {
+    totalProjects: resource.projects.length,
+    actualProjects: actualProjects.length,
+    forecastedProjects: forecastedProjects.length,
+    projects: resource.projects.map(p => ({ name: p.name, isForecasted: p.isForecasted }))
+  });
 
   // Fixed row height for consistency
   const rowHeight = 160;

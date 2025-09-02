@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { eachMonthOfInterval, addMonths, startOfMonth, endOfMonth } from 'date-fns';
@@ -16,6 +17,7 @@ interface Project {
   startDate: string;
   endDate: string | null;
   engagementPercentage: number;
+  isForecasted?: boolean;
 }
 
 interface ResourceData {
@@ -93,27 +95,57 @@ export const CalendarTimelineView: React.FC<CalendarTimelineViewProps> = ({
       
       const resourceData = resourceMap.get(key)!;
       
-      // Determine project name with priority logic:
-      // 1. If forecasted_project exists, use it (highest priority)
-      // 2. If project exists, use it
-      // 3. Otherwise, use 'Unassigned'
-      let projectName = 'Unassigned';
-      
-      if (resource.forecastedProject && resource.forecastedProject.trim()) {
-        projectName = resource.forecastedProject.trim();
-      } else if (resource.projectName && resource.projectName.trim()) {
-        projectName = resource.projectName.trim();
+      // Add actual project if it exists
+      if (resource.projectName && resource.projectName.trim()) {
+        const actualProjectName = resource.projectName.trim();
+        // Check if this actual project already exists
+        const existingActualProject = resourceData.projects.find(
+          p => p.name === actualProjectName && !p.isForecasted
+        );
+        if (!existingActualProject) {
+          resourceData.projects.push({
+            name: actualProjectName,
+            startDate: resource.engagementStartDate || '',
+            endDate: resource.releaseDate,
+            engagementPercentage: resource.engagementPercentage || 0,
+            isForecasted: false
+          });
+        }
       }
       
-      // Check if this project already exists for this resource
-      const existingProject = resourceData.projects.find(p => p.name === projectName);
-      if (!existingProject) {
-        resourceData.projects.push({
-          name: projectName,
-          startDate: resource.engagementStartDate || '',
-          endDate: resource.releaseDate,
-          engagementPercentage: resource.engagementPercentage || 0
-        });
+      // Add forecasted project if it exists (separate entry)
+      if (resource.forecastedProject && resource.forecastedProject.trim()) {
+        const forecastedProjectName = resource.forecastedProject.trim();
+        // Check if this forecasted project already exists
+        const existingForecastedProject = resourceData.projects.find(
+          p => p.name === forecastedProjectName && p.isForecasted
+        );
+        if (!existingForecastedProject) {
+          resourceData.projects.push({
+            name: forecastedProjectName,
+            startDate: resource.engagementStartDate || '',
+            endDate: resource.releaseDate,
+            engagementPercentage: resource.engagementPercentage || 0,
+            isForecasted: true
+          });
+        }
+      }
+      
+      // If neither actual nor forecasted project exists, add "Unassigned"
+      if ((!resource.projectName || !resource.projectName.trim()) && 
+          (!resource.forecastedProject || !resource.forecastedProject.trim())) {
+        const existingUnassigned = resourceData.projects.find(
+          p => p.name === 'Unassigned' && !p.isForecasted
+        );
+        if (!existingUnassigned) {
+          resourceData.projects.push({
+            name: 'Unassigned',
+            startDate: resource.engagementStartDate || '',
+            endDate: resource.releaseDate,
+            engagementPercentage: resource.engagementPercentage || 0,
+            isForecasted: false
+          });
+        }
       }
     });
     
@@ -124,7 +156,7 @@ export const CalendarTimelineView: React.FC<CalendarTimelineViewProps> = ({
       sampleResource: result[0] ? {
         name: result[0].profileName,
         projectCount: result[0].projects.length,
-        sampleProjects: result[0].projects.map(p => p.name)
+        sampleProjects: result[0].projects.map(p => ({ name: p.name, isForecasted: p.isForecasted }))
       } : null
     });
 

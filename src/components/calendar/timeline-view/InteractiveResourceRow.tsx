@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { ImprovedInteractiveResourceRow } from './ImprovedInteractiveResourceRow';
 
@@ -7,6 +8,7 @@ interface Project {
   startDate: string;
   endDate: string | null;
   engagementPercentage: number;
+  isForecasted?: boolean;
 }
 
 interface ResourceData {
