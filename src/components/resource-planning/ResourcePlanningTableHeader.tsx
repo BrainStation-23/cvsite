@@ -82,6 +82,9 @@ export const ResourcePlanningTableHeader: React.FC<ResourcePlanningTableHeaderPr
           </TableHead>
           
           <TableHead>
+           
+
+            <div className="flex flex-col gap-1">
             <Button
               variant="ghost"
               onClick={() => onSort('project')}
@@ -89,9 +92,6 @@ export const ResourcePlanningTableHeader: React.FC<ResourcePlanningTableHeaderPr
             >
               Project {getSortIcon('project')}
             </Button>
-          </TableHead>
-          
-          <TableHead>
             <Button
               variant="ghost"
               onClick={() => onSort('project_level')}
@@ -99,9 +99,7 @@ export const ResourcePlanningTableHeader: React.FC<ResourcePlanningTableHeaderPr
             >
               Project Level {getSortIcon('project_level')}
             </Button>
-          </TableHead>
-          
-          <TableHead>
+
             <Button
               variant="ghost"
               onClick={() => onSort('project_bill_type')}
@@ -109,7 +107,11 @@ export const ResourcePlanningTableHeader: React.FC<ResourcePlanningTableHeaderPr
             >
               Project Bill Type {getSortIcon('project_bill_type')}
             </Button>
+            </div>
+
+
           </TableHead>
+          
           
           <TableHead>
             <Button
