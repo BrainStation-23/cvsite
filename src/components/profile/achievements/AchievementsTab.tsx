@@ -8,7 +8,6 @@ import { Achievement } from '@/types';
 import { AchievementForm } from './AchievementForm';
 import { AchievementsList } from './AchievementsList';
 import { AchievementsTourButton } from './AchievementsTourButton';
-import { formatDateToString, parseStringToDate } from '@/utils/date-helpers';
 
 interface AchievementsTabProps {
   achievements: Achievement[];
@@ -35,7 +34,7 @@ export const AchievementsTab: React.FC<AchievementsTabProps> = ({
     defaultValues: {
       title: '',
       description: '',
-      date: formatDateToString(new Date())
+      date: new Date()
     }
   });
 
@@ -43,7 +42,7 @@ export const AchievementsTab: React.FC<AchievementsTabProps> = ({
     defaultValues: {
       title: '',
       description: '',
-      date: formatDateToString(new Date())
+      date: new Date()
     }
   });
 
@@ -53,7 +52,7 @@ export const AchievementsTab: React.FC<AchievementsTabProps> = ({
     addForm.reset({
       title: '',
       description: '',
-      date: formatDateToString(new Date())
+      date: new Date()
     });
   };
 
@@ -62,7 +61,7 @@ export const AchievementsTab: React.FC<AchievementsTabProps> = ({
   };
 
   const handleSaveNew = async (data: Omit<Achievement, 'id'>) => {
-    data.date = formatDateToString(date || new Date());
+    data.date = date || new Date();
     
     const success = await onSave(data);
     if (success) {
@@ -72,7 +71,7 @@ export const AchievementsTab: React.FC<AchievementsTabProps> = ({
 
   const handleStartEdit = (achievement: Achievement) => {
     setEditingId(achievement.id);
-    setDate(parseStringToDate(achievement.date));
+    setDate(achievement.date);
     
     editForm.reset({
       title: achievement.title,
@@ -88,7 +87,7 @@ export const AchievementsTab: React.FC<AchievementsTabProps> = ({
   const handleSaveEdit = async (data: Omit<Achievement, 'id'>) => {
     if (!editingId) return;
     
-    data.date = formatDateToString(date || new Date());
+    data.date = date || new Date();
     
     const success = await onUpdate(editingId, data);
     if (success) {

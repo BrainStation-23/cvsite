@@ -28,11 +28,9 @@ export const EducationForm: React.FC<EducationFormProps> = ({
   onCancel
 }) => {
   const [startDate, setStartDate] = useState<Date | undefined>(
-    initialData?.startDate ? new Date(initialData.startDate) : new Date()
+    initialData?.startDate || new Date()
   );
-  const [endDate, setEndDate] = useState<Date | undefined>(
-    initialData?.endDate ? new Date(initialData.endDate) : undefined
-  );
+  const [endDate, setEndDate] = useState<Date | undefined>(initialData?.endDate);
   const [isCurrent, setIsCurrent] = useState(initialData?.isCurrent || false);
 
   const form = useForm<Omit<Education, 'id'>>({
@@ -41,14 +39,14 @@ export const EducationForm: React.FC<EducationFormProps> = ({
       degree: initialData?.degree || '',
       department: initialData?.department || '',
       gpa: initialData?.gpa || '',
-      startDate: initialData?.startDate || format(new Date(), 'yyyy-MM-dd'),
+      startDate: initialData?.startDate || new Date(),
       isCurrent: initialData?.isCurrent || false
     }
   });
 
   const handleSubmit = async (data: Omit<Education, 'id'>) => {
-    data.startDate = startDate ? format(startDate, 'yyyy-MM-dd') : format(new Date(), 'yyyy-MM-dd');
-    data.endDate = isCurrent ? undefined : (endDate ? format(endDate, 'yyyy-MM-dd') : undefined);
+    data.startDate = startDate || new Date();
+    data.endDate = isCurrent ? undefined : endDate;
     data.isCurrent = isCurrent;
     
     const success = await onSave(data);

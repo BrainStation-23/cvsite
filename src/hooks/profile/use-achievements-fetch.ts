@@ -26,7 +26,7 @@ export function useAchievementsFetch(profileId: string) {
           id: achievement.id,
           title: achievement.title,
           description: achievement.description,
-          date: achievement.date
+          date: new Date(achievement.date)
         })));
       }
     } catch (error) {
