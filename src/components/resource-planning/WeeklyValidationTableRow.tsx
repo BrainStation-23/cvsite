@@ -44,6 +44,7 @@ interface WeeklyValidationData {
     client_name: string;
     budget: number;
     project_level?: string;
+    project_bill_type?: string;
     project_type_name?: string;
   } | null;
 }
@@ -224,7 +225,7 @@ export const WeeklyValidationTableRow: React.FC<WeeklyValidationTableRowProps> =
                   {item.project.client_name}
                 </div>
               )}
-              {(item.project.project_type_name || item.project.project_level) && (
+              {(item.project.project_type_name || item.project.project_level || item.project.project_bill_type) && (
                 <div className="flex gap-1 flex-wrap">
                   {item.project.project_type_name && (
                     <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-4 font-normal">
@@ -234,6 +235,11 @@ export const WeeklyValidationTableRow: React.FC<WeeklyValidationTableRowProps> =
                   {item.project.project_level && (
                     <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-4 font-normal">
                       {item.project.project_level}
+                    </Badge>
+                  )}
+                  {item.project.project_bill_type && (
+                    <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-4 font-normal">
+                      {item.project.project_bill_type}
                     </Badge>
                   )}
                 </div>
