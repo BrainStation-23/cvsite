@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import ProjectLevelCombobox from './ProjectLevelCombobox';
+import ProjectBillTypeCombobox from './ProjectBillTypeCombobox';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { ChevronDown, Filter } from 'lucide-react';
@@ -193,12 +194,10 @@ export const AdvancedResourceFilters: React.FC<AdvancedResourceFiltersProps> = (
 
               <div className="space-y-2">
                 <Label htmlFor="project-bill-type-filter">Project Bill Type</Label>
-                <Input
-                  id="project-bill-type-filter"
-                  type="text"
-                  placeholder="Enter project bill type..."
-                  value={filters.projectBillTypeFilter || ''}
-                  onChange={(e) => updateFilter('projectBillTypeFilter', e.target.value || null)}
+                <ProjectBillTypeCombobox
+                  value={filters.projectBillTypeFilter}
+                  onValueChange={(value) => updateFilter('projectBillTypeFilter', value)}
+                  placeholder="Select project bill type..."
                 />
               </div>
 
