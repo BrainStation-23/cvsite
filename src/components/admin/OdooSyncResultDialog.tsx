@@ -118,7 +118,7 @@ export const OdooSyncResultDialog: React.FC<OdooSyncResultDialogProps> = ({
   return (
 <Dialog open={isOpen} onOpenChange={onOpenChange}>
   <DialogContent className="max-w-5xl h-[90vh] flex flex-col">
-    {/* Fixed Header */}
+    {/* Header */}
     <DialogHeader className="flex-shrink-0 pb-4">
       <DialogTitle className="flex items-center gap-2">
         {syncResult.success ? (
@@ -131,7 +131,7 @@ export const OdooSyncResultDialog: React.FC<OdooSyncResultDialogProps> = ({
       <DialogDescription>{syncResult.message}</DialogDescription>
     </DialogHeader>
 
-    {/* Statistics */}
+    {/* Stats */}
     <div className="grid grid-cols-2 md:grid-cols-4 gap-4 flex-shrink-0 pb-6">
       <div className="text-center">
         <div className="text-2xl font-bold text-blue-600">{stats.total_processed}</div>
@@ -151,13 +151,13 @@ export const OdooSyncResultDialog: React.FC<OdooSyncResultDialogProps> = ({
       </div>
     </div>
 
-    {/* Scrollable Content */}
-    <div className="flex-1 overflow-y-auto">
+    {/* Main content area: prevent parent scrolling; children decide their own scroll */}
+    <div className="flex-1 overflow-hidden">
       {/* Not Found Employees */}
       {not_found_employees.length > 0 && (
-        <div className="mb-6">
-          {/* Section Header */}
-          <div className="flex items-center justify-between mb-3 sticky top-0 bg-white z-10 py-2">
+        <section className="mb-6">
+          {/* Section header + actions (never scrolls) */}
+          <div className="flex items-center justify-between mb-3">
             <h4 className="font-semibold flex items-center gap-2">
               <AlertTriangle className="h-4 w-4 text-orange-500" />
               Employees Not Found in Database ({not_found_employees.length})
@@ -187,55 +187,50 @@ export const OdooSyncResultDialog: React.FC<OdooSyncResultDialogProps> = ({
             </div>
           </div>
 
-          {/* Employee List Container */}
-          <div className="border rounded-md">
-            {/* Selection Controls */}
+          {/* Bordered container; header (select all) fixed; only rows scroll */}
+          <div className="border rounded-md overflow-hidden">
+            {/* Select All block (non-scrolling, vertical layout) */}
             {onBulkUpload && (
-              <div className="flex flex-col gap-3 p-3 border-b bg-gray-50 rounded-t-md">
-                <div className="flex items-center gap-2">
-                  <Checkbox
-                    id="select-all"
-                    checked={
-                      selectedEmployees.size === not_found_employees.length &&
-                      not_found_employees.length > 0
-                    }
-                    onCheckedChange={(checked) =>
-                      checked ? selectAll() : selectNone()
-                    }
-                  />
-                  <label
-                    htmlFor="select-all"
-                    className="text-sm font-medium cursor-pointer"
-                  >
-                    Select All ({not_found_employees.length})
-                  </label>
-                </div>
-                <div className="flex items-center gap-3">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={selectNone}
-                    disabled={selectedEmployees.size === 0}
-                  >
-                    Clear Selection
-                  </Button>
-                  {hasSelection && (
-                    <div className="flex items-center gap-1 text-sm text-blue-600">
-                      <Users className="h-4 w-4" />
-                      {selectedCount} selected
-                    </div>
-                  )}
+              <div className="p-3 bg-gray-50 border-b">
+                <div className="flex flex-col gap-3">
+                  <div className="flex items-center gap-2">
+                    <Checkbox
+                      id="select-all"
+                      checked={
+                        not_found_employees.length > 0 &&
+                        selectedEmployees.size === not_found_employees.length
+                      }
+                      onCheckedChange={(checked) => (checked ? selectAll() : selectNone())}
+                    />
+                    <label htmlFor="select-all" className="text-sm font-medium cursor-pointer">
+                      Select All ({not_found_employees.length})
+                    </label>
+                  </div>
+
+                  <div className="flex items-center gap-3">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={selectNone}
+                      disabled={selectedEmployees.size === 0}
+                    >
+                      Clear Selection
+                    </Button>
+                    {hasSelection && (
+                      <div className="flex items-center gap-1 text-sm text-blue-600">
+                        <Users className="h-4 w-4" />
+                        {selectedCount} selected
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
             )}
 
-            {/* Employee Rows */}
-            <div className="space-y-2 p-3">
+            {/* Scrollable rows only */}
+            <div className="max-h-[60vh] overflow-y-auto p-3 space-y-2">
               {not_found_employees.map((employee, index) => (
-                <div
-                  key={index}
-                  className="flex items-center gap-3 p-3 bg-orange-50 rounded"
-                >
+                <div key={index} className="flex items-center gap-3 p-3 bg-orange-50 rounded">
                   {onBulkUpload && (
                     <Checkbox
                       id={`employee-${employee.employeeId}`}
@@ -248,59 +243,50 @@ export const OdooSyncResultDialog: React.FC<OdooSyncResultDialogProps> = ({
                     <div className="text-sm text-gray-600">{employee.name}</div>
                     <div className="text-xs text-gray-500">{employee.email}</div>
                     {employee.managerEmail && (
-                      <div className="text-xs text-gray-500">
-                        Manager: {employee.managerEmail}
-                      </div>
+                      <div className="text-xs text-gray-500">Manager: {employee.managerEmail}</div>
                     )}
                   </div>
-                  <Badge
-                    variant="outline"
-                    className="text-orange-700 border-orange-300"
-                  >
+                  <Badge variant="outline" className="text-orange-700 border-orange-300">
                     {employee.sbuName || 'No SBU'}
                   </Badge>
                 </div>
               ))}
             </div>
           </div>
-        </div>
+        </section>
       )}
 
-      {/* Error Employees */}
+      {/* Error Employees (optional: make rows scroll if long) */}
       {error_employees.length > 0 && (
-        <div className="mb-6">
-          <h4 className="font-semibold mb-3 flex items-center gap-2 sticky top-0 bg-white z-10 py-2">
+        <section className="mb-6">
+          <h4 className="font-semibold mb-3 flex items-center gap-2">
             <XCircle className="h-4 w-4 text-red-500" />
             Employees with Errors ({error_employees.length})
           </h4>
-          <div className="space-y-2 border rounded-md p-3">
-            {error_employees.map((employee, index) => (
-              <div
-                key={index}
-                className="flex items-center justify-between p-2 bg-red-50 rounded"
-              >
-                <div className="flex-1">
-                  <div className="font-medium">{employee.employeeId}</div>
-                  <div className="text-sm text-red-600">{employee.reason}</div>
+
+          <div className="border rounded-md overflow-hidden">
+            <div className="max-h-[30vh] overflow-y-auto p-3 space-y-2">
+              {error_employees.map((employee, index) => (
+                <div key={index} className="flex items-center justify-between p-2 bg-red-50 rounded">
+                  <div className="flex-1">
+                    <div className="font-medium">{employee.employeeId}</div>
+                    <div className="text-sm text-red-600">{employee.reason}</div>
+                  </div>
+                  <Badge variant="destructive">Error</Badge>
                 </div>
-                <Badge variant="destructive">Error</Badge>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
-        </div>
+        </section>
       )}
 
       {/* Success State */}
-      {not_found_employees.length === 0 &&
-        error_employees.length === 0 &&
-        stats.updated > 0 && (
-          <div className="text-center py-8">
-            <CheckCircle className="h-12 w-12 text-green-500 mx-auto mb-4" />
-            <p className="text-lg font-medium text-green-700">
-              All employees synchronized successfully!
-            </p>
-          </div>
-        )}
+      {not_found_employees.length === 0 && error_employees.length === 0 && stats.updated > 0 && (
+        <div className="text-center py-8">
+          <CheckCircle className="h-12 w-12 text-green-500 mx-auto mb-4" />
+          <p className="text-lg font-medium text-green-700">All employees synchronized successfully!</p>
+        </div>
+      )}
     </div>
   </DialogContent>
 </Dialog>
