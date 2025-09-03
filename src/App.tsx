@@ -329,19 +329,20 @@ function App(): React.ReactElement {
                 </ProtectedRoute>
               }
             />
-            <Route
-              path="/admin/resource-planning"
-              element={
-                <ProtectedRoute allowedRoles={['admin', 'manager']}>
-                  <ResourceCalendarPlanning />
-                </ProtectedRoute>
-              }
-            />
+           
             <Route
               path="/admin/resource-calendar"
               element={
                 <ProtectedRoute allowedRoles={['admin', 'manager']}>
                   <ResourceCalendar />
+                </ProtectedRoute>
+              }
+            />
+             <Route
+              path="/admin/resource-calendar/planning"
+              element={
+                <ProtectedRoute allowedRoles={['admin', 'manager']}>
+                  <ResourceCalendarPlanning />
                 </ProtectedRoute>
               }
             />
