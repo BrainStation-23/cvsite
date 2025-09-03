@@ -3,12 +3,14 @@ import React , { useEffect }from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import ProjectLevelCombobox from './ProjectLevelCombobox';
+import ProjectBillTypeCombobox from './ProjectBillTypeCombobox';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { ChevronDown, Filter } from 'lucide-react';
 import BillTypeCombobox from './BillTypeCombobox';
 import ProjectSearchCombobox from './ProjectSearchCombobox';
-import DatePicker from '@/components/admin/user/DatePicker';
+import DatePicker from '@/components/admin/user/DatePicker';  
 
 const STORAGE_KEY = 'resource-calendar/planning/advanced-filters';
 
@@ -183,23 +185,19 @@ export const AdvancedResourceFilters: React.FC<AdvancedResourceFiltersProps> = (
 
               <div className="space-y-2">
                 <Label htmlFor="project-level-filter">Project Level</Label>
-                <Input
-                  id="project-level-filter"
-                  type="text"
-                  placeholder="Enter project level..."
-                  value={filters.projectLevelFilter || ''}
-                  onChange={(e) => updateFilter('projectLevelFilter', e.target.value || null)}
+                <ProjectLevelCombobox
+                  value={filters.projectLevelFilter}
+                  onValueChange={(value) => updateFilter('projectLevelFilter', value)}
+                  placeholder="Select project level..."
                 />
               </div>
 
               <div className="space-y-2">
                 <Label htmlFor="project-bill-type-filter">Project Bill Type</Label>
-                <Input
-                  id="project-bill-type-filter"
-                  type="text"
-                  placeholder="Enter project bill type..."
-                  value={filters.projectBillTypeFilter || ''}
-                  onChange={(e) => updateFilter('projectBillTypeFilter', e.target.value || null)}
+                <ProjectBillTypeCombobox
+                  value={filters.projectBillTypeFilter}
+                  onValueChange={(value) => updateFilter('projectBillTypeFilter', value)}
+                  placeholder="Select project bill type..."
                 />
               </div>
 
