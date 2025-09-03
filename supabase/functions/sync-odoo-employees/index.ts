@@ -17,10 +17,11 @@ interface OdooEmployee {
     name: string;
   } | null;
   parent: {
-    user: {
-      email: string;
-    };
+    workEmail : string | null;
   } | null;
+  resignationDate: string | null;
+  exitDate: string | null;
+  active: boolean | null;
 }
 
 interface OdooEmployeesResponse {
@@ -48,23 +49,25 @@ Deno.serve(async (req) => {
     // GraphQL query to fetch employees from Odoo with new date fields
     const graphqlQuery = {
       query: `
-        query AllEmployees {
-          allEmployees {
-            employeeId
-            name
-            workEmail
-            joiningDate
-            careerStartDate
-            dateOfBirth
-            sbu {
-              name
+       query AllEmployees {
+            allEmployees(includeArchived: true) {
+                active
+                employeeId
+                name
+                workEmail
+                joiningDate
+                careerStartDate
+                dateOfBirth
+                sbu {
+                    name
+                }
+                parent {
+                    workEmail
+                }
+                resignationDate
+                exitDate
+                
             }
-            parent {
-              user {
-                email
-              }
-            }
-          }
         }
       `
     };
@@ -99,11 +102,14 @@ Deno.serve(async (req) => {
         employeeId: employee.employeeId,
         email: employee.workEmail,
         name: employee.name || '',
-        managerEmail: employee.parent?.user?.email || null,
+        managerEmail: employee.parent?.workEmail || null,
         sbuName: employee.sbu?.name || null,
         joiningDate: employee.joiningDate || null,
         careerStartDate: employee.careerStartDate || null,
-        dateOfBirth: employee.dateOfBirth || null
+        dateOfBirth: employee.dateOfBirth || null,
+        resignationDate: employee.resignationDate || null,
+        exitDate: employee.exitDate || null,
+        active: employee.active,
       }));
 
     console.log(`Pre-processed ${processedEmployees.length} valid employees, calling bulk sync function...`);
