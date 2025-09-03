@@ -109,7 +109,7 @@ Deno.serve(async (req) => {
         dateOfBirth: employee.dateOfBirth || null,
         resignationDate: employee.resignationDate || null,
         exitDate: employee.exitDate || null,
-        active: employee.active || null,
+        active: employee.active,
       }));
 
     console.log(`Pre-processed ${processedEmployees.length} valid employees, calling bulk sync function...`);
