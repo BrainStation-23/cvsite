@@ -8,6 +8,7 @@ import { openCVPreview } from '@/utils/cv-preview-utility';
 import { exportCVAsPDF, ProgressDialog, ProgressStep } from '@/utils/pdf-export';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
+import CvAuditLogsDialog from '@/components/profile/CvAuditLogsDialog';
 
 interface CVActionsProps {
   profileId?: string; // Optional for when viewing other profiles
@@ -121,6 +122,8 @@ export const CVActions: React.FC<CVActionsProps> = ({ profileId }) => {
         </div>
         
         <div className="flex gap-2">
+          <CvAuditLogsDialog profileId={targetProfileId} />
+          
           <Button 
             variant="outline"
             onClick={handlePreview}

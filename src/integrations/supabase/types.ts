@@ -160,6 +160,48 @@ export type Database = {
         }
         Relationships: []
       }
+      cv_data_audit_logs: {
+        Row: {
+          changed_at: string | null
+          changed_by: string | null
+          changed_fields: string[] | null
+          created_at: string | null
+          id: string
+          new_data: Json | null
+          old_data: Json | null
+          operation_type: string
+          profile_id: string
+          record_id: string
+          table_name: string
+        }
+        Insert: {
+          changed_at?: string | null
+          changed_by?: string | null
+          changed_fields?: string[] | null
+          created_at?: string | null
+          id?: string
+          new_data?: Json | null
+          old_data?: Json | null
+          operation_type: string
+          profile_id: string
+          record_id: string
+          table_name: string
+        }
+        Update: {
+          changed_at?: string | null
+          changed_by?: string | null
+          changed_fields?: string[] | null
+          created_at?: string | null
+          id?: string
+          new_data?: Json | null
+          old_data?: Json | null
+          operation_type?: string
+          profile_id?: string
+          record_id?: string
+          table_name?: string
+        }
+        Relationships: []
+      }
       cv_templates: {
         Row: {
           achievements_limit: number | null
@@ -828,49 +870,58 @@ export type Database = {
       }
       profiles: {
         Row: {
+          active: boolean | null
           career_start_date: string | null
           created_at: string
           date_of_birth: string | null
           date_of_joining: string | null
           email: string | null
           employee_id: string | null
+          exit_date: string | null
           expertise: string | null
           first_name: string | null
           id: string
           last_name: string | null
           manager: string | null
+          resignation_date: string | null
           resource_type: string | null
           sbu_id: string | null
           updated_at: string
         }
         Insert: {
+          active?: boolean | null
           career_start_date?: string | null
           created_at?: string
           date_of_birth?: string | null
           date_of_joining?: string | null
           email?: string | null
           employee_id?: string | null
+          exit_date?: string | null
           expertise?: string | null
           first_name?: string | null
           id: string
           last_name?: string | null
           manager?: string | null
+          resignation_date?: string | null
           resource_type?: string | null
           sbu_id?: string | null
           updated_at?: string
         }
         Update: {
+          active?: boolean | null
           career_start_date?: string | null
           created_at?: string
           date_of_birth?: string | null
           date_of_joining?: string | null
           email?: string | null
           employee_id?: string | null
+          exit_date?: string | null
           expertise?: string | null
           first_name?: string | null
           id?: string
           last_name?: string | null
           manager?: string | null
+          resignation_date?: string | null
           resource_type?: string | null
           sbu_id?: string | null
           updated_at?: string
@@ -1695,6 +1746,21 @@ export type Database = {
           project_name: string
         }[]
       }
+      get_cv_audit_history: {
+        Args: { limit_records?: number; target_profile_id: string }
+        Returns: {
+          changed_at: string
+          changed_by: string
+          changed_by_name: string
+          changed_fields: string[]
+          id: string
+          new_data: Json
+          old_data: Json
+          operation_type: string
+          record_id: string
+          table_name: string
+        }[]
+      }
       get_employee_data: {
         Args: {
           achievements_limit?: number
@@ -1842,6 +1908,21 @@ export type Database = {
           resource_planning: Json
           sbu_name: string
           total_utilization: number
+        }[]
+      }
+      get_recent_cv_changes: {
+        Args: { limit_records?: number }
+        Returns: {
+          changed_at: string
+          changed_by: string
+          changed_by_name: string
+          changed_fields: string[]
+          id: string
+          operation_type: string
+          profile_id: string
+          profile_name: string
+          record_id: string
+          table_name: string
         }[]
       }
       get_resource_changes_summary: {
