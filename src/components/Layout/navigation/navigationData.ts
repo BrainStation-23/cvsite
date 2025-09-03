@@ -59,7 +59,7 @@ export const getSidebarGroups = (
     },
 
         // CV Database group (admin/manager)
-    (userRole === 'admin' || userRole === 'manager') && {
+    (userRole === 'admin') && {
       label: 'Resource Calendar',
       items: [
           { to: `/${userRole}/resource-calendar/planning`, icon: Calendar, label: 'Planning' },

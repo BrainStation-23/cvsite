@@ -338,26 +338,10 @@ function App(): React.ReactElement {
               }
             />
             <Route
-              path="/manager/resource-planning"
-              element={
-                <ProtectedRoute allowedRoles={['manager', 'admin']}>
-                  <ResourceCalendarPlanning />
-                </ProtectedRoute>
-              }
-            />
-            <Route
               path="/admin/resource-calendar"
               element={
                 <ProtectedRoute allowedRoles={['admin', 'manager']}>
                   <ResourceCalendar />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/admin/resource-calendar/planning"
-              element={
-                <ProtectedRoute allowedRoles={['admin', 'manager']}>
-                  <ResourceCalendarPlanning />
                 </ProtectedRoute>
               }
             />
@@ -377,38 +361,7 @@ function App(): React.ReactElement {
                 </ProtectedRoute>
               }
             />
-            <Route
-              path="/manager/resource-calendar"
-              element={
-                <ProtectedRoute allowedRoles={['manager', 'admin']}>
-                  <ResourceCalendar />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/manager/resource-calendar/planning"
-              element={
-                <ProtectedRoute allowedRoles={['manager', 'admin']}>
-                  <ResourceCalendarPlanning />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/manager/resource-calendar/calendar"
-              element={
-                <ProtectedRoute allowedRoles={['manager', 'admin']}>
-                  <ResourceCalendarView />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/manager/resource-calendar/statistics"
-              element={
-                <ProtectedRoute allowedRoles={['manager', 'admin']}>
-                  <ResourceCalendarStatistics />
-                </ProtectedRoute>
-              }
-            />
+
             <Route
               path="/admin/platform-settings"
               element={
