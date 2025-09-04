@@ -4,9 +4,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { eachMonthOfInterval, addMonths, startOfMonth, endOfMonth } from 'date-fns';
 import { Users } from 'lucide-react';
 
-import type { CalendarResource } from '@/hooks/use-resource-calendar';
+import type { ResourceCalendarData } from '@/hooks/use-resource-calendar-data';
 import { TimelineHeader } from './timeline-view/TimelineHeader';
-import { PaginationControls } from './timeline-view/PaginationControls';
 import { EngagementModal } from './timeline-view/EngagementModal';
 
 
@@ -14,7 +13,7 @@ import { EngagementModal } from './timeline-view/EngagementModal';
 interface CalendarTimelineViewProps {
   startingMonth: Date;
   monthsToShow: number;
-  calendarData: CalendarResource[];
+  calendarData: ResourceCalendarData[];
   selectedDate: Date | null;
   onDateSelect: (date: Date) => void;
   onPreviousMonth: () => void;

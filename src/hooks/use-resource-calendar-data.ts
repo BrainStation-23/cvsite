@@ -57,13 +57,10 @@ export function useResourceCalendarData(
   selectedSbu: string | null,
   selectedManager: string | null,
   startingMonth: Date,
-  viewType: 'month' | 'timeline' = 'timeline',
   advancedFilters: AdvancedFilters = {}
 ) {
-  // Calculate date range - for timeline view, we'll get a broader range from the parent
-  const dateRange = viewType === 'timeline' 
-    ? { start: startOfMonth(startingMonth), end: endOfMonth(addMonths(startingMonth, 5)) }
-    : { start: startOfMonth(startingMonth), end: endOfMonth(startingMonth) };
+
+  const dateRange = { start: startOfMonth(startingMonth), end: endOfMonth(addMonths(startingMonth, 5)) };
 
   const { data: resourceData, isLoading, error } = useQuery({
     queryKey: [
@@ -73,7 +70,6 @@ export function useResourceCalendarData(
       selectedManager, 
       dateRange.start.toISOString(), 
       dateRange.end.toISOString(),
-      viewType,
       advancedFilters
     ],
     queryFn: async () => {
@@ -82,21 +78,17 @@ export function useResourceCalendarData(
         selectedSbu,
         selectedManager,
         dateRange,
-        viewType,
         advancedFilters
       });
 
-      // For timeline view, don't restrict dates unless advanced filters are provided
+
       let startDateParam = null;
       let endDateParam = null;
       
-      if (viewType === 'timeline') {
-        startDateParam = advancedFilters.startDateFrom || null;
-        endDateParam = advancedFilters.startDateTo || null;
-      } else {
-        startDateParam = advancedFilters.startDateFrom || dateRange.start.toISOString().split('T')[0];
-        endDateParam = advancedFilters.startDateTo || dateRange.end.toISOString().split('T')[0];
-      }
+      
+      startDateParam = advancedFilters.startDateFrom || null;
+      endDateParam = advancedFilters.startDateTo || null;
+      
 
       // Use the planned resource data function for calendar view with advanced filters including new project-level filters
       const { data: rpcData, error } = await supabase.rpc('get_planned_resource_data', {
@@ -147,7 +139,6 @@ export function useResourceCalendarData(
         console.log(`Filtered ${filteredResources.length} resources from ${allResources.length} total for date range:`, {
           start: dateRange.start.toISOString(),
           end: dateRange.end.toISOString(),
-          viewType
         });
 
         return filteredResources;

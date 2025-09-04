@@ -4,7 +4,6 @@ import { Link, useLocation } from 'react-router-dom';
 import DashboardLayout from '../../components/Layout/DashboardLayout';
 import { Button } from '@/components/ui/button';
 import {ArrowLeft } from 'lucide-react';
-import ResourceCalendarViewComponent from '../../components/calendar/ResourceCalendarViewComponent';
 import { ResourceCalendarFilters } from '../../components/calendar/ResourceCalendarFilters';
 
 interface AdvancedFilters {
@@ -110,14 +109,6 @@ const ResourceCalendarView: React.FC = () => {
           onClearAdvancedFilters={clearAdvancedFilters}
         />
 
-        {/* Main Calendar */}
-        <ResourceCalendarViewComponent 
-          searchQuery={searchQuery}
-          selectedSbu={selectedSbu}
-          selectedManager={selectedManager}
-          showUnplanned={showUnplanned}
-          advancedFilters={advancedFilters}
-        />
       </div>
     </DashboardLayout>
   );
