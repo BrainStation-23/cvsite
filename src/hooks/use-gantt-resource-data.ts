@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { useResourceCalendarData, ResourceCalendarData } from './use-resource-calendar-data';
-import { format } from 'date-fns';
+import { format, addMonths } from 'date-fns';
 
 export interface GanttTask {
   id: string;
@@ -81,24 +81,11 @@ export const useGanttResourceData = (
     // Create parent and child tasks
     Object.entries(employeeGroups).forEach(([employeeKey, group]: [string, { profile: ResourceCalendarData['profile']; engagements: ResourceCalendarData[] }]) => {
       const profile = group.profile;
-      
-      // Parent task (Employee) - MUST be type "summary" for wx-react-gantt
       const parentId = `employee-${profile.id}`;
-      tasks.push({
-        id: parentId,
-        text: `${profile.first_name} ${profile.last_name} (${profile.employee_id})`,
-        type: 'summary', // Changed from 'project' to 'summary' - this is required!
-        open: true,
-        data: {
-          isEmployee: true,
-          designation: profile.current_designation,
-          employeeId: profile.employee_id
-        }
-      });
-
-      console.log('Adding parent task:', parentId, profile);
-
-      // Child tasks (Engagements) - MUST be type "task"
+      
+      // Process child tasks (Engagements) first to determine if parent has children
+      const validEngagements: any[] = [];
+      
       group.engagements.forEach((engagement, index) => {
         const startDate = engagement.engagement_start_date ? new Date(engagement.engagement_start_date) : null;
         const endDate = engagement.release_date ? new Date(engagement.release_date) : null;
@@ -141,11 +128,54 @@ export const useGanttResourceData = (
           };
           
           console.log('Adding task:', taskData);
-          tasks.push(taskData);
+          validEngagements.push(taskData);
         } else {
           console.warn('Skipping engagement with invalid start date:', engagement.id, engagement.engagement_start_date);
         }
       });
+
+      // Only add parent task if it has valid child engagements OR provide start/end dates
+      if (validEngagements.length > 0) {
+        // Parent task (Employee) with subtasks
+        tasks.push({
+          id: parentId,
+          text: `${profile.first_name} ${profile.last_name} (${profile.employee_id})`,
+          type: 'summary', // Required type for parent tasks
+          open: true,
+          data: {
+            isEmployee: true,
+            designation: profile.current_designation,
+            employeeId: profile.employee_id
+          }
+        });
+        
+        // Add all valid child tasks
+        tasks.push(...validEngagements);
+        
+        console.log('Adding parent task with', validEngagements.length, 'children:', parentId, profile);
+      } else {
+        // Parent task without subtasks - must have start/end dates
+        // Use current month as start and next 6 months as end for timeline view
+        const startDate = startingMonth;
+        const endDate = addMonths(startingMonth, 5);
+        
+        tasks.push({
+          id: parentId,
+          text: `${profile.first_name} ${profile.last_name} (${profile.employee_id}) - No Assignments`,
+          type: 'summary',
+          start: startDate,
+          end: endDate,
+          open: true,
+          data: {
+            isEmployee: true,
+            designation: profile.current_designation,
+            employeeId: profile.employee_id,
+            noAssignments: true
+          }
+        });
+        
+        console.log('Adding parent task without children (with dates):', parentId, profile);
+      }
     });
 
     console.log('Final gantt tasks:', tasks);
