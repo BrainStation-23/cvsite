@@ -1,4 +1,3 @@
-
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -40,6 +39,7 @@ export const useResourcePlanningOperations = () => {
       queryClient.invalidateQueries({ queryKey: ['planned-resources-tab'] });
       queryClient.invalidateQueries({ queryKey: ['weekly-validation-tab'] });
       queryClient.invalidateQueries({ queryKey: ['resource-calendar-data'] });
+      queryClient.invalidateQueries({ queryKey: ['unplanned-resources'] });
     },
   });
 
@@ -59,6 +59,7 @@ export const useResourcePlanningOperations = () => {
       queryClient.invalidateQueries({ queryKey: ['planned-resources-tab'] });
       queryClient.invalidateQueries({ queryKey: ['weekly-validation-tab'] });
       queryClient.invalidateQueries({ queryKey: ['resource-calendar-data'] });
+      queryClient.invalidateQueries({ queryKey: ['unplanned-resources'] });
     },
   });
 
@@ -105,6 +106,7 @@ export const useResourcePlanningOperations = () => {
       queryClient.invalidateQueries({ queryKey: ['planned-resources-tab'] });
       queryClient.invalidateQueries({ queryKey: ['weekly-validation-tab'] });
       queryClient.invalidateQueries({ queryKey: ['resource-calendar-data'] });
+      queryClient.invalidateQueries({ queryKey: ['unplanned-resources'] });
       toast({
         title: 'Success',
         description: 'Resource assignment deleted successfully.',
