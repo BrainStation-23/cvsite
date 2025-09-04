@@ -29,7 +29,6 @@ import ProfileImageWarningAudit from '@/pages/admin/platform-settings/ProfileIma
 import SecurityPage from '@/pages/security/SecurityPage';
 import NotFound from '@/pages/NotFound';
 import TrainingCertification from '@/pages/TrainingCertification';
-import ResourceCalendar from '@/pages/ResourceCalendar';
 import ResourceCalendarView from '@/pages/resource-calendar/ResourceCalendarView';
 import ResourceCalendarStatistics from '@/pages/resource-calendar/ResourceCalendarStatistics';
 import ResourceCalendarPlanning from '@/pages/resource-calendar/ResourceCalendarPlanning';
@@ -45,8 +44,8 @@ import MySituation from '@/pages/pip/MySituation';
 import PIPPMReview from '@/pages/pip/PIPPMReview';
 import ManagerPIPList from '@/pages/pip/ManagerPIPList';
 import ManagerPMReview from '@/pages/pip/ManagerPMReview';
-import './App.css';
 import AdminPIPView from './pages/pip/AdminPIPView';
+import './App.css';
 
 // Create QueryClient instance outside component to prevent recreation
 const queryClient = new QueryClient({
@@ -330,14 +329,6 @@ function App(): React.ReactElement {
               }
             />
            
-            <Route
-              path="/admin/resource-calendar"
-              element={
-                <ProtectedRoute allowedRoles={['admin', 'manager']}>
-                  <ResourceCalendar />
-                </ProtectedRoute>
-              }
-            />
              <Route
               path="/admin/resource-calendar/planning"
               element={
