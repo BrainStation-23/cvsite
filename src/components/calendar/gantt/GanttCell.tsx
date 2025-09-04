@@ -17,7 +17,7 @@ export const GanttCell: React.FC<GanttCellProps> = ({
     onEngagementClick?.(engagement);
   };
 
-  const opacity = Math.min(engagement.engagement_percentage / 100, 1);
+  const opacity = 1;
   const backgroundColor = engagement.bill_type?.color_code || '#6b7280';
 
   return (
@@ -35,15 +35,8 @@ export const GanttCell: React.FC<GanttCellProps> = ({
     >
       <div className="h-full flex items-center justify-center">
         <span className="text-xs text-white font-medium truncate px-1">
-          {engagement.project_name}
+          {engagement.project_name} [{engagement.engagement_percentage}%]
         </span>
-      </div>
-      
-      {/* Tooltip on hover */}
-      <div className="absolute z-50 invisible group-hover:visible opacity-0 group-hover:opacity-100 transition-opacity duration-200 bottom-full mb-2 left-1/2 transform -translate-x-1/2">
-        <div className="bg-popover text-popover-foreground text-xs p-3 rounded-lg shadow-lg border max-w-xs whitespace-pre-line">
-          {formatEngagementTooltip(engagement)}
-        </div>
       </div>
     </div>
   );
