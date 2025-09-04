@@ -6,34 +6,64 @@ import { startOfMonth, endOfMonth, addMonths } from 'date-fns';
 export interface ResourceCalendarData {
   id: string;
   profile_id: string;
+  project_id: string;
+  bill_type_id: string;
   engagement_percentage: number;
   billing_percentage: number;
-  release_date: string;
   engagement_start_date: string;
+  release_date: string;
   engagement_complete: boolean;
+  weekly_validation: boolean;
   forecasted_project: string | null;
   created_at: string;
   updated_at: string;
   profile: {
     id: string;
-    employee_id: string;
     first_name: string;
     last_name: string;
+    employee_id: string;
+    email: string;
+    profile_image: string | null;
     current_designation: string;
   };
-  bill_type: {
+  sbu: {
     id: string;
     name: string;
-    color_code: string;
+    sbu_head_name: string | null;
+    sbu_head_email: string | null;
+  };
+  manager: {
+    id: string;
+    first_name: string;
+    last_name: string;
+    employee_id: string;
+    full_name: string;
   } | null;
   project: {
     id: string;
     project_name: string;
-    project_manager: string;
-    client_name: string;
+    client_name: string | null;
+    description: string | null;
     budget: number;
-    project_level: string | null;
-    project_bill_type: string | null;
+    is_active: boolean;
+    project_level: string;
+    project_bill_type: string;
+    project_type_name: string;
+    project_manager: {
+      id: string;
+      first_name: string;
+      last_name: string;
+      employee_id: string;
+      full_name: string;
+    };
+  } | null;
+  bill_type: {
+    id: string;
+    name: string;
+    is_billable: boolean;
+    non_billed: boolean;
+    is_support: boolean;
+    color_code: string;
   } | null;
 }
 

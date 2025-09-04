@@ -19,7 +19,13 @@ export function transformResourceDataToGantt(resourceData: ResourceCalendarData[
       id: item.id,
       project_name: item.project?.project_name || 'Unknown Project',
       client_name: item.project?.client_name || 'Unknown Client',
-      project_manager: item.project?.project_manager || 'Unknown PM',
+      project_manager: item.project?.project_manager || {
+        id: '',
+        first_name: 'Unknown',
+        last_name: 'PM',
+        employee_id: '',
+        full_name: 'Unknown PM'
+      },
       start_date: new Date(item.engagement_start_date),
       end_date: item.release_date ? new Date(item.release_date) : null,
       engagement_percentage: item.engagement_percentage,
@@ -95,7 +101,7 @@ export function formatEngagementTooltip(engagement: GanttEngagement): string {
   return `
     Project: ${engagement.project_name}
     Client: ${engagement.client_name}
-    PM: ${engagement.project_manager}
+    PM: ${engagement.project_manager.full_name}
     Duration: ${startDate} - ${endDate}
     Engagement: ${engagement.engagement_percentage}%
     Billing: ${engagement.billing_percentage}%

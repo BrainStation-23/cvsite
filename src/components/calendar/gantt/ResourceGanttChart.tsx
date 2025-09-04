@@ -63,31 +63,6 @@ export const ResourceGanttChart: React.FC<ResourceGanttChartProps> = ({
           />
         ))}
       </div>
-
-      {/* Legend */}
-      <div className="border-t p-4 bg-muted/20">
-        <div className="flex items-center justify-between">
-          <div className="text-sm font-medium">Legend</div>
-          <div className="flex items-center space-x-6 text-xs">
-            <div className="flex items-center space-x-2">
-              <div className="w-3 h-3 bg-blue-500 rounded"></div>
-              <span>Billable</span>
-            </div>
-            <div className="flex items-center space-x-2">
-              <div className="w-3 h-3 bg-green-500 rounded"></div>
-              <span>Non-billable</span>
-            </div>
-            <div className="flex items-center space-x-2">
-              <div className="w-3 h-3 bg-yellow-500 rounded"></div>
-              <span>Investment</span>
-            </div>
-            <div className="flex items-center space-x-2">
-              <div className="w-3 h-3 bg-gray-400 rounded opacity-50"></div>
-              <span>Forecasted</span>
-            </div>
-          </div>
-        </div>
-      </div>
     </div>
   );
 };
