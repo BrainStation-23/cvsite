@@ -17,21 +17,22 @@ export function transformResourceDataToGantt(resourceData: ResourceCalendarData[
 
     const engagement: GanttEngagement = {
       id: item.id,
-      project_name: item.project?.project_name || 'Unknown Project',
-      client_name: item.project?.client_name || 'Unknown Client',
+      project_name: item.project?.project_name || null,
+      client_name: item.project?.client_name || null,
       project_manager: item.project?.project_manager || {
         id: '',
-        first_name: 'Unknown',
-        last_name: 'PM',
+        first_name: '',
+        last_name: '',
         employee_id: '',
-        full_name: 'Unknown PM'
+        full_name: ''
       },
       start_date: new Date(item.engagement_start_date),
       end_date: item.release_date ? new Date(item.release_date) : null,
       engagement_percentage: item.engagement_percentage,
       billing_percentage: item.billing_percentage,
       bill_type: item.bill_type,
-      is_forecasted: !!item.forecasted_project
+      is_forecasted: !!item.forecasted_project,
+      forecasted_project: item.forecasted_project
     };
 
     resourceMap.get(profileId)!.engagements.push(engagement);
@@ -151,13 +152,15 @@ export function formatEngagementTooltip(engagement: GanttEngagement): string {
   const startDate = format(engagement.start_date, 'MMM dd, yyyy');
   const endDate = engagement.end_date ? format(engagement.end_date, 'MMM dd, yyyy') : 'Ongoing';
   
-  return `
-    Project: ${engagement.project_name}
-    Client: ${engagement.client_name}
-    PM: ${engagement.project_manager.full_name}
-    Duration: ${startDate} - ${endDate}
-    Engagement: ${engagement.engagement_percentage}%
-    Billing: ${engagement.billing_percentage}%
-    Type: ${engagement.bill_type?.name || 'Unknown'}
-  `.trim();
+  const lines = [
+    `Project: ${engagement.project_name || engagement.forecasted_project || 'N/A'}`,
+    ...(engagement.client_name ? [`Client: ${engagement.client_name}`] : []),
+    ...(engagement.project_manager?.full_name ? [`PM: ${engagement.project_manager.full_name}`] : []),
+    `Duration: ${startDate} - ${endDate}`,
+    `Engagement: ${engagement.engagement_percentage}%`,
+    `Billing: ${engagement.billing_percentage}%`,
+    `Type: ${engagement.bill_type?.name || 'Unknown'}`
+  ];
+  
+  return lines.join('\n');
 }

@@ -39,7 +39,8 @@ export const GanttCell: React.FC<GanttCellProps> = ({
     >
       <div className="h-full flex items-center justify-center">
         <span className="text-xs text-white font-medium truncate px-1">
-          {engagement.project_name} [{engagement.engagement_percentage}%]
+          {engagement.project_name || engagement.forecasted_project} 
+          {engagement.engagement_percentage > 0 && `[${engagement.engagement_percentage}%]`}
         </span>
       </div>
     </div>
