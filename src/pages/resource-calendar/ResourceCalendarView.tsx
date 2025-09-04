@@ -1,14 +1,10 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import DashboardLayout from '../../components/Layout/DashboardLayout';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft } from 'lucide-react';
+import {ArrowLeft } from 'lucide-react';
 import { ResourceCalendarFilters } from '../../components/calendar/ResourceCalendarFilters';
-import { CalendarHeader } from '../../components/calendar/CalendarHeader';
-import { ResourceGanttChart } from '../../components/calendar/ResourceGanttChart';
-import { useGanttResourceData } from '../../hooks/use-gantt-resource-data';
-import { addMonths, subMonths } from 'date-fns';
 
 interface AdvancedFilters {
   billTypeFilter: string | null;
@@ -29,9 +25,6 @@ const ResourceCalendarView: React.FC = () => {
   const location = useLocation();
   const isAdmin = location.pathname.includes('/admin/');
   const baseUrl = isAdmin ? '/admin/resource-calendar' : '/manager/resource-calendar';
-
-  // Month navigation state
-  const [currentMonth, setCurrentMonth] = useState(new Date());
 
   // Basic filter states
   const [searchQuery, setSearchQuery] = useState('');
@@ -79,20 +72,6 @@ const ResourceCalendarView: React.FC = () => {
     });
   };
 
-  // Month navigation handlers
-  const handlePreviousMonth = () => setCurrentMonth(prev => subMonths(prev, 1));
-  const handleNextMonth = () => setCurrentMonth(prev => addMonths(prev, 1));
-  const handleToday = () => setCurrentMonth(new Date());
-
-  // Fetch Gantt data
-  const { ganttTasks, isLoading, error } = useGanttResourceData(
-    searchQuery,
-    selectedSbu,
-    selectedManager,
-    currentMonth,
-    advancedFilters
-  );
-
   return (
     <DashboardLayout>
       <div className="space-y-6">
@@ -114,14 +93,6 @@ const ResourceCalendarView: React.FC = () => {
           </div>
         </div>
 
-        {/* Calendar Header */}
-        <CalendarHeader
-          currentMonth={currentMonth}
-          onPreviousMonth={handlePreviousMonth}
-          onNextMonth={handleNextMonth}
-          onToday={handleToday}
-        />
-
         {/* Search and Filters */}
         <ResourceCalendarFilters
           searchQuery={searchQuery}
@@ -136,14 +107,6 @@ const ResourceCalendarView: React.FC = () => {
           advancedFilters={advancedFilters}
           onAdvancedFiltersChange={setAdvancedFilters}
           onClearAdvancedFilters={clearAdvancedFilters}
-        />
-
-        {/* Resource Gantt Chart */}
-        <ResourceGanttChart
-          tasks={ganttTasks}
-          isLoading={isLoading}
-          error={error}
-          currentMonth={currentMonth}
         />
 
       </div>

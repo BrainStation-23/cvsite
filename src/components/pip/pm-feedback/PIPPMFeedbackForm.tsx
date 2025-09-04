@@ -23,9 +23,6 @@ interface PIPPMFeedbackFormProps {
   isSubmitting?: boolean;
   isEditing?: boolean;
   isReadOnly?: boolean;
-  onSubmitToHR?: () => void;
-  canSubmitToHR?: boolean;
-  
 }
 
 export const PIPPMFeedbackForm: React.FC<PIPPMFeedbackFormProps> = ({
@@ -33,9 +30,7 @@ export const PIPPMFeedbackForm: React.FC<PIPPMFeedbackFormProps> = ({
   onSubmit,
   isSubmitting = false,
   isEditing = false,
-  isReadOnly = false,
-  onSubmitToHR,
-  canSubmitToHR = false,
+  isReadOnly = false
 }) => {
   const form = useForm<PIPPMFeedbackFormData>({
     resolver: zodResolver(pmFeedbackSchema),
@@ -103,28 +98,13 @@ export const PIPPMFeedbackForm: React.FC<PIPPMFeedbackFormProps> = ({
             <div className="text-sm text-muted-foreground">
               {isFormValid ? '✓ All sections completed' : 'Please complete all required sections'}
             </div>
-            <div className="flex justify-between items-center gap-2">
-              <Button
-                type="submit"
-                disabled={!isFormValid || isSubmitting}
-                size="lg"
-                variant='secondary'
-              >
-                {isSubmitting ? 'Saving...' : (isEditing ? 'Update Feedback' : 'Save Feedback')}
-              </Button>
-
-              {canSubmitToHR && onSubmitToHR && (
-                <Button
-                  onClick={onSubmitToHR}
-                  disabled={isSubmitting}
-                  className="shrink-0"
-                  size="lg"
-                >
-                  {isSubmitting ? 'Submitting...' : 'Submit to HR'}
-                </Button>
-              )}
-            </div>
-
+            <Button
+              type="submit"
+              disabled={!isFormValid || isSubmitting}
+              size="lg"
+            >
+              {isSubmitting ? 'Saving...' : (isEditing ? 'Update Feedback' : 'Save Feedback')}
+            </Button>
           </div>
         </div>
       )}

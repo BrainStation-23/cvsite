@@ -91,6 +91,9 @@ const ManagerPMReview: React.FC = () => {
           profile={profile}
           pipStatus={pip.status}
           onBack={() => navigate('/manager/pip/pm-review')}
+          onSubmitToHR={canSubmitToHR ? handleSubmitToHR : undefined}
+          canSubmitToHR={canSubmitToHR}
+          isSubmitting={isUpdatingStatus}
         />
 
         <div className="max-w-4xl mx-auto p-6 space-y-6">
@@ -127,8 +130,6 @@ const ManagerPMReview: React.FC = () => {
               isSubmitting={isCreating || isUpdating}
               isEditing={isEditing}
               isReadOnly={!isEditable}
-              onSubmitToHR={canSubmitToHR ? handleSubmitToHR : undefined}
-              canSubmitToHR={canSubmitToHR}
             />
           </div>
         </div>
