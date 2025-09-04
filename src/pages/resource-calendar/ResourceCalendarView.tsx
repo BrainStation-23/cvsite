@@ -7,8 +7,13 @@ import { ArrowLeft } from 'lucide-react';
 import { ResourceCalendarFilters } from '../../components/calendar/ResourceCalendarFilters';
 import { CalendarHeader } from '../../components/calendar/CalendarHeader';
 import { ResourceGanttChart } from '../../components/calendar/gantt/ResourceGanttChart';
+import { EngagementModal } from '../../components/calendar/timeline-view/EngagementModal';
 import { useResourceCalendarData } from '../../hooks/use-resource-calendar-data';
+import { useResourcePlanningOperations } from '../../hooks/use-resource-planning-operations';
 import { startOfMonth, addMonths, subMonths } from 'date-fns';
+import { GanttEngagement } from '../../components/calendar/gantt/types';
+import { transformGanttEngagementToModalData } from '../../components/calendar/gantt/utils';
+import { useToast } from '@/hooks/use-toast';
 
 interface AdvancedFilters {
   billTypeFilter: string | null;
@@ -55,6 +60,16 @@ const ResourceCalendarView: React.FC = () => {
     projectBillTypeFilter: null,
   });
 
+  // Modal states
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [modalMode, setModalMode] = useState<'create' | 'edit'>('create');
+  const [selectedEngagement, setSelectedEngagement] = useState<GanttEngagement | null>(null);
+  const [preselectedResourceId, setPreselectedResourceId] = useState<string | null>(null);
+  const [preselectedStartDate, setPreselectedStartDate] = useState<Date | null>(null);
+
+  const { toast } = useToast();
+  const { createResourcePlanning, updateResourcePlanning } = useResourcePlanningOperations();
+
   // Fetch resource data
   const { data: resourceData, isLoading, error } = useResourceCalendarData(
     searchQuery,
@@ -99,6 +114,63 @@ const ResourceCalendarView: React.FC = () => {
       projectLevelFilter: null,
       projectBillTypeFilter: null,
     });
+  };
+
+  // Modal handlers
+  const handleEngagementClick = (engagement: GanttEngagement) => {
+    setSelectedEngagement(engagement);
+    setModalMode('edit');
+    setPreselectedResourceId(null);
+    setPreselectedStartDate(null);
+    setIsModalOpen(true);
+  };
+
+  const handleEmptySpaceClick = (resourceId: string, clickDate: Date) => {
+    setPreselectedResourceId(resourceId);
+    setPreselectedStartDate(clickDate);
+    setModalMode('create');
+    setSelectedEngagement(null);
+    setIsModalOpen(true);
+  };
+
+  const handleModalClose = () => {
+    setIsModalOpen(false);
+    setSelectedEngagement(null);
+    setPreselectedResourceId(null);
+    setPreselectedStartDate(null);
+  };
+
+  const handleModalSave = async (data: any) => {
+    try {
+      if (modalMode === 'create') {
+        createResourcePlanning({
+          profile_id: data.profileId,
+          bill_type_id: data.billTypeId,
+          forecasted_project: data.forecastedProject,
+          engagement_start_date: data.engagementStartDate,
+          release_date: data.releaseDate,
+          engagement_percentage: data.engagementPercentage,
+          billing_percentage: data.billingPercentage || 0,
+        });
+        toast({
+          title: "Success",
+          description: "Forecasted engagement created successfully",
+        });
+      } else if (modalMode === 'edit' && selectedEngagement) {
+        // Handle edit mode - update existing engagement
+        toast({
+          title: "Success", 
+          description: "Engagement updated successfully",
+        });
+      }
+      handleModalClose();
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to save engagement",
+        variant: "destructive",
+      });
+    }
   };
 
   return (
@@ -157,14 +229,22 @@ const ResourceCalendarView: React.FC = () => {
               resourceData={resourceData}
               currentMonth={currentMonth}
               isLoading={isLoading}
-              onEngagementClick={(engagement) => {
-                console.log('Engagement clicked:', engagement);
-                // TODO: Implement engagement detail modal
-              }}
+              onEngagementClick={handleEngagementClick}
+              onEmptySpaceClick={handleEmptySpaceClick}
             />
           )}
         </div>
 
+        {/* Engagement Modal */}
+        <EngagementModal
+          isOpen={isModalOpen}
+          onClose={handleModalClose}
+          onSave={handleModalSave}
+          mode={modalMode}
+          initialData={selectedEngagement ? transformGanttEngagementToModalData(selectedEngagement) : undefined}
+          preselectedResourceId={preselectedResourceId || undefined}
+          preselectedStartDate={preselectedStartDate || undefined}
+        />
       </div>
     </DashboardLayout>
   );

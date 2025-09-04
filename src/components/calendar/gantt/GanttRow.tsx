@@ -1,21 +1,26 @@
 import React, { useMemo } from 'react';
 import { GanttResourceData, GanttEngagement, GanttTimelineMonth } from './types';
 import { GanttCell } from './GanttCell';
-import { calculateEngagementPosition, assignEngagementTracks, calculateMaxTracks } from './utils';
+import { calculateEngagementPosition, assignEngagementTracks, calculateMaxTracks, calculateClickedDate } from './utils';
 
 interface GanttRowProps {
   resource: GanttResourceData;
   timeline: GanttTimelineMonth[];
   onEngagementClick?: (engagement: GanttEngagement) => void;
+  onEmptySpaceClick?: (resourceId: string, clickDate: Date) => void;
 }
 
-export const GanttRow: React.FC<GanttRowProps> = ({
-  resource,
-  timeline,
-  onEngagementClick
+export const GanttRow: React.FC<GanttRowProps> = ({ 
+  resource, 
+  timeline, 
+  onEngagementClick,
+  onEmptySpaceClick 
 }) => {
   const timelineStart = timeline[0]?.weeks[0]?.weekStart;
   const timelineEnd = timeline[timeline.length - 1]?.weeks[timeline[timeline.length - 1].weeks.length - 1]?.weekEnd;
+  
+  // Calculate total weeks for percentage calculation
+  const totalWeeks = timeline.reduce((acc, month) => acc + month.weeks.length, 0);
 
   const { trackAssignments, maxTracks, rowHeight } = useMemo(() => {
     if (!resource.engagements.length) {
@@ -61,18 +66,31 @@ export const GanttRow: React.FC<GanttRowProps> = ({
       <div className="flex-1 relative" style={{ height: `${rowHeight}px` }}>
         {/* Week grid background */}
         <div className="absolute inset-0 flex">
-          {timeline.map((month, monthIndex) => (
-            <div key={monthIndex} className="flex-1 flex">
-              {month.weeks.map((week, weekIndex) => (
+          {timeline.map((month, monthIndex) =>
+            month.weeks.map((week, weekIndex) => {
+              const isCurrentWeek = week.isCurrentWeek;
+              const weekPercentage = 100 / totalWeeks;
+              const globalWeekIndex = timeline
+                .slice(0, monthIndex)
+                .reduce((acc, m) => acc + m.weeks.length, 0) + weekIndex;
+              
+              const handleEmptyClick = () => {
+                if (onEmptySpaceClick) {
+                  const clickedDate = calculateClickedDate(globalWeekIndex, timeline);
+                  onEmptySpaceClick(resource.profile.id, clickedDate);
+                }
+              };
+              
+              return (
                 <div
                   key={`${monthIndex}-${weekIndex}`}
-                  className={`flex-1 border-r last:border-r-0 ${
-                    week.isCurrentWeek ? 'bg-primary/5' : ''
-                  }`}
+                  className={`border-r border-border/20 cursor-pointer hover:bg-muted/20 transition-colors ${isCurrentWeek ? 'bg-primary/5' : ''}`}
+                  style={{ width: `${weekPercentage}%` }}
+                  onClick={handleEmptyClick}
                 />
-              ))}
-            </div>
-          ))}
+              );
+            })
+          )}
         </div>
 
         {/* Engagement cells */}

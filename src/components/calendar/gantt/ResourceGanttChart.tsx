@@ -10,13 +10,15 @@ interface ResourceGanttChartProps {
   currentMonth: Date;
   isLoading?: boolean;
   onEngagementClick?: (engagement: GanttEngagement) => void;
+  onEmptySpaceClick?: (resourceId: string, clickDate: Date) => void;
 }
 
 export const ResourceGanttChart: React.FC<ResourceGanttChartProps> = ({
   resourceData,
   currentMonth,
   isLoading = false,
-  onEngagementClick
+  onEngagementClick,
+  onEmptySpaceClick
 }) => {
   const ganttData = useMemo(() => 
     transformResourceDataToGantt(resourceData), 
@@ -60,6 +62,7 @@ export const ResourceGanttChart: React.FC<ResourceGanttChartProps> = ({
             resource={resource}
             timeline={timeline}
             onEngagementClick={onEngagementClick}
+            onEmptySpaceClick={onEmptySpaceClick}
           />
         ))}
       </div>
