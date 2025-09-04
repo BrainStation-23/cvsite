@@ -165,20 +165,6 @@ export function formatEngagementTooltip(engagement: GanttEngagement): string {
   return lines.join('\n');
 }
 
-// Transform GanttEngagement to EngagementModal data format
-export const transformGanttEngagementToModalData = (engagement: GanttEngagement) => {
-  return {
-    id: engagement.id,
-    profileId: '', // Will be set by the resource context
-    billTypeId: engagement.bill_type?.name || undefined,
-    forecastedProject: engagement.forecasted_project || engagement.project_name || '',
-    engagementPercentage: engagement.engagement_percentage,
-    billingPercentage: engagement.billing_percentage,
-    engagementStartDate: format(engagement.start_date, 'yyyy-MM-dd'),
-    releaseDate: engagement.end_date ? format(engagement.end_date, 'yyyy-MM-dd') : undefined,
-  };
-}
-
 // Calculate which date was clicked based on week position
 export const calculateClickedDate = (weekIndex: number, timeline: GanttTimelineMonth[]): Date => {
   let totalWeeksPassed = weekIndex;
