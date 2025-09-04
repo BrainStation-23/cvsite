@@ -53,7 +53,7 @@ export const ResourceGanttChart: React.FC<ResourceGanttChartProps> = ({
     <div className="bg-background rounded-lg border overflow-hidden">
       <GanttHeader timeline={timeline} />
       
-      <div className="max-h-96 overflow-y-auto">
+      <div className="h-full">
         {ganttData.map((resource) => (
           <GanttRow
             key={resource.profile.id}
