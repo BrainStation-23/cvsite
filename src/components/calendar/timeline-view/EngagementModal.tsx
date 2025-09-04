@@ -95,8 +95,8 @@ export const EngagementModal: React.FC<EngagementModalProps> = ({
       ...formData,
       engagement_start_date: format(startDate, 'yyyy-MM-dd'),
       release_date: format(endDate, 'yyyy-MM-dd'),
-      engagement_percentage: 0,
-      billing_percentage: 0,
+      engagement_percentage: formData.engagement_percentage,
+      billing_percentage: formData.billing_percentage || 0,
     };
     
     onSave(submissionData);
@@ -155,6 +155,19 @@ export const EngagementModal: React.FC<EngagementModalProps> = ({
             />
           </div>
 
+          <div className="space-y-2">
+            <Label htmlFor="engagementPercentage">Engagement Percentage *</Label>
+            <Input
+              type="number"
+              min="0"
+              max="100"
+              value={formData.engagement_percentage || ''}
+              onChange={(e) => setFormData(prev => ({ ...prev, engagement_percentage: Number(e.target.value) }))}
+              placeholder="Enter engagement percentage..."
+              required
+            />
+          </div>
+
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="month">Month *</Label>
@@ -201,7 +214,7 @@ export const EngagementModal: React.FC<EngagementModalProps> = ({
             </Button>
             <Button 
               type="submit" 
-              disabled={!formData.profile_id || !formData.forecasted_project || !selectedMonth || !selectedYear}
+              disabled={!formData.profile_id || !formData.forecasted_project || !selectedMonth || !selectedYear || !formData.engagement_percentage}
             >
               {mode === 'create' ? 'Create' : 'Update'} Assignment
             </Button>
