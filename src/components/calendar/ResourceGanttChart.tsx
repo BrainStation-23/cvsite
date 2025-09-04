@@ -2,7 +2,7 @@ import React, { useEffect, useMemo } from 'react';
 import { Gantt } from 'wx-react-gantt';
 import 'wx-react-gantt/dist/gantt.css';
 import { GanttTask } from '../../hooks/use-gantt-resource-data';
-import { format, addMonths } from 'date-fns';
+import { format, addMonths, isValid } from 'date-fns';
 
 interface ResourceGanttChartProps {
   tasks: GanttTask[];
@@ -17,59 +17,49 @@ export const ResourceGanttChart: React.FC<ResourceGanttChartProps> = ({
   error,
   currentMonth
 }) => {
-  // Generate dynamic CSS for bill type colors
-  useEffect(() => {
-    const style = document.createElement('style');
-    style.id = 'gantt-bill-type-styles';
-    
-    // Remove existing styles
-    const existingStyle = document.getElementById('gantt-bill-type-styles');
-    if (existingStyle) {
-      existingStyle.remove();
-    }
+  // Process and validate tasks for Gantt compatibility
+  const validatedTasks = useMemo(() => {
+    return tasks.map(task => {
+      // Ensure all required fields are present and valid
+      const validatedTask = {
+        id: task.id,
+        text: task.text || 'Untitled',
+        type: task.type || 'task',
+        ...task
+      };
 
-    // Generate CSS for each unique bill type color
-    const colorCodes = new Set<string>();
-    tasks.forEach(task => {
-      if (task.data?.colorCode) {
-        colorCodes.add(task.data.colorCode);
-      }
-    });
-
-    let css = '';
-    colorCodes.forEach(color => {
-      const className = `bill-type-${color.replace('#', '')}`;
-      css += `
-        .wx-gantt .${className} .wx-gantt-task-content {
-          background: ${color} !important;
-          border-color: ${color} !important;
+      // Validate dates for child tasks
+      if (task.type === 'task' && task.start) {
+        const startDate = new Date(task.start);
+        const endDate = task.end ? new Date(task.end) : null;
+        
+        if (isValid(startDate)) {
+          validatedTask.start = startDate;
+          if (endDate && isValid(endDate)) {
+            validatedTask.end = endDate;
+            // Calculate duration in days
+            const diffTime = endDate.getTime() - startDate.getTime();
+            validatedTask.duration = Math.max(1, Math.ceil(diffTime / (1000 * 60 * 60 * 24)));
+          } else {
+            // If no end date, set duration to extend to end of timeline
+            const timelineEnd = addMonths(currentMonth, 5);
+            const diffTime = timelineEnd.getTime() - startDate.getTime();
+            validatedTask.duration = Math.max(1, Math.ceil(diffTime / (1000 * 60 * 60 * 24)));
+          }
+        } else {
+          // If invalid start date, skip this task
+          return null;
         }
-        .wx-gantt .${className} .wx-gantt-task-content:hover {
-          background: ${color}dd !important;
-        }
-      `;
-    });
-
-    // Add general employee row styling
-    css += `
-      .wx-gantt .employee-row .wx-gantt-row {
-        background: hsl(var(--muted)) !important;
-        font-weight: 600;
       }
-      .wx-gantt .engagement-row .wx-gantt-row:hover {
-        background: hsl(var(--muted)/0.5) !important;
-      }
-    `;
 
-    style.textContent = css;
-    document.head.appendChild(style);
-
-    return () => {
-      if (document.getElementById('gantt-bill-type-styles')) {
-        document.getElementById('gantt-bill-type-styles')?.remove();
+      // Ensure progress is between 0 and 1
+      if (task.progress !== undefined) {
+        validatedTask.progress = Math.max(0, Math.min(1, task.progress));
       }
-    };
-  }, [tasks]);
+
+      return validatedTask;
+    }).filter(Boolean); // Remove null tasks
+  }, [tasks, currentMonth]);
 
   // Configure Gantt columns
   const columns = useMemo(() => [
@@ -77,27 +67,27 @@ export const ResourceGanttChart: React.FC<ResourceGanttChartProps> = ({
       name: "text",
       label: "Resource / Engagement",
       width: 300,
-      template: (task: GanttTask) => {
+      template: (task: any) => {
         if (task.data?.isEmployee) {
           return `
-            <div class="font-semibold text-foreground">
+            <div style="font-weight: 600; color: var(--foreground);">
               ${task.text}
-              <div class="text-xs text-muted-foreground mt-1">
-                ${task.data.designation} • ${task.data.sbu}
+              <div style="font-size: 12px; color: var(--muted-foreground); margin-top: 4px;">
+                ${task.data.designation || ''} ${task.data.employeeId ? '• ' + task.data.employeeId : ''}
               </div>
             </div>
           `;
         }
-        return `<div class="text-sm pl-4">${task.text}</div>`;
+        return `<div style="font-size: 14px; padding-left: 16px;">${task.text}</div>`;
       }
     },
     {
       name: "start",
       label: "Start Date",
       width: 100,
-      template: (task: GanttTask) => {
-        if (task.start) {
-          return format(task.start, 'MMM dd');
+      template: (task: any) => {
+        if (task.start && isValid(new Date(task.start))) {
+          return format(new Date(task.start), 'MMM dd');
         }
         return '';
       }
@@ -106,11 +96,9 @@ export const ResourceGanttChart: React.FC<ResourceGanttChartProps> = ({
       name: "duration",
       label: "Duration",
       width: 80,
-      template: (task: GanttTask) => {
-        if (task.start && task.end) {
-          const diffTime = task.end.getTime() - task.start.getTime();
-          const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-          return `${diffDays}d`;
+      template: (task: any) => {
+        if (task.duration) {
+          return `${task.duration}d`;
         }
         return task.data?.isEmployee ? '' : 'Ongoing';
       }
@@ -119,7 +107,7 @@ export const ResourceGanttChart: React.FC<ResourceGanttChartProps> = ({
       name: "progress",
       label: "Engagement %",
       width: 100,
-      template: (task: GanttTask) => {
+      template: (task: any) => {
         if (task.data?.engagementPercentage) {
           return `${task.data.engagementPercentage}%`;
         }
@@ -128,7 +116,7 @@ export const ResourceGanttChart: React.FC<ResourceGanttChartProps> = ({
     }
   ], []);
 
-  // Configure scales for 6-month view
+  // Configure scales for timeline
   const scales = useMemo(() => [
     {
       unit: "month",
@@ -136,25 +124,13 @@ export const ResourceGanttChart: React.FC<ResourceGanttChartProps> = ({
       format: "MMMM yyyy"
     },
     {
-      unit: "week",
+      unit: "week", 
       step: 1,
       format: "MMM dd"
     }
   ], []);
 
-  // Configure task template for custom styling
-  const taskTemplate = useMemo(() => (task: GanttTask) => {
-    if (task.data?.isEmployee) {
-      return '';
-    }
-    
-    const colorCode = task.data?.colorCode || '#6b7280';
-    const className = `bill-type-${colorCode.replace('#', '')}`;
-    
-    return `<div class="${className}"></div>`;
-  }, []);
-
-  // Set start and end dates for timeline
+  // Set timeline bounds
   const startDate = currentMonth;
   const endDate = addMonths(currentMonth, 5);
 
@@ -169,12 +145,12 @@ export const ResourceGanttChart: React.FC<ResourceGanttChartProps> = ({
   if (error) {
     return (
       <div className="border rounded-lg p-8 text-center">
-        <div className="text-destructive">Error loading resource data</div>
+        <div className="text-destructive">Error loading resource data: {error.message}</div>
       </div>
     );
   }
 
-  if (tasks.length === 0) {
+  if (validatedTasks.length === 0) {
     return (
       <div className="border rounded-lg p-8 text-center">
         <div className="text-muted-foreground">No resource data found for the selected criteria</div>
@@ -186,7 +162,7 @@ export const ResourceGanttChart: React.FC<ResourceGanttChartProps> = ({
     <div className="border rounded-lg overflow-hidden bg-card">
       <div className="h-[600px]">
         <Gantt
-          tasks={tasks}
+          tasks={validatedTasks}
           columns={columns}
           scales={scales}
           start={startDate}
@@ -194,37 +170,6 @@ export const ResourceGanttChart: React.FC<ResourceGanttChartProps> = ({
           cellWidth={40}
           cellHeight={40}
           readonly={true}
-          taskTemplate={taskTemplate}
-          rowClass={(task: GanttTask) => {
-            return task.data?.isEmployee ? 'employee-row' : 'engagement-row';
-          }}
-          tooltip={(task: GanttTask) => {
-            if (task.data?.isEmployee) {
-              return `
-                <div class="p-2">
-                  <div class="font-semibold">${task.text}</div>
-                  <div class="text-sm text-muted-foreground">
-                    ${task.data.designation}<br/>
-                    ${task.data.sbu}<br/>
-                    Manager: ${task.data.manager}
-                  </div>
-                </div>
-              `;
-            } else {
-              return `
-                <div class="p-2">
-                  <div class="font-semibold">${task.data?.projectName}</div>
-                  <div class="text-sm">
-                    Client: ${task.data?.clientName || 'N/A'}<br/>
-                    Engagement: ${task.data?.engagementPercentage}%<br/>
-                    Billing: ${task.data?.billingPercentage}%<br/>
-                    Bill Type: ${task.data?.billType?.name || 'N/A'}<br/>
-                    PM: ${task.data?.projectManager || 'N/A'}
-                  </div>
-                </div>
-              `;
-            }
-          }}
         />
       </div>
     </div>
