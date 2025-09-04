@@ -67,7 +67,7 @@ const ResourceCalendarView: React.FC = () => {
   const [preselectedStartDate, setPreselectedStartDate] = useState<Date | null>(null);
 
   const { toast } = useToast();
-  const { createResourcePlanning, updateResourcePlanning } = useResourcePlanningOperations();
+  const { createResourcePlanning, updateResourcePlanning, deleteResourcePlanning } = useResourcePlanningOperations();
 
   // Fetch resource data
   const { data: resourceData, isLoading, error } = useResourceCalendarData(
@@ -183,6 +183,19 @@ const ResourceCalendarView: React.FC = () => {
     }
   };
 
+  const handleModalDelete = async (id: string) => {
+    try {
+      deleteResourcePlanning(id);
+      handleModalClose();
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to delete engagement",
+        variant: "destructive",
+      });
+    }
+  };
+
   return (
     <DashboardLayout>
       <div className="space-y-6">
@@ -250,10 +263,12 @@ const ResourceCalendarView: React.FC = () => {
           isOpen={isModalOpen}
           onClose={handleModalClose}
           onSave={handleModalSave}
+          onDelete={handleModalDelete}
           mode={modalMode}
           initialData={selectedEngagement}
           preselectedResourceId={preselectedResourceId || undefined}
           preselectedStartDate={preselectedStartDate || undefined}
+          isForecasted={selectedEngagement?.forecasted_project !== null}
         />
       </div>
     </DashboardLayout>

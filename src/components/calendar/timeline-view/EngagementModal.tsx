@@ -13,20 +13,24 @@ interface EngagementModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSave: (data: any) => void;
+  onDelete?: (id: string) => void;
   initialData?: any;
   preselectedResourceId?: string;
   preselectedStartDate?: Date;
   mode: 'create' | 'edit';
+  isForecasted?: boolean;
 }
 
 export const EngagementModal: React.FC<EngagementModalProps> = ({
   isOpen,
   onClose,
   onSave,
+  onDelete,
   initialData,
   preselectedResourceId,
   preselectedStartDate,
   mode,
+  isForecasted = true,
 }) => {
   const currentDate = new Date();
   const currentMonth = currentDate.getMonth() + 1; // getMonth() returns 0-11
@@ -120,11 +124,23 @@ export const EngagementModal: React.FC<EngagementModalProps> = ({
       <DialogContent className="max-w-md">
         <DialogHeader>
           <DialogTitle>
-            {mode === 'create' ? 'Create Forecasted Assignment' : 'Edit Forecasted Assignment'}
+            {mode === 'create' ? 'Create Forecasted Assignment' : 'Edit Assignment'}
           </DialogTitle>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        {mode === 'edit' && !isForecasted ? (
+          <div className="p-4 bg-muted rounded-lg">
+            <p className="text-muted-foreground text-center">
+              Only forecasting cells can be edited here. This is a confirmed project assignment.
+            </p>
+            <div className="flex justify-end mt-4">
+              <Button type="button" variant="outline" onClick={handleClose}>
+                Close
+              </Button>
+            </div>
+          </div>
+        ) : (
+          <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="profile">Employee *</Label>
             <ProfileCombobox
@@ -208,18 +224,35 @@ export const EngagementModal: React.FC<EngagementModalProps> = ({
             </div>
           </div>
 
-          <div className="flex justify-end space-x-2 pt-4">
-            <Button type="button" variant="outline" onClick={handleClose}>
-              Cancel
-            </Button>
-            <Button 
-              type="submit" 
-              disabled={!formData.profile_id || !formData.forecasted_project || !selectedMonth || !selectedYear || !formData.engagement_percentage}
-            >
-              {mode === 'create' ? 'Create' : 'Update'} Assignment
-            </Button>
+          <div className="flex justify-between space-x-2 pt-4">
+            <div>
+              {mode === 'edit' && isForecasted && onDelete && initialData?.id && (
+                <Button
+                  type="button"
+                  variant="destructive"
+                  onClick={() => {
+                    onDelete(initialData.id);
+                    handleClose();
+                  }}
+                >
+                  Delete
+                </Button>
+              )}
+            </div>
+            <div className="flex space-x-2">
+              <Button type="button" variant="outline" onClick={handleClose}>
+                Cancel
+              </Button>
+              <Button 
+                type="submit" 
+                disabled={!formData.profile_id || !formData.forecasted_project || !selectedMonth || !selectedYear || !formData.engagement_percentage}
+              >
+                {mode === 'create' ? 'Create' : 'Update'} Assignment
+              </Button>
+            </div>
           </div>
         </form>
+        )}
       </DialogContent>
     </Dialog>
   );
