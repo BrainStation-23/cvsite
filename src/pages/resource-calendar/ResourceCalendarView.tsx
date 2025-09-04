@@ -3,9 +3,12 @@ import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import DashboardLayout from '../../components/Layout/DashboardLayout';
 import { Button } from '@/components/ui/button';
-import {ArrowLeft } from 'lucide-react';
-import ResourceCalendarViewComponent from '../../components/calendar/ResourceCalendarViewComponent';
+import { ArrowLeft } from 'lucide-react';
 import { ResourceCalendarFilters } from '../../components/calendar/ResourceCalendarFilters';
+import { CalendarHeader } from '../../components/calendar/CalendarHeader';
+import { ResourceGanttChart } from '../../components/calendar/gantt/ResourceGanttChart';
+import { useResourceCalendarData } from '../../hooks/use-resource-calendar-data';
+import { startOfMonth, addMonths, subMonths } from 'date-fns';
 
 interface AdvancedFilters {
   billTypeFilter: string | null;
@@ -26,6 +29,9 @@ const ResourceCalendarView: React.FC = () => {
   const location = useLocation();
   const isAdmin = location.pathname.includes('/admin/');
   const baseUrl = isAdmin ? '/admin/resource-calendar' : '/manager/resource-calendar';
+
+  // Month navigation state
+  const [currentMonth, setCurrentMonth] = useState(() => startOfMonth(new Date()));
 
   // Basic filter states
   const [searchQuery, setSearchQuery] = useState('');
@@ -48,6 +54,28 @@ const ResourceCalendarView: React.FC = () => {
     projectLevelFilter: null,
     projectBillTypeFilter: null,
   });
+
+  // Fetch resource data
+  const { data: resourceData, isLoading, error } = useResourceCalendarData(
+    searchQuery,
+    selectedSbu,
+    selectedManager,
+    currentMonth,
+    advancedFilters
+  );
+
+  // Month navigation handlers
+  const handlePreviousMonth = () => {
+    setCurrentMonth(prev => subMonths(prev, 1));
+  };
+
+  const handleNextMonth = () => {
+    setCurrentMonth(prev => addMonths(prev, 1));
+  };
+
+  const handleToday = () => {
+    setCurrentMonth(startOfMonth(new Date()));
+  };
 
   const clearFilters = () => {
     setSearchQuery('');
@@ -110,14 +138,33 @@ const ResourceCalendarView: React.FC = () => {
           onClearAdvancedFilters={clearAdvancedFilters}
         />
 
-        {/* Main Calendar */}
-        <ResourceCalendarViewComponent 
-          searchQuery={searchQuery}
-          selectedSbu={selectedSbu}
-          selectedManager={selectedManager}
-          showUnplanned={showUnplanned}
-          advancedFilters={advancedFilters}
+        {/* Calendar Header */}
+        <CalendarHeader
+          currentMonth={currentMonth}
+          onPreviousMonth={handlePreviousMonth}
+          onNextMonth={handleNextMonth}
+          onToday={handleToday}
         />
+
+        {/* Gantt Chart */}
+        <div className="bg-background rounded-lg border">
+          {error ? (
+            <div className="p-6 text-center text-destructive">
+              <p>Error loading resource data: {error.message}</p>
+            </div>
+          ) : (
+            <ResourceGanttChart
+              resourceData={resourceData}
+              currentMonth={currentMonth}
+              isLoading={isLoading}
+              onEngagementClick={(engagement) => {
+                console.log('Engagement clicked:', engagement);
+                // TODO: Implement engagement detail modal
+              }}
+            />
+          )}
+        </div>
+
       </div>
     </DashboardLayout>
   );

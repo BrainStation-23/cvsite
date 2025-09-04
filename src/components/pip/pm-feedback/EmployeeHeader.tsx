@@ -24,9 +24,6 @@ export const EmployeeHeader: React.FC<EmployeeHeaderProps> = ({
   profile,
   pipStatus,
   onBack,
-  onSubmitToHR,
-  canSubmitToHR = false,
-  isSubmitting = false
 }) => {
   return (
     <div className="sticky top-0 z-50 bg-background border-b shadow-sm">
@@ -64,16 +61,6 @@ export const EmployeeHeader: React.FC<EmployeeHeaderProps> = ({
             </Badge>
           </div>
         </div>
-        
-        {canSubmitToHR && onSubmitToHR && (
-          <Button
-            onClick={onSubmitToHR}
-            disabled={isSubmitting}
-            className="shrink-0"
-          >
-            {isSubmitting ? 'Submitting...' : 'Submit to HR'}
-          </Button>
-        )}
       </div>
     </div>
   );
