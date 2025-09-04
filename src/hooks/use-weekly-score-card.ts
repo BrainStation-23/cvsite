@@ -1,5 +1,5 @@
 
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 
 export interface WeeklyScoreCard {
@@ -57,6 +57,8 @@ export const useWeeklyScoreCard = (options: UseWeeklyScoreCardOptions = {}) => {
 
 // Hook to calculate new weekly score card
 export const useCalculateWeeklyScoreCard = () => {
+  const queryClient = useQueryClient();
+  
   return useQuery({
     queryKey: ['calculate-weekly-score-card'],
     queryFn: async () => {
@@ -70,8 +72,39 @@ export const useCalculateWeeklyScoreCard = () => {
       }
 
       console.log('Calculate weekly score card result:', data);
+      
+      // Invalidate weekly score card queries after calculation
+      queryClient.invalidateQueries({ queryKey: ['weekly-score-card'] });
+      
       return data;
     },
     enabled: false, // Only run when manually triggered
+  });
+};
+
+// Hook to delete weekly score card
+export const useDeleteWeeklyScoreCard = () => {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: async (scoreCardId: string) => {
+      console.log('Deleting weekly score card:', scoreCardId);
+      
+      const { error } = await supabase
+        .from('weekly_score_card')
+        .delete()
+        .eq('id', scoreCardId);
+
+      if (error) {
+        console.error('Error deleting weekly score card:', error);
+        throw error;
+      }
+      
+      return { success: true };
+    },
+    onSuccess: () => {
+      // Invalidate and refetch weekly score card data after deletion
+      queryClient.invalidateQueries({ queryKey: ['weekly-score-card'] });
+    },
   });
 };

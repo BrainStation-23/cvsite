@@ -4,16 +4,28 @@ import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
-import { CalendarIcon, RefreshCw, TrendingUp, Users, BarChart3, Target } from 'lucide-react';
-import { useWeeklyScoreCard, useCalculateWeeklyScoreCard } from '@/hooks/use-weekly-score-card';
+import { CalendarIcon, RefreshCw, TrendingUp, Users, BarChart3, Target, Trash2 } from 'lucide-react';
+import { useWeeklyScoreCard, useCalculateWeeklyScoreCard, useDeleteWeeklyScoreCard } from '@/hooks/use-weekly-score-card';
 import { useQueryClient } from '@tanstack/react-query';
 import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
 import DatePicker from '@/components/admin/user/DatePicker';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 
 export const WeeklyScoreCardTab: React.FC = () => {
   const [startDate, setStartDate] = useState<string>('');
   const [endDate, setEndDate] = useState<string>('');
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [selectedScoreCard, setSelectedScoreCard] = useState<{ id: string; timestamp: string } | null>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -23,6 +35,7 @@ export const WeeklyScoreCardTab: React.FC = () => {
   });
 
   const { refetch: calculateNewCard, isFetching: isCalculating } = useCalculateWeeklyScoreCard();
+  const deleteScoreCard = useDeleteWeeklyScoreCard();
 
   const handleCalculateNewCard = async () => {
     try {
@@ -33,8 +46,6 @@ export const WeeklyScoreCardTab: React.FC = () => {
           title: 'Success',
           description: 'New weekly score card calculated successfully',
         });
-        // Refresh the data
-        queryClient.invalidateQueries({ queryKey: ['weekly-score-card'] });
       } else {
         toast({
           title: 'Error',
@@ -47,6 +58,32 @@ export const WeeklyScoreCardTab: React.FC = () => {
       toast({
         title: 'Error',
         description: 'Failed to calculate weekly score card',
+        variant: 'destructive',
+      });
+    }
+  };
+
+  const handleDeleteClick = (scoreCard: { id: string; timestamp: string }) => {
+    setSelectedScoreCard(scoreCard);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!selectedScoreCard) return;
+
+    try {
+      await deleteScoreCard.mutateAsync(selectedScoreCard.id);
+      toast({
+        title: 'Success',
+        description: 'Weekly score card deleted successfully',
+      });
+      setDeleteDialogOpen(false);
+      setSelectedScoreCard(null);
+    } catch (error) {
+      console.error('Error deleting weekly score card:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to delete weekly score card',
         variant: 'destructive',
       });
     }
@@ -154,9 +191,20 @@ export const WeeklyScoreCardTab: React.FC = () => {
                           {format(new Date(scoreCard.timestamp), 'EEEE, yyyy')}
                         </p>
                       </div>
-                      <div className="text-right">
-                        <div className="text-2xl font-bold text-primary">{grandTotal}</div>
-                        <p className="text-xs text-muted-foreground">Total Resources</p>
+                      <div className="flex items-center gap-2">
+                        <div className="text-right">
+                          <div className="text-2xl font-bold text-primary">{grandTotal}</div>
+                          <p className="text-xs text-muted-foreground">Total Resources</p>
+                        </div>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => handleDeleteClick({ id: scoreCard.id, timestamp: scoreCard.timestamp })}
+                          className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
+                          title="Delete this score card"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
                       </div>
                     </div>
                   </CardHeader>
@@ -258,6 +306,30 @@ export const WeeklyScoreCardTab: React.FC = () => {
           </CardContent>
         </Card>
       )}
+      
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Weekly Score Card</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete the weekly score card for{" "}
+              {selectedScoreCard && format(new Date(selectedScoreCard.timestamp), 'EEEE, dd MMM yyyy')}?
+              This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={handleDeleteConfirm}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              disabled={deleteScoreCard.isPending}
+            >
+              {deleteScoreCard.isPending ? 'Deleting...' : 'Delete'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
