@@ -1,4 +1,3 @@
-
 import React, { useEffect, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -9,12 +8,14 @@ import { Badge } from '@/components/ui/badge';
 import { X, Filter } from 'lucide-react';
 
 const STORAGE_KEY = 'resource-calendar/planning/basic-filters';
+const CACHE_TTL_MS = 12 * 60 * 60 * 1000; // 12 hours in milliseconds
 
 type CacheShape = {
   searchQuery?: string;
   selectedSbu?: string | null;
   selectedManager?: string | null;
   activeTab?: string | null;
+  cachedAt?: number; // timestamp
 };
 
 function isBrowser() {
@@ -25,7 +26,14 @@ function readCache(): CacheShape {
   if (!isBrowser()) return {};
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
-    return raw ? (JSON.parse(raw) as CacheShape) : {};
+    if (!raw) return {};
+    const parsed = JSON.parse(raw) as CacheShape;
+    if (!parsed.cachedAt || Date.now() - parsed.cachedAt > CACHE_TTL_MS) {
+      // Cache expired
+      localStorage.removeItem(STORAGE_KEY);
+      return {};
+    }
+    return parsed;
   } catch {
     return {};
   }
@@ -34,7 +42,10 @@ function readCache(): CacheShape {
 function writeCache(next: CacheShape) {
   if (!isBrowser()) return;
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+    localStorage.setItem(
+      STORAGE_KEY,
+      JSON.stringify({ ...next, cachedAt: Date.now() })
+    );
   } catch {
     // no-op
   }
