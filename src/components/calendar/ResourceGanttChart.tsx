@@ -28,7 +28,7 @@ export const ResourceGanttChart: React.FC<ResourceGanttChartProps> = ({
         ...task
       };
 
-      // Validate dates for child tasks
+      // Validate dates for child tasks (type === 'task')
       if (task.type === 'task' && task.start) {
         const startDate = new Date(task.start);
         const endDate = task.end ? new Date(task.end) : null;
@@ -49,6 +49,22 @@ export const ResourceGanttChart: React.FC<ResourceGanttChartProps> = ({
         } else {
           // If invalid start date, skip this task
           return null;
+        }
+      }
+      
+      // Validate dates for summary tasks (type === 'summary')
+      if (task.type === 'summary' && task.start) {
+        const startDate = new Date(task.start);
+        const endDate = task.end ? new Date(task.end) : null;
+        
+        if (isValid(startDate)) {
+          validatedTask.start = startDate;
+          if (endDate && isValid(endDate)) {
+            validatedTask.end = endDate;
+          } else {
+            // For summary tasks without end date, extend to timeline end
+            validatedTask.end = addMonths(currentMonth, 5);
+          }
         }
       }
 
