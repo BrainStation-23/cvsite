@@ -2,8 +2,9 @@ import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { CalendarIcon, RefreshCw } from 'lucide-react';
+import { Progress } from '@/components/ui/progress';
+import { Badge } from '@/components/ui/badge';
+import { CalendarIcon, RefreshCw, TrendingUp, Users, BarChart3, Target } from 'lucide-react';
 import { useWeeklyScoreCard, useCalculateWeeklyScoreCard } from '@/hooks/use-weekly-score-card';
 import { useQueryClient } from '@tanstack/react-query';
 import { useToast } from '@/hooks/use-toast';
@@ -59,8 +60,8 @@ export const WeeklyScoreCardTab: React.FC = () => {
   if (isLoading) {
     return (
       <div className="space-y-6">
-        <div className="h-8 bg-gray-200 rounded animate-pulse" />
-        <div className="h-64 bg-gray-100 rounded animate-pulse" />
+        <div className="h-8 bg-muted rounded animate-pulse" />
+        <div className="h-64 bg-muted/50 rounded animate-pulse" />
       </div>
     );
   }
@@ -69,7 +70,7 @@ export const WeeklyScoreCardTab: React.FC = () => {
     return (
       <Card>
         <CardContent className="p-6">
-          <div className="text-center text-red-600">
+          <div className="text-center text-destructive">
             Error loading weekly score card data: {error.message}
           </div>
         </CardContent>
@@ -120,155 +121,132 @@ export const WeeklyScoreCardTab: React.FC = () => {
         </CardContent>
       </Card>
 
-      {/* Weekly Score Card Table */}
+      {/* Modern Weekly Score Cards Grid */}
       {scoreCards && scoreCards.length > 0 ? (
-        <Card>
-          <CardHeader>
-            <CardTitle>Weekly ScoreCard</CardTitle>
-          </CardHeader>
-          <CardContent className="p-0">
-            <div className="overflow-x-auto">
-              <Table className="border-collapse border border-border">
-                <TableHeader>
-                  <TableRow className="border-b border-border">
-                    <TableHead className="sticky left-0 z-20 border-r border-border w-48 h-8 p-2 text-xs font-semibold bg-muted"></TableHead>
-                    {scoreCards.map((scoreCard) => (
-                      <TableHead key={scoreCard.id} className="border-r border-border text-center h-8 p-2">
-                        <div className="text-primary font-semibold text-xs">
-                          {format(new Date(scoreCard.timestamp), 'dd-MMM-yy')}
+        <div className="space-y-6">
+          <div className="flex items-center justify-between">
+            <h2 className="text-2xl font-bold text-foreground flex items-center gap-2">
+              <BarChart3 className="h-6 w-6 text-primary" />
+              Weekly Score Cards
+            </h2>
+            <Badge variant="outline" className="text-sm">
+              {scoreCards.length} week{scoreCards.length !== 1 ? 's' : ''}
+            </Badge>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {scoreCards.map((scoreCard) => {
+              const totalBillable = scoreCard.billed_count + scoreCard.non_billed_count;
+              const utilizationPercentage = Math.round(scoreCard.utilization_rate * 100);
+              const nonBilledTotal = scoreCard.jsonb_record?.non_billed_distribution?.reduce((sum: number, item: any) => sum + item.count, 0) || 0;
+              const supportTotal = scoreCard.jsonb_record?.support_distribution?.reduce((sum: number, item: any) => sum + item.count, 0) || 0;
+              const grandTotal = totalBillable + supportTotal;
+
+              return (
+                <Card key={scoreCard.id} className="relative overflow-hidden hover:shadow-lg transition-all duration-200 border-l-4 border-l-primary">
+                  <CardHeader className="pb-3">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <CardTitle className="text-lg font-bold text-foreground">
+                          {format(new Date(scoreCard.timestamp), 'dd MMM')}
+                        </CardTitle>
+                        <p className="text-sm text-muted-foreground">
+                          {format(new Date(scoreCard.timestamp), 'EEEE, yyyy')}
+                        </p>
+                      </div>
+                      <div className="text-right">
+                        <div className="text-2xl font-bold text-primary">{grandTotal}</div>
+                        <p className="text-xs text-muted-foreground">Total Resources</p>
+                      </div>
+                    </div>
+                  </CardHeader>
+
+                  <CardContent className="space-y-4">
+                    {/* Utilization Rate */}
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm font-medium flex items-center gap-1">
+                          <Target className="h-4 w-4" />
+                          Utilization
+                        </span>
+                        <span className="text-sm font-bold">{utilizationPercentage}%</span>
+                      </div>
+                      <Progress 
+                        value={utilizationPercentage} 
+                        className="h-2"
+                      />
+                    </div>
+
+                    {/* Billable Resources */}
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between p-3 bg-primary/5 rounded-lg border">
+                        <div className="flex items-center gap-2">
+                          <TrendingUp className="h-4 w-4 text-primary" />
+                          <span className="font-medium text-primary">Billable</span>
                         </div>
-                        <div className="text-xs text-muted-foreground">
-                          {format(new Date(scoreCard.timestamp), 'EEE')}
+                        <span className="text-xl font-bold text-primary">{totalBillable}</span>
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-2 ml-4">
+                        <div className="p-2 bg-accent/30 rounded text-center">
+                          <div className="text-lg font-semibold text-accent-foreground">{scoreCard.billed_count}</div>
+                          <div className="text-xs text-muted-foreground">Billed</div>
                         </div>
-                      </TableHead>
-                    ))}
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {/* Billable Header Row */}
-                  <TableRow className="border-b border-border bg-primary hover:bg-primary text-primary-foreground">
-                    <TableCell className="sticky left-0 z-20 bg-primary  border-r border-border font-bold text-sm h-12 p-2">Billable</TableCell>
-                    {scoreCards.map((scoreCard) => {
-                      const totalBillable = scoreCard.billed_count + scoreCard.non_billed_count;
-                      return (
-                        <TableCell key={scoreCard.id} className="border-r border-border text-center font-bold text-lg h-12 p-2">
-                          {totalBillable}
-                        </TableCell>
-                      );
-                    })}
-                  </TableRow>
+                        <div className="p-2 bg-accent/30 rounded text-center">
+                          <div className="text-lg font-semibold text-accent-foreground">{scoreCard.non_billed_count}</div>
+                          <div className="text-xs text-muted-foreground">Non-Billed</div>
+                        </div>
+                      </div>
+                    </div>
 
-                  {/* Billed Breakdown */}
-                  <TableRow className="border-b border-border bg-blue-50 hover:bg-blue-200 hover:text-blue-900">
-                    <TableCell className="sticky left-0 z-20 bg-blue-50 border-r border-border pl-6 text-blue-700 font-medium text-sm h-6 p-2">Billed</TableCell>
-                    {scoreCards.map((scoreCard) => (
-                      <TableCell key={scoreCard.id} className="border-r border-border text-center font-medium text-sm h-6 p-2">
-                        {scoreCard.billed_count}
-                      </TableCell>
-                    ))}
-                  </TableRow>
+                    {/* Non-Billed Breakdown */}
+                    {nonBilledTotal > 0 && (
+                      <div className="space-y-2">
+                        <div className="flex items-center justify-between p-2 bg-destructive/5 rounded border border-destructive/20">
+                          <span className="text-sm font-medium text-destructive">Non-Billed Details</span>
+                          <span className="font-semibold text-destructive">{nonBilledTotal}</span>
+                        </div>
+                        <div className="space-y-1 ml-2">
+                          {scoreCard.jsonb_record?.non_billed_distribution?.map((item: any, index: number) => (
+                            <div key={index} className="flex justify-between text-sm">
+                              <span className="text-muted-foreground truncate">{item.bill_type_name}</span>
+                              <span className="font-medium min-w-fit">{item.count}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
 
-                  {/* Non Billed Breakdown */}
-                  <TableRow className="border-b border-border bg-blue-50 hover:bg-blue-50 hover:text-blue-900">
-                    <TableCell className="sticky left-0 z-20 bg-blue-50 border-r border-border pl-6 text-blue-700 font-medium text-sm h-6 p-2">Non Billed</TableCell>
-                    {scoreCards.map((scoreCard) => (
-                      <TableCell key={scoreCard.id} className="border-r border-border text-center font-medium text-sm h-6 p-2">
-                        {scoreCard.non_billed_count}
-                      </TableCell>
-                    ))}
-                  </TableRow>
-
-                  {/* Utilization Rate Header Row */}
-                  <TableRow className="border-b border-border bg-secondary hover:bg-secondary text-secondary-foreground">
-                    <TableCell className="sticky left-0 z-20 bg-secondary border-r border-border font-bold text-sm h-12 p-2">Utilization Rate</TableCell>
-                    {scoreCards.map((scoreCard) => {
-                      const utilizationPercentage = (scoreCard.utilization_rate * 100).toFixed(1);
-                      return (
-                        <TableCell key={scoreCard.id} className="border-r border-border text-center font-bold text-lg h-12 p-2">
-                          {utilizationPercentage}%
-                        </TableCell>
-                      );
-                    })}
-                  </TableRow>
-
-                  {/* Non Billed Breakdown Header */}
-                  <TableRow className="border-b border-border bg-orange-600 hover:bg-orange-600 text-white">
-                    <TableCell className="sticky left-0 z-20 bg-orange-600 border-r border-border font-bold text-sm h-12 p-2">Non Billed Breakdown</TableCell>
-                    {scoreCards.map((scoreCard) => {
-                      const nonBilledTotal = scoreCard.jsonb_record?.non_billed_distribution?.reduce((sum: number, item: any) => sum + item.count, 0) || 0;
-                      return (
-                        <TableCell key={scoreCard.id} className="border-r border-border text-center font-bold text-lg h-12 p-2">
-                          {nonBilledTotal}
-                        </TableCell>
-                      );
-                    })}
-                  </TableRow>
-
-                  {/* Non Billed Distribution Items */}
-                  {scoreCards[0]?.jsonb_record?.non_billed_distribution?.map((item: any, index: number) => (
-                    <TableRow key={`non-billed-${index}`} className="border-b border-border bg-orange-50 hover:bg-orange-200 hover:text-orange-900">
-                      <TableCell className="sticky left-0 z-20 bg-orange-50 border-r border-border pl-6 text-orange-700 text-sm h-6 p-2">{item.bill_type_name}</TableCell>
-                      {scoreCards.map((scoreCard) => {
-                        const matchingItem = scoreCard.jsonb_record?.non_billed_distribution?.find((dist: any) => dist.bill_type_name === item.bill_type_name);
-                        return (
-                          <TableCell key={scoreCard.id} className="border-r border-border text-center text-sm h-6 p-2">
-                            {matchingItem?.count || '-'}
-                          </TableCell>
-                        );
-                      })}
-                    </TableRow>
-                  ))}
-
-                  {/* Support Breakdown Header */}
-                  <TableRow className="border-b border-border bg-green-600 hover:bg-green-600 text-white">
-                    <TableCell className="sticky left-0 z-20 bg-green-600 border-r border-border font-bold text-sm h-12 p-2">Support Breakdown</TableCell>
-                    {scoreCards.map((scoreCard) => {
-                      const supportTotal = scoreCard.jsonb_record?.support_distribution?.reduce((sum: number, item: any) => sum + item.count, 0) || 0;
-                      return (
-                        <TableCell key={scoreCard.id} className="border-r border-border text-center font-bold text-lg h-12 p-2">
-                          {supportTotal}
-                        </TableCell>
-                      );
-                    })}
-                  </TableRow>
-
-                  {/* Support Distribution Items */}
-                  {scoreCards[0]?.jsonb_record?.support_distribution?.map((item: any, index: number) => (
-                    <TableRow key={`support-${index}`} className="border-b border-border bg-green-50 hover:bg-green-200 hover:text-green-900">
-                      <TableCell className="sticky left-0 z-20 bg-green-50 border-r border-border pl-6 text-green-700 text-sm h-6 p-2">{item.bill_type_name}</TableCell>
-                      {scoreCards.map((scoreCard) => {
-                        const matchingItem = scoreCard.jsonb_record?.support_distribution?.find((dist: any) => dist.bill_type_name === item.bill_type_name);
-                        return (
-                          <TableCell key={scoreCard.id} className="border-r border-border text-center text-sm h-6 p-2">
-                            {matchingItem?.count || '-'}
-                          </TableCell>
-                        );
-                      })}
-                    </TableRow>
-                  ))}
-
-                  {/* Grand Total Header Row */}
-                  <TableRow className="border-t-2 border-gray-400 bg-gray-900 hover:bg-gray-900 text-white">
-                    <TableCell className="sticky left-0 z-20 bg-gray-900 border-r border-border font-bold text-sm h-12 p-2">Grand Total</TableCell>
-                    {scoreCards.map((scoreCard) => {
-                      const grandTotal = scoreCard.billed_count + scoreCard.non_billed_count + 
-                        (scoreCard.jsonb_record?.support_distribution?.reduce((sum: number, item: any) => sum + item.count, 0) || 0);
-                      return (
-                        <TableCell key={scoreCard.id} className="border-r border-border text-center font-bold text-lg h-12 p-2">
-                          {grandTotal}
-                        </TableCell>
-                      );
-                    })}
-                  </TableRow>
-                </TableBody>
-              </Table>
-            </div>
-          </CardContent>
-        </Card>
+                    {/* Support Breakdown */}
+                    {supportTotal > 0 && (
+                      <div className="space-y-2">
+                        <div className="flex items-center justify-between p-2 bg-secondary/50 rounded border border-secondary">
+                          <div className="flex items-center gap-1">
+                            <Users className="h-4 w-4 text-secondary-foreground" />
+                            <span className="text-sm font-medium text-secondary-foreground">Support</span>
+                          </div>
+                          <span className="font-semibold text-secondary-foreground">{supportTotal}</span>
+                        </div>
+                        <div className="space-y-1 ml-2">
+                          {scoreCard.jsonb_record?.support_distribution?.map((item: any, index: number) => (
+                            <div key={index} className="flex justify-between text-sm">
+                              <span className="text-muted-foreground truncate">{item.bill_type_name}</span>
+                              <span className="font-medium min-w-fit">{item.count}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              );
+            })}
+          </div>
+        </div>
       ) : (
         <Card>
           <CardContent className="p-6 text-center">
-            <p className="text-gray-500">No weekly score card data available for the selected period.</p>
+            <p className="text-muted-foreground">No weekly score card data available for the selected period.</p>
             <Button 
               onClick={handleCalculateNewCard}
               disabled={isCalculating}
