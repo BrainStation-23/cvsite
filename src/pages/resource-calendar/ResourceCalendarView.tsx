@@ -7,8 +7,12 @@ import { ArrowLeft } from 'lucide-react';
 import { ResourceCalendarFilters } from '../../components/calendar/ResourceCalendarFilters';
 import { CalendarHeader } from '../../components/calendar/CalendarHeader';
 import { ResourceGanttChart } from '../../components/calendar/gantt/ResourceGanttChart';
+import { EngagementModal } from '../../components/calendar/timeline-view/EngagementModal';
 import { useResourceCalendarData } from '../../hooks/use-resource-calendar-data';
+import { useResourcePlanningOperations } from '../../hooks/use-resource-planning-operations';
 import { startOfMonth, addMonths, subMonths } from 'date-fns';
+import { GanttEngagement } from '../../components/calendar/gantt/types';
+import { useToast } from '@/hooks/use-toast';
 
 interface AdvancedFilters {
   billTypeFilter: string | null;
@@ -55,6 +59,16 @@ const ResourceCalendarView: React.FC = () => {
     projectBillTypeFilter: null,
   });
 
+  // Modal states
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [modalMode, setModalMode] = useState<'create' | 'edit'>('create');
+  const [selectedEngagement, setSelectedEngagement] = useState<any>(null);
+  const [preselectedResourceId, setPreselectedResourceId] = useState<string | null>(null);
+  const [preselectedStartDate, setPreselectedStartDate] = useState<Date | null>(null);
+
+  const { toast } = useToast();
+  const { createResourcePlanning, updateResourcePlanning, deleteResourcePlanning } = useResourcePlanningOperations();
+
   // Fetch resource data
   const { data: resourceData, isLoading, error } = useResourceCalendarData(
     searchQuery,
@@ -99,6 +113,87 @@ const ResourceCalendarView: React.FC = () => {
       projectLevelFilter: null,
       projectBillTypeFilter: null,
     });
+  };
+
+  // Modal handlers
+  const handleEngagementClick = (engagement: GanttEngagement) => {
+    // Find the original ResourceCalendarData for this engagement
+    const originalData = resourceData?.find(item => 
+      item.id === engagement.id
+    );
+    setSelectedEngagement(originalData || null);
+    setModalMode('edit');
+    setPreselectedResourceId(null);
+    setPreselectedStartDate(null);
+    setIsModalOpen(true);
+  };
+
+  const handleEmptySpaceClick = (resourceId: string, clickDate: Date) => {
+    setPreselectedResourceId(resourceId);
+    setPreselectedStartDate(clickDate);
+    setModalMode('create');
+    setSelectedEngagement(null);
+    setIsModalOpen(true);
+  };
+
+  const handleModalClose = () => {
+    setIsModalOpen(false);
+    setSelectedEngagement(null);
+    setPreselectedResourceId(null);
+    setPreselectedStartDate(null);
+  };
+
+  const handleModalSave = async (data: any) => {
+    try {
+      if (modalMode === 'create') {
+        createResourcePlanning({
+          profile_id: data.profile_id,
+          bill_type_id: data.bill_type_id,
+          forecasted_project: data.forecasted_project,
+          engagement_start_date: data.engagement_start_date,
+          release_date: data.release_date,
+          engagement_percentage: data.engagement_percentage,
+          billing_percentage: data.billing_percentage || 0,
+        });
+        toast({
+          title: "Success",
+          description: "Forecasted engagement created successfully",
+        });
+      } else if (modalMode === 'edit' && selectedEngagement) {
+        updateResourcePlanning({
+          id: selectedEngagement.id,
+          updates: {
+            profile_id: data.profile_id,
+            bill_type_id: data.bill_type_id,
+            forecasted_project: data.forecasted_project,
+            engagement_start_date: data.engagement_start_date,
+            release_date: data.release_date,
+            engagement_percentage: data.engagement_percentage,
+            billing_percentage: data.billing_percentage || 0,
+          }
+        });
+      }
+      handleModalClose();
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to save engagement",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleModalDelete = async (id: string) => {
+    try {
+      deleteResourcePlanning(id);
+      handleModalClose();
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to delete engagement",
+        variant: "destructive",
+      });
+    }
   };
 
   return (
@@ -157,14 +252,24 @@ const ResourceCalendarView: React.FC = () => {
               resourceData={resourceData}
               currentMonth={currentMonth}
               isLoading={isLoading}
-              onEngagementClick={(engagement) => {
-                console.log('Engagement clicked:', engagement);
-                // TODO: Implement engagement detail modal
-              }}
+              onEngagementClick={handleEngagementClick}
+              onEmptySpaceClick={handleEmptySpaceClick}
             />
           )}
         </div>
 
+        {/* Engagement Modal */}
+        <EngagementModal
+          isOpen={isModalOpen}
+          onClose={handleModalClose}
+          onSave={handleModalSave}
+          onDelete={handleModalDelete}
+          mode={modalMode}
+          initialData={selectedEngagement}
+          preselectedResourceId={preselectedResourceId || undefined}
+          preselectedStartDate={preselectedStartDate || undefined}
+          isForecasted={selectedEngagement?.forecasted_project !== null}
+        />
       </div>
     </DashboardLayout>
   );

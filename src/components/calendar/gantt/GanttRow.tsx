@@ -1,21 +1,46 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { GanttResourceData, GanttEngagement, GanttTimelineMonth } from './types';
 import { GanttCell } from './GanttCell';
-import { calculateEngagementPosition } from './utils';
+import { calculateEngagementPosition, assignEngagementTracks, calculateMaxTracks, calculateClickedDate } from './utils';
 
 interface GanttRowProps {
   resource: GanttResourceData;
   timeline: GanttTimelineMonth[];
   onEngagementClick?: (engagement: GanttEngagement) => void;
+  onEmptySpaceClick?: (resourceId: string, clickDate: Date) => void;
 }
 
-export const GanttRow: React.FC<GanttRowProps> = ({
-  resource,
-  timeline,
-  onEngagementClick
+export const GanttRow: React.FC<GanttRowProps> = ({ 
+  resource, 
+  timeline, 
+  onEngagementClick,
+  onEmptySpaceClick 
 }) => {
   const timelineStart = timeline[0]?.weeks[0]?.weekStart;
   const timelineEnd = timeline[timeline.length - 1]?.weeks[timeline[timeline.length - 1].weeks.length - 1]?.weekEnd;
+  
+  // Calculate total weeks for percentage calculation
+  const totalWeeks = timeline.reduce((acc, month) => acc + month.weeks.length, 0);
+
+  const { trackAssignments, maxTracks, rowHeight } = useMemo(() => {
+    if (!resource.engagements.length) {
+      return { trackAssignments: new Map(), maxTracks: 1, rowHeight: 48 };
+    }
+
+    const assignments = assignEngagementTracks(resource.engagements);
+    const tracks = calculateMaxTracks(resource.engagements);
+    const trackHeight = 22; // Height per track
+    const trackSpacing = 2; // Gap between tracks
+    const padding = 8; // Top and bottom padding
+    
+    const calculatedHeight = Math.max(48, (tracks * trackHeight) + ((tracks - 1) * trackSpacing) + padding);
+    
+    return { 
+      trackAssignments: assignments, 
+      maxTracks: tracks, 
+      rowHeight: calculatedHeight 
+    };
+  }, [resource.engagements]);
 
   if (!timelineStart || !timelineEnd) return null;
 
@@ -38,30 +63,46 @@ export const GanttRow: React.FC<GanttRowProps> = ({
       </div>
 
       {/* Timeline grid */}
-      <div className="flex-1 relative h-12">
+      <div className="flex-1 relative" style={{ height: `${rowHeight}px` }}>
         {/* Week grid background */}
         <div className="absolute inset-0 flex">
-          {timeline.map((month, monthIndex) => (
-            <div key={monthIndex} className="flex-1 flex">
-              {month.weeks.map((week, weekIndex) => (
+          {timeline.map((month, monthIndex) =>
+            month.weeks.map((week, weekIndex) => {
+              const isCurrentWeek = week.isCurrentWeek;
+              const weekPercentage = 100 / totalWeeks;
+              const globalWeekIndex = timeline
+                .slice(0, monthIndex)
+                .reduce((acc, m) => acc + m.weeks.length, 0) + weekIndex;
+              
+              const handleEmptyClick = () => {
+                if (onEmptySpaceClick) {
+                  const clickedDate = calculateClickedDate(globalWeekIndex, timeline);
+                  onEmptySpaceClick(resource.profile.id, clickedDate);
+                }
+              };
+              
+              return (
                 <div
                   key={`${monthIndex}-${weekIndex}`}
-                  className={`flex-1 border-r last:border-r-0 ${
-                    week.isCurrentWeek ? 'bg-primary/5' : ''
-                  }`}
+                  className={`border-r border-border/20 cursor-pointer hover:bg-muted/20 transition-colors ${isCurrentWeek ? 'bg-primary/5' : ''}`}
+                  style={{ width: `${weekPercentage}%` }}
+                  onClick={handleEmptyClick}
                 />
-              ))}
-            </div>
-          ))}
+              );
+            })
+          )}
         </div>
 
         {/* Engagement cells */}
         {resource.engagements.map((engagement, index) => {
+          const track = trackAssignments.get(engagement.id) || 0;
           const position = calculateEngagementPosition(
             engagement,
             timelineStart,
             timelineEnd,
-            100 // percentage-based positioning
+            100, // percentage-based positioning
+            track,
+            22 // track height
           );
 
           return (

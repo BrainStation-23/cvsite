@@ -9,36 +9,28 @@ import { ProfileCombobox } from '@/components/admin/user/ProfileCombobox';
 import BillTypeCombobox from '@/components/resource-planning/BillTypeCombobox';
 import { format, startOfMonth, endOfMonth } from 'date-fns';
 
-interface EngagementData {
-  id?: string;
-  profileId: string;
-  projectId?: string;
-  billTypeId?: string;
-  forecastedProject?: string;
-  engagementPercentage: number;
-  billingPercentage?: number;
-  engagementStartDate: string;
-  releaseDate?: string;
-}
-
 interface EngagementModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (data: EngagementData) => void;
-  initialData?: EngagementData;
+  onSave: (data: any) => void;
+  onDelete?: (id: string) => void;
+  initialData?: any;
   preselectedResourceId?: string;
   preselectedStartDate?: Date;
   mode: 'create' | 'edit';
+  isForecasted?: boolean;
 }
 
 export const EngagementModal: React.FC<EngagementModalProps> = ({
   isOpen,
   onClose,
   onSave,
+  onDelete,
   initialData,
   preselectedResourceId,
   preselectedStartDate,
   mode,
+  isForecasted = true,
 }) => {
   const currentDate = new Date();
   const currentMonth = currentDate.getMonth() + 1; // getMonth() returns 0-11
@@ -46,12 +38,12 @@ export const EngagementModal: React.FC<EngagementModalProps> = ({
 
   const [selectedMonth, setSelectedMonth] = useState<number>(currentMonth);
   const [selectedYear, setSelectedYear] = useState<number>(currentYear);
-  const [formData, setFormData] = useState<EngagementData>({
-    profileId: preselectedResourceId || '',
-    engagementPercentage: 0, // Hidden, set to 0
-    billingPercentage: 0, // Hidden, set to 0
-    engagementStartDate: '',
-    forecastedProject: '',
+  const [formData, setFormData] = useState<any>({
+    profile_id: preselectedResourceId || '',
+    engagement_percentage: 0,
+    billing_percentage: 0,
+    engagement_start_date: '',
+    forecasted_project: '',
     ...initialData,
   });
 
@@ -86,11 +78,11 @@ export const EngagementModal: React.FC<EngagementModalProps> = ({
       setSelectedMonth(defaultMonth);
       setSelectedYear(defaultYear);
       setFormData({
-        profileId: preselectedResourceId || '',
-        engagementPercentage: 0,
-        billingPercentage: 0,
-        engagementStartDate: '',
-        forecastedProject: '',
+        profile_id: preselectedResourceId || '',
+        engagement_percentage: 0,
+        billing_percentage: 0,
+        engagement_start_date: '',
+        forecasted_project: '',
         ...initialData,
       });
     }
@@ -103,12 +95,12 @@ export const EngagementModal: React.FC<EngagementModalProps> = ({
     const startDate = startOfMonth(new Date(selectedYear, selectedMonth - 1, 1));
     const endDate = endOfMonth(new Date(selectedYear, selectedMonth - 1, 1));
     
-    const submissionData: EngagementData = {
+    const submissionData: any = {
       ...formData,
-      engagementStartDate: format(startDate, 'yyyy-MM-dd'),
-      releaseDate: format(endDate, 'yyyy-MM-dd'),
-      engagementPercentage: 0, // Set to 0 as per requirements
-      billingPercentage: 0, // Set to 0 as per requirements
+      engagement_start_date: format(startDate, 'yyyy-MM-dd'),
+      release_date: format(endDate, 'yyyy-MM-dd'),
+      engagement_percentage: formData.engagement_percentage,
+      billing_percentage: formData.billing_percentage || 0,
     };
     
     onSave(submissionData);
@@ -119,11 +111,11 @@ export const EngagementModal: React.FC<EngagementModalProps> = ({
     setSelectedMonth(currentMonth);
     setSelectedYear(currentYear);
     setFormData({
-      profileId: '',
-      engagementPercentage: 0,
-      billingPercentage: 0,
-      engagementStartDate: '',
-      forecastedProject: '',
+      profile_id: '',
+      engagement_percentage: 0,
+      billing_percentage: 0,
+      engagement_start_date: '',
+      forecasted_project: '',
     });
   };
 
@@ -132,16 +124,28 @@ export const EngagementModal: React.FC<EngagementModalProps> = ({
       <DialogContent className="max-w-md">
         <DialogHeader>
           <DialogTitle>
-            {mode === 'create' ? 'Create Forecasted Assignment' : 'Edit Forecasted Assignment'}
+            {mode === 'create' ? 'Create Forecasted Assignment' : 'Edit Assignment'}
           </DialogTitle>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        {mode === 'edit' && !isForecasted ? (
+          <div className="p-4 bg-muted rounded-lg">
+            <p className="text-muted-foreground text-center">
+              Only forecasting cells can be edited here. This is a confirmed project assignment.
+            </p>
+            <div className="flex justify-end mt-4">
+              <Button type="button" variant="outline" onClick={handleClose}>
+                Close
+              </Button>
+            </div>
+          </div>
+        ) : (
+          <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="profile">Employee *</Label>
             <ProfileCombobox
-              value={formData.profileId}
-              onValueChange={(value) => setFormData(prev => ({ ...prev, profileId: value || '' }))}
+              value={formData.profile_id}
+              onValueChange={(value) => setFormData(prev => ({ ...prev, profile_id: value || '' }))}
               placeholder="Select employee..."
               label="Employee"
               disabled={mode === 'edit'}
@@ -151,8 +155,8 @@ export const EngagementModal: React.FC<EngagementModalProps> = ({
           <div className="space-y-2">
             <Label htmlFor="billType">Bill Type</Label>
             <BillTypeCombobox
-              value={formData.billTypeId || null}
-              onValueChange={(value) => setFormData(prev => ({ ...prev, billTypeId: value || undefined }))}
+              value={formData.bill_type_id || null}
+              onValueChange={(value) => setFormData(prev => ({ ...prev, bill_type_id: value || undefined }))}
               placeholder="Select bill type..."
             />
           </div>
@@ -160,9 +164,22 @@ export const EngagementModal: React.FC<EngagementModalProps> = ({
           <div className="space-y-2">
             <Label htmlFor="forecastedProject">Forecasted Project *</Label>
             <Input
-              value={formData.forecastedProject || ''}
-              onChange={(e) => setFormData(prev => ({ ...prev, forecastedProject: e.target.value }))}
+              value={formData.forecasted_project || ''}
+              onChange={(e) => setFormData(prev => ({ ...prev, forecasted_project: e.target.value }))}
               placeholder="Enter forecasted project name..."
+              required
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="engagementPercentage">Engagement Percentage *</Label>
+            <Input
+              type="number"
+              min="0"
+              max="100"
+              value={formData.engagement_percentage || ''}
+              onChange={(e) => setFormData(prev => ({ ...prev, engagement_percentage: Number(e.target.value) }))}
+              placeholder="Enter engagement percentage..."
               required
             />
           </div>
@@ -207,18 +224,35 @@ export const EngagementModal: React.FC<EngagementModalProps> = ({
             </div>
           </div>
 
-          <div className="flex justify-end space-x-2 pt-4">
-            <Button type="button" variant="outline" onClick={handleClose}>
-              Cancel
-            </Button>
-            <Button 
-              type="submit" 
-              disabled={!formData.profileId || !formData.forecastedProject || !selectedMonth || !selectedYear}
-            >
-              {mode === 'create' ? 'Create' : 'Update'} Assignment
-            </Button>
+          <div className="flex justify-between space-x-2 pt-4">
+            <div>
+              {mode === 'edit' && isForecasted && onDelete && initialData?.id && (
+                <Button
+                  type="button"
+                  variant="destructive"
+                  onClick={() => {
+                    onDelete(initialData.id);
+                    handleClose();
+                  }}
+                >
+                  Delete
+                </Button>
+              )}
+            </div>
+            <div className="flex space-x-2">
+              <Button type="button" variant="outline" onClick={handleClose}>
+                Cancel
+              </Button>
+              <Button 
+                type="submit" 
+                disabled={!formData.profile_id || !formData.forecasted_project || !selectedMonth || !selectedYear || !formData.engagement_percentage}
+              >
+                {mode === 'create' ? 'Create' : 'Update'} Assignment
+              </Button>
+            </div>
           </div>
         </form>
+        )}
       </DialogContent>
     </Dialog>
   );

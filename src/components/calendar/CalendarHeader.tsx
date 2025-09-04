@@ -35,21 +35,6 @@ export const CalendarHeader: React.FC<CalendarHeaderProps> = ({
           </Button>
         </div>
       </div>
-      
-      <div className="flex items-center space-x-4 text-sm">
-        <div className="flex items-center space-x-2">
-          <div className="w-3 h-3 bg-green-200 rounded"></div>
-          <span>Available</span>
-        </div>
-        <div className="flex items-center space-x-2">
-          <div className="w-3 h-3 bg-yellow-200 rounded"></div>
-          <span>Allocated</span>
-        </div>
-        <div className="flex items-center space-x-2">
-          <div className="w-3 h-3 bg-red-200 rounded"></div>
-          <span>Over-allocated</span>
-        </div>
-      </div>
     </div>
   );
 };

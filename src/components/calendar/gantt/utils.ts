@@ -17,15 +17,22 @@ export function transformResourceDataToGantt(resourceData: ResourceCalendarData[
 
     const engagement: GanttEngagement = {
       id: item.id,
-      project_name: item.project?.project_name || 'Unknown Project',
-      client_name: item.project?.client_name || 'Unknown Client',
-      project_manager: item.project?.project_manager || 'Unknown PM',
+      project_name: item.project?.project_name || null,
+      client_name: item.project?.client_name || null,
+      project_manager: item.project?.project_manager || {
+        id: '',
+        first_name: '',
+        last_name: '',
+        employee_id: '',
+        full_name: ''
+      },
       start_date: new Date(item.engagement_start_date),
       end_date: item.release_date ? new Date(item.release_date) : null,
       engagement_percentage: item.engagement_percentage,
       billing_percentage: item.billing_percentage,
       bill_type: item.bill_type,
-      is_forecasted: !!item.forecasted_project
+      is_forecasted: !!item.forecasted_project,
+      forecasted_project: item.forecasted_project
     };
 
     resourceMap.get(profileId)!.engagements.push(engagement);
@@ -64,12 +71,65 @@ export function generateTimeline(startMonth: Date): GanttTimelineMonth[] {
   return months;
 }
 
+// Check if two engagements overlap in time
+function engagementsOverlap(a: GanttEngagement, b: GanttEngagement): boolean {
+  const aEnd = a.end_date || new Date('2099-12-31'); // Use far future for ongoing engagements
+  const bEnd = b.end_date || new Date('2099-12-31');
+  
+  return a.start_date < bEnd && b.start_date < aEnd;
+}
+
+// Assign tracks to engagements to avoid overlaps
+export function assignEngagementTracks(engagements: GanttEngagement[]): Map<string, number> {
+  const trackAssignments = new Map<string, number>();
+  
+  // Sort engagements by start date for better track assignment
+  const sortedEngagements = [...engagements].sort((a, b) => 
+    a.start_date.getTime() - b.start_date.getTime()
+  );
+  
+  // Track which tracks are occupied by time ranges
+  const trackOccupancy: Array<{ engagement: GanttEngagement; track: number }> = [];
+  
+  for (const engagement of sortedEngagements) {
+    let assignedTrack = 0;
+    
+    // Find the first available track
+    while (true) {
+      const conflictingEngagement = trackOccupancy.find(occupied => 
+        occupied.track === assignedTrack && engagementsOverlap(occupied.engagement, engagement)
+      );
+      
+      if (!conflictingEngagement) {
+        break; // Found an available track
+      }
+      
+      assignedTrack++;
+    }
+    
+    trackAssignments.set(engagement.id, assignedTrack);
+    trackOccupancy.push({ engagement, track: assignedTrack });
+  }
+  
+  return trackAssignments;
+}
+
+// Calculate the maximum number of concurrent engagements (tracks needed)
+export function calculateMaxTracks(engagements: GanttEngagement[]): number {
+  if (engagements.length === 0) return 1;
+  
+  const trackAssignments = assignEngagementTracks(engagements);
+  return Math.max(...Array.from(trackAssignments.values())) + 1;
+}
+
 export function calculateEngagementPosition(
   engagement: GanttEngagement,
   timelineStart: Date,
   timelineEnd: Date,
-  totalWidth: number
-): { left: number; width: number } {
+  totalWidth: number,
+  track: number = 0,
+  trackHeight: number = 24
+): { left: number; width: number; track: number; trackHeight: number } {
   const totalDays = Math.ceil((timelineEnd.getTime() - timelineStart.getTime()) / (1000 * 60 * 60 * 24));
   
   const engagementStart = engagement.start_date;
@@ -85,20 +145,37 @@ export function calculateEngagementPosition(
   const left = (startOffset / totalDays) * totalWidth;
   const width = Math.max((duration / totalDays) * totalWidth, 2); // Minimum 2px width
   
-  return { left, width };
+  return { left, width, track, trackHeight };
 }
 
 export function formatEngagementTooltip(engagement: GanttEngagement): string {
   const startDate = format(engagement.start_date, 'MMM dd, yyyy');
   const endDate = engagement.end_date ? format(engagement.end_date, 'MMM dd, yyyy') : 'Ongoing';
   
-  return `
-    Project: ${engagement.project_name}
-    Client: ${engagement.client_name}
-    PM: ${engagement.project_manager}
-    Duration: ${startDate} - ${endDate}
-    Engagement: ${engagement.engagement_percentage}%
-    Billing: ${engagement.billing_percentage}%
-    Type: ${engagement.bill_type?.name || 'Unknown'}
-  `.trim();
+  const lines = [
+    `Project: ${engagement.project_name || engagement.forecasted_project || 'N/A'}`,
+    ...(engagement.client_name ? [`Client: ${engagement.client_name}`] : []),
+    ...(engagement.project_manager?.full_name ? [`PM: ${engagement.project_manager.full_name}`] : []),
+    `Duration: ${startDate} - ${endDate}`,
+    `Engagement: ${engagement.engagement_percentage}%`,
+    `Billing: ${engagement.billing_percentage}%`,
+    `Type: ${engagement.bill_type?.name || 'Unknown'}`
+  ];
+  
+  return lines.join('\n');
 }
+
+// Calculate which date was clicked based on week position
+export const calculateClickedDate = (weekIndex: number, timeline: GanttTimelineMonth[]): Date => {
+  let totalWeeksPassed = weekIndex;
+  
+  for (const month of timeline) {
+    if (totalWeeksPassed < month.weeks.length) {
+      return month.weeks[totalWeeksPassed].weekStart;
+    }
+    totalWeeksPassed -= month.weeks.length;
+  }
+  
+  // Fallback to current date if calculation fails
+  return new Date();
+};
