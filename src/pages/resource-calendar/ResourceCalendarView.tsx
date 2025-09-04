@@ -160,10 +160,17 @@ const ResourceCalendarView: React.FC = () => {
           description: "Forecasted engagement created successfully",
         });
       } else if (modalMode === 'edit' && selectedEngagement) {
-        // Handle edit mode - update existing engagement
-        toast({
-          title: "Success", 
-          description: "Engagement updated successfully",
+        updateResourcePlanning({
+          id: selectedEngagement.id,
+          updates: {
+            profile_id: data.profile_id,
+            bill_type_id: data.bill_type_id,
+            forecasted_project: data.forecasted_project,
+            engagement_start_date: data.engagement_start_date,
+            release_date: data.release_date,
+            engagement_percentage: data.engagement_percentage,
+            billing_percentage: data.billing_percentage || 0,
+          }
         });
       }
       handleModalClose();
