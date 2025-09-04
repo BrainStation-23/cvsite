@@ -134,13 +134,18 @@ export const useGanttResourceData = (
         }
       });
 
-      // Only add parent task if it has valid child engagements OR provide start/end dates
+      // Add parent task - ALL summary tasks need start/end dates for wx-react-gantt
+      const parentStartDate = startingMonth;
+      const parentEndDate = addMonths(startingMonth, 5);
+      
       if (validEngagements.length > 0) {
-        // Parent task (Employee) with subtasks
+        // Parent task (Employee) with subtasks - still needs start/end dates
         tasks.push({
           id: parentId,
           text: `${profile.first_name} ${profile.last_name} (${profile.employee_id})`,
           type: 'summary', // Required type for parent tasks
+          start: parentStartDate, // Required for ALL summary tasks
+          end: parentEndDate, // Required for ALL summary tasks
           open: true,
           data: {
             isEmployee: true,
@@ -155,16 +160,12 @@ export const useGanttResourceData = (
         console.log('Adding parent task with', validEngagements.length, 'children:', parentId, profile);
       } else {
         // Parent task without subtasks - must have start/end dates
-        // Use current month as start and next 6 months as end for timeline view
-        const startDate = startingMonth;
-        const endDate = addMonths(startingMonth, 5);
-        
         tasks.push({
           id: parentId,
           text: `${profile.first_name} ${profile.last_name} (${profile.employee_id}) - No Assignments`,
           type: 'summary',
-          start: startDate,
-          end: endDate,
+          start: parentStartDate,
+          end: parentEndDate,
           open: true,
           data: {
             isEmployee: true,
