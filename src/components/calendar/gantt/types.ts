@@ -31,6 +31,13 @@ export interface GanttEngagement {
   is_forecasted: boolean;
 }
 
+export interface GanttEngagementPosition {
+  left: number;
+  width: number;
+  track: number;
+  trackHeight: number;
+}
+
 export interface GanttTimelineWeek {
   weekStart: Date;
   weekEnd: Date;

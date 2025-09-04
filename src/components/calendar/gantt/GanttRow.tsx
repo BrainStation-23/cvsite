@@ -1,7 +1,7 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { GanttResourceData, GanttEngagement, GanttTimelineMonth } from './types';
 import { GanttCell } from './GanttCell';
-import { calculateEngagementPosition } from './utils';
+import { calculateEngagementPosition, assignEngagementTracks, calculateMaxTracks } from './utils';
 
 interface GanttRowProps {
   resource: GanttResourceData;
@@ -16,6 +16,26 @@ export const GanttRow: React.FC<GanttRowProps> = ({
 }) => {
   const timelineStart = timeline[0]?.weeks[0]?.weekStart;
   const timelineEnd = timeline[timeline.length - 1]?.weeks[timeline[timeline.length - 1].weeks.length - 1]?.weekEnd;
+
+  const { trackAssignments, maxTracks, rowHeight } = useMemo(() => {
+    if (!resource.engagements.length) {
+      return { trackAssignments: new Map(), maxTracks: 1, rowHeight: 48 };
+    }
+
+    const assignments = assignEngagementTracks(resource.engagements);
+    const tracks = calculateMaxTracks(resource.engagements);
+    const trackHeight = 22; // Height per track
+    const trackSpacing = 2; // Gap between tracks
+    const padding = 8; // Top and bottom padding
+    
+    const calculatedHeight = Math.max(48, (tracks * trackHeight) + ((tracks - 1) * trackSpacing) + padding);
+    
+    return { 
+      trackAssignments: assignments, 
+      maxTracks: tracks, 
+      rowHeight: calculatedHeight 
+    };
+  }, [resource.engagements]);
 
   if (!timelineStart || !timelineEnd) return null;
 
@@ -38,7 +58,7 @@ export const GanttRow: React.FC<GanttRowProps> = ({
       </div>
 
       {/* Timeline grid */}
-      <div className="flex-1 relative h-12">
+      <div className="flex-1 relative" style={{ height: `${rowHeight}px` }}>
         {/* Week grid background */}
         <div className="absolute inset-0 flex">
           {timeline.map((month, monthIndex) => (
@@ -57,11 +77,14 @@ export const GanttRow: React.FC<GanttRowProps> = ({
 
         {/* Engagement cells */}
         {resource.engagements.map((engagement, index) => {
+          const track = trackAssignments.get(engagement.id) || 0;
           const position = calculateEngagementPosition(
             engagement,
             timelineStart,
             timelineEnd,
-            100 // percentage-based positioning
+            100, // percentage-based positioning
+            track,
+            22 // track height
           );
 
           return (

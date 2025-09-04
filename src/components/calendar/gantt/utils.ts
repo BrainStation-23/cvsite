@@ -70,12 +70,65 @@ export function generateTimeline(startMonth: Date): GanttTimelineMonth[] {
   return months;
 }
 
+// Check if two engagements overlap in time
+function engagementsOverlap(a: GanttEngagement, b: GanttEngagement): boolean {
+  const aEnd = a.end_date || new Date('2099-12-31'); // Use far future for ongoing engagements
+  const bEnd = b.end_date || new Date('2099-12-31');
+  
+  return a.start_date < bEnd && b.start_date < aEnd;
+}
+
+// Assign tracks to engagements to avoid overlaps
+export function assignEngagementTracks(engagements: GanttEngagement[]): Map<string, number> {
+  const trackAssignments = new Map<string, number>();
+  
+  // Sort engagements by start date for better track assignment
+  const sortedEngagements = [...engagements].sort((a, b) => 
+    a.start_date.getTime() - b.start_date.getTime()
+  );
+  
+  // Track which tracks are occupied by time ranges
+  const trackOccupancy: Array<{ engagement: GanttEngagement; track: number }> = [];
+  
+  for (const engagement of sortedEngagements) {
+    let assignedTrack = 0;
+    
+    // Find the first available track
+    while (true) {
+      const conflictingEngagement = trackOccupancy.find(occupied => 
+        occupied.track === assignedTrack && engagementsOverlap(occupied.engagement, engagement)
+      );
+      
+      if (!conflictingEngagement) {
+        break; // Found an available track
+      }
+      
+      assignedTrack++;
+    }
+    
+    trackAssignments.set(engagement.id, assignedTrack);
+    trackOccupancy.push({ engagement, track: assignedTrack });
+  }
+  
+  return trackAssignments;
+}
+
+// Calculate the maximum number of concurrent engagements (tracks needed)
+export function calculateMaxTracks(engagements: GanttEngagement[]): number {
+  if (engagements.length === 0) return 1;
+  
+  const trackAssignments = assignEngagementTracks(engagements);
+  return Math.max(...Array.from(trackAssignments.values())) + 1;
+}
+
 export function calculateEngagementPosition(
   engagement: GanttEngagement,
   timelineStart: Date,
   timelineEnd: Date,
-  totalWidth: number
-): { left: number; width: number } {
+  totalWidth: number,
+  track: number = 0,
+  trackHeight: number = 24
+): { left: number; width: number; track: number; trackHeight: number } {
   const totalDays = Math.ceil((timelineEnd.getTime() - timelineStart.getTime()) / (1000 * 60 * 60 * 24));
   
   const engagementStart = engagement.start_date;
@@ -91,7 +144,7 @@ export function calculateEngagementPosition(
   const left = (startOffset / totalDays) * totalWidth;
   const width = Math.max((duration / totalDays) * totalWidth, 2); // Minimum 2px width
   
-  return { left, width };
+  return { left, width, track, trackHeight };
 }
 
 export function formatEngagementTooltip(engagement: GanttEngagement): string {
