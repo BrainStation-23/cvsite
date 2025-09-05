@@ -8,6 +8,9 @@ import { Loader2, Eye } from 'lucide-react';
 import { useCVTemplates } from '@/hooks/use-cv-templates';
 import { openCVPreview } from '@/utils/cv-preview-utility';
 import { toast } from 'sonner';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
+import { Check, ChevronsUpDown } from 'lucide-react';
 
 interface CVPreviewModalProps {
   isOpen: boolean;
@@ -24,6 +27,8 @@ const CVPreviewModal: React.FC<CVPreviewModalProps> = ({
 }) => {
   const [selectedTemplateId, setSelectedTemplateId] = useState<string>('');
   const [isPreviewing, setIsPreviewing] = useState(false);
+  const [popoverOpen, SetPopoverOpen] = useState(false);
+  const [templateSearch, setTemplateSearch] = useState('');
 
   const { templates, isLoading: templatesLoading } = useCVTemplates();
 
@@ -76,22 +81,62 @@ const CVPreviewModal: React.FC<CVPreviewModalProps> = ({
         <div className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="template-select">Select CV Template</Label>
-            <Select
-              value={selectedTemplateId}
-              onValueChange={setSelectedTemplateId}
+            <Popover open={popoverOpen} onOpenChange={SetPopoverOpen}>
+              <PopoverTrigger asChild>
+              <Button
+              variant='outline'
+              role='combobox'
+              aria-expanded={popoverOpen}
+              className='w-full justify-between'
               disabled={isPreviewing || templatesLoading}
             >
-              <SelectTrigger id="template-select">
-                <SelectValue placeholder={templatesLoading ? "Loading templates..." : "Choose a template"} />
-              </SelectTrigger>
-              <SelectContent>
-                {enabledTemplates.map((template) => (
-                  <SelectItem key={template.id} value={template.id}>
-                    {template.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+              {selectedTemplateId 
+              ? enabledTemplates.find(t => t.id === selectedTemplateId)?.name
+            : (templatesLoading ? "Loading templates..." : "Choose a template")}
+              <ChevronsUpDown className='ml-2 h-4 w-4 shrink-0 opacity-50' />
+              </Button>  
+              </PopoverTrigger>
+              <PopoverContent className='w-full p-0'>
+                <Command shouldFilter={false}>
+                  <CommandInput 
+                    placeholder='Search templates...' 
+                    value={templateSearch}
+                    onValueChange={setTemplateSearch}
+                  />
+                  <CommandList>
+                    <CommandEmpty>
+                      {templatesLoading ? "Loading..." : "No template found."}
+                    </CommandEmpty>
+                    <CommandGroup>
+                      {enabledTemplates
+                      .filter(t =>
+                        !templateSearch || t.name.toLowerCase().includes(templateSearch.toLowerCase())
+                      )
+                      .map((template)=>(
+                        <CommandItem
+                        key={template.id}
+                        value='{template.id}'
+                        onSelect={() =>{
+                          setSelectedTemplateId(template.id);
+                          SetPopoverOpen(false);
+                        }}>
+                                          <Check
+                  className={
+                    selectedTemplateId === template.id
+                      ? "mr-2 h-4 w-4 opacity-100"
+                      : "mr-2 h-4 w-4 opacity-0"
+                  }
+                />
+                <span>
+                  {template.name}
+                </span>
+                        </CommandItem>
+                      ))}
+                    </CommandGroup>
+                  </CommandList>
+                </Command>
+              </PopoverContent>
+            </Popover>
           </div>
           
           <div className="flex justify-end space-x-2">
