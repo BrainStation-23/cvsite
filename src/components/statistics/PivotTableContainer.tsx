@@ -25,7 +25,7 @@ export const PivotTableContainer: React.FC<PivotTableContainerProps> = ({
 }) => {
   const [primaryDimension, setPrimaryDimension] = useState('sbu');
   const [secondaryDimension, setSecondaryDimension] = useState('bill_type');
-  const [enableGrouping, setEnableGrouping] = useState(true); // Enable by default
+  const [enableGrouping, setEnableGrouping] = useState(false);
 
   const { data: pivotData, isLoading } = useResourcePivotStatistics(
     primaryDimension,
@@ -39,8 +39,6 @@ export const PivotTableContainer: React.FC<PivotTableContainerProps> = ({
     if (dimension === secondaryDimension) {
       setSecondaryDimension(primaryDimension);
     }
-    // Enable grouping if either dimension is 'sbu'
-    setEnableGrouping(dimension === 'sbu' || secondaryDimension === 'sbu');
   };
 
   const handleSecondaryDimensionChange = (dimension: string) => {
@@ -48,8 +46,6 @@ export const PivotTableContainer: React.FC<PivotTableContainerProps> = ({
     if (dimension === primaryDimension) {
       setPrimaryDimension(secondaryDimension);
     }
-    // Enable grouping if either dimension is 'sbu'
-    setEnableGrouping(primaryDimension === 'sbu' || dimension === 'sbu');
   };
 
   return (

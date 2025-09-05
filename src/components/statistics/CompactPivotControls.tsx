@@ -42,8 +42,6 @@ export const CompactPivotControls: React.FC<CompactPivotControlsProps> = ({
 
   const getPrimaryOptions = () => DIMENSION_OPTIONS.filter(option => option.value !== secondaryDimension);
   const getSecondaryOptions = () => DIMENSION_OPTIONS.filter(option => option.value !== primaryDimension);
-  
-  const canEnableGrouping = primaryDimension === 'sbu' || secondaryDimension === 'sbu';
 
   return (
     <div className="space-y-4">
@@ -124,26 +122,24 @@ export const CompactPivotControls: React.FC<CompactPivotControlsProps> = ({
       </div>
 
       {/* Grouping Control */}
-      {canEnableGrouping && (
-        <div className="flex items-center justify-between p-3 rounded-lg border bg-muted/10">
-          <div className="flex items-center gap-3">
-            <Group className="h-4 w-4 text-muted-foreground" />
-            <div className="space-y-1">
-              <Label htmlFor="enable-grouping" className="text-sm font-medium">
-                Enable Parent Grouping
-              </Label>
-              <p className="text-xs text-muted-foreground">
-                Group SBUs by departments and business units
-              </p>
-            </div>
+      <div className="flex items-center justify-between p-3 rounded-lg border bg-muted/10">
+        <div className="flex items-center gap-3">
+          <Group className="h-4 w-4 text-muted-foreground" />
+          <div className="space-y-1">
+            <Label htmlFor="enable-grouping" className="text-sm font-medium">
+              Enable Hierarchical Grouping
+            </Label>
+            <p className="text-xs text-muted-foreground">
+              Group data by parent categories when available
+            </p>
           </div>
-          <Switch
-            id="enable-grouping"
-            checked={enableGrouping}
-            onCheckedChange={onEnableGroupingChange}
-          />
         </div>
-      )}
+        <Switch
+          id="enable-grouping"
+          checked={enableGrouping}
+          onCheckedChange={onEnableGroupingChange}
+        />
+      </div>
 
       {/* Dimension Preview */}
       <div className="text-xs text-muted-foreground bg-muted/10 p-3 rounded border">
@@ -156,7 +152,7 @@ export const CompactPivotControls: React.FC<CompactPivotControlsProps> = ({
           {DIMENSION_OPTIONS.find(opt => opt.value === secondaryDimension)?.label}
         </span>
         {' '}(columns) to show resource distribution patterns.
-        {enableGrouping && canEnableGrouping && (
+        {enableGrouping && (
           <span className="block mt-1 text-primary font-medium">
             🔗 Hierarchical grouping enabled for better organization
           </span>

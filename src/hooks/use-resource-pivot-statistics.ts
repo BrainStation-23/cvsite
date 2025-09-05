@@ -83,6 +83,13 @@ export function useResourcePivotStatistics(
         dimensions: result?.dimensions || {
           primary: primaryDimension,
           secondary: secondaryDimension
+        },
+        grouping: result?.grouping || {
+          enabled: enableGrouping,
+          info: {
+            row_groups: null,
+            col_groups: null
+          }
         }
       } as PivotStatistics;
     },
