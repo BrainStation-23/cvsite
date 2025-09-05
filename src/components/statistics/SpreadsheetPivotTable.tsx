@@ -37,12 +37,36 @@ export const SpreadsheetPivotTable: React.FC<SpreadsheetPivotTableProps> = ({ da
     );
   }
 
+  // Check if grouping is enabled
+  const isGroupingEnabled = data.grouping?.enabled || false;
+  
   // Transform pivot data into a matrix
   // Use row_totals and col_totals to maintain backend sorting
   const uniqueRows = data.row_totals?.map(item => item.dimension) || 
                     [...new Set(data.pivot_data.map(item => item.row_dimension))];
   const uniqueCols = data.col_totals?.map(item => item.dimension) ||
                     [...new Set(data.pivot_data.map(item => item.col_dimension))];
+
+  // Group data by parent groups if grouping is enabled
+  const groupedRows = isGroupingEnabled && data.grouping?.info.row_groups 
+    ? data.grouping.info.row_groups.reduce((acc, group) => {
+        const items = data.row_totals?.filter(item => item.group_name === group) || [];
+        if (items.length > 0) {
+          acc[group] = items.map(item => item.dimension);
+        }
+        return acc;
+      }, {} as Record<string, string[]>)
+    : null;
+
+  const groupedCols = isGroupingEnabled && data.grouping?.info.col_groups
+    ? data.grouping.info.col_groups.reduce((acc, group) => {
+        const items = data.col_totals?.filter(item => item.group_name === group) || [];
+        if (items.length > 0) {
+          acc[group] = items.map(item => item.dimension);
+        }
+        return acc;
+      }, {} as Record<string, string[]>)
+    : null;
   
   // Create lookup maps
   const dataMap = new Map<string, number>();
@@ -107,6 +131,22 @@ export const SpreadsheetPivotTable: React.FC<SpreadsheetPivotTableProps> = ({ da
             <div className="rounded-lg border bg-card overflow-x-auto">
               <Table className="text-sm">
                 <TableHeader>
+                  {/* Render grouped headers if grouping is enabled */}
+                  {isGroupingEnabled && groupedCols && (
+                    <TableRow className="border-b bg-muted/30">
+                      <TableHead className="sticky left-0 z-20 bg-muted border-r-2"></TableHead>
+                      {Object.entries(groupedCols).map(([groupName, cols]) => (
+                        <TableHead 
+                          key={groupName} 
+                          colSpan={cols.length} 
+                          className="text-center font-bold bg-primary/10 border-r-2"
+                        >
+                          {groupName}
+                        </TableHead>
+                      ))}
+                      <TableHead className="sticky right-0 z-10 bg-muted border-l-2"></TableHead>
+                    </TableRow>
+                  )}
                   <TableRow className="border-b-2 bg-muted/50">
                     <TableHead className="sticky left-0 z-20 bg-muted border-r-2 font-semibold min-w-40 max-w-48">
                       <div className="flex items-center gap-2">
@@ -126,30 +166,71 @@ export const SpreadsheetPivotTable: React.FC<SpreadsheetPivotTableProps> = ({ da
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {uniqueRows.map((row, index) => (
-                    <TableRow key={row} className="hover:bg-muted/30 transition-colors">
-                      <TableCell className="sticky left-0 z-10 bg-card border-r-2 font-medium min-w-40 max-w-48">
-                        <div className="truncate font-medium" title={row}>
-                          {row}
-                        </div>
-                      </TableCell>
-                      {uniqueCols.map(col => {
-                        const value = dataMap.get(`${row}|${col}`) || 0;
-                        return (
-                          <TableCell key={col} className={`text-center border-r  ${getIntensityClass(value, maxValue)}`}>
-                            <div className="font-mono text-sm font-medium py-1">
-                              {value || '—'}
-                            </div>
+                  {isGroupingEnabled && groupedRows ? (
+                    // Render grouped rows
+                    Object.entries(groupedRows).map(([groupName, rows]) => (
+                      <React.Fragment key={groupName}>
+                        <TableRow className="bg-primary/5 border-t-2">
+                          <TableCell 
+                            colSpan={uniqueCols.length + 2} 
+                            className="sticky left-0 z-10 font-bold text-primary bg-primary/10 border-r-2"
+                          >
+                            {groupName}
                           </TableCell>
-                        );
-                      })}
-                      <TableCell className="text-center font-bold bg-primary/5 border-l-2 sticky right-0 z-10 bg-card">
-                        <div className="font-mono font-bold text-primary">
-                          {rowTotalsMap.get(row) || 0}
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))}
+                        </TableRow>
+                        {rows.map((row) => (
+                          <TableRow key={row} className="hover:bg-muted/30 transition-colors">
+                            <TableCell className="sticky left-0 z-10 bg-card border-r-2 font-medium min-w-40 max-w-48 pl-6">
+                              <div className="truncate font-medium" title={row}>
+                                {row}
+                              </div>
+                            </TableCell>
+                            {uniqueCols.map(col => {
+                              const value = dataMap.get(`${row}|${col}`) || 0;
+                              return (
+                                <TableCell key={col} className={`text-center border-r  ${getIntensityClass(value, maxValue)}`}>
+                                  <div className="font-mono text-sm font-medium py-1">
+                                    {value || '—'}
+                                  </div>
+                                </TableCell>
+                              );
+                            })}
+                            <TableCell className="text-center font-bold bg-primary/5 border-l-2 sticky right-0 z-10 bg-card">
+                              <div className="font-mono font-bold text-primary">
+                                {rowTotalsMap.get(row) || 0}
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </React.Fragment>
+                    ))
+                  ) : (
+                    // Render flat rows
+                    uniqueRows.map((row, index) => (
+                      <TableRow key={row} className="hover:bg-muted/30 transition-colors">
+                        <TableCell className="sticky left-0 z-10 bg-card border-r-2 font-medium min-w-40 max-w-48">
+                          <div className="truncate font-medium" title={row}>
+                            {row}
+                          </div>
+                        </TableCell>
+                        {uniqueCols.map(col => {
+                          const value = dataMap.get(`${row}|${col}`) || 0;
+                          return (
+                            <TableCell key={col} className={`text-center border-r  ${getIntensityClass(value, maxValue)}`}>
+                              <div className="font-mono text-sm font-medium py-1">
+                                {value || '—'}
+                              </div>
+                            </TableCell>
+                          );
+                        })}
+                        <TableCell className="text-center font-bold bg-primary/5 border-l-2 sticky right-0 z-10 bg-card">
+                          <div className="font-mono font-bold text-primary">
+                            {rowTotalsMap.get(row) || 0}
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  )}
                   {/* Totals row */}
                   <TableRow className="border-t-2 bg-primary/5 hover:bg-primary/10 transition-colors">
                     <TableCell className="sticky left-0 z-10 bg-muted border-r-2 font-bold">

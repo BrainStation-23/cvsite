@@ -15,11 +15,19 @@ export interface PivotData {
   row_dimension: string;
   col_dimension: string;
   count: number;
+  row_group?: string;
+  col_group?: string;
 }
 
 export interface PivotTotals {
   dimension: string;
   total: number;
+  group_name?: string;
+}
+
+export interface GroupInfo {
+  row_groups: string[] | null;
+  col_groups: string[] | null;
 }
 
 export interface PivotStatistics {
@@ -31,17 +39,22 @@ export interface PivotStatistics {
     primary: string;
     secondary: string;
   };
+  grouping?: {
+    enabled: boolean;
+    info: GroupInfo;
+  };
 }
 
 export function useResourcePivotStatistics(
   primaryDimension: string = 'sbu',
   secondaryDimension: string = 'bill_type',
-  filters: PivotFilters = {}
+  filters: PivotFilters = {},
+  enableGrouping: boolean = false
 ) {
   return useQuery({
-    queryKey: ['resource-pivot-statistics', primaryDimension, secondaryDimension, filters],
+    queryKey: ['resource-pivot-statistics', primaryDimension, secondaryDimension, filters, enableGrouping],
     queryFn: async () => {
-      const { data, error } = await supabase.rpc('get_resource_pivot_statistics', {
+      const { data, error } = await supabase.rpc('get_resource_pivot_statistics_with_grouping', {
         primary_dimension: primaryDimension,
         secondary_dimension: secondaryDimension,
         resource_type_filter: filters.resourceType || null,
@@ -50,6 +63,7 @@ export function useResourcePivotStatistics(
         sbu_filter: filters.sbu || null,
         start_date_filter: filters.startDate || null,
         end_date_filter: filters.endDate || null,
+        enable_grouping: enableGrouping,
       });
 
       if (error) {
@@ -69,6 +83,13 @@ export function useResourcePivotStatistics(
         dimensions: result?.dimensions || {
           primary: primaryDimension,
           secondary: secondaryDimension
+        },
+        grouping: result?.grouping || {
+          enabled: enableGrouping,
+          info: {
+            row_groups: null,
+            col_groups: null
+          }
         }
       } as PivotStatistics;
     },
