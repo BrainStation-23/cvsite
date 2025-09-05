@@ -26,6 +26,10 @@ import {
 import { Tabs } from '@/components/ui/tabs';
 import { CVImportTab } from './cv-import/CVImportTab';
 import { ServerSideJSONImportExport } from './importExport/ServerSideJSONImportExport';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
+import { Check, ChevronsUpDown } from 'lucide-react';
+
 interface CVActionsProps {
   profileId?: string; // Optional for when viewing other profiles
   onDataChange?: () => void; // <-- Add this line
@@ -39,6 +43,8 @@ export const CVActions: React.FC<CVActionsProps> = ({ profileId, onDataChange })
   const [showProgressDialog, setShowProgressDialog] = useState(false);
   const [progressSteps, setProgressSteps] = useState<ProgressStep[]>([]);
   const [progress, setProgress] = useState(0);
+  const [popoverOpen, setPopoverOpen] = useState(false);
+  const [templateSearch, setTemplateSearch] = useState('');
 
   const { templates, isLoading: templatesLoading } = useCVTemplates();
 
@@ -119,23 +125,66 @@ export const CVActions: React.FC<CVActionsProps> = ({ profileId, onDataChange })
     <>
       <div className="flex items-center gap-4 p-4 bg-muted/30 rounded-lg border">
         <div className="flex-1 max-w-xs">
-          <Select
-            value={selectedTemplateId}
-            onValueChange={setSelectedTemplateId}
-            disabled={templatesLoading || isExporting || isPreviewing}
-          >
-            <SelectTrigger id="cv-template-select">
-              <SelectValue placeholder={templatesLoading ? "Loading templates..." : "Choose template"} />
-            </SelectTrigger>
-            <SelectContent>
-              {enabledTemplates.map((template) => (
-                <SelectItem key={template.id} value={template.id}>
-                  {template.name}
-                  {template.is_default && ' (Default)'}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
+            <PopoverTrigger asChild>
+              <Button
+                variant="outline"
+                role="combobox"
+                aria-expanded={popoverOpen}
+                className="w-full justify-between"
+                disabled={templatesLoading || isExporting || isPreviewing}
+              >
+                {selectedTemplateId
+                  ? enabledTemplates.find(t => t.id === selectedTemplateId)?.name +
+                    (enabledTemplates.find(t => t.id === selectedTemplateId)?.is_default ? ' (Default)' : '')
+                  : (templatesLoading ? "Loading templates..." : "Choose template")}
+                <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-full p-0">
+              <Command shouldFilter={false}>
+                <CommandInput
+                  placeholder="Search templates..."
+                  value={templateSearch}
+                  onValueChange={setTemplateSearch}
+                />
+                <CommandList>
+                  <CommandEmpty>
+                    {templatesLoading ? "Loading..." : "No template found."}
+                  </CommandEmpty>
+                  <CommandGroup>
+                    {enabledTemplates
+                      .filter(t =>
+                        !templateSearch ||
+                        t.name.toLowerCase().includes(templateSearch.toLowerCase())
+                      )
+                      .map((template) => (
+                        <CommandItem
+                          key={template.id}
+                          value={template.id}
+                          onSelect={() => {
+                            setSelectedTemplateId(template.id);
+                            setPopoverOpen(false);
+                          }}
+                        >
+                          <Check
+                            className={
+                              selectedTemplateId === template.id
+                                ? "mr-2 h-4 w-4 opacity-100"
+                                : "mr-2 h-4 w-4 opacity-0"
+                            }
+                          />
+                          <span>
+                            {template.name}
+                            {template.is_default && ' (Default)'}
+                          </span>
+                        </CommandItem>
+                      ))}
+                  </CommandGroup>
+                </CommandList>
+              </Command>
+            </PopoverContent>
+          </Popover>
         </div>
 
         <div className="flex gap-2 flex-1 justify-between">

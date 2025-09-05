@@ -53,8 +53,7 @@ export const ResourceGanttChart: React.FC<ResourceGanttChartProps> = ({
 
   return (
     <div className="bg-background rounded-lg border overflow-hidden">
-      <GanttHeader timeline={timeline} />
-      
+      <GanttHeader timeline={timeline} resourceCount={ganttData.length} />
       <div className="h-full">
         {ganttData.map((resource) => (
           <GanttRow

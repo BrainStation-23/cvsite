@@ -1248,6 +1248,42 @@ export type Database = {
           },
         ]
       }
+      resource_planning_audit_logs: {
+        Row: {
+          changed_at: string
+          changed_by: string | null
+          changed_fields: string[] | null
+          created_at: string
+          id: string
+          new_data: Json | null
+          old_data: Json | null
+          operation_type: string
+          resource_planning_id: string
+        }
+        Insert: {
+          changed_at?: string
+          changed_by?: string | null
+          changed_fields?: string[] | null
+          created_at?: string
+          id?: string
+          new_data?: Json | null
+          old_data?: Json | null
+          operation_type: string
+          resource_planning_id: string
+        }
+        Update: {
+          changed_at?: string
+          changed_by?: string | null
+          changed_fields?: string[] | null
+          created_at?: string
+          id?: string
+          new_data?: Json | null
+          old_data?: Json | null
+          operation_type?: string
+          resource_planning_id?: string
+        }
+        Relationships: []
+      }
       resource_types: {
         Row: {
           created_at: string
@@ -2182,6 +2218,23 @@ export type Database = {
         Args: {
           items_per_page?: number
           page_number?: number
+          search_query?: string
+          sort_by?: string
+          sort_order?: string
+        }
+        Returns: Json
+      }
+      search_resource_planning_audit_logs: {
+        Args: {
+          bill_type_filter?: string
+          date_from?: string
+          date_to?: string
+          employee_id_filter?: string
+          forecasted_project_filter?: string
+          items_per_page?: number
+          operation_type_filter?: string
+          page_number?: number
+          project_name_filter?: string
           search_query?: string
           sort_by?: string
           sort_order?: string
