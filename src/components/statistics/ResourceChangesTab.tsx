@@ -250,9 +250,9 @@ export const ResourceChangesTab: React.FC = () => {
           </div>
         </CardContent>
       </Card>
-
+      <div className="flex gap-4 w-full">
       {/* Bill Type Changes Section */}
-      <Card>
+      <Card className="flex-1">
         <CardHeader>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
@@ -348,7 +348,7 @@ export const ResourceChangesTab: React.FC = () => {
       </Card>
 
       {/* SBU Changes Section */}
-      <Card>
+      <Card className="flex-1">
         <CardHeader>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
@@ -451,6 +451,7 @@ export const ResourceChangesTab: React.FC = () => {
           )}
         </CardContent>
       </Card>
+      </div>
     </div>
   );
 };
