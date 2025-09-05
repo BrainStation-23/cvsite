@@ -38,8 +38,11 @@ export const SpreadsheetPivotTable: React.FC<SpreadsheetPivotTableProps> = ({ da
   }
 
   // Transform pivot data into a matrix
-  const uniqueRows = [...new Set(data.pivot_data.map(item => item.row_dimension))];
-  const uniqueCols = [...new Set(data.pivot_data.map(item => item.col_dimension))];
+  // Use row_totals and col_totals to maintain backend sorting
+  const uniqueRows = data.row_totals?.map(item => item.dimension) || 
+                    [...new Set(data.pivot_data.map(item => item.row_dimension))];
+  const uniqueCols = data.col_totals?.map(item => item.dimension) ||
+                    [...new Set(data.pivot_data.map(item => item.col_dimension))];
   
   // Create lookup maps
   const dataMap = new Map<string, number>();
