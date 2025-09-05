@@ -180,7 +180,7 @@ export const CVActions: React.FC<CVActionsProps> = ({ profileId, onDataChange })
               <Sheet>
                 <SheetTrigger>
                   <Button variant="outline" className="ml-2">
-                    AI Import
+                    Import
                   </Button>
                 </SheetTrigger>
                 <SheetContent className="w-[86%] !max-w-none">
@@ -198,7 +198,7 @@ export const CVActions: React.FC<CVActionsProps> = ({ profileId, onDataChange })
                           <TabTriggerWithIcon
                             value="json"
                             icon={FileJson}
-                            label="JSON"
+                            label="JSON Import"
                             isEmpty={false}
                             dataTour="json-tab"
                           />
