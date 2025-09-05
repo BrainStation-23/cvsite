@@ -25,11 +25,13 @@ export const PivotTableContainer: React.FC<PivotTableContainerProps> = ({
 }) => {
   const [primaryDimension, setPrimaryDimension] = useState('sbu');
   const [secondaryDimension, setSecondaryDimension] = useState('bill_type');
+  const [enableGrouping, setEnableGrouping] = useState(false);
 
   const { data: pivotData, isLoading } = useResourcePivotStatistics(
     primaryDimension,
     secondaryDimension,
-    filters
+    filters,
+    enableGrouping
   );
 
   const handlePrimaryDimensionChange = (dimension: string) => {
@@ -77,12 +79,14 @@ export const PivotTableContainer: React.FC<PivotTableContainerProps> = ({
             </CardTitle>
           </CardHeader>
           <CardContent className="pt-0">
-            <CompactPivotControls
-              primaryDimension={primaryDimension}
-              secondaryDimension={secondaryDimension}
-              onPrimaryDimensionChange={handlePrimaryDimensionChange}
-              onSecondaryDimensionChange={handleSecondaryDimensionChange}
-            />
+              <CompactPivotControls
+                primaryDimension={primaryDimension}
+                secondaryDimension={secondaryDimension}
+                onPrimaryDimensionChange={handlePrimaryDimensionChange}
+                onSecondaryDimensionChange={handleSecondaryDimensionChange}
+                enableGrouping={enableGrouping}
+                onEnableGroupingChange={setEnableGrouping}
+              />
           </CardContent>
         </Card>
       </div>

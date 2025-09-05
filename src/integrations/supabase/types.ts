@@ -200,7 +200,22 @@ export type Database = {
           record_id?: string
           table_name?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "cv_data_audit_logs_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cv_data_audit_logs_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "resource_availability_view"
+            referencedColumns: ["profile_id"]
+          },
+        ]
       }
       cv_templates: {
         Row: {
@@ -1941,6 +1956,20 @@ export type Database = {
       get_resource_pivot_statistics: {
         Args: {
           bill_type_filter?: string
+          end_date_filter?: string
+          expertise_type_filter?: string
+          primary_dimension?: string
+          resource_type_filter?: string
+          sbu_filter?: string
+          secondary_dimension?: string
+          start_date_filter?: string
+        }
+        Returns: Json
+      }
+      get_resource_pivot_statistics_with_grouping: {
+        Args: {
+          bill_type_filter?: string
+          enable_grouping?: boolean
           end_date_filter?: string
           expertise_type_filter?: string
           primary_dimension?: string
