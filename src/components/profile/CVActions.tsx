@@ -9,12 +9,29 @@ import { exportCVAsPDF, ProgressDialog, ProgressStep } from '@/utils/pdf-export'
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 import CvAuditLogsDialog from '@/components/profile/CvAuditLogsDialog';
-
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
+import { TabsContent, TabsList } from '@/components/ui/tabs';
+import { TabTriggerWithIcon } from './tabs/TabTriggerWithIcon';
+import {
+  FileJson,
+  Bot
+} from 'lucide-react';
+import { Tabs } from '@/components/ui/tabs';
+import { CVImportTab } from './cv-import/CVImportTab';
+import { ServerSideJSONImportExport } from './importExport/ServerSideJSONImportExport';
 interface CVActionsProps {
   profileId?: string; // Optional for when viewing other profiles
+  onDataChange?: () => void; // <-- Add this line
 }
 
-export const CVActions: React.FC<CVActionsProps> = ({ profileId }) => {
+export const CVActions: React.FC<CVActionsProps> = ({ profileId, onDataChange }) => {
   const { user } = useAuth();
   const [selectedTemplateId, setSelectedTemplateId] = useState<string>('');
   const [isExporting, setIsExporting] = useState(false);
@@ -67,25 +84,25 @@ export const CVActions: React.FC<CVActionsProps> = ({ profileId }) => {
       toast.error('Please select a CV template');
       return;
     }
-    
+
     try {
       setIsExporting(true);
       setShowProgressDialog(true);
-      
+
       await exportCVAsPDF(targetProfileId, selectedTemplateId, {
         onProgress: (steps, progressValue) => {
           setProgressSteps(steps);
           setProgress(progressValue);
         }
       });
-      
+
       // Keep dialog open for a moment to show completion
       setTimeout(() => {
         setShowProgressDialog(false);
         setIsExporting(false);
         toast.success('PDF downloaded successfully');
       }, 1000);
-      
+
     } catch (error) {
       console.error('PDF generation failed:', error);
       setShowProgressDialog(false);
@@ -120,45 +137,102 @@ export const CVActions: React.FC<CVActionsProps> = ({ profileId }) => {
             </SelectContent>
           </Select>
         </div>
-        
-        <div className="flex gap-2 flex-1 justify-between">  
+
+        <div className="flex gap-2 flex-1 justify-between">
           <div className='flex gap-2'>
-          <Button 
-            variant="outline"
-            onClick={handlePreview}
-            disabled={!selectedTemplateId || templatesLoading || isPreviewing || isExporting}
-          >
-            {isPreviewing ? (
-              <>
-                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                Opening...
-              </>
-            ) : (
-              <>
-                <Eye className="h-4 w-4 mr-2" />
-                Preview CV
-              </>
-            )}
-          </Button>
-          
-          <Button 
-            onClick={handleExportPDF}
-            disabled={!selectedTemplateId || templatesLoading || isExporting || isPreviewing}
-          >
-            {isExporting ? (
-              <>
-                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                Exporting...
-              </>
-            ) : (
-              <>
-                <FileDown className="h-4 w-4 mr-2" />
-                Export PDF
-              </>
-            )}
-          </Button>
+            <Button
+              variant="outline"
+              onClick={handlePreview}
+              disabled={!selectedTemplateId || templatesLoading || isPreviewing || isExporting}
+            >
+              {isPreviewing ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Opening...
+                </>
+              ) : (
+                <>
+                  <Eye className="h-4 w-4 mr-2" />
+                  Preview CV
+                </>
+              )}
+            </Button>
+
+            <Button
+              onClick={handleExportPDF}
+              disabled={!selectedTemplateId || templatesLoading || isExporting || isPreviewing}
+            >
+              {isExporting ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Exporting...
+                </>
+              ) : (
+                <>
+                  <FileDown className="h-4 w-4 mr-2" />
+                  Export PDF
+                </>
+              )}
+            </Button>
           </div>
-          <div>
+          <div className='flex gap-2 items-center'>
+            <div>
+              <Sheet>
+                <SheetTrigger>
+                  <Button variant="outline" className="ml-2">
+                    AI Import
+                  </Button>
+                </SheetTrigger>
+                <SheetContent className="w-[86%] !max-w-none">
+                  <SheetHeader>
+                    <SheetTitle>
+                      <Tabs defaultValue="cv-import" className="w-full h-full flex flex-col mt-3">
+                        <TabsList className="grid w-full grid-cols-2 h-12 bg-gray-100 dark:bg-gray-800 rounded-md p-2 mt-6">
+                          <TabTriggerWithIcon
+                            value="cv-import"
+                            icon={Bot}
+                            label="AI Import"
+                            isEmpty={false}
+                            dataTour="cv-import-tab"
+                          />
+                          <TabTriggerWithIcon
+                            value="json"
+                            icon={FileJson}
+                            label="JSON"
+                            isEmpty={false}
+                            dataTour="json-tab"
+                          />
+                        </TabsList>
+                        <TabsContent value="cv-import" className="mt-6">
+                          <CVImportTab
+                            profileId={profileId}
+                            onImportSuccess={onDataChange}
+                          />
+                        </TabsContent>
+
+                        <TabsContent value="json" className="mt-6">
+                          <div className="space-y-6">
+                            <div>
+                              <h2 className="text-2xl font-bold mb-4">Import/Export Profile Data</h2>
+                              <p className="text-muted-foreground mb-6">
+                                Import or export your complete profile data as JSON. All operations are processed securely on the server.
+                              </p>
+                            </div>
+
+                            <ServerSideJSONImportExport
+                              profileId={profileId}
+                              onImportSuccess={onDataChange}
+                            />
+                          </div>
+                        </TabsContent>
+                      </Tabs>
+                    </SheetTitle>
+                    <SheetDescription>
+                    </SheetDescription>
+                  </SheetHeader>
+                </SheetContent>
+              </Sheet>
+            </div>
             <CvAuditLogsDialog profileId={targetProfileId} />
           </div>
         </div>
