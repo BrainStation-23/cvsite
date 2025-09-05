@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { format } from 'date-fns';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -51,12 +51,61 @@ const FieldChangeDisplay: React.FC<FieldChangeDisplayProps> = ({ fieldName, oldV
   );
 };
 
+const LOGS_PER_PAGE = 15;
+
 const CvAuditLogsDialog: React.FC<CvAuditLogsDialogProps> = ({
   profileId,
   trigger
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const { auditLogs, isLoading, error } = useCvAuditLogs(profileId, isOpen);
+  const [visibleCount, setVisibleCount] = useState(LOGS_PER_PAGE);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const scrollAreaRef = useRef<HTMLDivElement>(null);
+
+  // Reset visible logs when dialog opens or logs change
+  React.useEffect(() => {
+    setVisibleCount(LOGS_PER_PAGE);
+    setLoadingMore(false);
+  }, [isOpen, auditLogs.length]);
+
+  // Attach scroll handler to the actual scrollable viewport inside ScrollArea
+  React.useEffect(() => {
+    const scrollArea = scrollAreaRef.current;
+    if (!scrollArea) return;
+
+    // Find the scrollable viewport inside ScrollArea
+    const viewport = scrollArea.querySelector('[data-radix-scroll-area-viewport]');
+    if (!viewport) return;
+
+    let ticking = false;
+
+    const handleScroll = () => {
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(() => {
+        if (
+          viewport.scrollTop + viewport.clientHeight >= viewport.scrollHeight - 20
+        ) {
+          if (visibleCount < auditLogs.length && !loadingMore) {
+            setLoadingMore(true);
+            setTimeout(() => {
+              setVisibleCount((prev) =>
+                Math.min(prev + LOGS_PER_PAGE, auditLogs.length)
+              );
+              setLoadingMore(false);
+            }, 500); // Simulate loading delay
+          }
+        }
+        ticking = false;
+      });
+    };
+
+    viewport.addEventListener('scroll', handleScroll);
+    return () => {
+      viewport.removeEventListener('scroll', handleScroll);
+    };
+  }, [auditLogs.length, visibleCount, loadingMore]);
 
   const defaultTrigger = (
     <Button variant="outline" size="sm" className='h-10'>
@@ -157,7 +206,10 @@ const CvAuditLogsDialog: React.FC<CvAuditLogsDialogProps> = ({
           </DialogDescription>
         </DialogHeader>
 
-        <ScrollArea className="max-h-[60vh] pr-4">
+        <ScrollArea
+          className="max-h-[60vh] pr-4"
+          ref={scrollAreaRef}
+        >
           {isLoading && (
             <div className="space-y-4">
               {[1, 2, 3].map((i) => (
@@ -206,7 +258,22 @@ const CvAuditLogsDialog: React.FC<CvAuditLogsDialogProps> = ({
               <Separator />
               
               <div className="space-y-4">
-                {auditLogs.map((log, index) => renderAuditLogItem(log, index))}
+                {auditLogs.slice(0, visibleCount).map((log, index) =>
+                  renderAuditLogItem(log, index)
+                )}
+                {visibleCount < auditLogs.length && (
+                  <div className="text-center py-4 text-muted-foreground text-xs flex flex-col items-center">
+                    {loadingMore ? (
+                      <div className="flex flex-col gap-2 w-full">
+                        <Skeleton className="h-4 w-1/3 mx-auto" />
+                        <Skeleton className="h-3 w-1/2 mx-auto" />
+                        <Skeleton className="h-6 w-2/3 mx-auto" />
+                      </div>
+                    ) : (
+                      <>Scroll to load more...</>
+                    )}
+                  </div>
+                )}
               </div>
             </div>
           )}
