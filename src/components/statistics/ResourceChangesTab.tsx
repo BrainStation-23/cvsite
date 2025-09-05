@@ -1,11 +1,12 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
-import { CalendarIcon, Download, Filter, RotateCcw } from 'lucide-react';
+import { CalendarIcon, Download, Filter, RotateCcw, ChevronRight, ChevronDown, ArrowRight } from 'lucide-react';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Collapsible, CollapsibleTrigger, CollapsibleContent } from '@/components/ui/collapsible';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -29,34 +30,73 @@ export const ResourceChangesTab: React.FC = () => {
     isLoading,
   } = useResourceChanges();
 
-  // Process bill type changes into breakdown statistics
+  // State for managing expanded collapsible sections
+  const [expandedBillTypeChanges, setExpandedBillTypeChanges] = useState<Set<string>>(new Set());
+  const [expandedSbuChanges, setExpandedSbuChanges] = useState<Set<string>>(new Set());
+
+  // Process bill type changes into grouped data for collapsible sections
   const processBillTypeChanges = () => {
     if (!billTypeChanges || billTypeChanges.length === 0) {
-      return new Map<string, number>();
+      return new Map<string, { count: number; changes: typeof billTypeChanges }>();
     }
 
-    const breakdown = new Map<string, number>();
+    const grouped = new Map<string, { count: number; changes: typeof billTypeChanges }>();
     billTypeChanges.forEach(change => {
       const key = `${change.old_bill_type_name} → ${change.new_bill_type_name}`;
-      breakdown.set(key, (breakdown.get(key) || 0) + 1);
+      if (!grouped.has(key)) {
+        grouped.set(key, { count: 0, changes: [] });
+      }
+      const group = grouped.get(key)!;
+      group.count++;
+      group.changes.push(change);
     });
 
-    return breakdown;
+    return grouped;
   };
 
-  // Process SBU changes into breakdown statistics
+  // Process SBU changes into grouped data for collapsible sections
   const processSbuChanges = () => {
     if (!sbuChanges || sbuChanges.length === 0) {
-      return new Map<string, number>();
+      return new Map<string, { count: number; changes: typeof sbuChanges }>();
     }
 
-    const breakdown = new Map<string, number>();
+    const grouped = new Map<string, { count: number; changes: typeof sbuChanges }>();
     sbuChanges.forEach(change => {
       const key = `${change.old_sbu_name} → ${change.new_sbu_name}`;
-      breakdown.set(key, (breakdown.get(key) || 0) + 1);
+      if (!grouped.has(key)) {
+        grouped.set(key, { count: 0, changes: [] });
+      }
+      const group = grouped.get(key)!;
+      group.count++;
+      group.changes.push(change);
     });
 
-    return breakdown;
+    return grouped;
+  };
+
+  // Toggle functions for collapsible sections
+  const toggleBillTypeChange = (pattern: string) => {
+    setExpandedBillTypeChanges(prev => {
+      const next = new Set(prev);
+      if (next.has(pattern)) {
+        next.delete(pattern);
+      } else {
+        next.add(pattern);
+      }
+      return next;
+    });
+  };
+
+  const toggleSbuChange = (pattern: string) => {
+    setExpandedSbuChanges(prev => {
+      const next = new Set(prev);
+      if (next.has(pattern)) {
+        next.delete(pattern);
+      } else {
+        next.add(pattern);
+      }
+      return next;
+    });
   };
 
   const exportBillTypeChangesToCsv = () => {
@@ -115,8 +155,8 @@ export const ResourceChangesTab: React.FC = () => {
     );
   }
 
-  const billTypeBreakdown = processBillTypeChanges();
-  const sbuBreakdown = processSbuChanges();
+  const billTypeGrouped = processBillTypeChanges();
+  const sbuGrouped = processSbuChanges();
 
   return (
     <div className="space-y-6">
@@ -210,230 +250,207 @@ export const ResourceChangesTab: React.FC = () => {
           </div>
         </CardContent>
       </Card>
+      <div className="flex gap-4 w-full">
+      {/* Bill Type Changes Section */}
+      <Card className="flex-1">
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <ArrowRight className="h-5 w-5 text-primary" />
+              <CardTitle className="text-lg">
+                Bill Type Changes ({billTypeChangesLoading ? '...' : billTypeChanges?.length || 0})
+              </CardTitle>
+            </div>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={exportBillTypeChangesToCsv}
+              disabled={!billTypeChanges || billTypeChanges.length === 0 || billTypeChangesLoading}
+            >
+              <Download className="h-4 w-4 mr-2" />
+              Export CSV
+            </Button>
+          </div>
+        </CardHeader>
+        <CardContent>
+          {billTypeChangesLoading ? (
+            <div className="flex items-center justify-center py-8">
+              <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary mr-3"></div>
+              <span className="text-muted-foreground">Loading bill type changes...</span>
+            </div>
+          ) : billTypeGrouped.size === 0 ? (
+            <div className="text-center py-8 text-muted-foreground">
+              No bill type changes found
+            </div>
+          ) : (
+            <div className="space-y-2">
+              {Array.from(billTypeGrouped.entries())
+                .sort(([, a], [, b]) => b.count - a.count)
+                .map(([pattern, { count, changes }]) => (
+                  <Collapsible 
+                    key={pattern}
+                    open={expandedBillTypeChanges.has(pattern)}
+                    onOpenChange={() => toggleBillTypeChange(pattern)}
+                  >
+                    <CollapsibleTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        className="w-full justify-between p-4 h-auto hover:bg-muted/50"
+                      >
+                        <div className="flex items-center gap-3">
+                          {expandedBillTypeChanges.has(pattern) ? (
+                            <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                          ) : (
+                            <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                          )}
+                          <span className="font-medium text-left">{pattern}</span>
+                        </div>
+                        <Badge variant="secondary" className="ml-2">
+                          {count} change{count !== 1 ? 's' : ''}
+                        </Badge>
+                      </Button>
+                    </CollapsibleTrigger>
+                    <CollapsibleContent className="px-4 pb-4">
+                      <div className="border rounded-lg bg-muted/20">
+                        <Table>
+                          <TableHeader>
+                            <TableRow>
+                              <TableHead>Date</TableHead>
+                              <TableHead>Project</TableHead>
+                              <TableHead>Change</TableHead>
+                            </TableRow>
+                          </TableHeader>
+                          <TableBody>
+                            {changes.map((change) => (
+                              <TableRow key={change.id}>
+                                <TableCell className="text-sm">
+                                  {format(new Date(change.changed_at), 'MMM dd, yyyy')}
+                                </TableCell>
+                                <TableCell className="text-sm">{change.project_name}</TableCell>
+                                <TableCell>
+                                  <div className="flex items-center gap-2 text-sm">
+                                    <Badge variant="outline">{change.old_bill_type_name}</Badge>
+                                    <ArrowRight className="h-3 w-3 text-muted-foreground" />
+                                    <Badge variant="default">{change.new_bill_type_name}</Badge>
+                                  </div>
+                                </TableCell>
+                              </TableRow>
+                            ))}
+                          </TableBody>
+                        </Table>
+                      </div>
+                    </CollapsibleContent>
+                  </Collapsible>
+                ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
 
-      {/* Breakdown Tables */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Bill Type Changes Breakdown Table */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg">
-              Bill Type Changes ({billTypeChangesLoading ? '...' : billTypeChanges?.length || 0})
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="max-h-80 overflow-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Change Pattern</TableHead>
-                    <TableHead className="text-right">Count</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {billTypeChangesLoading ? (
-                    <TableRow>
-                      <TableCell colSpan={2} className="text-center">Loading breakdown...</TableCell>
-                    </TableRow>
-                  ) : billTypeBreakdown.size === 0 ? (
-                    <TableRow>
-                      <TableCell colSpan={2} className="text-center text-muted-foreground">
-                        No bill type changes found
-                      </TableCell>
-                    </TableRow>
-                  ) : (
-                    Array.from(billTypeBreakdown.entries())
-                      .sort(([, a], [, b]) => b - a)
-                      .map(([change, count]) => (
-                        <TableRow key={change}>
-                          <TableCell className="font-medium">{change}</TableCell>
-                          <TableCell className="text-right">
-                            <Badge variant="secondary">{count}</Badge>
-                          </TableCell>
-                        </TableRow>
-                      ))
-                  )}
-                </TableBody>
-              </Table>
+      {/* SBU Changes Section */}
+      <Card className="flex-1">
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <ArrowRight className="h-5 w-5 text-primary" />
+              <CardTitle className="text-lg">
+                SBU Changes ({sbuChangesLoading ? '...' : sbuChanges?.length || 0})
+              </CardTitle>
             </div>
-          </CardContent>
-        </Card>
-
-        {/* SBU Changes Breakdown Table */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg">
-              SBU Changes ({sbuChangesLoading ? '...' : sbuChanges?.length || 0})
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="max-h-80 overflow-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Change Pattern</TableHead>
-                    <TableHead className="text-right">Count</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {sbuChangesLoading ? (
-                    <TableRow>
-                      <TableCell colSpan={2} className="text-center">Loading breakdown...</TableCell>
-                    </TableRow>
-                  ) : sbuBreakdown.size === 0 ? (
-                    <TableRow>
-                      <TableCell colSpan={2} className="text-center text-muted-foreground">
-                        No SBU changes found
-                      </TableCell>
-                    </TableRow>
-                  ) : (
-                    Array.from(sbuBreakdown.entries())
-                      .sort(([, a], [, b]) => b - a)
-                      .map(([change, count]) => (
-                        <TableRow key={change}>
-                          <TableCell className="font-medium">{change}</TableCell>
-                          <TableCell className="text-right">
-                            <Badge variant="secondary">{count}</Badge>
-                          </TableCell>
-                        </TableRow>
-                      ))
-                  )}
-                </TableBody>
-              </Table>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={exportSbuChangesToCsv}
+              disabled={!sbuChanges || sbuChanges.length === 0 || sbuChangesLoading}
+            >
+              <Download className="h-4 w-4 mr-2" />
+              Export CSV
+            </Button>
+          </div>
+        </CardHeader>
+        <CardContent>
+          {sbuChangesLoading ? (
+            <div className="flex items-center justify-center py-8">
+              <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary mr-3"></div>
+              <span className="text-muted-foreground">Loading SBU changes...</span>
             </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Changes Details Tables */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Bill Type Changes Details */}
-        <Card>
-          <CardHeader>
-            <div className="flex items-center justify-between">
-              <CardTitle className="text-lg">Bill Type Changes Details</CardTitle>
-              <Button 
-                variant="outline" 
-                size="sm" 
-                onClick={exportBillTypeChangesToCsv}
-                disabled={!billTypeChanges || billTypeChanges.length === 0 || billTypeChangesLoading}
-              >
-                <Download className="h-4 w-4 mr-2" />
-                Export CSV
-              </Button>
+          ) : sbuGrouped.size === 0 ? (
+            <div className="text-center py-8 text-muted-foreground">
+              No SBU changes found
             </div>
-          </CardHeader>
-          <CardContent>
-            <div className="max-h-96 overflow-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Date</TableHead>
-                    <TableHead>Project</TableHead>
-                    <TableHead>Change</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {billTypeChangesLoading ? (
-                    <TableRow>
-                      <TableCell colSpan={3} className="text-center">Loading...</TableCell>
-                    </TableRow>
-                  ) : billTypeChanges?.length === 0 ? (
-                    <TableRow>
-                      <TableCell colSpan={3} className="text-center text-muted-foreground">
-                        No bill type changes found
-                      </TableCell>
-                    </TableRow>
-                  ) : (
-                    billTypeChanges?.map((change) => (
-                      <TableRow key={change.id}>
-                        <TableCell className="text-sm">
-                          {format(new Date(change.changed_at), 'MMM dd, yyyy')}
-                        </TableCell>
-                        <TableCell className="text-sm">{change.project_name}</TableCell>
-                        <TableCell>
-                          <div className="flex items-center gap-2 text-sm">
-                            <Badge variant="outline">{change.old_bill_type_name}</Badge>
-                            <span>→</span>
-                            <Badge variant="default">{change.new_bill_type_name}</Badge>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    ))
-                  )}
-                </TableBody>
-              </Table>
+          ) : (
+            <div className="space-y-2">
+              {Array.from(sbuGrouped.entries())
+                .sort(([, a], [, b]) => b.count - a.count)
+                .map(([pattern, { count, changes }]) => (
+                  <Collapsible 
+                    key={pattern}
+                    open={expandedSbuChanges.has(pattern)}
+                    onOpenChange={() => toggleSbuChange(pattern)}
+                  >
+                    <CollapsibleTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        className="w-full justify-between p-4 h-auto hover:bg-muted/50"
+                      >
+                        <div className="flex items-center gap-3">
+                          {expandedSbuChanges.has(pattern) ? (
+                            <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                          ) : (
+                            <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                          )}
+                          <span className="font-medium text-left">{pattern}</span>
+                        </div>
+                        <Badge variant="secondary" className="ml-2">
+                          {count} change{count !== 1 ? 's' : ''}
+                        </Badge>
+                      </Button>
+                    </CollapsibleTrigger>
+                    <CollapsibleContent className="px-4 pb-4">
+                      <div className="border rounded-lg bg-muted/20">
+                        <Table>
+                          <TableHeader>
+                            <TableRow>
+                              <TableHead>Date</TableHead>
+                              <TableHead>Employee</TableHead>
+                              <TableHead>Change</TableHead>
+                            </TableRow>
+                          </TableHeader>
+                          <TableBody>
+                            {changes.map((change) => (
+                              <TableRow key={change.id}>
+                                <TableCell className="text-sm">
+                                  {format(new Date(change.changed_at), 'MMM dd, yyyy')}
+                                </TableCell>
+                                <TableCell className="text-sm">
+                                  <div>
+                                    <div className="font-medium">
+                                      {change.first_name} {change.last_name}
+                                    </div>
+                                    <div className="text-muted-foreground text-xs">
+                                      {change.employee_id}
+                                    </div>
+                                  </div>
+                                </TableCell>
+                                <TableCell>
+                                  <div className="flex items-center gap-2 text-sm">
+                                    <Badge variant="outline">{change.old_sbu_name}</Badge>
+                                    <ArrowRight className="h-3 w-3 text-muted-foreground" />
+                                    <Badge variant="default">{change.new_sbu_name}</Badge>
+                                  </div>
+                                </TableCell>
+                              </TableRow>
+                            ))}
+                          </TableBody>
+                        </Table>
+                      </div>
+                    </CollapsibleContent>
+                  </Collapsible>
+                ))}
             </div>
-          </CardContent>
-        </Card>
-
-        {/* SBU Changes Details */}
-        <Card>
-          <CardHeader>
-            <div className="flex items-center justify-between">
-              <CardTitle className="text-lg">SBU Changes Details</CardTitle>
-              <Button 
-                variant="outline" 
-                size="sm" 
-                onClick={exportSbuChangesToCsv}
-                disabled={!sbuChanges || sbuChanges.length === 0 || sbuChangesLoading}
-              >
-                <Download className="h-4 w-4 mr-2" />
-                Export CSV
-              </Button>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="max-h-96 overflow-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Date</TableHead>
-                    <TableHead>Employee</TableHead>
-                    <TableHead>Change</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {sbuChangesLoading ? (
-                    <TableRow>
-                      <TableCell colSpan={3} className="text-center">Loading...</TableCell>
-                    </TableRow>
-                  ) : sbuChanges?.length === 0 ? (
-                    <TableRow>
-                      <TableCell colSpan={3} className="text-center text-muted-foreground">
-                        No SBU changes found
-                      </TableCell>
-                    </TableRow>
-                  ) : (
-                    sbuChanges?.map((change) => (
-                      <TableRow key={change.id}>
-                        <TableCell className="text-sm">
-                          {format(new Date(change.changed_at), 'MMM dd, yyyy')}
-                        </TableCell>
-                        <TableCell className="text-sm">
-                          <div>
-                            <div className="font-medium">
-                              {change.first_name} {change.last_name}
-                            </div>
-                            <div className="text-muted-foreground text-xs">
-                              {change.employee_id}
-                            </div>
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex items-center gap-2 text-sm">
-                            <Badge variant="outline">{change.old_sbu_name}</Badge>
-                            <span>→</span>
-                            <Badge variant="default">{change.new_sbu_name}</Badge>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    ))
-                  )}
-                </TableBody>
-              </Table>
-            </div>
-          </CardContent>
-        </Card>
+          )}
+        </CardContent>
+      </Card>
       </div>
     </div>
   );

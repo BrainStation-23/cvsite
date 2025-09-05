@@ -59,7 +59,7 @@ const CvAuditLogsDialog: React.FC<CvAuditLogsDialogProps> = ({
   const { auditLogs, isLoading, error } = useCvAuditLogs(profileId, isOpen);
 
   const defaultTrigger = (
-    <Button variant="outline" size="sm">
+    <Button variant="outline" size="sm" className='h-10'>
       <ClipboardList className="h-4 w-4" />
     </Button>
   );

@@ -50,7 +50,7 @@ export const ProfileTabsList: React.FC<ProfileTabsListProps> = ({
 
   return (
     <div className="flex-shrink-0">
-      <TabsList className="grid w-full grid-cols-9 h-12 bg-gray-100 dark:bg-gray-800 rounded-md p-1">
+      <TabsList className="grid w-full grid-cols-7 h-12 bg-gray-100 dark:bg-gray-800 rounded-md p-1">
         <TabTriggerWithIcon
           value="general"
           icon={User}
@@ -100,7 +100,7 @@ export const ProfileTabsList: React.FC<ProfileTabsListProps> = ({
           isEmpty={projects.length === 0}
           dataTour="projects-tab"
         />
-        <TabTriggerWithIcon
+        {/* <TabTriggerWithIcon
           value="cv-import"
           icon={Bot}
           label="AI Import"
@@ -113,7 +113,7 @@ export const ProfileTabsList: React.FC<ProfileTabsListProps> = ({
           label="JSON"
           isEmpty={false}
           dataTour="json-tab"
-        />
+        /> */}
       </TabsList>
     </div>
   );
