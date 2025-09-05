@@ -25,7 +25,7 @@ export const PivotTableContainer: React.FC<PivotTableContainerProps> = ({
 }) => {
   const [primaryDimension, setPrimaryDimension] = useState('sbu');
   const [secondaryDimension, setSecondaryDimension] = useState('bill_type');
-  const [enableGrouping, setEnableGrouping] = useState(false);
+  const [enableGrouping, setEnableGrouping] = useState(true);
 
   const { data: pivotData, isLoading } = useResourcePivotStatistics(
     primaryDimension,
