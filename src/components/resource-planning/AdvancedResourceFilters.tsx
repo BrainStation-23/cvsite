@@ -13,6 +13,7 @@ import ProjectSearchCombobox from './ProjectSearchCombobox';
 import DatePicker from '@/components/admin/user/DatePicker';  
 
 const STORAGE_KEY = 'resource-calendar/planning/advanced-filters';
+const CACHE_TTL_MS = 12 * 60 * 60 * 1000; 
 
 interface AdvancedFilters {
   billTypeFilter: string | null;
@@ -27,6 +28,7 @@ interface AdvancedFilters {
   endDateTo: string;
   projectLevelFilter: string | null;
   projectBillTypeFilter: string | null;
+    cachedAt?: number; // timestamp
 }
 
 function isBrowser() {
@@ -50,7 +52,7 @@ function readCache(): AdvancedFilters {
   };
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
-    return raw ? (JSON.parse(raw) as AdvancedFilters) : {
+    if(!raw) return {
       billTypeFilter: null,
       projectSearch: '',
       minEngagementPercentage: null,
@@ -64,6 +66,26 @@ function readCache(): AdvancedFilters {
       projectLevelFilter: null,
       projectBillTypeFilter: null,
     };
+    const parsed = JSON.parse(raw) as AdvancedFilters
+       if (!parsed.cachedAt || Date.now() - parsed.cachedAt > CACHE_TTL_MS) {
+      // Cache expired
+      localStorage.removeItem(STORAGE_KEY);
+      return {
+      billTypeFilter: null,
+      projectSearch: '',
+      minEngagementPercentage: null,
+      maxEngagementPercentage: null,
+      minBillingPercentage: null,
+      maxBillingPercentage: null,
+      startDateFrom: '',
+      startDateTo: '',
+      endDateFrom: '',
+      endDateTo: '',
+      projectLevelFilter: null,
+      projectBillTypeFilter: null,
+      };
+    }
+    return parsed;
   } catch {
     return {
       billTypeFilter: null,
@@ -85,7 +107,7 @@ function readCache(): AdvancedFilters {
 function writeCache(next: AdvancedFilters) {
   if (!isBrowser()) return;
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({...next, cachedAt: Date.now()}));
   } catch {
     // no-op
   }

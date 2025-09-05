@@ -121,9 +121,8 @@ export const CVActions: React.FC<CVActionsProps> = ({ profileId }) => {
           </Select>
         </div>
         
-        <div className="flex gap-2">
-          <CvAuditLogsDialog profileId={targetProfileId} />
-          
+        <div className="flex gap-2 flex-1 justify-between">  
+          <div className='flex gap-2'>
           <Button 
             variant="outline"
             onClick={handlePreview}
@@ -158,7 +157,12 @@ export const CVActions: React.FC<CVActionsProps> = ({ profileId }) => {
               </>
             )}
           </Button>
+          </div>
+          <div>
+            <CvAuditLogsDialog profileId={targetProfileId} />
+          </div>
         </div>
+
       </div>
 
       {/* Progress Dialog */}

@@ -60,8 +60,7 @@ const CvAuditLogsDialog: React.FC<CvAuditLogsDialogProps> = ({
 
   const defaultTrigger = (
     <Button variant="outline" size="sm">
-      <ClipboardList className="h-4 w-4 mr-2" />
-      View Audit Log
+      <ClipboardList className="h-4 w-4" />
     </Button>
   );
 
