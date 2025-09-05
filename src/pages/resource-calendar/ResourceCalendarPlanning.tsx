@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
 import { ResourcePlanningTable } from '../../components/resource-planning/ResourcePlanningTable';
 import { ResourcePlanningExportButton } from '../../components/resource-planning/ResourcePlanningExportButton';
+import { ResourcePlanningAuditLogsDialog } from '@/components/resource-planning/ResourcePlanningAuditLogsDialog';
 
 const ResourceCalendarPlanning: React.FC = () => {
   const location = useLocation();
@@ -31,11 +32,13 @@ const ResourceCalendarPlanning: React.FC = () => {
               </p>
             </div>
           </div>
-
-          <ResourcePlanningExportButton />
+          <div className="flex space-x-2">
+            <ResourcePlanningExportButton />
+            <ResourcePlanningAuditLogsDialog
+              params={{ items_per_page: 100, page_number: 1 }}
+            />
+          </div>
         </div>
-
-
         <ResourcePlanningTable />
       </div>
     </DashboardLayout>
