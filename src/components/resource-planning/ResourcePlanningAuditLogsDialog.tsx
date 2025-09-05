@@ -97,12 +97,28 @@ export const ResourcePlanningAuditLogsDialog: React.FC<ResourcePlanningAuditLogs
 
   const renderAuditLogItem = (log: ResourcePlanningAuditLog, index: number) => {
     const hasChangedFields = log.changed_fields && log.changed_fields.length > 0;
+    const oldProfile = log.old_data_enriched?.profile;
+    const newProfile = log.new_data_enriched?.profile;
+    const oldProject = log.old_data_enriched?.project;
+    const newProject = log.new_data_enriched?.project;
+    const oldBillType = log.old_data_enriched?.bill_type;
+    const newBillType = log.new_data_enriched?.bill_type;
+
+    const employee =
+      newProfile?.first_name
+        ? `${newProfile.first_name} ${newProfile.last_name} (${newProfile.employee_id})`
+        : oldProfile?.first_name
+          ? `${oldProfile.first_name} ${oldProfile.last_name} (${oldProfile.employee_id})`
+          : "Unknown";
+
+    const isDeleted = !newProfile?.first_name && !!oldProfile?.first_name;
+
     return (
       <div key={log.id} className="border rounded-lg p-4 bg-background">
         <div className="flex items-center justify-between mb-2">
           <div className="flex flex-col">
             <span className="text-xs text-muted-foreground">
-              {log.operation_type} by {log.changed_by_user?.first_name} {log.changed_by_user?.last_name} ({log.changed_by_user?.employee_id})
+              <b>{log.operation_type}</b> by {log.changed_by_user?.first_name} {log.changed_by_user?.last_name} ({log.changed_by_user?.employee_id})
             </span>
             <span className="text-xs text-muted-foreground">
               {new Date(log.changed_at).toLocaleString()}
@@ -113,6 +129,44 @@ export const ResourcePlanningAuditLogsDialog: React.FC<ResourcePlanningAuditLogs
           </span>
         </div>
         <Separator />
+
+        {/* --- More Details Section --- */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-2 mt-3 text-xs">
+          <div>
+            <b>Employee:</b> {employee}
+            {isDeleted && (
+              <span className="ml-2 px-2 py-0.5 rounded bg-destructive/20 text-destructive text-xs font-semibold">
+                Deleted
+              </span>
+            )}
+          </div>
+          <div>
+            <b>Project:</b> {newProject?.project_name}
+          </div>
+          <div>
+            <b>Bill Type:</b> {newBillType?.name}
+          </div>
+          <div>
+            <b>Engagement %:</b> {log.new_data_enriched?.engagement_percentage}
+          </div>
+          <div>
+            <b>Billing %:</b> {log.new_data_enriched?.billing_percentage}
+          </div>
+          <div>
+            <b>Engagement Start:</b> {log.new_data_enriched?.engagement_start_date}
+          </div>
+          <div>
+            <b>Release Date:</b> {log.new_data_enriched?.release_date}
+          </div>
+          <div>
+            <b>Weekly Validation:</b> {log.new_data_enriched?.weekly_validation ? 'Yes' : 'No'}
+          </div>
+          <div>
+            <b>Forecasted Project:</b> {log.new_data_enriched?.forecasted_project ?? 'N/A'}
+          </div>
+        </div>
+        {/* --- End More Details Section --- */}
+
         {hasChangedFields ? (
           <div className="mt-3 space-y-2">
             {log.changed_fields!.map((field) => (
