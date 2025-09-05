@@ -1953,19 +1953,6 @@ export type Database = {
         }
         Returns: Json
       }
-      get_resource_pivot_statistics: {
-        Args: {
-          bill_type_filter?: string
-          end_date_filter?: string
-          expertise_type_filter?: string
-          primary_dimension?: string
-          resource_type_filter?: string
-          sbu_filter?: string
-          secondary_dimension?: string
-          start_date_filter?: string
-        }
-        Returns: Json
-      }
       get_resource_pivot_statistics_with_grouping: {
         Args: {
           bill_type_filter?: string
