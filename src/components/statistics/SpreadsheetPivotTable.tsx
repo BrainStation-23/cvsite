@@ -1,9 +1,8 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { PivotStatistics } from '@/hooks/use-resource-pivot-statistics';
-import { Loader2, TrendingUp, ChevronDown, ChevronRight } from 'lucide-react';
+import { Loader2, TrendingUp } from 'lucide-react';
 
 interface SpreadsheetPivotTableProps {
   data: PivotStatistics;
@@ -11,28 +10,6 @@ interface SpreadsheetPivotTableProps {
 }
 
 export const SpreadsheetPivotTable: React.FC<SpreadsheetPivotTableProps> = ({ data, isLoading }) => {
-  const [collapsedRowGroups, setCollapsedRowGroups] = useState<Set<string>>(new Set());
-  const [collapsedColGroups, setCollapsedColGroups] = useState<Set<string>>(new Set());
-
-  const toggleRowGroup = (groupName: string) => {
-    const newCollapsed = new Set(collapsedRowGroups);
-    if (newCollapsed.has(groupName)) {
-      newCollapsed.delete(groupName);
-    } else {
-      newCollapsed.add(groupName);
-    }
-    setCollapsedRowGroups(newCollapsed);
-  };
-
-  const toggleColGroup = (groupName: string) => {
-    const newCollapsed = new Set(collapsedColGroups);
-    if (newCollapsed.has(groupName)) {
-      newCollapsed.delete(groupName);
-    } else {
-      newCollapsed.add(groupName);
-    }
-    setCollapsedColGroups(newCollapsed);
-  };
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-full min-h-96">
@@ -161,21 +138,10 @@ export const SpreadsheetPivotTable: React.FC<SpreadsheetPivotTableProps> = ({ da
                       {Object.entries(groupedCols).map(([groupName, cols]) => (
                         <TableHead 
                           key={groupName} 
-                          colSpan={collapsedColGroups.has(groupName) ? 1 : cols.length} 
-                          className="text-center font-bold bg-primary/10 border-r-2 cursor-pointer hover:bg-primary/20 transition-colors"
-                          onClick={() => toggleColGroup(groupName)}
+                          colSpan={cols.length} 
+                          className="text-center font-bold bg-primary/10 border-r-2"
                         >
-                          <div className="flex items-center justify-center gap-1">
-                            {collapsedColGroups.has(groupName) ? (
-                              <ChevronRight className="h-3 w-3" />
-                            ) : (
-                              <ChevronDown className="h-3 w-3" />
-                            )}
-                            {groupName}
-                            {collapsedColGroups.has(groupName) && (
-                              <span className="text-xs text-muted-foreground">({cols.length})</span>
-                            )}
-                          </div>
+                          {groupName}
                         </TableHead>
                       ))}
                       <TableHead className="sticky right-0 z-10 bg-muted border-l-2"></TableHead>
@@ -187,23 +153,13 @@ export const SpreadsheetPivotTable: React.FC<SpreadsheetPivotTableProps> = ({ da
                         <span>{getDimensionLabel(data.dimensions.primary)}</span>
                       </div>
                     </TableHead>
-                    {uniqueCols.map(col => {
-                      // Check if this column belongs to a collapsed group
-                      const belongsToCollapsedGroup = isGroupingEnabled && groupedCols && 
-                        Object.entries(groupedCols).some(([groupName, cols]) => 
-                          collapsedColGroups.has(groupName) && cols.includes(col)
-                        );
-                      
-                      if (belongsToCollapsedGroup) return null;
-                      
-                      return (
-                        <TableHead key={col} className="text-center font-medium border-r min-w-16 max-w-32 ">
-                          <div className="truncate font-semibold" title={col}>
-                            {col}
-                          </div>
-                        </TableHead>
-                      );
-                    })}
+                    {uniqueCols.map(col => (
+                      <TableHead key={col} className="text-center font-medium border-r min-w-16 max-w-32 ">
+                        <div className="truncate font-semibold" title={col}>
+                          {col}
+                        </div>
+                      </TableHead>
+                    ))}
                     <TableHead className="text-center font-bold bg-muted border-l-2 min-w-20 sticky right-0 z-10">
                       Total
                     </TableHead>
@@ -213,64 +169,40 @@ export const SpreadsheetPivotTable: React.FC<SpreadsheetPivotTableProps> = ({ da
                   {isGroupingEnabled && groupedRows ? (
                     // Render grouped rows
                     Object.entries(groupedRows).map(([groupName, rows]) => (
-                      <Collapsible key={groupName} open={!collapsedRowGroups.has(groupName)}>
-                        <CollapsibleTrigger asChild>
-                          <TableRow className="bg-primary/5 border-t-2 cursor-pointer hover:bg-primary/10 transition-colors">
-                            <TableCell 
-                              colSpan={uniqueCols.length + 2} 
-                              className="sticky left-0 z-10 font-bold text-primary bg-primary/10 border-r-2"
-                            >
-                              <div className="flex items-center gap-2" onClick={() => toggleRowGroup(groupName)}>
-                                {collapsedRowGroups.has(groupName) ? (
-                                  <ChevronRight className="h-4 w-4" />
-                                ) : (
-                                  <ChevronDown className="h-4 w-4" />
-                                )}
-                                {groupName}
-                                {collapsedRowGroups.has(groupName) && (
-                                  <span className="text-xs text-muted-foreground">({rows.length} items)</span>
-                                )}
+                      <React.Fragment key={groupName}>
+                        <TableRow className="bg-primary/5 border-t-2">
+                          <TableCell 
+                            colSpan={uniqueCols.length + 2} 
+                            className="sticky left-0 z-10 font-bold text-primary bg-primary/10 border-r-2"
+                          >
+                            {groupName}
+                          </TableCell>
+                        </TableRow>
+                        {rows.map((row) => (
+                          <TableRow key={row} className="hover:bg-muted/30 transition-colors">
+                            <TableCell className="sticky left-0 z-10 bg-card border-r-2 font-medium min-w-40 max-w-48 pl-6">
+                              <div className="truncate font-medium" title={row}>
+                                {row}
+                              </div>
+                            </TableCell>
+                            {uniqueCols.map(col => {
+                              const value = dataMap.get(`${row}|${col}`) || 0;
+                              return (
+                                <TableCell key={col} className={`text-center border-r  ${getIntensityClass(value, maxValue)}`}>
+                                  <div className="font-mono text-sm font-medium py-1">
+                                    {value || '—'}
+                                  </div>
+                                </TableCell>
+                              );
+                            })}
+                            <TableCell className="text-center font-bold bg-primary/5 border-l-2 sticky right-0 z-10 bg-card">
+                              <div className="font-mono font-bold text-primary">
+                                {rowTotalsMap.get(row) || 0}
                               </div>
                             </TableCell>
                           </TableRow>
-                        </CollapsibleTrigger>
-                        <CollapsibleContent asChild>
-                          <React.Fragment>
-                            {rows.map((row) => (
-                              <TableRow key={row} className="hover:bg-muted/30 transition-colors">
-                                <TableCell className="sticky left-0 z-10 bg-card border-r-2 font-medium min-w-40 max-w-48 pl-6">
-                                  <div className="truncate font-medium" title={row}>
-                                    {row}
-                                  </div>
-                                </TableCell>
-                                {uniqueCols.map(col => {
-                                  // Check if this column belongs to a collapsed group
-                                  const belongsToCollapsedGroup = isGroupingEnabled && groupedCols && 
-                                    Object.entries(groupedCols).some(([groupName, cols]) => 
-                                      collapsedColGroups.has(groupName) && cols.includes(col)
-                                    );
-                                  
-                                  if (belongsToCollapsedGroup) return null;
-                                  
-                                  const value = dataMap.get(`${row}|${col}`) || 0;
-                                  return (
-                                    <TableCell key={col} className={`text-center border-r  ${getIntensityClass(value, maxValue)}`}>
-                                      <div className="font-mono text-sm font-medium py-1">
-                                        {value || '—'}
-                                      </div>
-                                    </TableCell>
-                                  );
-                                })}
-                                <TableCell className="text-center font-bold bg-primary/5 border-l-2 sticky right-0 z-10 bg-card">
-                                  <div className="font-mono font-bold text-primary">
-                                    {rowTotalsMap.get(row) || 0}
-                                  </div>
-                                </TableCell>
-                              </TableRow>
-                            ))}
-                          </React.Fragment>
-                        </CollapsibleContent>
-                      </Collapsible>
+                        ))}
+                      </React.Fragment>
                     ))
                   ) : (
                     // Render flat rows
@@ -282,14 +214,6 @@ export const SpreadsheetPivotTable: React.FC<SpreadsheetPivotTableProps> = ({ da
                           </div>
                         </TableCell>
                         {uniqueCols.map(col => {
-                          // Check if this column belongs to a collapsed group
-                          const belongsToCollapsedGroup = isGroupingEnabled && groupedCols && 
-                            Object.entries(groupedCols).some(([groupName, cols]) => 
-                              collapsedColGroups.has(groupName) && cols.includes(col)
-                            );
-                          
-                          if (belongsToCollapsedGroup) return null;
-                          
                           const value = dataMap.get(`${row}|${col}`) || 0;
                           return (
                             <TableCell key={col} className={`text-center border-r  ${getIntensityClass(value, maxValue)}`}>
@@ -312,23 +236,13 @@ export const SpreadsheetPivotTable: React.FC<SpreadsheetPivotTableProps> = ({ da
                     <TableCell className="sticky left-0 z-10 bg-muted border-r-2 font-bold">
                       Total
                     </TableCell>
-                    {uniqueCols.map(col => {
-                      // Check if this column belongs to a collapsed group
-                      const belongsToCollapsedGroup = isGroupingEnabled && groupedCols && 
-                        Object.entries(groupedCols).some(([groupName, cols]) => 
-                          collapsedColGroups.has(groupName) && cols.includes(col)
-                        );
-                      
-                      if (belongsToCollapsedGroup) return null;
-                      
-                      return (
-                        <TableCell key={col} className="text-center font-bold bg-primary/10 border-r ">
-                          <div className="font-mono font-bold text-primary">
-                            {colTotalsMap.get(col) || 0}
-                          </div>
-                        </TableCell>
-                      );
-                    })}
+                    {uniqueCols.map(col => (
+                      <TableCell key={col} className="text-center font-bold bg-primary/10 border-r ">
+                        <div className="font-mono font-bold text-primary">
+                          {colTotalsMap.get(col) || 0}
+                        </div>
+                      </TableCell>
+                    ))}
                     <TableCell className="text-center font-bold bg-primary text-primary-foreground border-l-2 sticky right-0 z-10">
                       <div className="font-mono font-bold">
                         {data.grand_total}
