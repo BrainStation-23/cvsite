@@ -2003,6 +2003,14 @@ export type Database = {
         }
         Returns: Json
       }
+      get_sbu_billing_metrics: {
+        Args: {
+          end_date_filter?: string
+          sbu_filter?: string
+          start_date_filter?: string
+        }
+        Returns: Json
+      }
       get_sbu_changes: {
         Args: {
           end_date_param?: string

@@ -3,6 +3,7 @@ import React from 'react';
 import { ResourceCountCharts } from './ResourceCountCharts';
 import { ResourceCountTable } from './ResourceCountTable';
 import { ResourceCountStatistics } from '@/hooks/use-resource-count-statistics';
+import { SbuBillingMetrics } from './SbuBillingMetrics';
 
 interface ResourceStatisticsContentProps {
   resourceCountData: ResourceCountStatistics;
@@ -57,54 +58,59 @@ export const ResourceStatisticsContent: React.FC<ResourceStatisticsContentProps>
   };
 
   return (
-    <div className={`grid gap-6 ${showCharts && showTables ? 'grid-cols-2' : 'grid-cols-1'}`}>
-      {/* Charts Section */}
-      {showCharts && (
-        <div className="space-y-6">
-          <ResourceCountCharts 
-            data={resourceCountData} 
-            isLoading={resourceCountLoading}
-            filters={filters}
-            groupBy={groupBy}
-          />
-        </div>
-      )}
+    <div className="space-y-6">
+      {/* SBU Billing Metrics */}
+      <SbuBillingMetrics filters={filters} />
       
-      {/* Tables Section */}
-      {showTables && (
-        <div className="space-y-6">
-          {groupBy !== 'all' ? (
-            <ResourceCountTable
-              title={getTableTitle()}
-              data={getTableData()}
+      <div className={`grid gap-6 ${showCharts && showTables ? 'grid-cols-2' : 'grid-cols-1'}`}>
+        {/* Charts Section */}
+        {showCharts && (
+          <div className="space-y-6">
+            <ResourceCountCharts 
+              data={resourceCountData} 
               isLoading={resourceCountLoading}
+              filters={filters}
+              groupBy={groupBy}
             />
-          ) : (
-            <div className="grid gap-4">
+          </div>
+        )}
+        
+        {/* Tables Section */}
+        {showTables && (
+          <div className="space-y-6">
+            {groupBy !== 'all' ? (
               <ResourceCountTable
-                title="Resources by SBU"
-                data={resourceCountData.by_sbu}
+                title={getTableTitle()}
+                data={getTableData()}
                 isLoading={resourceCountLoading}
               />
-              <ResourceCountTable
-                title="Resources by Type"
-                data={resourceCountData.by_resource_type}
-                isLoading={resourceCountLoading}
-              />
-              <ResourceCountTable
-                title="Resources by Bill Type"
-                data={resourceCountData.by_bill_type}
-                isLoading={resourceCountLoading}
-              />
-              <ResourceCountTable
-                title="Resources by Expertise"
-                data={resourceCountData.by_expertise_type}
-                isLoading={resourceCountLoading}
-              />
-            </div>
-          )}
-        </div>
-      )}
+            ) : (
+              <div className="grid gap-4">
+                <ResourceCountTable
+                  title="Resources by SBU"
+                  data={resourceCountData.by_sbu}
+                  isLoading={resourceCountLoading}
+                />
+                <ResourceCountTable
+                  title="Resources by Type"
+                  data={resourceCountData.by_resource_type}
+                  isLoading={resourceCountLoading}
+                />
+                <ResourceCountTable
+                  title="Resources by Bill Type"
+                  data={resourceCountData.by_bill_type}
+                  isLoading={resourceCountLoading}
+                />
+                <ResourceCountTable
+                  title="Resources by Expertise"
+                  data={resourceCountData.by_expertise_type}
+                  isLoading={resourceCountLoading}
+                />
+              </div>
+            )}
+          </div>
+        )}
+      </div>
     </div>
   );
 };
