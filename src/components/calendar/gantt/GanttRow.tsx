@@ -63,7 +63,7 @@ export const GanttRow: React.FC<GanttRowProps> = ({
       </div>
 
       {/* Timeline grid */}
-      <div className="flex-1 relative" style={{ height: `${rowHeight}px` }}>
+      <div className="flex-1 relative">
         {/* Week grid background */}
         <div className="absolute inset-0 flex">
           {timeline.map((month, monthIndex) =>
