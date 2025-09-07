@@ -1,8 +1,11 @@
-
 import React from 'react';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Table } from '@/components/ui/table';
 import { PivotStatistics } from '@/hooks/use-resource-pivot-statistics';
 import { Loader2, TrendingUp } from 'lucide-react';
+import { usePivotTableState } from '@/hooks/usePivotTableState';
+import { PivotTableSummary } from './pivot-table/PivotTableSummary';
+import { PivotTableHeaders } from './pivot-table/PivotTableHeaders';
+import { PivotTableBody } from './pivot-table/PivotTableBody';
 
 interface SpreadsheetPivotTableProps {
   data: PivotStatistics;
@@ -10,6 +13,30 @@ interface SpreadsheetPivotTableProps {
 }
 
 export const SpreadsheetPivotTable: React.FC<SpreadsheetPivotTableProps> = ({ data, isLoading }) => {
+  const {
+    collapsedRowGroups,
+    collapsedColGroups,
+    toggleRowGroup,
+    toggleColGroup,
+    expandAllRowGroups,
+    collapseAllRowGroups,
+    expandAllColGroups,
+    collapseAllColGroups,
+    isGroupingEnabled,
+    maxValue,
+    uniqueRows,
+    uniqueCols,
+    visibleCols,
+    groupedRows,
+    groupedCols,
+    dataMap,
+    rowTotalsMap,
+    colTotalsMap,
+    aggregatedRowTotals,
+    aggregatedColTotals,
+    aggregatedCellValues
+  } = usePivotTableState(data);
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-full min-h-96">
@@ -37,222 +64,55 @@ export const SpreadsheetPivotTable: React.FC<SpreadsheetPivotTableProps> = ({ da
     );
   }
 
-  // Check if grouping is enabled
-  const isGroupingEnabled = data.grouping?.enabled || false;
-  
-  // Transform pivot data into a matrix
-  // Use row_totals and col_totals to maintain backend sorting
-  const uniqueRows = data.row_totals?.map(item => item.dimension) || 
-                    [...new Set(data.pivot_data.map(item => item.row_dimension))];
-  const uniqueCols = data.col_totals?.map(item => item.dimension) ||
-                    [...new Set(data.pivot_data.map(item => item.col_dimension))];
-
-  // Group data by parent groups if grouping is enabled
-  const groupedRows = isGroupingEnabled && data.grouping?.info.row_groups 
-    ? data.grouping.info.row_groups.reduce((acc, group) => {
-        const items = data.row_totals?.filter(item => item.group_name === group) || [];
-        if (items.length > 0) {
-          acc[group] = items.map(item => item.dimension);
-        }
-        return acc;
-      }, {} as Record<string, string[]>)
-    : null;
-
-  const groupedCols = isGroupingEnabled && data.grouping?.info.col_groups
-    ? data.grouping.info.col_groups.reduce((acc, group) => {
-        const items = data.col_totals?.filter(item => item.group_name === group) || [];
-        if (items.length > 0) {
-          acc[group] = items.map(item => item.dimension);
-        }
-        return acc;
-      }, {} as Record<string, string[]>)
-    : null;
-  
-  // Create lookup maps
-  const dataMap = new Map<string, number>();
-  data.pivot_data.forEach(item => {
-    dataMap.set(`${item.row_dimension}|${item.col_dimension}`, item.count);
-  });
-
-  const rowTotalsMap = new Map<string, number>();
-  data.row_totals?.forEach(item => {
-    rowTotalsMap.set(item.dimension, item.total);
-  });
-
-  const colTotalsMap = new Map<string, number>();
-  data.col_totals?.forEach(item => {
-    colTotalsMap.set(item.dimension, item.total);
-  });
-
-  const getDimensionLabel = (dimension: string) => {
-    const labels: Record<string, string> = {
-      'sbu': 'SBU',
-      'resource_type': 'Resource Type',
-      'bill_type': 'Bill Type',
-      'expertise': 'Expertise Type',
-    };
-    return labels[dimension] || dimension.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase());
-  };
-
-  const getIntensityClass = (value: number, maxValue: number) => {
-    if (value === 0) return 'bg-background';
-    const intensity = value / maxValue;
-    if (intensity > 0.7) return 'bg-primary/20 text-primary';
-    if (intensity > 0.4) return 'bg-primary/10 text-primary';
-    if (intensity > 0.2) return 'bg-primary/5';
-    return 'bg-background';
-  };
-
-  // Calculate max value for intensity coloring
-  const maxValue = Math.max(...data.pivot_data.map(item => item.count));
-
   return (
     <div className="h-full flex flex-col bg-background">
-      {/* Summary Bar */}
-      <div className="flex-shrink-0 px-6 py-3 border-b bg-muted/30">
-        <div className="flex items-center justify-between text-sm">
-          <div className="flex items-center gap-6">
-            <span className="text-muted-foreground">
-              Showing <span className="font-medium">{uniqueRows.length}</span> rows × <span className="font-medium">{uniqueCols.length}</span> columns
-            </span>
-            <span className="text-muted-foreground">
-              Total: <span className="font-bold text-foreground">{data.grand_total}</span> resources
-            </span>
-          </div>
-          <div className="text-xs text-muted-foreground">
-            Rows: {getDimensionLabel(data.dimensions.primary)} | Columns: {getDimensionLabel(data.dimensions.secondary)}
-          </div>
-        </div>
-      </div>
+      <PivotTableSummary
+        data={data}
+        uniqueRowsLength={uniqueRows.length}
+        visibleColsLength={visibleCols.length}
+        isGroupingEnabled={isGroupingEnabled}
+        groupedRows={groupedRows}
+        groupedCols={groupedCols}
+        expandAllRowGroups={expandAllRowGroups}
+        collapseAllRowGroups={collapseAllRowGroups}
+        expandAllColGroups={expandAllColGroups}
+        collapseAllColGroups={collapseAllColGroups}
+      />
 
       {/* Table Container */}
       <div className="flex-1 min-h-0">
-          <div className="p-6">
-            <div className="rounded-lg border bg-card overflow-x-auto">
-              <Table className="text-sm">
-                <TableHeader>
-                  {/* Render grouped headers if grouping is enabled */}
-                  {isGroupingEnabled && groupedCols && (
-                    <TableRow className="border-b bg-muted/30">
-                      <TableHead className="sticky left-0 z-20 bg-muted border-r-2"></TableHead>
-                      {Object.entries(groupedCols).map(([groupName, cols]) => (
-                        <TableHead 
-                          key={groupName} 
-                          colSpan={cols.length} 
-                          className="text-center font-bold bg-primary/10 border-r-2"
-                        >
-                          {groupName}
-                        </TableHead>
-                      ))}
-                      <TableHead className="sticky right-0 z-10 bg-muted border-l-2"></TableHead>
-                    </TableRow>
-                  )}
-                  <TableRow className="border-b-2 bg-muted/50">
-                    <TableHead className="sticky left-0 z-20 bg-muted border-r-2 font-semibold min-w-40 max-w-48">
-                      <div className="flex items-center gap-2">
-                        <span>{getDimensionLabel(data.dimensions.primary)}</span>
-                      </div>
-                    </TableHead>
-                    {uniqueCols.map(col => (
-                      <TableHead key={col} className="text-center font-medium border-r min-w-16 max-w-32 ">
-                        <div className="truncate font-semibold" title={col}>
-                          {col}
-                        </div>
-                      </TableHead>
-                    ))}
-                    <TableHead className="text-center font-bold bg-muted border-l-2 min-w-20 sticky right-0 z-10">
-                      Total
-                    </TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {isGroupingEnabled && groupedRows ? (
-                    // Render grouped rows
-                    Object.entries(groupedRows).map(([groupName, rows]) => (
-                      <React.Fragment key={groupName}>
-                        <TableRow className="bg-primary/5 border-t-2">
-                          <TableCell 
-                            colSpan={uniqueCols.length + 2} 
-                            className="sticky left-0 z-10 font-bold text-primary bg-primary/10 border-r-2"
-                          >
-                            {groupName}
-                          </TableCell>
-                        </TableRow>
-                        {rows.map((row) => (
-                          <TableRow key={row} className="hover:bg-muted/30 transition-colors">
-                            <TableCell className="sticky left-0 z-10 bg-card border-r-2 font-medium min-w-40 max-w-48 pl-6">
-                              <div className="truncate font-medium" title={row}>
-                                {row}
-                              </div>
-                            </TableCell>
-                            {uniqueCols.map(col => {
-                              const value = dataMap.get(`${row}|${col}`) || 0;
-                              return (
-                                <TableCell key={col} className={`text-center border-r  ${getIntensityClass(value, maxValue)}`}>
-                                  <div className="font-mono text-sm font-medium py-1">
-                                    {value || '—'}
-                                  </div>
-                                </TableCell>
-                              );
-                            })}
-                            <TableCell className="text-center font-bold bg-primary/5 border-l-2 sticky right-0 z-10 bg-card">
-                              <div className="font-mono font-bold text-primary">
-                                {rowTotalsMap.get(row) || 0}
-                              </div>
-                            </TableCell>
-                          </TableRow>
-                        ))}
-                      </React.Fragment>
-                    ))
-                  ) : (
-                    // Render flat rows
-                    uniqueRows.map((row, index) => (
-                      <TableRow key={row} className="hover:bg-muted/30 transition-colors">
-                        <TableCell className="sticky left-0 z-10 bg-card border-r-2 font-medium min-w-40 max-w-48">
-                          <div className="truncate font-medium" title={row}>
-                            {row}
-                          </div>
-                        </TableCell>
-                        {uniqueCols.map(col => {
-                          const value = dataMap.get(`${row}|${col}`) || 0;
-                          return (
-                            <TableCell key={col} className={`text-center border-r  ${getIntensityClass(value, maxValue)}`}>
-                              <div className="font-mono text-sm font-medium py-1">
-                                {value || '—'}
-                              </div>
-                            </TableCell>
-                          );
-                        })}
-                        <TableCell className="text-center font-bold bg-primary/5 border-l-2 sticky right-0 z-10 bg-card">
-                          <div className="font-mono font-bold text-primary">
-                            {rowTotalsMap.get(row) || 0}
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    ))
-                  )}
-                  {/* Totals row */}
-                  <TableRow className="border-t-2 bg-primary/5 hover:bg-primary/10 transition-colors">
-                    <TableCell className="sticky left-0 z-10 bg-muted border-r-2 font-bold">
-                      Total
-                    </TableCell>
-                    {uniqueCols.map(col => (
-                      <TableCell key={col} className="text-center font-bold bg-primary/10 border-r ">
-                        <div className="font-mono font-bold text-primary">
-                          {colTotalsMap.get(col) || 0}
-                        </div>
-                      </TableCell>
-                    ))}
-                    <TableCell className="text-center font-bold bg-primary text-primary-foreground border-l-2 sticky right-0 z-10">
-                      <div className="font-mono font-bold">
-                        {data.grand_total}
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                </TableBody>
-              </Table>
-            </div>
+        <div className="p-6">
+          <div className="rounded-lg border bg-card overflow-x-auto">
+            <Table className="text-sm">
+              <PivotTableHeaders
+                data={data}
+                isGroupingEnabled={isGroupingEnabled}
+                groupedCols={groupedCols}
+                visibleCols={visibleCols}
+                collapsedColGroups={collapsedColGroups}
+                toggleColGroup={toggleColGroup}
+              />
+              <PivotTableBody
+                data={data}
+                isGroupingEnabled={isGroupingEnabled}
+                groupedRows={groupedRows}
+                groupedCols={groupedCols}
+                uniqueRows={uniqueRows}
+                visibleCols={visibleCols}
+                collapsedRowGroups={collapsedRowGroups}
+                collapsedColGroups={collapsedColGroups}
+                dataMap={dataMap}
+                rowTotalsMap={rowTotalsMap}
+                colTotalsMap={colTotalsMap}
+                aggregatedRowTotals={aggregatedRowTotals}
+                aggregatedColTotals={aggregatedColTotals}
+                aggregatedCellValues={aggregatedCellValues}
+                maxValue={maxValue}
+                toggleRowGroup={toggleRowGroup}
+              />
+            </Table>
           </div>
+        </div>
       </div>
     </div>
   );
