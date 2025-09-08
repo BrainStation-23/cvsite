@@ -32,8 +32,23 @@ export const GanttRow: React.FC<GanttRowProps> = ({
     const trackHeight = 22; // Height per track
     const trackSpacing = 2; // Gap between tracks
     const padding = 8; // Top and bottom padding
+    const extraCells = 2; // Number of extra cells of height to add
+    const minTracks = 2; // Minimum number of tracks/cells to show
     
-    const calculatedHeight = Math.max(48, (tracks * trackHeight) + ((tracks - 1) * trackSpacing) + padding);
+    // Calculate base height based on tracks
+    const baseHeight = (tracks * trackHeight) + ((tracks - 1) * trackSpacing) + padding;
+    
+    // Calculate height based on number of engagements + extra cells
+    const engagementCount = resource.engagements.length;
+    const cellHeight = trackHeight + trackSpacing;
+    const engagementBasedHeight = (Math.max(engagementCount, minTracks) + extraCells) * cellHeight + padding;
+    
+    // Use the larger of the two heights to ensure everything fits
+    const calculatedHeight = Math.max(
+      (minTracks * trackHeight) + ((minTracks - 1) * trackSpacing) + padding, // Minimum 4 tracks height
+      baseHeight, 
+      engagementBasedHeight
+    );
     
     return { 
       trackAssignments: assignments, 
@@ -45,7 +60,10 @@ export const GanttRow: React.FC<GanttRowProps> = ({
   if (!timelineStart || !timelineEnd) return null;
 
   return (
-    <div className="flex border-b hover:bg-muted/50 transition-colors">
+    <div 
+      className="flex border-b hover:bg-muted/50 transition-colors"
+      style={{ height: `${rowHeight}px` }}
+    >
       {/* Resource info column */}
       <div className="w-80 flex-shrink-0 border-r p-4 space-y-1">
         <div className="font-medium text-sm">
