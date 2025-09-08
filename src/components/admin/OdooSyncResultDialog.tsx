@@ -11,9 +11,10 @@ import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
-import { CheckCircle, XCircle, AlertTriangle, Download, UserPlus, Users } from 'lucide-react';
+import { CheckCircle, XCircle, AlertTriangle, Download, UserPlus, Users, Copy, FileDown } from 'lucide-react';
 import Papa from 'papaparse';
 import { useOdooSyncBulkCreate } from '@/hooks/use-odoo-sync-bulk-create';
+import { toast } from '@/hooks/use-toast';
 
 interface SyncStats {
   total_processed: number;
@@ -113,6 +114,65 @@ export const OdooSyncResultDialog: React.FC<OdooSyncResultDialogProps> = ({
       link.click();
       document.body.removeChild(link);
     }
+  };
+
+  const downloadErrorsCSV = () => {
+    if (!error_employees || error_employees.length === 0) return;
+
+    const csvData = error_employees.map(employee => ({
+      employeeId: employee.employeeId,
+      errorMessage: employee.reason,
+      timestamp: new Date().toISOString()
+    }));
+
+    const csv = Papa.unparse(csvData);
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    
+    if (link.download !== undefined) {
+      const url = URL.createObjectURL(blob);
+      link.setAttribute('href', url);
+      link.setAttribute('download', `sync_errors_${new Date().toISOString().split('T')[0]}.csv`);
+      link.style.visibility = 'hidden';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+  };
+
+  const copyErrorsToClipboard = () => {
+    if (!error_employees || error_employees.length === 0) return;
+
+    const errorText = error_employees
+      .map(employee => `${employee.employeeId}: ${employee.reason}`)
+      .join('\n');
+
+    navigator.clipboard.writeText(errorText).then(() => {
+      toast({
+        title: "Copied to clipboard",
+        description: "Error details have been copied to your clipboard",
+      });
+    }).catch(() => {
+      toast({
+        title: "Copy failed",
+        description: "Could not copy error details to clipboard",
+        variant: "destructive"
+      });
+    });
+  };
+
+  const getErrorCategory = (reason: string) => {
+    if (reason.includes('foreign key constraint')) return 'Missing Reference';
+    if (reason.includes('not-null constraint')) return 'Missing Data';
+    if (reason.includes('duplicate key')) return 'Duplicate Entry';
+    if (reason.includes('invalid input')) return 'Invalid Data';
+    return 'Database Error';
+  };
+
+  const getErrorSeverity = (reason: string) => {
+    if (reason.includes('not-null constraint')) return 'Critical';
+    if (reason.includes('foreign key constraint')) return 'High';
+    return 'Medium';
   };
 
   return (
@@ -256,25 +316,78 @@ export const OdooSyncResultDialog: React.FC<OdooSyncResultDialogProps> = ({
         </section>
       )}
 
-      {/* Error Employees (optional: make rows scroll if long) */}
+      {/* Error Employees */}
       {error_employees.length > 0 && (
         <section className="mb-6">
-          <h4 className="font-semibold mb-3 flex items-center gap-2">
-            <XCircle className="h-4 w-4 text-red-500" />
-            Employees with Errors ({error_employees.length})
-          </h4>
+          <div className="flex items-center justify-between mb-3">
+            <h4 className="font-semibold flex items-center gap-2">
+              <XCircle className="h-4 w-4 text-red-500" />
+              Employees with Errors ({error_employees.length})
+            </h4>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={copyErrorsToClipboard}
+                className="flex items-center gap-2"
+              >
+                <Copy className="h-4 w-4" />
+                Copy Errors
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={downloadErrorsCSV}
+                className="flex items-center gap-2"
+              >
+                <FileDown className="h-4 w-4" />
+                Download CSV
+              </Button>
+            </div>
+          </div>
 
           <div className="border rounded-md overflow-hidden">
-            <div className="max-h-[30vh] overflow-y-auto p-3 space-y-2">
-              {error_employees.map((employee, index) => (
-                <div key={index} className="flex items-center justify-between p-2 bg-red-50 rounded">
-                  <div className="flex-1">
-                    <div className="font-medium">{employee.employeeId}</div>
-                    <div className="text-sm text-red-600">{employee.reason}</div>
+            <div className="max-h-[40vh] overflow-y-auto p-3 space-y-3">
+              {error_employees.map((employee, index) => {
+                const category = getErrorCategory(employee.reason);
+                const severity = getErrorSeverity(employee.reason);
+                
+                return (
+                  <div key={index} className="p-4 bg-red-50 rounded-lg border border-red-200">
+                    <div className="flex items-start justify-between mb-2">
+                      <div className="flex items-center gap-2">
+                        <div className="font-medium text-red-900">{employee.employeeId}</div>
+                        <Badge 
+                          variant="outline" 
+                          className={`text-xs ${
+                            severity === 'Critical' ? 'border-red-500 text-red-700' :
+                            severity === 'High' ? 'border-orange-500 text-orange-700' :
+                            'border-yellow-500 text-yellow-700'
+                          }`}
+                        >
+                          {severity}
+                        </Badge>
+                        <Badge variant="secondary" className="text-xs">
+                          {category}
+                        </Badge>
+                      </div>
+                    </div>
+                    <div className="text-sm text-red-700 leading-relaxed">
+                      <strong>Error:</strong> {employee.reason}
+                    </div>
+                    {category === 'Missing Reference' && (
+                      <div className="mt-2 text-xs text-red-600 bg-red-100 p-2 rounded">
+                        <strong>Suggestion:</strong> Check if the referenced designation exists in the system or update the employee's job position in Odoo.
+                      </div>
+                    )}
+                    {category === 'Missing Data' && (
+                      <div className="mt-2 text-xs text-red-600 bg-red-100 p-2 rounded">
+                        <strong>Suggestion:</strong> Complete the missing information in Odoo before syncing.
+                      </div>
+                    )}
                   </div>
-                  <Badge variant="destructive">Error</Badge>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         </section>
