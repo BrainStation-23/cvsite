@@ -223,7 +223,7 @@ export const ResourcePlanningTableRow: React.FC<ResourcePlanningTableRowProps> =
             <span className="text-xs text-muted-foreground">
               {item.profile.employee_id} 
               {item.expertise && (
-                <Badge variant="secondary" className="text-[10px] px-2 mx-1 py-0 h-4 bg-blue-100 text-blue-600">
+                <Badge variant="secondary" className="text-[10px] px-2 mx-1 py-0 h-4 bg-blue-100 text-blue-600 hover:text-blue-600 hover:bg-blue-100">
                    {item.expertise}  
                 </Badge>
               )} 
