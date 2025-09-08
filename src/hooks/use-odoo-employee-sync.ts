@@ -57,53 +57,9 @@ export function useOdooEmployeeSync() {
       console.log('Sync completed:', data);
       setLastSyncResult(data);
 
-      if (data.success) {
-        const { stats } = data;
-        let description = `Successfully processed ${stats.total_processed} employees.\n`;
-        description += `✅ Updated: ${stats.updated}\n`;
-        
-        if (stats.not_found > 0) {
-          description += `⚠️ Not found in database: ${stats.not_found}\n`;
-        }
-        
-        if (stats.errors > 0) {
-          description += `❌ Errors: ${stats.errors}`;
-        }
-
-        toast({
-          title: 'Sync Completed',
-          description,
-        });
-
-        // Show additional info about not found employees if any
-        if (data.not_found_employees?.length > 0) {
-          setTimeout(() => {
-            const notFoundCount = data.not_found_employees.length;
-            const exampleEmployees = data.not_found_employees
-              .slice(0, 3)
-              .map(emp => emp.employeeId)
-              .join(', ');
-            
-            toast({
-              title: `${notFoundCount} employees not found in database`,
-              description: `Examples: ${exampleEmployees}${notFoundCount > 3 ? '...' : ''}. Check sync results for full list.`,
-              variant: 'destructive',
-            });
-          }, 2000);
-        }
-      } else {
-        throw new Error(data.error || 'Sync failed');
-      }
-
       return data;
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error syncing employees:', error);
-      
-      toast({
-        title: 'Sync Failed',
-        description: error.message || 'Failed to sync employees from Odoo',
-        variant: 'destructive'
-      });
       
       throw error;
     } finally {

@@ -9,15 +9,27 @@ const corsHeaders = {
 interface OdooEmployee {
   employeeId: string;
   name: string | null;
-  workEmail : string | null;
+  workEmail: string | null;
   joiningDate: string | null;
   careerStartDate: string | null;
   dateOfBirth: string | null;
   sbu: {
     name: string;
   } | null;
+  department: {
+    name: string;
+  } | null;
   parent: {
-    workEmail : string | null;
+    workEmail: string | null;
+  } | null;
+  jobPosition: {
+    name: string;
+  } | null;
+  jobRole: {
+    jobType: {
+      name: string;
+    } | null;
+    role: string | null;
   } | null;
   resignationDate: string | null;
   exitDate: string | null;
@@ -43,32 +55,44 @@ Deno.serve(async (req) => {
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const odooApiKey = Deno.env.get('ODOO_API_KEY')!;
-    
+
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
     // GraphQL query to fetch employees from Odoo with new date fields
     const graphqlQuery = {
       query: `
-       query AllEmployees {
-            allEmployees(includeArchived: true) {
-                active
-                employeeId
-                name
-                workEmail
-                joiningDate
-                careerStartDate
-                dateOfBirth
-                sbu {
-                    name
-                }
-                parent {
-                    workEmail
-                }
-                resignationDate
-                exitDate
-                
+              query AllEmployees {
+              allEmployees(includeArchived: true) {
+                  active
+                  employeeId
+                  name
+                  workEmail
+                  joiningDate
+                  careerStartDate
+                  dateOfBirth
+                  sbu {
+                      name
+                  }
+                  parent {
+                      workEmail
+                  }
+                  resignationDate
+                  exitDate
+                  department {
+                      name
+                  }
+                  jobPosition {
+                      name
+                  }
+                  jobRole {
+                      jobType {
+                          name
+                      }
+                      role
+                  }
             }
         }
+
       `
     };
 
@@ -94,8 +118,8 @@ Deno.serve(async (req) => {
     // Flatten and pre-process the employee data
     const processedEmployees = odooData.data.allEmployees
       .flat() // Flatten the nested arrays
-      .filter(employee => 
-        employee.employeeId && 
+      .filter(employee =>
+        employee.employeeId &&
         employee.workEmail // Only process employees with email
       )
       .map(employee => ({
@@ -104,6 +128,10 @@ Deno.serve(async (req) => {
         name: employee.name || '',
         managerEmail: employee.parent?.workEmail || null,
         sbuName: employee.sbu?.name || null,
+        departmentName: employee.department?.name || null,
+        jobPositionName: employee.jobPosition?.name || null,
+        jobRoleName: employee.jobRole?.role || null,
+        jobTypeName: employee.jobRole?.jobType?.name || null,
         joiningDate: employee.joiningDate || null,
         careerStartDate: employee.careerStartDate || null,
         dateOfBirth: employee.dateOfBirth || null,
@@ -144,7 +172,7 @@ Deno.serve(async (req) => {
 
   } catch (error) {
     console.error('Sync error:', error);
-    
+
     return new Response(JSON.stringify({
       success: false,
       error: error.message || 'Unknown error occurred'
