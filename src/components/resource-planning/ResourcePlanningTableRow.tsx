@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { TableCell, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
@@ -46,6 +45,14 @@ interface ResourcePlanningData {
     project_bill_type?: string;
     project_type_name?: string;
   } | null;
+  manager: {
+    id: string;
+    first_name: string;
+    last_name: string;
+    employee_id: string;
+    full_name: string;
+  } | null;
+  expertise: string;
 }
 
 interface EditFormData {
@@ -214,7 +221,13 @@ export const ResourcePlanningTableRow: React.FC<ResourcePlanningTableRowProps> =
               )}
             </div>
             <span className="text-xs text-muted-foreground">
-              {item.profile.employee_id}
+              {item.profile.employee_id} 
+              {item.expertise && (
+                <Badge variant="secondary" className="text-[10px] px-2 mx-1 py-0 h-4 bg-blue-100 text-blue-600">
+                   {item.expertise}  
+                </Badge>
+              )} 
+
             </span>
           </div>
         </TableCell>
@@ -260,7 +273,15 @@ export const ResourcePlanningTableRow: React.FC<ResourcePlanningTableRowProps> =
             <span className="text-muted-foreground text-xs">Not assigned</span>
           )}
         </TableCell>
-        
+
+        <TableCell className="py-1 px-2">
+          {item.manager ? (
+            <span className="text-xs">{item.manager.first_name}</span>
+          ) : (
+            <span className="text-muted-foreground text-xs">Not specified</span>
+          )}
+        </TableCell>
+
         <TableCell className="py-1 px-2">
           {item.forecasted_project ? (
             <span className="text-xs">{item.forecasted_project}</span>
@@ -268,6 +289,8 @@ export const ResourcePlanningTableRow: React.FC<ResourcePlanningTableRowProps> =
             <span className="text-muted-foreground text-xs">Not specified</span>
           )}
         </TableCell>
+        
+
         
         <TableCell className="py-1 px-2">
           <Badge variant="outline" className="text-xs">{item.engagement_percentage}%</Badge>
