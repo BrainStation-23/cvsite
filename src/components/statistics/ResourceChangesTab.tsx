@@ -61,7 +61,7 @@ export const ResourceChangesTab: React.FC = () => {
 
     const grouped = new Map<string, { count: number; changes: typeof sbuChanges }>();
     sbuChanges.forEach(change => {
-      const key = `${change.old_sbu_name} → ${change.new_sbu_name}`;
+      const key = `${change.old_sbu_name ? change.old_sbu_name : 'Not Assigned' } → ${change.new_sbu_name}`;
       if (!grouped.has(key)) {
         grouped.set(key, { count: 0, changes: [] });
       }
@@ -449,7 +449,7 @@ export const ResourceChangesTab: React.FC = () => {
                                   </TableCell>
                                   <TableCell>
                                     <div className="flex items-center gap-2 text-sm">
-                                      <Badge variant="outline">{change.old_sbu_name}</Badge>
+                                      <Badge variant="outline">{change.old_sbu_name ? change.old_sbu_name : 'Not Assigned'}</Badge>
                                       <ArrowRight className="h-3 w-3 text-muted-foreground" />
                                       <Badge variant="default">{change.new_sbu_name}</Badge>
                                     </div>
