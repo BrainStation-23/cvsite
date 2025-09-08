@@ -4,10 +4,15 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Separator } from '@/components/ui/separator';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
-import { ClipboardList, Eye } from 'lucide-react';
+import { ClipboardList, Eye, User, Briefcase, BadgeDollarSign, Percent, CalendarDays, CheckCircle, HelpCircle, FileEdit, Trash2, PlusCircle } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import BillTypeCombobox from './BillTypeCombobox';
+import DatePicker from '../admin/user/DatePicker';
+import { Select, SelectTrigger, SelectContent, SelectItem } from '@/components/ui/select';
+import ProjectSearchCombobox from './ProjectSearchCombobox';
 
-const LOGS_PER_PAGE = 15;
 
 interface ResourcePlanningAuditLogsDialogProps {
   params: ResourcePlanningAuditLogsParams;
@@ -42,52 +47,61 @@ export const ResourcePlanningAuditLogsDialog: React.FC<ResourcePlanningAuditLogs
   params,
   trigger
 }) => {
+  const defaultFilters = {
+    searchQuery: '',
+    billTypeFilter: null as string | null,
+    startDateFrom: null as string | null,
+    startDateTo: null as string | null,
+    employeeIdFilter: null as string | null,
+    forecastedProjectFilter: null as string | null,
+    operationTypeFilter: null as string | null,
+    projectNameFilter: '',
+    sortBy: 'changed_at',
+    sortOrder: 'desc',
+  };
+
+  // Filter state
+  const [filters, setFilters] = useState(defaultFilters);
+
+  // Pagination state
+  const [page, setPage] = useState(1);
+  const [perPage, setPerPage] = useState(10);
+
+  // Update filter helper
+  const updateFilter = (key: keyof typeof filters, value: any) => {
+    setFilters((prev) => ({ ...prev, [key]: value }));
+  };
+
+  const handleClearAll = () => setFilters(defaultFilters);
+
+  const hasActiveFilters = Object.entries(filters).some(
+    ([key, value]) =>
+      value !== null &&
+      value !== '' &&
+      // Don't count sortBy/sortOrder as "active"
+      key !== 'sortBy' &&
+      key !== 'sortOrder'
+  );
+
+  // Compose params for the hook
+  const auditLogParams: ResourcePlanningAuditLogsParams = {
+    bill_type_filter: filters.billTypeFilter,
+    date_from: filters.startDateFrom,
+    date_to: filters.startDateTo,
+    employee_id_filter: filters.employeeIdFilter,
+    forecasted_project_filter: filters.forecastedProjectFilter,
+    operation_type_filter: filters.operationTypeFilter,
+    project_name_filter: filters.projectNameFilter || null,
+    search_query: filters.searchQuery || null,
+    sort_by: filters.sortBy,
+    sort_order: filters.sortOrder as 'asc' | 'desc',
+    items_per_page: perPage,
+    page_number: page,
+  };
+
   const [isOpen, setIsOpen] = useState(false);
-  const { auditLogs, isLoading, error } = useResourcePlanningAuditLogs(params, isOpen);
-  const [visibleCount, setVisibleCount] = useState(LOGS_PER_PAGE);
-  const [loadingMore, setLoadingMore] = useState(false);
-  const scrollAreaRef = useRef<HTMLDivElement>(null);
+  const { auditLogs, pagination, isLoading, error } = useResourcePlanningAuditLogs(auditLogParams, isOpen);
 
-  // Reset visible logs when dialog opens or logs change
-  useEffect(() => {
-    setVisibleCount(LOGS_PER_PAGE);
-    setLoadingMore(false);
-  }, [isOpen, auditLogs.length]);
-
-  // Infinite scroll logic
-  useEffect(() => {
-    const scrollArea = scrollAreaRef.current;
-    if (!scrollArea) return;
-    const viewport = scrollArea.querySelector('[data-radix-scroll-area-viewport]');
-    if (!viewport) return;
-
-    let ticking = false;
-    const handleScroll = () => {
-      if (ticking) return;
-      ticking = true;
-      requestAnimationFrame(() => {
-        if (
-          viewport.scrollTop + viewport.clientHeight >= viewport.scrollHeight - 20
-        ) {
-          if (visibleCount < auditLogs.length && !loadingMore) {
-            setLoadingMore(true);
-            setTimeout(() => {
-              setVisibleCount((prev) =>
-                Math.min(prev + LOGS_PER_PAGE, auditLogs.length)
-              );
-              setLoadingMore(false);
-            }, 500); // Simulate loading delay
-          }
-        }
-        ticking = false;
-      });
-    };
-
-    viewport.addEventListener('scroll', handleScroll);
-    return () => {
-      viewport.removeEventListener('scroll', handleScroll);
-    };
-  }, [auditLogs.length, visibleCount, loadingMore]);
 
   const defaultTrigger = (
     <Button variant="outline" size="sm" className='h-9'>
@@ -111,64 +125,98 @@ export const ResourcePlanningAuditLogsDialog: React.FC<ResourcePlanningAuditLogs
           ? `${oldProfile.first_name} ${oldProfile.last_name} (${oldProfile.employee_id})`
           : "Unknown";
 
-    const isDeleted = !newProfile?.first_name && !!oldProfile?.first_name;
+    const operationColor =
+      log.operation_type === 'INSERT'
+        ? 'border-green-500'
+        : log.operation_type === 'UPDATE'
+        ? 'border-blue-500'
+        : 'border-red-500';
+
+    const operationIcon =
+      log.operation_type === 'INSERT'
+        ? <PlusCircle className="h-4 w-4 text-green-600" />
+        : log.operation_type === 'UPDATE'
+        ? <FileEdit className="h-4 w-4 text-blue-600" />
+        : <Trash2 className="h-4 w-4 text-red-600" />;
 
     return (
-      <div key={log.id} className="border rounded-lg p-4 bg-background">
-        <div className="flex items-center justify-between mb-2">
-          <div className="flex flex-col">
-            <span className="text-xs text-muted-foreground">
-              <b>{log.operation_type}</b> by {log.changed_by_user?.first_name} {log.changed_by_user?.last_name} ({log.changed_by_user?.employee_id})
+      <div
+        key={log.id}
+        className={`relative rounded-xl bg-background shadow-sm hover:shadow-md transition-shadow border-2 ${operationColor} p-0`}
+      >
+        {/* Header */}
+        <div className="flex items-center justify-between px-4 pt-4 pb-2">
+          <div className="flex items-center gap-2">
+            {operationIcon}
+            <span className="font-semibold text-sm capitalize">
+              {log.operation_type.toLowerCase()}
             </span>
-            <span className="text-xs text-muted-foreground">
-              {new Date(log.changed_at).toLocaleString()}
+            <span className="text-xs text-muted-foreground ml-2">
+              by {log.changed_by_user?.first_name} {log.changed_by_user?.last_name} ({log.changed_by_user?.employee_id})
             </span>
           </div>
-          <span className="text-xs text-muted-foreground">
-            Resource Planning ID: {log.resource_planning_id}
-          </span>
+          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+            <CalendarDays className="h-4 w-4" />
+            {new Date(log.changed_at).toLocaleString()}
+          </div>
         </div>
         <Separator />
-
-        {/* --- More Details Section --- */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-2 mt-3 text-xs">
-          <div>
-            <b>Employee:</b> {employee}
-            {isDeleted && (
-              <span className="ml-2 px-2 py-0.5 rounded bg-destructive/20 text-destructive text-xs font-semibold">
-                Deleted
-              </span>
-            )}
-          </div>
-          <div>
-            <b>Project:</b> {newProject?.project_name}
-          </div>
-          <div>
-            <b>Bill Type:</b> {newBillType?.name}
-          </div>
-          <div>
-            <b>Engagement %:</b> {log.new_data_enriched?.engagement_percentage}
-          </div>
-          <div>
-            <b>Billing %:</b> {log.new_data_enriched?.billing_percentage}
-          </div>
-          <div>
-            <b>Engagement Start:</b> {log.new_data_enriched?.engagement_start_date}
-          </div>
-          <div>
-            <b>Release Date:</b> {log.new_data_enriched?.release_date}
-          </div>
-          <div>
-            <b>Weekly Validation:</b> {log.new_data_enriched?.weekly_validation ? 'Yes' : 'No'}
-          </div>
-          <div>
-            <b>Forecasted Project:</b> {log.new_data_enriched?.forecasted_project ?? 'N/A'}
-          </div>
+        {/* Details */}
+        <div className="bg-muted/40 rounded-lg px-6 py-4 my-3">
+          <dl className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-1">
+            <div className="flex items-center gap-2">
+              <User className="h-4 w-4 text-muted-foreground" />
+              <dt className="font-semibold">Employee:</dt>
+              <dd className="ml-1">
+                {employee}
+              </dd>
+            </div>
+            <div className="flex items-center gap-2">
+              <Briefcase className="h-4 w-4 text-muted-foreground" />
+              <dt className="font-semibold">Project:</dt>
+              <dd className="ml-1">{newProject?.project_name || <span className="text-muted-foreground">N/A</span>}</dd>
+            </div>
+            <div className="flex items-center gap-2">
+              <BadgeDollarSign className="h-4 w-4 text-muted-foreground" />
+              <dt className="font-semibold">Bill Type:</dt>
+              <dd className="ml-1">{newBillType?.name || <span className="text-muted-foreground">N/A</span>}</dd>
+            </div>
+            <div className="flex items-center gap-2">
+              <Percent className="h-4 w-4 text-muted-foreground" />
+              <dt className="font-semibold">Engagement %:</dt>
+              <dd className="ml-1">{log.new_data_enriched?.engagement_percentage ?? <span className="text-muted-foreground">N/A</span>}</dd>
+            </div>
+            <div className="flex items-center gap-2">
+              <Percent className="h-4 w-4 text-muted-foreground" />
+              <dt className="font-semibold">Billing %:</dt>
+              <dd className="ml-1">{log.new_data_enriched?.billing_percentage ?? <span className="text-muted-foreground">N/A</span>}</dd>
+            </div>
+            <div className="flex items-center gap-2">
+              <CalendarDays className="h-4 w-4 text-muted-foreground" />
+              <dt className="font-semibold">Engagement Start:</dt>
+              <dd className="ml-1">{log.new_data_enriched?.engagement_start_date ?? <span className="text-muted-foreground">N/A</span>}</dd>
+            </div>
+            <div className="flex items-center gap-2">
+              <CalendarDays className="h-4 w-4 text-muted-foreground" />
+              <dt className="font-semibold">Release Date:</dt>
+              <dd className="ml-1">{log.new_data_enriched?.release_date ?? <span className="text-muted-foreground">N/A</span>}</dd>
+            </div>
+            <div className="flex items-center gap-2">
+              <CheckCircle className="h-4 w-4 text-muted-foreground" />
+              <dt className="font-semibold">Weekly Validation:</dt>
+              <dd className="ml-1">{log.new_data_enriched?.weekly_validation ? 'Yes' : 'No'}</dd>
+            </div>
+            <div className="flex items-center gap-2">
+              <HelpCircle className="h-4 w-4 text-muted-foreground" />
+              <dt className="font-semibold">Forecasted Project:</dt>
+              <dd className="ml-1">{log.new_data_enriched?.forecasted_project ?? <span className="text-muted-foreground">N/A</span>}</dd>
+            </div>
+          </dl>
         </div>
-        {/* --- End More Details Section --- */}
-
+        <Separator />
+        {/* Changed Fields */}
         {hasChangedFields ? (
-          <div className="mt-3 space-y-2">
+          <div className="mt-3 space-y-2 px-4 pb-4">
             {log.changed_fields!.map((field) => (
               <FieldChangeDisplay
                 key={field}
@@ -178,10 +226,7 @@ export const ResourcePlanningAuditLogsDialog: React.FC<ResourcePlanningAuditLogs
               />
             ))}
           </div>
-        ) : (
-          <div className="mt-3 text-sm text-muted-foreground">
-            No field-level changes detected.
-          </div>
+        ) : (''
         )}
       </div>
     );
@@ -192,11 +237,118 @@ export const ResourcePlanningAuditLogsDialog: React.FC<ResourcePlanningAuditLogs
       <DialogTrigger asChild>
         {trigger || defaultTrigger}
       </DialogTrigger>
-      <DialogContent className="max-w-4xl max-h-[80vh]">
+      <DialogContent className="max-w-6xl max-h-[90vh]">
         <DialogHeader>
           <DialogTitle>Resource Planning Audit Logs</DialogTitle>
+          <div className='resource-audit-logs-filters grid grid-cols-1 md:grid-cols-3 gap-3 mt-4 w-full'>
+            <div className="space-y-2">
+              <Label htmlFor="search-query">Search</Label>
+              <Input
+                id="search-query"
+                placeholder="Search employees, projects, etc..."
+                value={filters.searchQuery}
+                onChange={(e) => updateFilter('searchQuery', e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="bill-type-filter">Bill Type</Label>
+              <BillTypeCombobox
+                value={filters.billTypeFilter}
+                onValueChange={(value) => updateFilter('billTypeFilter', value)}
+                placeholder="Select bill type..."
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="project-filter">Project</Label>
+                <ProjectSearchCombobox
+                value={filters.projectNameFilter}
+                onValueChange={(value) => updateFilter('projectNameFilter', value)}
+                placeholder="Select project..."
+                />
+            </div> 
+            <div className="space-y-2">
+              <Label htmlFor="forecasted-project-filter">Forecasted Project</Label>
+              <Input
+                id="forecasted-project-filter"
+                placeholder="Forecasted project..."
+                value={filters.forecastedProjectFilter || ''}
+                onChange={(e) => updateFilter('forecastedProjectFilter', e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="operation-type-filter">Operation Type</Label>
+              <Select
+                value={filters.operationTypeFilter || "all"}
+                onValueChange={(value) => updateFilter('operationTypeFilter', value === "all" ? null : value)}
+              >
+                <SelectTrigger id="operation-type-filter">
+                  {filters.operationTypeFilter || 'All'}
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All</SelectItem>
+                  <SelectItem value="INSERT">Insert</SelectItem>
+                  <SelectItem value="UPDATE">Update</SelectItem>
+                  <SelectItem value="DELETE">Delete</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label>Sort By</Label>
+              <Select
+                value={filters.sortBy}
+                onValueChange={(value) => updateFilter('sortBy', value)}
+              >
+                <SelectTrigger id="sort-by">
+                  {filters.sortBy}
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="changed_at">Changed At</SelectItem>
+                  <SelectItem value="created_at">Created At</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Sort Order</Label>
+              <Select
+                value={filters.sortOrder}
+                onValueChange={(value) => updateFilter('sortOrder', value)}
+              >
+                <SelectTrigger id="sort-order">
+                  {filters.sortOrder}
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="desc">Descending</SelectItem>
+                  <SelectItem value="asc">Ascending</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+              <div className="space-y-2">
+              <Label>Start Date Range</Label>
+              <div className="flex gap-2">
+                <DatePicker
+                  value={filters.startDateFrom}
+                  onChange={(val) => updateFilter('startDateFrom', val)}
+                  placeholder="From date"
+                />
+                <DatePicker
+                  value={filters.startDateTo}
+                  onChange={(val) => updateFilter('startDateTo', val)}
+                  placeholder="To date"
+                />
+              </div>
+            </div>
+           {hasActiveFilters && (
+            <div className="flex justify-end pt-7">
+              <Button variant="outline" onClick={handleClearAll}>
+                Clear Filters
+              </Button>
+            </div>
+          )}
+          </div>
+
         </DialogHeader>
-        <ScrollArea className="max-h-[60vh] pr-4" ref={scrollAreaRef}>
+        <ScrollArea className="max-h-[50vh] pr-4">
           {isLoading && (
             <div className="space-y-4">
               {[1, 2, 3].map((i) => (
@@ -230,29 +382,50 @@ export const ResourcePlanningAuditLogsDialog: React.FC<ResourcePlanningAuditLogs
             </div>
           )}
 
-          {!isLoading && !error && auditLogs.length > 0 && (
+          {!error && auditLogs.length > 0 && (
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <p className="text-sm text-muted-foreground">
-                  Showing {auditLogs.length} audit log{auditLogs.length !== 1 ? 's' : ''}
+                  Showing {auditLogs.length} of {pagination?.filtered_count ?? 0} audit log{pagination?.filtered_count !== 1 ? 's' : ''}
                 </p>
+                <div className="flex items-center gap-2">
+                  <label className="text-xs">Rows per page:</label>
+                  <select
+                    className="border rounded px-2 py-1 text-xs"
+                    value={perPage}
+                    onChange={e => { setPerPage(Number(e.target.value)); setPage(1); }}
+                  >
+                    {[5, 10, 20, 50].map(n => (
+                      <option key={n} value={n}>{n}</option>
+                    ))}
+                  </select>
+                </div>
               </div>
               <Separator />
               <div className="space-y-4">
-                {auditLogs.slice(0, visibleCount).map(renderAuditLogItem)}
-                {visibleCount < auditLogs.length && (
-                  <div className="text-center py-4 text-muted-foreground text-xs flex flex-col items-center">
-                    {loadingMore ? (
-                      <div className="flex flex-col gap-2 w-full">
-                        <Skeleton className="h-4 w-1/3 mx-auto" />
-                        <Skeleton className="h-3 w-1/2 mx-auto" />
-                        <Skeleton className="h-6 w-2/3 mx-auto" />
-                      </div>
-                    ) : (
-                      <>Scroll to load more...</>
-                    )}
-                  </div>
-                )}
+                {auditLogs.map(renderAuditLogItem)}
+              </div>
+              {/* Pagination Controls */}
+              <div className="flex justify-between items-center pt-4">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={page <= 1}
+                  onClick={() => setPage(page - 1)}
+                >
+                  Previous
+                </Button>
+                <span className="text-xs">
+                  Page {pagination?.page ?? page} of {pagination?.page_count ?? 1}
+                </span>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={page >= (pagination?.page_count ?? 1)}
+                  onClick={() => setPage(page + 1)}
+                >
+                  Next
+                </Button>
               </div>
             </div>
           )}

@@ -110,6 +110,15 @@ export const ResourcePlanningTableHeader: React.FC<ResourcePlanningTableHeaderPr
           <TableHead>
             <Button
               variant="ghost"
+              className="flex items-center gap-2 p-0 h-auto font-medium justify-start"
+            >
+              Manager
+            </Button>
+          </TableHead>
+          
+          <TableHead>
+            <Button
+              variant="ghost"
               onClick={() => onSort('forecasted_project')}
               className="flex items-center gap-2 p-0 h-auto font-medium justify-start"
             >
