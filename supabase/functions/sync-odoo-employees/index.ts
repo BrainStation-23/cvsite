@@ -129,7 +129,7 @@ Deno.serve(async (req) => {
         managerEmail: employee.parent?.workEmail || null,
         sbuName: employee.sbu?.name || null,
         departmentName: employee.department?.name || null,
-        jobPositionName: employee.jobPosition?.name || null,
+        jobPositionName: employee.jobPosition?.name?.split(",")[0].trim() || null, // Data Sanitization workaround
         jobRoleName: employee.jobRole?.role || null,
         jobTypeName: employee.jobRole?.jobType?.name || null,
         joiningDate: employee.joiningDate || null,
