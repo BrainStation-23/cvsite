@@ -63,10 +63,47 @@ export const OdooSyncResultDialog: React.FC<OdooSyncResultDialogProps> = ({
 }) => {
   if (!syncResult) return null;
 
+  // Debug logging to identify the issue
+  console.log('OdooSyncResultDialog - Full syncResult:', syncResult);
+  console.log('OdooSyncResultDialog - syncResult type:', typeof syncResult);
+  
   const { stats, not_found_employees, error_employees } = syncResult;
+  
+  // Normalize and validate the data arrays
+  const normalizedNotFoundEmployees = Array.isArray(not_found_employees) ? not_found_employees : [];
+  const normalizedErrorEmployees = Array.isArray(error_employees) ? error_employees : [];
+  
+  // Debug logging for each array
+  console.log('OdooSyncResultDialog - not_found_employees:', {
+    type: typeof not_found_employees,
+    isArray: Array.isArray(not_found_employees),
+    length: not_found_employees?.length,
+    data: not_found_employees
+  });
+  
+  console.log('OdooSyncResultDialog - error_employees:', {
+    type: typeof error_employees,
+    isArray: Array.isArray(error_employees),
+    length: error_employees?.length,
+    data: error_employees
+  });
+  
+  console.log('OdooSyncResultDialog - normalized arrays:', {
+    notFoundLength: normalizedNotFoundEmployees.length,
+    errorLength: normalizedErrorEmployees.length
+  });
+  
+  // Check if the conditional rendering should trigger
+  const shouldShowNotFound = normalizedNotFoundEmployees.length > 0;
+  const shouldShowErrors = normalizedErrorEmployees.length > 0;
+  
+  console.log('OdooSyncResultDialog - rendering conditions:', {
+    shouldShowNotFound,
+    shouldShowErrors
+  });
 
   const bulkCreateHook = useOdooSyncBulkCreate({
-    employees: not_found_employees,
+    employees: normalizedNotFoundEmployees,
     onBulkUpload: onBulkUpload || (async () => false),
     onSuccess: onRefreshUsers
   });
@@ -83,10 +120,10 @@ export const OdooSyncResultDialog: React.FC<OdooSyncResultDialogProps> = ({
   } = bulkCreateHook;
 
   const downloadNotFoundEmployeesCSV = () => {
-    if (!not_found_employees || not_found_employees.length === 0) return;
+    if (!normalizedNotFoundEmployees || normalizedNotFoundEmployees.length === 0) return;
 
     // Transform not found employees to bulk create format
-    const csvData = not_found_employees.map(employee => ({
+    const csvData = normalizedNotFoundEmployees.map(employee => ({
       email: employee.email || '',
       firstName: employee.name ? employee.name.split(' ')[0] : '',
       lastName: employee.name ? employee.name.split(' ').slice(1).join(' ') : '',
@@ -117,9 +154,9 @@ export const OdooSyncResultDialog: React.FC<OdooSyncResultDialogProps> = ({
   };
 
   const downloadErrorsCSV = () => {
-    if (!error_employees || error_employees.length === 0) return;
+    if (!normalizedErrorEmployees || normalizedErrorEmployees.length === 0) return;
 
-    const csvData = error_employees.map(employee => ({
+    const csvData = normalizedErrorEmployees.map(employee => ({
       employeeId: employee.employeeId,
       errorMessage: employee.reason,
       timestamp: new Date().toISOString()
@@ -141,9 +178,9 @@ export const OdooSyncResultDialog: React.FC<OdooSyncResultDialogProps> = ({
   };
 
   const copyErrorsToClipboard = () => {
-    if (!error_employees || error_employees.length === 0) return;
+    if (!normalizedErrorEmployees || normalizedErrorEmployees.length === 0) return;
 
-    const errorText = error_employees
+    const errorText = normalizedErrorEmployees
       .map(employee => `${employee.employeeId}: ${employee.reason}`)
       .join('\n');
 
@@ -214,13 +251,13 @@ export const OdooSyncResultDialog: React.FC<OdooSyncResultDialogProps> = ({
     {/* Main content area: prevent parent scrolling; children decide their own scroll */}
     <div className="flex-1 overflow-hidden">
       {/* Not Found Employees */}
-      {not_found_employees.length > 0 && (
+      {shouldShowNotFound && (
         <section className="mb-6">
           {/* Section header + actions (never scrolls) */}
           <div className="flex items-center justify-between mb-3">
             <h4 className="font-semibold flex items-center gap-2">
               <AlertTriangle className="h-4 w-4 text-orange-500" />
-              Employees Not Found in Database ({not_found_employees.length})
+              Employees Not Found in Database ({normalizedNotFoundEmployees.length})
             </h4>
             <div className="flex items-center gap-2">
               <Button
@@ -257,13 +294,13 @@ export const OdooSyncResultDialog: React.FC<OdooSyncResultDialogProps> = ({
                     <Checkbox
                       id="select-all"
                       checked={
-                        not_found_employees.length > 0 &&
-                        selectedEmployees.size === not_found_employees.length
+                        normalizedNotFoundEmployees.length > 0 &&
+                        selectedEmployees.size === normalizedNotFoundEmployees.length
                       }
                       onCheckedChange={(checked) => (checked ? selectAll() : selectNone())}
                     />
                     <label htmlFor="select-all" className="text-sm font-medium cursor-pointer">
-                      Select All ({not_found_employees.length})
+                      Select All ({normalizedNotFoundEmployees.length})
                     </label>
                   </div>
 
@@ -289,7 +326,7 @@ export const OdooSyncResultDialog: React.FC<OdooSyncResultDialogProps> = ({
 
             {/* Scrollable rows only */}
             <div className="max-h-[60vh] overflow-y-auto p-3 space-y-2">
-              {not_found_employees.map((employee, index) => (
+              {normalizedNotFoundEmployees.map((employee, index) => (
                 <div key={index} className="flex items-center gap-3 p-3 bg-orange-50 rounded">
                   {onBulkUpload && (
                     <Checkbox
@@ -317,12 +354,12 @@ export const OdooSyncResultDialog: React.FC<OdooSyncResultDialogProps> = ({
       )}
 
       {/* Error Employees */}
-      {error_employees.length > 0 && (
+      {shouldShowErrors && (
         <section className="mb-6">
           <div className="flex items-center justify-between mb-3">
             <h4 className="font-semibold flex items-center gap-2">
               <XCircle className="h-4 w-4 text-red-500" />
-              Employees with Errors ({error_employees.length})
+              Employees with Errors ({normalizedErrorEmployees.length})
             </h4>
             <div className="flex items-center gap-2">
               <Button
@@ -348,7 +385,7 @@ export const OdooSyncResultDialog: React.FC<OdooSyncResultDialogProps> = ({
 
           <div className="border rounded-md overflow-hidden">
             <div className="max-h-[40vh] overflow-y-auto p-3 space-y-3">
-              {error_employees.map((employee, index) => {
+              {normalizedErrorEmployees.map((employee, index) => {
                 const category = getErrorCategory(employee.reason);
                 const severity = getErrorSeverity(employee.reason);
                 
@@ -394,7 +431,7 @@ export const OdooSyncResultDialog: React.FC<OdooSyncResultDialogProps> = ({
       )}
 
       {/* Success State */}
-      {not_found_employees.length === 0 && error_employees.length === 0 && stats.updated > 0 && (
+      {normalizedNotFoundEmployees.length === 0 && normalizedErrorEmployees.length === 0 && stats.updated > 0 && (
         <div className="text-center py-8">
           <CheckCircle className="h-12 w-12 text-green-500 mx-auto mb-4" />
           <p className="text-lg font-medium text-green-700">All employees synchronized successfully!</p>
