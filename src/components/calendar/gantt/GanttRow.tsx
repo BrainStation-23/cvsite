@@ -65,18 +65,63 @@ export const GanttRow: React.FC<GanttRowProps> = ({
       style={{ height: `${rowHeight}px` }}
     >
       {/* Resource info column */}
-      <div className="w-80 flex-shrink-0 border-r p-4 space-y-1">
-        <div className="font-medium text-sm">
-          {resource.profile.first_name} {resource.profile.last_name}
+      <div className="w-80 flex-shrink-0 border-r p-4">
+        {/* Name and ID row */}
+        <div className="flex items-center gap-2 mb-2">
+          <h4 className="font-semibold text-sm leading-tight">
+            {resource.profile.first_name} {resource.profile.last_name}
+          </h4>
+          <span className="text-xs bg-muted text-muted-foreground px-2 py-0.5 rounded-full">
+            {resource.profile.employee_id}
+          </span>
         </div>
-        <div className="text-xs text-muted-foreground">
-          {resource.profile.current_designation}
-        </div>
-        <div className="text-xs text-muted-foreground">
-          ID: {resource.profile.employee_id}
-        </div>
-        <div className="text-xs text-muted-foreground">
-          {resource.engagements.length} engagement{resource.engagements.length !== 1 ? 's' : ''}
+        
+        {/* Designation row */}
+        {resource.profile.current_designation && (
+          <div className="flex items-center gap-2 mb-3 text-muted-foreground">
+            <svg 
+              xmlns="http://www.w3.org/2000/svg" 
+              width="12" 
+              height="12" 
+              viewBox="0 0 24 24" 
+              fill="none" 
+              stroke="currentColor" 
+              strokeWidth="2" 
+              strokeLinecap="round" 
+              strokeLinejoin="round"
+              className="flex-shrink-0"
+            >
+              <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
+              <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
+            </svg>
+            <span className="text-xs truncate">{resource.profile.current_designation}</span>
+          </div>
+        )}
+        
+        {/* Engagement count */}
+        <div className="flex items-center gap-2">
+          <div className="relative">
+            <svg 
+              xmlns="http://www.w3.org/2000/svg" 
+              width="12" 
+              height="12" 
+              viewBox="0 0 24 24" 
+              fill="none" 
+              stroke="currentColor" 
+              strokeWidth="2" 
+              strokeLinecap="round" 
+              strokeLinejoin="round"
+              className="text-primary"
+            >
+              <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+              <line x1="16" y1="2" x2="16" y2="6"></line>
+              <line x1="8" y1="2" x2="8" y2="6"></line>
+              <line x1="3" y1="10" x2="21" y2="10"></line>
+            </svg>
+          </div>
+          <span className="text-xs font-medium text-foreground">
+            {resource.engagements.length} {resource.engagements.length === 1 ? 'Engagement' : 'Engagements'}
+          </span>
         </div>
       </div>
 
