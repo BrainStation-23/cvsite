@@ -8,6 +8,7 @@ import BillTypeCombobox from './BillTypeCombobox';
 import { ProjectCombobox } from '@/components/projects/ProjectCombobox';
 import DatePicker from '@/components/admin/user/DatePicker';
 import { Check, X } from 'lucide-react';
+import { Badge } from '../ui/badge';
 
 interface WeeklyValidationData {
   id: string;
@@ -39,6 +40,14 @@ interface WeeklyValidationData {
     client_name: string;
     budget: number;
   } | null;
+  manager: {
+    id: string;
+    first_name: string;
+    last_name: string;
+    employee_id: string;
+    full_name: string;
+  } | null;
+  expertise: string;
 }
 
 interface EditFormData {
@@ -110,6 +119,11 @@ export const WeeklyValidationTableEditRow: React.FC<WeeklyValidationTableEditRow
           </span>
           <span className="text-xs text-muted-foreground">
             {item.profile.employee_id}
+            {item.expertise && (
+              <Badge variant="secondary" className="text-[10px] px-2 mx-1 py-0 h-4 bg-blue-100 text-blue-600 hover:text-blue-600 hover:bg-blue-100">
+                  {item.expertise}  
+              </Badge>
+            )} 
           </span>
         </div>
       </TableCell>
@@ -131,6 +145,15 @@ export const WeeklyValidationTableEditRow: React.FC<WeeklyValidationTableEditRow
           />
         </div>
       </TableCell>
+            
+            <TableCell className="py-1 px-2">
+              {item.manager ? (
+                <span className="text-xs">{item.manager.first_name}</span>
+              ) : (
+                <span className="text-muted-foreground text-xs">Not specified</span>
+              )}
+            </TableCell>
+
       <TableCell className="py-1 px-2">
         <div className="w-full max-w-[140px]">
           <Input
