@@ -1637,6 +1637,7 @@ export type Database = {
           engagement_complete: boolean | null
           engagement_percentage: number | null
           engagement_start_date: string | null
+          expertise: string | null
           first_name: string | null
           forecasted_project: string | null
           full_name: string | null
@@ -1960,6 +1961,10 @@ export type Database = {
           sbu_name: string
           total_utilization: number
         }[]
+      }
+      get_profile_relations: {
+        Args: { target_id: string }
+        Returns: Json
       }
       get_recent_cv_changes: {
         Args: { limit_records?: number }
