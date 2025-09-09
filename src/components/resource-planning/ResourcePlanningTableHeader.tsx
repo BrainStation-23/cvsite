@@ -111,8 +111,9 @@ export const ResourcePlanningTableHeader: React.FC<ResourcePlanningTableHeaderPr
             <Button
               variant="ghost"
               className="flex items-center gap-2 p-0 h-auto font-medium justify-start"
+              onClick={() => onSort('manager_first_name')}
             >
-              Manager
+              Manager {getSortIcon('manager_first_name')}
             </Button>
           </TableHead>
           

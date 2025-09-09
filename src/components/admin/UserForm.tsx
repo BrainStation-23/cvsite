@@ -122,14 +122,13 @@ const UserForm: React.FC<UserFormProps> = ({
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="lastName">Last Name *</Label>
+                  <Label htmlFor="lastName">Last Name</Label>
                   <Input
                     id="lastName"
                     type="text"
                     value={formData.lastName}
                     onChange={(e) => handleInputChange('lastName', e.target.value)}
                     placeholder="Enter last name"
-                    required
                   />
                 </div>
 

@@ -25,7 +25,7 @@ export const GanttCell: React.FC<GanttCellProps> = ({
 
   return (
     <div
-      className="absolute rounded-sm border border-white/20 cursor-pointer hover:border-white/40 transition-all duration-200 hover:scale-105 group"
+      className="absolute rounded-sm border border-white/20 cursor-pointer hover:border-white/40 transition-all duration-200 group"
       style={{
         left: `${position.left}%`,
         width: `${position.width}%`,
