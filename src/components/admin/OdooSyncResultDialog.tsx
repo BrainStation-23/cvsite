@@ -318,7 +318,7 @@ export const OdooSyncResultDialog: React.FC<OdooSyncResultDialogProps> = ({
                     )}
 
                     {/* Scrollable rows only */}
-                    <div className="max-h-[60vh] overflow-y-auto p-3 space-y-2">
+                    <div className="max-h-[35vh] overflow-y-auto p-3 space-y-2">
                       {normalizedNotFoundEmployees.map((employee, index) => (
                         <div key={index} className="flex items-center gap-3 p-3 bg-orange-50 rounded">
                           {onBulkUpload && (
@@ -378,7 +378,7 @@ export const OdooSyncResultDialog: React.FC<OdooSyncResultDialogProps> = ({
                   </div>
 
                   <div className="border rounded-md overflow-hidden">
-                    <div className="max-h-[60vh] overflow-y-auto p-3 space-y-3">
+                    <div className="max-h-[35vh] overflow-y-auto p-3 space-y-3">
                       {normalizedErrorEmployees.map((employee, index) => {
                         const category = getErrorCategory(employee.reason);
                         const severity = getErrorSeverity(employee.reason);
