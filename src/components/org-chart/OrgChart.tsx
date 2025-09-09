@@ -7,19 +7,18 @@ import {
   Connection,
   Edge,
   Position,
-} from '@reactflow/core';
-import { Controls } from '@reactflow/controls';
-import { Background, BackgroundVariant } from '@reactflow/background';
-import '@reactflow/core/dist/style.css';
-import '@reactflow/controls/dist/style.css';
-import '@reactflow/background/dist/style.css';
+  Controls,
+  Background,
+  BackgroundVariant,
+} from '@xyflow/react';
+import '@xyflow/react/dist/style.css';
 import OrgChartNode from './OrgChartNode';
 import { useOrgChart } from '@/hooks/use-org-chart';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Loader2, Users, UserCheck, UserPlus } from 'lucide-react';
 
 const nodeTypes = {
-  orgChartNode: OrgChartNode,
+  orgChartNode: OrgChartNode as any,
 };
 
 interface OrgChartProps {

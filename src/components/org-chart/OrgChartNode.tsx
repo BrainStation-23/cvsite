@@ -1,5 +1,5 @@
 import { memo } from 'react';
-import { Handle, Position, NodeProps } from '@reactflow/core';
+import { Handle, Position } from '@xyflow/react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
@@ -14,7 +14,7 @@ interface OrgChartNodeData {
   nodeType: 'current' | 'manager' | 'peer' | 'report';
 }
 
-const OrgChartNode = memo(({ data }: NodeProps<OrgChartNodeData>) => {
+const OrgChartNode = memo(({ data }: { data: OrgChartNodeData }) => {
   const getNodeStyles = () => {
     switch (data.nodeType) {
       case 'current':

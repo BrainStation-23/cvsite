@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
-import { Node, Edge, Position } from '@reactflow/core';
+import { Node, Edge, Position } from '@xyflow/react';
 import dagre from 'dagre';
 
 interface ProfileRelation {
