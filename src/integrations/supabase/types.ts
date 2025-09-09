@@ -66,6 +66,7 @@ export type Database = {
           id: string
           new_bill_type_id: string | null
           old_bill_type_id: string | null
+          profile_id: string | null
           project_id: string | null
         }
         Insert: {
@@ -74,6 +75,7 @@ export type Database = {
           id?: string
           new_bill_type_id?: string | null
           old_bill_type_id?: string | null
+          profile_id?: string | null
           project_id?: string | null
         }
         Update: {
@@ -82,9 +84,25 @@ export type Database = {
           id?: string
           new_bill_type_id?: string | null
           old_bill_type_id?: string | null
+          profile_id?: string | null
           project_id?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "bill_type_change_history_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bill_type_change_history_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "resource_availability_view"
+            referencedColumns: ["profile_id"]
+          },
+        ]
       }
       bill_types: {
         Row: {
