@@ -18,46 +18,42 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
-  const [isPlatformSettingsOpen, setIsPlatformSettingsOpen] = useState(
-    location.pathname.startsWith('/admin/platform-settings')
-  );
-  const [isResourceCalendarOpen, setIsResourceCalendarOpen] = useState(
-    location.pathname.startsWith(`/${user?.role}/resource-calendar`)
-  );
   
   const getPageTitle = () => {
     const path = location.pathname;
     const role = user?.role || '';
     
-    // Remove role prefix and split path
+    // First try to find a matching navigation item
+    for (const group of sidebarGroups) {
+      const matchingItem = group.items.find(item => {
+        // Check if the path matches exactly or is a subpath (for nested routes)
+        return path === item.to || path.startsWith(`${item.to}/`);
+      });
+      
+      if (matchingItem) {
+        return matchingItem.label;
+      }
+    }
+    
+    // Fallback for dashboard
+    if (path.endsWith('/dashboard') || path === `/${role}` || path === `/${role}/`) {
+      return `${role.charAt(0).toUpperCase() + role.slice(1)} Dashboard`;
+    }
+    
+    // Fallback: Convert path segments to title case
     const pathWithoutRole = path.replace(`/${role}`, '');
     const segments = pathWithoutRole.split('/').filter(Boolean);
     
-    if (segments.length === 0 || segments[0] === 'dashboard') {
-      return `${role.charAt(0).toUpperCase() + role.slice(1)} Dashboard`;
-    }
-
-    // Convert path segments to title case
-    const title = segments
+    return segments
       .map(segment => segment.split('-')
         .map(word => word.charAt(0).toUpperCase() + word.slice(1))
         .join(' ')
       )
       .join(' - ');
-
-    return title;
   };
 
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
-  };
-
-  const togglePlatformSettings = () => {
-    setIsPlatformSettingsOpen(!isPlatformSettingsOpen);
-  };
-
-  const toggleResourceCalendar = () => {
-    setIsResourceCalendarOpen(!isResourceCalendarOpen);
   };
 
   const handleSignOut = async () => {
