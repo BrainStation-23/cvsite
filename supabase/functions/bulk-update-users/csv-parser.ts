@@ -50,12 +50,10 @@ export const parseCSVData = async (file: File): Promise<UserUpdateData[]> => {
           .filter((row: any) => row.userId && row.userId.trim() !== '')
           .map((row: any) => ({
             userId: row.userId?.trim(),
-            email: row.email?.trim(),
             firstName: row.firstName?.trim(),
             lastName: row.lastName?.trim() || undefined,
             role: row.role?.trim(),
             employeeId: row.employeeId?.trim(),
-            password: row.password?.trim(),
             managerEmail: row.managerEmail?.trim(),
             sbuName: row.sbuName?.trim(),
             expertiseName: row.expertiseName?.trim(),

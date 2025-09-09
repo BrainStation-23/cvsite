@@ -29,13 +29,7 @@ export function useChunkedBulkUpdate() {
     isComplete: false
   });
 
-  const chunkArray = <T>(array: T[], size: number): T[][] => {
-    const chunks = [];
-    for (let i = 0; i < array.length; i += size) {
-      chunks.push(array.slice(i, i + size));
-    }
-    return chunks;
-  };
+  // Remove chunking logic as we now use RPC function for bulk processing
 
   const parseCSVFile = async (file: File) => {
     try {
@@ -55,18 +49,17 @@ export function useChunkedBulkUpdate() {
     }
   };
 
-  const processUserChunk = async (users: any[]) => {
-    try {
-      const { data, error } = await supabase.functions.invoke('bulk-update-users', {
-        body: { users }
-      });
+  const processBulkUsers = async (users: any[]) => {
+    const { data, error } = await supabase.functions.invoke('bulk-update-users', {
+      body: { users }
+    });
 
-      if (error) throw error;
-      return data;
-    } catch (error) {
-      console.error('Error processing chunk:', error);
+    if (error) {
+      console.error('Error processing bulk update:', error);
       throw error;
     }
+
+    return data;
   };
 
   const bulkUpdateUsers = async (file: File) => {
@@ -74,163 +67,123 @@ export function useChunkedBulkUpdate() {
       setIsProcessing(true);
       setProgress({
         currentChunk: 0,
-        totalChunks: 0,
+        totalChunks: 1,
         processedUsers: 0,
         totalUsers: 0,
         errors: [],
         isComplete: false
       });
 
-      // First, parse the CSV file
-      toast({
-        title: 'Parsing CSV file',
-        description: 'Analyzing the uploaded file...',
-      });
-
+      // Step 1: Parse CSV file
       const parseResult = await parseCSVFile(file);
       
       if (!parseResult.users || parseResult.users.length === 0) {
-        throw new Error('No valid users found in the CSV file');
+        toast({
+          title: "No valid users found",
+          description: "No valid users found in the CSV file",
+          variant: "destructive"
+        });
+        return { success: false, error: "No valid users found" };
       }
 
       const users = parseResult.users;
-      const CHUNK_SIZE = 250; // Process 250 users at a time
-      const chunks = chunkArray(users, CHUNK_SIZE);
+      console.log(`Total users to process: ${users.length}`);
       
       setProgress(prev => ({
         ...prev,
-        totalChunks: chunks.length,
         totalUsers: users.length
       }));
 
       toast({
-        title: 'Starting bulk update',
-        description: `Processing ${users.length} users in ${chunks.length} chunks...`,
+        title: 'Processing users',
+        description: `Processing ${users.length} users in bulk operation...`,
       });
 
-      const allResults: ChunkResult = {
-        successful: [],
-        failed: []
-      };
+      // Step 2: Process all users in a single bulk operation
+      try {
+        console.log(`Processing ${users.length} users in bulk operation`);
+        
+        const bulkResult = await processBulkUsers(users);
+        
+        const successCount = bulkResult.successCount || 0;
+        const errorCount = bulkResult.errorCount || 0;
+        
+        // Update progress
+        setProgress(prev => ({
+          ...prev,
+          currentChunk: 1,
+          processedUsers: users.length,
+          errors: bulkResult.results?.failed || [],
+          isComplete: true
+        }));
 
-      // Process each chunk sequentially
-      for (let i = 0; i < chunks.length; i++) {
-        const chunk = chunks[i];
+        // Show results
+        if (successCount > 0) {
+          toast({
+            title: 'Bulk update completed',
+            description: `${successCount} users updated successfully` + 
+              (errorCount > 0 ? `, ${errorCount} failed` : ''),
+            variant: errorCount > 0 ? 'destructive' : 'default'
+          });
+        } else {
+          toast({
+            title: 'Bulk update failed',
+            description: `${errorCount} users failed to update.`,
+            variant: 'destructive'
+          });
+        }
+
+        return {
+          success: true,
+          results: bulkResult.results || { successful: [], failed: [] },
+          summary: {
+            totalUsers: users.length,
+            successfulUsers: successCount,
+            failedUsers: errorCount,
+            totalChunks: 1
+          }
+        };
+
+      } catch (error: any) {
+        console.error('Error processing bulk update:', error);
+        
+        // Add all users to failed list
+        const allFailed = users.map(user => ({
+          userId: user.userId,
+          error: error.message || 'Bulk processing failed'
+        }));
         
         setProgress(prev => ({
           ...prev,
-          currentChunk: i + 1
+          currentChunk: 1,
+          processedUsers: users.length,
+          errors: allFailed,
+          isComplete: true
         }));
 
         toast({
-          title: `Processing chunk ${i + 1} of ${chunks.length}`,
-          description: `Updating ${chunk.length} users...`,
+          title: 'Bulk update failed',
+          description: error.message,
+          variant: 'destructive'
         });
-
-        try {
-          const chunkResult = await processUserChunk(chunk);
-          
-          if (chunkResult.results) {
-            allResults.successful.push(...chunkResult.results.successful);
-            allResults.failed.push(...chunkResult.results.failed);
-          }
-
-          setProgress(prev => ({
-            ...prev,
-            processedUsers: prev.processedUsers + chunk.length,
-            errors: [...prev.errors, ...allResults.failed]
-          }));
-
-          // Show progress update
-          toast({
-            title: `Chunk ${i + 1} completed`,
-            description: `${allResults.successful.length} successful, ${allResults.failed.length} failed so far.`,
-          });
-
-          // Small delay between chunks to prevent overwhelming the system
-          if (i < chunks.length - 1) {
-            await new Promise(resolve => setTimeout(resolve, 1000));
-          }
-        } catch (chunkError) {
-          console.error(`Error processing chunk ${i + 1}:`, chunkError);
-          
-          // Add all users in this chunk to failed results
-          const chunkErrors = chunk.map((user: any) => ({
-            userId: user.userId,
-            error: `Chunk processing failed: ${chunkError.message}`
-          }));
-          
-          allResults.failed.push(...chunkErrors);
-          
-          setProgress(prev => ({
-            ...prev,
-            processedUsers: prev.processedUsers + chunk.length,
-            errors: [...prev.errors, ...chunkErrors]
-          }));
-
-          toast({
-            title: `Chunk ${i + 1} failed`,
-            description: `Error: ${chunkError.message}`,
-            variant: 'destructive'
-          });
-        }
+        
+        return {
+          success: false,
+          error: error.message,
+          results: { successful: [], failed: allFailed }
+        };
       }
 
-      // Mark as complete
-      setProgress(prev => ({
-        ...prev,
-        isComplete: true
-      }));
-
-      // Show final results
-      const successCount = allResults.successful.length;
-      const failureCount = allResults.failed.length;
-
-      toast({
-        title: 'Bulk update completed',
-        description: `${successCount} users updated successfully, ${failureCount} failed.`,
-        variant: failureCount > 0 ? 'destructive' : 'default'
-      });
-
-      // Show detailed error information if there were failures
-      if (failureCount > 0 && failureCount <= 10) {
-        const errorSample = allResults.failed.slice(0, 5);
-        setTimeout(() => {
-          toast({
-            title: 'Update errors',
-            description: `Failed users: ${errorSample.map(e => e.userId).join(', ')}${failureCount > 5 ? ` and ${failureCount - 5} more` : ''}`,
-            variant: 'destructive'
-          });
-        }, 2000);
-      }
-
-      return {
-        success: true,
-        results: allResults,
-        summary: {
-          totalUsers: users.length,
-          successful: successCount,
-          failed: failureCount
-        }
-      };
-
-    } catch (error) {
-      console.error('Bulk update error:', error);
-      
-      setProgress(prev => ({
-        ...prev,
-        isComplete: true
-      }));
-
+    } catch (error: any) {
+      console.error('Error in bulk update process:', error);
       toast({
         title: 'Bulk update failed',
-        description: error.message || 'An unexpected error occurred',
+        description: error.message,
         variant: 'destructive'
       });
-
-      return {
-        success: false,
-        error: error.message
+      return { 
+        success: false, 
+        error: error.message 
       };
     } finally {
       setIsProcessing(false);
