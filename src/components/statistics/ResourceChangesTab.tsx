@@ -13,7 +13,7 @@ import { Badge } from '@/components/ui/badge';
 import { useResourceChanges } from '@/hooks/use-resource-changes';
 import { BillTypeMultiSelect } from './BillTypeMultiSelect';
 import { SbuMultiSelect } from './SbuMultiSelect';
-import { ProfileMultiSelect } from './ProfileMultiSelect';
+import { ProfileCombobox } from '@/components/admin/user/ProfileCombobox';
 import Papa from 'papaparse';
 
 export const ResourceChangesTab: React.FC = () => {
@@ -183,7 +183,7 @@ export const ResourceChangesTab: React.FC = () => {
           </div>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             {/* Start Date */}
             <div className="space-y-2">
               <Label>Start Date</Label>
@@ -256,12 +256,13 @@ export const ResourceChangesTab: React.FC = () => {
               />
             </div>
 
-            {/* Profiles Filter */}
+            {/* Profile Filter */}
             <div className="space-y-2">
-              <Label>Profiles</Label>
-              <ProfileMultiSelect
-                selectedValues={filters.selectedProfiles}
-                onSelectionChange={(values) => updateFilters({ selectedProfiles: values })}
+              <Label>Profile</Label>
+              <ProfileCombobox
+                value={filters.selectedProfiles[0] || null}
+                onValueChange={(value) => updateFilters({ selectedProfiles: value ? [value] : [] })}
+                placeholder="Select profile..."
               />
             </div>
           </div>
