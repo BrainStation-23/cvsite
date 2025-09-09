@@ -63,7 +63,7 @@ export function useOrgChart() {
       });
 
       if (error) throw error;
-      return data?.[0] as ProfileRelationsResponse;
+      return data as unknown as ProfileRelationsResponse;
     },
     enabled: !!user?.id,
   });
