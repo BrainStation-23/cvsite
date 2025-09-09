@@ -1781,6 +1781,10 @@ export type Database = {
         Args: { projects_data: Json }
         Returns: Json
       }
+      bulk_update_users: {
+        Args: { users_data: Json }
+        Returns: Json
+      }
       calculate_experience_duration: {
         Args: { end_date: string; is_current: boolean; start_date: string }
         Returns: number
