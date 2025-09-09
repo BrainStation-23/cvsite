@@ -45,7 +45,7 @@ import PIPPMReview from '@/pages/pip/PIPPMReview';
 import ManagerPIPList from '@/pages/pip/ManagerPIPList';
 import ManagerPMReview from '@/pages/pip/ManagerPMReview';
 import AdminPIPView from './pages/pip/AdminPIPView';
-import MyTeam from '@/pages/myTeam';
+import MyTeam from '@/pages/MyTeam';
 import './App.css';
 
 // Create QueryClient instance outside component to prevent recreation
