@@ -13,6 +13,7 @@ import { Badge } from '@/components/ui/badge';
 import { useResourceChanges } from '@/hooks/use-resource-changes';
 import { BillTypeMultiSelect } from './BillTypeMultiSelect';
 import { SbuMultiSelect } from './SbuMultiSelect';
+import { ProfileMultiSelect } from './ProfileMultiSelect';
 import Papa from 'papaparse';
 
 export const ResourceChangesTab: React.FC = () => {
@@ -105,6 +106,14 @@ export const ResourceChangesTab: React.FC = () => {
 
     const csvData = billTypeChanges.map(change => ({
       'Date': format(new Date(change.changed_at), 'yyyy-MM-dd HH:mm:ss'),
+      'Employee Name': `${change.first_name} ${change.last_name}`,
+      'Employee ID': change.employee_id,
+      'Email': change.email,
+      'SBU': change.sbu_name,
+      'Expertise': change.expertise_name,
+      'Manager': change.manager_name,
+      'Date of Joining': change.date_of_joining ? format(new Date(change.date_of_joining), 'yyyy-MM-dd') : '',
+      'Career Start Date': change.career_start_date ? format(new Date(change.career_start_date), 'yyyy-MM-dd') : '',
       'Project': change.project_name,
       'Old Bill Type': change.old_bill_type_name,
       'New Bill Type': change.new_bill_type_name,
@@ -174,7 +183,7 @@ export const ResourceChangesTab: React.FC = () => {
           </div>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
             {/* Start Date */}
             <div className="space-y-2">
               <Label>Start Date</Label>
@@ -244,6 +253,15 @@ export const ResourceChangesTab: React.FC = () => {
               <SbuMultiSelect
                 selectedValues={filters.selectedSbus}
                 onSelectionChange={(values) => updateFilters({ selectedSbus: values })}
+              />
+            </div>
+
+            {/* Profiles Filter */}
+            <div className="space-y-2">
+              <Label>Profiles</Label>
+              <ProfileMultiSelect
+                selectedValues={filters.selectedProfiles}
+                onSelectionChange={(values) => updateFilters({ selectedProfiles: values })}
               />
             </div>
           </div>
@@ -323,6 +341,10 @@ export const ResourceChangesTab: React.FC = () => {
                             <TableHeader>
                               <TableRow>
                                 <TableHead>Date</TableHead>
+                                <TableHead>Employee</TableHead>
+                                <TableHead>SBU</TableHead>
+                                <TableHead>Expertise</TableHead>
+                                <TableHead>Manager</TableHead>
                                 <TableHead>Project</TableHead>
                                 <TableHead>Change</TableHead>
                               </TableRow>
@@ -332,6 +354,34 @@ export const ResourceChangesTab: React.FC = () => {
                                 <TableRow key={change.id}>
                                   <TableCell className="text-sm">
                                     {format(new Date(change.changed_at), 'MMM dd, yyyy')}
+                                  </TableCell>
+                                  <TableCell className="text-sm">
+                                    <div className="flex flex-col">
+                                      <span className="font-medium">{`${change.first_name} ${change.last_name}`}</span>
+                                      <span className="text-xs text-muted-foreground">{change.employee_id}</span>
+                                    </div>
+                                  </TableCell>
+                                  <TableCell className="text-sm">
+                                    {change.sbu_name && (
+                                      <Badge variant="outline" className="text-xs">
+                                        {change.sbu_name}
+                                      </Badge>
+                                    )}
+                                  </TableCell>
+                                  <TableCell className="text-sm">
+                                    {change.expertise_name && (
+                                      <Badge variant="secondary" className="text-xs">
+                                        {change.expertise_name}
+                                      </Badge>
+                                    )}
+                                  </TableCell>
+                                  <TableCell className="text-sm">
+                                    {change.manager_name && (
+                                      <div className="flex flex-col">
+                                        <span className="text-xs">{change.manager_name}</span>
+                                        <span className="text-xs text-muted-foreground">{change.manager_employee_id}</span>
+                                      </div>
+                                    )}
                                   </TableCell>
                                   <TableCell className="text-sm">{change.project_name}</TableCell>
                                   <TableCell>
