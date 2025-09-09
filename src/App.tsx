@@ -45,6 +45,7 @@ import PIPPMReview from '@/pages/pip/PIPPMReview';
 import ManagerPIPList from '@/pages/pip/ManagerPIPList';
 import ManagerPMReview from '@/pages/pip/ManagerPMReview';
 import AdminPIPView from './pages/pip/AdminPIPView';
+import MyTeam from '@/pages/myTeam';
 import './App.css';
 
 // Create QueryClient instance outside component to prevent recreation
@@ -80,6 +81,30 @@ function App(): React.ReactElement {
               element={
                 <ProtectedRoute allowedRoles={['admin']}>
                   <ProfilePage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/myteam"
+              element={
+                <ProtectedRoute allowedRoles={['admin']}>
+                  <MyTeam />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/manager/myteam"
+              element={
+                <ProtectedRoute allowedRoles={['manager']}>
+                  <MyTeam />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/employee/myteam"
+              element={
+                <ProtectedRoute allowedRoles={['employee']}>
+                  <MyTeam />
                 </ProtectedRoute>
               }
             />

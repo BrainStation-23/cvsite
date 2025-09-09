@@ -18,7 +18,8 @@ import {
   List,
   TrendingUp,
   UserCheck,
-  Search
+  Search,
+  Network,
 } from 'lucide-react';
 
 export interface NavigationItem {
@@ -45,7 +46,9 @@ export const getSidebarGroups = (
       items: [
         { to: `/${userRole}/dashboard`, icon: Home, label: 'Dashboard' },
         { to: `/${userRole}/profile`, icon: User, label: 'My Profile' },
+        { to: `/${userRole}/myteam`, icon: Network, label: 'My Team' },
         { to: `/${userRole}/security`, icon: Shield, label: 'Security' },
+
       ],
     },
 
