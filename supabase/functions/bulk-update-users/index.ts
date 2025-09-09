@@ -2,8 +2,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.38.4";
 import { parseCSVData } from "./csv-parser.ts";
-import { processBatch } from "./batch-processor.ts";
-import { UserUpdateData, ProcessingResult } from "./types.ts";
+import { UserUpdateData } from "./types.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -34,56 +33,34 @@ const handleCSVParsing = async (file: File) => {
   );
 };
 
-const handleChunkProcessing = async (supabase: any, users: UserUpdateData[]) => {
+const handleBulkProcessing = async (supabase: any, users: UserUpdateData[]) => {
   if (!users || !Array.isArray(users)) {
     throw new Error('Invalid users data provided');
   }
   
-  console.log(`Processing chunk with ${users.length} users`);
+  console.log(`Processing ${users.length} users using RPC function`);
   
-  // Process users in smaller batches
-  const BATCH_SIZE = 10;
-  const batches = [];
-  for (let i = 0; i < users.length; i += BATCH_SIZE) {
-    batches.push(users.slice(i, i + BATCH_SIZE));
-  }
-  
-  const allResults = {
-    successful: [] as any[],
-    failed: [] as any[]
-  };
-  
-  for (let i = 0; i < batches.length; i++) {
-    const batchResults = await processBatch(supabase, batches[i], i + 1);
-    allResults.successful.push(...batchResults.successful);
-    allResults.failed.push(...batchResults.failed);
+  try {
+    // Call the RPC function for bulk processing
+    const { data, error } = await supabase.rpc('bulk_update_users', {
+      users_data: users
+    });
     
-    // Small delay between batches
-    if (i < batches.length - 1) {
-      await new Promise(resolve => setTimeout(resolve, 100));
+    if (error) {
+      console.error('RPC function error:', error);
+      throw error;
     }
+    
+    console.log('Bulk processing completed:', data);
+    
+    return new Response(
+      JSON.stringify(data),
+      { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    );
+  } catch (error: any) {
+    console.error('Error in bulk processing:', error);
+    throw error;
   }
-  
-  console.log('Chunk processing completed:', {
-    successful: allResults.successful.length,
-    failed: allResults.failed.length,
-    totalUsers: users.length
-  });
-  
-  const result: ProcessingResult = {
-    message: `Processed ${users.length} users. ${allResults.successful.length} updated successfully, ${allResults.failed.length} failed.`,
-    results: allResults,
-    chunkInfo: {
-      totalUsers: users.length,
-      totalBatches: batches.length,
-      batchSize: BATCH_SIZE
-    }
-  };
-  
-  return new Response(
-    JSON.stringify(result),
-    { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-  );
 };
 
 serve(async (req) => {
@@ -107,9 +84,9 @@ serve(async (req) => {
     const contentType = req.headers.get('content-type') || '';
     
     if (contentType.includes('application/json')) {
-      // This is a chunk processing request
+      // This is a bulk processing request
       const { users } = await req.json();
-      return await handleChunkProcessing(supabase, users);
+      return await handleBulkProcessing(supabase, users);
     } else {
       // This is a CSV parsing request
       const formData = await req.formData();
