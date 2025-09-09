@@ -39,7 +39,7 @@ export default function OrgChart({ className }: OrgChartProps) {
   React.useEffect(() => {
     setNodes(initialNodes);
     setEdges(initialEdges);
-  }, [initialNodes, initialEdges, setNodes, setEdges]);
+  }, [initialNodes, initialEdges]);
 
   if (isLoading) {
     return (

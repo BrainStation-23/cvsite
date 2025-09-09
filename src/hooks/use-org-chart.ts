@@ -2,6 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { Node, Edge, Position } from '@xyflow/react';
+import { useMemo } from 'react';
 import dagre from 'dagre';
 
 interface ProfileRelation {
@@ -18,13 +19,13 @@ interface ProfileRelationsResponse {
   reports: ProfileRelation[];
 }
 
-const dagreGraph = new dagre.graphlib.Graph();
-dagreGraph.setDefaultEdgeLabel(() => ({}));
-
 const nodeWidth = 280;
 const nodeHeight = 120;
 
 const getLayoutedElements = (nodes: Node[], edges: Edge[]) => {
+  // Create a new dagre graph instance to avoid side effects
+  const dagreGraph = new dagre.graphlib.Graph();
+  dagreGraph.setDefaultEdgeLabel(() => ({}));
   dagreGraph.setGraph({ rankdir: 'TB', ranksep: 100, nodesep: 50 });
 
   nodes.forEach((node) => {
@@ -153,7 +154,10 @@ export function useOrgChart() {
     return getLayoutedElements(nodes, edges);
   };
 
-  const flowData = data && user?.id ? transformToFlowData(data, user.id) : { nodes: [], edges: [] };
+  const flowData = useMemo(() => {
+    if (!data || !user?.id) return { nodes: [], edges: [] };
+    return transformToFlowData(data, user.id);
+  }, [data, user?.id]);
 
   return {
     nodes: flowData.nodes,
