@@ -113,7 +113,7 @@ export function useOrgChart() {
       });
     }
 
-    // Add peer nodes
+    // Add peer nodes and connect them to manager
     relations.peers.forEach((peer, index) => {
       nodes.push({
         id: peer.id,
@@ -125,6 +125,18 @@ export function useOrgChart() {
         },
         position: { x: 0, y: 0 },
       });
+
+      // Connect each peer to manager if manager exists
+      if (relations.manager) {
+        edges.push({
+          id: `${relations.manager.id}-${peer.id}`,
+          source: relations.manager.id,
+          target: peer.id,
+          type: 'smoothstep',
+          animated: false,
+          style: { stroke: 'hsl(var(--primary))' },
+        });
+      }
     });
 
     // Add report nodes
