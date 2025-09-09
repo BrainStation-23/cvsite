@@ -125,6 +125,7 @@ export function useResourceChanges() {
         start_date_param: filters.startDate ? format(filters.startDate, 'yyyy-MM-dd') : null,
         end_date_param: filters.endDate ? format(filters.endDate, 'yyyy-MM-dd') : null,
         sbu_ids: filters.selectedSbus.length > 0 ? filters.selectedSbus : null,
+        profile_ids: filters.selectedProfiles.length > 0 ? filters.selectedProfiles : null,
       });
 
       if (error) throw error;
