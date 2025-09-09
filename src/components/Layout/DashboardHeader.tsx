@@ -28,7 +28,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({ pageTitle, user }) =>
           </div>
           <div className="flex items-center space-x-3">
             <span className="text-sm text-slate-600 dark:text-slate-300">
-              {user?.firstName} {user?.lastName}
+              {user?.firstName}
             </span>
             <div className="w-9 h-9 bg-gradient-to-r from-teal-500 to-cyan-600 rounded-full flex items-center justify-center text-white">
               {user?.firstName.charAt(0)}{user?.lastName.charAt(0)}

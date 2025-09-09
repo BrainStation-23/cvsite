@@ -66,6 +66,7 @@ export type Database = {
           id: string
           new_bill_type_id: string | null
           old_bill_type_id: string | null
+          profile_id: string | null
           project_id: string | null
         }
         Insert: {
@@ -74,6 +75,7 @@ export type Database = {
           id?: string
           new_bill_type_id?: string | null
           old_bill_type_id?: string | null
+          profile_id?: string | null
           project_id?: string | null
         }
         Update: {
@@ -82,9 +84,25 @@ export type Database = {
           id?: string
           new_bill_type_id?: string | null
           old_bill_type_id?: string | null
+          profile_id?: string | null
           project_id?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "bill_type_change_history_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bill_type_change_history_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "resource_availability_view"
+            referencedColumns: ["profile_id"]
+          },
+        ]
       }
       bill_types: {
         Row: {
@@ -1637,6 +1655,7 @@ export type Database = {
           engagement_complete: boolean | null
           engagement_percentage: number | null
           engagement_start_date: string | null
+          expertise: string | null
           first_name: string | null
           forecasted_project: string | null
           full_name: string | null
@@ -1779,22 +1798,44 @@ export type Database = {
         Returns: Json
       }
       get_bill_type_changes: {
-        Args: {
-          bill_type_ids?: string[]
-          end_date_param?: string
-          project_ids?: string[]
-          start_date_param?: string
-        }
+        Args:
+          | {
+              bill_type_ids?: string[]
+              end_date_param?: string
+              profile_ids?: string[]
+              sbu_ids?: string[]
+              start_date_param?: string
+            }
+          | {
+              bill_type_ids?: string[]
+              end_date_param?: string
+              project_ids?: string[]
+              start_date_param?: string
+            }
         Returns: {
+          career_start_date: string
           changed_at: string
           created_at: string
+          date_of_joining: string
+          email: string
+          employee_id: string
+          expertise_id: string
+          expertise_name: string
+          first_name: string
           id: string
+          last_name: string
+          manager_employee_id: string
+          manager_id: string
+          manager_name: string
           new_bill_type_id: string
           new_bill_type_name: string
           old_bill_type_id: string
           old_bill_type_name: string
+          profile_id: string
           project_id: string
           project_name: string
+          sbu_id: string
+          sbu_name: string
         }[]
       }
       get_cv_audit_history: {
@@ -1960,6 +2001,10 @@ export type Database = {
           sbu_name: string
           total_utilization: number
         }[]
+      }
+      get_profile_relations: {
+        Args: { target_id: string }
+        Returns: Json
       }
       get_recent_cv_changes: {
         Args: { limit_records?: number }

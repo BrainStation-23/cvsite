@@ -9,10 +9,12 @@ interface ResourceChangesFilters {
   endDate: Date | null;
   selectedBillTypes: string[];
   selectedSbus: string[];
+  selectedProfiles: string[];
 }
 
 interface BillTypeChange {
   id: string;
+  profile_id: string;
   old_bill_type_id: string;
   old_bill_type_name: string;
   new_bill_type_id: string;
@@ -21,6 +23,23 @@ interface BillTypeChange {
   project_name: string;
   changed_at: string;
   created_at: string;
+  // Profile information
+  employee_id: string;
+  first_name: string;
+  last_name: string;
+  email: string;
+  date_of_joining: string;
+  career_start_date: string;
+  // SBU information
+  sbu_id: string;
+  sbu_name: string;
+  // Expertise information
+  expertise_id: string;
+  expertise_name: string;
+  // Manager information
+  manager_id: string;
+  manager_name: string;
+  manager_employee_id: string;
 }
 
 interface SbuChange {
@@ -50,6 +69,7 @@ export function useResourceChanges() {
     endDate: null,
     selectedBillTypes: [],
     selectedSbus: [],
+    selectedProfiles: [],
   });
 
   const updateFilters = useCallback((updates: Partial<ResourceChangesFilters>) => {
@@ -62,6 +82,7 @@ export function useResourceChanges() {
       endDate: null,
       selectedBillTypes: [],
       selectedSbus: [],
+      selectedProfiles: [],
     });
   }, []);
 
@@ -87,6 +108,8 @@ export function useResourceChanges() {
         start_date_param: filters.startDate ? format(filters.startDate, 'yyyy-MM-dd') : null,
         end_date_param: filters.endDate ? format(filters.endDate, 'yyyy-MM-dd') : null,
         bill_type_ids: filters.selectedBillTypes.length > 0 ? filters.selectedBillTypes : null,
+        sbu_ids: filters.selectedSbus.length > 0 ? filters.selectedSbus : null,
+        profile_ids: filters.selectedProfiles.length > 0 ? filters.selectedProfiles : null,
       });
 
       if (error) throw error;

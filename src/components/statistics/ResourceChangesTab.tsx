@@ -13,6 +13,7 @@ import { Badge } from '@/components/ui/badge';
 import { useResourceChanges } from '@/hooks/use-resource-changes';
 import { BillTypeMultiSelect } from './BillTypeMultiSelect';
 import { SbuMultiSelect } from './SbuMultiSelect';
+import { ProfileCombobox } from '@/components/admin/user/ProfileCombobox';
 import Papa from 'papaparse';
 
 export const ResourceChangesTab: React.FC = () => {
@@ -61,7 +62,7 @@ export const ResourceChangesTab: React.FC = () => {
 
     const grouped = new Map<string, { count: number; changes: typeof sbuChanges }>();
     sbuChanges.forEach(change => {
-      const key = `${change.old_sbu_name} → ${change.new_sbu_name}`;
+      const key = `${change.old_sbu_name ? change.old_sbu_name : 'Not Assigned' } → ${change.new_sbu_name}`;
       if (!grouped.has(key)) {
         grouped.set(key, { count: 0, changes: [] });
       }
@@ -105,6 +106,14 @@ export const ResourceChangesTab: React.FC = () => {
 
     const csvData = billTypeChanges.map(change => ({
       'Date': format(new Date(change.changed_at), 'yyyy-MM-dd HH:mm:ss'),
+      'Employee Name': `${change.first_name} ${change.last_name}`,
+      'Employee ID': change.employee_id,
+      'Email': change.email,
+      'SBU': change.sbu_name,
+      'Expertise': change.expertise_name,
+      'Manager': change.manager_name,
+      'Date of Joining': change.date_of_joining ? format(new Date(change.date_of_joining), 'yyyy-MM-dd') : '',
+      'Career Start Date': change.career_start_date ? format(new Date(change.career_start_date), 'yyyy-MM-dd') : '',
       'Project': change.project_name,
       'Old Bill Type': change.old_bill_type_name,
       'New Bill Type': change.new_bill_type_name,
@@ -246,6 +255,16 @@ export const ResourceChangesTab: React.FC = () => {
                 onSelectionChange={(values) => updateFilters({ selectedSbus: values })}
               />
             </div>
+
+            {/* Profile Filter */}
+            <div className="space-y-2">
+              <Label>Profile</Label>
+              <ProfileCombobox
+                value={filters.selectedProfiles[0] || null}
+                onValueChange={(value) => updateFilters({ selectedProfiles: value ? [value] : [] })}
+                placeholder="Select profile..."
+              />
+            </div>
           </div>
         </CardContent>
       </Card>
@@ -323,6 +342,10 @@ export const ResourceChangesTab: React.FC = () => {
                             <TableHeader>
                               <TableRow>
                                 <TableHead>Date</TableHead>
+                                <TableHead>Employee</TableHead>
+                                <TableHead>SBU</TableHead>
+                                <TableHead>Expertise</TableHead>
+                                <TableHead>Manager</TableHead>
                                 <TableHead>Project</TableHead>
                                 <TableHead>Change</TableHead>
                               </TableRow>
@@ -332,6 +355,34 @@ export const ResourceChangesTab: React.FC = () => {
                                 <TableRow key={change.id}>
                                   <TableCell className="text-sm">
                                     {format(new Date(change.changed_at), 'MMM dd, yyyy')}
+                                  </TableCell>
+                                  <TableCell className="text-sm">
+                                    <div className="flex flex-col">
+                                      <span className="font-medium">{`${change.first_name} ${change.last_name}`}</span>
+                                      <span className="text-xs text-muted-foreground">{change.employee_id}</span>
+                                    </div>
+                                  </TableCell>
+                                  <TableCell className="text-sm">
+                                    {change.sbu_name && (
+                                      <Badge variant="outline" className="text-xs">
+                                        {change.sbu_name}
+                                      </Badge>
+                                    )}
+                                  </TableCell>
+                                  <TableCell className="text-sm">
+                                    {change.expertise_name && (
+                                      <Badge variant="secondary" className="text-xs">
+                                        {change.expertise_name}
+                                      </Badge>
+                                    )}
+                                  </TableCell>
+                                  <TableCell className="text-sm">
+                                    {change.manager_name && (
+                                      <div className="flex flex-col">
+                                        <span className="text-xs">{change.manager_name}</span>
+                                        <span className="text-xs text-muted-foreground">{change.manager_employee_id}</span>
+                                      </div>
+                                    )}
                                   </TableCell>
                                   <TableCell className="text-sm">{change.project_name}</TableCell>
                                   <TableCell>
@@ -449,7 +500,7 @@ export const ResourceChangesTab: React.FC = () => {
                                   </TableCell>
                                   <TableCell>
                                     <div className="flex items-center gap-2 text-sm">
-                                      <Badge variant="outline">{change.old_sbu_name}</Badge>
+                                      <Badge variant="outline">{change.old_sbu_name ? change.old_sbu_name : 'Not Assigned'}</Badge>
                                       <ArrowRight className="h-3 w-3 text-muted-foreground" />
                                       <Badge variant="default">{change.new_sbu_name}</Badge>
                                     </div>
