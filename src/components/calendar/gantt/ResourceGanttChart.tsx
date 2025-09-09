@@ -21,7 +21,7 @@ export const ResourceGanttChart: React.FC<ResourceGanttChartProps> = ({
   onEmptySpaceClick
 }) => {
   // --- Add sort state ---
-  const [sortBy, setSortBy] = useState<'last_name' | 'employee_id'>('last_name');
+  const [sortBy, setSortBy] = useState<'first_name' | 'employee_id'>('first_name');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
 
   const ganttData = useMemo(() => 
@@ -35,9 +35,9 @@ export const ResourceGanttChart: React.FC<ResourceGanttChartProps> = ({
     sorted.sort((a, b) => {
       let aValue: string | number = '';
       let bValue: string | number = '';
-      if (sortBy === 'last_name') {
-        aValue = a.profile.last_name?.toLowerCase() || '';
-        bValue = b.profile.last_name?.toLowerCase() || '';
+      if (sortBy === 'first_name') {
+        aValue = a.profile.first_name?.toLowerCase() || '';
+        bValue = b.profile.first_name?.toLowerCase() || '';
       } else if (sortBy === 'employee_id') {
         aValue = a.profile.employee_id || '';
         bValue = b.profile.employee_id || '';
@@ -71,7 +71,7 @@ export const ResourceGanttChart: React.FC<ResourceGanttChartProps> = ({
   }, [ganttData]);
 
   // --- Sorting handler ---
-  const handleSort = (column: 'last_name' | 'employee_id') => {
+  const handleSort = (column: 'first_name' | 'employee_id') => {
     if (sortBy === column) {
       setSortOrder((prev) => (prev === 'asc' ? 'desc' : 'asc'));
     } else {

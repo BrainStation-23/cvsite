@@ -7,9 +7,9 @@ import { ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
 interface GanttHeaderProps {
   timeline: GanttTimelineMonth[];
   resourceCount: number;
-  sortBy: string;
+  sortBy: 'first_name' | 'employee_id';
   sortOrder: 'asc' | 'desc';
-  onSort: (column: string) => void;
+  onSort: (column: 'first_name' | 'employee_id') => void;
 }
 
 export const GanttHeader: React.FC<GanttHeaderProps> = ({ timeline, resourceCount, sortBy, sortOrder, onSort }) => {
@@ -27,10 +27,10 @@ export const GanttHeader: React.FC<GanttHeaderProps> = ({ timeline, resourceCoun
             <div className="flex flex-col gap-1">
               <Button
                 variant="ghost"
-                onClick={() => onSort('last_name')}
+                onClick={() => onSort('first_name')}
                 className="flex items-center gap-2 p-0 h-auto font-medium justify-start"
               >
-                Employee {getSortIcon('last_name')}
+                Employee {getSortIcon('first_name')}
               </Button>
               <Button
                 variant="ghost"
@@ -63,18 +63,20 @@ export const GanttHeader: React.FC<GanttHeaderProps> = ({ timeline, resourceCoun
         <div className="flex-1 flex">
           {timeline.map((month, monthIndex) => (
             <div key={monthIndex} className="flex-1 flex">
-              {month.weeks.map((week, weekIndex) => (
-                <div
-                  key={`${monthIndex}-${weekIndex}`}
-                  className={`flex-1 border-r last:border-r-0 p-1 text-center ${
-                    week.isCurrentWeek ? 'bg-primary/10' : 'bg-muted/30'
-                  }`}
-                >
-                  <div className="text-xs text-muted-foreground">
-                    {format(week.weekStart, 'dd')}
+              {month.weeks
+                .filter((week) => format(week.weekStart, 'MM') === format(month.month, 'MM'))
+                .map((week, weekIndex) => (
+                  <div
+                    key={`${monthIndex}-${weekIndex}`}
+                    className={`flex-1 border-r last:border-r-0 p-1 text-center ${
+                      week.isCurrentWeek ? 'bg-primary/10' : 'bg-muted/30'
+                    }`}
+                  >
+                    <div className="text-xs text-muted-foreground">
+                      {format(week.weekStart, 'dd')}
+                    </div>
                   </div>
-                </div>
-              ))}
+                ))}
             </div>
           ))}
         </div>
