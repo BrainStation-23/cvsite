@@ -32,6 +32,7 @@ interface WeeklyValidationData {
     first_name: string;
     last_name: string;
     current_designation: string;
+    has_overhead: boolean;
   };
   bill_type: {
     id: string;
@@ -217,6 +218,9 @@ export const WeeklyValidationTableRow: React.FC<WeeklyValidationTableRowProps> =
                     {item.expertise}  
                 </Badge>
               )} 
+              <Badge variant="outline" className="text-[10px] px-2 mx-1 py-0 h-4 bg-red-100 text-white-600">
+                   {item.profile.has_overhead ? 'Overhead' : ''}  
+                </Badge>
             </span>
           </div>
         </TableCell>
