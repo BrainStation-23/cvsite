@@ -62,6 +62,11 @@ serve(async (req) => {
       resourceTypeName: user.resource_type_name || '',
       dateOfJoining: user.date_of_joining || '',
       careerStartDate: user.career_start_date || '',
+      dateOfBirth: user.date_of_birth || '',
+      resignationDate: user.resignation_date || '',
+      exitDate: user.exit_date || '',
+      active: user.active !== undefined ? user.active : true,
+      hasOverhead: user.has_overhead !== undefined ? user.has_overhead : true,
       createdAt: user.created_at || '',
       lastSignIn: user.last_sign_in_at || ''
     }));
@@ -70,7 +75,8 @@ serve(async (req) => {
     const csvHeaders = [
       'userId', 'email', 'firstName', 'lastName', 'role', 'employeeId', 
       'managerName', 'sbuName', 'expertiseName', 'resourceTypeName', 
-      'dateOfJoining', 'careerStartDate', 'createdAt', 'lastSignIn'
+      'dateOfJoining', 'careerStartDate', 'dateOfBirth', 'resignationDate', 
+      'exitDate', 'active', 'hasOverhead', 'createdAt', 'lastSignIn'
     ];
     
     const csvRows = csvData.map(row => [
@@ -86,6 +92,11 @@ serve(async (req) => {
       row.resourceTypeName,
       row.dateOfJoining,
       row.careerStartDate,
+      row.dateOfBirth,
+      row.resignationDate,
+      row.exitDate,
+      row.active,
+      row.hasOverhead,
       row.createdAt,
       row.lastSignIn
     ]);

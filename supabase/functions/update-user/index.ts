@@ -33,6 +33,11 @@ serve(async (req) => {
       dateOfJoining, 
       careerStartDate, 
       managerId,
+      dateOfBirth,
+      resignationDate,
+      exitDate,
+      active,
+      hasOverhead,
       password 
     } = await req.json();
     
@@ -77,7 +82,7 @@ serve(async (req) => {
     }
     
     // Update profile table if profile-related fields are provided
-    if (firstName || lastName || employeeId || sbuId !== undefined || expertiseId !== undefined || resourceTypeId !== undefined || dateOfJoining !== undefined || careerStartDate !== undefined || managerId !== undefined) {
+    if (firstName || lastName || employeeId || sbuId !== undefined || expertiseId !== undefined || resourceTypeId !== undefined || dateOfJoining !== undefined || careerStartDate !== undefined || managerId !== undefined || dateOfBirth !== undefined || resignationDate !== undefined || exitDate !== undefined || active !== undefined || hasOverhead !== undefined) {
       const profileUpdates: Record<string, any> = {};
       if (firstName) profileUpdates.first_name = firstName;
       if (lastName) profileUpdates.last_name = lastName;
@@ -88,6 +93,11 @@ serve(async (req) => {
       if (dateOfJoining !== undefined) profileUpdates.date_of_joining = dateOfJoining;
       if (careerStartDate !== undefined) profileUpdates.career_start_date = careerStartDate;
       if (managerId !== undefined) profileUpdates.manager = managerId;
+      if (dateOfBirth !== undefined) profileUpdates.date_of_birth = dateOfBirth;
+      if (resignationDate !== undefined) profileUpdates.resignation_date = resignationDate;
+      if (exitDate !== undefined) profileUpdates.exit_date = exitDate;
+      if (active !== undefined) profileUpdates.active = active;
+      if (hasOverhead !== undefined) profileUpdates.has_overhead = hasOverhead;
       
       const { error: profileError } = await supabase
         .from('profiles')

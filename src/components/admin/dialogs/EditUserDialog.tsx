@@ -28,6 +28,16 @@ interface EditUserDialogProps {
     role: UserRole;
     employeeId: string;
     sbuId?: string | null;
+    expertiseId?: string | null;
+    resourceTypeId?: string | null;
+    dateOfJoining?: string | null;
+    careerStartDate?: string | null;
+    managerId?: string | null;
+    dateOfBirth?: string | null;
+    resignationDate?: string | null;
+    exitDate?: string | null;
+    active?: boolean;
+    hasOverhead?: boolean;
     password?: string;
   }) => Promise<boolean>;
   isLoading: boolean;
@@ -48,6 +58,16 @@ export const EditUserDialog: React.FC<EditUserDialogProps> = ({
     role: '' as UserRole,
     employeeId: '',
     sbuId: null as string | null,
+    expertiseId: null as string | null,
+    resourceTypeId: null as string | null,
+    dateOfJoining: '',
+    careerStartDate: '',
+    managerId: null as string | null,
+    dateOfBirth: '',
+    resignationDate: '',
+    exitDate: '',
+    active: true,
+    hasOverhead: true,
     password: '',
   });
   
@@ -61,6 +81,16 @@ export const EditUserDialog: React.FC<EditUserDialogProps> = ({
         role: user.role,
         employeeId: user.employeeId || '',
         sbuId: user.sbuId || null,
+        expertiseId: user.expertiseId || null,
+        resourceTypeId: user.resourceTypeId || null,
+        dateOfJoining: user.dateOfJoining || '',
+        careerStartDate: user.careerStartDate || '',
+        managerId: user.managerId || null,
+        dateOfBirth: user.dateOfBirth || '',
+        resignationDate: user.resignationDate || '',
+        exitDate: user.exitDate || '',
+        active: user.active ?? true,
+        hasOverhead: user.hasOverhead ?? true,
         password: '',
       });
     }

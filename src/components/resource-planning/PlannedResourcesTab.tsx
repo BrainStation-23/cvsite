@@ -59,8 +59,9 @@ export const PlannedResourcesTab: React.FC<PlannedResourcesTabProps> = ({
     isBulkDeleting,
     isBulkInvalidating,
     isBulkCopying,
+    perPage,
+    setPerPage, 
   } = resourcePlanningState;
-
   // Bulk selection
   const {
     selectedItems,
@@ -238,6 +239,8 @@ export const PlannedResourcesTab: React.FC<PlannedResourcesTabProps> = ({
               pagination={pagination}
               currentPage={currentPage}
               setCurrentPage={setCurrentPage}
+              perPage={perPage}
+              setPerPage={setPerPage}
             />
           )}
         </>

@@ -11,6 +11,11 @@ export interface UserUpdateData {
   resourceTypeName?: string;
   dateOfJoining?: string;
   careerStartDate?: string;
+  dateOfBirth?: string;
+  resignationDate?: string;
+  exitDate?: string;
+  active?: boolean;
+  hasOverhead?: boolean;
 }
 
 export interface ChunkResult {
