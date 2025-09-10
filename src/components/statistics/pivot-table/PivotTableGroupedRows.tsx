@@ -69,40 +69,44 @@ export const PivotTableGroupedRows: React.FC<PivotTableGroupedRowsProps> = ({
                     <span className="italic">{groupName} Total</span>
                   </div>
                 </TableCell>
-                {visibleCols.map(col => {
-                  // Check if this column is also collapsed
-                  const colGroup = data.col_totals?.find(item => item.dimension === col)?.group_name;
-                  let value = 0;
-                  
-                  if (colGroup && collapsedColGroups.has(colGroup)) {
-                    value = aggregatedCellValues.get(`${groupName}|${colGroup}`) || 0;
-                  } else {
-                    value = rows.reduce((sum, row) => sum + (dataMap.get(`${row}|${col}`) || 0), 0);
-                  }
-                  
-                  return (
-                    <TableCell key={col} className={`text-center border-r ${getIntensityClass(value, maxValue)}`}>
-                      <div className="font-mono text-sm font-bold py-1 italic">
-                        {value || '—'}
-                      </div>
-                    </TableCell>
-                  );
-                })}
-                {/* Render collapsed column totals */}
-                {isGroupingEnabled && groupedCols && 
-                  Object.entries(groupedCols).map(([colGroupName, cols]) => {
-                    if (collapsedColGroups.has(colGroupName)) {
-                      const value = aggregatedCellValues.get(`${groupName}|${colGroupName}`) || 0;
+                {/* Render columns in original group order */}
+                {isGroupingEnabled && groupedCols
+                  ? Object.entries(groupedCols).map(([colGroupName, cols]) => {
+                      if (collapsedColGroups.has(colGroupName)) {
+                        // Render collapsed group cell
+                        const value = aggregatedCellValues.get(`${groupName}|${colGroupName}`) || 0;
+                        return (
+                          <TableCell key={`collapsed-${colGroupName}`} className={`text-center border-r ${getIntensityClass(value, maxValue)}`}>
+                            <div className="font-mono text-sm font-bold py-1 italic">
+                              {value || '—'}
+                            </div>
+                          </TableCell>
+                        );
+                      } else {
+                        // Render each column in the group
+                        return cols.map(col => {
+                          const value = rows.reduce((sum, row) => sum + (dataMap.get(`${row}|${col}`) || 0), 0);
+                          return (
+                            <TableCell key={col} className={`text-center border-r ${getIntensityClass(value, maxValue)}`}>
+                              <div className="font-mono text-sm font-bold py-1 italic">
+                                {value || '—'}
+                              </div>
+                            </TableCell>
+                          );
+                        });
+                      }
+                    })
+                  // If no grouping, just render visibleCols
+                  : visibleCols.map(col => {
+                      const value = rows.reduce((sum, row) => sum + (dataMap.get(`${row}|${col}`) || 0), 0);
                       return (
-                        <TableCell key={`collapsed-${colGroupName}`} className={`text-center border-r ${getIntensityClass(value, maxValue)}`}>
+                        <TableCell key={col} className={`text-center border-r ${getIntensityClass(value, maxValue)}`}>
                           <div className="font-mono text-sm font-bold py-1 italic">
                             {value || '—'}
                           </div>
                         </TableCell>
                       );
-                    }
-                    return null;
-                  })
+                    })
                 }
                 <TableCell className="text-center font-bold bg-primary/5 border-l-2 sticky right-0 z-10 bg-card">
                   <div className="font-mono font-bold text-primary">
@@ -119,31 +123,44 @@ export const PivotTableGroupedRows: React.FC<PivotTableGroupedRowsProps> = ({
                       {row}
                     </div>
                   </TableCell>
-                  {visibleCols.map(col => {
-                    const value = dataMap.get(`${row}|${col}`) || 0;
-                    return (
-                      <TableCell key={col} className={`text-center border-r ${getIntensityClass(value, maxValue)}`}>
-                        <div className="font-mono text-sm font-medium py-1">
-                          {value || '—'}
-                        </div>
-                      </TableCell>
-                    );
-                  })}
-                  {/* Render collapsed column values for expanded rows */}
-                  {isGroupingEnabled && groupedCols && 
-                    Object.entries(groupedCols).map(([colGroupName, cols]) => {
-                      if (collapsedColGroups.has(colGroupName)) {
-                        const value = cols.reduce((sum, col) => sum + (dataMap.get(`${row}|${col}`) || 0), 0);
+                  {/* Render columns in original group order */}
+                  {isGroupingEnabled && groupedCols
+                    ? Object.entries(groupedCols).map(([colGroupName, cols]) => {
+                        if (collapsedColGroups.has(colGroupName)) {
+                          // Render collapsed group cell
+                          const value = cols.reduce((sum, col) => sum + (dataMap.get(`${row}|${col}`) || 0), 0);
+                          return (
+                            <TableCell key={`collapsed-${colGroupName}`} className={`text-center border-r ${getIntensityClass(value, maxValue)}`}>
+                              <div className="font-mono text-sm font-medium py-1">
+                                {value || '—'}
+                              </div>
+                            </TableCell>
+                          );
+                        } else {
+                          // Render each column in the group
+                          return cols.map(col => {
+                            const value = dataMap.get(`${row}|${col}`) || 0;
+                            return (
+                              <TableCell key={col} className={`text-center border-r ${getIntensityClass(value, maxValue)}`}>
+                                <div className="font-mono text-sm font-medium py-1">
+                                  {value || '—'}
+                                </div>
+                              </TableCell>
+                            );
+                          });
+                        }
+                      })
+                    // If no grouping, just render visibleCols
+                    : visibleCols.map(col => {
+                        const value = dataMap.get(`${row}|${col}`) || 0;
                         return (
-                          <TableCell key={`collapsed-${colGroupName}`} className={`text-center border-r ${getIntensityClass(value, maxValue)}`}>
+                          <TableCell key={col} className={`text-center border-r ${getIntensityClass(value, maxValue)}`}>
                             <div className="font-mono text-sm font-medium py-1">
                               {value || '—'}
                             </div>
                           </TableCell>
                         );
-                      }
-                      return null;
-                    })
+                      })
                   }
                   <TableCell className="text-center font-bold bg-primary/5 border-l-2 sticky right-0 z-10 bg-card">
                     <div className="font-mono font-bold text-primary">
