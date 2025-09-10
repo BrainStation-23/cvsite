@@ -1,15 +1,18 @@
-
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Download, Loader2 } from 'lucide-react';
 import { usePlannedResourcesExport } from '@/hooks/use-planned-resources-export';
 
-export const ResourcePlanningExportButton: React.FC = () => {
+interface ResourcePlanningExportButtonProps {
+  selectedItems?: any[];
+}
+
+export const ResourcePlanningExportButton: React.FC<ResourcePlanningExportButtonProps> = ({ selectedItems }) => {
   const { exportPlannedResources, isExporting } = usePlannedResourcesExport();
 
   return (
     <Button
-      onClick={exportPlannedResources}
+      onClick={() => exportPlannedResources(selectedItems)}
       disabled={isExporting}
       variant="outline"
       size="sm"

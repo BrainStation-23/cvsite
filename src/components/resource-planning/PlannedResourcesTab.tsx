@@ -73,7 +73,7 @@ export const PlannedResourcesTab: React.FC<PlannedResourcesTabProps> = ({
     isIndeterminate,
     selectedCount
   } = useBulkSelection(data);
-
+  const selectedRows = data.filter(item => selectedItems.includes(item.id));
   // Confirmation dialog
   const { isOpen, config, showConfirmation, hideConfirmation, handleConfirm } = useConfirmationDialog();
 
@@ -189,6 +189,7 @@ export const PlannedResourcesTab: React.FC<PlannedResourcesTabProps> = ({
           <div className="rounded-md border">
             <BulkActionsToolbar
               selectedCount={selectedCount}
+              selectedItems={selectedRows}
               onBulkComplete={handleBulkComplete}
               onBulkDelete={handleBulkDelete}
               onBulkInvalidate={handleBulkInvalidate}
