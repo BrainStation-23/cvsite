@@ -22,6 +22,11 @@ interface UserData {
   date_of_joining: string | null;
   career_start_date: string | null;
   manager: string | null;
+  date_of_birth: string | null;
+  resignation_date: string | null;
+  exit_date: string | null;
+  active: boolean | null;
+  has_overhead: boolean | null;
 }
 
 const EditUser: React.FC = () => {
@@ -79,7 +84,12 @@ const EditUser: React.FC = () => {
           resource_type: user.resource_type_id || null,
           date_of_joining: user.date_of_joining || null,
           career_start_date: user.career_start_date || null,
-          manager: user.manager_id || null
+          manager: user.manager_id || null,
+          date_of_birth: user.date_of_birth || null,
+          resignation_date: user.resignation_date || null,
+          exit_date: user.exit_date || null,
+          active: user.active ?? true,
+          has_overhead: user.has_overhead ?? true
         };
         
         console.log('Mapped user data with IDs:', mappedUserData);
@@ -124,6 +134,11 @@ const EditUser: React.FC = () => {
           dateOfJoining: formData.dateOfJoining || null,
           careerStartDate: formData.careerStartDate || null,
           managerId: formData.managerId || null,
+          dateOfBirth: formData.dateOfBirth || null,
+          resignationDate: formData.resignationDate || null,
+          exitDate: formData.exitDate || null,
+          active: formData.active,
+          hasOverhead: formData.hasOverhead,
           password: formData.password || undefined
         }
       });
@@ -185,7 +200,12 @@ const EditUser: React.FC = () => {
     resourceTypeId: userData.resource_type,
     dateOfJoining: userData.date_of_joining || '',
     careerStartDate: userData.career_start_date || '',
-    managerId: userData.manager
+    managerId: userData.manager,
+    dateOfBirth: userData.date_of_birth || '',
+    resignationDate: userData.resignation_date || '',
+    exitDate: userData.exit_date || '',
+    active: userData.active ?? true,
+    hasOverhead: userData.has_overhead ?? true
   };
 
   console.log('Initial form data being passed to UserForm:', initialFormData);

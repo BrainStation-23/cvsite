@@ -281,6 +281,8 @@ export const UnplannedResourcesTable: React.FC<UnplannedResourcesTableProps> = (
           pagination={pagination}
           currentPage={currentPage}
           setCurrentPage={setCurrentPage}
+          perPage={10}
+          setPerPage={() => {}}
         />
       )}
     </div>

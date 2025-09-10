@@ -20,6 +20,11 @@ export interface UserData {
   expertiseName?: string | null;
   resourceTypeId?: string | null;
   resourceTypeName?: string | null;
+  dateOfBirth?: string | null;
+  resignationDate?: string | null;
+  exitDate?: string | null;
+  active?: boolean;
+  hasOverhead?: boolean;
 }
 
 export interface PaginationData {

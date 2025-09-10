@@ -16,6 +16,16 @@ export function useUserUpdate(state: ReturnType<typeof import('./use-user-state'
     role: UserRole;
     employeeId: string;
     sbuId?: string | null;
+    expertiseId?: string | null;
+    resourceTypeId?: string | null;
+    dateOfJoining?: string | null;
+    careerStartDate?: string | null;
+    managerId?: string | null;
+    dateOfBirth?: string | null;
+    resignationDate?: string | null;
+    exitDate?: string | null;
+    active?: boolean;
+    hasOverhead?: boolean;
     password?: string;
   }) => {
     try {
@@ -30,6 +40,16 @@ export function useUserUpdate(state: ReturnType<typeof import('./use-user-state'
           role: userData.role,
           employeeId: userData.employeeId,
           sbuId: userData.sbuId,
+          expertiseId: userData.expertiseId,
+          resourceTypeId: userData.resourceTypeId,
+          dateOfJoining: userData.dateOfJoining,
+          careerStartDate: userData.careerStartDate,
+          managerId: userData.managerId,
+          dateOfBirth: userData.dateOfBirth,
+          resignationDate: userData.resignationDate,
+          exitDate: userData.exitDate,
+          active: userData.active,
+          hasOverhead: userData.hasOverhead,
           password: userData.password || undefined
         }
       });
