@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -8,6 +7,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { ProfileCombobox } from '@/components/admin/user/ProfileCombobox';
 import BillTypeCombobox from '@/components/resource-planning/BillTypeCombobox';
 import { format, startOfMonth, endOfMonth } from 'date-fns';
+import ProjectSearchCombobox from '@/components/resource-planning/ProjectSearchCombobox';
+import DatePicker from '@/components/admin/user/DatePicker';
 
 interface EngagementModalProps {
   isOpen: boolean;
@@ -46,6 +47,7 @@ export const EngagementModal: React.FC<EngagementModalProps> = ({
     forecasted_project: '',
     ...initialData,
   });
+  const [isDirty, setIsDirty] = useState(false);
 
   // Generate month options
   const months = [
@@ -68,6 +70,28 @@ export const EngagementModal: React.FC<EngagementModalProps> = ({
   for (let year = currentYear - 2; year <= currentYear + 2; year++) {
     years.push(year);
   }
+
+  // Shallow compare relevant fields for edit-assignment-form
+  useEffect(() => {
+    if (mode === 'edit' && !isForecasted && initialData) {
+      const relevantFields = [
+        'engagement_percentage',
+        'billing_percentage',
+        'bill_type_id',
+        'project_id',
+        'engagement_start_date',
+        'release_date',
+      ];
+      let dirty = false;
+      for (const key of relevantFields) {
+        if ((formData?.[key] ?? '') !== (initialData?.[key] ?? '')) {
+          dirty = true;
+          break;
+        }
+      }
+      setIsDirty(dirty);
+    }
+  }, [formData, initialData, mode, isForecasted]);
 
   useEffect(() => {
     if (isOpen) {
@@ -130,14 +154,99 @@ export const EngagementModal: React.FC<EngagementModalProps> = ({
 
         {mode === 'edit' && !isForecasted ? (
           <div className="p-4 bg-muted rounded-lg">
-            <p className="text-muted-foreground text-center">
-              Only forecasting cells can be edited here. This is a confirmed project assignment.
-            </p>
-            <div className="flex justify-end mt-4">
-              <Button type="button" variant="outline" onClick={handleClose}>
-                Close
-              </Button>
-            </div>
+            <form onSubmit={handleSubmit} className="space-y-4 edit-assignment-form">
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="profile" className="text-sm font-medium">Employee *</Label>
+                  <ProfileCombobox
+                    value={formData.profile_id}
+                    onValueChange={(value) => setFormData({ ...formData, profile_id: value })}
+                    placeholder="Select employee..."
+                    label="Employee"
+                    disabled
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="engagement" className="text-sm font-medium">Engagement % *</Label>
+                  <Input
+                    id="engagement"
+                    type="number"
+                    min="1"
+                    max="100"
+                    value={formData.engagement_percentage}
+                    onChange={(e) => setFormData({ ...formData, engagement_percentage: Number(e.target.value) })}
+                    placeholder="100"
+                    required
+                    className="h-9"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="billing" className="text-sm font-medium">Billing %</Label>
+                  <Input
+                    id="billing"
+                    type="number"
+                    min="0"
+                    max="100"
+                    value={formData.billing_percentage}
+                    onChange={(e) => setFormData({ ...formData, billing_percentage: Number(e.target.value) })}
+                    placeholder="0"
+                    className="h-9"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="billType" className="text-sm font-medium">Bill Type</Label>
+                  <BillTypeCombobox
+                    value={formData.bill_type_id}
+                    onValueChange={(value) => setFormData({ ...formData, bill_type_id: value })}
+                    placeholder="Select bill type..."
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="project" className="text-sm font-medium">Project</Label>
+                  <ProjectSearchCombobox
+                    value={formData.project_id}
+                    onValueChange={(value) => setFormData({ ...formData, project_id: value })}
+                    placeholder="Select project..."
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="startDate" className="text-sm font-medium">Start Date</Label>
+                  <DatePicker
+                    value={formData.engagement_start_date}
+                    onChange={(date) => setFormData({ ...formData, engagement_start_date: date })}
+                    placeholder="Select start date"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="releaseDate" className="text-sm font-medium">Release Date</Label>
+                  <DatePicker
+                    value={formData.release_date}
+                    onChange={(date) => setFormData({ ...formData, release_date: date })}
+                    placeholder="Select release date"
+                  />
+                </div>
+              </div>
+
+              <div className="flex justify-between space-x-2 pt-4">
+                <div className="flex space-x-2">
+                  <Button type="button" variant="outline" onClick={handleClose}>
+                    Cancel
+                  </Button>
+                  <Button 
+                    type="submit" 
+                    disabled={!isDirty}
+                  >
+                    Update Assignment
+                  </Button>
+                </div>
+              </div>
+            </form>
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="space-y-4">
@@ -251,7 +360,7 @@ export const EngagementModal: React.FC<EngagementModalProps> = ({
               </Button>
             </div>
           </div>
-        </form>
+          </form>
         )}
       </DialogContent>
     </Dialog>
