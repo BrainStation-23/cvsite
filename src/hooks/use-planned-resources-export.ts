@@ -8,10 +8,53 @@ export function usePlannedResourcesExport() {
   const [isExporting, setIsExporting] = useState(false);
   const { toast } = useToast();
 
-  const exportPlannedResources = async () => {
+  // Accept selectedItems as an optional parameter
+  const exportPlannedResources = async (selectedItems?: any[]) => {
     try {
       setIsExporting(true);
-      
+
+      // If selectedItems are provided, export only those
+      if (selectedItems && selectedItems.length > 0) {
+        console.log('Selected items for export:', selectedItems);
+        const csvData = selectedItems.map(resource => ({
+          'Employee ID': resource.profile?.employee_id || '',
+          'Employee Name': `${resource.profile?.first_name || ''} ${resource.profile?.last_name || ''}`.trim() || '',
+          'SBU': resource.sbu?.name || '',
+          'Project Name': resource.project?.project_name || '',
+          'Client Name': resource.project?.client_name || '',
+          'Project Manager': resource.project?.project_manager || '',
+          'Bill Type': resource.bill_type?.name || resource.bill_type_id || '',
+          'Engagement %': resource.engagement_percentage || '',
+          'Billing %': resource.billing_percentage || '',
+          'Start Date': resource.engagement_start_date || '',
+          'Release Date': resource.release_date || '',
+          'Weekly Validation': resource.weekly_validation ? 'Yes' : 'No',
+          'Created At': resource.created_at ? new Date(resource.created_at).toLocaleDateString() : ''
+        }));
+
+        const csv = Papa.unparse(csvData);
+
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+
+        if (link.download !== undefined) {
+          const url = URL.createObjectURL(blob);
+          link.setAttribute('href', url);
+          link.setAttribute('download', `planned_resources_selected_${new Date().toISOString().split('T')[0]}.csv`);
+          link.style.visibility = 'hidden';
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+
+          toast({
+            title: "Export Successful",
+            description: `Successfully exported ${selectedItems.length} selected planned resources to CSV.`,
+            variant: "default"
+          });
+        }
+        return;
+      }
+
       console.log('Starting planned resources export using pagination...');
       
       let allResources: any[] = [];
