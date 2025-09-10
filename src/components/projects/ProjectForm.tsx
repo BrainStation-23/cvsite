@@ -28,6 +28,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import ProjectBillTypeCombobox from '@/components/resource-planning/ProjectBillTypeCombobox';
+import { ProjectTypeCombobox } from '@/components/projects/ProjectTypeCombobox';
 
 const projectSchema = z.object({
   project_name: z.string().min(1, 'Project name is required'),
@@ -111,6 +113,8 @@ export const ProjectForm: React.FC<ProjectFormProps> = ({
         budget: undefined,
         description: '',
         project_level: '',
+        project_bill_type: '',
+        project_type: '',
         is_active: true,
         forecasted: false,
       });
@@ -202,6 +206,42 @@ export const ProjectForm: React.FC<ProjectFormProps> = ({
                         ))}
                       </SelectContent>
                     </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="project_bill_type"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Project Bill Type</FormLabel>
+                    <FormControl>
+                      <ProjectBillTypeCombobox
+                        value={field.value}
+                        onValueChange={field.onChange}
+                        placeholder="Select project bill type"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="project_type"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Project Type</FormLabel>
+                    <FormControl>
+                      <ProjectTypeCombobox
+                        value={field.value}
+                        onValueChange={field.onChange}
+                        placeholder="Select project type"
+                      />
+                    </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}

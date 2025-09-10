@@ -17,6 +17,7 @@ interface Project {
   project_manager: string | null;
   budget: number | null;
   is_active: boolean;
+  forecasted: boolean;
   created_at: string;
   updated_at: string;
   description?: string | null;
