@@ -15,6 +15,11 @@ export interface UserCSVRow {
   resourceTypeName?: string;
   dateOfJoining?: string;
   careerStartDate?: string;
+  dateOfBirth?: string;
+  resignationDate?: string;
+  exitDate?: string;
+  active?: boolean;
+  hasOverhead?: boolean;
 }
 
 export interface CSVValidationResult {
@@ -136,7 +141,12 @@ export const downloadCSVTemplate = () => {
       expertiseName: 'Software Development',
       resourceTypeName: 'Senior Developer',
       dateOfJoining: '2024-01-15',
-      careerStartDate: '2020-06-01'
+      careerStartDate: '2020-06-01',
+      dateOfBirth: '1990-05-20',
+      resignationDate: '',
+      exitDate: '',
+      active: true,
+      hasOverhead: true
     },
     {
       email: 'jane.smith@company.com',
@@ -150,7 +160,12 @@ export const downloadCSVTemplate = () => {
       expertiseName: 'Digital Marketing',
       resourceTypeName: 'Marketing Manager',
       dateOfJoining: '2023-03-10',
-      careerStartDate: '2018-09-15'
+      careerStartDate: '2018-09-15',
+      dateOfBirth: '1985-12-03',
+      resignationDate: '',
+      exitDate: '',
+      active: true,
+      hasOverhead: true
     },
     {
       email: 'admin@company.com',
@@ -164,7 +179,12 @@ export const downloadCSVTemplate = () => {
       expertiseName: 'System Administration',
       resourceTypeName: 'System Administrator',
       dateOfJoining: '2022-11-01',
-      careerStartDate: '2019-04-20'
+      careerStartDate: '2019-04-20',
+      dateOfBirth: '1980-08-15',
+      resignationDate: '',
+      exitDate: '',
+      active: true,
+      hasOverhead: true
     }
   ];
 
@@ -198,7 +218,12 @@ export const downloadUpdateCSVTemplate = () => {
       expertiseName: 'Full Stack Development',
       resourceTypeName: 'Tech Lead',
       dateOfJoining: '2024-01-15',
-      careerStartDate: '2020-06-01'
+      careerStartDate: '2020-06-01',
+      dateOfBirth: '1990-05-20',
+      resignationDate: '',
+      exitDate: '',
+      active: true,
+      hasOverhead: true
     },
     {
       userId: 'user-id-2',
@@ -213,7 +238,12 @@ export const downloadUpdateCSVTemplate = () => {
       expertiseName: 'Growth Marketing',
       resourceTypeName: 'Marketing Director',
       dateOfJoining: '2023-03-10',
-      careerStartDate: '2018-09-15'
+      careerStartDate: '2018-09-15',
+      dateOfBirth: '1985-12-03',
+      resignationDate: '2025-03-01',
+      exitDate: '2025-03-15',
+      active: false,
+      hasOverhead: false
     }
   ];
 
@@ -377,6 +407,33 @@ export const validateCSVData = (data: any[], existingUsers: any[] = [], mode: 'c
       }
     }
 
+    // Validate and normalize date of birth if provided
+    let normalizedDateOfBirth = null;
+    if (row.dateOfBirth && row.dateOfBirth.trim()) {
+      normalizedDateOfBirth = normalizeDate(row.dateOfBirth.trim());
+      if (normalizedDateOfBirth === null) {
+        console.warn(`Invalid date format for dateOfBirth at row ${rowNumber}: ${row.dateOfBirth}. Will be set to null.`);
+      }
+    }
+
+    // Validate and normalize resignation date if provided
+    let normalizedResignationDate = null;
+    if (row.resignationDate && row.resignationDate.trim()) {
+      normalizedResignationDate = normalizeDate(row.resignationDate.trim());
+      if (normalizedResignationDate === null) {
+        console.warn(`Invalid date format for resignationDate at row ${rowNumber}: ${row.resignationDate}. Will be set to null.`);
+      }
+    }
+
+    // Validate and normalize exit date if provided
+    let normalizedExitDate = null;
+    if (row.exitDate && row.exitDate.trim()) {
+      normalizedExitDate = normalizeDate(row.exitDate.trim());
+      if (normalizedExitDate === null) {
+        console.warn(`Invalid date format for exitDate at row ${rowNumber}: ${row.exitDate}. Will be set to null.`);
+      }
+    }
+
     // If no errors, add to valid array with defaults
     if (!hasErrors && formattedRole) {
       const validRow: UserCSVRow = {
@@ -390,7 +447,12 @@ export const validateCSVData = (data: any[], existingUsers: any[] = [], mode: 'c
         expertiseName: row.expertiseName ? row.expertiseName.trim() : '',
         resourceTypeName: row.resourceTypeName ? row.resourceTypeName.trim() : '',
         dateOfJoining: normalizedDateOfJoining || '',
-        careerStartDate: normalizedCareerStartDate || ''
+        careerStartDate: normalizedCareerStartDate || '',
+        dateOfBirth: normalizedDateOfBirth || '',
+        resignationDate: normalizedResignationDate || '',
+        exitDate: normalizedExitDate || '',
+        active: row.active !== undefined ? (row.active === 'true' || row.active === true) : true,
+        hasOverhead: row.hasOverhead !== undefined ? (row.hasOverhead === 'true' || row.hasOverhead === true) : true
       };
 
       // Add userId for update mode
