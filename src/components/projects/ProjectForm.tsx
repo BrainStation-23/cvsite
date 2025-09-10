@@ -30,6 +30,7 @@ import {
 } from '@/components/ui/select';
 import ProjectBillTypeCombobox from '@/components/resource-planning/ProjectBillTypeCombobox';
 import { ProjectTypeCombobox } from '@/components/projects/ProjectTypeCombobox';
+import { Project } from '@/types/projects';
 
 const projectSchema = z.object({
   project_name: z.string().min(1, 'Project name is required'),
@@ -45,20 +46,6 @@ const projectSchema = z.object({
 });
 
 type ProjectFormData = z.infer<typeof projectSchema>;
-
-interface Project {
-  id: string;
-  project_name: string;
-  client_name: string | null;
-  project_manager: string | null;
-  budget: number | null;
-  description?: string | null;
-  project_level?: string | null;
-  project_bill_type?: string | null;
-  project_type?: string | null;
-  is_active: boolean;
-  forecasted: boolean;
-}
 
 interface ProjectFormProps {
   isOpen: boolean;
@@ -101,7 +88,7 @@ export const ProjectForm: React.FC<ProjectFormProps> = ({
         description: initialData.description || '',
         project_level: initialData.project_level || '',
         project_bill_type: initialData.project_bill_type || '',
-        project_type: initialData.project_type || '',
+        project_type: initialData.project_type_data?.id || '',
         is_active: initialData.is_active,
         forecasted: initialData.forecasted,
       });

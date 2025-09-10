@@ -6,11 +6,14 @@ export interface Project {
   project_manager: string | null;
   budget: number | null;
   is_active: boolean;
+  forecasted: boolean;
   created_at: string;
   updated_at: string;
   // Enhanced fields from RPC function
   description?: string | null;
   project_level?: string | null;
+  project_bill_type?: string | null;
+  project_type?: string | null; // For form compatibility
   project_manager_profile?: {
     first_name: string | null;
     last_name: string | null;
@@ -18,6 +21,7 @@ export interface Project {
   } | null;
   project_type_data?: {
     name: string;
+    id: string;
   } | null;
   relevance_score?: number;
 }
@@ -39,8 +43,11 @@ export interface ProjectFormData {
   project_manager: string | null;
   budget: number | null;
   is_active: boolean;
+  forecasted: boolean;
   description?: string | null;
   project_level?: string | null;
+  project_bill_type?: string | null;
+  project_type?: string | null;
 }
 
 // Enhanced filter interface for the new RPC function

@@ -106,8 +106,11 @@ export function useEnhancedProjectsManagement(): UseEnhancedProjectsManagementRe
         project_manager: project.project_manager,
         budget: project.budget,
         is_active: project.is_active,
+        forecasted: project.forecasted,
         description: project.description,
-        project_level: project.project_level
+        project_level: project.project_level,
+        project_bill_type: project.project_bill_type,
+        project_type: project.project_type
       };
 
       await EnhancedProjectsApiService.createProject(projectData);
