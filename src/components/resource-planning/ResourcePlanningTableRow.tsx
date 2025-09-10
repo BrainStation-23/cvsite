@@ -215,11 +215,9 @@ export const ResourcePlanningTableRow: React.FC<ResourcePlanningTableRowProps> =
               <span className="font-medium text-xs">
                 {item.profile.first_name} {item.profile.last_name}
               </span>
-              {item.weekly_validation && (
-                <Badge variant="secondary" className="text-[10px] px-1.5 py-0 h-4 bg-green-100 text-green-700">
-                  Validated
+              <Badge variant="outline" className="text-[10px] px-2 mx-1 py-0 h-4 bg-red-100 text-white-600">
+                   {item.profile.has_overhead ? 'Overhead' : ''}  
                 </Badge>
-              )}
             </div>
             <span className="text-xs text-muted-foreground">
               {item.profile.employee_id} 
@@ -228,9 +226,7 @@ export const ResourcePlanningTableRow: React.FC<ResourcePlanningTableRowProps> =
                    {item.expertise}  
                 </Badge>
               )} 
-              <Badge variant="outline" className="text-[10px] px-2 mx-1 py-0 h-4 bg-red-100 text-white-600">
-                   {item.profile.has_overhead ? 'Overhead' : ''}  
-                </Badge>
+            
             </span>
           </div>
         </TableCell>

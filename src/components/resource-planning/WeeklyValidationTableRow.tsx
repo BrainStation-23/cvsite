@@ -210,6 +210,9 @@ export const WeeklyValidationTableRow: React.FC<WeeklyValidationTableRowProps> =
           <div className="flex flex-col">
             <span className="font-medium text-xs">
               {item.profile.first_name} {item.profile.last_name}
+              <Badge variant="outline" className="text-[10px] px-2 mx-1 py-0 h-4 bg-red-100 text-white-600">
+                   {item.profile.has_overhead ? 'Overhead' : ''}  
+                </Badge>
             </span>
             <span className="text-xs text-muted-foreground">
               {item.profile.employee_id}
@@ -218,9 +221,7 @@ export const WeeklyValidationTableRow: React.FC<WeeklyValidationTableRowProps> =
                     {item.expertise}  
                 </Badge>
               )} 
-              <Badge variant="outline" className="text-[10px] px-2 mx-1 py-0 h-4 bg-red-100 text-white-600">
-                   {item.profile.has_overhead ? 'Overhead' : ''}  
-                </Badge>
+
             </span>
           </div>
         </TableCell>
