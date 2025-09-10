@@ -36,7 +36,10 @@ const projectSchema = z.object({
   budget: z.coerce.number().optional(),
   description: z.string().optional(),
   project_level: z.string().optional(),
+  project_bill_type: z.string().optional(),
+  project_type: z.string().optional(),
   is_active: z.boolean().default(true),
+  forecasted: z.boolean().default(false),
 });
 
 type ProjectFormData = z.infer<typeof projectSchema>;
@@ -49,7 +52,10 @@ interface Project {
   budget: number | null;
   description?: string | null;
   project_level?: string | null;
+  project_bill_type?: string | null;
+  project_type?: string | null;
   is_active: boolean;
+  forecasted: boolean;
 }
 
 interface ProjectFormProps {
@@ -76,7 +82,10 @@ export const ProjectForm: React.FC<ProjectFormProps> = ({
       budget: undefined,
       description: '',
       project_level: '',
+      project_bill_type: '',
+      project_type: '',
       is_active: true,
+      forecasted: false,
     },
   });
 
@@ -89,7 +98,10 @@ export const ProjectForm: React.FC<ProjectFormProps> = ({
         budget: initialData.budget || undefined,
         description: initialData.description || '',
         project_level: initialData.project_level || '',
+        project_bill_type: initialData.project_bill_type || '',
+        project_type: initialData.project_type || '',
         is_active: initialData.is_active,
+        forecasted: initialData.forecasted,
       });
     } else {
       form.reset({
@@ -100,6 +112,7 @@ export const ProjectForm: React.FC<ProjectFormProps> = ({
         description: '',
         project_level: '',
         is_active: true,
+        forecasted: false,
       });
     }
   }, [initialData, form]);
@@ -112,7 +125,10 @@ export const ProjectForm: React.FC<ProjectFormProps> = ({
       budget: data.budget || null,
       description: data.description || null,
       project_level: data.project_level || null,
+      project_bill_type: data.project_bill_type || null,
+      project_type: data.project_type || null,
       is_active: data.is_active,
+      forecasted: data.forecasted,
     });
 
     if (success) {
@@ -238,6 +254,27 @@ export const ProjectForm: React.FC<ProjectFormProps> = ({
                     <FormLabel className="text-base">Active Project</FormLabel>
                     <div className="text-sm text-muted-foreground">
                       Enable this project for resource planning and assignments
+                    </div>
+                  </div>
+                  <FormControl>
+                    <Switch
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                    />
+                  </FormControl>
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="forecasted"
+              render={({ field }) => (
+                <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                  <div className="space-y-0.5">
+                    <FormLabel className="text-base">Forecasted Project</FormLabel>
+                    <div className="text-sm text-muted-foreground">
+                      Enable this project for forecasted resource planning and assignments
                     </div>
                   </div>
                   <FormControl>
