@@ -1,4 +1,3 @@
-
 import { useState, useCallback, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -48,7 +47,7 @@ export function usePlannedResourcesTab(isActive: boolean = true) {
   const [currentPage, setCurrentPage] = useState(1);
   const [sortBy, setSortBy] = useState('created_at');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
-  const itemsPerPage = 10;
+  const [perPage, setPerPage] = useState(10);
 
   // Stable filter clear functions
   const clearBasicFilters = useCallback(() => {
@@ -75,7 +74,7 @@ export function usePlannedResourcesTab(isActive: boolean = true) {
   const rpcParams = useMemo(() => ({
     search_query: searchQuery || null,
     page_number: currentPage,
-    items_per_page: itemsPerPage,
+    items_per_page: perPage, // <-- Use perPage here
     sort_by: sortBy,
     sort_order: sortOrder,
     sbu_filter: selectedSbu,
@@ -95,6 +94,7 @@ export function usePlannedResourcesTab(isActive: boolean = true) {
   }), [
     searchQuery,
     currentPage,
+    perPage, // <-- Add perPage as a dependency
     sortBy,
     sortOrder,
     selectedSbu,
@@ -122,7 +122,7 @@ export function usePlannedResourcesTab(isActive: boolean = true) {
             total_count: 0,
             filtered_count: 0,
             page: currentPage,
-            per_page: itemsPerPage,
+            per_page: perPage,
             page_count: 0
           }
         };
@@ -134,7 +134,7 @@ export function usePlannedResourcesTab(isActive: boolean = true) {
           total_count: 0,
           filtered_count: 0,
           page: currentPage,
-          per_page: itemsPerPage,
+          per_page: perPage,
           page_count: 0
         }
       };
@@ -307,7 +307,8 @@ export function usePlannedResourcesTab(isActive: boolean = true) {
     setSortBy,
     sortOrder,
     setSortOrder,
-    
+    perPage,        // <-- Add this
+    setPerPage,     // <-- Add this
     // Bulk operations
     bulkComplete: bulkCompletionMutation.mutate,
     bulkDelete: bulkDeletionMutation.mutate,
