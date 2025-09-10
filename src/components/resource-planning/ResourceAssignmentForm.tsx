@@ -109,7 +109,7 @@ export const ResourceAssignmentForm: React.FC<ResourceAssignmentFormProps> = ({
           />
         </div>
 
-        <div className="space-y-2">
+        {/* <div className="space-y-2">
           <Label htmlFor="forecastedProject" className="text-sm font-medium">Forecasted Project</Label>
           <Input
             id="forecastedProject"
@@ -119,7 +119,7 @@ export const ResourceAssignmentForm: React.FC<ResourceAssignmentFormProps> = ({
             placeholder="Enter forecasted project..."
             className="h-9"
           />
-        </div>
+        </div> */}
 
         <div className="space-y-2">
           <Label htmlFor="startDate" className="text-sm font-medium">Start Date</Label>
