@@ -35,7 +35,15 @@ export const parseCSVData = async (file: File): Promise<UserUpdateData[]> => {
           'dateofjoining': 'dateOfJoining',
           'date_of_joining': 'dateOfJoining',
           'careerstartdate': 'careerStartDate',
-          'career_start_date': 'careerStartDate'
+          'career_start_date': 'careerStartDate',
+          'dateofbirth': 'dateOfBirth',
+          'date_of_birth': 'dateOfBirth',
+          'resignationdate': 'resignationDate',
+          'resignation_date': 'resignationDate',
+          'exitdate': 'exitDate',
+          'exit_date': 'exitDate',
+          'hasoverhead': 'hasOverhead',
+          'has_overhead': 'hasOverhead'
         };
         return headerMap[normalized] || header;
       },
@@ -48,19 +56,35 @@ export const parseCSVData = async (file: File): Promise<UserUpdateData[]> => {
         
         const users = results.data
           .filter((row: any) => row.userId && row.userId.trim() !== '')
-          .map((row: any) => ({
-            userId: row.userId?.trim(),
-            firstName: row.firstName?.trim(),
-            lastName: row.lastName?.trim() || undefined,
-            role: row.role?.trim(),
-            employeeId: row.employeeId?.trim(),
-            managerEmail: row.managerEmail?.trim(),
-            sbuName: row.sbuName?.trim(),
-            expertiseName: row.expertiseName?.trim(),
-            resourceTypeName: row.resourceTypeName?.trim(),
-            dateOfJoining: row.dateOfJoining?.trim(),
-            careerStartDate: row.careerStartDate?.trim()
-          }));
+          .map((row: any) => {
+            // Helper function to parse boolean values from CSV strings
+            const parseBoolean = (value: any): boolean | undefined => {
+              if (value === undefined || value === null || value === '') return undefined;
+              const str = String(value).toLowerCase().trim();
+              if (str === 'true' || str === '1' || str === 'yes') return true;
+              if (str === 'false' || str === '0' || str === 'no') return false;
+              return undefined;
+            };
+
+            return {
+              userId: row.userId?.trim(),
+              firstName: row.firstName?.trim(),
+              lastName: row.lastName?.trim() || undefined,
+              role: row.role?.trim(),
+              employeeId: row.employeeId?.trim(),
+              managerEmail: row.managerEmail?.trim(),
+              sbuName: row.sbuName?.trim(),
+              expertiseName: row.expertiseName?.trim(),
+              resourceTypeName: row.resourceTypeName?.trim(),
+              dateOfJoining: row.dateOfJoining?.trim(),
+              careerStartDate: row.careerStartDate?.trim(),
+              dateOfBirth: row.dateOfBirth?.trim(),
+              resignationDate: row.resignationDate?.trim(),
+              exitDate: row.exitDate?.trim(),
+              active: parseBoolean(row.active),
+              hasOverhead: parseBoolean(row.hasOverhead)
+            };
+          });
         
         console.log('Filtered users count:', users.length);
         resolve(users);

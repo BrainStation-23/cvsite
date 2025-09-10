@@ -6,7 +6,8 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
-import { User, Mail, Lock, IdCard, Building, Calendar, Briefcase } from 'lucide-react';
+import { User, Mail, Lock, IdCard, Building, Calendar, Briefcase, UserCheck, Settings } from 'lucide-react';
+import { Switch } from '@/components/ui/switch';
 import { UserRole } from '@/types';
 import SbuCombobox from './user/SbuCombobox';
 import ExpertiseCombobox from './user/ExpertiseCombobox';
@@ -27,6 +28,11 @@ interface UserFormData {
   dateOfJoining: string;
   careerStartDate: string;
   managerId: string | null;
+  dateOfBirth: string;
+  resignationDate: string;
+  exitDate: string;
+  active: boolean;
+  hasOverhead: boolean;
 }
 
 interface UserFormProps {
@@ -64,7 +70,12 @@ const UserForm: React.FC<UserFormProps> = ({
     resourceTypeId: initialData.resourceTypeId || null,
     dateOfJoining: initialData.dateOfJoining || '',
     careerStartDate: initialData.careerStartDate || '',
-    managerId: initialData.managerId || null
+    managerId: initialData.managerId || null,
+    dateOfBirth: initialData.dateOfBirth || '',
+    resignationDate: initialData.resignationDate || '',
+    exitDate: initialData.exitDate || '',
+    active: initialData.active ?? true,
+    hasOverhead: initialData.hasOverhead ?? true
   });
 
   console.log('Form data state after initialization:', formData);
@@ -72,7 +83,7 @@ const UserForm: React.FC<UserFormProps> = ({
   console.log('Expertise ID in form state:', formData.expertiseId);
   console.log('Resource Type ID in form state:', formData.resourceTypeId);
 
-  const handleInputChange = (field: keyof UserFormData, value: string | null) => {
+  const handleInputChange = (field: keyof UserFormData, value: string | boolean | null) => {
     console.log(`=== UserForm Field Change ===`);
     console.log(`Field: ${field}, New Value:`, value);
     setFormData(prev => {
@@ -101,6 +112,27 @@ const UserForm: React.FC<UserFormProps> = ({
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-8">
+            {/* Personal Information Section */}
+            <div className="space-y-4">
+              <div className="flex items-center gap-2 mb-4">
+                <UserCheck size={18} />
+                <h3 className="text-lg font-medium">Personal Information</h3>
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-2">
+                  <Label htmlFor="dateOfBirth">Date of Birth</Label>
+                  <DatePicker
+                    value={formData.dateOfBirth}
+                    onChange={(value) => handleInputChange('dateOfBirth', value)}
+                    placeholder="Select date of birth"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <Separator />
+
             {/* Basic Information Section */}
             <div className="space-y-4">
               <div className="flex items-center gap-2 mb-4">
@@ -286,6 +318,70 @@ const UserForm: React.FC<UserFormProps> = ({
                 </div>
               </div>
             </div>
+
+            <Separator />
+
+            {/* Employment Status Section */}
+            <div className="space-y-4">
+              <div className="flex items-center gap-2 mb-4">
+                <Settings size={18} />
+                <h3 className="text-lg font-medium">Employment Status</h3>
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="flex items-center space-x-2">
+                  <Switch 
+                    id="active"
+                    checked={formData.active}
+                    onCheckedChange={(value) => handleInputChange('active', value)}
+                  />
+                  <Label htmlFor="active">Active Employee</Label>
+                </div>
+
+                <div className="flex items-center space-x-2">
+                  <Switch 
+                    id="hasOverhead"
+                    checked={formData.hasOverhead}
+                    onCheckedChange={(value) => handleInputChange('hasOverhead', value)}
+                  />
+                  <Label htmlFor="hasOverhead">Has Overhead</Label>
+                </div>
+              </div>
+            </div>
+
+            {!formData.active && (
+              <>
+                <Separator />
+                
+                {/* Exit Information Section */}
+                <div className="space-y-4">
+                  <div className="flex items-center gap-2 mb-4">
+                    <Calendar size={18} />
+                    <h3 className="text-lg font-medium">Exit Information</h3>
+                  </div>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="space-y-2">
+                      <Label htmlFor="resignationDate">Resignation Date</Label>
+                      <DatePicker
+                        value={formData.resignationDate}
+                        onChange={(value) => handleInputChange('resignationDate', value)}
+                        placeholder="Select resignation date"
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="exitDate">Exit Date</Label>
+                      <DatePicker
+                        value={formData.exitDate}
+                        onChange={(value) => handleInputChange('exitDate', value)}
+                        placeholder="Select exit date"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </>
+            )}
 
             <div className="flex justify-end gap-3 pt-6">
               <Button type="submit" disabled={isLoading}>

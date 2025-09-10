@@ -913,6 +913,7 @@ export type Database = {
           exit_date: string | null
           expertise: string | null
           first_name: string | null
+          has_overhead: boolean
           id: string
           last_name: string | null
           manager: string | null
@@ -932,6 +933,7 @@ export type Database = {
           exit_date?: string | null
           expertise?: string | null
           first_name?: string | null
+          has_overhead?: boolean
           id: string
           last_name?: string | null
           manager?: string | null
@@ -951,6 +953,7 @@ export type Database = {
           exit_date?: string | null
           expertise?: string | null
           first_name?: string | null
+          has_overhead?: boolean
           id?: string
           last_name?: string | null
           manager?: string | null

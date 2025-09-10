@@ -210,6 +210,8 @@ export const WeeklyValidationTab: React.FC<WeeklyValidationTabProps> = ({
               pagination={pagination}
               currentPage={currentPage}
               setCurrentPage={setCurrentPage}
+              perPage={10}
+              setPerPage={() => {}}
             />
           )}
         </>

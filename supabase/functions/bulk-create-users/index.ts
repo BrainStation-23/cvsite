@@ -174,7 +174,12 @@ serve(async (req) => {
           expertiseName, 
           resourceTypeName,
           dateOfJoining,
-          careerStartDate
+          careerStartDate,
+          dateOfBirth,
+          resignationDate,
+          exitDate,
+          active,
+          hasOverhead
         } = user;
         
         if (!email || !firstName || !lastName) {
@@ -206,8 +211,17 @@ serve(async (req) => {
           // Parse dates
           const parsedDateOfJoining = dateOfJoining && dateOfJoining.trim() ? dateOfJoining.trim() : null;
           const parsedCareerStartDate = careerStartDate && careerStartDate.trim() ? careerStartDate.trim() : null;
+          const parsedDateOfBirth = dateOfBirth && dateOfBirth.trim() ? dateOfBirth.trim() : null;
+          const parsedResignationDate = resignationDate && resignationDate.trim() ? resignationDate.trim() : null;
+          const parsedExitDate = exitDate && exitDate.trim() ? exitDate.trim() : null;
+          
+          // Parse booleans from CSV (they come as strings)
+          const activeValue = active !== undefined ? (active === 'true' || active === true || active === 'TRUE' || active === '1') : true;
+          const hasOverheadValue = hasOverhead !== undefined ? (hasOverhead === 'true' || hasOverhead === true || hasOverhead === 'TRUE' || hasOverhead === '1') : true;
           
           console.log(`Creating user: ${email} with SBU: ${sbuName} (ID: ${sbuId}), Manager: ${managerEmail} (ID: ${managerId})`);
+          console.log(`User status: active=${activeValue}, hasOverhead=${hasOverheadValue}`);
+          
           
           // Create user in Supabase Auth
           const { data: authData, error: authError } = await supabase.auth.admin.createUser({
@@ -224,7 +238,12 @@ serve(async (req) => {
               resource_type_id: resourceTypeId,
               manager_id: managerId,
               date_of_joining: parsedDateOfJoining,
-              career_start_date: parsedCareerStartDate
+              career_start_date: parsedCareerStartDate,
+              date_of_birth: parsedDateOfBirth,
+              resignation_date: parsedResignationDate,
+              exit_date: parsedExitDate,
+              active: activeValue,
+              has_overhead: hasOverheadValue
             }
           });
           
@@ -253,6 +272,11 @@ serve(async (req) => {
           if (managerId) profileUpdates.manager = managerId;
           if (parsedDateOfJoining) profileUpdates.date_of_joining = parsedDateOfJoining;
           if (parsedCareerStartDate) profileUpdates.career_start_date = parsedCareerStartDate;
+          if (parsedDateOfBirth) profileUpdates.date_of_birth = parsedDateOfBirth;
+          if (parsedResignationDate) profileUpdates.resignation_date = parsedResignationDate;
+          if (parsedExitDate) profileUpdates.exit_date = parsedExitDate;
+          if (active !== undefined) profileUpdates.active = activeValue;
+          if (hasOverhead !== undefined) profileUpdates.has_overhead = hasOverheadValue;
           
           if (Object.keys(profileUpdates).length > 0) {
             const { error: profileError } = await supabase
