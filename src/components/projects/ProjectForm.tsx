@@ -28,6 +28,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import ProjectBillTypeCombobox from '@/components/resource-planning/ProjectBillTypeCombobox';
+import { ProjectTypeCombobox } from '@/components/projects/ProjectTypeCombobox';
+import { Project } from '@/types/projects';
 
 const projectSchema = z.object({
   project_name: z.string().min(1, 'Project name is required'),
@@ -36,21 +39,13 @@ const projectSchema = z.object({
   budget: z.coerce.number().optional(),
   description: z.string().optional(),
   project_level: z.string().optional(),
+  project_bill_type: z.string().optional(),
+  project_type: z.string().optional(),
   is_active: z.boolean().default(true),
+  forecasted: z.boolean().default(false),
 });
 
 type ProjectFormData = z.infer<typeof projectSchema>;
-
-interface Project {
-  id: string;
-  project_name: string;
-  client_name: string | null;
-  project_manager: string | null;
-  budget: number | null;
-  description?: string | null;
-  project_level?: string | null;
-  is_active: boolean;
-}
 
 interface ProjectFormProps {
   isOpen: boolean;
@@ -76,7 +71,10 @@ export const ProjectForm: React.FC<ProjectFormProps> = ({
       budget: undefined,
       description: '',
       project_level: '',
+      project_bill_type: '',
+      project_type: '',
       is_active: true,
+      forecasted: false,
     },
   });
 
@@ -89,7 +87,10 @@ export const ProjectForm: React.FC<ProjectFormProps> = ({
         budget: initialData.budget || undefined,
         description: initialData.description || '',
         project_level: initialData.project_level || '',
+        project_bill_type: initialData.project_bill_type || '',
+        project_type: initialData.project_type_data?.id || '',
         is_active: initialData.is_active,
+        forecasted: initialData.forecasted,
       });
     } else {
       form.reset({
@@ -99,7 +100,10 @@ export const ProjectForm: React.FC<ProjectFormProps> = ({
         budget: undefined,
         description: '',
         project_level: '',
+        project_bill_type: '',
+        project_type: '',
         is_active: true,
+        forecasted: false,
       });
     }
   }, [initialData, form]);
@@ -112,7 +116,10 @@ export const ProjectForm: React.FC<ProjectFormProps> = ({
       budget: data.budget || null,
       description: data.description || null,
       project_level: data.project_level || null,
+      project_bill_type: data.project_bill_type || null,
+      project_type: data.project_type || null,
       is_active: data.is_active,
+      forecasted: data.forecasted,
     });
 
     if (success) {
@@ -193,6 +200,42 @@ export const ProjectForm: React.FC<ProjectFormProps> = ({
 
               <FormField
                 control={form.control}
+                name="project_bill_type"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Project Bill Type</FormLabel>
+                    <FormControl>
+                      <ProjectBillTypeCombobox
+                        value={field.value}
+                        onValueChange={field.onChange}
+                        placeholder="Select project bill type"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="project_type"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Project Type</FormLabel>
+                    <FormControl>
+                      <ProjectTypeCombobox
+                        value={field.value}
+                        onValueChange={field.onChange}
+                        placeholder="Select project type"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
                 name="budget"
                 render={({ field }) => (
                   <FormItem>
@@ -238,6 +281,27 @@ export const ProjectForm: React.FC<ProjectFormProps> = ({
                     <FormLabel className="text-base">Active Project</FormLabel>
                     <div className="text-sm text-muted-foreground">
                       Enable this project for resource planning and assignments
+                    </div>
+                  </div>
+                  <FormControl>
+                    <Switch
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                    />
+                  </FormControl>
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="forecasted"
+              render={({ field }) => (
+                <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                  <div className="space-y-0.5">
+                    <FormLabel className="text-base">Forecasted Project</FormLabel>
+                    <div className="text-sm text-muted-foreground">
+                      Enable this project for forecasted resource planning and assignments
                     </div>
                   </div>
                   <FormControl>

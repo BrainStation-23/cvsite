@@ -158,6 +158,7 @@ export const WeeklyValidationTab: React.FC<WeeklyValidationTabProps> = ({
           <div className="rounded-md border">
             <BulkActionsToolbar
               selectedCount={selectedCount}
+              selectedItems={Array.from(selectedItems)}
               onBulkComplete={handleBulkComplete}
               onBulkValidate={handleBulkValidate}
               onBulkDelete={handleBulkDelete}

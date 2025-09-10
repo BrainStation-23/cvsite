@@ -2,6 +2,7 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Trash2, CheckCircle, CheckCircle2, Copy, XCircle } from 'lucide-react';
+import { ResourcePlanningExportButton } from './ResourcePlanningExportButton';
 
 interface BulkActionsToolbarProps {
   selectedCount: number;
@@ -13,6 +14,7 @@ interface BulkActionsToolbarProps {
   onClearSelection: () => void;
   showValidate?: boolean;
   showInvalidate?: boolean;
+  selectedItems: any[]; 
 }
 
 export const BulkActionsToolbar: React.FC<BulkActionsToolbarProps> = ({
@@ -24,7 +26,8 @@ export const BulkActionsToolbar: React.FC<BulkActionsToolbarProps> = ({
   onBulkCopy,
   onClearSelection,
   showValidate = false,
-  showInvalidate = false
+  showInvalidate = false,
+  selectedItems
 }) => {
   if (selectedCount === 0) return null;
 
@@ -97,6 +100,7 @@ export const BulkActionsToolbar: React.FC<BulkActionsToolbarProps> = ({
         >
           Clear
         </Button>
+        <ResourcePlanningExportButton selectedItems={selectedItems} />
       </div>
     </div>
   );

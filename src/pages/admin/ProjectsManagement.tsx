@@ -9,29 +9,7 @@ import { ProjectForm } from '@/components/projects/ProjectForm';
 import { ConfirmationDialog } from '@/components/ui/confirmation-dialog';
 import { useConfirmationDialog } from '@/hooks/use-confirmation-dialog';
 import { OdooSyncButton } from '@/components/projects/OdooSyncButton';
-
-interface Project {
-  id: string;
-  project_name: string;
-  client_name: string | null;
-  project_manager: string | null;
-  budget: number | null;
-  is_active: boolean;
-  created_at: string;
-  updated_at: string;
-  description?: string | null;
-  project_level?: string | null;
-  project_bill_type?: string | null;
-  project_manager_profile?: {
-    first_name: string | null;
-    last_name: string | null;
-    employee_id: string | null;
-  } | null;
-  project_type_data?: {
-    name: string;
-  } | null;
-  relevance_score?: number;
-}
+import { Project } from '@/types/projects';
 
 const ProjectsManagement: React.FC = () => {
   const {

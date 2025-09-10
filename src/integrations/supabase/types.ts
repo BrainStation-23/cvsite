@@ -1093,6 +1093,7 @@ export type Database = {
           client_name: string | null
           created_at: string
           description: string | null
+          forecasted: boolean
           id: string
           is_active: boolean
           project_bill_type: string | null
@@ -1107,6 +1108,7 @@ export type Database = {
           client_name?: string | null
           created_at?: string
           description?: string | null
+          forecasted?: boolean
           id?: string
           is_active?: boolean
           project_bill_type?: string | null
@@ -1121,6 +1123,7 @@ export type Database = {
           client_name?: string | null
           created_at?: string
           description?: string | null
+          forecasted?: boolean
           id?: string
           is_active?: boolean
           project_bill_type?: string | null
@@ -1673,6 +1676,7 @@ export type Database = {
           profile_email: string | null
           profile_employee_id: string | null
           profile_first_name: string | null
+          profile_has_overhead: boolean | null
           profile_id: string | null
           profile_image: string | null
           profile_last_name: string | null
@@ -1883,6 +1887,35 @@ export type Database = {
           specialized_skills_limit?: number
           technical_skills_limit?: number
           trainings_limit?: number
+        }
+        Returns: Json
+      }
+      get_employee_profile_v2: {
+        Args: {
+          achievement_filter?: string
+          availability_status?: string
+          current_project_search?: string
+          education_filter?: string
+          experience_filter?: string
+          items_per_page?: number
+          max_billing_percentage?: number
+          max_engagement_percentage?: number
+          max_experience_years?: number
+          max_graduation_year?: number
+          min_billing_percentage?: number
+          min_engagement_percentage?: number
+          min_experience_years?: number
+          min_graduation_year?: number
+          page_number?: number
+          project_filter?: string
+          release_date_from?: string
+          release_date_to?: string
+          require_all_skills?: boolean
+          search_query?: string
+          skill_filter?: string
+          sort_by?: string
+          sort_order?: string
+          training_filter?: string
         }
         Returns: Json
       }
