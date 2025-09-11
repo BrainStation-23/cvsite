@@ -59,6 +59,32 @@ export type Database = {
           },
         ]
       }
+      bench_bill_types: {
+        Row: {
+          bill_type: string | null
+          created_at: string
+          id: number
+        }
+        Insert: {
+          bill_type?: string | null
+          created_at?: string
+          id?: number
+        }
+        Update: {
+          bill_type?: string | null
+          created_at?: string
+          id?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bench_bill_types_bill_type_fkey"
+            columns: ["bill_type"]
+            isOneToOne: false
+            referencedRelation: "bill_types"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       bill_type_change_history: {
         Row: {
           changed_at: string
@@ -1687,6 +1713,7 @@ export type Database = {
           project_description: string | null
           project_id: string | null
           project_is_active: boolean | null
+          project_is_forecasted: boolean | null
           project_level: string | null
           project_manager_display_first_name: string | null
           project_manager_display_last_name: string | null
@@ -1809,20 +1836,13 @@ export type Database = {
         Returns: Json
       }
       get_bill_type_changes: {
-        Args:
-          | {
-              bill_type_ids?: string[]
-              end_date_param?: string
-              profile_ids?: string[]
-              sbu_ids?: string[]
-              start_date_param?: string
-            }
-          | {
-              bill_type_ids?: string[]
-              end_date_param?: string
-              project_ids?: string[]
-              start_date_param?: string
-            }
+        Args: {
+          bill_type_ids?: string[]
+          end_date_param?: string
+          profile_ids?: string[]
+          sbu_ids?: string[]
+          start_date_param?: string
+        }
         Returns: {
           career_start_date: string
           changed_at: string
