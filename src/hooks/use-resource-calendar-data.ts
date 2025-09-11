@@ -14,7 +14,6 @@ export interface ResourceCalendarData {
   release_date: string;
   engagement_complete: boolean;
   weekly_validation: boolean;
-  forecasted_project: string | null;
   created_at: string;
   updated_at: string;
   profile: {
@@ -46,6 +45,7 @@ export interface ResourceCalendarData {
     description: string | null;
     budget: number;
     is_active: boolean;
+    forecasted: boolean;
     project_level: string;
     project_bill_type: string;
     project_type_name: string;

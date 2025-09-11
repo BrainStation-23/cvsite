@@ -29,7 +29,6 @@ export interface GanttEngagement {
     color_code: string;
   } | null;
   is_forecasted: boolean;
-  forecasted_project: string | null;
 }
 
 export interface GanttEngagementPosition {
