@@ -3,22 +3,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Calendar, Clock, Award, Users, Building2 } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
-
-interface BenchRecord {
-  employee_id: string;
-  employee_name: string;
-  expertise_id: string;
-  expertise_name: string;
-  sbu_id: string;
-  sbu_name: string;
-  total_years_experience: number;
-  bill_type_id: string;
-  bill_type_name: string;
-  bill_type_color_code: string;
-  bench_date: string;
-  bench_duration_days: number;
-  planned_status: 'planned' | 'unplanned';
-}
+import { BenchRecord } from './types/benchRecord';
 
 interface BenchTableMobileProps {
   record: BenchRecord;
@@ -75,7 +60,7 @@ export const BenchTableMobile: React.FC<BenchTableMobileProps> = ({ record }) =>
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-2">
               <Users className="h-4 w-4 text-muted-foreground" />
-              <Badge variant="outline">{record.expertise_name}</Badge>
+              <Badge variant="outline">{record.expertise}</Badge>
             </div>
             <div className="flex items-center gap-2">
               <Building2 className="h-4 w-4 text-muted-foreground" />
