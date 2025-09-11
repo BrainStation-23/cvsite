@@ -63,45 +63,56 @@ export const GanttCell: React.FC<GanttCellProps> = ({
       <div className="h-full flex items-center px-2 py-1">
         {isMediumCell ? (
           <div className="flex-1 min-w-0">
-            <div className={cn("flex items-center gap-1.5", textColor)}>
+            <div className={cn("flex items-center gap-1.5 w-full", textColor)}>
               {/* Project name - primary info */}
-              <span className="text-xs font-medium truncate flex-1">
+              <span className="text-xs font-medium truncate">
                 {engagement.project_name || 'Untitled Project'}
               </span>
               
-              {/* Engagement percentage - always visible */}
-              <span className={cn("text-xs font-bold shrink-0", secondaryTextColor)}>
+              {/* Badges next to project name in wide cells */}
+              {isWideCell && (
+                <div className="flex items-center gap-1 flex-shrink-0">
+                  {engagement.project?.project_level && (
+                    <Badge 
+                      variant="outline" 
+                      className={cn(
+                        "text-[9px] px-1 py-0 h-4 border-current/20",
+                        isLight ? "bg-white/50 text-gray-700" : "bg-black/20 text-gray-200"
+                      )}
+                    >
+                      {engagement.project.project_level}
+                    </Badge>
+                  )}
+                  {engagement.project?.project_bill_type && (
+                    <Badge 
+                      variant="outline" 
+                      className={cn(
+                        "text-[9px] px-1 py-0 h-4 border-current/20",
+                        isLight ? "bg-white/50 text-gray-700" : "bg-black/20 text-gray-200"
+                      )}
+                    >
+                      {engagement.project.project_bill_type}
+                    </Badge>
+                  )}
+                  {engagement.project?.project_type_name && (
+                    <Badge 
+                      variant="outline" 
+                      className={cn(
+                        "text-[9px] px-1 py-0 h-4 border-current/20",
+                        isLight ? "bg-white/50 text-gray-700" : "bg-black/20 text-gray-200"
+                      )}
+                    >
+                      {engagement.project.project_type_name}
+                    </Badge>
+                  )}
+                </div>
+              )}
+              
+              {/* Engagement percentage - always visible on the right */}
+              <span className={cn("text-xs font-bold ml-auto shrink-0", secondaryTextColor)}>
                 {engagement.engagement_percentage}%
               </span>
             </div>
-            
-            {/* Secondary info row - only for wide cells */}
-            {isWideCell && (
-              <div className="flex items-center gap-1 mt-0.5">
-                {engagement.project?.project_level && (
-                  <Badge 
-                    variant="outline" 
-                    className={cn(
-                      "text-[9px] px-1 py-0 h-4 border-current/20",
-                      isLight ? "bg-white/50 text-gray-700" : "bg-black/20 text-gray-200"
-                    )}
-                  >
-                    {engagement.project.project_level}
-                  </Badge>
-                )}
-                {engagement.project?.project_bill_type && (
-                  <Badge 
-                    variant="outline" 
-                    className={cn(
-                      "text-[9px] px-1 py-0 h-4 border-current/20",
-                      isLight ? "bg-white/50 text-gray-700" : "bg-black/20 text-gray-200"
-                    )}
-                  >
-                    {engagement.project.project_bill_type}
-                  </Badge>
-                )}
-              </div>
-            )}
           </div>
         ) : (
           // Compact view for narrow cells - just percentage
