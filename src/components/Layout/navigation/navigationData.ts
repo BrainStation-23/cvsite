@@ -20,6 +20,7 @@ import {
   UserCheck,
   Search,
   Network,
+  Settings,
 } from 'lucide-react';
 
 export interface NavigationItem {
@@ -96,6 +97,15 @@ export const getSidebarGroups = (
         { to: '/admin/employee-data-management', icon: FolderOpen, label: 'Employee Data Management' },
         { to: '/admin/projects', icon: Database, label: 'Projects' },
         { to: '/admin/cv-templates', icon: FileText, label: 'CV Templates' },
+      ],
+    },
+
+    // Bench Management group (admin only)
+    userRole === 'admin' && {
+      label: 'Bench Management',
+      items: [
+        { to: '/admin/bench/report', icon: BarChart3, label: 'Bench Report' },
+        { to: '/admin/bench/settings', icon: Settings, label: 'Bench Settings' },
       ],
     },
 

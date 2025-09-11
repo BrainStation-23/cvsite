@@ -46,6 +46,8 @@ import ManagerPIPList from '@/pages/pip/ManagerPIPList';
 import ManagerPMReview from '@/pages/pip/ManagerPMReview';
 import AdminPIPView from './pages/pip/AdminPIPView';
 import MyTeam from '@/pages/MyTeam';
+import BenchReportPage from '@/pages/admin/bench/BenchReportPage';
+import BenchSettingsPage from '@/pages/admin/bench/BenchSettingsPage';
 import './App.css';
 
 // Create QueryClient instance outside component to prevent recreation
@@ -440,6 +442,23 @@ function App(): React.ReactElement {
               element={
                 <ProtectedRoute allowedRoles={['admin']}>
                   <ProjectsManagement />
+                </ProtectedRoute>
+              }
+            />
+            {/* Bench Management Routes */}
+            <Route
+              path="/admin/bench/report"
+              element={
+                <ProtectedRoute allowedRoles={['admin']}>
+                  <BenchReportPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/bench/settings"
+              element={
+                <ProtectedRoute allowedRoles={['admin']}>
+                  <BenchSettingsPage />
                 </ProtectedRoute>
               }
             />
