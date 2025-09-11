@@ -29,6 +29,11 @@ export interface GanttEngagement {
     color_code: string;
   } | null;
   is_forecasted: boolean;
+  project: {
+    project_level: string;
+    project_bill_type: string;
+    project_type_name: string;
+  } | null;
 }
 
 export interface GanttEngagementPosition {
