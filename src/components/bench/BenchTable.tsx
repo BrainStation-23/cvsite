@@ -5,22 +5,7 @@ import { Button } from '@/components/ui/button';
 import { ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
 import { BenchTableRow } from './BenchTableRow';
 import { BenchTableMobile } from './BenchTableMobile';
-
-interface BenchRecord {
-  employee_id: string;
-  employee_name: string;
-  expertise_id: string;
-  expertise_name: string;
-  sbu_id: string;
-  sbu_name: string;
-  total_years_experience: number;
-  bill_type_id: string;
-  bill_type_name: string;
-  bill_type_color_code: string;
-  bench_date: string;
-  bench_duration_days: number;
-  planned_status: 'planned' | 'unplanned';
-}
+import { BenchRecord } from './types/benchRecord';
 
 interface BenchTableProps {
   benchRecords: BenchRecord[];

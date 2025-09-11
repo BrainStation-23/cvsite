@@ -3,22 +3,8 @@ import { TableCell, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Calendar, Clock, Award } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
+import { BenchRecord } from './types/benchRecord';
 
-interface BenchRecord {
-  employee_id: string;
-  employee_name: string;
-  expertise_id: string;
-  expertise_name: string;
-  sbu_id: string;
-  sbu_name: string;
-  total_years_experience: number;
-  bill_type_id: string;
-  bill_type_name: string;
-  bill_type_color_code: string;
-  bench_date: string;
-  bench_duration_days: number;
-  planned_status: 'planned' | 'unplanned';
-}
 
 interface BenchTableRowProps {
   record: BenchRecord;
@@ -62,7 +48,7 @@ export const BenchTableRow: React.FC<BenchTableRowProps> = ({ record }) => {
         </div>
       </TableCell>
       <TableCell>
-        <Badge variant="outline">{record.expertise_name}</Badge>
+        <Badge variant="outline">{record.expertise}</Badge>
       </TableCell>
       <TableCell>
         <div className="flex items-center gap-2">

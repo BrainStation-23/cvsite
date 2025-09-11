@@ -2,22 +2,8 @@ import { useState, useCallback, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { BenchRecord } from '@/components/bench/types/benchRecord';
 
-interface BenchRecord {
-  employee_id: string;
-  employee_name: string;
-  expertise_id: string;
-  expertise_name: string;
-  sbu_id: string;
-  sbu_name: string;
-  total_years_experience: number;
-  bill_type_id: string;
-  bill_type_name: string;
-  bill_type_color_code: string;
-  bench_date: string;
-  bench_duration_days: number;
-  planned_status: 'planned' | 'unplanned';
-}
 
 interface BenchData {
   bench_records: BenchRecord[];
