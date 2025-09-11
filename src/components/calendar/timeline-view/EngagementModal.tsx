@@ -9,13 +9,24 @@ import BillTypeCombobox from '@/components/resource-planning/BillTypeCombobox';
 import { format, startOfMonth, endOfMonth } from 'date-fns';
 import ProjectSearchCombobox from '@/components/resource-planning/ProjectSearchCombobox';
 import DatePicker from '@/components/admin/user/DatePicker';
+import { ResourcePlanningData } from '@/components/resource-planning/types/resourceplanning';
+
+interface EngagementFormData {
+  profile_id: string;
+  engagement_percentage: number;
+  billing_percentage: number;
+  engagement_start_date: string;
+  release_date?: string;
+  bill_type_id?: string;
+  project_id?: string;
+}
 
 interface EngagementModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (data: any) => void;
+  onSave: (data: EngagementFormData) => void;
   onDelete?: (id: string) => void;
-  initialData?: any;
+  initialData?: ResourcePlanningData | null;
   preselectedResourceId?: string;
   preselectedStartDate?: Date;
   mode: 'create' | 'edit';
@@ -39,12 +50,11 @@ export const EngagementModal: React.FC<EngagementModalProps> = ({
 
   const [selectedMonth, setSelectedMonth] = useState<number>(currentMonth);
   const [selectedYear, setSelectedYear] = useState<number>(currentYear);
-  const [formData, setFormData] = useState<any>({
+  const [formData, setFormData] = useState<EngagementFormData>({
     profile_id: preselectedResourceId || '',
     engagement_percentage: 0,
     billing_percentage: 0,
     engagement_start_date: '',
-    forecasted_project: '',
     ...initialData,
   });
   const [isDirty, setIsDirty] = useState(false);
@@ -102,12 +112,13 @@ export const EngagementModal: React.FC<EngagementModalProps> = ({
       setSelectedMonth(defaultMonth);
       setSelectedYear(defaultYear);
       setFormData({
-        profile_id: preselectedResourceId || '',
-        engagement_percentage: 0,
-        billing_percentage: 0,
-        engagement_start_date: '',
-        forecasted_project: '',
-        ...initialData,
+        profile_id: preselectedResourceId || initialData?.profile_id || '',
+        engagement_percentage: initialData?.engagement_percentage || 0,
+        billing_percentage: initialData?.billing_percentage || 0,
+        engagement_start_date: initialData?.engagement_start_date || '',
+        release_date: initialData?.release_date || '',
+        bill_type_id: initialData?.bill_type?.id || '',
+        project_id: initialData?.project?.id || '',
       });
     }
   }, [isOpen, initialData, preselectedResourceId, preselectedStartDate, currentMonth, currentYear]);
@@ -119,7 +130,7 @@ export const EngagementModal: React.FC<EngagementModalProps> = ({
     const startDate = startOfMonth(new Date(selectedYear, selectedMonth - 1, 1));
     const endDate = endOfMonth(new Date(selectedYear, selectedMonth - 1, 1));
     
-    const submissionData: any = {
+    const submissionData: EngagementFormData = {
       ...formData,
       engagement_start_date: format(startDate, 'yyyy-MM-dd'),
       release_date: format(endDate, 'yyyy-MM-dd'),
@@ -139,7 +150,6 @@ export const EngagementModal: React.FC<EngagementModalProps> = ({
       engagement_percentage: 0,
       billing_percentage: 0,
       engagement_start_date: '',
-      forecasted_project: '',
     });
   };
 
@@ -271,12 +281,11 @@ export const EngagementModal: React.FC<EngagementModalProps> = ({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="forecastedProject">Forecasted Project *</Label>
-            <Input
-              value={formData.forecasted_project || ''}
-              onChange={(e) => setFormData(prev => ({ ...prev, forecasted_project: e.target.value }))}
-              placeholder="Enter forecasted project name..."
-              required
+            <Label htmlFor="project">Project</Label>
+            <ProjectSearchCombobox
+              value={formData.project_id}
+              onValueChange={(value) => setFormData(prev => ({ ...prev, project_id: value }))}
+              placeholder="Select project..."
             />
           </div>
 
@@ -354,7 +363,7 @@ export const EngagementModal: React.FC<EngagementModalProps> = ({
               </Button>
               <Button 
                 type="submit" 
-                disabled={!formData.profile_id || !formData.forecasted_project || !selectedMonth || !selectedYear || !formData.engagement_percentage}
+                disabled={!formData.profile_id || !selectedMonth || !selectedYear || !formData.engagement_percentage}
               >
                 {mode === 'create' ? 'Create' : 'Update'} Assignment
               </Button>
