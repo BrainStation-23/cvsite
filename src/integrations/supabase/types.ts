@@ -2280,6 +2280,19 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: boolean
       }
+      list_bench: {
+        Args: {
+          bill_type_filter?: string
+          expertise_filter?: string
+          items_per_page?: number
+          page_number?: number
+          sbu_filter?: string
+          search_query?: string
+          sort_by?: string
+          sort_order?: string
+        }
+        Returns: Json
+      }
       list_users: {
         Args: {
           filter_expertise_id?: string
