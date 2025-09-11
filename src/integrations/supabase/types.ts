@@ -2414,6 +2414,10 @@ export type Database = {
         }
         Returns: Json
       }
+      sync_bench_now: {
+        Args: Record<PropertyKey, never>
+        Returns: Json
+      }
       update_pip_pm_feedback: {
         Args: {
           p_behavioral_areas?: string[]
