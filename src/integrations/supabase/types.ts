@@ -59,6 +59,55 @@ export type Database = {
           },
         ]
       }
+      bench: {
+        Row: {
+          bench_date: string | null
+          bench_feedback: string | null
+          bill_type_id: string | null
+          created_at: string
+          id: string
+          profile_id: string | null
+        }
+        Insert: {
+          bench_date?: string | null
+          bench_feedback?: string | null
+          bill_type_id?: string | null
+          created_at?: string
+          id?: string
+          profile_id?: string | null
+        }
+        Update: {
+          bench_date?: string | null
+          bench_feedback?: string | null
+          bill_type_id?: string | null
+          created_at?: string
+          id?: string
+          profile_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bench_bill_type_id_fkey"
+            columns: ["bill_type_id"]
+            isOneToOne: false
+            referencedRelation: "bill_types"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bench_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bench_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "resource_availability_view"
+            referencedColumns: ["profile_id"]
+          },
+        ]
+      }
       bench_bill_types: {
         Row: {
           bill_type: string | null
@@ -68,7 +117,7 @@ export type Database = {
         Insert: {
           bill_type?: string | null
           created_at?: string
-          id: string
+          id?: string
         }
         Update: {
           bill_type?: string | null
