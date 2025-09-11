@@ -117,16 +117,6 @@ export const ResourcePlanningTableHeader: React.FC<ResourcePlanningTableHeaderPr
             </Button>
           </TableHead>
           
-          <TableHead>
-            <Button
-              variant="ghost"
-              onClick={() => onSort('forecasted_project')}
-              className="flex items-center gap-2 p-0 h-auto font-medium justify-start"
-            >
-              Forecasted Project {getSortIcon('forecasted_project')}
-            </Button>
-          </TableHead>
-          
           <TableHead className="w-16">
             <Tooltip>
               <TooltipTrigger asChild>

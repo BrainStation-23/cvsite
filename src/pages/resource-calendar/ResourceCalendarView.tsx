@@ -12,6 +12,17 @@ import { useResourceCalendarData } from '../../hooks/use-resource-calendar-data'
 import { useResourcePlanningOperations } from '../../hooks/use-resource-planning-operations';
 import { startOfMonth, addMonths, subMonths } from 'date-fns';
 import { GanttEngagement } from '../../components/calendar/gantt/types';
+import { ResourcePlanningData } from '../../components/resource-planning/types/resourceplanning';
+
+interface EngagementFormData {
+  profile_id: string;
+  engagement_percentage: number;
+  billing_percentage: number;
+  engagement_start_date: string;
+  release_date?: string;
+  bill_type_id?: string;
+  project_id?: string;
+}
 import { useToast } from '@/hooks/use-toast';
 
 interface AdvancedFilters {
@@ -62,7 +73,7 @@ const ResourceCalendarView: React.FC = () => {
   // Modal states
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalMode, setModalMode] = useState<'create' | 'edit'>('create');
-  const [selectedEngagement, setSelectedEngagement] = useState<any>(null);
+  const [selectedEngagement, setSelectedEngagement] = useState<ResourcePlanningData | null>(null);
   const [preselectedResourceId, setPreselectedResourceId] = useState<string | null>(null);
   const [preselectedStartDate, setPreselectedStartDate] = useState<Date | null>(null);
 
@@ -143,17 +154,17 @@ const ResourceCalendarView: React.FC = () => {
     setPreselectedStartDate(null);
   };
 
-  const handleModalSave = async (data: any) => {
+  const handleModalSave = async (data: EngagementFormData) => {
     try {
       if (modalMode === 'create') {
         createResourcePlanning({
-          profile_id: data.profile_id,
+          profile_id: data.profile_id!,
           bill_type_id: data.bill_type_id,
-          forecasted_project: data.forecasted_project,
-          engagement_start_date: data.engagement_start_date,
+          engagement_start_date: data.engagement_start_date!,
           release_date: data.release_date,
-          engagement_percentage: data.engagement_percentage,
+          engagement_percentage: data.engagement_percentage!,
           billing_percentage: data.billing_percentage || 0,
+          project_id: data.project_id,
         });
         toast({
           title: "Success",
@@ -163,13 +174,13 @@ const ResourceCalendarView: React.FC = () => {
         updateResourcePlanning({
           id: selectedEngagement.id,
           updates: {
-            profile_id: data.profile_id,
+            profile_id: data.profile_id!,
             bill_type_id: data.bill_type_id,
-            forecasted_project: data.forecasted_project,
-            engagement_start_date: data.engagement_start_date,
+            engagement_start_date: data.engagement_start_date!,
             release_date: data.release_date,
-            engagement_percentage: data.engagement_percentage,
+            engagement_percentage: data.engagement_percentage!,
             billing_percentage: data.billing_percentage || 0,
+            project_id: data.project_id,
           }
         });
       }
@@ -268,7 +279,7 @@ const ResourceCalendarView: React.FC = () => {
           initialData={selectedEngagement}
           preselectedResourceId={preselectedResourceId || undefined}
           preselectedStartDate={preselectedStartDate || undefined}
-          isForecasted={selectedEngagement?.forecasted_project !== null}
+          isForecasted={selectedEngagement?.project?.forecasted || false}
         />
       </div>
     </DashboardLayout>

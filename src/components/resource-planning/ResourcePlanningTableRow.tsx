@@ -11,50 +11,7 @@ import { useCompleteEngagementDialog } from '@/hooks/use-complete-engagement-dia
 import { ConfirmationDialog } from '@/components/ui/confirmation-dialog';
 import { CompleteEngagementDialog } from '@/components/ui/complete-engagement-dialog';
 import { ResourcePlanningTableEditRow } from './ResourcePlanningTableEditRow';
-
-interface ResourcePlanningData {
-  id: string;
-  profile_id: string;
-  engagement_percentage: number;
-  billing_percentage: number;
-  release_date: string;
-  engagement_start_date: string;
-  engagement_complete: boolean;
-  weekly_validation: boolean;
-  forecasted_project: string | null;
-  created_at: string;
-  updated_at: string;
-  profile: {
-    id: string;
-    employee_id: string;
-    first_name: string;
-    last_name: string;
-    current_designation: string;
-    has_overhead: boolean;
-  };
-  bill_type: {
-    id: string;
-    name: string;
-  } | null;
-  project: {
-    id: string;
-    project_name: string;
-    project_manager: string;
-    client_name: string;
-    budget: number;
-    project_level?: string;
-    project_bill_type?: string;
-    project_type_name?: string;
-  } | null;
-  manager: {
-    id: string;
-    first_name: string;
-    last_name: string;
-    employee_id: string;
-    full_name: string;
-  } | null;
-  expertise: string;
-}
+import { ResourcePlanningData } from './types/resourceplanning';
 
 interface EditFormData {
   profileId: string;
@@ -64,7 +21,6 @@ interface EditFormData {
   billingPercentage: number;
   releaseDate: string;
   engagementStartDate: string;
-  forecastedProject: string | null;
 }
 
 interface ResourcePlanningTableRowProps {
@@ -167,7 +123,6 @@ export const ResourcePlanningTableRow: React.FC<ResourcePlanningTableRowProps> =
           billing_percentage: item.billing_percentage,
           engagement_start_date: item.engagement_start_date,
           release_date: item.release_date,
-          forecasted_project: item.forecasted_project,
           engagement_complete: false,
           weekly_validation: false,
         };
@@ -242,12 +197,16 @@ export const ResourcePlanningTableRow: React.FC<ResourcePlanningTableRowProps> =
         <TableCell className="py-1 px-2">
           {item.project ? (
             <div className="space-y-1">
-              <div className="font-medium text-xs leading-tight">{item.project.project_name}</div>
-              {item.project.client_name && (
-                <div className="text-xs text-muted-foreground leading-tight">
-                  {item.project.client_name}
-                </div>
+                          <div className="flex items-center gap-2">
+              <span className="font-medium text-xs">
+                {item.project.project_name}
+              </span>
+              {item.project.forecasted && (
+                <Badge variant="outline" className="text-[10px] px-2 mx-1 py-0 h-4 bg-blue-100 text-white-600">
+                   Forecasted
+                </Badge>
               )}
+            </div>
               {(item.project.project_type_name || item.project.project_level || item.project.project_bill_type) && (
                 <div className="flex gap-1 flex-wrap">
                   {item.project.project_type_name && (
@@ -281,16 +240,6 @@ export const ResourcePlanningTableRow: React.FC<ResourcePlanningTableRowProps> =
           )}
         </TableCell>
 
-        <TableCell className="py-1 px-2">
-          {item.forecasted_project ? (
-            <span className="text-xs">{item.forecasted_project}</span>
-          ) : (
-            <span className="text-muted-foreground text-xs">Not specified</span>
-          )}
-        </TableCell>
-        
-
-        
         <TableCell className="py-1 px-2">
           <Badge variant="outline" className="text-xs">{item.engagement_percentage}%</Badge>
         </TableCell>

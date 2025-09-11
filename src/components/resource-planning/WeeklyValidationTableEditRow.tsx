@@ -9,46 +9,8 @@ import { ProjectCombobox } from '@/components/projects/ProjectCombobox';
 import DatePicker from '@/components/admin/user/DatePicker';
 import { Check, X } from 'lucide-react';
 import { Badge } from '../ui/badge';
+import { ResourcePlanningData } from './types/resourceplanning';
 
-interface WeeklyValidationData {
-  id: string;
-  profile_id: string;
-  engagement_percentage: number;
-  billing_percentage: number;
-  release_date: string;
-  engagement_start_date: string;
-  engagement_complete: boolean;
-  weekly_validation: boolean;
-  forecasted_project: string | null;
-  created_at: string;
-  updated_at: string;
-  profile: {
-    id: string;
-    employee_id: string;
-    first_name: string;
-    last_name: string;
-    current_designation: string;
-  };
-  bill_type: {
-    id: string;
-    name: string;
-  } | null;
-  project: {
-    id: string;
-    project_name: string;
-    project_manager: string;
-    client_name: string;
-    budget: number;
-  } | null;
-  manager: {
-    id: string;
-    first_name: string;
-    last_name: string;
-    employee_id: string;
-    full_name: string;
-  } | null;
-  expertise: string;
-}
 
 interface EditFormData {
   profileId: string;
@@ -58,11 +20,10 @@ interface EditFormData {
   billingPercentage: number;
   releaseDate: string;
   engagementStartDate: string;
-  forecastedProject: string | null;
 }
 
 interface WeeklyValidationTableEditRowProps {
-  item: WeeklyValidationData;
+  item: ResourcePlanningData;
   editData: EditFormData;
   onEditDataChange: (data: Partial<EditFormData>) => void;
   onSave: () => void;
@@ -87,17 +48,8 @@ export const WeeklyValidationTableEditRow: React.FC<WeeklyValidationTableEditRow
 }) => {
   // Handle project selection with mutual exclusivity
   const handleProjectChange = (value: string | null) => {
-    onEditDataChange({ 
+    onEditDataChange({
       projectId: value,
-      forecastedProject: value ? null : editData.forecastedProject
-    });
-  };
-
-  // Handle forecasted project input with mutual exclusivity
-  const handleForecastedProjectChange = (value: string) => {
-    onEditDataChange({ 
-      forecastedProject: value,
-      projectId: value ? null : editData.projectId
     });
   };
 
@@ -121,9 +73,9 @@ export const WeeklyValidationTableEditRow: React.FC<WeeklyValidationTableEditRow
             {item.profile.employee_id}
             {item.expertise && (
               <Badge variant="secondary" className="text-[10px] px-2 mx-1 py-0 h-4 bg-blue-100 text-blue-600 hover:text-blue-600 hover:bg-blue-100">
-                  {item.expertise}  
+                {item.expertise}
               </Badge>
-            )} 
+            )}
           </span>
         </div>
       </TableCell>
@@ -145,26 +97,15 @@ export const WeeklyValidationTableEditRow: React.FC<WeeklyValidationTableEditRow
           />
         </div>
       </TableCell>
-            
-            <TableCell className="py-1 px-2">
-              {item.manager ? (
-                <span className="text-xs">{item.manager.first_name}</span>
-              ) : (
-                <span className="text-muted-foreground text-xs">Not specified</span>
-              )}
-            </TableCell>
 
       <TableCell className="py-1 px-2">
-        <div className="w-full max-w-[140px]">
-          <Input
-            type="text"
-            value={editData.forecastedProject || ''}
-            onChange={(e) => handleForecastedProjectChange(e.target.value)}
-            placeholder="Enter project..."
-            className="h-7 text-xs px-2"
-          />
-        </div>
+        {item.manager ? (
+          <span className="text-xs">{item.manager.first_name}</span>
+        ) : (
+          <span className="text-muted-foreground text-xs">Not specified</span>
+        )}
       </TableCell>
+
       <TableCell className="py-1 px-2 w-20">
         <Input
           type="number"

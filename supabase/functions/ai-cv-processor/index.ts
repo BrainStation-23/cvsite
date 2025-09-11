@@ -143,87 +143,188 @@ serve(async (req) => {
 
     console.log('File uploaded successfully, URI:', fileUri);
 
-    // Step 3: Generate content and analyze CV in one request
+    // Create JSON Schema for structured output
+    const profileSchema = {
+      type: "OBJECT",
+      properties: {
+        generalInfo: {
+          type: "OBJECT",
+          required: ["firstName", "lastName"],
+          properties: {
+            firstName: { type: "STRING" },
+            lastName: { type: "STRING" },
+            biography: { type: "STRING", nullable: true },
+            profileImage: { type: "STRING", nullable: true },
+            current_designation: { 
+              type: "STRING", 
+              nullable: true,
+              ...(designations.length > 0 && { enum: designations.slice(0, 20) })
+            }
+          }
+        },
+        technicalSkills: {
+          type: "ARRAY",
+          items: {
+            type: "OBJECT",
+            required: ["name", "proficiency"],
+            properties: {
+              name: { type: "STRING" },
+              proficiency: { type: "NUMBER" }
+            }
+          }
+        },
+        specializedSkills: {
+          type: "ARRAY",
+          items: {
+            type: "OBJECT",
+            required: ["name", "proficiency"],
+            properties: {
+              name: { type: "STRING" },
+              proficiency: { type: "NUMBER" }
+            }
+          }
+        },
+        experiences: {
+          type: "ARRAY",
+          items: {
+            type: "OBJECT",
+            required: ["companyName", "designation"],
+            properties: {
+              companyName: { type: "STRING" },
+              designation: { 
+                type: "STRING",
+                ...(designations.length > 0 && { enum: designations.slice(0, 20) })
+              },
+              description: { type: "STRING", nullable: true },
+              startDate: { type: "STRING", nullable: true },
+              endDate: { type: "STRING", nullable: true },
+              isCurrent: { type: "BOOLEAN", nullable: true }
+            }
+          }
+        },
+        education: {
+          type: "ARRAY",
+          items: {
+            type: "OBJECT",
+            required: ["university"],
+            properties: {
+              university: { 
+                type: "STRING",
+                ...(universities.length > 0 && { enum: universities.slice(0, 20) })
+              },
+              degree: { 
+                type: "STRING", 
+                nullable: true,
+                ...(degrees.length > 0 && { enum: degrees.slice(0, 15) })
+              },
+              department: { 
+                type: "STRING", 
+                nullable: true,
+                ...(departments.length > 0 && { enum: departments.slice(0, 15) })
+              },
+              gpa: { type: "STRING", nullable: true },
+              startDate: { type: "STRING", nullable: true },
+              endDate: { type: "STRING", nullable: true },
+              isCurrent: { type: "BOOLEAN", nullable: true }
+            }
+          }
+        },
+        trainings: {
+          type: "ARRAY",
+          items: {
+            type: "OBJECT",
+            required: ["title"],
+            properties: {
+              title: { type: "STRING" },
+              provider: { type: "STRING", nullable: true },
+              description: { type: "STRING", nullable: true },
+              date: { type: "STRING", nullable: true },
+              certificateUrl: { type: "STRING", nullable: true }
+            }
+          }
+        },
+        achievements: {
+          type: "ARRAY",
+          items: {
+            type: "OBJECT",
+            required: ["title"],
+            properties: {
+              title: { type: "STRING" },
+              description: { type: "STRING", nullable: true },
+              date: { type: "STRING", nullable: true }
+            }
+          }
+        },
+        projects: {
+          type: "ARRAY",
+          items: {
+            type: "OBJECT",
+            required: ["name"],
+            properties: {
+              name: { type: "STRING" },
+              role: { type: "STRING", nullable: true },
+              description: { type: "STRING", nullable: true },
+              responsibility: { type: "STRING", nullable: true },
+              startDate: { type: "STRING", nullable: true },
+              endDate: { type: "STRING", nullable: true },
+              isCurrent: { type: "BOOLEAN", nullable: true },
+              technologiesUsed: { 
+                type: "ARRAY", 
+                nullable: true,
+                items: { type: "STRING" }
+              },
+              url: { type: "STRING", nullable: true }
+            }
+          }
+        },
+        confidence: {
+          type: "OBJECT",
+          properties: {
+            overall: { type: "STRING", enum: ["high", "medium", "low"] },
+            sections: {
+              type: "OBJECT",
+              properties: {
+                generalInfo: { type: "STRING", enum: ["high", "medium", "low"] },
+                technicalSkills: { type: "STRING", enum: ["high", "medium", "low"] },
+                specializedSkills: { type: "STRING", enum: ["high", "medium", "low"] },
+                experiences: { type: "STRING", enum: ["high", "medium", "low"] },
+                education: { type: "STRING", enum: ["high", "medium", "low"] },
+                trainings: { type: "STRING", enum: ["high", "medium", "low"] },
+                achievements: { type: "STRING", enum: ["high", "medium", "low"] },
+                projects: { type: "STRING", enum: ["high", "medium", "low"] }
+              }
+            }
+          }
+        }
+      },
+      required: ["generalInfo", "technicalSkills", "specializedSkills", "experiences", "education", "trainings", "achievements", "projects", "confidence"]
+    };
+
+    // Step 3: Generate content and analyze CV with structured output
     const prompt = `
-Extract CV/Resume information from the uploaded document and return ONLY valid JSON in this exact structure:
+Extract comprehensive CV/Resume information from the uploaded document. Follow these extraction guidelines:
 
-{
-  "generalInfo": {
-    "firstName": "string",
-    "lastName": "string", 
-    "biography": "string or null",
-    "profileImage": null,
-    "current_designation": "string or null"
-  },
-  "technicalSkills": [
-    {"name": "string", "proficiency": 1}
-  ],
-  "specializedSkills": [
-    {"name": "string", "proficiency": 1}  
-  ],
-  "experiences": [
-    {
-      "companyName": "string",
-      "designation": "string",
-      "description": "string or null",
-      "startDate": "YYYY-MM-DD or null",
-      "endDate": "YYYY-MM-DD or null", 
-      "isCurrent": boolean
-    }
-  ],
-  "education": [
-    {
-      "university": "string",
-      "degree": "string or null",
-      "department": "string or null", 
-      "gpa": "string or null",
-      "startDate": "YYYY-MM-DD or null",
-      "endDate": "YYYY-MM-DD or null",
-      "isCurrent": boolean
-    }
-  ],
-  "trainings": [
-    {
-      "title": "string",
-      "provider": "string or null",
-      "description": "string or null",
-      "date": "YYYY-MM-DD or null",
-      "certificateUrl": null
-    }
-  ],
-  "achievements": [
-    {
-      "title": "string", 
-      "description": "string or null",
-      "date": "YYYY-MM-DD or null"
-    }
-  ],
-  "projects": [
-    {
-      "name": "string",
-      "role": "string or null",
-      "description": "string", 
-      "responsibility": "string or null",
-      "startDate": "YYYY-MM-DD or null",
-      "endDate": "YYYY-MM-DD or null",
-      "isCurrent": boolean,
-      "technologiesUsed": ["string"],
-      "url": "string or null"
-    }
-  ]
-}
+EXTRACTION RULES:
+1. Extract all personal information, skills, experience, education, training, achievements, and projects
+2. For skill proficiency: use 1-5 scale (1=beginner, 5=expert), default to 1 if not specified
+3. Use YYYY-MM-DD format for all dates
+4. Set isCurrent to true for ongoing positions/education/projects
+5. Extract technical skills (programming languages, frameworks, tools, software)
+6. Extract specialized skills (domain expertise, certifications, methodologies)
+7. Only include education entries for recognized universities from the provided list
+8. Only use valid designations from the provided list for experience roles
+9. Provide confidence scoring for each section based on clarity and completeness of extracted data
 
-IMPORTANT RULES:
-1. Set skill proficiency to 1 if not specified
-2. Only use universities from this list: ${universities.slice(0, 20).join(', ')}
-3. Only use degrees from this list: ${degrees.slice(0, 15).join(', ')}
-4. Only use departments from this list: ${departments.slice(0, 15).join(', ')}
-5. Only use designations from this list: ${designations.slice(0, 20).join(', ')}
-6. Skip education entries if university not in the list
-7. Use YYYY-MM-DD format for dates
-8. Set isCurrent to true for ongoing positions/education
-9. Extract technical skills (programming languages, frameworks, tools) and specialized skills (domain expertise)
-10. Return ONLY the JSON object, no additional text or explanation`;
+CONFIDENCE SCORING:
+- "high": Clear, complete information with specific details
+- "medium": Partial information with some details missing
+- "low": Minimal or unclear information
+
+DATA CONSTRAINTS:
+- Universities must match: ${universities.slice(0, 20).join(', ')}
+- Degrees should match: ${degrees.slice(0, 15).join(', ')}
+- Departments should match: ${departments.slice(0, 15).join(', ')}
+- Designations should match: ${designations.slice(0, 20).join(', ')}`;
 
     const generateResponse = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent', {
       method: 'POST',
@@ -250,6 +351,8 @@ IMPORTANT RULES:
           topK: 1,
           topP: 1,
           maxOutputTokens: 8192,
+          responseMimeType: "application/json",
+          responseSchema: profileSchema
         }
       })
     });
@@ -264,48 +367,51 @@ IMPORTANT RULES:
     }
 
     const generateData = await generateResponse.json();
-    const analysisResult = generateData.candidates?.[0]?.content?.parts?.[0]?.text || '';
+    const structuredResult = generateData.candidates?.[0]?.content?.parts?.[0]?.text;
 
-    if (!analysisResult) {
+    if (!structuredResult) {
+      console.error('No structured result received from Gemini');
       return new Response(
         JSON.stringify({ error: 'No analysis result received from AI' }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
-    // Clean the response to extract JSON
-    let cleanedResult = analysisResult.trim();
-    if (cleanedResult.startsWith('```json')) {
-      cleanedResult = cleanedResult.replace(/```json\n?/, '').replace(/\n?```$/, '');
-    } else if (cleanedResult.startsWith('```')) {
-      cleanedResult = cleanedResult.replace(/```\n?/, '').replace(/\n?```$/, '');
-    }
-
     let parsedResult;
     try {
-      parsedResult = JSON.parse(cleanedResult);
-    } catch (parseError) {
-      console.error('Failed to parse AI response as JSON:', parseError);
-      console.log('Raw AI response:', analysisResult);
+      // Since we're using structured output, the response should already be valid JSON
+      parsedResult = JSON.parse(structuredResult);
+      console.log('CV processing successful with structured output');
+      
+      // Extract confidence data
+      const confidence = parsedResult.confidence || { overall: 'medium' };
+      
+      // Remove confidence from profile data before returning
+      const { confidence: _, ...profileData } = parsedResult;
+
       return new Response(
-        JSON.stringify({ error: 'AI returned invalid JSON format' }),
+        JSON.stringify({ 
+          profileData,
+          confidence: confidence.overall || 'medium',
+          confidenceBreakdown: confidence.sections || {},
+          fileName: file.name,
+          fileSize,
+          fileType,
+          fileUri // Include for potential cleanup later
+        }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+
+    } catch (parseError) {
+      console.error('Failed to parse structured response:', parseError);
+      console.log('Raw structured response:', structuredResult);
+      
+      // Fallback: return a basic error structure
+      return new Response(
+        JSON.stringify({ error: 'AI returned malformed structured output' }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
-
-    console.log('CV processing successful');
-
-    return new Response(
-      JSON.stringify({ 
-        profileData: parsedResult,
-        confidence: 'medium',
-        fileName: file.name,
-        fileSize,
-        fileType,
-        fileUri // Include for potential cleanup later
-      }),
-      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-    );
 
   } catch (error) {
     console.error('Error in ai-cv-processor:', error);

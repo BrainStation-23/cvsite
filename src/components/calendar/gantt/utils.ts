@@ -31,8 +31,7 @@ export function transformResourceDataToGantt(resourceData: ResourceCalendarData[
       engagement_percentage: item.engagement_percentage,
       billing_percentage: item.billing_percentage,
       bill_type: item.bill_type,
-      is_forecasted: !!item.forecasted_project,
-      forecasted_project: item.forecasted_project
+      is_forecasted: item.project?.forecasted,
     };
 
     resourceMap.get(profileId)!.engagements.push(engagement);
@@ -153,7 +152,7 @@ export function formatEngagementTooltip(engagement: GanttEngagement): string {
   const endDate = engagement.end_date ? format(engagement.end_date, 'MMM dd, yyyy') : 'Ongoing';
   
   const lines = [
-    `Project: ${engagement.project_name || engagement.forecasted_project || 'N/A'}`,
+    `Project: ${engagement.project_name || 'N/A'}`,
     ...(engagement.client_name ? [`Client: ${engagement.client_name}`] : []),
     ...(engagement.project_manager?.full_name ? [`PM: ${engagement.project_manager.full_name}`] : []),
     `Duration: ${startDate} - ${endDate}`,
