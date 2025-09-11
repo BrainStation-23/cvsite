@@ -10,6 +10,7 @@ import { format, startOfMonth, endOfMonth } from 'date-fns';
 import ProjectSearchCombobox from '@/components/resource-planning/ProjectSearchCombobox';
 import DatePicker from '@/components/admin/user/DatePicker';
 import { ResourcePlanningData } from '@/components/resource-planning/types/resourceplanning';
+import { ProjectDetails } from '@/components/resource-planning/ProjectDetails';
 
 interface EngagementFormData {
   profile_id: string;
@@ -57,6 +58,7 @@ export const EngagementModal: React.FC<EngagementModalProps> = ({
     engagement_start_date: '',
     ...initialData,
   });
+  const [selectedProjectData, setSelectedProjectData] = useState<any>(null);
   const [isDirty, setIsDirty] = useState(false);
 
   // Generate month options
@@ -120,6 +122,18 @@ export const EngagementModal: React.FC<EngagementModalProps> = ({
         bill_type_id: initialData?.bill_type?.id || '',
         project_id: initialData?.project?.id || '',
       });
+      
+      // Set selected project data if in edit mode
+      if (initialData?.project) {
+        setSelectedProjectData({
+          project_name: initialData.project.project_name,
+          client_name: initialData.project.client_name,
+          project_level: initialData.project.project_level,
+          project_bill_type: initialData.project.project_bill_type,
+          project_type_name: initialData.project.project_type_name,
+          forecasted: initialData.project.forecasted || false,
+        });
+      }
     }
   }, [isOpen, initialData, preselectedResourceId, preselectedStartDate, currentMonth, currentYear]);
 
@@ -219,10 +233,20 @@ export const EngagementModal: React.FC<EngagementModalProps> = ({
                   <Label htmlFor="project" className="text-sm font-medium">Project</Label>
                   <ProjectSearchCombobox
                     value={formData.project_id}
-                    onValueChange={(value) => setFormData({ ...formData, project_id: value })}
+                    onValueChange={(value, projectData) => {
+                      setFormData({ ...formData, project_id: value });
+                      setSelectedProjectData(projectData);
+                    }}
                     placeholder="Select project..."
                   />
                 </div>
+
+                {selectedProjectData && (
+                  <div className="space-y-2">
+                    <Label className="text-sm font-medium">Project Details</Label>
+                    <ProjectDetails project={selectedProjectData} />
+                  </div>
+                )}
 
                 <div className="space-y-2">
                   <Label htmlFor="startDate" className="text-sm font-medium">Start Date</Label>
@@ -284,10 +308,20 @@ export const EngagementModal: React.FC<EngagementModalProps> = ({
             <Label htmlFor="project">Project</Label>
             <ProjectSearchCombobox
               value={formData.project_id}
-              onValueChange={(value) => setFormData(prev => ({ ...prev, project_id: value }))}
+              onValueChange={(value, projectData) => {
+                setFormData(prev => ({ ...prev, project_id: value }));
+                setSelectedProjectData(projectData);
+              }}
               placeholder="Select project..."
             />
           </div>
+
+          {selectedProjectData && (
+            <div className="space-y-2">
+              <Label>Project Details</Label>
+              <ProjectDetails project={selectedProjectData} />
+            </div>
+          )}
 
           <div className="space-y-2">
             <Label htmlFor="engagementPercentage">Engagement Percentage *</Label>
