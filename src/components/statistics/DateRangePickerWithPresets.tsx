@@ -147,7 +147,7 @@ export const DateRangePickerWithPresets: React.FC<DateRangePickerWithPresetsProp
             {/* Custom Date Selection */}
             <div className="p-3">
               <Label className="text-xs font-medium text-muted-foreground mb-2 block">CUSTOM RANGE</Label>
-              <div className="space-y-3">
+              <div className="flex gap-3">
                 <div>
                   <Label className="text-xs">Start Date</Label>
                   <Calendar
@@ -166,7 +166,9 @@ export const DateRangePickerWithPresets: React.FC<DateRangePickerWithPresetsProp
                     className="p-0"
                   />
                 </div>
-                <div className="flex gap-2">
+
+              </div>
+              <div className="flex justify-end gap-2 mt-3">
                   <Button size="sm" onClick={handleApplyCustomRange}>
                     Apply
                   </Button>
@@ -174,7 +176,6 @@ export const DateRangePickerWithPresets: React.FC<DateRangePickerWithPresetsProp
                     Cancel
                   </Button>
                 </div>
-              </div>
             </div>
           </div>
         </PopoverContent>

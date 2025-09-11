@@ -57,6 +57,8 @@ export const WeeklyValidationTab: React.FC<WeeklyValidationTabProps> = ({
     isBulkCompleting,
     isBulkDeleting,
     isBulkCopying,
+    perPage,
+    setPerPage, 
   } = resourcePlanningState;
 
   // Bulk selection
@@ -211,8 +213,8 @@ export const WeeklyValidationTab: React.FC<WeeklyValidationTabProps> = ({
               pagination={pagination}
               currentPage={currentPage}
               setCurrentPage={setCurrentPage}
-              perPage={10}
-              setPerPage={() => {}}
+              perPage={perPage}
+              setPerPage={setPerPage}
             />
           )}
         </>

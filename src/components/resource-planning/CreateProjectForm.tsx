@@ -54,7 +54,7 @@ export const CreateProjectForm: React.FC<CreateProjectFormProps> = ({
         <h3 className="font-semibold text-sm">Create New Forecasted Project</h3>
       </div>
 
-      <div className="space-y-3">
+      <div>
         <div>
           <Label htmlFor="project-name" className="text-xs">Project Name *</Label>
           <Input

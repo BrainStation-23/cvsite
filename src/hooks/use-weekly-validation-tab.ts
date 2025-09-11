@@ -47,7 +47,7 @@ export function useWeeklyValidationTab(isActive: boolean = true) {
   const [currentPage, setCurrentPage] = useState(1);
   const [sortBy, setSortBy] = useState('created_at');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
-  const itemsPerPage = 10;
+  const [perPage, setPerPage] = useState(10);
 
   // Stable filter clear functions
   const clearBasicFilters = useCallback(() => {
@@ -74,7 +74,7 @@ export function useWeeklyValidationTab(isActive: boolean = true) {
   const rpcParams = useMemo(() => ({
     search_query: searchQuery || null,
     page_number: currentPage,
-    items_per_page: itemsPerPage,
+    items_per_page: perPage,
     sort_by: sortBy,
     sort_order: sortOrder,
     sbu_filter: selectedSbu,
@@ -94,6 +94,7 @@ export function useWeeklyValidationTab(isActive: boolean = true) {
   }), [
     searchQuery,
     currentPage,
+    perPage,
     sortBy,
     sortOrder,
     selectedSbu,
@@ -121,7 +122,7 @@ export function useWeeklyValidationTab(isActive: boolean = true) {
             total_count: 0,
             filtered_count: 0,
             page: currentPage,
-            per_page: itemsPerPage,
+            per_page: perPage,
             page_count: 0
           }
         };
@@ -133,7 +134,7 @@ export function useWeeklyValidationTab(isActive: boolean = true) {
           total_count: 0,
           filtered_count: 0,
           page: currentPage,
-          per_page: itemsPerPage,
+          per_page: perPage,
           page_count: 0
         }
       };
@@ -334,7 +335,8 @@ export function useWeeklyValidationTab(isActive: boolean = true) {
     setSortBy,
     sortOrder,
     setSortOrder,
-    
+    perPage,
+    setPerPage,
     // Validation functionality
     validateWeekly: validateMutation.mutate,
     isValidating: validateMutation.isPending,
