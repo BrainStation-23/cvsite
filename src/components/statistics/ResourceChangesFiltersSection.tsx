@@ -1,16 +1,11 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
-import { CalendarIcon, Download, Filter, RotateCcw, ChevronRight, ChevronDown, ArrowRight, FileText, Users } from 'lucide-react';
-import { Calendar } from '@/components/ui/calendar';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { format } from 'date-fns';
-import { cn } from '@/lib/utils';
-import { useResourceChanges } from '@/hooks/use-resource-changes';
+import { Filter, RotateCcw } from 'lucide-react';
 import { BillTypeMultiSelect } from './BillTypeMultiSelect';
 import { SbuMultiSelect } from './SbuMultiSelect';
 import { ProfileCombobox } from '@/components/admin/user/ProfileCombobox';
-
+import { DateRangePickerWithPresets } from './DateRangePickerWithPresets';
 
 const ResourceChangesFiltersSection = ({
     filters,
@@ -34,58 +29,15 @@ const ResourceChangesFiltersSection = ({
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            {/* Start Date */}
-            <div className="space-y-2">
-              <Label>Start Date</Label>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    className={cn(
-                      "w-full justify-start text-left font-normal",
-                      !filters.startDate && "text-muted-foreground"
-                    )}
-                  >
-                    <CalendarIcon className="mr-2 h-4 w-4" />
-                    {filters.startDate ? format(filters.startDate, "PPP") : "Pick a date"}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0">
-                  <Calendar
-                    mode="single"
-                    selected={filters.startDate || undefined}
-                    onSelect={(date) => updateFilters({ startDate: date || null })}
-                    initialFocus
-                  />
-                </PopoverContent>
-              </Popover>
-            </div>
-
-            {/* End Date */}
-            <div className="space-y-2">
-              <Label>End Date</Label>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    className={cn(
-                      "w-full justify-start text-left font-normal",
-                      !filters.endDate && "text-muted-foreground"
-                    )}
-                  >
-                    <CalendarIcon className="mr-2 h-4 w-4" />
-                    {filters.endDate ? format(filters.endDate, "PPP") : "Pick a date"}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0">
-                  <Calendar
-                    mode="single"
-                    selected={filters.endDate || undefined}
-                    onSelect={(date) => updateFilters({ endDate: date || null })}
-                    initialFocus
-                  />
-                </PopoverContent>
-              </Popover>
+            {/* Date Range */}
+            <div className="md:col-span-2">
+              <DateRangePickerWithPresets
+                startDate={filters.startDate}
+                endDate={filters.endDate}
+                onDateRangeChange={({ startDate, endDate }) => 
+                  updateFilters({ startDate, endDate })
+                }
+              />
             </div>
 
             {/* Bill Types Filter */}

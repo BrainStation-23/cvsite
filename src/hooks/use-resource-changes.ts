@@ -2,7 +2,7 @@
 import { useState, useCallback } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { format } from 'date-fns';
+import { format, startOfWeek, endOfWeek } from 'date-fns';
 
 interface ResourceChangesFilters {
   startDate: Date | null;
@@ -65,8 +65,8 @@ interface ResourceChangesSummary {
 
 export function useResourceChanges() {
   const [filters, setFilters] = useState<ResourceChangesFilters>({
-    startDate: null,
-    endDate: null,
+    startDate: startOfWeek(new Date(), { weekStartsOn: 1 }),
+    endDate: endOfWeek(new Date(), { weekStartsOn: 1 }),
     selectedBillTypes: [],
     selectedSbus: [],
     selectedProfiles: [],
