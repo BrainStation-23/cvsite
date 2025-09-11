@@ -1,6 +1,7 @@
 import React from 'react';
 import { GanttEngagement, GanttEngagementPosition } from './types';
 import { formatEngagementTooltip } from './utils';
+import { Badge } from '@/components/ui/badge';
 
 interface GanttCellProps {
   engagement: GanttEngagement;
@@ -38,9 +39,27 @@ export const GanttCell: React.FC<GanttCellProps> = ({
       title={formatEngagementTooltip(engagement)}
     >
       <div className="h-full flex items-center justify-center">
-        <span className="text-xs text-white font-medium truncate px-1">
-          {engagement.project_name} 
-          {engagement.engagement_percentage > 0 && `[${engagement.engagement_percentage}%]`}
+        <span className="text-xs text-white font-medium truncate px-1 flex items-center gap-1">
+
+          {engagement.project?.project_bill_type && (
+            <Badge variant="default" className="text-[10px] py-0">
+              {engagement.project.project_bill_type}
+            </Badge>
+          )}
+          {engagement.project?.project_level && (
+            <Badge variant="default" className="text-[10px] py-0">
+              {engagement.project.project_level}
+            </Badge>
+          )}
+          {engagement.project?.project_type_name && (
+            <Badge variant="default" className="text-[10px] py-0">
+              {engagement.project.project_type_name}
+            </Badge>
+          )}
+          {engagement.project_name}
+          {engagement.engagement_percentage > 0 && (
+            <span className="ml-1 text-white/80">[{engagement.engagement_percentage}%]</span>
+          )}
         </span>
       </div>
     </div>
