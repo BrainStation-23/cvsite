@@ -32,6 +32,13 @@ export function transformResourceDataToGantt(resourceData: ResourceCalendarData[
       billing_percentage: item.billing_percentage,
       bill_type: item.bill_type,
       is_forecasted: item.project?.forecasted,
+      project: item.project
+        ? {
+            project_level: item.project.project_level,
+            project_bill_type: item.project.project_bill_type,
+            project_type_name: item.project.project_type_name,
+          }
+        : null,
     };
 
     resourceMap.get(profileId)!.engagements.push(engagement);
