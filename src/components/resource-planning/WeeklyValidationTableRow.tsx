@@ -13,50 +13,8 @@ import { ConfirmationDialog } from '@/components/ui/confirmation-dialog';
 import { CompleteEngagementDialog } from '@/components/ui/complete-engagement-dialog';
 import { WeeklyValidationTableEditRow } from './WeeklyValidationTableEditRow';
 import { useResourcePlanningOperations } from '@/hooks/use-resource-planning-operations';
+import { ResourcePlanningData } from './types/resourceplanning';
 
-interface WeeklyValidationData {
-  id: string;
-  profile_id: string;
-  engagement_percentage: number;
-  billing_percentage: number;
-  release_date: string;
-  engagement_start_date: string;
-  engagement_complete: boolean;
-  weekly_validation: boolean;
-  forecasted_project: string | null;
-  created_at: string;
-  updated_at: string;
-  profile: {
-    id: string;
-    employee_id: string;
-    first_name: string;
-    last_name: string;
-    current_designation: string;
-    has_overhead: boolean;
-  };
-  bill_type: {
-    id: string;
-    name: string;
-  } | null;
-  project: {
-    id: string;
-    project_name: string;
-    project_manager: string;
-    client_name: string;
-    budget: number;
-    project_level?: string;
-    project_bill_type?: string;
-    project_type_name?: string;
-  } | null;
-    manager: {
-    id: string;
-    first_name: string;
-    last_name: string;
-    employee_id: string;
-    full_name: string;
-  } | null;
-  expertise: string;
-}
 
 interface EditFormData {
   profileId: string;
@@ -66,16 +24,15 @@ interface EditFormData {
   billingPercentage: number;
   releaseDate: string;
   engagementStartDate: string;
-  forecastedProject: string | null;
 }
 
 interface WeeklyValidationTableRowProps {
-  item: WeeklyValidationData;
+  item: ResourcePlanningData;
   onValidate: (id: string) => void;
   isValidating: boolean;
   isEditing: boolean;
   editData: EditFormData | null;
-  onStartEdit: (item: WeeklyValidationData) => void;
+  onStartEdit: (item: ResourcePlanningData) => void;
   onCancelEdit: () => void;
   onSaveEdit: () => void;
   onEditDataChange: (data: Partial<EditFormData>) => void;
@@ -157,7 +114,6 @@ export const WeeklyValidationTableRow: React.FC<WeeklyValidationTableRowProps> =
           billing_percentage: item.billing_percentage,
           engagement_start_date: item.engagement_start_date,
           release_date: item.release_date,
-          forecasted_project: item.forecasted_project,
           engagement_complete: false,
           weekly_validation: false,
         };
@@ -276,13 +232,6 @@ export const WeeklyValidationTableRow: React.FC<WeeklyValidationTableRowProps> =
           )}
         </TableCell>
 
-        <TableCell className="py-1 px-2">
-          {item.forecasted_project ? (
-            <span className="text-xs">{item.forecasted_project}</span>
-          ) : (
-            <span className="text-muted-foreground text-xs">Not specified</span>
-          )}
-        </TableCell>
         
         <TableCell className="py-1 px-2">
           <Badge variant="outline" className="text-xs">{item.engagement_percentage}%</Badge>

@@ -9,48 +9,8 @@ import BillTypeCombobox from './BillTypeCombobox';
 import { ProjectCombobox } from '@/components/projects/ProjectCombobox';
 import DatePicker from '@/components/admin/user/DatePicker';
 import { Check, X } from 'lucide-react';
+import { ResourcePlanningData } from './types/resourceplanning';
 
-interface ResourcePlanningData {
-  id: string;
-  profile_id: string;
-  engagement_percentage: number;
-  billing_percentage: number;
-  release_date: string;
-  engagement_start_date: string;
-  engagement_complete: boolean;
-  weekly_validation: boolean;
-  forecasted_project: string | null;
-  created_at: string;
-  updated_at: string;
-  profile: {
-    id: string;
-    employee_id: string;
-    first_name: string;
-    last_name: string;
-    current_designation: string;
-  };
-  bill_type: {
-    id: string;
-    name: string;
-  } | null;
-  project: {
-    id: string;
-    project_name: string;
-    project_manager: string;
-    client_name: string;
-    budget: number;
-    project_level?: string;
-    project_type_name?: string;
-  } | null;
-    manager: {
-    id: string;
-    first_name: string;
-    last_name: string;
-    employee_id: string;
-    full_name: string;
-  } | null;
-  expertise: string;
-}
 
 interface EditFormData {
   profileId: string;
@@ -60,7 +20,6 @@ interface EditFormData {
   billingPercentage: number;
   releaseDate: string;
   engagementStartDate: string;
-  forecastedProject: string | null;
 }
 
 interface ResourcePlanningTableEditRowProps {
@@ -93,16 +52,7 @@ export const ResourcePlanningTableEditRow: React.FC<ResourcePlanningTableEditRow
   // Handle project selection with mutual exclusivity
   const handleProjectChange = (value: string | null) => {
     onEditDataChange({ 
-      projectId: value,
-      forecastedProject: value ? null : editData?.forecastedProject || null
-    });
-  };
-
-  // Handle forecasted project input with mutual exclusivity
-  const handleForecastedProjectChange = (value: string) => {
-    onEditDataChange({ 
-      forecastedProject: value,
-      projectId: value ? null : editData?.projectId || null
+      projectId: value
     });
   };
 
@@ -168,18 +118,6 @@ export const ResourcePlanningTableEditRow: React.FC<ResourcePlanningTableEditRow
         )}
       </TableCell>
 
-      <TableCell className="py-1 px-2">
-        <div className="w-full max-w-[140px]">
-          <Input
-            type="text"
-            value={editData?.forecastedProject || ''}
-            onChange={(e) => handleForecastedProjectChange(e.target.value)}
-            placeholder="Enter project..."
-            className="h-7 text-xs px-2"
-          />
-        </div>
-      </TableCell>
-      
       <TableCell className="py-1 px-2 w-20">
         <Input
           type="number"
