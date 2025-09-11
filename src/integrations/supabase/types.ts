@@ -59,6 +59,81 @@ export type Database = {
           },
         ]
       }
+      bench: {
+        Row: {
+          bench_date: string | null
+          bench_feedback: string | null
+          bill_type_id: string | null
+          created_at: string
+          id: string
+          profile_id: string | null
+        }
+        Insert: {
+          bench_date?: string | null
+          bench_feedback?: string | null
+          bill_type_id?: string | null
+          created_at?: string
+          id?: string
+          profile_id?: string | null
+        }
+        Update: {
+          bench_date?: string | null
+          bench_feedback?: string | null
+          bill_type_id?: string | null
+          created_at?: string
+          id?: string
+          profile_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bench_bill_type_id_fkey"
+            columns: ["bill_type_id"]
+            isOneToOne: false
+            referencedRelation: "bill_types"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bench_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bench_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "resource_availability_view"
+            referencedColumns: ["profile_id"]
+          },
+        ]
+      }
+      bench_bill_types: {
+        Row: {
+          bill_type: string | null
+          created_at: string
+          id: string
+        }
+        Insert: {
+          bill_type?: string | null
+          created_at?: string
+          id?: string
+        }
+        Update: {
+          bill_type?: string | null
+          created_at?: string
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bench_bill_types_bill_type_fkey"
+            columns: ["bill_type"]
+            isOneToOne: false
+            referencedRelation: "bill_types"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       bill_type_change_history: {
         Row: {
           changed_at: string
@@ -1687,6 +1762,7 @@ export type Database = {
           project_description: string | null
           project_id: string | null
           project_is_active: boolean | null
+          project_is_forecasted: boolean | null
           project_level: string | null
           project_manager_display_first_name: string | null
           project_manager_display_last_name: string | null
@@ -1809,20 +1885,13 @@ export type Database = {
         Returns: Json
       }
       get_bill_type_changes: {
-        Args:
-          | {
-              bill_type_ids?: string[]
-              end_date_param?: string
-              profile_ids?: string[]
-              sbu_ids?: string[]
-              start_date_param?: string
-            }
-          | {
-              bill_type_ids?: string[]
-              end_date_param?: string
-              project_ids?: string[]
-              start_date_param?: string
-            }
+        Args: {
+          bill_type_ids?: string[]
+          end_date_param?: string
+          profile_ids?: string[]
+          sbu_ids?: string[]
+          start_date_param?: string
+        }
         Returns: {
           career_start_date: string
           changed_at: string
@@ -2211,6 +2280,19 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: boolean
       }
+      list_bench: {
+        Args: {
+          bill_type_filter?: string
+          expertise_filter?: string
+          items_per_page?: number
+          page_number?: number
+          sbu_filter?: string
+          search_query?: string
+          sort_by?: string
+          sort_order?: string
+        }
+        Returns: Json
+      }
       list_users: {
         Args: {
           filter_expertise_id?: string
@@ -2343,6 +2425,10 @@ export type Database = {
           sort_order?: string
           type_filter?: string
         }
+        Returns: Json
+      }
+      sync_bench_now: {
+        Args: Record<PropertyKey, never>
         Returns: Json
       }
       update_pip_pm_feedback: {
