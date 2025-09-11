@@ -149,7 +149,6 @@ const ResourceCalendarView: React.FC = () => {
         createResourcePlanning({
           profile_id: data.profile_id,
           bill_type_id: data.bill_type_id,
-          forecasted_project: data.forecasted_project,
           engagement_start_date: data.engagement_start_date,
           release_date: data.release_date,
           engagement_percentage: data.engagement_percentage,
@@ -165,7 +164,6 @@ const ResourceCalendarView: React.FC = () => {
           updates: {
             profile_id: data.profile_id,
             bill_type_id: data.bill_type_id,
-            forecasted_project: data.forecasted_project,
             engagement_start_date: data.engagement_start_date,
             release_date: data.release_date,
             engagement_percentage: data.engagement_percentage,
@@ -268,7 +266,7 @@ const ResourceCalendarView: React.FC = () => {
           initialData={selectedEngagement}
           preselectedResourceId={preselectedResourceId || undefined}
           preselectedStartDate={preselectedStartDate || undefined}
-          isForecasted={selectedEngagement?.forecasted_project !== null}
+          isForecasted={selectedEngagement?.project?.forecasted || false}
         />
       </div>
     </DashboardLayout>

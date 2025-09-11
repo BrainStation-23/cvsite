@@ -116,8 +116,10 @@ export class EnhancedProjectsApiService {
         project_manager: projectData.project_manager,
         budget: projectData.budget,
         is_active: projectData.is_active,
+        forecasted: projectData.forecasted,
         description: projectData.description,
         project_level: projectData.project_level,
+        project_bill_type: projectData.project_bill_type,
         project_type: projectData.project_type
       });
 
@@ -131,8 +133,10 @@ export class EnhancedProjectsApiService {
     if (projectData.project_manager !== undefined) updateData.project_manager = projectData.project_manager;
     if (projectData.budget !== undefined) updateData.budget = projectData.budget;
     if (projectData.is_active !== undefined) updateData.is_active = projectData.is_active;
+    if (projectData.forecasted !== undefined) updateData.forecasted = projectData.forecasted;
     if (projectData.description !== undefined) updateData.description = projectData.description;
     if (projectData.project_level !== undefined) updateData.project_level = projectData.project_level;
+    if (projectData.project_bill_type !== undefined) updateData.project_bill_type = projectData.project_bill_type;
     if (projectData.project_type !== undefined) updateData.project_type = projectData.project_type;
 
     const { error } = await supabase
