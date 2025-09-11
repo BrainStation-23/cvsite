@@ -63,17 +63,17 @@ export type Database = {
         Row: {
           bill_type: string | null
           created_at: string
-          id: number
+          id: string
         }
         Insert: {
           bill_type?: string | null
           created_at?: string
-          id?: number
+          id: string
         }
         Update: {
           bill_type?: string | null
           created_at?: string
-          id?: number
+          id?: string
         }
         Relationships: [
           {
