@@ -19,6 +19,7 @@ export function usePlannedResourcesExport() {
         const csvData = selectedItems.map(resource => ({
           'Employee ID': resource.profile?.employee_id || '',
           'Employee Name': `${resource.profile?.first_name || ''} ${resource.profile?.last_name || ''}`.trim() || '',
+          'Overhead': resource.profile?.has_overhead ? 'Yes' : 'No',
           'SBU': resource.sbu?.name || '',
           'Project Name': resource.project?.project_name || '',
           'Client Name': resource.project?.client_name || '',
@@ -126,6 +127,7 @@ export function usePlannedResourcesExport() {
         return {
           'Employee ID': resource.profile?.employee_id || '',
           'Employee Name': `${resource.profile?.first_name || ''} ${resource.profile?.last_name || ''}`.trim() || '',
+          'Overhead': resource.profile?.has_overhead ? 'Yes' : 'No',
           'SBU': resource.sbu?.name || '',
           'Project Name': resource.project?.project_name || '',
           'Client Name': resource.project?.client_name || '',

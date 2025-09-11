@@ -17,7 +17,7 @@ interface ResourcePlanningPaginationProps {
   setPerPage: (perPage: number) => void;
 }
 
-const PER_PAGE_OPTIONS = [10, 20, 50, 100];
+const PER_PAGE_OPTIONS = [10, 20, 50, 100, 200, 500, 1000];
 
 export const ResourcePlanningPagination: React.FC<ResourcePlanningPaginationProps> = ({
   pagination,
@@ -39,20 +39,40 @@ export const ResourcePlanningPagination: React.FC<ResourcePlanningPaginationProp
         Showing {startIndex} to {endIndex} of {pagination.filtered_count} entries
       </div>
       <div className="flex items-center space-x-2">
-        <label className="text-sm" htmlFor="per-page-select">Rows per page:</label>
-        <select
-          id="per-page-select"
-          className="border rounded px-2 py-1 text-sm"
-          value={perPage}
-          onChange={e => {
-            setPerPage(Number(e.target.value)); // update perPage
-            setCurrentPage(1); // reset to first page
-          }}
-        >
-          {PER_PAGE_OPTIONS.map(option => (
-            <option key={option} value={option}>{option}</option>
-          ))}
-        </select>
+        <label className="text-sm" htmlFor="per-page-input">Rows per page:</label>
+        <div className="relative">
+          <input
+            id="per-page-input"
+            type="number"
+            min={1}
+            className="border rounded px-2 py-1 text-sm w-20 pr-6 [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:m-0"
+            value={perPage}
+            onChange={e => {
+              const val = Number(e.target.value);
+              if (!isNaN(val) && val > 0) {
+                setPerPage(val);
+                setCurrentPage(1);
+              }
+            }}
+            list="per-page-options"
+          />
+          <select
+            className="absolute right-0 top-0 h-full bg-transparent border-none text-gray-500 pr-2 cursor-pointer"
+            style={{ width: 24 }}
+            value=""
+            onChange={e => {
+              const val = Number(e.target.value);
+              setPerPage(val);
+              setCurrentPage(1);
+            }}
+            tabIndex={-1}
+          >
+            <option value="" disabled hidden />
+            {PER_PAGE_OPTIONS.map(option => (
+              <option key={option} value={option}>{option}</option>
+            ))}
+          </select>
+        </div>
         <Button
           variant="outline"
           size="sm"
