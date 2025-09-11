@@ -3,7 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
 interface BenchBillType {
-  id: number;
+  id: string;
   bill_type: string | null;
   created_at: string;
   bill_types?: {
@@ -81,7 +81,7 @@ export const useBenchBillTypes = () => {
 
   // Remove bench bill type mutation
   const removeBenchBillTypeMutation = useMutation({
-    mutationFn: async (id: number) => {
+    mutationFn: async (id: string) => {
       const { error } = await supabase
         .from('bench_bill_types')
         .delete()

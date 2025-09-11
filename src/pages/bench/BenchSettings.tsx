@@ -24,7 +24,7 @@ export const BenchSettings: React.FC = () => {
     }
   };
 
-  const handleRemoveBillType = (id: number) => {
+  const handleRemoveBillType = (id: string) => {
     removeBenchBillType(id);
   };
 
