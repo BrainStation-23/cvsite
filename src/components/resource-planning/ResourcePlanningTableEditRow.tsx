@@ -73,9 +73,9 @@ export const ResourcePlanningTableEditRow: React.FC<ResourcePlanningTableEditRow
             <span className="font-medium text-xs">
               {item.profile.first_name} {item.profile.last_name}
             </span>
-            {item.weekly_validation && (
-              <Badge variant="secondary" className="text-[10px] px-1.5 py-0 h-4 bg-green-100 text-green-700">
-                Validated
+            {item.profile.has_overhead && (
+              <Badge variant="secondary" className="text-[10px] px-1.5 py-0 h-4 bg-red-100 text-black-700">
+                Overhead
               </Badge>
             )}
           </div>
