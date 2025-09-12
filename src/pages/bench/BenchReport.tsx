@@ -2,7 +2,6 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { RefreshCw, Download } from 'lucide-react';
 import { BenchFilters } from '@/components/bench/BenchFilters';
-import { BenchMetricsCards } from '@/components/bench/BenchMetricsCards';
 import { BenchTable } from '@/components/bench/BenchTable';
 import { BenchPagination } from '@/components/bench/BenchPagination';
 import { useBenchData } from '@/hooks/use-bench-data';
@@ -119,12 +118,6 @@ export const BenchReport: React.FC = () => {
         selectedBillType={selectedBillType}
         setSelectedBillType={setSelectedBillType}
         clearFilters={clearFilters}
-      />
-
-      {/* Metrics Cards */}
-      <BenchMetricsCards
-        benchRecords={benchRecords}
-        isLoading={isLoading}
       />
 
       {/* Table */}

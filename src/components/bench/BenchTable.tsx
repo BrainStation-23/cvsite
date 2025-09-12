@@ -78,7 +78,7 @@ export const BenchTable: React.FC<BenchTableProps> = ({
       <div className="hidden md:block">
         <Card>
           <CardHeader>
-            <CardTitle>Bench Resources ({benchRecords.length})</CardTitle>
+            <CardTitle>Bench Resources</CardTitle>
           </CardHeader>
           <CardContent>
             <Table>
