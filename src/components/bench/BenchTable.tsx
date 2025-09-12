@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
@@ -6,6 +6,7 @@ import { ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
 import { BenchTableRow } from './BenchTableRow';
 import { BenchTableMobile } from './BenchTableMobile';
 import { BenchRecord } from './types/benchRecord';
+import PDFExportModal from '../employee/PDFExportModal';
 
 interface BenchTableProps {
   benchRecords: BenchRecord[];
@@ -22,6 +23,19 @@ export const BenchTable: React.FC<BenchTableProps> = ({
   sortOrder,
   onSort,
 }) => {
+  const [pdfExportModalOpen, setPdfExportModalOpen] = useState(false);
+  const [selectedEmployeeForPDF, setSelectedEmployeeForPDF] = useState<{ id: string; name: string } | null>(null);
+
+  const handlePDFExport = (profileId: string, employeeName: string) => {
+    setSelectedEmployeeForPDF({ id: profileId, name: employeeName });
+    setPdfExportModalOpen(true);
+  };
+
+  const handleClosePDFExportModal = () => {
+    setPdfExportModalOpen(false);
+    setSelectedEmployeeForPDF(null);
+  };
+
   const getSortIcon = (field: string) => {
     if (sortBy !== field) {
       return <ArrowUpDown className="ml-2 h-4 w-4" />;
@@ -138,7 +152,7 @@ export const BenchTable: React.FC<BenchTableProps> = ({
               </TableHeader>
               <TableBody>
                 {benchRecords.map((record, index) => (
-                  <BenchTableRow key={`${record.employee_id}-${index}`} record={record} />
+                  <BenchTableRow key={`${record.employee_id}-${index}`} record={record} onPDFExport={handlePDFExport}/>
                 ))}
               </TableBody>
             </Table>
@@ -155,6 +169,15 @@ export const BenchTable: React.FC<BenchTableProps> = ({
           <BenchTableMobile key={`${record.employee_id}-${index}`} record={record} />
         ))}
       </div>
+
+      {selectedEmployeeForPDF && (
+        <PDFExportModal
+          isOpen={pdfExportModalOpen}
+          onClose={handleClosePDFExportModal}
+          employeeId={selectedEmployeeForPDF.id}
+          employeeName={selectedEmployeeForPDF.name}
+        />
+      )}
     </div>
   );
 };

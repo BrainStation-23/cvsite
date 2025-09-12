@@ -5,17 +5,19 @@ import { Calendar, Clock, Award } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Eye } from 'lucide-react';
+import { Eye, Download } from 'lucide-react';
 import { BenchRecord } from './types/benchRecord';
 import { BenchFeedbackCell } from './BenchFeedbackCell';
 import { useBenchFeedback } from '@/hooks/use-bench-feedback';
+import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from '@/components/ui/tooltip';
 
 
 interface BenchTableRowProps {
   record: BenchRecord;
+  onPDFExport: (profileId: string, employeeName: string) => void;
 }
 
-export const BenchTableRow: React.FC<BenchTableRowProps> = ({ record }) => {
+export const BenchTableRow: React.FC<BenchTableRowProps> = ({ record, onPDFExport }) => {
   const navigate = useNavigate();
   const { updateFeedback } = useBenchFeedback();
   const formatBenchDate = (dateString: string) => {
@@ -45,6 +47,9 @@ export const BenchTableRow: React.FC<BenchTableRowProps> = ({ record }) => {
       return <Badge variant="outline" className="text-purple-600">Senior</Badge>;
     }
   };
+
+  // Construct employee name (adjust fields as needed)
+  const employeeName = `${record.employee_name || ''}`.trim();
 
   return (
     <TableRow>
@@ -117,15 +122,23 @@ export const BenchTableRow: React.FC<BenchTableRowProps> = ({ record }) => {
         />
       </TableCell>
       <TableCell>
-        <Button
-          variant="ghost"
-          size="sm"
-          className="h-8 w-8 p-0"
-          onClick={() => navigate(`/employee/profile/${record.profile_id}`)}
-          title="View Profile"
-        >
-          <Eye className="h-4 w-4" />
-        </Button>
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => onPDFExport(record.profile_id, employeeName)}
+                className="h-8 w-8 p-0"
+              >
+                <Eye className="h-4 w-4" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Export CV as PDF</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
       </TableCell>
     </TableRow>
   );
