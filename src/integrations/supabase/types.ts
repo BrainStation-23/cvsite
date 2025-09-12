@@ -1281,7 +1281,6 @@ export type Database = {
           engagement_complete: boolean
           engagement_percentage: number | null
           engagement_start_date: string | null
-          forecasted_project: string | null
           id: string
           profile_id: string
           project_id: string | null
@@ -1296,7 +1295,6 @@ export type Database = {
           engagement_complete?: boolean
           engagement_percentage?: number | null
           engagement_start_date?: string | null
-          forecasted_project?: string | null
           id?: string
           profile_id: string
           project_id?: string | null
@@ -1311,7 +1309,6 @@ export type Database = {
           engagement_complete?: boolean
           engagement_percentage?: number | null
           engagement_start_date?: string | null
-          forecasted_project?: string | null
           id?: string
           profile_id?: string
           project_id?: string | null
@@ -2407,7 +2404,6 @@ export type Database = {
           date_from?: string
           date_to?: string
           employee_id_filter?: string
-          forecasted_project_filter?: string
           items_per_page?: number
           operation_type_filter?: string
           page_number?: number
