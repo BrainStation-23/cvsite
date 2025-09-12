@@ -18,12 +18,12 @@ export const BenchReport: React.FC = () => {
     // Filters
     searchQuery,
     setSearchQuery,
-    selectedSbu,
-    setSelectedSbu,
-    selectedExpertise,
-    setSelectedExpertise,
-    selectedBillType,
-    setSelectedBillType,
+    selectedSbus,
+    setSelectedSbus,
+    selectedExpertises,
+    setSelectedExpertises,
+    selectedBillTypes,
+    setSelectedBillTypes,
     clearFilters,
     
     // Pagination and sorting
@@ -112,12 +112,12 @@ export const BenchReport: React.FC = () => {
       <BenchFilters
         searchQuery={searchQuery}
         setSearchQuery={setSearchQuery}
-        selectedSbu={selectedSbu}
-        setSelectedSbu={setSelectedSbu}
-        selectedExpertise={selectedExpertise}
-        setSelectedExpertise={setSelectedExpertise}
-        selectedBillType={selectedBillType}
-        setSelectedBillType={setSelectedBillType}
+        selectedSbus={selectedSbus}
+        setSelectedSbus={setSelectedSbus}
+        selectedExpertises={selectedExpertises}
+        setSelectedExpertises={setSelectedExpertises}
+        selectedBillTypes={selectedBillTypes}
+        setSelectedBillTypes={setSelectedBillTypes}
         clearFilters={clearFilters}
       />
 

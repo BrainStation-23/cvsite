@@ -22,9 +22,9 @@ export function useBenchData() {
 
   // Filter states
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedSbu, setSelectedSbu] = useState<string | null>(null);
-  const [selectedExpertise, setSelectedExpertise] = useState<string | null>(null);
-  const [selectedBillType, setSelectedBillType] = useState<string | null>(null);
+  const [selectedSbus, setSelectedSbus] = useState<string[]>([]);
+  const [selectedExpertises, setSelectedExpertises] = useState<string[]>([]);
+  const [selectedBillTypes, setSelectedBillTypes] = useState<string[]>([]);
 
   // Pagination and sorting
   const [currentPage, setCurrentPage] = useState(1);
@@ -35,9 +35,9 @@ export function useBenchData() {
   // Clear filters function
   const clearFilters = useCallback(() => {
     setSearchQuery('');
-    setSelectedSbu(null);
-    setSelectedExpertise(null);
-    setSelectedBillType(null);
+    setSelectedSbus([]);
+    setSelectedExpertises([]);
+    setSelectedBillTypes([]);
     setCurrentPage(1);
   }, []);
 
@@ -48,18 +48,18 @@ export function useBenchData() {
     items_per_page: perPage,
     sort_by: sortBy,
     sort_order: sortOrder,
-    sbu_filter: selectedSbu,
-    expertise_filter: selectedExpertise,
-    bill_type_filter: selectedBillType,
+    sbu_filter: selectedSbus.length > 0 ? selectedSbus : null,
+    expertise_filter: selectedExpertises.length > 0 ? selectedExpertises : null,
+    bill_type_filter: selectedBillTypes.length > 0 ? selectedBillTypes : null,
   }), [
     searchQuery,
     currentPage,
     perPage,
     sortBy,
     sortOrder,
-    selectedSbu,
-    selectedExpertise,
-    selectedBillType
+    selectedSbus,
+    selectedExpertises,
+    selectedBillTypes
   ]);
 
   // Data fetching
@@ -138,12 +138,12 @@ export function useBenchData() {
     // Filters
     searchQuery,
     setSearchQuery,
-    selectedSbu,
-    setSelectedSbu,
-    selectedExpertise,
-    setSelectedExpertise,
-    selectedBillType,
-    setSelectedBillType,
+    selectedSbus,
+    setSelectedSbus,
+    selectedExpertises,
+    setSelectedExpertises,
+    selectedBillTypes,
+    setSelectedBillTypes,
     clearFilters,
 
     // Pagination and sorting

@@ -2281,11 +2281,11 @@ export type Database = {
       }
       list_bench: {
         Args: {
-          bill_type_filter?: string
-          expertise_filter?: string
+          bill_type_filter?: string[]
+          expertise_filter?: string[]
           items_per_page?: number
           page_number?: number
-          sbu_filter?: string
+          sbu_filter?: string[]
           search_query?: string
           sort_by?: string
           sort_order?: string
@@ -2404,6 +2404,7 @@ export type Database = {
           date_from?: string
           date_to?: string
           employee_id_filter?: string
+          forecasted_project_filter?: string
           items_per_page?: number
           operation_type_filter?: string
           page_number?: number
