@@ -12,4 +12,5 @@ export interface BenchRecord {
   bench_date: string;
   bench_duration_days: number;
   planned_status: 'planned' | 'unplanned';
+  bench_feedback: string | null;
 }

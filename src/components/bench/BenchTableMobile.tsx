@@ -4,12 +4,15 @@ import { Badge } from '@/components/ui/badge';
 import { Calendar, Clock, Award, Users, Building2 } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
 import { BenchRecord } from './types/benchRecord';
+import { BenchFeedbackCell } from './BenchFeedbackCell';
+import { useBenchFeedback } from '@/hooks/use-bench-feedback';
 
 interface BenchTableMobileProps {
   record: BenchRecord;
 }
 
 export const BenchTableMobile: React.FC<BenchTableMobileProps> = ({ record }) => {
+  const { updateFeedback } = useBenchFeedback();
   const formatBenchDate = (dateString: string) => {
     try {
       return format(parseISO(dateString), 'MMM dd, yyyy');
@@ -113,8 +116,19 @@ export const BenchTableMobile: React.FC<BenchTableMobileProps> = ({ record }) =>
               </div>
             </div>
           </div>
-        </div>
-      </CardContent>
-    </Card>
-  );
+          </div>
+          
+          {/* Feedback Section */}
+          <div className="space-y-2">
+            <div className="text-sm font-medium text-muted-foreground">Feedback</div>
+            <BenchFeedbackCell
+              employeeId={record.employee_id}
+              employeeName={record.employee_name}
+              feedback={record.bench_feedback}
+              onUpdate={updateFeedback}
+            />
+          </div>
+        </CardContent>
+      </Card>
+    );
 };
