@@ -203,7 +203,7 @@ const UserManagement: React.FC = () => {
   };
 
   return (
-    <DashboardLayout>
+    <div>
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-semibold text-cvsite-navy dark:text-white">User Management</h1>
         <div className="flex space-x-2">
@@ -339,7 +339,7 @@ const UserManagement: React.FC = () => {
         onBulkUpload={bulkUpload}
         onRefreshUsers={handleRefreshUsersFromSync}
       />
-    </DashboardLayout>
+    </div>
   );
 };
 

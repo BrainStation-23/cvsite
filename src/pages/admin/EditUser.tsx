@@ -165,21 +165,21 @@ const EditUser: React.FC = () => {
 
   if (isLoadingUser) {
     return (
-      <DashboardLayout>
+      <div>
         <div className="flex justify-center items-center h-64">
           <div className="text-lg">Loading user data...</div>
         </div>
-      </DashboardLayout>
+      </div>
     );
   }
 
   if (!userData) {
     return (
-      <DashboardLayout>
+      <div>
         <div className="flex justify-center items-center h-64">
           <div className="text-lg">User not found</div>
         </div>
-      </DashboardLayout>
+      </div>
     );
   }
 
@@ -211,7 +211,7 @@ const EditUser: React.FC = () => {
   console.log('Initial form data being passed to UserForm:', initialFormData);
 
   return (
-    <DashboardLayout>
+    <div>
       <div className="space-y-6">
         <div className="flex items-center gap-4">
           <Button
@@ -238,7 +238,7 @@ const EditUser: React.FC = () => {
           description="Update the user details below"
         />
       </div>
-    </DashboardLayout>
+    </div>
   );
 };
 

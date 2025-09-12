@@ -93,7 +93,7 @@ const ProjectsManagement: React.FC = () => {
   };
 
   return (
-    <DashboardLayout>
+    <div>
       <div className="space-y-6">
         <div className="flex justify-between items-center">
           <div>
@@ -168,7 +168,7 @@ const ProjectsManagement: React.FC = () => {
           variant={config?.variant || 'default'}
         />
       </div>
-    </DashboardLayout>
+    </div>
   );
 };
 

@@ -9,8 +9,7 @@ import { ConditionalRenderingSection } from '@/components/admin/cv-templates/doc
 
 const CVTemplateDocumentationPage: React.FC = () => {
   return (
-    <DashboardLayout>
-      <div className="space-y-6">
+    <div className="space-y-6">
         <div>
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
             CV Template Documentation
@@ -45,7 +44,6 @@ const CVTemplateDocumentationPage: React.FC = () => {
           </TabsContent>
         </Tabs>
       </div>
-    </DashboardLayout>
   );
 };
 

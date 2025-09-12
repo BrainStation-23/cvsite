@@ -1,7 +1,6 @@
 
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import DashboardLayout from '../../components/Layout/DashboardLayout';
 import { List } from 'lucide-react';
 import { PIPListFilters } from '@/components/pip/PIPListFilters';
 import { PIPListTable } from '@/components/pip/PIPListTable';
@@ -52,7 +51,7 @@ const PIPList: React.FC = () => {
   };
 
   return (
-    <DashboardLayout>
+   
       <div className="space-y-6">
         <div className="flex items-center gap-4">
           <List className="h-8 w-8 text-cvsite-teal" />
@@ -109,7 +108,6 @@ const PIPList: React.FC = () => {
           isDeleting={isDeleting}
         />
       </div>
-    </DashboardLayout>
   );
 };
 

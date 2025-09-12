@@ -50,7 +50,7 @@ const SecurityPage: React.FC = () => {
   };
 
   return (
-    <DashboardLayout>
+    <div>
       
       <Card className="max-w-2xl">
         <CardHeader>
@@ -113,7 +113,7 @@ const SecurityPage: React.FC = () => {
           </form>
         </CardContent>
       </Card>
-    </DashboardLayout>
+    </div>
   );
 };
 

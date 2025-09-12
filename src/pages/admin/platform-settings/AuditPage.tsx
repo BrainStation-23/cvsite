@@ -20,8 +20,7 @@ const AuditPage: React.FC = () => {
   ];
 
   return (
-    <DashboardLayout>
-      <div className="flex flex-col h-full">
+    <div className="flex flex-col h-full">
         {/* Header */}
         <div className="mb-8">
           <div className="flex items-center gap-3 mb-2">
@@ -103,7 +102,6 @@ const AuditPage: React.FC = () => {
           </div>
         </div>
       </div>
-    </DashboardLayout>
   );
 };
 

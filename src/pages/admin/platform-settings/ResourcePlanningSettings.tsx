@@ -1,6 +1,5 @@
 
 import React from 'react';
-import DashboardLayout from '@/components/Layout/DashboardLayout';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { ArrowLeft } from 'lucide-react';
@@ -15,8 +14,7 @@ import WeeklyScoreCardScheduling from '@/components/admin/WeeklyScoreCardSchedul
 
 const ResourcePlanningSettings: React.FC = () => {
   return (
-    <DashboardLayout>
-      <div className="flex flex-col h-full">
+    <div className="flex flex-col h-full">
         {/* Header with back button */}
         <div className="flex items-center gap-4 mb-6">
           <Button variant="ghost" size="sm" asChild>
@@ -130,7 +128,7 @@ const ResourcePlanningSettings: React.FC = () => {
           </div>
         </Tabs>
       </div>
-    </DashboardLayout>
+
   );
 };
 

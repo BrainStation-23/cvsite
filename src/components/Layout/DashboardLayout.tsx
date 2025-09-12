@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation, Outlet } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { LogOut, Menu } from 'lucide-react';
 import SidebarNavigation from './navigation/SidebarNavigation';
@@ -10,7 +10,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Toaster } from '@/components/ui/toaster';
 
 interface DashboardLayoutProps {
-  children: React.ReactNode;
+  children?: React.ReactNode;
 }
 
 const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
@@ -112,7 +112,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
         {/* Content */}
         <main className="flex-1 p-2 bg-slate-50 dark:bg-slate-900 min-w-0">
           <ScrollArea className="bg-white dark:bg-slate-800 rounded-xl shadow-sm p-4 w-full">
-            {children}
+            {children || <Outlet />}
           </ScrollArea>
         </main>
       </div>
