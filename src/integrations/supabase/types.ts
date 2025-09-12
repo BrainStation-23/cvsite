@@ -1738,7 +1738,6 @@ export type Database = {
           engagement_start_date: string | null
           expertise: string | null
           first_name: string | null
-          forecasted_project: string | null
           full_name: string | null
           id: string | null
           last_name: string | null
@@ -2429,6 +2428,10 @@ export type Database = {
       }
       sync_bench_now: {
         Args: Record<PropertyKey, never>
+        Returns: Json
+      }
+      update_bench_feedback: {
+        Args: { employee_id_param: string; feedback_param: string }
         Returns: Json
       }
       update_pip_pm_feedback: {

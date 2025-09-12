@@ -4,6 +4,8 @@ import { Badge } from '@/components/ui/badge';
 import { Calendar, Clock, Award } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
 import { BenchRecord } from './types/benchRecord';
+import { BenchFeedbackCell } from './BenchFeedbackCell';
+import { useBenchFeedback } from '@/hooks/use-bench-feedback';
 
 
 interface BenchTableRowProps {
@@ -11,6 +13,7 @@ interface BenchTableRowProps {
 }
 
 export const BenchTableRow: React.FC<BenchTableRowProps> = ({ record }) => {
+  const { updateFeedback } = useBenchFeedback();
   const formatBenchDate = (dateString: string) => {
     try {
       return format(parseISO(dateString), 'MMM dd, yyyy');
@@ -88,6 +91,14 @@ export const BenchTableRow: React.FC<BenchTableRowProps> = ({ record }) => {
           <span className="text-sm mr-2">{record.total_years_experience}y</span>
           {getExperienceBadge(record.total_years_experience)}
         </div>
+      </TableCell>
+      <TableCell>
+        <BenchFeedbackCell
+          employeeId={record.employee_id}
+          employeeName={record.employee_name}
+          feedback={record.bench_feedback}
+          onUpdate={updateFeedback}
+        />
       </TableCell>
     </TableRow>
   );

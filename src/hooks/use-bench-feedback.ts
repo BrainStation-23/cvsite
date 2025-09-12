@@ -13,7 +13,7 @@ export const useBenchFeedback = () => {
 
   const updateFeedbackMutation = useMutation({
     mutationFn: async ({ employeeId, feedback }: UpdateBenchFeedbackParams) => {
-      const { data, error } = await supabase.rpc('update_bench_feedback', {
+      const { data, error } = await supabase.rpc('update_bench_feedback' as any, {
         employee_id_param: employeeId,
         feedback_param: feedback
       });
@@ -44,7 +44,9 @@ export const useBenchFeedback = () => {
   });
 
   return {
-    updateFeedback: updateFeedbackMutation.mutateAsync,
+    updateFeedback: async (employeeId: string, feedback: string) => {
+      return updateFeedbackMutation.mutateAsync({ employeeId, feedback });
+    },
     isUpdating: updateFeedbackMutation.isPending,
   };
 };

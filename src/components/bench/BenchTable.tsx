@@ -100,6 +100,7 @@ export const BenchTable: React.FC<BenchTableProps> = ({
                   <TableHead>Status</TableHead>
                   <TableHead>Duration</TableHead>
                   <TableHead>Experience</TableHead>
+                  <TableHead>Feedback</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
