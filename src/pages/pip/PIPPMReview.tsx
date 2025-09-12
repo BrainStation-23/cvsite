@@ -46,27 +46,23 @@ const PIPPMReview: React.FC = () => {
 
   if (isLoading) {
     return (
-      <DashboardLayout>
         <div className="flex items-center justify-center h-64">
           <div className="text-center">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
             <p className="text-muted-foreground">Loading PIP details...</p>
           </div>
         </div>
-      </DashboardLayout>
     );
   }
 
   if (!pipDetails) {
     return (
-      <DashboardLayout>
         <div className="text-center py-12">
           <p className="text-muted-foreground">PIP not found</p>
           <Button onClick={() => navigate('/admin/pip/list')} className="mt-4">
             Back to PIP List
           </Button>
         </div>
-      </DashboardLayout>
     );
   }
 
@@ -74,7 +70,6 @@ const PIPPMReview: React.FC = () => {
   const isEditing = !!pm_feedback;
 
   return (
-    <DashboardLayout>
       <div className="space-y-6">
         <div className="flex items-center gap-4">
           <Button
@@ -242,7 +237,6 @@ const PIPPMReview: React.FC = () => {
           )}
         </div>
       </div>
-    </DashboardLayout>
   );
 };
 

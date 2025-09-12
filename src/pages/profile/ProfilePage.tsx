@@ -1,6 +1,5 @@
 
 import React, { useState, useEffect } from 'react';
-import DashboardLayout from '../../components/Layout/DashboardLayout';
 import { useToast } from '@/hooks/use-toast';
 import { useProfileComposite } from '@/hooks/profile/use-profile-composite';
 import { useForm } from 'react-hook-form';
@@ -129,7 +128,7 @@ const ProfilePage: React.FC = () => {
   };
 
   return (
-    <DashboardLayout>
+
       <div className="flex flex-col h-full">
         {/* Header with CV Actions */}
         <div className="flex-shrink-0 space-y-4 py-4">
@@ -193,7 +192,6 @@ const ProfilePage: React.FC = () => {
           )}
         </div>
       </div>
-    </DashboardLayout>
   );
 };
 

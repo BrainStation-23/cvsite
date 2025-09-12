@@ -117,8 +117,7 @@ const ResourceCalendarStatistics: React.FC = () => {
   };
 
   return (
-    <DashboardLayout>
-      <div className="space-y-6">
+    <div className="space-y-6">
         {/* Header */}
         <ResourceStatisticsHeader
           baseUrl={baseUrl}
@@ -181,7 +180,6 @@ const ResourceCalendarStatistics: React.FC = () => {
           </TabsContent>
         </Tabs>
       </div>
-    </DashboardLayout>
   );
 };
 

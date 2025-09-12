@@ -106,16 +106,13 @@ const CVTemplatesPage: React.FC = () => {
 
   if (isLoading) {
     return (
-      <DashboardLayout>
         <div className="flex justify-center items-center h-64">
           <div className="text-lg">Loading CV templates...</div>
         </div>
-      </DashboardLayout>
     );
   }
 
   return (
-    <DashboardLayout>
       <div className="space-y-6">
         {/* Header */}
         <div className="flex justify-between items-center">
@@ -270,7 +267,7 @@ const CVTemplatesPage: React.FC = () => {
           />
         )}
       </div>
-    </DashboardLayout>
+    
   );
 };
 

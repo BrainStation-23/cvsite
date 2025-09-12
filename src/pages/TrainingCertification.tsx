@@ -64,7 +64,7 @@ const TrainingCertification: React.FC = () => {
   };
 
   return (
-    <DashboardLayout>
+    <div>
       <div className="space-y-6">
         {/* Page Header */}
         <div className="flex justify-between items-center">
@@ -160,7 +160,7 @@ const TrainingCertification: React.FC = () => {
           </CardContent>
         </Card>
       </div>
-    </DashboardLayout>
+    </div>
   );
 };
 

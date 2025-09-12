@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import DashboardLayout from '../../components/Layout/DashboardLayout';
 import { Card, CardContent } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useEmployeeProfilesEnhanced } from '@/hooks/use-employee-profiles-enhanced';
@@ -148,7 +147,7 @@ const EmployeeData: React.FC = () => {
   };
 
   return (
-    <DashboardLayout>
+    <div>
       <div className="flex h-full w-full min-h-screen overflow-x-hidden">
         {/* Main Content Area - Left Side */}
         <div className="flex-1 w-0 flex flex-col space-y-3 pr-6">
@@ -245,7 +244,7 @@ const EmployeeData: React.FC = () => {
           />
         )}
       </div>
-    </DashboardLayout>
+    </div>
   );
 };
 

@@ -1,13 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { ArrowLeft, Save, Eye, FileText, Database } from 'lucide-react';
 import { toast } from 'sonner';
-import DashboardLayout from '@/components/Layout/DashboardLayout';
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from '@/components/ui/resizable';
 import { useCVTemplates } from '@/hooks/use-cv-templates';
 import { CVTemplateHTMLEditor } from '@/components/admin/cv-templates/CVTemplateHTMLEditor';
@@ -159,16 +157,15 @@ const CVTemplateEditorPage: React.FC = () => {
 
   if (!currentTemplate) {
     return (
-      <DashboardLayout>
+
         <div className="flex justify-center items-center h-64">
           <div className="text-lg">Template not found</div>
         </div>
-      </DashboardLayout>
     );
   }
 
   return (
-    <DashboardLayout>
+    <div>
       <div className="h-full flex flex-col">
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b bg-background">
@@ -298,7 +295,7 @@ const CVTemplateEditorPage: React.FC = () => {
         cancelText={config?.cancelText}
         variant={config?.variant}
       />
-    </DashboardLayout>
+    </div>
   );
 };
 

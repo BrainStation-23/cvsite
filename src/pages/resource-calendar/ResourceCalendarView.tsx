@@ -208,7 +208,6 @@ const ResourceCalendarView: React.FC = () => {
   };
 
   return (
-    <DashboardLayout>
       <div className="space-y-6">
         {/* Header with Back Button */}
         <div className="flex items-center justify-between">
@@ -282,7 +281,6 @@ const ResourceCalendarView: React.FC = () => {
           isForecasted={selectedEngagement?.project?.forecasted || false}
         />
       </div>
-    </DashboardLayout>
   );
 };
 

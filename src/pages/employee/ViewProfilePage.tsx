@@ -23,11 +23,11 @@ const ViewProfilePage: React.FC = () => {
   const { user } = useAuth();
   const [newTechnicalSkill, setNewTechnicalSkill] = useState({ name: '', proficiency: 1, priority: 0 });
   const [newSpecializedSkill, setNewSpecializedSkill] = useState({ name: '', proficiency: 1, priority: 0 });
-  
+
   console.log('=== ViewProfilePage Debug ===');
   console.log('Profile ID from URL:', profileId);
   console.log('Current user:', user);
-  
+
   // Use the same hooks as the regular profile page with profileId
   const { isLoading: generalInfoLoading, generalInfo, saveGeneralInfo, isSaving: generalInfoSaving } = useGeneralInfo(profileId);
   const { isLoading: skillsLoading, technicalSkills, specializedSkills, saveTechnicalSkill, saveSpecializedSkill, deleteTechnicalSkill, deleteSpecializedSkill, reorderTechnicalSkills, reorderSpecializedSkills, isSaving: skillsSaving } = useSkills(profileId);
@@ -63,7 +63,7 @@ const ViewProfilePage: React.FC = () => {
     console.log('=== Form Update Effect ===');
     console.log('Is loading:', isLoading);
     console.log('General info:', generalInfo);
-    
+
     if (!isLoading) {
       const formData = {
         firstName: generalInfo.firstName || '',
@@ -72,7 +72,7 @@ const ViewProfilePage: React.FC = () => {
         profileImage: generalInfo.profileImage,
         currentDesignation: generalInfo.currentDesignation || ''
       };
-      
+
       console.log('Setting form data:', formData);
       form.reset(formData);
     }
@@ -111,86 +111,85 @@ const ViewProfilePage: React.FC = () => {
 
   if (isLoading) {
     return (
-      <DashboardLayout>
-        <div className="flex justify-center items-center h-64">
-          <p>Loading profile information...</p>
-        </div>
-      </DashboardLayout>
+
+      <div className="flex justify-center items-center h-64">
+        <p>Loading profile information...</p>
+      </div>
+
     );
   }
 
   return (
-    <DashboardLayout>
-      <div className="flex flex-col h-full">
-        {/* Header */}
-        <div className="flex-shrink-0 space-y-4 py-4 border-b border-gray-200 dark:border-gray-700">
-          <div className="flex items-center">
-            <Button 
-              variant="outline" 
-              onClick={() => navigate('/admin/employee-data')}
-              className="flex items-center gap-2 mr-4"
-            >
-              <ArrowLeft className="h-4 w-4" />
-              Back
-            </Button>
-            <h1 className="text-xl font-semibold text-cvsite-navy dark:text-white">
-              {generalInfo.firstName} {generalInfo.lastName}'s Profile
-            </h1>
-          </div>
-          
-          {/* CV Actions */}
-          <CVActions profileId={profileId} />
+
+    <div className="flex flex-col h-full">
+      {/* Header */}
+      <div className="flex-shrink-0 space-y-4 py-4 border-b border-gray-200 dark:border-gray-700">
+        <div className="flex items-center">
+          <Button
+            variant="outline"
+            onClick={() => navigate('/admin/employee-data')}
+            className="flex items-center gap-2 mr-4"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Back
+          </Button>
+          <h1 className="text-xl font-semibold text-cvsite-navy dark:text-white">
+            {generalInfo.firstName} {generalInfo.lastName}'s Profile
+          </h1>
         </div>
 
-        {/* Content area - now takes full height */}
-        <div className="flex-1 min-h-0 py-4">
-          <ProfileTabs
-            form={form}
-            isEditing={canEdit}
-            onImageUpdate={handleImageUpdate}
-            technicalSkills={technicalSkills}
-            specializedSkills={specializedSkills}
-            experiences={experiences}
-            education={education}
-            trainings={trainings}
-            achievements={achievements}
-            projects={projects}
-            isSaving={isSaving}
-            newTechnicalSkill={newTechnicalSkill}
-            newSpecializedSkill={newSpecializedSkill}
-            setNewTechnicalSkill={setNewTechnicalSkill}
-            setNewSpecializedSkill={setNewSpecializedSkill}
-            handleAddTechnicalSkill={handleAddTechnicalSkillWrapper}
-            handleAddSpecializedSkill={handleAddSpecializedSkillWrapper}
-            saveExperience={saveExperience}
-            updateExperience={updateExperience}
-            deleteExperience={deleteExperience}
-            saveEducation={saveEducation}
-            updateEducation={updateEducation}
-            deleteEducation={deleteEducation}
-            saveTraining={saveTraining}
-            updateTraining={updateTraining}
-            deleteTraining={deleteTraining}
-            saveAchievement={saveAchievement}
-            updateAchievement={updateAchievement}
-            deleteAchievement={deleteAchievement}
-            saveProject={saveProject}
-            updateProject={updateProject}
-            deleteProject={deleteProject}
-            reorderProjects={reorderProjects}
-            deleteTechnicalSkill={deleteTechnicalSkill}
-            deleteSpecializedSkill={deleteSpecializedSkill}
-            saveTechnicalSkill={saveTechnicalSkill}
-            saveSpecializedSkill={saveSpecializedSkill}
-            reorderTechnicalSkills={reorderTechnicalSkills}
-            reorderSpecializedSkills={reorderSpecializedSkills}
-            profileId={profileId}
-            saveGeneralInfo={saveGeneralInfo}
-            onDataChange={handleDataRefresh}
-          />
-        </div>
+        {/* CV Actions */}
+        <CVActions profileId={profileId} />
       </div>
-    </DashboardLayout>
+
+      {/* Content area - now takes full height */}
+      <div className="flex-1 min-h-0 py-4">
+        <ProfileTabs
+          form={form}
+          isEditing={canEdit}
+          onImageUpdate={handleImageUpdate}
+          technicalSkills={technicalSkills}
+          specializedSkills={specializedSkills}
+          experiences={experiences}
+          education={education}
+          trainings={trainings}
+          achievements={achievements}
+          projects={projects}
+          isSaving={isSaving}
+          newTechnicalSkill={newTechnicalSkill}
+          newSpecializedSkill={newSpecializedSkill}
+          setNewTechnicalSkill={setNewTechnicalSkill}
+          setNewSpecializedSkill={setNewSpecializedSkill}
+          handleAddTechnicalSkill={handleAddTechnicalSkillWrapper}
+          handleAddSpecializedSkill={handleAddSpecializedSkillWrapper}
+          saveExperience={saveExperience}
+          updateExperience={updateExperience}
+          deleteExperience={deleteExperience}
+          saveEducation={saveEducation}
+          updateEducation={updateEducation}
+          deleteEducation={deleteEducation}
+          saveTraining={saveTraining}
+          updateTraining={updateTraining}
+          deleteTraining={deleteTraining}
+          saveAchievement={saveAchievement}
+          updateAchievement={updateAchievement}
+          deleteAchievement={deleteAchievement}
+          saveProject={saveProject}
+          updateProject={updateProject}
+          deleteProject={deleteProject}
+          reorderProjects={reorderProjects}
+          deleteTechnicalSkill={deleteTechnicalSkill}
+          deleteSpecializedSkill={deleteSpecializedSkill}
+          saveTechnicalSkill={saveTechnicalSkill}
+          saveSpecializedSkill={saveSpecializedSkill}
+          reorderTechnicalSkills={reorderTechnicalSkills}
+          reorderSpecializedSkills={reorderSpecializedSkills}
+          profileId={profileId}
+          saveGeneralInfo={saveGeneralInfo}
+          onDataChange={handleDataRefresh}
+        />
+      </div>
+    </div>
   );
 };
 

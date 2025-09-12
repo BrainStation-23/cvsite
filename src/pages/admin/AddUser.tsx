@@ -54,7 +54,7 @@ const AddUser: React.FC = () => {
   };
 
   return (
-    <DashboardLayout>
+    <div>
       <div className="space-y-6">
         <div className="flex items-center gap-4">
           <Button
@@ -79,7 +79,7 @@ const AddUser: React.FC = () => {
           description="Fill in the details below to create a new user account"
         />
       </div>
-    </DashboardLayout>
+    </div>
   );
 };
 

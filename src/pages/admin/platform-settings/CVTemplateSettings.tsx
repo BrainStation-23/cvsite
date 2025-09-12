@@ -1,6 +1,5 @@
 
 import React from 'react';
-import DashboardLayout from '@/components/Layout/DashboardLayout';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { ArrowLeft } from 'lucide-react';
 import { Link } from 'react-router-dom';
@@ -11,8 +10,7 @@ import { PlaceholderImageSettings } from '@/components/admin/placeholder-images/
 
 const CVTemplateSettings: React.FC = () => {
   return (
-    <DashboardLayout>
-      <div className="flex flex-col h-full">
+    <div className="flex flex-col h-full">
         {/* Header with back button */}
         <div className="flex items-center gap-4 mb-6">
           <Button variant="ghost" size="sm" asChild>
@@ -53,7 +51,6 @@ const CVTemplateSettings: React.FC = () => {
           </ScrollArea>
         </div>
       </div>
-    </DashboardLayout>
   );
 };
 
