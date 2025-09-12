@@ -75,7 +75,7 @@ export const BenchTableMobile: React.FC<BenchTableMobileProps> = ({ record }) =>
           <div className="flex items-center gap-2">
             <div
               className="w-3 h-3 rounded-full"
-              style={{ backgroundColor: record.bill_type_color_code }}
+              style={{ backgroundColor: record.bill_type_color }}
             />
             <span className="text-sm font-medium">Bill Type:</span>
             <span className="text-sm">{record.bill_type_name}</span>

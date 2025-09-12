@@ -1,7 +1,6 @@
 
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import DashboardLayout from '../../components/Layout/DashboardLayout';
 import { UserCheck } from 'lucide-react';
 import { PIPListTable } from '@/components/pip/PIPListTable';
 import { usePIPManagement } from '@/hooks/use-pip-management';
@@ -43,35 +42,33 @@ const ManagerPIPList: React.FC = () => {
   );
 
   return (
-    <DashboardLayout>
-      <div className="space-y-6">
-        <div className="flex items-center gap-4">
-          <UserCheck className="h-8 w-8 text-cvsite-teal" />
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-              PM Review
-            </h1>
-            <p className="text-muted-foreground">
-              Review and provide feedback on Performance Improvement Plans for your team members
-            </p>
-          </div>
+    <div className="space-y-6">
+      <div className="flex items-center gap-4">
+        <UserCheck className="h-8 w-8 text-cvsite-teal" />
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+            PM Review
+          </h1>
+          <p className="text-muted-foreground">
+            Review and provide feedback on Performance Improvement Plans for your team members
+          </p>
         </div>
-
-        {/* Results Table */}
-        <PIPListTable
-          pips={relevantPips}
-          pagination={pagination}
-          isLoading={isLoading}
-          onPageChange={handlePageChange}
-          onEditPIP={handlePMReview}
-          onDeletePIP={() => {}} // Managers can't delete PIPs
-          onViewPIP={() => {}} // Managers don't need view functionality
-          isDeleting={false}
-          showActions={false} // Don't show delete actions for managers
-          showViewButton={false} // Hide view details button for managers
-        />
       </div>
-    </DashboardLayout>
+
+      {/* Results Table */}
+      <PIPListTable
+        pips={relevantPips}
+        pagination={pagination}
+        isLoading={isLoading}
+        onPageChange={handlePageChange}
+        onEditPIP={handlePMReview}
+        onDeletePIP={() => {}} // Managers can't delete PIPs
+        onViewPIP={() => {}} // Managers don't need view functionality
+        isDeleting={false}
+        showActions={false} // Don't show delete actions for managers
+        showViewButton={false} // Hide view details button for managers
+      />
+    </div>
   );
 };
 

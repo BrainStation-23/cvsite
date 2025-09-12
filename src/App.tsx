@@ -49,6 +49,7 @@ import MyTeam from '@/pages/MyTeam';
 import BenchReportPage from '@/pages/admin/bench/BenchReportPage';
 import BenchSettingsPage from '@/pages/admin/bench/BenchSettingsPage';
 import BenchDashboard from '@/pages/bench/BenchDashboard';
+import DashboardLayout from '@/components/Layout/DashboardLayout';
 import './App.css';
 
 // Create QueryClient instance outside component to prevent recreation
@@ -79,11 +80,98 @@ function App(): React.ReactElement {
                 </ProtectedRoute>
               }
             />
+            
+            {/* Nested Admin Routes with persistent DashboardLayout */}
+            <Route path="/admin" element={
+              <ProtectedRoute allowedRoles={['admin']}>
+                <DashboardLayout />
+              </ProtectedRoute>
+            }>
+              <Route path="dashboard" element={<AdminDashboard />} />
+              <Route path="profile" element={<ProfilePage />} />
+              <Route path="myteam" element={<MyTeam />} />
+              <Route path="users" element={<UserManagement />} />
+              <Route path="users/add" element={<AddUser />} />
+              <Route path="users/edit/:userId" element={<EditUser />} />
+              <Route path="user-management" element={<UserManagement />} />
+              <Route path="employee-data-management" element={<EmployeeDataManagement />} />
+              <Route path="employee-data" element={<EmployeeData />} />
+              <Route path="training-certification" element={<TrainingCertification />} />
+              <Route path="projects" element={<ProjectsManagement />} />
+              <Route path="security" element={<SecurityPage />} />
+              
+              {/* Resource Calendar */}
+              <Route path="resource-calendar/planning" element={<ResourceCalendarPlanning />} />
+              <Route path="resource-calendar/calendar" element={<ResourceCalendarView />} />
+              <Route path="resource-calendar/statistics" element={<ResourceCalendarStatistics />} />
+              
+              {/* Platform Settings */}
+              <Route path="platform-settings" element={<PlatformSettings />} />
+              <Route path="platform-settings/profile" element={<ProfileManagementSettings />} />
+              <Route path="platform-settings/resources" element={<ResourcePlanningSettings />} />
+              <Route path="platform-settings/cv-templates" element={<CVTemplateSettings />} />
+              <Route path="platform-settings/system" element={<SystemConfigurationSettings />} />
+              <Route path="platform-settings/audit" element={<AuditPage />} />
+              <Route path="platform-settings/audit/profile-image-warnings" element={<ProfileImageWarningAudit />} />
+              
+              {/* CV Templates */}
+              <Route path="cv-templates" element={<CVTemplatesPage />} />
+              <Route path="cv-templates/documentation" element={<CVTemplateDocumentationPage />} />
+              <Route path="cv-templates/:id" element={<CVTemplateViewPage />} />
+              <Route path="cv-templates/:id/edit" element={<CVTemplateEditorPage />} />
+              
+              {/* PIP Management */}
+              <Route path="pip/initiate" element={<PIPInitiate />} />
+              <Route path="pip/list" element={<PIPList />} />
+              <Route path="pip/view/:pipId" element={<AdminPIPView />} />
+              <Route path="pip/dashboard" element={<PIPDashboard />} />
+              <Route path="pip/pm-review/:pipId" element={<PIPPMReview />} />
+              <Route path="pip/my-situation" element={<MySituation />} />
+              
+              {/* Bench Management */}
+              <Route path="bench/dashboard" element={<BenchDashboard />} />
+              <Route path="bench/report" element={<BenchReportPage />} />
+              <Route path="bench/settings" element={<BenchSettingsPage />} />
+            </Route>
+
+            {/* Nested Manager Routes with persistent DashboardLayout */}
+            <Route path="/manager" element={
+              <ProtectedRoute allowedRoles={['manager']}>
+                <DashboardLayout />
+              </ProtectedRoute>
+            }>
+              <Route path="dashboard" element={<ManagerDashboard />} />
+              <Route path="profile" element={<ProfilePage />} />
+              <Route path="myteam" element={<MyTeam />} />
+              <Route path="employee-data" element={<EmployeeData />} />
+              <Route path="training-certification" element={<TrainingCertification />} />
+              <Route path="security" element={<SecurityPage />} />
+              <Route path="pip/pm-review" element={<ManagerPIPList />} />
+              <Route path="pip/pm-review/:pipId" element={<ManagerPMReview />} />
+              <Route path="pip/my-situation" element={<MySituation />} />
+            </Route>
+
+            {/* Nested Employee Routes with persistent DashboardLayout */}
+            <Route path="/employee" element={
+              <ProtectedRoute allowedRoles={['employee']}>
+                <DashboardLayout />
+              </ProtectedRoute>
+            }>
+              <Route path="dashboard" element={<EmployeeDashboard />} />
+              <Route path="profile" element={<ProfilePage />} />
+              <Route path="myteam" element={<MyTeam />} />
+              <Route path="security" element={<SecurityPage />} />
+              <Route path="pip/my-situation" element={<MySituation />} />
+            </Route>
+
+            {/* Legacy routes for backward compatibility */}
             <Route
               path="/admin/profile"
               element={
                 <ProtectedRoute allowedRoles={['admin']}>
-                  <ProfilePage />
+                  <DashboardLayout>
+                    <ProfilePage />
+                  </DashboardLayout>
                 </ProtectedRoute>
               }
             />
@@ -91,7 +179,9 @@ function App(): React.ReactElement {
               path="/admin/myteam"
               element={
                 <ProtectedRoute allowedRoles={['admin']}>
-                  <MyTeam />
+                  <DashboardLayout>
+                    <MyTeam />
+                  </DashboardLayout>
                 </ProtectedRoute>
               }
             />
@@ -99,7 +189,9 @@ function App(): React.ReactElement {
               path="/manager/myteam"
               element={
                 <ProtectedRoute allowedRoles={['manager']}>
-                  <MyTeam />
+                  <DashboardLayout>
+                    <MyTeam />
+                  </DashboardLayout>
                 </ProtectedRoute>
               }
             />
@@ -107,7 +199,9 @@ function App(): React.ReactElement {
               path="/employee/myteam"
               element={
                 <ProtectedRoute allowedRoles={['employee']}>
-                  <MyTeam />
+                  <DashboardLayout>
+                    <MyTeam />
+                  </DashboardLayout>
                 </ProtectedRoute>
               }
             />
@@ -115,7 +209,9 @@ function App(): React.ReactElement {
               path="/manager/profile"
               element={
                 <ProtectedRoute allowedRoles={['manager']}>
-                  <ProfilePage />
+                  <DashboardLayout>
+                    <ProfilePage />
+                  </DashboardLayout>
                 </ProtectedRoute>
               }
             />
@@ -123,7 +219,9 @@ function App(): React.ReactElement {
               path="/employee/profile"
               element={
                 <ProtectedRoute allowedRoles={['employee']}>
-                  <ProfilePage />
+                  <DashboardLayout>
+                    <ProfilePage />
+                  </DashboardLayout>
                 </ProtectedRoute>
               }
             />
@@ -131,7 +229,9 @@ function App(): React.ReactElement {
               path="/employee/profile/:profileId"
               element={
                 <ProtectedRoute allowedRoles={['admin', 'manager']}>
-                  <ViewProfilePage />
+                  <DashboardLayout>
+                    <ViewProfilePage />
+                  </DashboardLayout>
                 </ProtectedRoute>
               }
             />
@@ -139,7 +239,9 @@ function App(): React.ReactElement {
               path="/employee-data"
               element={
                 <ProtectedRoute allowedRoles={['admin', 'manager']}>
-                  <EmployeeData />
+                  <DashboardLayout>
+                    <EmployeeData />
+                  </DashboardLayout>
                 </ProtectedRoute>
               }
             />
@@ -147,7 +249,9 @@ function App(): React.ReactElement {
               path="/employee/:id"
               element={
                 <ProtectedRoute allowedRoles={['admin', 'manager']}>
-                  <ViewProfilePage />
+                  <DashboardLayout>
+                    <ViewProfilePage />
+                  </DashboardLayout>
                 </ProtectedRoute>
               }
             />
@@ -155,7 +259,9 @@ function App(): React.ReactElement {
               path="/admin/dashboard"
               element={
                 <ProtectedRoute allowedRoles={['admin']}>
-                  <AdminDashboard />
+                  <DashboardLayout>
+                    <AdminDashboard />
+                  </DashboardLayout>
                 </ProtectedRoute>
               }
             />
@@ -163,7 +269,9 @@ function App(): React.ReactElement {
               path="/employee/dashboard"
               element={
                 <ProtectedRoute allowedRoles={['employee']}>
-                  <EmployeeDashboard />
+                  <DashboardLayout>
+                    <EmployeeDashboard />
+                  </DashboardLayout>
                 </ProtectedRoute>
               }
             />
@@ -171,7 +279,9 @@ function App(): React.ReactElement {
               path="/manager/dashboard"
               element={
                 <ProtectedRoute allowedRoles={['manager']}>
-                  <ManagerDashboard />
+                  <DashboardLayout>
+                    <ManagerDashboard />
+                  </DashboardLayout>
                 </ProtectedRoute>
               }
             />
@@ -179,7 +289,9 @@ function App(): React.ReactElement {
               path="/admin-dashboard"
               element={
                 <ProtectedRoute allowedRoles={['admin']}>
-                  <AdminDashboard />
+                  <DashboardLayout>
+                    <AdminDashboard />
+                  </DashboardLayout>
                 </ProtectedRoute>
               }
             />
@@ -187,7 +299,9 @@ function App(): React.ReactElement {
               path="/employee-dashboard"
               element={
                 <ProtectedRoute allowedRoles={['employee']}>
-                  <EmployeeDashboard />
+                  <DashboardLayout>
+                    <EmployeeDashboard />
+                  </DashboardLayout>
                 </ProtectedRoute>
               }
             />
@@ -195,7 +309,9 @@ function App(): React.ReactElement {
               path="/manager-dashboard"
               element={
                 <ProtectedRoute allowedRoles={['manager']}>
-                  <ManagerDashboard />
+                  <DashboardLayout>
+                    <ManagerDashboard />
+                  </DashboardLayout>
                 </ProtectedRoute>
               }
             />
@@ -206,7 +322,9 @@ function App(): React.ReactElement {
               path="/admin/pip/initiate"
               element={
                 <ProtectedRoute allowedRoles={['admin']}>
-                  <PIPInitiate />
+                  <DashboardLayout>
+                    <PIPInitiate />
+                  </DashboardLayout>
                 </ProtectedRoute>
               }
             />
@@ -214,20 +332,26 @@ function App(): React.ReactElement {
               path="/admin/pip/list"
               element={
                 <ProtectedRoute allowedRoles={['admin']}>
-                  <PIPList />
+                  <DashboardLayout>
+                    <PIPList />
+                  </DashboardLayout>
                 </ProtectedRoute>
               }
             />
             <Route path="/admin/pip/view/:pipId" element={
               <ProtectedRoute allowedRoles={['admin']}>
+                <DashboardLayout>
                   <AdminPIPView />
+                </DashboardLayout>
               </ProtectedRoute>
             } />
             <Route
               path="/admin/pip/dashboard"
               element={
                 <ProtectedRoute allowedRoles={['admin']}>
-                  <PIPDashboard />
+                  <DashboardLayout>
+                    <PIPDashboard />
+                  </DashboardLayout>
                 </ProtectedRoute>
               }
             />
@@ -235,7 +359,9 @@ function App(): React.ReactElement {
               path="/admin/pip/pm-review/:pipId"
               element={
                 <ProtectedRoute allowedRoles={['admin']}>
-                  <PIPPMReview />
+                  <DashboardLayout>
+                    <PIPPMReview />
+                  </DashboardLayout>
                 </ProtectedRoute>
               }
             />
@@ -245,7 +371,9 @@ function App(): React.ReactElement {
               path="/manager/pip/pm-review"
               element={
                 <ProtectedRoute allowedRoles={['manager']}>
-                  <ManagerPIPList />
+                  <DashboardLayout>
+                    <ManagerPIPList />
+                  </DashboardLayout>
                 </ProtectedRoute>
               }
             />
@@ -253,7 +381,9 @@ function App(): React.ReactElement {
               path="/manager/pip/pm-review/:pipId"
               element={
                 <ProtectedRoute allowedRoles={['manager']}>
-                  <ManagerPMReview />
+                  <DashboardLayout>
+                    <ManagerPMReview />
+                  </DashboardLayout>
                 </ProtectedRoute>
               }
             />
@@ -263,7 +393,9 @@ function App(): React.ReactElement {
               path="/admin/pip/my-situation"
               element={
                 <ProtectedRoute allowedRoles={['admin']}>
-                  <MySituation />
+                  <DashboardLayout>
+                    <MySituation />
+                  </DashboardLayout>
                 </ProtectedRoute>
               }
             />
@@ -271,7 +403,9 @@ function App(): React.ReactElement {
               path="/manager/pip/my-situation"
               element={
                 <ProtectedRoute allowedRoles={['manager']}>
-                  <MySituation />
+                  <DashboardLayout>
+                    <MySituation />
+                  </DashboardLayout>
                 </ProtectedRoute>
               }
             />
@@ -279,7 +413,9 @@ function App(): React.ReactElement {
               path="/employee/pip/my-situation"
               element={
                 <ProtectedRoute allowedRoles={['employee']}>
-                  <MySituation />
+                  <DashboardLayout>
+                    <MySituation />
+                  </DashboardLayout>
                 </ProtectedRoute>
               }
             />
@@ -288,7 +424,9 @@ function App(): React.ReactElement {
               path="/admin/users"
               element={
                 <ProtectedRoute allowedRoles={['admin']}>
-                  <UserManagement />
+                  <DashboardLayout>
+                    <UserManagement />
+                  </DashboardLayout>
                 </ProtectedRoute>
               }
             />
@@ -296,7 +434,9 @@ function App(): React.ReactElement {
               path="/admin/users/add"
               element={
                 <ProtectedRoute allowedRoles={['admin']}>
-                  <AddUser />
+                  <DashboardLayout>
+                    <AddUser />
+                  </DashboardLayout>
                 </ProtectedRoute>
               }
             />
@@ -304,7 +444,9 @@ function App(): React.ReactElement {
               path="/admin/users/edit/:userId"
               element={
                 <ProtectedRoute allowedRoles={['admin']}>
-                  <EditUser />
+                  <DashboardLayout>
+                    <EditUser />
+                  </DashboardLayout>
                 </ProtectedRoute>
               }
             />
@@ -312,7 +454,9 @@ function App(): React.ReactElement {
               path="/admin/user-management"
               element={
                 <ProtectedRoute allowedRoles={['admin']}>
-                  <UserManagement />
+                  <DashboardLayout>
+                    <UserManagement />
+                  </DashboardLayout>
                 </ProtectedRoute>
               }
             />
@@ -320,7 +464,9 @@ function App(): React.ReactElement {
                 path="/admin/employee-data-management" 
                 element={
                   <ProtectedRoute allowedRoles={['admin']}>
-                    <EmployeeDataManagement />
+                    <DashboardLayout>
+                      <EmployeeDataManagement />
+                    </DashboardLayout>
                   </ProtectedRoute>
                 } 
               />
@@ -328,7 +474,9 @@ function App(): React.ReactElement {
               path="/admin/employee-data"
               element={
                 <ProtectedRoute allowedRoles={['admin', 'manager']}>
-                  <EmployeeData />
+                  <DashboardLayout>
+                    <EmployeeData />
+                  </DashboardLayout>
                 </ProtectedRoute>
               }
             />
@@ -336,7 +484,9 @@ function App(): React.ReactElement {
               path="/manager/employee-data"
               element={
                 <ProtectedRoute allowedRoles={['manager']}>
-                  <EmployeeData />
+                  <DashboardLayout>
+                    <EmployeeData />
+                  </DashboardLayout>
                 </ProtectedRoute>
               }
             />
@@ -344,7 +494,9 @@ function App(): React.ReactElement {
               path="/admin/training-certification"
               element={
                 <ProtectedRoute allowedRoles={['admin', 'manager']}>
-                  <TrainingCertification />
+                  <DashboardLayout>
+                    <TrainingCertification />
+                  </DashboardLayout>
                 </ProtectedRoute>
               }
             />
@@ -352,7 +504,9 @@ function App(): React.ReactElement {
               path="/manager/training-certification"
               element={
                 <ProtectedRoute allowedRoles={['manager', 'admin']}>
-                  <TrainingCertification />
+                  <DashboardLayout>
+                    <TrainingCertification />
+                  </DashboardLayout>
                 </ProtectedRoute>
               }
             />
@@ -361,7 +515,9 @@ function App(): React.ReactElement {
               path="/admin/resource-calendar/planning"
               element={
                 <ProtectedRoute allowedRoles={['admin', 'manager']}>
-                  <ResourceCalendarPlanning />
+                  <DashboardLayout>
+                    <ResourceCalendarPlanning />
+                  </DashboardLayout>
                 </ProtectedRoute>
               }
             />
@@ -369,7 +525,9 @@ function App(): React.ReactElement {
               path="/admin/resource-calendar/calendar"
               element={
                 <ProtectedRoute allowedRoles={['admin', 'manager']}>
-                  <ResourceCalendarView />
+                  <DashboardLayout>
+                    <ResourceCalendarView />
+                  </DashboardLayout>
                 </ProtectedRoute>
               }
             />
@@ -377,7 +535,9 @@ function App(): React.ReactElement {
               path="/admin/resource-calendar/statistics"
               element={
                 <ProtectedRoute allowedRoles={['admin', 'manager']}>
-                  <ResourceCalendarStatistics />
+                  <DashboardLayout>
+                    <ResourceCalendarStatistics />
+                  </DashboardLayout>
                 </ProtectedRoute>
               }
             />
@@ -386,7 +546,9 @@ function App(): React.ReactElement {
               path="/admin/platform-settings"
               element={
                 <ProtectedRoute allowedRoles={['admin']}>
-                  <PlatformSettings />
+                  <DashboardLayout>
+                    <PlatformSettings />
+                  </DashboardLayout>
                 </ProtectedRoute>
               }
             />
@@ -394,7 +556,9 @@ function App(): React.ReactElement {
               path="/admin/platform-settings/profile"
               element={
                 <ProtectedRoute allowedRoles={['admin']}>
-                  <ProfileManagementSettings />
+                  <DashboardLayout>
+                    <ProfileManagementSettings />
+                  </DashboardLayout>
                 </ProtectedRoute>
               }
             />
@@ -402,7 +566,9 @@ function App(): React.ReactElement {
               path="/admin/platform-settings/resources"
               element={
                 <ProtectedRoute allowedRoles={['admin']}>
-                  <ResourcePlanningSettings />
+                  <DashboardLayout>
+                    <ResourcePlanningSettings />
+                  </DashboardLayout>
                 </ProtectedRoute>
               }
             />
@@ -410,7 +576,9 @@ function App(): React.ReactElement {
               path="/admin/platform-settings/cv-templates"
               element={
                 <ProtectedRoute allowedRoles={['admin']}>
-                  <CVTemplateSettings />
+                  <DashboardLayout>
+                    <CVTemplateSettings />
+                  </DashboardLayout>
                 </ProtectedRoute>
               }
             />
@@ -418,7 +586,9 @@ function App(): React.ReactElement {
               path="/admin/platform-settings/system"
               element={
                 <ProtectedRoute allowedRoles={['admin']}>
-                  <SystemConfigurationSettings />
+                  <DashboardLayout>
+                    <SystemConfigurationSettings />
+                  </DashboardLayout>
                 </ProtectedRoute>
               }
             />
@@ -426,7 +596,9 @@ function App(): React.ReactElement {
               path="/admin/platform-settings/audit"
               element={
                 <ProtectedRoute allowedRoles={['admin']}>
-                  <AuditPage />
+                  <DashboardLayout>
+                    <AuditPage />
+                  </DashboardLayout>
                 </ProtectedRoute>
               }
             />
@@ -434,7 +606,9 @@ function App(): React.ReactElement {
               path="/admin/platform-settings/audit/profile-image-warnings"
               element={
                 <ProtectedRoute allowedRoles={['admin']}>
-                  <ProfileImageWarningAudit />
+                  <DashboardLayout>
+                    <ProfileImageWarningAudit />
+                  </DashboardLayout>
                 </ProtectedRoute>
               }
             />
@@ -442,7 +616,9 @@ function App(): React.ReactElement {
               path="/admin/projects"
               element={
                 <ProtectedRoute allowedRoles={['admin']}>
-                  <ProjectsManagement />
+                  <DashboardLayout>
+                    <ProjectsManagement />
+                  </DashboardLayout>
                 </ProtectedRoute>
               }
             />
@@ -451,7 +627,9 @@ function App(): React.ReactElement {
               path="/admin/bench/dashboard"
               element={
                 <ProtectedRoute allowedRoles={['admin']}>
-                    <BenchDashboard />
+                    <DashboardLayout>
+                      <BenchDashboard />
+                    </DashboardLayout>
                 </ProtectedRoute>
               }
             />
@@ -459,7 +637,9 @@ function App(): React.ReactElement {
               path="/admin/bench/report"
               element={
                 <ProtectedRoute allowedRoles={['admin']}>
-                  <BenchReportPage />
+                  <DashboardLayout>
+                    <BenchReportPage />
+                  </DashboardLayout>
                 </ProtectedRoute>
               }
             />
@@ -467,7 +647,9 @@ function App(): React.ReactElement {
               path="/admin/bench/settings"
               element={
                 <ProtectedRoute allowedRoles={['admin']}>
-                  <BenchSettingsPage />
+                  <DashboardLayout>
+                    <BenchSettingsPage />
+                  </DashboardLayout>
                 </ProtectedRoute>
               }
             />
@@ -475,7 +657,9 @@ function App(): React.ReactElement {
               path="/admin/cv-templates"
               element={
                 <ProtectedRoute allowedRoles={['admin']}>
-                  <CVTemplatesPage/>
+                  <DashboardLayout>
+                    <CVTemplatesPage/>
+                  </DashboardLayout>
                 </ProtectedRoute>
               }
             />
@@ -483,7 +667,9 @@ function App(): React.ReactElement {
               path="/admin/cv-templates/documentation"
               element={
                 <ProtectedRoute allowedRoles={['admin']}>
-                  <CVTemplateDocumentationPage />
+                  <DashboardLayout>
+                    <CVTemplateDocumentationPage />
+                  </DashboardLayout>
                 </ProtectedRoute>
               }
             />
@@ -491,7 +677,9 @@ function App(): React.ReactElement {
               path="/admin/cv-templates/:id"
               element={
                 <ProtectedRoute allowedRoles={['admin']}>
-                  <CVTemplateViewPage />
+                  <DashboardLayout>
+                    <CVTemplateViewPage />
+                  </DashboardLayout>
                 </ProtectedRoute>
               }
             />
@@ -499,7 +687,9 @@ function App(): React.ReactElement {
               path="/admin/cv-templates/:id/edit"
               element={
                 <ProtectedRoute allowedRoles={['admin']}>
-                  <CVTemplateEditorPage />
+                  <DashboardLayout>
+                    <CVTemplateEditorPage />
+                  </DashboardLayout>
                 </ProtectedRoute>
               }
             />
@@ -507,7 +697,9 @@ function App(): React.ReactElement {
               path="/admin/security"
               element={
                 <ProtectedRoute allowedRoles={['admin']}>
-                  <SecurityPage />
+                  <DashboardLayout>
+                    <SecurityPage />
+                  </DashboardLayout>
                 </ProtectedRoute>
               }
             />
@@ -515,7 +707,9 @@ function App(): React.ReactElement {
               path="/manager/security"
               element={
                 <ProtectedRoute allowedRoles={['manager']}>
-                  <SecurityPage />
+                  <DashboardLayout>
+                    <SecurityPage />
+                  </DashboardLayout>
                 </ProtectedRoute>
               }
             />
@@ -523,7 +717,9 @@ function App(): React.ReactElement {
               path="/employee/security"
               element={
                 <ProtectedRoute allowedRoles={['employee']}>
-                  <SecurityPage />
+                  <DashboardLayout>
+                    <SecurityPage />
+                  </DashboardLayout>
                 </ProtectedRoute>
               }
             />
@@ -531,7 +727,9 @@ function App(): React.ReactElement {
               path="/security"
               element={
                 <ProtectedRoute>
-                  <SecurityPage />
+                  <DashboardLayout>
+                    <SecurityPage />
+                  </DashboardLayout>
                 </ProtectedRoute>
               }
             />
