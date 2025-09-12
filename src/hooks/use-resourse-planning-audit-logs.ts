@@ -26,7 +26,6 @@ export interface ResourcePlanningAuditLogsParams {
   date_from?: string | null;
   date_to?: string | null;
   employee_id_filter?: string | null;
-  forecasted_project_filter?: string | null;
   items_per_page?: number;
   operation_type_filter?: string | null;
   page_number?: number;

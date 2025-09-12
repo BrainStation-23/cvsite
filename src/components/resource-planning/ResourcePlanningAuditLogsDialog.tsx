@@ -53,7 +53,6 @@ export const ResourcePlanningAuditLogsDialog: React.FC<ResourcePlanningAuditLogs
     startDateFrom: null as string | null,
     startDateTo: null as string | null,
     employeeIdFilter: null as string | null,
-    forecastedProjectFilter: null as string | null,
     operationTypeFilter: null as string | null,
     projectNameFilter: '',
     sortBy: 'changed_at',
@@ -89,7 +88,6 @@ export const ResourcePlanningAuditLogsDialog: React.FC<ResourcePlanningAuditLogs
     date_from: filters.startDateFrom,
     date_to: filters.startDateTo,
     employee_id_filter: filters.employeeIdFilter,
-    forecasted_project_filter: filters.forecastedProjectFilter,
     operation_type_filter: filters.operationTypeFilter,
     project_name_filter: filters.projectNameFilter || null,
     search_query: filters.searchQuery || null,
@@ -206,11 +204,6 @@ export const ResourcePlanningAuditLogsDialog: React.FC<ResourcePlanningAuditLogs
               <dt className="font-semibold">Weekly Validation:</dt>
               <dd className="ml-1">{log.new_data_enriched?.weekly_validation ? 'Yes' : 'No'}</dd>
             </div>
-            <div className="flex items-center gap-2">
-              <HelpCircle className="h-4 w-4 text-muted-foreground" />
-              <dt className="font-semibold">Forecasted Project:</dt>
-              <dd className="ml-1">{log.new_data_enriched?.forecasted_project ?? <span className="text-muted-foreground">N/A</span>}</dd>
-            </div>
           </dl>
         </div>
         <Separator />
@@ -266,15 +259,6 @@ export const ResourcePlanningAuditLogsDialog: React.FC<ResourcePlanningAuditLogs
                 placeholder="Select project..."
                 />
             </div> 
-            <div className="space-y-2">
-              <Label htmlFor="forecasted-project-filter">Forecasted Project</Label>
-              <Input
-                id="forecasted-project-filter"
-                placeholder="Forecasted project..."
-                value={filters.forecastedProjectFilter || ''}
-                onChange={(e) => updateFilter('forecastedProjectFilter', e.target.value)}
-              />
-            </div>
             <div className="space-y-2">
               <Label htmlFor="operation-type-filter">Operation Type</Label>
               <Select
