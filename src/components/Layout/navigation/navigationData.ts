@@ -104,6 +104,7 @@ export const getSidebarGroups = (
     userRole === 'admin' && {
       label: 'Bench Management',
       items: [
+        { to: '/admin/bench/dashboard', icon: BarChart3, label: 'Bench Dashboard' },
         { to: '/admin/bench/report', icon: BarChart3, label: 'Bench Report' },
         { to: '/admin/bench/settings', icon: Settings, label: 'Bench Settings' },
       ],

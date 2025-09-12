@@ -48,6 +48,7 @@ import AdminPIPView from './pages/pip/AdminPIPView';
 import MyTeam from '@/pages/MyTeam';
 import BenchReportPage from '@/pages/admin/bench/BenchReportPage';
 import BenchSettingsPage from '@/pages/admin/bench/BenchSettingsPage';
+import BenchDashboard from '@/pages/bench/BenchDashboard';
 import './App.css';
 
 // Create QueryClient instance outside component to prevent recreation
@@ -446,6 +447,14 @@ function App(): React.ReactElement {
               }
             />
             {/* Bench Management Routes */}
+            <Route
+              path="/admin/bench/dashboard"
+              element={
+                <ProtectedRoute allowedRoles={['admin']}>
+                    <BenchDashboard />
+                </ProtectedRoute>
+              }
+            />
             <Route
               path="/admin/bench/report"
               element={
