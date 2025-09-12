@@ -68,6 +68,11 @@ export const WeeklyValidationTableEditRow: React.FC<WeeklyValidationTableEditRow
         <div className="flex flex-col">
           <span className="font-medium text-xs">
             {item.profile.first_name} {item.profile.last_name}
+            {item.profile.has_overhead && (
+              <Badge variant="outline" className="text-[10px] px-2 mx-1 py-0 h-4 bg-red-100 text-black-700">
+                Overhead
+              </Badge>
+            )}
           </span>
           <span className="text-xs text-muted-foreground">
             {item.profile.employee_id}
