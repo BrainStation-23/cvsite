@@ -30,14 +30,14 @@ export const BenchFeedbackCell: React.FC<BenchFeedbackCellProps> = ({
 
   return (
     <>
-      <div className="flex items-center gap-2 max-w-[200px]">
+      <div className="flex items-center gap-1 max-w-[180px]">
         {feedback ? (
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
-                <div className="flex-1 text-sm text-muted-foreground cursor-help">
-                  <MessageSquare className="h-4 w-4 inline mr-1" />
-                  {truncatedFeedback}
+                <div className="flex-1 text-sm text-muted-foreground cursor-help truncate">
+                  <MessageSquare className="h-3.5 w-3.5 inline mr-1.5 -mt-0.5" />
+                  <span className="align-middle">{truncatedFeedback}</span>
                 </div>
               </TooltipTrigger>
               <TooltipContent className="max-w-xs">
@@ -46,18 +46,18 @@ export const BenchFeedbackCell: React.FC<BenchFeedbackCellProps> = ({
             </Tooltip>
           </TooltipProvider>
         ) : (
-          <div className="flex-1 text-sm text-muted-foreground">
-            <MessageSquare className="h-4 w-4 inline mr-1 opacity-50" />
-            No feedback
+          <div className="flex-1 text-sm text-muted-foreground opacity-70">
+            <MessageSquare className="h-3.5 w-3.5 inline mr-1.5 -mt-0.5 opacity-70" />
+            <span className="align-middle">No feedback</span>
           </div>
         )}
         <Button
           variant="ghost"
           size="sm"
-          className="h-8 w-8 p-0"
+          className="h-7 w-7 p-0 ml-1"
           onClick={() => setIsDialogOpen(true)}
         >
-          <Edit3 className="h-4 w-4" />
+          <Edit3 className="h-3.5 w-3.5" />
         </Button>
       </div>
 

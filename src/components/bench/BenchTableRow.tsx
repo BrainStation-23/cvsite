@@ -3,6 +3,9 @@ import { TableCell, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Calendar, Clock, Award } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
+import { useNavigate } from 'react-router-dom';
+import { Button } from '@/components/ui/button';
+import { Eye } from 'lucide-react';
 import { BenchRecord } from './types/benchRecord';
 import { BenchFeedbackCell } from './BenchFeedbackCell';
 import { useBenchFeedback } from '@/hooks/use-bench-feedback';
@@ -13,6 +16,7 @@ interface BenchTableRowProps {
 }
 
 export const BenchTableRow: React.FC<BenchTableRowProps> = ({ record }) => {
+  const navigate = useNavigate();
   const { updateFeedback } = useBenchFeedback();
   const formatBenchDate = (dateString: string) => {
     try {
@@ -44,22 +48,34 @@ export const BenchTableRow: React.FC<BenchTableRowProps> = ({ record }) => {
 
   return (
     <TableRow>
-      <TableCell className="font-medium">{record.employee_id}</TableCell>
       <TableCell>
-        <div className="flex flex-col">
-          <span className="font-medium">{record.employee_name}</span>
+        <div className="flex flex-col space-y-1">
+          <div className="flex items-baseline gap-2">
+            <span className="font-medium">{record.employee_name}</span>
+            <span className="text-xs text-muted-foreground">#{record.employee_id}</span>
+          </div>
+          {record.expertise && (
+            <div>
+              <Badge variant="outline" className="text-xs">
+                {record.expertise}
+              </Badge>
+            </div>
+          )}
         </div>
       </TableCell>
       <TableCell>
-        <Badge variant="outline">{record.expertise}</Badge>
-      </TableCell>
-      <TableCell>
         <div className="flex items-center gap-2">
-          <div
-            className="w-3 h-3 rounded-full"
-            style={{ backgroundColor: record.bill_type_color_code }}
+          <div 
+            className="w-4 h-4 rounded-full flex-shrink-0"
+            style={{ 
+              backgroundColor: record.bill_type_color,
+              boxShadow: '0 0 0 1px rgba(0,0,0,0.1) inset'
+            }}
+            title={`Bill Type: ${record.bill_type_name}`}
           />
-          <span className="text-sm">{record.bill_type_name}</span>
+          <span className="text-sm font-medium" style={{ color: record.bill_type_color }}>
+            {record.bill_type_name}
+          </span>
         </div>
       </TableCell>
       <TableCell>
@@ -92,13 +108,24 @@ export const BenchTableRow: React.FC<BenchTableRowProps> = ({ record }) => {
           {getExperienceBadge(record.total_years_experience)}
         </div>
       </TableCell>
-      <TableCell>
+      <TableCell className="py-1 px-2">
         <BenchFeedbackCell
           employeeId={record.employee_id}
           employeeName={record.employee_name}
           feedback={record.bench_feedback}
           onUpdate={updateFeedback}
         />
+      </TableCell>
+      <TableCell>
+        <Button
+          variant="ghost"
+          size="sm"
+          className="h-8 w-8 p-0"
+          onClick={() => navigate(`/employee/profile/${record.profile_id}`)}
+          title="View Profile"
+        >
+          <Eye className="h-4 w-4" />
+        </Button>
       </TableCell>
     </TableRow>
   );

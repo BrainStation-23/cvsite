@@ -32,13 +32,15 @@ export const BenchTable: React.FC<BenchTableProps> = ({
   };
 
   const sortableColumns = [
-    { key: 'employee_id', label: 'Employee ID' },
-    { key: 'employee_name', label: 'Employee' },
-    { key: 'expertise', label: 'Expertise' },
+    { 
+      key: 'employee', 
+      label: 'Employee',
+      subKeys: ['employee_id', 'employee_name', 'expertise'] // For sorting
+    },
     { key: 'bill_type', label: 'Bill Type' },
     { key: 'bench_date', label: 'Bench Date' },
     { key: 'sbu_name', label: 'SBU' },
-  ];
+  ] as const;
 
   if (isLoading) {
     return (
@@ -84,7 +86,37 @@ export const BenchTable: React.FC<BenchTableProps> = ({
             <Table>
               <TableHeader>
                 <TableRow>
-                  {sortableColumns.map((column) => (
+                  <TableHead className="w-[280px]">
+                    <div className="flex flex-col gap-1">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-auto p-0 font-medium justify-start"
+                        onClick={() => onSort('employee_name')}
+                      >
+                        Employee {getSortIcon('employee_name')}
+                      </Button>
+                      <div className="flex gap-4">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-auto p-0 text-xs text-muted-foreground justify-start"
+                          onClick={() => onSort('employee_id')}
+                        >
+                          ID {getSortIcon('employee_id')}
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-auto p-0 text-xs text-muted-foreground justify-start"
+                          onClick={() => onSort('expertise')}
+                        >
+                          Expertise {getSortIcon('expertise')}
+                        </Button>
+                      </div>
+                    </div>
+                  </TableHead>
+                  {sortableColumns.filter(col => col.key !== 'employee').map((column) => (
                     <TableHead key={column.key}>
                       <Button
                         variant="ghost"
@@ -101,6 +133,7 @@ export const BenchTable: React.FC<BenchTableProps> = ({
                   <TableHead>Duration</TableHead>
                   <TableHead>Experience</TableHead>
                   <TableHead>Feedback</TableHead>
+                  <TableHead className="w-24">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
