@@ -35,8 +35,6 @@ export const ResourcePlanningForm: React.FC<ResourcePlanningFormProps> = ({
         setBillTypeId={formState.setBillTypeId}
         projectId={formState.projectId}
         setProjectId={formState.setProjectId}
-        forecastedProject=""
-        setForecastedProject={() => {}}
         engagementPercentage={formState.engagementPercentage}
         setEngagementPercentage={formState.setEngagementPercentage}
         billingPercentage={formState.billingPercentage}
