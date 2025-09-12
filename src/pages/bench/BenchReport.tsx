@@ -5,7 +5,7 @@ import { BenchFilters } from '@/components/bench/BenchFilters';
 import { BenchTable } from '@/components/bench/BenchTable';
 import { BenchPagination } from '@/components/bench/BenchPagination';
 import { useBenchData } from '@/hooks/use-bench-data';
-
+import { useBenchExport } from '@/hooks/use-bench-export';  
 export const BenchReport: React.FC = () => {
   const {
     // Data
@@ -40,7 +40,7 @@ export const BenchReport: React.FC = () => {
     syncBench,
     isSyncing,
   } = useBenchData();
-
+  const { exportBench, isExporting } = useBenchExport();
   const handleSort = (field: string) => {
     if (sortBy === field) {
       setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
@@ -100,9 +100,10 @@ export const BenchReport: React.FC = () => {
             variant="outline"
             size="sm"
             disabled={isLoading || benchRecords.length === 0}
+            onClick={() => exportBench()}
           >
             <Download className="mr-2 h-4 w-4" />
-            Export
+            Export CSV
           </Button>
         </div>
       </div>
