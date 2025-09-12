@@ -5,7 +5,7 @@ import { Calendar, Clock, Award } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Eye, Download } from 'lucide-react';
+import { Download } from 'lucide-react';
 import { BenchRecord } from './types/benchRecord';
 import { BenchFeedbackCell } from './BenchFeedbackCell';
 import { useBenchFeedback } from '@/hooks/use-bench-feedback';
@@ -131,7 +131,7 @@ export const BenchTableRow: React.FC<BenchTableRowProps> = ({ record, onPDFExpor
                 onClick={() => onPDFExport(record.profile_id, employeeName)}
                 className="h-8 w-8 p-0"
               >
-                <Eye className="h-4 w-4" />
+                <Download className="h-4 w-4" />
               </Button>
             </TooltipTrigger>
             <TooltipContent>
