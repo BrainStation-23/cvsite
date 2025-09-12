@@ -67,6 +67,7 @@ export type Database = {
           created_at: string
           id: string
           profile_id: string | null
+          updated_at: string | null
         }
         Insert: {
           bench_date?: string | null
@@ -75,6 +76,7 @@ export type Database = {
           created_at?: string
           id?: string
           profile_id?: string | null
+          updated_at?: string | null
         }
         Update: {
           bench_date?: string | null
@@ -83,6 +85,7 @@ export type Database = {
           created_at?: string
           id?: string
           profile_id?: string | null
+          updated_at?: string | null
         }
         Relationships: [
           {
