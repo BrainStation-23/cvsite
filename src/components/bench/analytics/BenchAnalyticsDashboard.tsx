@@ -1,11 +1,10 @@
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { DateRangePicker } from '@/components/ui/date-range-picker';
+import { DateRangePickerWithPresets } from '@/components/statistics/DateRangePickerWithPresets';
 import { Button } from '@/components/ui/button';
 import { RefreshCw, Download, Calendar, BarChart3, AlertTriangle, TrendingUp } from 'lucide-react';
-import { addDays, subDays } from 'date-fns';
-import { DateRange } from 'react-day-picker';
+import { subDays } from 'date-fns';
 
 import { 
   useBenchOverview, 
@@ -22,23 +21,21 @@ import { TrendsChart } from './TrendsChart';
 
 
 export function BenchAnalyticsDashboard() {
-  const [dateRange, setDateRange] = useState<DateRange>({
-    from: subDays(new Date(), 30),
-    to: new Date(),
-  });
+  const [startDate, setStartDate] = useState<Date | null>(subDays(new Date(), 30));
+  const [endDate, setEndDate] = useState<Date | null>(new Date());
   
   const [dimensionType, setDimensionType] = useState<'sbu' | 'expertise' | 'bill_type'>('sbu');
   const [periodType, setPeriodType] = useState<'daily' | 'weekly' | 'monthly'>('monthly');
 
   // Fetch analytics data
   const overviewQuery = useBenchOverview({
-    startDate: dateRange.from,
-    endDate: dateRange.to,
+    startDate,
+    endDate,
   });
 
   const dimensionalQuery = useBenchDimensionalAnalysis(dimensionType, {
-    startDate: dateRange.from,
-    endDate: dateRange.to,
+    startDate,
+    endDate,
   });
 
   const riskQuery = useBenchRiskAnalytics(30);
@@ -71,11 +68,13 @@ export function BenchAnalyticsDashboard() {
         </div>
         
         <div className="flex items-center gap-3">
-          <DateRangePicker
-            value={dateRange}
-            onChange={setDateRange}
-            placeholder="Select date range"
-            className="w-64"
+          <DateRangePickerWithPresets
+            startDate={startDate}
+            endDate={endDate}
+            onDateRangeChange={({ startDate: newStartDate, endDate: newEndDate }) => {
+              setStartDate(newStartDate);
+              setEndDate(newEndDate);
+            }}
           />
           
           <Button variant="outline" size="sm" onClick={handleRefresh} disabled={isLoading}>
