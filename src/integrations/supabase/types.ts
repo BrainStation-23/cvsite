@@ -1883,6 +1883,32 @@ export type Database = {
         Args: { target_user_id?: string }
         Returns: Json
       }
+      get_bench_dimensional_analysis: {
+        Args: {
+          end_date_filter?: string
+          group_by_dimension?: string
+          start_date_filter?: string
+        }
+        Returns: Json
+      }
+      get_bench_overview_statistics: {
+        Args: {
+          bill_type_filter?: string[]
+          end_date_filter?: string
+          expertise_filter?: string[]
+          sbu_filter?: string[]
+          start_date_filter?: string
+        }
+        Returns: Json
+      }
+      get_bench_risk_analytics: {
+        Args: { risk_threshold_days?: number }
+        Returns: Json
+      }
+      get_bench_trends_analysis: {
+        Args: { lookback_days?: number; period_type?: string }
+        Returns: Json
+      }
       get_bill_type_changes: {
         Args: {
           bill_type_ids?: string[]
