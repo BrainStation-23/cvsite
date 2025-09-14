@@ -1,6 +1,8 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { ViewToggle } from '@/components/statistics/ViewToggle';
+import { useState } from 'react';
 
 interface DimensionalData {
   dimension_id: string;
@@ -16,15 +18,17 @@ interface DimensionalAnalysisChartProps {
   data: DimensionalData[];
   isLoading: boolean;
   dimension: 'sbu' | 'expertise' | 'bill_type';
-  onDimensionChange: (dimension: 'sbu' | 'expertise' | 'bill_type') => void;
+  title?: string;
 }
 
 export function DimensionalAnalysisChart({ 
   data, 
   isLoading, 
-  dimension, 
-  onDimensionChange 
+  dimension,
+  title
 }: DimensionalAnalysisChartProps) {
+  const [showCharts, setShowCharts] = useState(true);
+  const [showTables, setShowTables] = useState(false);
   if (isLoading) {
     return (
       <Card className="animate-pulse">
@@ -76,49 +80,86 @@ export function DimensionalAnalysisChart({
         <div className="flex items-center justify-between">
           <div>
             <CardTitle className="text-lg font-semibold">
-              Bench Analysis by {dimensionLabels[dimension]}
+              {title || `Bench Analysis by ${dimensionLabels[dimension]}`}
             </CardTitle>
             <p className="text-sm text-muted-foreground">
               Breakdown of bench metrics across different {dimensionLabels[dimension].toLowerCase()}s
             </p>
           </div>
-          <Select value={dimension} onValueChange={onDimensionChange}>
-            <SelectTrigger className="w-32">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="sbu">SBU</SelectItem>
-              <SelectItem value="expertise">Expertise</SelectItem>
-              <SelectItem value="bill_type">Bill Type</SelectItem>
-            </SelectContent>
-          </Select>
+          <ViewToggle
+            showCharts={showCharts}
+            showTables={showTables}
+            onToggleCharts={() => {
+              setShowCharts(!showCharts);
+              if (!showCharts && showTables) setShowTables(false);
+            }}
+            onToggleTables={() => {
+              setShowTables(!showTables);
+              if (!showTables && showCharts) setShowCharts(false);
+            }}
+          />
         </div>
       </CardHeader>
       <CardContent>
-        <ResponsiveContainer width="100%" height={400}>
-          <BarChart
-            data={sortedData}
-            margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
-          >
-            <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
-            <XAxis 
-              dataKey="dimension_name" 
-              angle={-45}
-              textAnchor="end"
-              height={100}
-              interval={0}
-              fontSize={12}
-            />
-            <YAxis fontSize={12} />
-            <Tooltip content={<CustomTooltip />} />
-            <Bar 
-              dataKey="total_count" 
-              fill="hsl(var(--primary))" 
-              radius={[4, 4, 0, 0]}
-              name="Total Count"
-            />
-          </BarChart>
-        </ResponsiveContainer>
+        {showCharts && (
+          <ResponsiveContainer width="100%" height={400}>
+            <BarChart
+              data={sortedData}
+              margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
+            >
+              <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
+              <XAxis 
+                dataKey="dimension_name" 
+                angle={-45}
+                textAnchor="end"
+                height={100}
+                interval={0}
+                fontSize={12}
+              />
+              <YAxis fontSize={12} />
+              <Tooltip content={<CustomTooltip />} />
+              <Bar 
+                dataKey="total_count" 
+                fill="hsl(var(--primary))" 
+                radius={[4, 4, 0, 0]}
+                name="Total Count"
+              />
+            </BarChart>
+          </ResponsiveContainer>
+        )}
+        
+        {showTables && (
+          <div className="max-h-96 overflow-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>{dimensionLabels[dimension]}</TableHead>
+                  <TableHead className="text-right">Total Count</TableHead>
+                  <TableHead className="text-right">Avg Duration (days)</TableHead>
+                  <TableHead className="text-right">Long Term Count</TableHead>
+                  {sortedData.some(d => d.avg_experience_years) && (
+                    <TableHead className="text-right">Avg Experience (years)</TableHead>
+                  )}
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {sortedData.map((item) => (
+                  <TableRow key={item.dimension_id}>
+                    <TableCell className="font-medium">{item.dimension_name}</TableCell>
+                    <TableCell className="text-right">{item.total_count}</TableCell>
+                    <TableCell className="text-right">{item.avg_duration_days}</TableCell>
+                    <TableCell className="text-right">{item.long_term_count}</TableCell>
+                    {sortedData.some(d => d.avg_experience_years) && (
+                      <TableCell className="text-right">
+                        {item.avg_experience_years ? `${item.avg_experience_years}y` : '-'}
+                      </TableCell>
+                    )}
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        )}
       </CardContent>
     </Card>
   );

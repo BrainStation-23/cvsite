@@ -24,7 +24,7 @@ export function BenchAnalyticsDashboard() {
   const [startDate, setStartDate] = useState<Date | null>(subDays(new Date(), 30));
   const [endDate, setEndDate] = useState<Date | null>(new Date());
   
-  const [dimensionType, setDimensionType] = useState<'sbu' | 'expertise' | 'bill_type'>('sbu');
+  
   const [periodType, setPeriodType] = useState<'daily' | 'weekly' | 'monthly'>('monthly');
 
   // Fetch analytics data
@@ -33,7 +33,17 @@ export function BenchAnalyticsDashboard() {
     endDate,
   });
 
-  const dimensionalQuery = useBenchDimensionalAnalysis(dimensionType, {
+  const sbuQuery = useBenchDimensionalAnalysis('sbu', {
+    startDate,
+    endDate,
+  });
+
+  const expertiseQuery = useBenchDimensionalAnalysis('expertise', {
+    startDate,
+    endDate,
+  });
+
+  const billTypeQuery = useBenchDimensionalAnalysis('bill_type', {
     startDate,
     endDate,
   });
@@ -41,12 +51,15 @@ export function BenchAnalyticsDashboard() {
   const riskQuery = useBenchRiskAnalytics(30);
   const trendsQuery = useBenchTrendsAnalysis(periodType, 365);
 
-  const isLoading = overviewQuery.isLoading || dimensionalQuery.isLoading || 
+  const isLoading = overviewQuery.isLoading || sbuQuery.isLoading || 
+                   expertiseQuery.isLoading || billTypeQuery.isLoading ||
                    riskQuery.isLoading || trendsQuery.isLoading;
 
   const handleRefresh = () => {
     overviewQuery.refetch();
-    dimensionalQuery.refetch();
+    sbuQuery.refetch();
+    expertiseQuery.refetch();
+    billTypeQuery.refetch();
     riskQuery.refetch();
     trendsQuery.refetch();
   };
@@ -128,27 +141,50 @@ export function BenchAnalyticsDashboard() {
               />
             )}
 
-            {/* Quick dimensional preview */}
-            {dimensionalQuery.data && (
+            {/* SBU Analysis Preview */}
+            {sbuQuery.data && (
               <DimensionalAnalysisChart
-                data={dimensionalQuery.data}
-                isLoading={dimensionalQuery.isLoading}
-                dimension={dimensionType}
-                onDimensionChange={setDimensionType}
+                data={sbuQuery.data}
+                isLoading={sbuQuery.isLoading}
+                dimension="sbu"
+                title="Bench by SBU (Preview)"
               />
             )}
           </div>
         </TabsContent>
 
         <TabsContent value="analysis" className="space-y-6">
-          {dimensionalQuery.data && (
-            <DimensionalAnalysisChart
-              data={dimensionalQuery.data}
-              isLoading={dimensionalQuery.isLoading}
-              dimension={dimensionType}
-              onDimensionChange={setDimensionType}
-            />
-          )}
+          <div className="grid grid-cols-1 gap-6">
+            {/* SBU Analysis */}
+            {sbuQuery.data && (
+              <DimensionalAnalysisChart
+                data={sbuQuery.data}
+                isLoading={sbuQuery.isLoading}
+                dimension="sbu"
+                title="Bench Analysis by SBU"
+              />
+            )}
+
+            {/* Expertise Analysis */}
+            {expertiseQuery.data && (
+              <DimensionalAnalysisChart
+                data={expertiseQuery.data}
+                isLoading={expertiseQuery.isLoading}
+                dimension="expertise"
+                title="Bench Analysis by Expertise"
+              />
+            )}
+
+            {/* Bill Type Analysis */}
+            {billTypeQuery.data && (
+              <DimensionalAnalysisChart
+                data={billTypeQuery.data}
+                isLoading={billTypeQuery.isLoading}
+                dimension="bill_type"
+                title="Bench Analysis by Bill Type"
+              />
+            )}
+          </div>
         </TabsContent>
 
         <TabsContent value="risk" className="space-y-6">
