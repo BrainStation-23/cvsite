@@ -1,5 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { ViewToggle } from '@/components/statistics/ViewToggle';
 import { useState } from 'react';
@@ -73,6 +73,18 @@ export function DimensionalAnalysisChart({
   const sortedData = [...data]
     .sort((a, b) => b.total_count - a.total_count)
     .slice(0, 10);
+    
+  // Color array for charts
+  const chartColors = [
+    'hsl(var(--chart-1))', // Blue
+    'hsl(var(--chart-2))', // Green  
+    'hsl(var(--chart-3))', // Purple
+    'hsl(var(--chart-4))', // Pink
+    'hsl(var(--chart-5))', // Orange
+    'hsl(var(--chart-6))', // Cyan
+    'hsl(var(--chart-7))', // Yellow
+    'hsl(var(--chart-8))', // Red
+  ];
 
   return (
     <Card className="animate-fade-in">
@@ -120,10 +132,13 @@ export function DimensionalAnalysisChart({
               <Tooltip content={<CustomTooltip />} />
               <Bar 
                 dataKey="total_count" 
-                fill="hsl(var(--primary))" 
                 radius={[4, 4, 0, 0]}
                 name="Total Count"
-              />
+              >
+                {sortedData.map((entry, index) => (
+                  <Cell key={`cell-${index}`} fill={chartColors[index % chartColors.length]} />
+                ))}
+              </Bar>
             </BarChart>
           </ResponsiveContainer>
         )}

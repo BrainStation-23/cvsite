@@ -14,10 +14,10 @@ interface ExperienceDistributionChartProps {
 }
 
 const EXPERIENCE_COLORS = {
-  junior: 'hsl(var(--chart-1))',
-  mid: 'hsl(var(--chart-2))',
-  senior: 'hsl(var(--chart-3))',
-  unknown: 'hsl(var(--muted))',
+  junior: 'hsl(var(--chart-2))', // Green for junior
+  mid: 'hsl(var(--chart-1))', // Blue for mid
+  senior: 'hsl(var(--chart-3))', // Purple for senior
+  unknown: 'hsl(var(--chart-4))', // Pink for unknown
 };
 
 export function ExperienceDistributionChart({ data, isLoading }: ExperienceDistributionChartProps) {

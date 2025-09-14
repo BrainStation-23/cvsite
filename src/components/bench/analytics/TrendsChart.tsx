@@ -70,7 +70,7 @@ export function TrendsChart({ data, isLoading, periodType, onPeriodChange }: Tre
           <p className="font-medium mb-2">{formatXAxisLabel(label)}</p>
           <div className="space-y-1 text-sm">
             <p className="flex items-center gap-2">
-              <div className="w-3 h-3 rounded-full bg-primary"></div>
+              <div className="w-3 h-3 rounded-full" style={{ backgroundColor: 'hsl(var(--chart-1))' }}></div>
               New Bench: <span className="font-medium">{data.new_bench_count}</span>
             </p>
             <p>Affected SBUs: <span className="font-medium">{data.affected_sbus}</span></p>
@@ -116,6 +116,12 @@ export function TrendsChart({ data, isLoading, periodType, onPeriodChange }: Tre
         <CardContent>
           <ResponsiveContainer width="100%" height={300}>
             <AreaChart data={sortedTrends}>
+              <defs>
+                <linearGradient id="benchTrendGradient" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="hsl(var(--chart-1))" stopOpacity={0.8}/>
+                  <stop offset="95%" stopColor="hsl(var(--chart-1))" stopOpacity={0.1}/>
+                </linearGradient>
+              </defs>
               <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
               <XAxis 
                 dataKey="period"
@@ -127,10 +133,9 @@ export function TrendsChart({ data, isLoading, periodType, onPeriodChange }: Tre
               <Area
                 type="monotone"
                 dataKey="new_bench_count"
-                stroke="hsl(var(--primary))"
-                fill="hsl(var(--primary))"
-                fillOpacity={0.1}
-                strokeWidth={2}
+                stroke="hsl(var(--chart-1))"
+                fill="url(#benchTrendGradient)"
+                strokeWidth={3}
               />
             </AreaChart>
           </ResponsiveContainer>
