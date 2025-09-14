@@ -188,12 +188,10 @@ export function BenchAnalyticsDashboard() {
         </TabsContent>
 
         <TabsContent value="risk" className="space-y-6">
-          {riskQuery.data && (
-            <RiskAnalytics
-              data={riskQuery.data}
-              isLoading={riskQuery.isLoading}
-            />
-          )}
+          <RiskAnalytics
+            data={riskQuery.data}
+            isLoading={riskQuery.isLoading}
+          />
         </TabsContent>
 
         <TabsContent value="trends" className="space-y-6">

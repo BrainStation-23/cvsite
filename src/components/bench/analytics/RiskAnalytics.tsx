@@ -42,11 +42,11 @@ interface TopRiskSbu {
 }
 
 interface RiskAnalyticsProps {
-  data: {
+  data?: {
     risk_summary: RiskSummary;
     high_risk_profiles: RiskProfile[];
     top_risk_sbus: TopRiskSbu[];
-  };
+  } | null;
   isLoading: boolean;
 }
 
@@ -64,6 +64,90 @@ export function RiskAnalytics({ data, isLoading }: RiskAnalyticsProps) {
             <div className="h-64 bg-muted rounded"></div>
           </CardContent>
         </Card>
+      </div>
+    );
+  }
+
+  // Handle no data or empty risk data
+  if (!data || !data.risk_summary || data.risk_summary.total_high_risk_count === 0) {
+    return (
+      <div className="space-y-6">
+        <Card className="text-center py-12">
+          <CardContent>
+            <div className="flex flex-col items-center gap-4">
+              <div className="w-16 h-16 rounded-full bg-green-100 dark:bg-green-900/20 flex items-center justify-center">
+                <AlertTriangle className="h-8 w-8 text-green-600 dark:text-green-400" />
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold text-foreground">All Clear!</h3>
+                <p className="text-muted-foreground mt-1">
+                  No employees are currently at risk. All bench profiles are within acceptable duration limits.
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        
+        {/* Show zero state metrics */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                <Users className="h-4 w-4" />
+                High Risk Profiles
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">0</div>
+              <p className="text-xs text-muted-foreground">30+ days on bench</p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                <AlertTriangle className="h-4 w-4" />
+                Critical Risk
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-green-600">0</div>
+              <div className="flex items-center gap-2 mt-1">
+                <Progress value={0} className="flex-1 h-2" />
+                <span className="text-xs text-muted-foreground">0%</span>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                <Calendar className="h-4 w-4" />
+                Unplanned Bench
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">0</div>
+              <div className="flex items-center gap-2 mt-1">
+                <Progress value={0} className="flex-1 h-2" />
+                <span className="text-xs text-muted-foreground">0%</span>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                <Clock className="h-4 w-4" />
+                Avg Duration
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">0</div>
+              <p className="text-xs text-muted-foreground">days</p>
+            </CardContent>
+          </Card>
+        </div>
       </div>
     );
   }
