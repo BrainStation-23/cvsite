@@ -277,7 +277,7 @@ const ResourceCalendarView: React.FC = () => {
           initialData={selectedEngagement}
           preselectedResourceId={preselectedResourceId || undefined}
           preselectedStartDate={preselectedStartDate || undefined}
-          isForecasted={selectedEngagement.is_forecasted}
+          isForecasted={selectedEngagement?.is_forecasted || false}
         />
       </div>
   );

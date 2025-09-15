@@ -31,7 +31,7 @@ export function transformResourceDataToGantt(resourceData: ResourceCalendarData[
       engagement_percentage: item.engagement_percentage,
       billing_percentage: item.billing_percentage,
       bill_type: item.bill_type,
-      is_forecasted: item.project?.forecasted,
+      is_forecasted: item.is_forecasted,
       project: item.project
         ? {
             project_level: item.project.project_level,
