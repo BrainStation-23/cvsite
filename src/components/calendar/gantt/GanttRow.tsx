@@ -2,6 +2,7 @@ import React, { useMemo } from 'react';
 import { GanttResourceData, GanttEngagement, GanttTimelineMonth } from './types';
 import { GanttCell } from './GanttCell';
 import { calculateEngagementPosition, assignEngagementTracks, calculateMaxTracks, calculateClickedDate } from './utils';
+import { Briefcase, Calendar } from 'lucide-react';
 
 interface GanttRowProps {
   resource: GanttResourceData;
@@ -79,21 +80,7 @@ export const GanttRow: React.FC<GanttRowProps> = ({
         {/* Designation row */}
         {resource.profile.current_designation && (
           <div className="flex items-center gap-2 mb-3 text-muted-foreground">
-            <svg 
-              xmlns="http://www.w3.org/2000/svg" 
-              width="12" 
-              height="12" 
-              viewBox="0 0 24 24" 
-              fill="none" 
-              stroke="currentColor" 
-              strokeWidth="2" 
-              strokeLinecap="round" 
-              strokeLinejoin="round"
-              className="flex-shrink-0"
-            >
-              <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
-              <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
-            </svg>
+            <Briefcase className="h-3 w-3" />
             <span className="text-xs truncate">{resource.profile.current_designation}</span>
           </div>
         )}
@@ -101,23 +88,7 @@ export const GanttRow: React.FC<GanttRowProps> = ({
         {/* Engagement count */}
         <div className="flex items-center gap-2">
           <div className="relative">
-            <svg 
-              xmlns="http://www.w3.org/2000/svg" 
-              width="12" 
-              height="12" 
-              viewBox="0 0 24 24" 
-              fill="none" 
-              stroke="currentColor" 
-              strokeWidth="2" 
-              strokeLinecap="round" 
-              strokeLinejoin="round"
-              className="text-primary"
-            >
-              <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
-              <line x1="16" y1="2" x2="16" y2="6"></line>
-              <line x1="8" y1="2" x2="8" y2="6"></line>
-              <line x1="3" y1="10" x2="21" y2="10"></line>
-            </svg>
+            <Calendar className="h-3 w-3" />
           </div>
           <span className="text-xs font-medium text-foreground">
             {resource.engagements.length} {resource.engagements.length === 1 ? 'Engagement' : 'Engagements'}
