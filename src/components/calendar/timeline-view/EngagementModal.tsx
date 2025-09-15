@@ -20,6 +20,7 @@ interface EngagementFormData {
   release_date?: string;
   bill_type_id?: string;
   project_id?: string;
+  is_forecasted: boolean;
 }
 
 interface EngagementModalProps {
@@ -56,6 +57,7 @@ export const EngagementModal: React.FC<EngagementModalProps> = ({
     engagement_percentage: 0,
     billing_percentage: 0,
     engagement_start_date: '',
+    is_forecasted: isForecasted,
     ...initialData,
   });
   const [selectedProjectData, setSelectedProjectData] = useState<any>(null);
@@ -121,6 +123,7 @@ export const EngagementModal: React.FC<EngagementModalProps> = ({
         release_date: initialData?.release_date || '',
         bill_type_id: initialData?.bill_type?.id || '',
         project_id: initialData?.project?.id || '',
+        is_forecasted: initialData?.is_forecasted ?? isForecasted,
       });
       
       // Set selected project data if in edit mode
@@ -150,6 +153,7 @@ export const EngagementModal: React.FC<EngagementModalProps> = ({
       release_date: format(endDate, 'yyyy-MM-dd'),
       engagement_percentage: formData.engagement_percentage,
       billing_percentage: formData.billing_percentage || 0,
+      is_forecasted: mode === 'edit' ? (initialData?.is_forecasted ?? false) : isForecasted,
     };
     
     onSave(submissionData);
@@ -164,6 +168,7 @@ export const EngagementModal: React.FC<EngagementModalProps> = ({
       engagement_percentage: 0,
       billing_percentage: 0,
       engagement_start_date: '',
+      is_forecasted: false,
     });
   };
 

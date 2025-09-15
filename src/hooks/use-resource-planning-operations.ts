@@ -12,6 +12,7 @@ interface ResourcePlanningData {
   release_date?: string;
   engagement_complete?: boolean;
   weekly_validation?: boolean;
+  is_forecasted?: boolean;
 }
 
 interface UpdateResourcePlanningData {

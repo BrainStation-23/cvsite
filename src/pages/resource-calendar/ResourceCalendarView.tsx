@@ -21,6 +21,7 @@ interface EngagementFormData {
   release_date?: string;
   bill_type_id?: string;
   project_id?: string;
+  is_forecasted: boolean;
 }
 import { useToast } from '@/hooks/use-toast';
 
@@ -164,6 +165,7 @@ const ResourceCalendarView: React.FC = () => {
           engagement_percentage: data.engagement_percentage!,
           billing_percentage: data.billing_percentage || 0,
           project_id: data.project_id,
+          is_forecasted: data.is_forecasted,
         });
         toast({
           title: "Success",
@@ -180,6 +182,7 @@ const ResourceCalendarView: React.FC = () => {
             engagement_percentage: data.engagement_percentage!,
             billing_percentage: data.billing_percentage || 0,
             project_id: data.project_id,
+            is_forecasted: data.is_forecasted,
           }
         });
       }
