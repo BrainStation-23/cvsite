@@ -79,3 +79,48 @@ export interface AdvancedProjectFilters {
     end?: string | null;
   } | null;
 }
+
+// Example type definitions (adjust as per your actual types)
+export interface ProjectManager {
+  id: string;
+  name: string;
+  employee_id: string;
+}
+
+export interface ProjectType {
+  id: string;
+  name: string;
+}
+
+export interface ProjectLevel {
+  project_level: string;
+}
+
+export interface ProjectData {
+  project_name: string;
+  client_name: string;
+  project_manager: string;
+  budget: number;
+  is_active: boolean;
+  description: string;
+  project_level: string;
+  project_bill_type: string;
+  project_type: string;
+}
+
+export interface BulkSyncStats {
+  total_processed: number;
+  inserted: number;
+  updated: number;
+  skipped: number;
+}
+
+export interface BulkSyncErrorProject {
+  projectName: string;
+  error: string;
+}
+
+export interface BulkSyncResponse {
+  stats: BulkSyncStats;
+  error_projects: BulkSyncErrorProject[];
+}
