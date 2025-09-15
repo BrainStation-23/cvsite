@@ -47,10 +47,10 @@ export function transformResourceDataToGantt(resourceData: ResourceCalendarData[
   return Array.from(resourceMap.values());
 }
 
-export function generateTimeline(startMonth: Date): GanttTimelineMonth[] {
+export function generateTimeline(startMonth: Date, monthCount: number = 3): GanttTimelineMonth[] {
   const months: GanttTimelineMonth[] = [];
   
-  for (let i = 0; i < 3; i++) { // This number dictates how many months will be shown
+  for (let i = 0; i < monthCount; i++) { 
     const monthDate = addMonths(startMonth, i);
     const monthStart = startOfMonth(monthDate);
     const monthEnd = endOfMonth(monthDate);
