@@ -1,6 +1,6 @@
 
 import { supabase } from '@/integrations/supabase/client';
-import {  ProjectsResponse, ProjectFilters } from '@/types/projects';
+import { ProjectsResponse, ProjectFilters, ProjectType, ProjectLevel, ProjectManager, ProjectData, BulkSyncResponse } from '@/types/projects';
 
 export class EnhancedProjectsApiService {
   // Use the new search_projects RPC function with enhanced filtering
@@ -55,7 +55,7 @@ export class EnhancedProjectsApiService {
   }
 
   // Get unique project types for filtering
-  static async getProjectTypes(): Promise<Array<{ id: string; name: string }>> {
+  static async getProjectTypes(): Promise<ProjectType[]> {
     const { data, error } = await supabase
       .from('project_types')
       .select('id, name')
@@ -74,14 +74,14 @@ export class EnhancedProjectsApiService {
       .order('project_level');
 
     if (error) throw error;
-    
+
     // Extract unique project levels
-    const uniqueLevels = [...new Set(data?.map(item => item.project_level).filter(Boolean))];
+    const uniqueLevels = [...new Set(data?.map((item: ProjectLevel) => item.project_level).filter(Boolean))];
     return uniqueLevels;
   }
 
   // Get project managers for filtering
-  static async getProjectManagers(): Promise<Array<{ id: string; name: string; employee_id: string }>> {
+  static async getProjectManagers(): Promise<ProjectManager[]> {
     const { data, error } = await supabase
       .from('profiles')
       .select(`
@@ -95,11 +95,22 @@ export class EnhancedProjectsApiService {
 
     if (error) throw error;
 
-    return (data || []).map(profile => ({
+    type ProfileWithGeneralInfo = {
+      id: string;
+      first_name?: string;
+      last_name?: string;
+      employee_id?: string;
+      general_information?: {
+        first_name?: string;
+        last_name?: string;
+      };
+    };
+
+    return (data || []).map((profile: ProfileWithGeneralInfo) => ({
       id: profile.id,
       name: `${profile.general_information?.first_name || profile.first_name || ''} ${profile.general_information?.last_name || profile.last_name || ''}`.trim(),
       employee_id: profile.employee_id || ''
-    })).filter(pm => pm.name); // Only include entries with names
+    })).filter((pm: ProjectManager) => pm.name); // Only include entries with names
   }
 
   // Legacy methods for backward compatibility
@@ -107,7 +118,7 @@ export class EnhancedProjectsApiService {
     return this.searchProjects(filters);
   }
 
-  static async createProject(projectData: any): Promise<void> {
+  static async createProject(projectData: ProjectData): Promise<void> {
     const { error } = await supabase
       .from('projects_management')
       .insert({
@@ -116,7 +127,6 @@ export class EnhancedProjectsApiService {
         project_manager: projectData.project_manager,
         budget: projectData.budget,
         is_active: projectData.is_active,
-        forecasted: projectData.forecasted,
         description: projectData.description,
         project_level: projectData.project_level,
         project_bill_type: projectData.project_bill_type,
@@ -126,14 +136,13 @@ export class EnhancedProjectsApiService {
     if (error) throw error;
   }
 
-  static async updateProject(id: string, projectData: any): Promise<void> {
-    const updateData: any = {};
+  static async updateProject(id: string, projectData: Partial<ProjectData>): Promise<void> {
+    const updateData: Partial<ProjectData> = {};
     if (projectData.project_name !== undefined) updateData.project_name = projectData.project_name;
     if (projectData.client_name !== undefined) updateData.client_name = projectData.client_name;
     if (projectData.project_manager !== undefined) updateData.project_manager = projectData.project_manager;
     if (projectData.budget !== undefined) updateData.budget = projectData.budget;
     if (projectData.is_active !== undefined) updateData.is_active = projectData.is_active;
-    if (projectData.forecasted !== undefined) updateData.forecasted = projectData.forecasted;
     if (projectData.description !== undefined) updateData.description = projectData.description;
     if (projectData.project_level !== undefined) updateData.project_level = projectData.project_level;
     if (projectData.project_bill_type !== undefined) updateData.project_bill_type = projectData.project_bill_type;
@@ -171,9 +180,9 @@ export class EnhancedProjectsApiService {
   }
 
   // Bulk sync projects from Odoo
-  static async bulkSyncOdooProjects(projectsData: any[]): Promise<any> {
+  static async bulkSyncOdooProjects(projectsData: ProjectData[]): Promise<BulkSyncResponse> {
     const { data, error } = await supabase.rpc('bulk_sync_odoo_projects', {
-      projects_data: projectsData
+      projects_data: projectsData.map(project => ({ ...project }))
     });
 
     if (error) {
@@ -181,17 +190,6 @@ export class EnhancedProjectsApiService {
       throw error;
     }
 
-    return data as unknown as {
-      stats: {
-        total_processed: number;
-        inserted: number;
-        updated: number;
-        skipped: number;
-      };
-      error_projects: Array<{
-        projectName: string;
-        error: string;
-      }>;
-    };
+    return data as unknown as BulkSyncResponse;
   }
 }

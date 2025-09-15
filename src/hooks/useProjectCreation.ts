@@ -81,7 +81,6 @@ export const useProjectCreation = ({ onProjectCreated, onCancel }: UseProjectCre
         project_level: formData.project_level,
         project_bill_type: formData.project_bill_type,
         project_type: formData.project_type,
-        forecasted: true,
         is_active: true,
         client_name: null,
         project_manager: null,
@@ -104,11 +103,9 @@ export const useProjectCreation = ({ onProjectCreated, onCancel }: UseProjectCre
           client_name, 
           project_level, 
           project_bill_type, 
-          forecasted,
           project_type:project_types(name)
         `)
         .eq('project_name', projectData.project_name)
-        .eq('forecasted', true)
         .order('created_at', { ascending: false })
         .limit(1);
 
