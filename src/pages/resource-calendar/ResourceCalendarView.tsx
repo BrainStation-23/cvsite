@@ -165,7 +165,7 @@ const ResourceCalendarView: React.FC = () => {
           engagement_percentage: data.engagement_percentage!,
           billing_percentage: data.billing_percentage || 0,
           project_id: data.project_id,
-          is_forecasted: data.is_forecasted,
+          is_forecasted: true,
         });
         toast({
           title: "Success",
