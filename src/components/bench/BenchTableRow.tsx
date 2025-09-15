@@ -3,7 +3,6 @@ import { TableCell, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Calendar, Clock, Award } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
-import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Download } from 'lucide-react';
 import { BenchRecord } from './types/benchRecord';
@@ -18,7 +17,6 @@ interface BenchTableRowProps {
 }
 
 export const BenchTableRow: React.FC<BenchTableRowProps> = ({ record, onPDFExport }) => {
-  const navigate = useNavigate();
   const { updateFeedback } = useBenchFeedback();
   const formatBenchDate = (dateString: string) => {
     try {
