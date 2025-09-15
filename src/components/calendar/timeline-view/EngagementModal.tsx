@@ -131,7 +131,7 @@ export const EngagementModal: React.FC<EngagementModalProps> = ({
           project_level: initialData.project.project_level,
           project_bill_type: initialData.project.project_bill_type,
           project_type_name: initialData.project.project_type_name,
-          forecasted: initialData.project.forecasted || false,
+          forecasted: initialData.is_forecasted || false,
         });
       }
     }

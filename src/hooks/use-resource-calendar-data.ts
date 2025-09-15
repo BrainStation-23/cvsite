@@ -14,6 +14,7 @@ export interface ResourceCalendarData {
   release_date: string;
   engagement_complete: boolean;
   weekly_validation: boolean;
+  is_forecasted: boolean;
   created_at: string;
   updated_at: string;
   profile: {
@@ -45,7 +46,6 @@ export interface ResourceCalendarData {
     description: string | null;
     budget: number;
     is_active: boolean;
-    forecasted: boolean;
     project_level: string;
     project_bill_type: string;
     project_type_name: string;
@@ -121,7 +121,7 @@ export function useResourceCalendarData(
       
 
       // Use the planned resource data function for calendar view with advanced filters including new project-level filters
-      const { data: rpcData, error } = await supabase.rpc('get_planned_resource_data', {
+      const { data: rpcData, error } = await supabase.rpc('get_planned_resource_calendar_data', {
         search_query: searchQuery || null,
         page_number: 1,
         items_per_page: 1000,

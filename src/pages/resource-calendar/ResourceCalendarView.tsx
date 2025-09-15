@@ -1,7 +1,6 @@
 
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import DashboardLayout from '../../components/Layout/DashboardLayout';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
 import { ResourceCalendarFilters } from '../../components/calendar/ResourceCalendarFilters';
@@ -278,7 +277,7 @@ const ResourceCalendarView: React.FC = () => {
           initialData={selectedEngagement}
           preselectedResourceId={preselectedResourceId || undefined}
           preselectedStartDate={preselectedStartDate || undefined}
-          isForecasted={selectedEngagement?.project?.forecasted || false}
+          isForecasted={selectedEngagement.is_forecasted}
         />
       </div>
   );
