@@ -1282,6 +1282,7 @@ export type Database = {
           engagement_percentage: number | null
           engagement_start_date: string | null
           id: string
+          is_forecasted: boolean | null
           profile_id: string
           project_id: string | null
           release_date: string | null
@@ -1296,6 +1297,7 @@ export type Database = {
           engagement_percentage?: number | null
           engagement_start_date?: string | null
           id?: string
+          is_forecasted?: boolean | null
           profile_id: string
           project_id?: string | null
           release_date?: string | null
@@ -1310,6 +1312,7 @@ export type Database = {
           engagement_percentage?: number | null
           engagement_start_date?: string | null
           id?: string
+          is_forecasted?: boolean | null
           profile_id?: string
           project_id?: string | null
           release_date?: string | null
@@ -2064,6 +2067,30 @@ export type Database = {
       }
       get_pip_profile_details: {
         Args: { input_pip_id: string }
+        Returns: Json
+      }
+      get_planned_resource_calendar_data: {
+        Args: {
+          bill_type_filter?: string
+          end_date_from?: string
+          end_date_to?: string
+          items_per_page?: number
+          manager_filter?: string
+          max_billing_percentage?: number
+          max_engagement_percentage?: number
+          min_billing_percentage?: number
+          min_engagement_percentage?: number
+          page_number?: number
+          project_bill_type_filter?: string
+          project_level_filter?: string
+          project_search?: string
+          sbu_filter?: string
+          search_query?: string
+          sort_by?: string
+          sort_order?: string
+          start_date_from?: string
+          start_date_to?: string
+        }
         Returns: Json
       }
       get_planned_resource_data: {
