@@ -21,6 +21,7 @@ import {
   Search,
   Network,
   Settings,
+  LayoutDashboard
 } from 'lucide-react';
 
 export interface NavigationItem {
@@ -57,6 +58,7 @@ export const getSidebarGroups = (
     (userRole === 'admin' || userRole === 'manager') && {
       label: 'CV Database',
       items: [
+        { to: `/${userRole}/cv-dashboard`, icon: LayoutDashboard, label: 'CV Dashboard' },
         { to: `/${userRole}/employee-data`, icon: Search, label: 'CV Search' },
         { to: `/${userRole}/training-certification`, icon: FileText, label: 'Training and Certification' },
       ],
@@ -66,9 +68,10 @@ export const getSidebarGroups = (
     (userRole === 'admin') && {
       label: 'Resource Calendar',
       items: [
+          { to: `/${userRole}/resource-calendar/resource-dashboard`, icon: LayoutDashboard, label: 'Resource Dashboard' },
           { to: `/${userRole}/resource-calendar/planning`, icon: Calendar, label: 'Planning' },
           { to: `/${userRole}/resource-calendar/calendar`, icon: CalendarDays, label: 'Calendar View' },
-          { to: `/${userRole}/resource-calendar/statistics`, icon: BarChart3, label: 'Statistics' },
+
       ],
     },
 
@@ -77,9 +80,9 @@ export const getSidebarGroups = (
       label: 'PIP',
       items: [
         ...(userRole === 'admin' ? [
+          { to: '/admin/pip/dashboard', icon: LayoutDashboard, label: 'PIP Dashboard' },
           { to: '/admin/pip/initiate', icon: UserX, label: 'Initiate' },
           { to: '/admin/pip/list', icon: List, label: 'PIP List' },
-          { to: '/admin/pip/dashboard', icon: TrendingUp, label: 'PIP Dashboard' },
         ] : []),
         ...(userRole === 'manager' ? [
           { to: '/manager/pip/pm-review', icon: UserCheck, label: 'PM Review' },
@@ -104,7 +107,7 @@ export const getSidebarGroups = (
     userRole === 'admin' && {
       label: 'Bench Management',
       items: [
-        { to: '/admin/bench/dashboard', icon: BarChart3, label: 'Bench Dashboard' },
+        { to: '/admin/bench/dashboard', icon: LayoutDashboard, label: 'Bench Dashboard' },
         { to: '/admin/bench/report', icon: BarChart3, label: 'Bench Report' },
         { to: '/admin/bench/settings', icon: Settings, label: 'Bench Settings' },
       ],
