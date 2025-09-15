@@ -109,12 +109,16 @@ export const EngagementModal: React.FC<EngagementModalProps> = ({
 
   useEffect(() => {
     if (isOpen) {
-      // Set default values when modal opens
+      // Reset form when opening the modal
       const defaultMonth = preselectedStartDate ? preselectedStartDate.getMonth() + 1 : currentMonth;
       const defaultYear = preselectedStartDate ? preselectedStartDate.getFullYear() : currentYear;
       
       setSelectedMonth(defaultMonth);
       setSelectedYear(defaultYear);
+      
+      // Reset project data when opening the modal
+      setSelectedProjectData(null);
+      
       setFormData({
         profile_id: preselectedResourceId || initialData?.profile_id || '',
         engagement_percentage: initialData?.engagement_percentage || 0,
@@ -125,17 +129,6 @@ export const EngagementModal: React.FC<EngagementModalProps> = ({
         project_id: initialData?.project?.id || '',
         is_forecasted: initialData?.is_forecasted ?? isForecasted,
       });
-      
-      // Set selected project data if in edit mode
-      if (initialData?.project) {
-        setSelectedProjectData({
-          project_name: initialData.project.project_name,
-          client_name: initialData.project.client_name,
-          project_level: initialData.project.project_level,
-          project_bill_type: initialData.project.project_bill_type,
-          project_type_name: initialData.project.project_type_name,
-        });
-      }
     }
   }, [isOpen, initialData, preselectedResourceId, preselectedStartDate, currentMonth, currentYear]);
 
