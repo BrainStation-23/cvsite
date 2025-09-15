@@ -246,7 +246,6 @@ const ResourceCalendarView: React.FC = () => {
 
         {/* Calendar Header */}
         <CalendarHeader
-          currentMonth={currentMonth}
           onPreviousMonth={handlePreviousMonth}
           onNextMonth={handleNextMonth}
           onToday={handleToday}

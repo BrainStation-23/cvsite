@@ -94,7 +94,7 @@ export function useResourceCalendarData(
   advancedFilters: AdvancedFilters = {}
 ) {
 
-  const dateRange = { start: startOfMonth(startingMonth), end: endOfMonth(addMonths(startingMonth, 5)) };
+  const dateRange = { start: startOfMonth(startingMonth), end: endOfMonth(addMonths(startingMonth, 3)) };
 
   const { data: resourceData, isLoading, error } = useQuery({
     queryKey: [

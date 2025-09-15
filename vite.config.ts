@@ -5,7 +5,7 @@ import fs from "fs";
 import { basename } from "path";
 import { componentTagger } from "lovable-tagger";
 
-// 👇 MediaPipe export fix plugin
+
 function mediapipeWorkaround() {
   const exportMap: Record<string, string> = {
     'selfie_segmentation.js': 'SelfieSegmentation',
@@ -41,12 +41,20 @@ export default defineConfig(({ mode }) => ({
   },
   plugins: [
     react(),
-    mode === 'development' && componentTagger(),
-    mediapipeWorkaround()
+    mode === "development" && componentTagger(),
+    mediapipeWorkaround(),
   ].filter(Boolean),
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
+    },
+  },
+  build: {
+    minify: "terser",
+    terserOptions: {
+      compress: {
+        drop_console: true, 
+      },
     },
   },
 }));

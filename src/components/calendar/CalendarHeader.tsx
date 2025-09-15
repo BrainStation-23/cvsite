@@ -1,18 +1,15 @@
 
 import React from 'react';
-import { format } from 'date-fns';
 import { Button } from '@/components/ui/button';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface CalendarHeaderProps {
-  currentMonth: Date;
   onPreviousMonth: () => void;
   onNextMonth: () => void;
   onToday: () => void;
 }
 
 export const CalendarHeader: React.FC<CalendarHeaderProps> = ({
-  currentMonth,
   onPreviousMonth,
   onNextMonth,
   onToday,
@@ -20,9 +17,7 @@ export const CalendarHeader: React.FC<CalendarHeaderProps> = ({
   return (
     <div className="flex items-center justify-between">
       <div className="flex items-center space-x-4">
-        <h2 className="text-2xl font-bold">
-          {format(currentMonth, 'MMMM yyyy')}
-        </h2>
+
         <div className="flex items-center space-x-1">
           <Button variant="outline" size="sm" onClick={onPreviousMonth}>
             <ChevronLeft className="h-4 w-4" />
