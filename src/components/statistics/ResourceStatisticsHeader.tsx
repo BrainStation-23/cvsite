@@ -1,7 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
-import { ArrowLeft, BarChart3 } from 'lucide-react';
+import { BarChart3 } from 'lucide-react';
 import { ViewToggle } from './ViewToggle';
 interface ResourceStatisticsHeaderProps {
   baseUrl: string;

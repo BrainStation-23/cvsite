@@ -39,7 +39,7 @@ const ResourceCalendarStatistics: React.FC = () => {
 
   // Add state for view toggles (only for overview)
   const [showCharts, setShowCharts] = useState(true);
-  const [showTables, setShowTables] = useState(false);
+  const [showTables, setShowTables] = useState(true);
 
   console.log('Current overview filters state:', overviewFilters);
   console.log('Current pivot filters state:', pivotFilters);
