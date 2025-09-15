@@ -19,7 +19,7 @@ export const GanttHeader: React.FC<GanttHeaderProps> = ({ timeline, resourceCoun
     };
   
   return (
-    <div className="sticky top-0 z-10 bg-background border-b">
+    <div className="sticky top-0 z-10 bg-background border-b pr-1">
       {/* Month headers */}
       <div className="flex">
         <div className="w-80 flex-shrink-0 border-r bg-muted/50 p-2">
