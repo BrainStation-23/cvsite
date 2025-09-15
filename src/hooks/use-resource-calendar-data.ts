@@ -91,10 +91,12 @@ export function useResourceCalendarData(
   selectedSbu: string | null,
   selectedManager: string | null,
   startingMonth: Date,
-  advancedFilters: AdvancedFilters = {}
+  advancedFilters: AdvancedFilters = {},
+  monthCount: number = 3,
 ) {
 
-  const dateRange = { start: startOfMonth(startingMonth), end: endOfMonth(addMonths(startingMonth, 5)) };
+  const safeMonthCount = Math.max(1, Math.floor(monthCount || 3));
+  const dateRange = { start: startOfMonth(startingMonth), end: endOfMonth(addMonths(startingMonth, safeMonthCount - 1)) };
 
   const { data: resourceData, isLoading, error } = useQuery({
     queryKey: [
@@ -104,7 +106,8 @@ export function useResourceCalendarData(
       selectedManager, 
       dateRange.start.toISOString(), 
       dateRange.end.toISOString(),
-      advancedFilters
+      advancedFilters,
+      safeMonthCount,
     ],
     queryFn: async () => {
       console.log('Fetching calendar data with date range and filters:', {
@@ -112,6 +115,7 @@ export function useResourceCalendarData(
         selectedSbu,
         selectedManager,
         dateRange,
+        monthCount: safeMonthCount,
         advancedFilters
       });
 

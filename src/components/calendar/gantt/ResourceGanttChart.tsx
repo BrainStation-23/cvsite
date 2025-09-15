@@ -11,6 +11,7 @@ interface ResourceGanttChartProps {
   isLoading?: boolean;
   onEngagementClick?: (engagement: GanttEngagement) => void;
   onEmptySpaceClick?: (resourceId: string, clickDate: Date) => void;
+  monthCount?: number;
 }
 
 export const ResourceGanttChart: React.FC<ResourceGanttChartProps> = ({
@@ -18,7 +19,8 @@ export const ResourceGanttChart: React.FC<ResourceGanttChartProps> = ({
   currentMonth,
   isLoading = false,
   onEngagementClick,
-  onEmptySpaceClick
+  onEmptySpaceClick,
+  monthCount = 3,
 }) => {
   // --- Add sort state ---
   const [sortBy, setSortBy] = useState<'first_name' | 'employee_id'>('first_name');
@@ -50,8 +52,8 @@ export const ResourceGanttChart: React.FC<ResourceGanttChartProps> = ({
   }, [ganttData, sortBy, sortOrder]);
 
   const timeline = useMemo(() => 
-    generateTimeline(currentMonth), 
-    [currentMonth]
+    generateTimeline(currentMonth, monthCount), 
+    [currentMonth, monthCount]
   );
 
   // infinite scroll state

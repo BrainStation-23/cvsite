@@ -46,6 +46,7 @@ const ResourceCalendarView: React.FC = () => {
 
   // Month navigation state
   const [currentMonth, setCurrentMonth] = useState(() => startOfMonth(new Date()));
+  const [monthCount, setMonthCount] = useState<number>(3);
 
   // Basic filter states
   const [searchQuery, setSearchQuery] = useState('');
@@ -85,7 +86,8 @@ const ResourceCalendarView: React.FC = () => {
     selectedSbu,
     selectedManager,
     currentMonth,
-    advancedFilters
+    advancedFilters,
+    monthCount
   );
 
   // Month navigation handlers
@@ -99,6 +101,15 @@ const ResourceCalendarView: React.FC = () => {
 
   const handleToday = () => {
     setCurrentMonth(startOfMonth(new Date()));
+  };
+
+  // Month count handlers
+  const handleIncreaseMonths = () => {
+    setMonthCount((prev) => Math.min(prev + 1, 12));
+  };
+
+  const handleDecreaseMonths = () => {
+    setMonthCount((prev) => Math.max(prev - 1, 1));
   };
 
   const clearFilters = () => {
@@ -246,10 +257,12 @@ const ResourceCalendarView: React.FC = () => {
 
         {/* Calendar Header */}
         <CalendarHeader
-          currentMonth={currentMonth}
           onPreviousMonth={handlePreviousMonth}
           onNextMonth={handleNextMonth}
           onToday={handleToday}
+          monthCount={monthCount}
+          onIncreaseMonths={handleIncreaseMonths}
+          onDecreaseMonths={handleDecreaseMonths}
         />
 
         {/* Gantt Chart */}
@@ -262,6 +275,7 @@ const ResourceCalendarView: React.FC = () => {
             <ResourceGanttChart
               resourceData={resourceData}
               currentMonth={currentMonth}
+              monthCount={monthCount}
               isLoading={isLoading}
               onEngagementClick={handleEngagementClick}
               onEmptySpaceClick={handleEmptySpaceClick}
