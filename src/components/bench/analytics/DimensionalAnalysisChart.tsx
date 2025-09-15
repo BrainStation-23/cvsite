@@ -27,9 +27,8 @@ export function DimensionalAnalysisChart({
   dimension,
   title
 }: DimensionalAnalysisChartProps) {
-  const [showCharts, setShowCharts] = useState(true);
-  const [showTables, setShowTables] = useState(false);
-  if (isLoading) {
+  const [showCharts, setShowCharts] = useState(false);
+  const [showTables, setShowTables] = useState(true);  if (isLoading) {
     return (
       <Card className="animate-pulse">
         <CardHeader>
