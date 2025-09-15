@@ -10,7 +10,6 @@ interface ProjectDetailsProps {
     project_level?: string | null;
     project_bill_type?: string | null;
     project_type_name?: string | null;
-    forecasted: boolean;
   } | null;
 }
 
@@ -23,12 +22,6 @@ export const ProjectDetails: React.FC<ProjectDetailsProps> = ({ project }) => {
         <div className="space-y-3">
           <div className="flex items-center gap-2">
             <h4 className="text-sm font-medium text-foreground">{project.project_name}</h4>
-            {project.forecasted && (
-              <Badge variant="outline" className="text-xs bg-purple-50 text-purple-700 border-purple-200">
-                <Sparkles className="w-3 h-3 mr-1" />
-                Forecasted
-              </Badge>
-            )}
           </div>
           
           {project.client_name && (

@@ -9,7 +9,7 @@ import BillTypeCombobox from '@/components/resource-planning/BillTypeCombobox';
 import { format, startOfMonth, endOfMonth } from 'date-fns';
 import ProjectSearchCombobox from '@/components/resource-planning/ProjectSearchCombobox';
 import DatePicker from '@/components/admin/user/DatePicker';
-import { ResourcePlanningData } from '@/components/resource-planning/types/resourceplanning';
+import { ResourceCalendarData } from '@/hooks/use-resource-calendar-data';
 import { ProjectDetails } from '@/components/resource-planning/ProjectDetails';
 
 interface EngagementFormData {
@@ -20,6 +20,7 @@ interface EngagementFormData {
   release_date?: string;
   bill_type_id?: string;
   project_id?: string;
+  is_forecasted: boolean;
 }
 
 interface EngagementModalProps {
@@ -27,7 +28,7 @@ interface EngagementModalProps {
   onClose: () => void;
   onSave: (data: EngagementFormData) => void;
   onDelete?: (id: string) => void;
-  initialData?: ResourcePlanningData | null;
+  initialData?: ResourceCalendarData | null;
   preselectedResourceId?: string;
   preselectedStartDate?: Date;
   mode: 'create' | 'edit';
@@ -56,6 +57,7 @@ export const EngagementModal: React.FC<EngagementModalProps> = ({
     engagement_percentage: 0,
     billing_percentage: 0,
     engagement_start_date: '',
+    is_forecasted: isForecasted,
     ...initialData,
   });
   const [selectedProjectData, setSelectedProjectData] = useState<any>(null);
@@ -107,12 +109,16 @@ export const EngagementModal: React.FC<EngagementModalProps> = ({
 
   useEffect(() => {
     if (isOpen) {
-      // Set default values when modal opens
+      // Reset form when opening the modal
       const defaultMonth = preselectedStartDate ? preselectedStartDate.getMonth() + 1 : currentMonth;
       const defaultYear = preselectedStartDate ? preselectedStartDate.getFullYear() : currentYear;
       
       setSelectedMonth(defaultMonth);
       setSelectedYear(defaultYear);
+      
+      // Reset project data when opening the modal
+      setSelectedProjectData(null);
+      
       setFormData({
         profile_id: preselectedResourceId || initialData?.profile_id || '',
         engagement_percentage: initialData?.engagement_percentage || 0,
@@ -121,19 +127,8 @@ export const EngagementModal: React.FC<EngagementModalProps> = ({
         release_date: initialData?.release_date || '',
         bill_type_id: initialData?.bill_type?.id || '',
         project_id: initialData?.project?.id || '',
+        is_forecasted: initialData?.is_forecasted ?? isForecasted,
       });
-      
-      // Set selected project data if in edit mode
-      if (initialData?.project) {
-        setSelectedProjectData({
-          project_name: initialData.project.project_name,
-          client_name: initialData.project.client_name,
-          project_level: initialData.project.project_level,
-          project_bill_type: initialData.project.project_bill_type,
-          project_type_name: initialData.project.project_type_name,
-          forecasted: initialData.project.forecasted || false,
-        });
-      }
     }
   }, [isOpen, initialData, preselectedResourceId, preselectedStartDate, currentMonth, currentYear]);
 
@@ -150,6 +145,7 @@ export const EngagementModal: React.FC<EngagementModalProps> = ({
       release_date: format(endDate, 'yyyy-MM-dd'),
       engagement_percentage: formData.engagement_percentage,
       billing_percentage: formData.billing_percentage || 0,
+      is_forecasted: mode === 'edit' ? (initialData?.is_forecasted ?? false) : isForecasted,
     };
     
     onSave(submissionData);
@@ -164,6 +160,7 @@ export const EngagementModal: React.FC<EngagementModalProps> = ({
       engagement_percentage: 0,
       billing_percentage: 0,
       engagement_start_date: '',
+      is_forecasted: false,
     });
   };
 

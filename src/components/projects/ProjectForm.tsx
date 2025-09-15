@@ -42,7 +42,6 @@ const projectSchema = z.object({
   project_bill_type: z.string().optional(),
   project_type: z.string().optional(),
   is_active: z.boolean().default(true),
-  forecasted: z.boolean().default(false),
 });
 
 type ProjectFormData = z.infer<typeof projectSchema>;
@@ -74,7 +73,6 @@ export const ProjectForm: React.FC<ProjectFormProps> = ({
       project_bill_type: '',
       project_type: '',
       is_active: true,
-      forecasted: false,
     },
   });
 
@@ -90,7 +88,6 @@ export const ProjectForm: React.FC<ProjectFormProps> = ({
         project_bill_type: initialData.project_bill_type || '',
         project_type: initialData.project_type_data?.id || '',
         is_active: initialData.is_active,
-        forecasted: initialData.forecasted,
       });
     } else {
       form.reset({
@@ -103,7 +100,6 @@ export const ProjectForm: React.FC<ProjectFormProps> = ({
         project_bill_type: '',
         project_type: '',
         is_active: true,
-        forecasted: false,
       });
     }
   }, [initialData, form]);
@@ -119,7 +115,6 @@ export const ProjectForm: React.FC<ProjectFormProps> = ({
       project_bill_type: data.project_bill_type || null,
       project_type: data.project_type || null,
       is_active: data.is_active,
-      forecasted: data.forecasted,
     });
 
     if (success) {
@@ -293,26 +288,6 @@ export const ProjectForm: React.FC<ProjectFormProps> = ({
               )}
             />
 
-            <FormField
-              control={form.control}
-              name="forecasted"
-              render={({ field }) => (
-                <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
-                  <div className="space-y-0.5">
-                    <FormLabel className="text-base">Forecasted Project</FormLabel>
-                    <div className="text-sm text-muted-foreground">
-                      Enable this project for forecasted resource planning and assignments
-                    </div>
-                  </div>
-                  <FormControl>
-                    <Switch
-                      checked={field.value}
-                      onCheckedChange={field.onChange}
-                    />
-                  </FormControl>
-                </FormItem>
-              )}
-            />
 
             <div className="flex justify-end space-x-2 pt-4">
               <Button

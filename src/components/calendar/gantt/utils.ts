@@ -31,7 +31,7 @@ export function transformResourceDataToGantt(resourceData: ResourceCalendarData[
       engagement_percentage: item.engagement_percentage,
       billing_percentage: item.billing_percentage,
       bill_type: item.bill_type,
-      is_forecasted: item.project?.forecasted,
+      is_forecasted: item.is_forecasted,
       project: item.project
         ? {
             project_level: item.project.project_level,
@@ -47,10 +47,10 @@ export function transformResourceDataToGantt(resourceData: ResourceCalendarData[
   return Array.from(resourceMap.values());
 }
 
-export function generateTimeline(startMonth: Date): GanttTimelineMonth[] {
+export function generateTimeline(startMonth: Date, monthCount: number = 3): GanttTimelineMonth[] {
   const months: GanttTimelineMonth[] = [];
   
-  for (let i = 0; i < 3; i++) { // This number dictates how many months will be shown
+  for (let i = 0; i < monthCount; i++) { 
     const monthDate = addMonths(startMonth, i);
     const monthStart = startOfMonth(monthDate);
     const monthEnd = endOfMonth(monthDate);

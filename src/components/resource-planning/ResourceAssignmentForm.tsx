@@ -105,18 +105,6 @@ export const ResourceAssignmentForm: React.FC<ResourceAssignmentFormProps> = ({
           />
         </div>
 
-        {/* <div className="space-y-2">
-          <Label htmlFor="forecastedProject" className="text-sm font-medium">Forecasted Project</Label>
-          <Input
-            id="forecastedProject"
-            type="text"
-            value={forecastedProject}
-            onChange={(e) => setForecastedProject(e.target.value)}
-            placeholder="Enter forecasted project..."
-            className="h-9"
-          />
-        </div> */}
-
         <div className="space-y-2">
           <Label htmlFor="startDate" className="text-sm font-medium">Start Date</Label>
           <DatePicker

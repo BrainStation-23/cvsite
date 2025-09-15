@@ -49,6 +49,7 @@ import BenchReportPage from '@/pages/admin/bench/BenchReportPage';
 import BenchSettingsPage from '@/pages/admin/bench/BenchSettingsPage';
 import BenchDashboard from '@/pages/bench/BenchDashboard';
 import DashboardLayout from '@/components/Layout/DashboardLayout';
+import CvDashboard from './pages/employee/CvDashboard';
 import './App.css';
 
 // Create QueryClient instance outside component to prevent recreation
@@ -101,7 +102,7 @@ function App(): React.ReactElement {
               {/* Resource Calendar */}
               <Route path="resource-calendar/planning" element={<ResourceCalendarPlanning />} />
               <Route path="resource-calendar/calendar" element={<ResourceCalendarView />} />
-              <Route path="resource-calendar/statistics" element={<ResourceCalendarStatistics />} />
+              <Route path="resource-calendar/resource-dashboard" element={<ResourceCalendarStatistics />} />
               
               {/* Platform Settings */}
               <Route path="platform-settings/profile" element={<ProfileManagementSettings />} />
@@ -112,6 +113,7 @@ function App(): React.ReactElement {
               <Route path="platform-settings/audit/profile-image-warnings" element={<ProfileImageWarningAudit />} />
               
               {/* CV Templates */}
+              <Route path="cv-dashboard" element={<CvDashboard />} />
               <Route path="cv-templates" element={<CVTemplatesPage />} />
               <Route path="cv-templates/documentation" element={<CVTemplateDocumentationPage />} />
               <Route path="cv-templates/:id" element={<CVTemplateViewPage />} />

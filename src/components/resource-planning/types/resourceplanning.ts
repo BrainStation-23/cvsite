@@ -7,6 +7,7 @@ export interface ResourcePlanningData {
   engagement_start_date: string;
   engagement_complete: boolean;
   weekly_validation: boolean;
+  is_forecasted: boolean;
   created_at: string;
   updated_at: string;
   profile: {
@@ -30,7 +31,6 @@ export interface ResourcePlanningData {
     project_level?: string;
     project_bill_type?: string;
     project_type_name?: string;
-    forecasted: boolean;
   } | null;
   manager: {
     id: string;

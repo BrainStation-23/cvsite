@@ -41,7 +41,6 @@ const ProjectSearchCombobox: React.FC<ProjectSearchComboboxProps> = ({
           client_name, 
           project_level, 
           project_bill_type, 
-          forecasted,
           project_type:project_types(name)
         `)
         .eq('id', value)
@@ -67,7 +66,6 @@ const ProjectSearchCombobox: React.FC<ProjectSearchComboboxProps> = ({
           client_name, 
           project_level, 
           project_bill_type, 
-          forecasted,
           project_type:project_types(name)
         `)
         .eq('is_active', true)
@@ -247,12 +245,6 @@ const ProjectSearchCombobox: React.FC<ProjectSearchComboboxProps> = ({
                     <div className="flex flex-col w-full min-w-0">
                       <div className="flex items-center gap-2 mb-1">
                         <span className="font-medium truncate">{project.project_name}</span>
-                        {project.forecasted && (
-                          <Badge variant="outline" className="text-xs bg-purple-50 text-purple-700 border-purple-200 shrink-0">
-                            <Sparkles className="w-3 h-3 mr-1" />
-                            Forecasted
-                          </Badge>
-                        )}
                       </div>
                       {project.client_name && (
                         <span className="text-sm text-muted-foreground mb-2 truncate">Client: {project.client_name}</span>

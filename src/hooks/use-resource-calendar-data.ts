@@ -14,6 +14,7 @@ export interface ResourceCalendarData {
   release_date: string;
   engagement_complete: boolean;
   weekly_validation: boolean;
+  is_forecasted: boolean;
   created_at: string;
   updated_at: string;
   profile: {
@@ -45,7 +46,6 @@ export interface ResourceCalendarData {
     description: string | null;
     budget: number;
     is_active: boolean;
-    forecasted: boolean;
     project_level: string;
     project_bill_type: string;
     project_type_name: string;
@@ -65,6 +65,10 @@ export interface ResourceCalendarData {
     is_support: boolean;
     color_code: string;
   } | null;
+}
+
+interface ResourceCalendarResponse {
+  resource_planning: ResourceCalendarData[];
 }
 
 interface AdvancedFilters {
@@ -87,10 +91,12 @@ export function useResourceCalendarData(
   selectedSbu: string | null,
   selectedManager: string | null,
   startingMonth: Date,
-  advancedFilters: AdvancedFilters = {}
+  advancedFilters: AdvancedFilters = {},
+  monthCount: number = 3,
 ) {
 
-  const dateRange = { start: startOfMonth(startingMonth), end: endOfMonth(addMonths(startingMonth, 5)) };
+  const safeMonthCount = Math.max(1, Math.floor(monthCount || 3));
+  const dateRange = { start: startOfMonth(startingMonth), end: endOfMonth(addMonths(startingMonth, safeMonthCount - 1)) };
 
   const { data: resourceData, isLoading, error } = useQuery({
     queryKey: [
@@ -100,28 +106,25 @@ export function useResourceCalendarData(
       selectedManager, 
       dateRange.start.toISOString(), 
       dateRange.end.toISOString(),
-      advancedFilters
+      advancedFilters,
+      safeMonthCount,
     ],
     queryFn: async () => {
-      console.log('Fetching calendar data with advanced filters:', {
+      console.log('Fetching calendar data with date range and filters:', {
         searchQuery,
         selectedSbu,
         selectedManager,
         dateRange,
+        monthCount: safeMonthCount,
         advancedFilters
       });
 
+      // Use calendar date range as primary filter, with advanced filters as additional constraints
+      const calendarStartDate = dateRange.start.toISOString().split('T')[0];
+      const calendarEndDate = dateRange.end.toISOString().split('T')[0];
 
-      let startDateParam = null;
-      let endDateParam = null;
-      
-      
-      startDateParam = advancedFilters.startDateFrom || null;
-      endDateParam = advancedFilters.startDateTo || null;
-      
-
-      // Use the planned resource data function for calendar view with advanced filters including new project-level filters
-      const { data: rpcData, error } = await supabase.rpc('get_planned_resource_data', {
+      // Use the planned resource data function for calendar view with date range and advanced filters
+      const { data: rpcData, error } = await supabase.rpc('get_planned_resource_calendar_data', {
         search_query: searchQuery || null,
         page_number: 1,
         items_per_page: 1000,
@@ -135,8 +138,8 @@ export function useResourceCalendarData(
         max_engagement_percentage: advancedFilters.maxEngagementPercentage || null,
         min_billing_percentage: advancedFilters.minBillingPercentage || null,
         max_billing_percentage: advancedFilters.maxBillingPercentage || null,
-        start_date_from: startDateParam,
-        start_date_to: endDateParam,
+        start_date_from: advancedFilters.startDateFrom || calendarStartDate,
+        start_date_to: advancedFilters.startDateTo || calendarEndDate,
         end_date_from: advancedFilters.endDateFrom || null,
         end_date_to: advancedFilters.endDateTo || null,
         project_level_filter: advancedFilters.projectLevelFilter || null,
@@ -148,30 +151,18 @@ export function useResourceCalendarData(
         throw error;
       }
       
-      console.log('Raw RPC response:', rpcData);
+      console.log('RPC response received:', rpcData);
 
       if (rpcData && typeof rpcData === 'object' && 'resource_planning' in rpcData) {
-        const allResources = (rpcData as any).resource_planning || [];
+        const response = rpcData as unknown as ResourceCalendarResponse;
+        const resources = response.resource_planning || [];
         
-        // Filter resources that overlap with the date range
-        const filteredResources = allResources.filter((resource: ResourceCalendarData) => {
-          if (!resource.engagement_start_date) return false;
-          
-          const startDate = new Date(resource.engagement_start_date);
-          const endDate = resource.release_date ? new Date(resource.release_date) : new Date('2099-12-31');
-          
-          // Check if resource engagement overlaps with the viewing period
-          const overlaps = startDate <= dateRange.end && endDate >= dateRange.start;
-          
-          return overlaps;
+        console.log(`Received ${resources.length} resources from RPC for date range:`, {
+          start: calendarStartDate,
+          end: calendarEndDate,
         });
 
-        console.log(`Filtered ${filteredResources.length} resources from ${allResources.length} total for date range:`, {
-          start: dateRange.start.toISOString(),
-          end: dateRange.end.toISOString(),
-        });
-
-        return filteredResources;
+        return resources;
       } else {
         console.warn('Unexpected RPC response structure:', rpcData);
         return [];

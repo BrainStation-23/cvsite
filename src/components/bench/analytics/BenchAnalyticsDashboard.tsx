@@ -21,8 +21,8 @@ import { TrendsChart } from './TrendsChart';
 
 
 export function BenchAnalyticsDashboard() {
-  const [startDate, setStartDate] = useState<Date | null>(subDays(new Date(), 30));
-  const [endDate, setEndDate] = useState<Date | null>(new Date());
+  const [startDate, setStartDate] = useState<Date | null>(null);
+  const [endDate, setEndDate] = useState<Date | null>(null);
   
   
   const [periodType, setPeriodType] = useState<'daily' | 'weekly' | 'monthly'>('monthly');

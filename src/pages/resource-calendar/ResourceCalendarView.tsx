@@ -1,18 +1,17 @@
 
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import DashboardLayout from '../../components/Layout/DashboardLayout';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
 import { ResourceCalendarFilters } from '../../components/calendar/ResourceCalendarFilters';
 import { CalendarHeader } from '../../components/calendar/CalendarHeader';
 import { ResourceGanttChart } from '../../components/calendar/gantt/ResourceGanttChart';
 import { EngagementModal } from '../../components/calendar/timeline-view/EngagementModal';
-import { useResourceCalendarData } from '../../hooks/use-resource-calendar-data';
+import { useResourceCalendarData, ResourceCalendarData } from '../../hooks/use-resource-calendar-data';
 import { useResourcePlanningOperations } from '../../hooks/use-resource-planning-operations';
 import { startOfMonth, addMonths, subMonths } from 'date-fns';
 import { GanttEngagement } from '../../components/calendar/gantt/types';
-import { ResourcePlanningData } from '../../components/resource-planning/types/resourceplanning';
+import { useToast } from '@/hooks/use-toast';
 
 interface EngagementFormData {
   profile_id: string;
@@ -22,8 +21,8 @@ interface EngagementFormData {
   release_date?: string;
   bill_type_id?: string;
   project_id?: string;
+  is_forecasted: boolean;
 }
-import { useToast } from '@/hooks/use-toast';
 
 interface AdvancedFilters {
   billTypeFilter: string | null;
@@ -47,6 +46,7 @@ const ResourceCalendarView: React.FC = () => {
 
   // Month navigation state
   const [currentMonth, setCurrentMonth] = useState(() => startOfMonth(new Date()));
+  const [monthCount, setMonthCount] = useState<number>(3);
 
   // Basic filter states
   const [searchQuery, setSearchQuery] = useState('');
@@ -73,7 +73,7 @@ const ResourceCalendarView: React.FC = () => {
   // Modal states
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalMode, setModalMode] = useState<'create' | 'edit'>('create');
-  const [selectedEngagement, setSelectedEngagement] = useState<ResourcePlanningData | null>(null);
+  const [selectedEngagement, setSelectedEngagement] = useState<ResourceCalendarData | null>(null);
   const [preselectedResourceId, setPreselectedResourceId] = useState<string | null>(null);
   const [preselectedStartDate, setPreselectedStartDate] = useState<Date | null>(null);
 
@@ -86,7 +86,8 @@ const ResourceCalendarView: React.FC = () => {
     selectedSbu,
     selectedManager,
     currentMonth,
-    advancedFilters
+    advancedFilters,
+    monthCount
   );
 
   // Month navigation handlers
@@ -100,6 +101,15 @@ const ResourceCalendarView: React.FC = () => {
 
   const handleToday = () => {
     setCurrentMonth(startOfMonth(new Date()));
+  };
+
+  // Month count handlers
+  const handleIncreaseMonths = () => {
+    setMonthCount((prev) => Math.min(prev + 1, 12));
+  };
+
+  const handleDecreaseMonths = () => {
+    setMonthCount((prev) => Math.max(prev - 1, 1));
   };
 
   const clearFilters = () => {
@@ -165,6 +175,7 @@ const ResourceCalendarView: React.FC = () => {
           engagement_percentage: data.engagement_percentage!,
           billing_percentage: data.billing_percentage || 0,
           project_id: data.project_id,
+          is_forecasted: true,
         });
         toast({
           title: "Success",
@@ -181,6 +192,7 @@ const ResourceCalendarView: React.FC = () => {
             engagement_percentage: data.engagement_percentage!,
             billing_percentage: data.billing_percentage || 0,
             project_id: data.project_id,
+            is_forecasted: data.is_forecasted,
           }
         });
       }
@@ -245,10 +257,12 @@ const ResourceCalendarView: React.FC = () => {
 
         {/* Calendar Header */}
         <CalendarHeader
-          currentMonth={currentMonth}
           onPreviousMonth={handlePreviousMonth}
           onNextMonth={handleNextMonth}
           onToday={handleToday}
+          monthCount={monthCount}
+          onIncreaseMonths={handleIncreaseMonths}
+          onDecreaseMonths={handleDecreaseMonths}
         />
 
         {/* Gantt Chart */}
@@ -261,6 +275,7 @@ const ResourceCalendarView: React.FC = () => {
             <ResourceGanttChart
               resourceData={resourceData}
               currentMonth={currentMonth}
+              monthCount={monthCount}
               isLoading={isLoading}
               onEngagementClick={handleEngagementClick}
               onEmptySpaceClick={handleEmptySpaceClick}
@@ -278,7 +293,7 @@ const ResourceCalendarView: React.FC = () => {
           initialData={selectedEngagement}
           preselectedResourceId={preselectedResourceId || undefined}
           preselectedStartDate={preselectedStartDate || undefined}
-          isForecasted={selectedEngagement?.project?.forecasted || false}
+          isForecasted={selectedEngagement?.is_forecasted || false}
         />
       </div>
   );

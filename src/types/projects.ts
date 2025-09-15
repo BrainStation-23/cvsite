@@ -6,7 +6,6 @@ export interface Project {
   project_manager: string | null;
   budget: number | null;
   is_active: boolean;
-  forecasted: boolean;
   created_at: string;
   updated_at: string;
   description?: string | null;
@@ -42,7 +41,6 @@ export interface ProjectFormData {
   project_manager: string | null;
   budget: number | null;
   is_active: boolean;
-  forecasted: boolean;
   description?: string | null;
   project_level?: string | null;
   project_bill_type?: string | null;
@@ -80,4 +78,49 @@ export interface AdvancedProjectFilters {
     start?: string | null;
     end?: string | null;
   } | null;
+}
+
+// Example type definitions (adjust as per your actual types)
+export interface ProjectManager {
+  id: string;
+  name: string;
+  employee_id: string;
+}
+
+export interface ProjectType {
+  id: string;
+  name: string;
+}
+
+export interface ProjectLevel {
+  project_level: string;
+}
+
+export interface ProjectData {
+  project_name: string;
+  client_name: string;
+  project_manager: string;
+  budget: number;
+  is_active: boolean;
+  description: string;
+  project_level: string;
+  project_bill_type: string;
+  project_type: string;
+}
+
+export interface BulkSyncStats {
+  total_processed: number;
+  inserted: number;
+  updated: number;
+  skipped: number;
+}
+
+export interface BulkSyncErrorProject {
+  projectName: string;
+  error: string;
+}
+
+export interface BulkSyncResponse {
+  stats: BulkSyncStats;
+  error_projects: BulkSyncErrorProject[];
 }

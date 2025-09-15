@@ -2,7 +2,7 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useSbuBillingMetrics } from '@/hooks/use-sbu-billing-metrics';
-import { Loader2, Users, DollarSign, CreditCard } from 'lucide-react';
+import { Loader2, Users, CreditCard } from 'lucide-react';
 
 interface SbuBillingMetricsProps {
   filters?: {
@@ -20,7 +20,7 @@ export const SbuBillingMetrics: React.FC<SbuBillingMetricsProps> = ({ filters = 
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <DollarSign className="h-5 w-5" />
+            <CreditCard className="h-5 w-5" />
             SBU Billing Metrics
           </CardTitle>
         </CardHeader>
@@ -38,7 +38,7 @@ export const SbuBillingMetrics: React.FC<SbuBillingMetricsProps> = ({ filters = 
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <DollarSign className="h-5 w-5" />
+            <CreditCard className="h-5 w-5" />
             SBU Billing Metrics
           </CardTitle>
         </CardHeader>
@@ -56,7 +56,7 @@ export const SbuBillingMetrics: React.FC<SbuBillingMetricsProps> = ({ filters = 
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <DollarSign className="h-5 w-5" />
+            <CreditCard className="h-5 w-5" />
             SBU Billing Metrics
           </CardTitle>
         </CardHeader>
@@ -100,7 +100,7 @@ export const SbuBillingMetrics: React.FC<SbuBillingMetricsProps> = ({ filters = 
         <Card>
           <CardContent className="p-6">
             <div className="flex items-center space-x-2">
-              <DollarSign className="h-5 w-5 text-primary" />
+              <CreditCard className="h-5 w-5 text-primary" />
               <div>
                 <p className="text-sm font-medium text-muted-foreground">Total Actual Billed</p>
                 <p className="text-2xl font-bold">{data.totals.total_actual_billed.toFixed(2)}</p>
@@ -114,7 +114,7 @@ export const SbuBillingMetrics: React.FC<SbuBillingMetricsProps> = ({ filters = 
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <DollarSign className="h-5 w-5" />
+            <CreditCard className="h-5 w-5" />
             SBU Billing Breakdown
           </CardTitle>
         </CardHeader>

@@ -201,11 +201,6 @@ export const ResourcePlanningTableRow: React.FC<ResourcePlanningTableRowProps> =
               <span className="font-medium text-xs">
                 {item.project.project_name}
               </span>
-              {item.project.forecasted && (
-                <Badge variant="outline" className="text-[10px] px-2 mx-1 py-0 h-4 bg-blue-100 text-white-600">
-                   Forecasted
-                </Badge>
-              )}
             </div>
               {(item.project.project_type_name || item.project.project_level || item.project.project_bill_type) && (
                 <div className="flex gap-1 flex-wrap">
