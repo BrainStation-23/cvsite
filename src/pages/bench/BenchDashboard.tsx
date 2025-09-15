@@ -1,8 +1,7 @@
+import { BenchAnalyticsDashboard } from '@/components/bench/analytics/BenchAnalyticsDashboard';
+
 const BenchDashboard = () => {
-  return (
-    <div className="space-y-6">
-    </div>
-  );
+  return <BenchAnalyticsDashboard />;
 };
 
 export default BenchDashboard;

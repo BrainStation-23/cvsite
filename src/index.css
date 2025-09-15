@@ -35,6 +35,16 @@
 
     --radius: 0.5rem;
     
+    /* Chart Colors */
+    --chart-1: 220 70% 50%; /* Blue */
+    --chart-2: 142 76% 36%; /* Green */
+    --chart-3: 262 83% 58%; /* Purple */
+    --chart-4: 339 82% 52%; /* Pink */
+    --chart-5: 25 95% 53%; /* Orange */
+    --chart-6: 190 81% 47%; /* Cyan */
+    --chart-7: 47 96% 89%; /* Yellow */
+    --chart-8: 0 84% 60%; /* Red */
+    
     --sidebar-background: 210 64% 24%;
     --sidebar-foreground: 210 40% 98%;
     --sidebar-primary: 187 72% 33%;
@@ -73,6 +83,16 @@
     --border: 217.2 32.6% 17.5%;
     --input: 217.2 32.6% 17.5%;
     --ring: 224.3 76.3% 48%;
+    
+    /* Chart Colors - Dark Mode */
+    --chart-1: 220 70% 60%; /* Blue */
+    --chart-2: 142 69% 45%; /* Green */
+    --chart-3: 262 80% 65%; /* Purple */
+    --chart-4: 339 75% 60%; /* Pink */
+    --chart-5: 25 90% 60%; /* Orange */
+    --chart-6: 190 75% 55%; /* Cyan */
+    --chart-7: 47 85% 70%; /* Yellow */
+    --chart-8: 0 80% 65%; /* Red */
   }
 }
 
