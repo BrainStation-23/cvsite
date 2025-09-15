@@ -6,7 +6,6 @@ export interface Project {
   project_manager: string | null;
   budget: number | null;
   is_active: boolean;
-  forecasted: boolean;
   created_at: string;
   updated_at: string;
   description?: string | null;
@@ -42,7 +41,6 @@ export interface ProjectFormData {
   project_manager: string | null;
   budget: number | null;
   is_active: boolean;
-  forecasted: boolean;
   description?: string | null;
   project_level?: string | null;
   project_bill_type?: string | null;
