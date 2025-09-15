@@ -2,7 +2,6 @@ import React, { useMemo } from 'react';
 import { GanttResourceData, GanttEngagement, GanttTimelineMonth } from './types';
 import { GanttCell } from './GanttCell';
 import { calculateEngagementPosition, assignEngagementTracks, calculateMaxTracks, calculateClickedDate } from './utils';
-import { Briefcase, Calendar } from 'lucide-react';
 
 interface GanttRowProps {
   resource: GanttResourceData;
@@ -11,15 +10,15 @@ interface GanttRowProps {
   onEmptySpaceClick?: (resourceId: string, clickDate: Date) => void;
 }
 
-export const GanttRow: React.FC<GanttRowProps> = ({
-  resource,
-  timeline,
+export const GanttRow: React.FC<GanttRowProps> = ({ 
+  resource, 
+  timeline, 
   onEngagementClick,
-  onEmptySpaceClick
+  onEmptySpaceClick 
 }) => {
   const timelineStart = timeline[0]?.weeks[0]?.weekStart;
   const timelineEnd = timeline[timeline.length - 1]?.weeks[timeline[timeline.length - 1].weeks.length - 1]?.weekEnd;
-
+  
   // Calculate total weeks for percentage calculation
   const totalWeeks = timeline.reduce((acc, month) => acc + month.weeks.length, 0);
 
@@ -35,34 +34,34 @@ export const GanttRow: React.FC<GanttRowProps> = ({
     const padding = 8; // Top and bottom padding
     const extraCells = 2; // Number of extra cells of height to add
     const minTracks = 2; // Minimum number of tracks/cells to show
-
+    
     // Calculate base height based on tracks
     const baseHeight = (tracks * trackHeight) + ((tracks - 1) * trackSpacing) + padding;
-
+    
     // Calculate height based on number of engagements + extra cells
     const engagementCount = resource.engagements.length;
     const cellHeight = trackHeight + trackSpacing;
     const engagementBasedHeight = (Math.max(engagementCount, minTracks) + extraCells) * cellHeight + padding;
-
+    
     // Use the larger of the two heights to ensure everything fits
     const calculatedHeight = Math.max(
       (minTracks * trackHeight) + ((minTracks - 1) * trackSpacing) + padding, // Minimum 4 tracks height
-      baseHeight,
+      baseHeight, 
       engagementBasedHeight
     );
-
-    return {
-      trackAssignments: assignments,
-      maxTracks: tracks,
-      rowHeight: calculatedHeight
+    
+    return { 
+      trackAssignments: assignments, 
+      maxTracks: tracks, 
+      rowHeight: calculatedHeight 
     };
   }, [resource.engagements]);
 
   if (!timelineStart || !timelineEnd) return null;
 
   return (
-    <div
-      className="flex border-b hover:bg-slate-200 transition-colors"
+    <div 
+      className="flex border-b hover:bg-muted/50 transition-colors"
       style={{ height: `${rowHeight}px` }}
     >
       {/* Resource info column */}
@@ -76,19 +75,49 @@ export const GanttRow: React.FC<GanttRowProps> = ({
             {resource.profile.employee_id}
           </span>
         </div>
-
+        
         {/* Designation row */}
         {resource.profile.current_designation && (
           <div className="flex items-center gap-2 mb-3 text-muted-foreground">
-            <Briefcase className="h-3 w-3" />
+            <svg 
+              xmlns="http://www.w3.org/2000/svg" 
+              width="12" 
+              height="12" 
+              viewBox="0 0 24 24" 
+              fill="none" 
+              stroke="currentColor" 
+              strokeWidth="2" 
+              strokeLinecap="round" 
+              strokeLinejoin="round"
+              className="flex-shrink-0"
+            >
+              <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
+              <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
+            </svg>
             <span className="text-xs truncate">{resource.profile.current_designation}</span>
           </div>
         )}
-
+        
         {/* Engagement count */}
         <div className="flex items-center gap-2">
           <div className="relative">
-            <Calendar className="h-3 w-3" />
+            <svg 
+              xmlns="http://www.w3.org/2000/svg" 
+              width="12" 
+              height="12" 
+              viewBox="0 0 24 24" 
+              fill="none" 
+              stroke="currentColor" 
+              strokeWidth="2" 
+              strokeLinecap="round" 
+              strokeLinejoin="round"
+              className="text-primary"
+            >
+              <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+              <line x1="16" y1="2" x2="16" y2="6"></line>
+              <line x1="8" y1="2" x2="8" y2="6"></line>
+              <line x1="3" y1="10" x2="21" y2="10"></line>
+            </svg>
           </div>
           <span className="text-xs font-medium text-foreground">
             {resource.engagements.length} {resource.engagements.length === 1 ? 'Engagement' : 'Engagements'}
@@ -97,9 +126,9 @@ export const GanttRow: React.FC<GanttRowProps> = ({
       </div>
 
       {/* Timeline grid */}
-      <div className="flex-1 relative overflow-x-hidden">
+      <div className="flex-1 relative">
         {/* Week grid background */}
-        <div className="absolute inset-0 flex w-full h-full">
+        <div className="absolute inset-0 flex">
           {timeline.map((month, monthIndex) =>
             month.weeks.map((week, weekIndex) => {
               const isCurrentWeek = week.isCurrentWeek;
@@ -107,18 +136,18 @@ export const GanttRow: React.FC<GanttRowProps> = ({
               const globalWeekIndex = timeline
                 .slice(0, monthIndex)
                 .reduce((acc, m) => acc + m.weeks.length, 0) + weekIndex;
-
+              
               const handleEmptyClick = () => {
                 if (onEmptySpaceClick) {
                   const clickedDate = calculateClickedDate(globalWeekIndex, timeline);
                   onEmptySpaceClick(resource.profile.id, clickedDate);
                 }
               };
-
+              
               return (
                 <div
                   key={`${monthIndex}-${weekIndex}`}
-                  className={`border-r border-border/20 cursor-pointer transition-colors ${isCurrentWeek ? 'bg-primary/5' : ''}`}
+                  className={`border-r border-border/20 cursor-pointer hover:bg-muted/20 transition-colors ${isCurrentWeek ? 'bg-primary/5' : ''}`}
                   style={{ width: `${weekPercentage}%` }}
                   onClick={handleEmptyClick}
                 />
@@ -128,28 +157,26 @@ export const GanttRow: React.FC<GanttRowProps> = ({
         </div>
 
         {/* Engagement cells */}
-        <div className="relative w-full h-full">
-          {resource.engagements.map((engagement, index) => {
-            const track = trackAssignments.get(engagement.id) || 0;
-            const position = calculateEngagementPosition(
-              engagement,
-              timelineStart,
-              timelineEnd,
-              100, // percentage-based positioning
-              track,
-              22 // track height
-            );
+        {resource.engagements.map((engagement, index) => {
+          const track = trackAssignments.get(engagement.id) || 0;
+          const position = calculateEngagementPosition(
+            engagement,
+            timelineStart,
+            timelineEnd,
+            100, // percentage-based positioning
+            track,
+            22 // track height
+          );
 
-            return (
-              <GanttCell
-                key={`${engagement.id}-${index}`}
-                engagement={engagement}
-                position={position}
-                onEngagementClick={onEngagementClick}
-              />
-            );
-          })}
-        </div>
+          return (
+            <GanttCell
+              key={`${engagement.id}-${index}`}
+              engagement={engagement}
+              position={position}
+              onEngagementClick={onEngagementClick}
+            />
+          );
+        })}
       </div>
     </div>
   );
