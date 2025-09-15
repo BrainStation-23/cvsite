@@ -64,14 +64,24 @@ export const getSidebarGroups = (
       ],
     },
 
-        // CV Database group (admin/manager)
+    // CV Database group (admin/manager)
     (userRole === 'admin') && {
       label: 'Resource Calendar',
       items: [
-          { to: `/${userRole}/resource-calendar/resource-dashboard`, icon: LayoutDashboard, label: 'Resource Dashboard' },
-          { to: `/${userRole}/resource-calendar/planning`, icon: Calendar, label: 'Planning' },
-          { to: `/${userRole}/resource-calendar/calendar`, icon: CalendarDays, label: 'Calendar View' },
+        { to: `/${userRole}/resource-calendar/resource-dashboard`, icon: LayoutDashboard, label: 'Resource Dashboard' },
+        { to: `/${userRole}/resource-calendar/planning`, icon: Calendar, label: 'Planning' },
+        { to: `/${userRole}/resource-calendar/calendar`, icon: CalendarDays, label: 'Calendar View' },
 
+      ],
+    },
+
+    // Bench Management group (admin only)
+    userRole === 'admin' && {
+      label: 'Bench Management',
+      items: [
+        { to: '/admin/bench/dashboard', icon: LayoutDashboard, label: 'Bench Dashboard' },
+        { to: '/admin/bench/report', icon: BarChart3, label: 'Bench Report' },
+        { to: '/admin/bench/settings', icon: Settings, label: 'Bench Settings' },
       ],
     },
 
@@ -103,26 +113,18 @@ export const getSidebarGroups = (
       ],
     },
 
-    // Bench Management group (admin only)
-    userRole === 'admin' && {
-      label: 'Bench Management',
-      items: [
-        { to: '/admin/bench/dashboard', icon: LayoutDashboard, label: 'Bench Dashboard' },
-        { to: '/admin/bench/report', icon: BarChart3, label: 'Bench Report' },
-        { to: '/admin/bench/settings', icon: Settings, label: 'Bench Settings' },
-      ],
-    },
+
 
 
     // Platform Settings(admin only)
     userRole === 'admin' && {
       label: 'Platform Settings',
       items: [
-          { to: '/admin/platform-settings/profile', icon: GraduationCap, label: 'Profile Management' },
-          { to: '/admin/platform-settings/resources', icon: Briefcase, label: 'Resource Planning' },
-          { to: '/admin/platform-settings/cv-templates', icon: FileText, label: 'CV Templates' },
-          { to: '/admin/platform-settings/system', icon: Building2, label: 'System Config' },
-          { to: '/admin/platform-settings/audit', icon: AlertTriangle, label: 'Audit' },
+        { to: '/admin/platform-settings/profile', icon: GraduationCap, label: 'Profile Management' },
+        { to: '/admin/platform-settings/resources', icon: Briefcase, label: 'Resource Planning' },
+        { to: '/admin/platform-settings/cv-templates', icon: FileText, label: 'CV Templates' },
+        { to: '/admin/platform-settings/system', icon: Building2, label: 'System Config' },
+        { to: '/admin/platform-settings/audit', icon: AlertTriangle, label: 'Audit' },
       ],
     },
 
