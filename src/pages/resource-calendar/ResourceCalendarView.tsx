@@ -7,11 +7,11 @@ import { ResourceCalendarFilters } from '../../components/calendar/ResourceCalen
 import { CalendarHeader } from '../../components/calendar/CalendarHeader';
 import { ResourceGanttChart } from '../../components/calendar/gantt/ResourceGanttChart';
 import { EngagementModal } from '../../components/calendar/timeline-view/EngagementModal';
-import { useResourceCalendarData } from '../../hooks/use-resource-calendar-data';
+import { useResourceCalendarData, ResourceCalendarData } from '../../hooks/use-resource-calendar-data';
 import { useResourcePlanningOperations } from '../../hooks/use-resource-planning-operations';
 import { startOfMonth, addMonths, subMonths } from 'date-fns';
 import { GanttEngagement } from '../../components/calendar/gantt/types';
-import { ResourcePlanningData } from '../../components/resource-planning/types/resourceplanning';
+import { useToast } from '@/hooks/use-toast';
 
 interface EngagementFormData {
   profile_id: string;
@@ -23,7 +23,6 @@ interface EngagementFormData {
   project_id?: string;
   is_forecasted: boolean;
 }
-import { useToast } from '@/hooks/use-toast';
 
 interface AdvancedFilters {
   billTypeFilter: string | null;
@@ -73,7 +72,7 @@ const ResourceCalendarView: React.FC = () => {
   // Modal states
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalMode, setModalMode] = useState<'create' | 'edit'>('create');
-  const [selectedEngagement, setSelectedEngagement] = useState<ResourcePlanningData | null>(null);
+  const [selectedEngagement, setSelectedEngagement] = useState<ResourceCalendarData | null>(null);
   const [preselectedResourceId, setPreselectedResourceId] = useState<string | null>(null);
   const [preselectedStartDate, setPreselectedStartDate] = useState<Date | null>(null);
 

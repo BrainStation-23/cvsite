@@ -9,7 +9,7 @@ import BillTypeCombobox from '@/components/resource-planning/BillTypeCombobox';
 import { format, startOfMonth, endOfMonth } from 'date-fns';
 import ProjectSearchCombobox from '@/components/resource-planning/ProjectSearchCombobox';
 import DatePicker from '@/components/admin/user/DatePicker';
-import { ResourcePlanningData } from '@/components/resource-planning/types/resourceplanning';
+import { ResourceCalendarData } from '@/hooks/use-resource-calendar-data';
 import { ProjectDetails } from '@/components/resource-planning/ProjectDetails';
 
 interface EngagementFormData {
@@ -28,7 +28,7 @@ interface EngagementModalProps {
   onClose: () => void;
   onSave: (data: EngagementFormData) => void;
   onDelete?: (id: string) => void;
-  initialData?: ResourcePlanningData | null;
+  initialData?: ResourceCalendarData | null;
   preselectedResourceId?: string;
   preselectedStartDate?: Date;
   mode: 'create' | 'edit';
