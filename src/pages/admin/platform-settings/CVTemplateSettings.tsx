@@ -29,7 +29,7 @@ const CVTemplateSettings: React.FC = () => {
           </div>
         </div>
 
-        <Tabs defaultValue="universities" className="flex flex-col h-full">
+        <Tabs defaultValue="references" className="flex flex-col h-full">
           {/* Fixed header with tabs */}
           <div className="flex-shrink-0 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 pb-0">
             <TabsList className="h-12 w-full justify-start rounded-none bg-transparent p-0 border-b-0">
