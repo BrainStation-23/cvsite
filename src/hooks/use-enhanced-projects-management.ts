@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { EnhancedProjectsApiService } from '@/services/enhanced-projects-api';
-import { Project, ProjectsResponse, ProjectFormData, ProjectFilters, AdvancedProjectFilters } from '@/types/projects';
+import { Project, ProjectsResponse, ProjectFormData, ProjectFilters, AdvancedProjectFilters, ProjectData } from '@/types/projects';
 
 interface UseEnhancedProjectsManagementReturn {
   projects: Project[];
@@ -100,14 +100,13 @@ export function useEnhancedProjectsManagement(): UseEnhancedProjectsManagementRe
 
   const createProject = async (project: Omit<Project, 'id' | 'created_at' | 'updated_at'>): Promise<boolean> => {
     try {
-      const projectData: ProjectFormData = {
+      const projectData: ProjectData = {
         project_name: project.project_name,
         client_name: project.client_name,
         project_manager: project.project_manager,
         budget: project.budget,
         is_active: project.is_active,
-        
-        description: project.description,
+        description: project.description || '',
         project_level: project.project_level,
         project_bill_type: project.project_bill_type,
         project_type: project.project_type
