@@ -42,17 +42,6 @@ const AdminPIPView: React.FC = () => {
   if (error || !pipDetails) {
     return (
       <div className="space-y-6">
-        <div className="flex items-center gap-4">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => navigate('/admin/pip')}
-            className="flex items-center gap-2"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            Back to PIP List
-          </Button>
-        </div>
         <div className="text-center py-12">
           <div className="text-destructive text-lg mb-2">Error Loading PIP</div>
           <p className="text-muted-foreground">
@@ -71,15 +60,6 @@ const AdminPIPView: React.FC = () => {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => navigate('/admin/pip/list')}
-            className="flex items-center gap-2"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            Back to PIP List
-          </Button>
           <div>
             <h1 className="text-2xl font-bold">Performance Improvement Plan</h1>
             <p className="text-muted-foreground">
