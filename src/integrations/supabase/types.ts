@@ -2038,6 +2038,7 @@ export type Database = {
       }
       get_non_billed_resources_dimensional_analysis: {
         Args: {
+          bench_filter?: boolean
           end_date_filter?: string
           group_by_dimension?: string
           start_date_filter?: string
@@ -2046,6 +2047,7 @@ export type Database = {
       }
       get_non_billed_resources_overview_statistics: {
         Args: {
+          bench_filter?: boolean
           bill_type_filter?: string[]
           end_date_filter?: string
           expertise_filter?: string[]
@@ -2055,11 +2057,15 @@ export type Database = {
         Returns: Json
       }
       get_non_billed_resources_risk_analytics: {
-        Args: { risk_threshold_days?: number }
+        Args: { bench_filter?: boolean; risk_threshold_days?: number }
         Returns: Json
       }
       get_non_billed_resources_trends_analysis: {
-        Args: { lookback_days?: number; period_type?: string }
+        Args: {
+          bench_filter?: boolean
+          lookback_days?: number
+          period_type?: string
+        }
         Returns: Json
       }
       get_pip_profile_details: {
