@@ -103,15 +103,15 @@ const CVTemplateEditorPage: React.FC = () => {
         confirmText: 'Leave',
         cancelText: 'Stay',
         variant: 'destructive',
-        onConfirm: () => navigate('/admin/cv-templates')
+        onConfirm: () => navigate('/admin/cv-database/cv-templates')
       });
     } else {
-      navigate('/admin/cv-templates');
+      navigate('/admin/cv-database/cv-templates');
     }
   };
 
   const handlePreview = () => {
-    navigate(`/admin/cv-templates/${id}`);
+    navigate(`/admin/cv-database/cv-templates/${id}`);
   };
 
   const handleInsertExample = (exampleHTML: string) => {
