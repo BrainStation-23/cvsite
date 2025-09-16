@@ -115,8 +115,8 @@ export const getSidebarGroups = (
     userRole === 'admin' && {
       label: 'Audit',
       items: [
-        { to: '/admin/audit/audit-dashboard', icon: AlertTriangle, label: 'Audit' },
-        { to: '/admin/audit/profile-image-warnings', icon: ContactRound, label: 'Profile Image Warnings' },
+        { to: '/admin/audit/audit-dashboard', icon: AlertTriangle, label: 'Dashboard' },
+        { to: '/admin/audit/profile-image-warnings', icon: ContactRound, label: 'Profile Image' },
       ],
     },
   ].filter(Boolean) as NavigationGroup[];
