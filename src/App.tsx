@@ -91,6 +91,8 @@ function App(): React.ReactElement {
               <Route path="profile" element={<ProfilePage />} />
               <Route path="myteam" element={<MyTeam />} />
               <Route path="users" element={<UserManagement />} />
+              <Route path="/admin/system-settings" element={<SystemConfigurationSettings />} />
+              <Route path="/admin/audit" element={<AuditPage />} />
               <Route path="users/add" element={<AddUser />} />
               <Route path="users/edit/:userId" element={<EditUser />} />
               <Route path="employee-data-management" element={<EmployeeDataManagement />} />
@@ -103,14 +105,7 @@ function App(): React.ReactElement {
               <Route path="resource-calendar/planning" element={<ResourceCalendarPlanning />} />
               <Route path="resource-calendar/calendar" element={<ResourceCalendarView />} />
               <Route path="resource-calendar/resource-dashboard" element={<ResourceCalendarStatistics />} />
-              
-              {/* Platform Settings */}
-              <Route path="platform-settings/profile" element={<ProfileManagementSettings />} />
-              <Route path="platform-settings/resources" element={<ResourcePlanningSettings />} />
-              <Route path="platform-settings/cv-templates" element={<CVTemplateSettings />} />
-              <Route path="platform-settings/system" element={<SystemConfigurationSettings />} />
-              <Route path="platform-settings/audit" element={<AuditPage />} />
-              <Route path="platform-settings/audit/profile-image-warnings" element={<ProfileImageWarningAudit />} />
+              <Route path="resource-calendar/resource-settings" element={<ResourcePlanningSettings />} />
               
               {/* CV Templates */}
               <Route path="cv-dashboard" element={<CvDashboard />} />
@@ -118,6 +113,7 @@ function App(): React.ReactElement {
               <Route path="cv-templates/documentation" element={<CVTemplateDocumentationPage />} />
               <Route path="cv-templates/:id" element={<CVTemplateViewPage />} />
               <Route path="cv-templates/:id/edit" element={<CVTemplateEditorPage />} />
+              <Route path="cv-template-settings" element={<CVTemplateSettings />} />
               
               {/* PIP Management */}
               <Route path="pip/initiate" element={<PIPInitiate />} />

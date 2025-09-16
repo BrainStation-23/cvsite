@@ -61,6 +61,7 @@ export const getSidebarGroups = (
         { to: `/${userRole}/cv-dashboard`, icon: LayoutDashboard, label: 'CV Dashboard' },
         { to: `/${userRole}/employee-data`, icon: Search, label: 'CV Search' },
         { to: `/${userRole}/training-certification`, icon: FileText, label: 'Training and Certification' },
+        { to: `/${userRole}/cv-template-settings`, icon: Settings, label: 'CV Template Settings' },
       ],
     },
 
@@ -71,7 +72,7 @@ export const getSidebarGroups = (
         { to: `/${userRole}/resource-calendar/resource-dashboard`, icon: LayoutDashboard, label: 'Resource Dashboard' },
         { to: `/${userRole}/resource-calendar/planning`, icon: Calendar, label: 'Planning' },
         { to: `/${userRole}/resource-calendar/calendar`, icon: CalendarDays, label: 'Calendar View' },
-
+        { to: `/${userRole}/resource-calendar/resource-settings`, icon: Settings, label: 'Resource Settings' },
       ],
     },
 
@@ -110,24 +111,10 @@ export const getSidebarGroups = (
         { to: '/admin/employee-data-management', icon: FolderOpen, label: 'Employee Data Management' },
         { to: '/admin/projects', icon: Database, label: 'Projects' },
         { to: '/admin/cv-templates', icon: FileText, label: 'CV Templates' },
+        { to: '/admin/system-settings', icon: Settings, label: 'System Settings' },
+        { to: '/admin/audit', icon: AlertTriangle, label: 'Audit' },
       ],
     },
-
-
-
-
-    // Platform Settings(admin only)
-    userRole === 'admin' && {
-      label: 'Platform Settings',
-      items: [
-        { to: '/admin/platform-settings/profile', icon: GraduationCap, label: 'Profile Management' },
-        { to: '/admin/platform-settings/resources', icon: Briefcase, label: 'Resource Planning' },
-        { to: '/admin/platform-settings/cv-templates', icon: FileText, label: 'CV Templates' },
-        { to: '/admin/platform-settings/system', icon: Building2, label: 'System Config' },
-        { to: '/admin/platform-settings/audit', icon: AlertTriangle, label: 'Audit' },
-      ],
-    },
-
   ].filter(Boolean) as NavigationGroup[];
 
   return groups;

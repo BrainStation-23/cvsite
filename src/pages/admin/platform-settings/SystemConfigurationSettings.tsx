@@ -42,18 +42,6 @@ const SystemConfigurationSettings: React.FC = () => {
                 SBUs
               </TabsTrigger>
               <TabsTrigger 
-                value="hr-contacts" 
-                className="h-12 rounded-none border-b-2 border-transparent data-[state=active]:border-cvsite-teal data-[state=active]:bg-transparent data-[state=active]:shadow-none px-6 font-medium"
-              >
-                HR Contacts
-              </TabsTrigger>
-              <TabsTrigger 
-                value="note-categories" 
-                className="h-12 rounded-none border-b-2 border-transparent data-[state=active]:border-cvsite-teal data-[state=active]:bg-transparent data-[state=active]:shadow-none px-6 font-medium"
-              >
-                Note Categories
-              </TabsTrigger>
-              <TabsTrigger 
                 value="system-health" 
                 className="h-12 rounded-none border-b-2 border-transparent data-[state=active]:border-cvsite-teal data-[state=active]:bg-transparent data-[state=active]:shadow-none px-6 font-medium"
               >
@@ -68,22 +56,6 @@ const SystemConfigurationSettings: React.FC = () => {
               <ScrollArea className="h-full">
                 <div className="p-6">
                   <SbuSettings />
-                </div>
-              </ScrollArea>
-            </TabsContent>
-            
-            <TabsContent value="hr-contacts" className="mt-0 h-full">
-              <ScrollArea className="h-full">
-                <div className="p-6">
-                  <HrContactSettings />
-                </div>
-              </ScrollArea>
-            </TabsContent>
-            
-            <TabsContent value="note-categories" className="mt-0 h-full">
-              <ScrollArea className="h-full">
-                <div className="p-6">
-                  <NoteCategorySettings />
                 </div>
               </ScrollArea>
             </TabsContent>

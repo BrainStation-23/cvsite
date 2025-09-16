@@ -7,49 +7,150 @@ import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import ReferenceSettings from '@/components/admin/reference/ReferenceSettings';
 import { PlaceholderImageSettings } from '@/components/admin/placeholder-images/PlaceholderImageSettings';
+import UniversitySettings from '@/components/admin/UniversitySettings';
+import DepartmentSettings from '@/components/admin/DepartmentSettings';
+import DegreeSettings from '@/components/admin/DegreeSettings';
+import DesignationSettings from '@/components/admin/DesignationSettings';
+import HrContactSettings from '@/components/admin/HrContactSettings';
+import NoteCategorySettings from '@/components/admin/NoteCategorySettings';
 
 const CVTemplateSettings: React.FC = () => {
   return (
     <div className="flex flex-col h-full">
         {/* Header with back button */}
         <div className="flex items-center gap-4 mb-6">
-          <Button variant="ghost" size="sm" asChild>
-            <Link to="/admin/platform-settings">
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Back to Platform Settings
-            </Link>
-          </Button>
           <div>
             <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
               CV Template Settings
             </h1>
             <p className="text-gray-600 dark:text-gray-400">
-              Configure references, placeholder images, and other settings related to CV template generation.
+              Configure references, placeholder images, universities, departments, degrees, designations, HR Contacts, Note Categories and other settings related to CV template generation.
             </p>
           </div>
         </div>
 
-        {/* Content area with tabs */}
-        <div className="flex-1 min-h-0">
-          <ScrollArea className="h-full">
-            <div className="p-6">
-              <Tabs defaultValue="references" className="space-y-6">
-                <TabsList>
-                  <TabsTrigger value="references">References</TabsTrigger>
-                  <TabsTrigger value="placeholder-images">Placeholder Images</TabsTrigger>
-                </TabsList>
-                
-                <TabsContent value="references" className="space-y-6">
+        <Tabs defaultValue="universities" className="flex flex-col h-full">
+          {/* Fixed header with tabs */}
+          <div className="flex-shrink-0 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 pb-0">
+            <TabsList className="h-12 w-full justify-start rounded-none bg-transparent p-0 border-b-0">
+              <TabsTrigger 
+                value="references" 
+                className="h-12 rounded-none border-b-2 border-transparent data-[state=active]:border-cvsite-teal data-[state=active]:bg-transparent data-[state=active]:shadow-none px-6 font-medium"
+              >
+                References
+              </TabsTrigger>
+              <TabsTrigger 
+                value="placeholder-images" 
+                className="h-12 rounded-none border-b-2 border-transparent data-[state=active]:border-cvsite-teal data-[state=active]:bg-transparent data-[state=active]:shadow-none px-6 font-medium"
+              >
+                Placeholder Images
+              </TabsTrigger> 
+              <TabsTrigger 
+                value="universities" 
+                className="h-12 rounded-none border-b-2 border-transparent data-[state=active]:border-cvsite-teal data-[state=active]:bg-transparent data-[state=active]:shadow-none px-6 font-medium"
+              >
+                Universities
+              </TabsTrigger>
+              <TabsTrigger 
+                value="departments" 
+                className="h-12 rounded-none border-b-2 border-transparent data-[state=active]:border-cvsite-teal data-[state=active]:bg-transparent data-[state=active]:shadow-none px-6 font-medium"
+              >
+                Departments
+              </TabsTrigger>
+              <TabsTrigger 
+                value="degrees" 
+                className="h-12 rounded-none border-b-2 border-transparent data-[state=active]:border-cvsite-teal data-[state=active]:bg-transparent data-[state=active]:shadow-none px-6 font-medium"
+              >
+                Degrees
+              </TabsTrigger>
+              <TabsTrigger 
+                value="designations" 
+                className="h-12 rounded-none border-b-2 border-transparent data-[state=active]:border-cvsite-teal data-[state=active]:bg-transparent data-[state=active]:shadow-none px-6 font-medium"
+              >
+                Designations
+              </TabsTrigger>
+              <TabsTrigger 
+                value="hr-contacts" 
+                className="h-12 rounded-none border-b-2 border-transparent data-[state=active]:border-cvsite-teal data-[state=active]:bg-transparent data-[state=active]:shadow-none px-6 font-medium"
+              >
+                HR Contacts
+              </TabsTrigger>
+              <TabsTrigger 
+                value="note-categories" 
+                className="h-12 rounded-none border-b-2 border-transparent data-[state=active]:border-cvsite-teal data-[state=active]:bg-transparent data-[state=active]:shadow-none px-6 font-medium"
+              >
+                Note Categories
+              </TabsTrigger>
+            </TabsList>
+          </div>
+          
+          {/* Scrollable content area */}
+          <div className="flex-1 min-h-0">
+            <TabsContent value="references" className="mt-0 h-full">
+              <ScrollArea className="h-full">
+                <div className="p-6">
                   <ReferenceSettings />
-                </TabsContent>
-                
-                <TabsContent value="placeholder-images" className="space-y-6">
-                  <PlaceholderImageSettings />
-                </TabsContent>
-              </Tabs>
-            </div>
-          </ScrollArea>
-        </div>
+                </div>
+              </ScrollArea>
+            </TabsContent>
+            
+            <TabsContent value="placeholder-images" className="mt-0 h-full">
+              <ScrollArea className="h-full">
+                <div className="p-6">
+                 <PlaceholderImageSettings />
+                </div>
+              </ScrollArea>
+            </TabsContent>
+
+            <TabsContent value="universities" className="mt-0 h-full">
+              <ScrollArea className="h-full">
+                <div className="p-6">
+                  <UniversitySettings />
+                </div>
+              </ScrollArea>
+            </TabsContent>
+            
+            <TabsContent value="departments" className="mt-0 h-full">
+              <ScrollArea className="h-full">
+                <div className="p-6">
+                  <DepartmentSettings />
+                </div>
+              </ScrollArea>
+            </TabsContent>
+            
+            <TabsContent value="degrees" className="mt-0 h-full">
+              <ScrollArea className="h-full">
+                <div className="p-6">
+                  <DegreeSettings />
+                </div>
+              </ScrollArea>
+            </TabsContent>
+            
+            <TabsContent value="designations" className="mt-0 h-full">
+              <ScrollArea className="h-full">
+                <div className="p-6">
+                  <DesignationSettings />
+                </div>
+              </ScrollArea>
+            </TabsContent>
+
+            <TabsContent value="hr-contacts" className="mt-0 h-full">
+              <ScrollArea className="h-full">
+                <div className="p-6">
+                  <HrContactSettings />
+                </div>
+              </ScrollArea>
+            </TabsContent>
+            
+            <TabsContent value="note-categories" className="mt-0 h-full">
+              <ScrollArea className="h-full">
+                <div className="p-6">
+                  <NoteCategorySettings />
+                </div>
+              </ScrollArea>
+            </TabsContent>
+          </div>
+        </Tabs>
       </div>
   );
 };
