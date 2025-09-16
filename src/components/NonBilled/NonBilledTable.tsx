@@ -81,7 +81,7 @@ export const NonBilledTable: React.FC<NonBilledTableProps> = ({
         </CardHeader>
         <CardContent>
           <div className="text-center py-8">
-            <p className="text-muted-foreground">No resources found on bench.</p>
+            <p className="text-muted-foreground">No non-billed resources found.</p>
           </div>
         </CardContent>
       </Card>

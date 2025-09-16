@@ -55,12 +55,12 @@ export const NonBilledReport: React.FC = () => {
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="text-2xl font-bold tracking-tight">Bench Report</h2>
-            <p className="text-muted-foreground">View and analyze bench utilization and resources</p>
+            <h2 className="text-2xl font-bold tracking-tight">Non-Billed Report</h2>
+            <p className="text-muted-foreground">View and analyze non-billed resources</p>
           </div>
         </div>
         <div className="text-center py-8">
-          <p className="text-destructive">Error loading bench data: {error.message}</p>
+          <p className="text-destructive">Error loading non-billed data: {error.message}</p>
           <Button onClick={() => refetch()} className="mt-4">
             <RefreshCw className="mr-2 h-4 w-4" />
             Retry
@@ -75,8 +75,8 @@ export const NonBilledReport: React.FC = () => {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold tracking-tight">Bench Report</h2>
-          <p className="text-muted-foreground">View and analyze bench utilization and resources</p>
+          <h2 className="text-2xl font-bold tracking-tight">Non-Billed Report</h2>
+          <p className="text-muted-foreground">View and analyze non-billed resources</p>
         </div>
         <div className="flex items-center gap-2">
           <Button

@@ -70,6 +70,8 @@ export function useNonBilledData() {
 
       const { data: rpcData, error } = await supabase.rpc('list_bench', rpcParams);
 
+      console.log('Non-Billed Data RPC Response:', rpcData);
+
       if (error) {
         console.error('Non-Billed data RPC call error:', error);
         throw error;
