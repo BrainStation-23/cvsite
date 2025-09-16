@@ -17,7 +17,8 @@ import {
   Search,
   Network,
   Settings,
-  LayoutDashboard
+  LayoutDashboard,
+  ContactRound
 } from 'lucide-react';
 
 export interface NavigationItem {
@@ -107,8 +108,15 @@ export const getSidebarGroups = (
       items: [
         { to: '/admin/users', icon: Users, label: 'User Management' },
         { to: '/admin/projects', icon: Database, label: 'Projects' },
-        { to: '/admin/audit', icon: AlertTriangle, label: 'Audit' },
         { to: '/admin/system-settings', icon: Settings, label: 'System Settings' }
+      ],
+    },
+        // Admin Configuration group (admin only)
+    userRole === 'admin' && {
+      label: 'Audit',
+      items: [
+        { to: '/admin/audit/audit-dashboard', icon: AlertTriangle, label: 'Audit' },
+        { to: '/admin/audit/profile-image-warnings', icon: ContactRound, label: 'Profile Image Warnings' },
       ],
     },
   ].filter(Boolean) as NavigationGroup[];

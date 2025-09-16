@@ -19,7 +19,6 @@ import UserManagement from '@/pages/admin/UserManagement';
 import AddUser from '@/pages/admin/AddUser';
 import EditUser from '@/pages/admin/EditUser';
 import EmployeeDataManagement from './pages/admin/EmployeeDataManagement';
-import ProfileManagementSettings from '@/pages/admin/platform-settings/ProfileManagementSettings';
 import ResourcePlanningSettings from '@/pages/admin/platform-settings/ResourcePlanningSettings';
 import CVTemplateSettings from '@/pages/admin/platform-settings/CVTemplateSettings';
 import SystemConfigurationSettings from '@/pages/admin/platform-settings/SystemConfigurationSettings';
@@ -92,7 +91,7 @@ function App(): React.ReactElement {
               <Route path="myteam" element={<MyTeam />} />
               <Route path="users" element={<UserManagement />} />
               <Route path="system-settings" element={<SystemConfigurationSettings />} />
-              <Route path="audit" element={<AuditPage />} />
+              <Route path="audit/audit-dashboard" element={<AuditPage />} />
               <Route path="audit/profile-image-warnings" element={<ProfileImageWarningAudit />} />
               <Route path="users/add" element={<AddUser />} />
               <Route path="users/edit/:userId" element={<EditUser />} />
