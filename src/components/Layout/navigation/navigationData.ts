@@ -7,16 +7,12 @@ import {
   Database,
   FileText,
   Calendar,
-  GraduationCap,
-  Briefcase,
-  Building2,
   CalendarDays,
   BarChart3,
   FolderOpen,
   AlertTriangle,
   UserX,
   List,
-  TrendingUp,
   UserCheck,
   Search,
   Network,
@@ -61,7 +57,9 @@ export const getSidebarGroups = (
         { to: `/${userRole}/cv-dashboard`, icon: LayoutDashboard, label: 'CV Dashboard' },
         { to: `/${userRole}/employee-data`, icon: Search, label: 'CV Search' },
         { to: `/${userRole}/training-certification`, icon: FileText, label: 'Training and Certification' },
-        { to: `/${userRole}/cv-template-settings`, icon: Settings, label: 'CV Template Settings' },
+        { to: `/${userRole}/employee-data-management`, icon: FolderOpen, label: 'CV Completion' },
+        { to: `/${userRole}/cv-templates`, icon: FileText, label: 'CV Templates' },
+        { to: `/${userRole}/cv-template-settings`, icon: Settings, label: 'CV Settings' },
       ],
     },
 
@@ -78,11 +76,11 @@ export const getSidebarGroups = (
 
     // Bench Management group (admin only)
     userRole === 'admin' && {
-      label: 'Bench Management',
+      label: 'Non-Billed Management',
       items: [
-        { to: '/admin/bench/dashboard', icon: LayoutDashboard, label: 'Bench Dashboard' },
-        { to: '/admin/bench/report', icon: BarChart3, label: 'Bench Report' },
-        { to: '/admin/bench/settings', icon: Settings, label: 'Bench Settings' },
+        { to: `/${userRole}/bench/dashboard`, icon: LayoutDashboard, label: 'Non-Billed Dashboard' },
+        { to: `/${userRole}/bench/report`, icon: BarChart3, label: 'Non-Billed Report' },
+        { to: `/${userRole}/bench/settings`, icon: Settings, label: 'Non-Billed Settings' },
       ],
     },
 
@@ -108,11 +106,9 @@ export const getSidebarGroups = (
       label: 'Admin Configuration',
       items: [
         { to: '/admin/users', icon: Users, label: 'User Management' },
-        { to: '/admin/employee-data-management', icon: FolderOpen, label: 'Employee Data Management' },
         { to: '/admin/projects', icon: Database, label: 'Projects' },
-        { to: '/admin/cv-templates', icon: FileText, label: 'CV Templates' },
-        { to: '/admin/system-settings', icon: Settings, label: 'System Settings' },
         { to: '/admin/audit', icon: AlertTriangle, label: 'Audit' },
+        { to: '/admin/system-settings', icon: Settings, label: 'System Settings' }
       ],
     },
   ].filter(Boolean) as NavigationGroup[];
