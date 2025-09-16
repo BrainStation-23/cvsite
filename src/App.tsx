@@ -45,9 +45,9 @@ import ManagerPIPList from '@/pages/pip/ManagerPIPList';
 import ManagerPMReview from '@/pages/pip/ManagerPMReview';
 import AdminPIPView from './pages/pip/AdminPIPView';
 import MyTeam from '@/pages/MyTeam';
-import BenchReportPage from '@/pages/admin/bench/BenchReportPage';
-import BenchSettingsPage from '@/pages/admin/bench/BenchSettingsPage';
-import BenchDashboard from '@/pages/bench/BenchDashboard';
+import NonBilledReportPage from '@/pages/admin/NonBilled/NonBilledReportPage';
+import NonBilledSettingsPage from '@/pages/admin/NonBilled/NonBilledSettingsPage';
+import NonBilledDashboard from '@/pages/NonBilled/NonBilledDashboard';
 import DashboardLayout from '@/components/Layout/DashboardLayout';
 import CvDashboard from './pages/employee/CvDashboard';
 import './App.css';
@@ -93,6 +93,7 @@ function App(): React.ReactElement {
               <Route path="users" element={<UserManagement />} />
               <Route path="system-settings" element={<SystemConfigurationSettings />} />
               <Route path="audit" element={<AuditPage />} />
+              <Route path="audit/profile-image-warnings" element={<ProfileImageWarningAudit />} />
               <Route path="users/add" element={<AddUser />} />
               <Route path="users/edit/:userId" element={<EditUser />} />
               <Route path="employee-data-management" element={<EmployeeDataManagement />} />
@@ -127,9 +128,9 @@ function App(): React.ReactElement {
               <Route path="pip/my-situation" element={<MySituation />} />
               
               {/* Bench Management */}
-              <Route path="non-billed-management/dashboard" element={<BenchDashboard />} />
-              <Route path="non-billed-management/report" element={<BenchReportPage />} />
-              <Route path="non-billed-management/settings" element={<BenchSettingsPage />} />
+              <Route path="non-billed-management/dashboard" element={<NonBilledDashboard />} />
+              <Route path="non-billed-management/report" element={<NonBilledReportPage />} />
+              <Route path="non-billed-management/settings" element={<NonBilledSettingsPage />} />
             </Route>
 
             {/* Nested Manager Routes with persistent DashboardLayout */}

@@ -72,7 +72,7 @@ const ProfileImageWarningAudit: React.FC = () => {
   };
 
   return (
-    <DashboardLayout>
+    <div>
       <div className="flex flex-col h-full">
         {/* Header */}
         <div className="mb-6">
@@ -301,7 +301,7 @@ const ProfileImageWarningAudit: React.FC = () => {
           </CardContent>
         </Card>
       </div>
-    </DashboardLayout>
+    </div>
   );
 };
 
