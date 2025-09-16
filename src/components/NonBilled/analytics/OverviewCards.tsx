@@ -70,13 +70,6 @@ export function OverviewCards({ data, isLoading }: OverviewCardsProps) {
       variant: data.overview.total_bench_count > 0 ? 'secondary' as const : 'default' as const,
     },
     {
-      title: 'Avg Duration',
-      value: `${data.overview.avg_non_billed_resources_duration_days} days`,
-      icon: Clock,
-      description: 'Average non-billed duration',
-      variant: 'default' as const,
-    },
-    {
       title: 'Avg Bench Duration',
       value: `${data.overview.avg_bench_duration_days} days`,
       icon: Timer,
@@ -96,21 +89,7 @@ export function OverviewCards({ data, isLoading }: OverviewCardsProps) {
       icon: AlertTriangle,
       description: 'Resources >60 days',
       variant: data.overview.critical_non_billed_resources_count > 0 ? 'destructive' as const : 'default' as const,
-    },
-    {
-      title: 'New (7 days)',
-      value: data.recent_trends.new_non_billed_resources_last_7_days,
-      icon: TrendingUp,
-      description: 'Recently non-billed',
-      variant: 'secondary' as const,
-    },
-    {
-      title: 'Avg Experience',
-      value: `${data.overview.avg_experience_years}y`,
-      icon: Target,
-      description: 'Years of experience',
-      variant: 'default' as const,
-    },
+    }
   ];
 
   return (
