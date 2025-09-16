@@ -13,7 +13,7 @@ export const useNonBilledFeedback = () => {
 
   const updateFeedbackMutation = useMutation({
     mutationFn: async ({ employeeId, feedback }: UpdateNonBilledFeedbackParams) => {
-      const { data, error } = await supabase.rpc('update_bench_feedback' as any, {
+      const { data, error } = await supabase.rpc('update_non_billed_resources_feedback' as any, {
         employee_id_param: employeeId,
         feedback_param: feedback
       });

@@ -20,10 +20,10 @@ interface RiskProfile {
   expertise_name: string;
   bill_type_name: string;
   color_code: string;
-  bench_date: string;
-  bench_duration_days: number;
+  non_billed_resources_date: string;
+  non_billed_resources_duration_days: number;
   total_years_experience: number;
-  bench_feedback: string;
+  non_billed_resources_feedback: string;
   planned_status: string;
 }
 
@@ -81,7 +81,7 @@ export function RiskAnalytics({ data, isLoading }: RiskAnalyticsProps) {
               <div>
                 <h3 className="text-lg font-semibold text-foreground">All Clear!</h3>
                 <p className="text-muted-foreground mt-1">
-                  No employees are currently at risk. All bench profiles are within acceptable duration limits.
+                  No employees are currently at risk. All non_billed_resources profiles are within acceptable duration limits.
                 </p>
               </div>
             </div>
@@ -99,7 +99,7 @@ export function RiskAnalytics({ data, isLoading }: RiskAnalyticsProps) {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">0</div>
-              <p className="text-xs text-muted-foreground">30+ days on bench</p>
+              <p className="text-xs text-muted-foreground">30+ days on non_billed_resources</p>
             </CardContent>
           </Card>
 
@@ -123,7 +123,7 @@ export function RiskAnalytics({ data, isLoading }: RiskAnalyticsProps) {
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
                 <Calendar className="h-4 w-4" />
-                Unplanned Bench
+                Unplanned non_billed_resources
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -176,7 +176,7 @@ export function RiskAnalytics({ data, isLoading }: RiskAnalyticsProps) {
         <Alert variant="destructive">
           <AlertTriangle className="h-4 w-4" />
           <AlertDescription>
-            <strong>{risk_summary.critical_risk_count} critical risk profiles</strong> have been on bench for over 90 days. 
+            <strong>{risk_summary.critical_risk_count} critical risk profiles</strong> have been on non_billed_resources for over 90 days. 
             Immediate action required.
           </AlertDescription>
         </Alert>
@@ -193,7 +193,7 @@ export function RiskAnalytics({ data, isLoading }: RiskAnalyticsProps) {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{risk_summary.total_high_risk_count}</div>
-            <p className="text-xs text-muted-foreground">30+ days on bench</p>
+            <p className="text-xs text-muted-foreground">30+ days on non_billed_resources</p>
           </CardContent>
         </Card>
 
@@ -217,7 +217,7 @@ export function RiskAnalytics({ data, isLoading }: RiskAnalyticsProps) {
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
               <Calendar className="h-4 w-4" />
-              Unplanned Bench
+              Unplanned non_billed_resources
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -252,7 +252,7 @@ export function RiskAnalytics({ data, isLoading }: RiskAnalyticsProps) {
               Top Risk SBUs
             </CardTitle>
             <p className="text-sm text-muted-foreground">
-              SBUs with highest bench risk counts
+              SBUs with highest non_billed_resources risk counts
             </p>
           </CardHeader>
           <CardContent>
@@ -293,7 +293,7 @@ export function RiskAnalytics({ data, isLoading }: RiskAnalyticsProps) {
           <CardContent>
             <div className="space-y-3 max-h-96 overflow-y-auto">
               {high_risk_profiles.slice(0, 10).map((profile) => {
-                const risk = getRiskLevel(profile.bench_duration_days);
+                const risk = getRiskLevel(profile.non_billed_resources_duration_days);
                 return (
                   <div key={profile.profile_id} className="p-3 border rounded-lg space-y-2">
                     <div className="flex items-center justify-between">
@@ -306,7 +306,7 @@ export function RiskAnalytics({ data, isLoading }: RiskAnalyticsProps) {
                         </p>
                       </div>
                       <Badge variant={risk.variant} className="ml-2">
-                        {profile.bench_duration_days} days
+                        {profile.non_billed_resources_duration_days} days
                       </Badge>
                     </div>
                     
@@ -323,7 +323,7 @@ export function RiskAnalytics({ data, isLoading }: RiskAnalyticsProps) {
                     </div>
 
                     <div className="text-xs text-muted-foreground">
-                      Bench since: {format(new Date(profile.bench_date), 'MMM dd, yyyy')}
+                      non_billed_resources since: {format(new Date(profile.non_billed_resources_date), 'MMM dd, yyyy')}
                     </div>
                   </div>
                 );

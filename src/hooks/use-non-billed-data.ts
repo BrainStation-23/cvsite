@@ -68,7 +68,7 @@ export function useNonBilledData() {
     queryFn: async () => {
       console.log('Non-Billed Data Query:', rpcParams);
 
-      const { data: rpcData, error } = await supabase.rpc('list_bench', rpcParams);
+      const { data: rpcData, error } = await supabase.rpc('list_non_billed_resources', rpcParams);
 
       console.log('Non-Billed Data RPC Response:', rpcData);
 
@@ -79,7 +79,7 @@ export function useNonBilledData() {
 
       if (rpcData && typeof rpcData === 'object') {
         return {
-          non_billed_records: (rpcData as any).bench_records || [],
+          non_billed_records: (rpcData as any).non_billed_resources_records || [],
           pagination: (rpcData as any).pagination || {
             total_count: 0,
             filtered_count: 0,
@@ -106,7 +106,7 @@ export function useNonBilledData() {
   // Sync bench mutation
   const syncNonBilledMutation = useMutation({
     mutationFn: async () => {
-      const { error } = await supabase.rpc('sync_bench_now');
+      const { error } = await supabase.rpc('sync_non_billed_resources_now');
       if (error) throw error;
     },
     onSuccess: () => {

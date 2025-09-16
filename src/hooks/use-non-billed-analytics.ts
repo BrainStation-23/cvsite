@@ -4,12 +4,12 @@ import { format } from 'date-fns';
 
 interface NonBilledOverviewData {
   overview: {
-    total_bench_count: number;
-    avg_bench_duration_days: number;
-    max_bench_duration_days: number;
-    min_bench_duration_days: number;
-    long_term_bench_count: number;
-    critical_bench_count: number;
+    total_non_billed_resources_count: number;
+    avg_non_billed_resources_duration_days: number;
+    max_non_billed_resources_duration_days: number;
+    min_non_billed_resources_duration_days: number;
+    long_term_non_billed_resources_count: number;
+    critical_non_billed_resources_count: number;
     avg_experience_years: number;
   };
   experience_distribution: {
@@ -19,8 +19,8 @@ interface NonBilledOverviewData {
     unknown: number;
   };
   recent_trends: {
-    new_bench_last_7_days: number;
-    new_bench_last_30_days: number;
+    new_non_billed_resources_last_7_days: number;
+    new_non_billed_resources_last_30_days: number;
   };
 }
 
@@ -51,10 +51,10 @@ interface RiskAnalyticsData {
     expertise_name: string;
     bill_type_name: string;
     color_code: string;
-    bench_date: string;
-    bench_duration_days: number;
+    non_billed_resources_date: string;
+    non_billed_resources_duration_days: number;
     total_years_experience: number;
-    bench_feedback: string;
+    non_billed_resources_feedback: string;
     planned_status: string;
   }>;
   top_risk_sbus: Array<{
@@ -67,9 +67,9 @@ interface RiskAnalyticsData {
 interface TrendsAnalysisData {
   trends: Array<{
     period: string;
-    new_bench_count: number;
+    new_non_billed_resources_count: number;
     affected_sbus: number;
-    avg_experience_of_new_bench: number;
+    avg_experience_of_new_non_billed_resources: number;
   }>;
   placement_metrics: {
     avg_days_to_placement: number;
@@ -88,7 +88,7 @@ export function useNonBilledOverview(filters: AnalyticsFilters = {}) {
   return useQuery({
     queryKey: ['non-billed-overview', filters],
     queryFn: async () => {
-      const { data, error } = await supabase.rpc('get_bench_overview_statistics', {
+      const { data, error } = await supabase.rpc('get_non_billed_resources_overview_statistics', {
         start_date_filter: filters.startDate ? format(filters.startDate, 'yyyy-MM-dd') : null,
         end_date_filter: filters.endDate ? format(filters.endDate, 'yyyy-MM-dd') : null,
         sbu_filter: filters.sbuFilter?.length ? filters.sbuFilter : null,
@@ -109,7 +109,7 @@ export function useNonBilledDimensionalAnalysis(
   return useQuery({
     queryKey: ['non-billed-dimensional-analysis', dimension, filters],
     queryFn: async () => {
-      const { data, error } = await supabase.rpc('get_bench_dimensional_analysis', {
+      const { data, error } = await supabase.rpc('get_non_billed_resources_dimensional_analysis', {
         start_date_filter: filters.startDate ? format(filters.startDate, 'yyyy-MM-dd') : null,
         end_date_filter: filters.endDate ? format(filters.endDate, 'yyyy-MM-dd') : null,
         group_by_dimension: dimension,
@@ -125,7 +125,7 @@ export function useNonBilledRiskAnalytics(riskThresholdDays: number = 30) {
   return useQuery({
     queryKey: ['non-billed-risk-analytics', riskThresholdDays],
     queryFn: async () => {
-      const { data, error } = await supabase.rpc('get_bench_risk_analytics', {
+      const { data, error } = await supabase.rpc('get_non_billed_resources_risk_analytics', {
         risk_threshold_days: riskThresholdDays,
       });
 
@@ -142,7 +142,7 @@ export function useNonBilledTrendsAnalysis(
   return useQuery({
     queryKey: ['non-billed-trends-analysis', periodType, lookbackDays],
     queryFn: async () => {
-      const { data, error } = await supabase.rpc('get_bench_trends_analysis', {
+      const { data, error } = await supabase.rpc('get_non_billed_resources_trends_analysis', {
         period_type: periodType,
         lookback_days: lookbackDays,
       });
