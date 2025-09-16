@@ -77,13 +77,6 @@ export const PivotTableBody: React.FC<PivotTableBodyProps> = ({
         <TableCell className="sticky left-0 z-10 bg-muted border-r-2 font-bold">
           Total
         </TableCell>
-        {visibleCols.map(col => (
-          <TableCell key={col} className="text-center font-bold bg-primary/10 border-r ">
-            <div className="font-mono font-bold text-primary">
-              {colTotalsMap.get(col) || 0}
-            </div>
-          </TableCell>
-        ))}
         {/* Render collapsed column totals in footer */}
         {isGroupingEnabled && groupedCols && 
           Object.entries(groupedCols).map(([colGroupName, cols]) => {
@@ -96,8 +89,15 @@ export const PivotTableBody: React.FC<PivotTableBodyProps> = ({
                   </div>
                 </TableCell>
               );
+            } else {
+            return cols.map(col => (
+              <TableCell key={`total-${col}`} className="text-center font-bold bg-primary/10 border-r ">
+                <div className="font-mono font-bold text-primary">
+                  {colTotalsMap.get(col) || 0}
+                </div>
+              </TableCell>
+            ));
             }
-            return null;
           })
         }
         <TableCell className="text-center font-bold bg-primary text-primary-foreground border-l-2 sticky right-0 z-10">
