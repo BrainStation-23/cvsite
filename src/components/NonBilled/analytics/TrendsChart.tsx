@@ -1,14 +1,14 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Area, AreaChart } from 'recharts';
+import { XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Area, AreaChart } from 'recharts';
 import { format, parseISO } from 'date-fns';
 import { TrendingUp, Clock } from 'lucide-react';
 
 interface TrendData {
   period: string;
-  new_bench_count: number;
+  new_non_billed_resources_count: number;
   affected_sbus: number;
-  avg_experience_of_new_bench: number;
+  avg_experience_of_new_non_billed_resources: number;
 }
 
 interface TrendsChartProps {
@@ -71,10 +71,10 @@ export function TrendsChart({ data, isLoading, periodType, onPeriodChange }: Tre
           <div className="space-y-1 text-sm">
             <p className="flex items-center gap-2">
               <div className="w-3 h-3 rounded-full" style={{ backgroundColor: 'hsl(var(--chart-1))' }}></div>
-              New Bench: <span className="font-medium">{data.new_bench_count}</span>
+              New non_billed_resources: <span className="font-medium">{data.new_non_billed_resources_count}</span>
             </p>
             <p>Affected SBUs: <span className="font-medium">{data.affected_sbus}</span></p>
-            <p>Avg Experience: <span className="font-medium">{data.avg_experience_of_new_bench}y</span></p>
+            <p>Avg Experience: <span className="font-medium">{data.avg_experience_of_new_non_billed_resources}y</span></p>
           </div>
         </div>
       );
@@ -95,10 +95,10 @@ export function TrendsChart({ data, isLoading, periodType, onPeriodChange }: Tre
             <div>
               <CardTitle className="text-lg font-semibold flex items-center gap-2">
                 <TrendingUp className="h-5 w-5" />
-                Bench Trends
+                non_billed_resources Trends
               </CardTitle>
               <p className="text-sm text-muted-foreground">
-                New bench additions over time
+                New non_billed_resources additions over time
               </p>
             </div>
             <Select value={periodType} onValueChange={onPeriodChange}>
@@ -117,7 +117,7 @@ export function TrendsChart({ data, isLoading, periodType, onPeriodChange }: Tre
           <ResponsiveContainer width="100%" height={300}>
             <AreaChart data={sortedTrends}>
               <defs>
-                <linearGradient id="benchTrendGradient" x1="0" y1="0" x2="0" y2="1">
+                <linearGradient id="non_billed_resourcesTrendGradient" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="5%" stopColor="hsl(var(--chart-1))" stopOpacity={0.8}/>
                   <stop offset="95%" stopColor="hsl(var(--chart-1))" stopOpacity={0.1}/>
                 </linearGradient>
@@ -132,9 +132,9 @@ export function TrendsChart({ data, isLoading, periodType, onPeriodChange }: Tre
               <Tooltip content={<CustomTooltip />} />
               <Area
                 type="monotone"
-                dataKey="new_bench_count"
+                dataKey="new_non_billed_resources_count"
                 stroke="hsl(var(--chart-1))"
-                fill="url(#benchTrendGradient)"
+                fill="url(#non_billed_resourcesTrendGradient)"
                 strokeWidth={3}
               />
             </AreaChart>
@@ -160,7 +160,7 @@ export function TrendsChart({ data, isLoading, periodType, onPeriodChange }: Tre
             </div>
             <p className="text-sm text-muted-foreground">days to placement</p>
             <div className="mt-2 text-xs text-muted-foreground">
-              Time from bench to project assignment
+              Time from non_billed_resources to project assignment
             </div>
           </CardContent>
         </Card>
@@ -176,7 +176,7 @@ export function TrendsChart({ data, isLoading, periodType, onPeriodChange }: Tre
                 <div className="text-sm">
                   <p className="font-medium">Latest Period</p>
                   <p className="text-muted-foreground">
-                    {sortedTrends[sortedTrends.length - 1]?.new_bench_count || 0} new bench additions
+                    {sortedTrends[sortedTrends.length - 1]?.new_non_billed_resources_count || 0} new non_billed_resources additions
                   </p>
                 </div>
                 
@@ -190,7 +190,7 @@ export function TrendsChart({ data, isLoading, periodType, onPeriodChange }: Tre
                 <div className="text-sm">
                   <p className="font-medium">Experience Level</p>
                   <p className="text-muted-foreground">
-                    {sortedTrends[sortedTrends.length - 1]?.avg_experience_of_new_bench || 0}y avg experience
+                    {sortedTrends[sortedTrends.length - 1]?.avg_experience_of_new_non_billed_resources || 0}y avg experience
                   </p>
                 </div>
               </>

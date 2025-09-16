@@ -9,9 +9,9 @@ export interface NonBilledRecord {
   bill_type_id: string;
   bill_type_name: string;
   bill_type_color: string;
-  bench_date: string;
-  bench_duration_days: number;
+  non_billed_resources_date: string;
+  non_billed_resources_duration_days: number;
   planned_status: 'planned' | 'unplanned';
-  bench_feedback: string | null;
+  non_billed_resources_feedback: string | null;
   profile_id: string;
 }

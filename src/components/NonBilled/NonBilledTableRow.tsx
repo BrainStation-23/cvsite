@@ -84,7 +84,7 @@ export const NonBilledTableRow: React.FC<NonBilledTableRowProps> = ({ record, on
       <TableCell>
         <div className="flex items-center gap-1">
           <Calendar className="h-4 w-4 text-muted-foreground" />
-          <span className="text-sm">{formatBenchDate(record.bench_date)}</span>
+          <span className="text-sm">{formatBenchDate(record.non_billed_resources_date)}</span>
         </div>
       </TableCell>
       <TableCell>
@@ -101,7 +101,7 @@ export const NonBilledTableRow: React.FC<NonBilledTableRowProps> = ({ record, on
       <TableCell>
         <div className="flex items-center gap-1">
           <Clock className="h-4 w-4 text-muted-foreground" />
-          {getDurationBadge(record.bench_duration_days)}
+          {getDurationBadge(record.non_billed_resources_duration_days)}
         </div>
       </TableCell>
       <TableCell>
@@ -115,7 +115,7 @@ export const NonBilledTableRow: React.FC<NonBilledTableRowProps> = ({ record, on
         <NonBilledFeedbackCell
           employeeId={record.employee_id}
           employeeName={record.employee_name}
-          feedback={record.bench_feedback}
+          feedback={record.non_billed_resources_feedback}
           onUpdate={updateFeedback}
         />
       </TableCell>

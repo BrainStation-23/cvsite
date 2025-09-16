@@ -59,58 +59,6 @@ export type Database = {
           },
         ]
       }
-      bench: {
-        Row: {
-          bench_date: string | null
-          bench_feedback: string | null
-          bill_type_id: string | null
-          created_at: string
-          id: string
-          profile_id: string | null
-          updated_at: string | null
-        }
-        Insert: {
-          bench_date?: string | null
-          bench_feedback?: string | null
-          bill_type_id?: string | null
-          created_at?: string
-          id?: string
-          profile_id?: string | null
-          updated_at?: string | null
-        }
-        Update: {
-          bench_date?: string | null
-          bench_feedback?: string | null
-          bill_type_id?: string | null
-          created_at?: string
-          id?: string
-          profile_id?: string | null
-          updated_at?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "bench_bill_type_id_fkey"
-            columns: ["bill_type_id"]
-            isOneToOne: false
-            referencedRelation: "bill_types"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "bench_profile_id_fkey"
-            columns: ["profile_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "bench_profile_id_fkey"
-            columns: ["profile_id"]
-            isOneToOne: false
-            referencedRelation: "resource_availability_view"
-            referencedColumns: ["profile_id"]
-          },
-        ]
-      }
       bench_bill_types: {
         Row: {
           bill_type: string | null
@@ -779,6 +727,58 @@ export type Database = {
         }
         Relationships: []
       }
+      non_billed_resources: {
+        Row: {
+          bill_type_id: string | null
+          created_at: string
+          id: string
+          non_billed_resources_date: string | null
+          non_billed_resources_feedback: string | null
+          profile_id: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          bill_type_id?: string | null
+          created_at?: string
+          id?: string
+          non_billed_resources_date?: string | null
+          non_billed_resources_feedback?: string | null
+          profile_id?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          bill_type_id?: string | null
+          created_at?: string
+          id?: string
+          non_billed_resources_date?: string | null
+          non_billed_resources_feedback?: string | null
+          profile_id?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bench_bill_type_id_fkey"
+            columns: ["bill_type_id"]
+            isOneToOne: false
+            referencedRelation: "bill_types"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bench_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bench_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "resource_availability_view"
+            referencedColumns: ["profile_id"]
+          },
+        ]
+      }
       note_categories: {
         Row: {
           created_at: string
@@ -1171,7 +1171,6 @@ export type Database = {
           client_name: string | null
           created_at: string
           description: string | null
-          forecasted: boolean
           id: string
           is_active: boolean
           project_bill_type: string | null
@@ -1186,7 +1185,6 @@ export type Database = {
           client_name?: string | null
           created_at?: string
           description?: string | null
-          forecasted?: boolean
           id?: string
           is_active?: boolean
           project_bill_type?: string | null
@@ -1201,7 +1199,6 @@ export type Database = {
           client_name?: string | null
           created_at?: string
           description?: string | null
-          forecasted?: boolean
           id?: string
           is_active?: boolean
           project_bill_type?: string | null
@@ -1886,32 +1883,6 @@ export type Database = {
         Args: { target_user_id?: string }
         Returns: Json
       }
-      get_bench_dimensional_analysis: {
-        Args: {
-          end_date_filter?: string
-          group_by_dimension?: string
-          start_date_filter?: string
-        }
-        Returns: Json
-      }
-      get_bench_overview_statistics: {
-        Args: {
-          bill_type_filter?: string[]
-          end_date_filter?: string
-          expertise_filter?: string[]
-          sbu_filter?: string[]
-          start_date_filter?: string
-        }
-        Returns: Json
-      }
-      get_bench_risk_analytics: {
-        Args: { risk_threshold_days?: number }
-        Returns: Json
-      }
-      get_bench_trends_analysis: {
-        Args: { lookback_days?: number; period_type?: string }
-        Returns: Json
-      }
       get_bill_type_changes: {
         Args: {
           bill_type_ids?: string[]
@@ -2063,6 +2034,32 @@ export type Database = {
           resource_type_filter?: string
           search_term?: string
         }
+        Returns: Json
+      }
+      get_non_billed_resources_dimensional_analysis: {
+        Args: {
+          end_date_filter?: string
+          group_by_dimension?: string
+          start_date_filter?: string
+        }
+        Returns: Json
+      }
+      get_non_billed_resources_overview_statistics: {
+        Args: {
+          bill_type_filter?: string[]
+          end_date_filter?: string
+          expertise_filter?: string[]
+          sbu_filter?: string[]
+          start_date_filter?: string
+        }
+        Returns: Json
+      }
+      get_non_billed_resources_risk_analytics: {
+        Args: { risk_threshold_days?: number }
+        Returns: Json
+      }
+      get_non_billed_resources_trends_analysis: {
+        Args: { lookback_days?: number; period_type?: string }
         Returns: Json
       }
       get_pip_profile_details: {
@@ -2332,7 +2329,7 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: boolean
       }
-      list_bench: {
+      list_non_billed_resources: {
         Args: {
           bill_type_filter?: string[]
           expertise_filter?: string[]
@@ -2479,11 +2476,11 @@ export type Database = {
         }
         Returns: Json
       }
-      sync_bench_now: {
+      sync_non_billed_resources_now: {
         Args: Record<PropertyKey, never>
         Returns: Json
       }
-      update_bench_feedback: {
+      update_non_billed_resources_feedback: {
         Args: { employee_id_param: string; feedback_param: string }
         Returns: Json
       }
