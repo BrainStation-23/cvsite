@@ -79,7 +79,7 @@ export function useNonBilledData() {
 
       if (rpcData && typeof rpcData === 'object') {
         return {
-          non_billed_records: (rpcData as any).non_billed_records || [],
+          non_billed_records: (rpcData as any).bench_records || [],
           pagination: (rpcData as any).pagination || {
             total_count: 0,
             filtered_count: 0,
