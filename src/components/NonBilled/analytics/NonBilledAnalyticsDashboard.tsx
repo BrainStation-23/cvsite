@@ -145,7 +145,7 @@ export function NonBilledAnalyticsDashboard() {
                 data={sbuQuery.data}
                 isLoading={sbuQuery.isLoading}
                 dimension="sbu"
-                title="Bench by SBU (Preview)"
+                title="Non Billed Analysis by SBU (Preview)"
               />
             )}
           </div>
@@ -159,7 +159,7 @@ export function NonBilledAnalyticsDashboard() {
                 data={sbuQuery.data}
                 isLoading={sbuQuery.isLoading}
                 dimension="sbu"
-                title="Bench Analysis by SBU"
+                title="Non Billed Analysis by SBU"
               />
             )}
 
@@ -169,7 +169,7 @@ export function NonBilledAnalyticsDashboard() {
                 data={expertiseQuery.data}
                 isLoading={expertiseQuery.isLoading}
                 dimension="expertise"
-                title="Bench Analysis by Expertise"
+                title="Non Billed Analysis by Expertise"
               />
             )}
 
@@ -179,7 +179,7 @@ export function NonBilledAnalyticsDashboard() {
                 data={billTypeQuery.data}
                 isLoading={billTypeQuery.isLoading}
                 dimension="bill_type"
-                title="Bench Analysis by Bill Type"
+                title="Non Billed Analysis by Bill Type"
               />
             )}
           </div>

@@ -176,7 +176,7 @@ export function RiskAnalytics({ data, isLoading }: RiskAnalyticsProps) {
         <Alert variant="destructive">
           <AlertTriangle className="h-4 w-4" />
           <AlertDescription>
-            <strong>{risk_summary.critical_risk_count} critical risk profiles</strong> have been on non_billed_resources for over 90 days. 
+            <strong>{risk_summary.critical_risk_count} critical risk profiles</strong> have been on Non Billed Resources for over 90 days. 
             Immediate action required.
           </AlertDescription>
         </Alert>
@@ -193,7 +193,7 @@ export function RiskAnalytics({ data, isLoading }: RiskAnalyticsProps) {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{risk_summary.total_high_risk_count}</div>
-            <p className="text-xs text-muted-foreground">30+ days on non_billed_resources</p>
+            <p className="text-xs text-muted-foreground">30+ days on Non Billed Resources</p>
           </CardContent>
         </Card>
 
@@ -217,7 +217,7 @@ export function RiskAnalytics({ data, isLoading }: RiskAnalyticsProps) {
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
               <Calendar className="h-4 w-4" />
-              Unplanned non_billed_resources
+              Unplanned Non Billed Resources
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -252,7 +252,7 @@ export function RiskAnalytics({ data, isLoading }: RiskAnalyticsProps) {
               Top Risk SBUs
             </CardTitle>
             <p className="text-sm text-muted-foreground">
-              SBUs with highest non_billed_resources risk counts
+              SBUs with highest Non Billed Resources risk counts
             </p>
           </CardHeader>
           <CardContent>
@@ -323,7 +323,7 @@ export function RiskAnalytics({ data, isLoading }: RiskAnalyticsProps) {
                     </div>
 
                     <div className="text-xs text-muted-foreground">
-                      non_billed_resources since: {format(new Date(profile.non_billed_resources_date), 'MMM dd, yyyy')}
+                      Non Billed Resources since: {format(new Date(profile.non_billed_resources_date), 'MMM dd, yyyy')}
                     </div>
                   </div>
                 );
