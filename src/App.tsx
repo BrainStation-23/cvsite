@@ -91,8 +91,8 @@ function App(): React.ReactElement {
               <Route path="profile" element={<ProfilePage />} />
               <Route path="myteam" element={<MyTeam />} />
               <Route path="users" element={<UserManagement />} />
-              <Route path="/admin/system-settings" element={<SystemConfigurationSettings />} />
-              <Route path="/admin/audit" element={<AuditPage />} />
+              <Route path="system-settings" element={<SystemConfigurationSettings />} />
+              <Route path="audit" element={<AuditPage />} />
               <Route path="users/add" element={<AddUser />} />
               <Route path="users/edit/:userId" element={<EditUser />} />
               <Route path="employee-data-management" element={<EmployeeDataManagement />} />
