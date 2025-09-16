@@ -41,7 +41,7 @@ const ManagerPMReview: React.FC = () => {
   const handleSubmitToHR = async () => {
     if (!pipDetails?.pm_feedback) return;
     await updatePIPStatus('hr_review');
-    navigate('/manager/pip/pm-review');
+    navigate('/pip/pm-review');
   };
 
   if (isLoading) {
@@ -90,7 +90,7 @@ const ManagerPMReview: React.FC = () => {
         <EmployeeHeader
           profile={profile}
           pipStatus={pip.status}
-          onBack={() => navigate('/manager/pip/pm-review')}
+          onBack={() => navigate('/pip/pm-review')}
         />
 
         <div className="max-w-4xl mx-auto p-6 space-y-6">

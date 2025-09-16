@@ -21,7 +21,7 @@ export const TemplateStructureGuide: React.FC<TemplateStructureGuideProps> = () 
   };
 
   const handleOpenDocumentation = () => {
-    navigate('/admin/cv-templates/documentation');
+    navigate('/cv-templates/documentation');
   };
 
   return (

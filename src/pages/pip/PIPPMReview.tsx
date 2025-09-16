@@ -41,7 +41,7 @@ const PIPPMReview: React.FC = () => {
   const handleSubmitToHR = async () => {
     if (!pipDetails?.pm_feedback) return;
     await updatePIPStatus('hr_review');
-    navigate('/admin/pip/list');
+    navigate('/pip/list');
   };
 
   if (isLoading) {
@@ -59,7 +59,7 @@ const PIPPMReview: React.FC = () => {
     return (
         <div className="text-center py-12">
           <p className="text-muted-foreground">PIP not found</p>
-          <Button onClick={() => navigate('/admin/pip/list')} className="mt-4">
+          <Button onClick={() => navigate('/pip/list')} className="mt-4">
             Back to PIP List
           </Button>
         </div>
@@ -75,7 +75,7 @@ const PIPPMReview: React.FC = () => {
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => navigate('/admin/pip/list')}
+            onClick={() => navigate('/pip/list')}
           >
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back to PIP List

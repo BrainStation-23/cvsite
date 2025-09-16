@@ -33,7 +33,7 @@ const ManagerPIPList: React.FC = () => {
   };
 
   const handlePMReview = (pip: PIP) => {
-    navigate(`/manager/pip/pm-review/${pip.pip_id}`);
+    navigate(`/pip/pm-review/${pip.pip_id}`);
   };
 
   // Filter PIPs that need PM feedback or are in PM review status

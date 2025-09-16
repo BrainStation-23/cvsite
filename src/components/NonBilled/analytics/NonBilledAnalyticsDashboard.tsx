@@ -128,14 +128,10 @@ export function NonBilledAnalyticsDashboard() {
 
       {/* Main Analytics Tabs */}
       <Tabs defaultValue="overview" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="overview" className="flex items-center gap-2">
             <BarChart3 className="h-4 w-4" />
             Overview
-          </TabsTrigger>
-          <TabsTrigger value="analysis" className="flex items-center gap-2">
-            <Calendar className="h-4 w-4" />
-            Analysis
           </TabsTrigger>
           <TabsTrigger value="risk" className="flex items-center gap-2">
             <AlertTriangle className="h-4 w-4" />
@@ -166,21 +162,7 @@ export function NonBilledAnalyticsDashboard() {
                 title="Non Billed Analysis by SBU (Preview)"
               />
             )}
-          </div>
-        </TabsContent>
-
-        <TabsContent value="analysis" className="space-y-6">
-          <div className="grid grid-cols-1 gap-6">
-            {/* SBU Analysis */}
-            {sbuQuery.data && (
-              <DimensionalAnalysisChart
-                data={sbuQuery.data}
-                isLoading={sbuQuery.isLoading}
-                dimension="sbu"
-                title="Non Billed Analysis by SBU"
-              />
-            )}
-
+            
             {/* Expertise Analysis */}
             {expertiseQuery.data && (
               <DimensionalAnalysisChart
