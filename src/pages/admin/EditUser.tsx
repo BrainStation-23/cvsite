@@ -147,7 +147,7 @@ const EditUser: React.FC = () => {
         description: `${formData.firstName} ${formData.lastName} has been updated.`,
       });
 
-      navigate('/admin/users');
+      navigate('/users');
     } catch (error) {
       console.error('Error updating user:', error);
       toast({

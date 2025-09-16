@@ -91,10 +91,10 @@ export function DimensionalAnalysisChart({
         <div className="flex items-center justify-between">
           <div>
             <CardTitle className="text-lg font-semibold">
-              {title || `Bench Analysis by ${dimensionLabels[dimension]}`}
+              {title || `Non Billed Analysis by ${dimensionLabels[dimension]}`}
             </CardTitle>
             <p className="text-sm text-muted-foreground">
-              Breakdown of bench metrics across different {dimensionLabels[dimension].toLowerCase()}s
+              Breakdown of non billed metrics across different {dimensionLabels[dimension].toLowerCase()}s
             </p>
           </div>
           <ViewToggle

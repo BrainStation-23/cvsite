@@ -102,6 +102,50 @@ function App(): React.ReactElement {
               <Route path="myteam" element={<MyTeam />} />
               <Route path="security" element={<SecurityPage />} />
 
+              {/* CV Database (admin/manager) */}
+              <Route path="cv-database" element={<ProtectedRoute allowedRoles={['admin','manager']}><Outlet /></ProtectedRoute>}>
+                <Route path="dashboard" element={<CvDashboard />} />
+                <Route path="employee-data" element={<EmployeeData />} />
+                <Route path="training-certification" element={<TrainingCertification />} />
+                <Route path="employee-data-management" element={<ProtectedRoute allowedRoles={['admin']}><EmployeeDataManagement /></ProtectedRoute>} />
+                <Route path="cv-templates">
+                  <Route index element={<ProtectedRoute allowedRoles={['admin']}><CVTemplatesPage /></ProtectedRoute>} />
+                  <Route path="documentation" element={<ProtectedRoute allowedRoles={['admin']}><CVTemplateDocumentationPage /></ProtectedRoute>} />
+                  <Route path=":id" element={<ProtectedRoute allowedRoles={['admin']}><CVTemplateViewPage /></ProtectedRoute>} />
+                  <Route path=":id/edit" element={<ProtectedRoute allowedRoles={['admin']}><CVTemplateEditorPage /></ProtectedRoute>} />
+                </Route>
+                <Route path="cv-template-settings" element={<ProtectedRoute allowedRoles={['admin']}><CVTemplateSettings /></ProtectedRoute>} />
+              </Route>
+
+              {/* Resource Calendar (admin only) */}
+              <Route path="resource-calendar" element={<ProtectedRoute allowedRoles={['admin']}><Outlet /></ProtectedRoute>}>
+                <Route path="dashboard" element={<ResourceCalendarStatistics />} />
+                <Route path="planning" element={<ResourceCalendarPlanning />} />
+                <Route path="calendar" element={<ResourceCalendarView />} />
+                <Route path="settings" element={<ResourcePlanningSettings />} />
+              </Route>
+
+              {/* Non-Billed (admin only) */}
+              <Route path="non-billed" element={<ProtectedRoute allowedRoles={['admin']}><Outlet /></ProtectedRoute>}>
+                <Route path="dashboard" element={<NonBilledDashboard />} />
+                <Route path="report" element={<NonBilledReportPage />} />
+                <Route path="settings" element={<NonBilledSettingsPage />} />
+              </Route>
+
+              {/* PIP */}
+              <Route path="pip">
+                <Route path="initiate" element={<ProtectedRoute allowedRoles={['admin']}><PIPInitiate /></ProtectedRoute>} />
+                <Route path="list" element={<ProtectedRoute allowedRoles={['admin']}><PIPList /></ProtectedRoute>} />
+                <Route path="view/:pipId" element={<ProtectedRoute allowedRoles={['admin']}><AdminPIPView /></ProtectedRoute>} />
+                <Route path="dashboard" element={<ProtectedRoute allowedRoles={['admin']}><PIPDashboard /></ProtectedRoute>} />
+                <Route path="pm-review" element={<ProtectedRoute allowedRoles={['manager']}><ManagerPIPList /></ProtectedRoute>} />
+                <Route path="pm-review/:pipId" element={<ProtectedRoute allowedRoles={['manager']}><ManagerPMReview /></ProtectedRoute>} />
+                <Route path="my-situation" element={<MySituation />} />
+              </Route>
+
+              {/* View Profile (admin + manager) */}
+              <Route path="employee/profile/:profileId" element={<ProtectedRoute allowedRoles={['admin','manager']}><ViewProfilePage /></ProtectedRoute>} />
+
               {/* Users (admin only) */}
               <Route path="users" element={<ProtectedRoute allowedRoles={['admin']}><Outlet /></ProtectedRoute>}>
                 <Route index element={<UserManagement />} />
@@ -120,50 +164,6 @@ function App(): React.ReactElement {
                 <Route path="dashboard" element={<AuditPage />} />
                 <Route path="profile-image-warnings" element={<ProfileImageWarningAudit />} />
               </Route>
-
-              {/* Resource Calendar (admin only) */}
-              <Route path="resource-calendar" element={<ProtectedRoute allowedRoles={['admin']}><Outlet /></ProtectedRoute>}>
-                <Route path="planning" element={<ResourceCalendarPlanning />} />
-                <Route path="calendar" element={<ResourceCalendarView />} />
-                <Route path="resource-dashboard" element={<ResourceCalendarStatistics />} />
-                <Route path="resource-settings" element={<ResourcePlanningSettings />} />
-              </Route>
-
-              {/* CV Database (admin/manager) */}
-              <Route path="cv-database" element={<ProtectedRoute allowedRoles={['admin','manager']}><Outlet /></ProtectedRoute>}>
-                <Route path="cv-dashboard" element={<CvDashboard />} />
-                <Route path="employee-data" element={<EmployeeData />} />
-                <Route path="training-certification" element={<TrainingCertification />} />
-                <Route path="employee-data-management" element={<ProtectedRoute allowedRoles={['admin']}><EmployeeDataManagement /></ProtectedRoute>} />
-                <Route path="cv-templates">
-                  <Route index element={<ProtectedRoute allowedRoles={['admin']}><CVTemplatesPage /></ProtectedRoute>} />
-                  <Route path="documentation" element={<ProtectedRoute allowedRoles={['admin']}><CVTemplateDocumentationPage /></ProtectedRoute>} />
-                  <Route path=":id" element={<ProtectedRoute allowedRoles={['admin']}><CVTemplateViewPage /></ProtectedRoute>} />
-                  <Route path=":id/edit" element={<ProtectedRoute allowedRoles={['admin']}><CVTemplateEditorPage /></ProtectedRoute>} />
-                </Route>
-                <Route path="cv-template-settings" element={<ProtectedRoute allowedRoles={['admin']}><CVTemplateSettings /></ProtectedRoute>} />
-              </Route>
-
-              {/* PIP */}
-              <Route path="pip">
-                <Route path="initiate" element={<ProtectedRoute allowedRoles={['admin']}><PIPInitiate /></ProtectedRoute>} />
-                <Route path="list" element={<ProtectedRoute allowedRoles={['admin']}><PIPList /></ProtectedRoute>} />
-                <Route path="view/:pipId" element={<ProtectedRoute allowedRoles={['admin']}><AdminPIPView /></ProtectedRoute>} />
-                <Route path="dashboard" element={<ProtectedRoute allowedRoles={['admin']}><PIPDashboard /></ProtectedRoute>} />
-                <Route path="pm-review" element={<ProtectedRoute allowedRoles={['manager']}><ManagerPIPList /></ProtectedRoute>} />
-                <Route path="pm-review/:pipId" element={<ProtectedRoute allowedRoles={['manager']}><ManagerPMReview /></ProtectedRoute>} />
-                <Route path="my-situation" element={<MySituation />} />
-              </Route>
-
-              {/* Non-Billed (admin only) */}
-              <Route path="non-billed" element={<ProtectedRoute allowedRoles={['admin']}><Outlet /></ProtectedRoute>}>
-                <Route path="dashboard" element={<NonBilledDashboard />} />
-                <Route path="report" element={<NonBilledReportPage />} />
-                <Route path="settings" element={<NonBilledSettingsPage />} />
-              </Route>
-
-              {/* View Profile (admin + manager) */}
-              <Route path="employee/profile/:profileId" element={<ProtectedRoute allowedRoles={['admin','manager']}><ViewProfilePage /></ProtectedRoute>} />
             </Route>
 
             <Route path="*" element={<NotFound />} />

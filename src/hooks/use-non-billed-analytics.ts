@@ -11,12 +11,20 @@ interface NonBilledOverviewData {
     long_term_non_billed_resources_count: number;
     critical_non_billed_resources_count: number;
     avg_experience_years: number;
+    // Bench specific fields
+    total_bench_count: number;
+    avg_bench_duration_days: number;
+    bench_initial_count: number;
+    bench_critical_count: number;
+    non_bench_initial_count: number;
+    non_bench_critical_count: number;
   };
   experience_distribution: {
     junior: number;
     mid: number;
     senior: number;
     unknown: number;
+    total_count: number;
   };
   recent_trends: {
     new_non_billed_resources_last_7_days: number;
@@ -82,6 +90,7 @@ interface AnalyticsFilters {
   sbuFilter?: string[] | null;
   expertiseFilter?: string[] | null;
   billTypeFilter?: string[] | null;
+  benchFilter?: boolean | null;
 }
 
 export function useNonBilledOverview(filters: AnalyticsFilters = {}) {
@@ -94,6 +103,7 @@ export function useNonBilledOverview(filters: AnalyticsFilters = {}) {
         sbu_filter: filters.sbuFilter?.length ? filters.sbuFilter : null,
         expertise_filter: filters.expertiseFilter?.length ? filters.expertiseFilter : null,
         bill_type_filter: filters.billTypeFilter?.length ? filters.billTypeFilter : null,
+        bench_filter: filters.benchFilter,
       });
 
       if (error) throw error;
@@ -104,7 +114,7 @@ export function useNonBilledOverview(filters: AnalyticsFilters = {}) {
 
 export function useNonBilledDimensionalAnalysis(
   dimension: 'sbu' | 'expertise' | 'bill_type' = 'sbu',
-  filters: Pick<AnalyticsFilters, 'startDate' | 'endDate'> = {}
+  filters: Pick<AnalyticsFilters, 'startDate' | 'endDate' | 'benchFilter'> = {}
 ) {
   return useQuery({
     queryKey: ['non-billed-dimensional-analysis', dimension, filters],
@@ -113,6 +123,7 @@ export function useNonBilledDimensionalAnalysis(
         start_date_filter: filters.startDate ? format(filters.startDate, 'yyyy-MM-dd') : null,
         end_date_filter: filters.endDate ? format(filters.endDate, 'yyyy-MM-dd') : null,
         group_by_dimension: dimension,
+        bench_filter: filters.benchFilter,
       });
 
       if (error) throw error;
@@ -121,12 +132,13 @@ export function useNonBilledDimensionalAnalysis(
   });
 }
 
-export function useNonBilledRiskAnalytics(riskThresholdDays: number = 30) {
+export function useNonBilledRiskAnalytics(riskThresholdDays: number = 30, benchFilter?: boolean | null) {
   return useQuery({
-    queryKey: ['non-billed-risk-analytics', riskThresholdDays],
+    queryKey: ['non-billed-risk-analytics', riskThresholdDays, benchFilter],
     queryFn: async () => {
       const { data, error } = await supabase.rpc('get_non_billed_resources_risk_analytics', {
         risk_threshold_days: riskThresholdDays,
+        bench_filter: benchFilter,
       });
 
       if (error) throw error;
@@ -137,14 +149,16 @@ export function useNonBilledRiskAnalytics(riskThresholdDays: number = 30) {
 
 export function useNonBilledTrendsAnalysis(
   periodType: 'daily' | 'weekly' | 'monthly' = 'monthly',
-  lookbackDays: number = 365
+  lookbackDays: number = 365,
+  benchFilter?: boolean | null
 ) {
   return useQuery({
-    queryKey: ['non-billed-trends-analysis', periodType, lookbackDays],
+    queryKey: ['non-billed-trends-analysis', periodType, lookbackDays, benchFilter],
     queryFn: async () => {
       const { data, error } = await supabase.rpc('get_non_billed_resources_trends_analysis', {
         period_type: periodType,
         lookback_days: lookbackDays,
+        bench_filter: benchFilter,
       });
 
       if (error) throw error;

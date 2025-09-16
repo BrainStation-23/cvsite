@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { DateRangePickerWithPresets } from '@/components/statistics/DateRangePickerWithPresets';
 import { Button } from '@/components/ui/button';
 import { RefreshCw, Download, Calendar, BarChart3, AlertTriangle, TrendingUp } from 'lucide-react';
@@ -21,7 +22,7 @@ import { TrendsChart } from './TrendsChart';
 export function NonBilledAnalyticsDashboard() {
   const [startDate, setStartDate] = useState<Date | null>(null);
   const [endDate, setEndDate] = useState<Date | null>(null);
-  
+  const [benchFilter, setBenchFilter] = useState<boolean | null>(null);
   
   const [periodType, setPeriodType] = useState<'daily' | 'weekly' | 'monthly'>('monthly');
 
@@ -29,25 +30,29 @@ export function NonBilledAnalyticsDashboard() {
   const overviewQuery = useNonBilledOverview({
     startDate,
     endDate,
+    benchFilter,
   });
 
   const sbuQuery = useNonBilledDimensionalAnalysis('sbu', {
     startDate,
     endDate,
+    benchFilter,
   });
 
   const expertiseQuery = useNonBilledDimensionalAnalysis('expertise', {
     startDate,
     endDate,
+    benchFilter,
   });
 
   const billTypeQuery = useNonBilledDimensionalAnalysis('bill_type', {
     startDate,
     endDate,
+    benchFilter,
   });
 
-  const riskQuery = useNonBilledRiskAnalytics(30);
-  const trendsQuery = useNonBilledTrendsAnalysis(periodType, 365);
+  const riskQuery = useNonBilledRiskAnalytics(30, benchFilter);
+  const trendsQuery = useNonBilledTrendsAnalysis(periodType, 365, benchFilter);
 
   const isLoading = overviewQuery.isLoading || sbuQuery.isLoading || 
                    expertiseQuery.isLoading || billTypeQuery.isLoading ||
@@ -88,6 +93,19 @@ export function NonBilledAnalyticsDashboard() {
             }}
           />
           
+          <Select value={benchFilter === null ? 'all' : benchFilter ? 'bench' : 'non-bench'} onValueChange={(value) => {
+            setBenchFilter(value === 'all' ? null : value === 'bench');
+          }}>
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="Filter by Type" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Resources</SelectItem>
+              <SelectItem value="bench">Bench Only</SelectItem>
+              <SelectItem value="non-bench">Non-Bench Only</SelectItem>
+            </SelectContent>
+          </Select>
+          
           <Button variant="outline" size="sm" onClick={handleRefresh} disabled={isLoading}>
             <RefreshCw className={`h-4 w-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
             Refresh
@@ -110,14 +128,10 @@ export function NonBilledAnalyticsDashboard() {
 
       {/* Main Analytics Tabs */}
       <Tabs defaultValue="overview" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="overview" className="flex items-center gap-2">
             <BarChart3 className="h-4 w-4" />
             Overview
-          </TabsTrigger>
-          <TabsTrigger value="analysis" className="flex items-center gap-2">
-            <Calendar className="h-4 w-4" />
-            Analysis
           </TabsTrigger>
           <TabsTrigger value="risk" className="flex items-center gap-2">
             <AlertTriangle className="h-4 w-4" />
@@ -134,7 +148,7 @@ export function NonBilledAnalyticsDashboard() {
             {/* Experience Distribution */}
             {overviewQuery.data && (
               <ExperienceDistributionChart
-                data={overviewQuery.data.experience_distribution}
+                data={{...overviewQuery.data.experience_distribution, total_count: overviewQuery.data.overview.total_non_billed_resources_count}}
                 isLoading={overviewQuery.isLoading}
               />
             )}
@@ -145,31 +159,17 @@ export function NonBilledAnalyticsDashboard() {
                 data={sbuQuery.data}
                 isLoading={sbuQuery.isLoading}
                 dimension="sbu"
-                title="Bench by SBU (Preview)"
+                title="Non Billed Analysis by SBU (Preview)"
               />
             )}
-          </div>
-        </TabsContent>
-
-        <TabsContent value="analysis" className="space-y-6">
-          <div className="grid grid-cols-1 gap-6">
-            {/* SBU Analysis */}
-            {sbuQuery.data && (
-              <DimensionalAnalysisChart
-                data={sbuQuery.data}
-                isLoading={sbuQuery.isLoading}
-                dimension="sbu"
-                title="Bench Analysis by SBU"
-              />
-            )}
-
+            
             {/* Expertise Analysis */}
             {expertiseQuery.data && (
               <DimensionalAnalysisChart
                 data={expertiseQuery.data}
                 isLoading={expertiseQuery.isLoading}
                 dimension="expertise"
-                title="Bench Analysis by Expertise"
+                title="Non Billed Analysis by Expertise"
               />
             )}
 
@@ -179,7 +179,7 @@ export function NonBilledAnalyticsDashboard() {
                 data={billTypeQuery.data}
                 isLoading={billTypeQuery.isLoading}
                 dimension="bill_type"
-                title="Bench Analysis by Bill Type"
+                title="Non Billed Analysis by Bill Type"
               />
             )}
           </div>

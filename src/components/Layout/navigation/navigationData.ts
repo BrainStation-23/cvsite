@@ -55,7 +55,7 @@ export const getSidebarGroups = (
     (userRole === 'admin' || userRole === 'manager') && {
       label: 'CV Database',
       items: [
-        { to: '/cv-database/cv-dashboard', icon: LayoutDashboard, label: 'CV Dashboard' },
+        { to: '/cv-database/dashboard', icon: LayoutDashboard, label: 'CV Dashboard' },
         { to: '/cv-database/employee-data', icon: Search, label: 'CV Search' },
         { to: '/cv-database/training-certification', icon: FileText, label: 'Training and Certification' },
         { to: '/cv-database/employee-data-management', icon: FolderOpen, label: 'CV Completion' },
@@ -68,10 +68,10 @@ export const getSidebarGroups = (
     (userRole === 'admin') && {
       label: 'Resource Calendar',
       items: [
-        { to: '/resource-calendar/resource-dashboard', icon: LayoutDashboard, label: 'Resource Dashboard' },
+        { to: '/resource-calendar/dashboard', icon: LayoutDashboard, label: 'Resource Dashboard' },
         { to: '/resource-calendar/planning', icon: Calendar, label: 'Planning' },
         { to: '/resource-calendar/calendar', icon: CalendarDays, label: 'Calendar View' },
-        { to: '/resource-calendar/resource-settings', icon: Settings, label: 'Resource Settings' },
+        { to: '/resource-calendar/settings', icon: Settings, label: 'Resource Settings' },
       ],
     },
 

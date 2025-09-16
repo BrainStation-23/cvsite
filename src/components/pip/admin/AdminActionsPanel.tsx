@@ -71,7 +71,7 @@ export const AdminActionsPanel: React.FC<AdminActionsPanelProps> = ({
   const handleAction = (action: string) => {
     switch (action) {
       case 'edit':
-        navigate(`/admin/pip/edit/${pipId}`);
+        navigate(`/pip/edit/${pipId}`);
         break;
       case 'delete':
         showConfirmation({

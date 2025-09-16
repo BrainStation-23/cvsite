@@ -71,7 +71,7 @@ export function TrendsChart({ data, isLoading, periodType, onPeriodChange }: Tre
           <div className="space-y-1 text-sm">
             <p className="flex items-center gap-2">
               <div className="w-3 h-3 rounded-full" style={{ backgroundColor: 'hsl(var(--chart-1))' }}></div>
-              New non_billed_resources: <span className="font-medium">{data.new_non_billed_resources_count}</span>
+              New Non Billed Resources: <span className="font-medium">{data.new_non_billed_resources_count}</span>
             </p>
             <p>Affected SBUs: <span className="font-medium">{data.affected_sbus}</span></p>
             <p>Avg Experience: <span className="font-medium">{data.avg_experience_of_new_non_billed_resources}y</span></p>
@@ -95,10 +95,10 @@ export function TrendsChart({ data, isLoading, periodType, onPeriodChange }: Tre
             <div>
               <CardTitle className="text-lg font-semibold flex items-center gap-2">
                 <TrendingUp className="h-5 w-5" />
-                non_billed_resources Trends
+                Non Billed Resources Trends
               </CardTitle>
               <p className="text-sm text-muted-foreground">
-                New non_billed_resources additions over time
+                New Non Billed Resources additions over time
               </p>
             </div>
             <Select value={periodType} onValueChange={onPeriodChange}>

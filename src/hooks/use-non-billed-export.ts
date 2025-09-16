@@ -19,11 +19,11 @@ export function useNonBilledExport() {
       let hasMorePages = true;
 
       while (hasMorePages) {
-        const { data: rpcData, error } = await supabase.rpc('list_bench', {
+        const { data: rpcData, error } = await supabase.rpc('list_non_billed_resources', {
           search_query: null,
           page_number: currentPage,
           items_per_page: itemsPerPage,
-          sort_by: 'bench_date',
+          sort_by: 'non_billed_resources_date',
           sort_order: 'desc',
           sbu_filter: null,
           expertise_filter: null,
@@ -35,8 +35,8 @@ export function useNonBilledExport() {
           throw error;
         }
 
-        if (rpcData && typeof rpcData === 'object' && 'bench_records' in rpcData) {
-          const pageRecords = (rpcData as any).bench_records || [];
+        if (rpcData && typeof rpcData === 'object' && 'non_billed_records' in rpcData) {
+          const pageRecords = (rpcData as any).non_billed_records || [];
           const pagination = (rpcData as any).pagination;
 
           allRecords = [...allRecords, ...pageRecords];
@@ -54,7 +54,7 @@ export function useNonBilledExport() {
       if (allRecords.length === 0) {
         toast({
           title: "No Data",
-          description: "No bench records found to export.",
+          description: "No non-billed records found to export.",
           variant: "default"
         });
         return;
@@ -65,12 +65,12 @@ export function useNonBilledExport() {
         'Employee Name': record.employee_name,
         'Expertise': record.expertise || '',
         'Bill Type': record.bill_type_name || '',
-        'Bench Date': record.bench_date || '',
+        'Non-Billed Date': record.non_billed_resources_date || '',
         'SBU': record.sbu_name || '',
         'Planned Status': record.planned_status || '',
-        'Bench Duration (Days)': record.bench_duration_days || 0,
+        'Duration (Days)': record.non_billed_resources_duration_days || 0,
         'Years of Experience': record.total_years_experience || 0,
-        'Bench Feedback': record.bench_feedback || ''
+        'Feedback': record.non_billed_resources_feedback || ''
       }));
 
       const csv = Papa.unparse(csvData);
@@ -81,7 +81,7 @@ export function useNonBilledExport() {
       if (link.download !== undefined) {
         const url = URL.createObjectURL(blob);
         link.setAttribute('href', url);
-        link.setAttribute('download', `bench_export_${new Date().toISOString().split('T')[0]}.csv`);
+        link.setAttribute('download', `non_billed_export_${new Date().toISOString().split('T')[0]}.csv`);
         link.style.visibility = 'hidden';
         document.body.appendChild(link);
         link.click();
@@ -89,7 +89,7 @@ export function useNonBilledExport() {
 
         toast({
           title: "Export Successful",
-          description: `Successfully exported ${allRecords.length} bench records to CSV.`,
+          description: `Successfully exported ${allRecords.length} non-billed records to CSV.`,
           variant: "default"
         });
       }
@@ -98,7 +98,7 @@ export function useNonBilledExport() {
       console.error('Bench export error:', error);
       toast({
         title: "Export Failed",
-        description: "Failed to export bench records. Please try again.",
+        description: "Failed to export non-billed records. Please try again.",
         variant: "destructive"
       });
     } finally {

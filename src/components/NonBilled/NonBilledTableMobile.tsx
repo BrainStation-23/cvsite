@@ -87,8 +87,8 @@ export const NonBilledTableMobile: React.FC<NonBilledTableMobileProps> = ({ reco
               <div className="flex items-center gap-2">
                 <Calendar className="h-4 w-4 text-muted-foreground" />
                 <div>
-                  <p className="text-xs text-muted-foreground">Bench Date</p>
-                  <p className="text-sm font-medium">{formatNonBilledDate(record.bench_date)}</p>
+                  <p className="text-xs text-muted-foreground">Non-Billed Date</p>
+                  <p className="text-sm font-medium">{formatNonBilledDate(record.non_billed_resources_date)}</p>
                 </div>
               </div>
               
@@ -97,7 +97,7 @@ export const NonBilledTableMobile: React.FC<NonBilledTableMobileProps> = ({ reco
                 <div>
                   <p className="text-xs text-muted-foreground">Duration</p>
                   <div className="flex items-center gap-1">
-                    {getDurationBadge(record.bench_duration_days)}
+                    {getDurationBadge(record.non_billed_resources_duration_days)}
                   </div>
                 </div>
               </div>
@@ -124,7 +124,7 @@ export const NonBilledTableMobile: React.FC<NonBilledTableMobileProps> = ({ reco
             <NonBilledFeedbackCell
               employeeId={record.employee_id}
               employeeName={record.employee_name}
-              feedback={record.bench_feedback}
+              feedback={record.non_billed_resources_feedback}
               onUpdate={updateFeedback}
             />
           </div>
