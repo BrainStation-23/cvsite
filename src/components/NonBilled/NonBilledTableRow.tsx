@@ -5,19 +5,19 @@ import { Calendar, Clock, Award } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
 import { Button } from '@/components/ui/button';
 import { Download } from 'lucide-react';
-import { BenchRecord } from './types/benchRecord';
-import { BenchFeedbackCell } from './BenchFeedbackCell';
-import { useBenchFeedback } from '@/hooks/use-bench-feedback';
+import { NonBilledRecord } from './types/NonBilledRecord';
+import { NonBilledFeedbackCell } from './NonBilledFeedbackCell';
+import { useNonBilledFeedback } from '@/hooks/use-non-billed-feedback';
 import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from '@/components/ui/tooltip';
 
 
-interface BenchTableRowProps {
-  record: BenchRecord;
+interface NonBilledTableRowProps {
+  record: NonBilledRecord;
   onPDFExport: (profileId: string, employeeName: string) => void;
 }
 
-export const BenchTableRow: React.FC<BenchTableRowProps> = ({ record, onPDFExport }) => {
-  const { updateFeedback } = useBenchFeedback();
+export const NonBilledTableRow: React.FC<NonBilledTableRowProps> = ({ record, onPDFExport }) => {
+  const { updateFeedback } = useNonBilledFeedback();
   const formatBenchDate = (dateString: string) => {
     try {
       return format(parseISO(dateString), 'MMM dd, yyyy');
@@ -112,7 +112,7 @@ export const BenchTableRow: React.FC<BenchTableRowProps> = ({ record, onPDFExpor
         </div>
       </TableCell>
       <TableCell className="py-1 px-2">
-        <BenchFeedbackCell
+        <NonBilledFeedbackCell
           employeeId={record.employee_id}
           employeeName={record.employee_name}
           feedback={record.bench_feedback}

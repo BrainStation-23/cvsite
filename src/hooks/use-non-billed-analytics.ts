@@ -2,7 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { format } from 'date-fns';
 
-interface BenchOverviewData {
+interface NonBilledOverviewData {
   overview: {
     total_bench_count: number;
     avg_bench_duration_days: number;
@@ -84,9 +84,9 @@ interface AnalyticsFilters {
   billTypeFilter?: string[] | null;
 }
 
-export function useBenchOverview(filters: AnalyticsFilters = {}) {
+export function useNonBilledOverview(filters: AnalyticsFilters = {}) {
   return useQuery({
-    queryKey: ['bench-overview', filters],
+    queryKey: ['non-billed-overview', filters],
     queryFn: async () => {
       const { data, error } = await supabase.rpc('get_bench_overview_statistics', {
         start_date_filter: filters.startDate ? format(filters.startDate, 'yyyy-MM-dd') : null,
@@ -97,17 +97,17 @@ export function useBenchOverview(filters: AnalyticsFilters = {}) {
       });
 
       if (error) throw error;
-      return data as unknown as BenchOverviewData;
+      return data as unknown as NonBilledOverviewData;
     },
   });
 }
 
-export function useBenchDimensionalAnalysis(
+export function useNonBilledDimensionalAnalysis(
   dimension: 'sbu' | 'expertise' | 'bill_type' = 'sbu',
   filters: Pick<AnalyticsFilters, 'startDate' | 'endDate'> = {}
 ) {
   return useQuery({
-    queryKey: ['bench-dimensional-analysis', dimension, filters],
+    queryKey: ['non-billed-dimensional-analysis', dimension, filters],
     queryFn: async () => {
       const { data, error } = await supabase.rpc('get_bench_dimensional_analysis', {
         start_date_filter: filters.startDate ? format(filters.startDate, 'yyyy-MM-dd') : null,
@@ -121,9 +121,9 @@ export function useBenchDimensionalAnalysis(
   });
 }
 
-export function useBenchRiskAnalytics(riskThresholdDays: number = 30) {
+export function useNonBilledRiskAnalytics(riskThresholdDays: number = 30) {
   return useQuery({
-    queryKey: ['bench-risk-analytics', riskThresholdDays],
+    queryKey: ['non-billed-risk-analytics', riskThresholdDays],
     queryFn: async () => {
       const { data, error } = await supabase.rpc('get_bench_risk_analytics', {
         risk_threshold_days: riskThresholdDays,
@@ -135,12 +135,12 @@ export function useBenchRiskAnalytics(riskThresholdDays: number = 30) {
   });
 }
 
-export function useBenchTrendsAnalysis(
+export function useNonBilledTrendsAnalysis(
   periodType: 'daily' | 'weekly' | 'monthly' = 'monthly',
   lookbackDays: number = 365
 ) {
   return useQuery({
-    queryKey: ['bench-trends-analysis', periodType, lookbackDays],
+    queryKey: ['non-billed-trends-analysis', periodType, lookbackDays],
     queryFn: async () => {
       const { data, error } = await supabase.rpc('get_bench_trends_analysis', {
         period_type: periodType,

@@ -1,17 +1,15 @@
 import { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { DateRangePickerWithPresets } from '@/components/statistics/DateRangePickerWithPresets';
 import { Button } from '@/components/ui/button';
 import { RefreshCw, Download, Calendar, BarChart3, AlertTriangle, TrendingUp } from 'lucide-react';
-import { subDays } from 'date-fns';
 
 import { 
-  useBenchOverview, 
-  useBenchDimensionalAnalysis, 
-  useBenchRiskAnalytics, 
-  useBenchTrendsAnalysis 
-} from '@/hooks/use-bench-analytics';
+  useNonBilledOverview, 
+  useNonBilledDimensionalAnalysis, 
+  useNonBilledRiskAnalytics, 
+  useNonBilledTrendsAnalysis 
+} from '@/hooks/use-non-billed-analytics';
 
 import { OverviewCards } from './OverviewCards';
 import { ExperienceDistributionChart } from './ExperienceDistributionChart';
@@ -20,7 +18,7 @@ import { RiskAnalytics } from './RiskAnalytics';
 import { TrendsChart } from './TrendsChart';
 
 
-export function BenchAnalyticsDashboard() {
+export function NonBilledAnalyticsDashboard() {
   const [startDate, setStartDate] = useState<Date | null>(null);
   const [endDate, setEndDate] = useState<Date | null>(null);
   
@@ -28,28 +26,28 @@ export function BenchAnalyticsDashboard() {
   const [periodType, setPeriodType] = useState<'daily' | 'weekly' | 'monthly'>('monthly');
 
   // Fetch analytics data
-  const overviewQuery = useBenchOverview({
+  const overviewQuery = useNonBilledOverview({
     startDate,
     endDate,
   });
 
-  const sbuQuery = useBenchDimensionalAnalysis('sbu', {
+  const sbuQuery = useNonBilledDimensionalAnalysis('sbu', {
     startDate,
     endDate,
   });
 
-  const expertiseQuery = useBenchDimensionalAnalysis('expertise', {
+  const expertiseQuery = useNonBilledDimensionalAnalysis('expertise', {
     startDate,
     endDate,
   });
 
-  const billTypeQuery = useBenchDimensionalAnalysis('bill_type', {
+  const billTypeQuery = useNonBilledDimensionalAnalysis('bill_type', {
     startDate,
     endDate,
   });
 
-  const riskQuery = useBenchRiskAnalytics(30);
-  const trendsQuery = useBenchTrendsAnalysis(periodType, 365);
+  const riskQuery = useNonBilledRiskAnalytics(30);
+  const trendsQuery = useNonBilledTrendsAnalysis(periodType, 365);
 
   const isLoading = overviewQuery.isLoading || sbuQuery.isLoading || 
                    expertiseQuery.isLoading || billTypeQuery.isLoading ||
@@ -74,9 +72,9 @@ export function BenchAnalyticsDashboard() {
       {/* Header */}
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Bench Analytics</h1>
+          <h1 className="text-3xl font-bold tracking-tight">Non-Billed Analytics</h1>
           <p className="text-muted-foreground">
-            Comprehensive insights into bench metrics and workforce management
+            Comprehensive insights into non-billed metrics and workforce management
           </p>
         </div>
         

@@ -45,9 +45,9 @@ import ManagerPIPList from '@/pages/pip/ManagerPIPList';
 import ManagerPMReview from '@/pages/pip/ManagerPMReview';
 import AdminPIPView from './pages/pip/AdminPIPView';
 import MyTeam from '@/pages/MyTeam';
-import BenchReportPage from '@/pages/admin/bench/BenchReportPage';
-import BenchSettingsPage from '@/pages/admin/bench/BenchSettingsPage';
-import BenchDashboard from '@/pages/bench/BenchDashboard';
+import NonBilledReportPage from '@/pages/admin/NonBilled/NonBilledReportPage';
+import NonBilledSettingsPage from '@/pages/admin/NonBilled/NonBilledSettingsPage';
+import NonBilledDashboard from '@/pages/NonBilled/NonBilledDashboard';
 import DashboardLayout from '@/components/Layout/DashboardLayout';
 import CvDashboard from './pages/employee/CvDashboard';
 import './App.css';
@@ -124,9 +124,9 @@ function App(): React.ReactElement {
               <Route path="pip/my-situation" element={<MySituation />} />
               
               {/* Bench Management */}
-              <Route path="bench/dashboard" element={<BenchDashboard />} />
-              <Route path="bench/report" element={<BenchReportPage />} />
-              <Route path="bench/settings" element={<BenchSettingsPage />} />
+              <Route path="bench/dashboard" element={<NonBilledDashboard />} />
+              <Route path="bench/report" element={<NonBilledReportPage />} />
+              <Route path="bench/settings" element={<NonBilledSettingsPage />} />
             </Route>
 
             {/* Nested Manager Routes with persistent DashboardLayout */}

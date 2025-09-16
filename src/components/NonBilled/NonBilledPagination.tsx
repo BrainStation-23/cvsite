@@ -18,7 +18,7 @@ interface PaginationData {
   page_count: number;
 }
 
-interface BenchPaginationProps {
+interface NonBilledPaginationProps {
   pagination: PaginationData;
   currentPage: number;
   perPage: number;
@@ -28,7 +28,7 @@ interface BenchPaginationProps {
 
 const PER_PAGE_OPTIONS = [10, 25, 50, 100];
 
-export const BenchPagination: React.FC<BenchPaginationProps> = ({
+export const NonBilledPagination: React.FC<NonBilledPaginationProps> = ({
   pagination,
   currentPage,
   perPage,

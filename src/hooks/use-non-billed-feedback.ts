@@ -2,17 +2,17 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
-interface UpdateBenchFeedbackParams {
+interface UpdateNonBilledFeedbackParams {
   employeeId: string;
   feedback: string;
 }
 
-export const useBenchFeedback = () => {
+export const useNonBilledFeedback = () => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
   const updateFeedbackMutation = useMutation({
-    mutationFn: async ({ employeeId, feedback }: UpdateBenchFeedbackParams) => {
+    mutationFn: async ({ employeeId, feedback }: UpdateNonBilledFeedbackParams) => {
       const { data, error } = await supabase.rpc('update_bench_feedback' as any, {
         employee_id_param: employeeId,
         feedback_param: feedback
@@ -26,18 +26,18 @@ export const useBenchFeedback = () => {
     },
     onSuccess: () => {
       // Invalidate and refetch bench data
-      queryClient.invalidateQueries({ queryKey: ['bench-data'] });
+      queryClient.invalidateQueries({ queryKey: ['non-billed-data'] });
       
       toast({
         title: 'Success',
-        description: 'Bench feedback updated successfully.',
+        description: 'Non-billed feedback updated successfully.',
       });
     },
     onError: (error) => {
-      console.error('Failed to update bench feedback:', error);
+      console.error('Failed to update non-billed feedback:', error);
       toast({
         title: 'Error',
-        description: 'Failed to update bench feedback. Please try again.',
+        description: 'Failed to update non-billed feedback. Please try again.',
         variant: 'destructive',
       });
     },

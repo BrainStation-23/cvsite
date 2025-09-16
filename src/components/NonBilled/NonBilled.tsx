@@ -8,7 +8,7 @@ import { SbuMultiSelect } from '@/components/statistics/SbuMultiSelect';
 import { ExpertiseMultiSelect } from '@/components/statistics/ExpertiseMultiSelect';
 import { BillTypeMultiSelect } from '@/components/statistics/BillTypeMultiSelect';
 
-interface BenchFiltersProps {
+interface NonBilledFiltersProps {
   searchQuery: string;
   setSearchQuery: (query: string) => void;
   selectedSbus: string[];
@@ -20,7 +20,7 @@ interface BenchFiltersProps {
   clearFilters: () => void;
 }
 
-export const BenchFilters: React.FC<BenchFiltersProps> = ({
+export const NonBilledFilters: React.FC<NonBilledFiltersProps> = ({
   searchQuery,
   setSearchQuery,
   selectedSbus,
