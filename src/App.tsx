@@ -108,12 +108,15 @@ function App(): React.ReactElement {
               <Route path="resource-calendar/resource-settings" element={<ResourcePlanningSettings />} />
               
               {/* CV Templates */}
-              <Route path="cv-dashboard" element={<CvDashboard />} />
-              <Route path="cv-templates" element={<CVTemplatesPage />} />
-              <Route path="cv-templates/documentation" element={<CVTemplateDocumentationPage />} />
-              <Route path="cv-templates/:id" element={<CVTemplateViewPage />} />
-              <Route path="cv-templates/:id/edit" element={<CVTemplateEditorPage />} />
-              <Route path="cv-template-settings" element={<CVTemplateSettings />} />
+              <Route path="cv-database/cv-dashboard" element={<CvDashboard />} />
+              <Route path="cv-database/employee-data" element={<EmployeeData />} />
+              <Route path="cv-database/training-certification" element={<TrainingCertification />} />
+              <Route path="cv-database/employee-data-management" element={<EmployeeDataManagement />} />
+              <Route path="cv-database/cv-templates" element={<CVTemplatesPage />} />
+              <Route path="cv-database/cv-templates/documentation" element={<CVTemplateDocumentationPage />} />
+              <Route path="cv-database/cv-templates/:id" element={<CVTemplateViewPage />} />
+              <Route path="cv-database/cv-templates/:id/edit" element={<CVTemplateEditorPage />} />
+              <Route path="cv-database/cv-template-settings" element={<CVTemplateSettings />} />
               
               {/* PIP Management */}
               <Route path="pip/initiate" element={<PIPInitiate />} />
@@ -124,9 +127,9 @@ function App(): React.ReactElement {
               <Route path="pip/my-situation" element={<MySituation />} />
               
               {/* Bench Management */}
-              <Route path="bench/dashboard" element={<BenchDashboard />} />
-              <Route path="bench/report" element={<BenchReportPage />} />
-              <Route path="bench/settings" element={<BenchSettingsPage />} />
+              <Route path="non-billed-management/dashboard" element={<BenchDashboard />} />
+              <Route path="non-billed-management/report" element={<BenchReportPage />} />
+              <Route path="non-billed-management/settings" element={<BenchSettingsPage />} />
             </Route>
 
             {/* Nested Manager Routes with persistent DashboardLayout */}

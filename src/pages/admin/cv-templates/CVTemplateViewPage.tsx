@@ -16,11 +16,11 @@ const CVTemplateViewPage: React.FC = () => {
   const currentTemplate = templates.find(t => t.id === id);
 
   const handleBack = () => {
-    navigate('/admin/cv-templates');
+    navigate('/admin/cv-database/cv-templates');
   };
 
   const handleEdit = () => {
-    navigate(`/admin/cv-templates/${id}/edit`);
+    navigate(`/admin/cv-database/cv-templates/${id}/edit`);
   };
 
   if (!currentTemplate) {

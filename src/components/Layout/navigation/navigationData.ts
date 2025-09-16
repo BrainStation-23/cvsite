@@ -54,12 +54,12 @@ export const getSidebarGroups = (
     (userRole === 'admin' || userRole === 'manager') && {
       label: 'CV Database',
       items: [
-        { to: `/${userRole}/cv-dashboard`, icon: LayoutDashboard, label: 'CV Dashboard' },
-        { to: `/${userRole}/employee-data`, icon: Search, label: 'CV Search' },
-        { to: `/${userRole}/training-certification`, icon: FileText, label: 'Training and Certification' },
-        { to: `/${userRole}/employee-data-management`, icon: FolderOpen, label: 'CV Completion' },
-        { to: `/${userRole}/cv-templates`, icon: FileText, label: 'CV Templates' },
-        { to: `/${userRole}/cv-template-settings`, icon: Settings, label: 'CV Settings' },
+        { to: `/${userRole}/cv-database/cv-dashboard`, icon: LayoutDashboard, label: 'CV Dashboard' },
+        { to: `/${userRole}/cv-database/employee-data`, icon: Search, label: 'CV Search' },
+        { to: `/${userRole}/cv-database/training-certification`, icon: FileText, label: 'Training and Certification' },
+        { to: `/${userRole}/cv-database/employee-data-management`, icon: FolderOpen, label: 'CV Completion' },
+        { to: `/${userRole}/cv-database/cv-templates`, icon: FileText, label: 'CV Templates' },
+        { to: `/${userRole}/cv-database/cv-template-settings`, icon: Settings, label: 'CV Settings' },
       ],
     },
 
@@ -78,9 +78,9 @@ export const getSidebarGroups = (
     userRole === 'admin' && {
       label: 'Non-Billed Management',
       items: [
-        { to: `/${userRole}/bench/dashboard`, icon: LayoutDashboard, label: 'Non-Billed Dashboard' },
-        { to: `/${userRole}/bench/report`, icon: BarChart3, label: 'Non-Billed Report' },
-        { to: `/${userRole}/bench/settings`, icon: Settings, label: 'Non-Billed Settings' },
+        { to: `/${userRole}/non-billed-management/dashboard`, icon: LayoutDashboard, label: 'Non-Billed Dashboard' },
+        { to: `/${userRole}/non-billed-management/report`, icon: BarChart3, label: 'Non-Billed Report' },
+        { to: `/${userRole}/non-billed-management/settings`, icon: Settings, label: 'Non-Billed Settings' },
       ],
     },
 
