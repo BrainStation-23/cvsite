@@ -43,10 +43,10 @@ export const getSidebarGroups = (
     {
       label: null,
       items: [
-        { to: `/${userRole}/dashboard`, icon: Home, label: 'Dashboard' },
-        { to: `/${userRole}/profile`, icon: User, label: 'My Profile' },
-        { to: `/${userRole}/myteam`, icon: Network, label: 'My Team' },
-        { to: `/${userRole}/security`, icon: Shield, label: 'Security' },
+        { to: '/dashboard', icon: Home, label: 'Dashboard' },
+        { to: '/profile', icon: User, label: 'My Profile' },
+        { to: '/myteam', icon: Network, label: 'My Team' },
+        { to: '/security', icon: Shield, label: 'Security' },
 
       ],
     },
@@ -55,12 +55,12 @@ export const getSidebarGroups = (
     (userRole === 'admin' || userRole === 'manager') && {
       label: 'CV Database',
       items: [
-        { to: `/${userRole}/cv-database/cv-dashboard`, icon: LayoutDashboard, label: 'CV Dashboard' },
-        { to: `/${userRole}/cv-database/employee-data`, icon: Search, label: 'CV Search' },
-        { to: `/${userRole}/cv-database/training-certification`, icon: FileText, label: 'Training and Certification' },
-        { to: `/${userRole}/cv-database/employee-data-management`, icon: FolderOpen, label: 'CV Completion' },
-        { to: `/${userRole}/cv-database/cv-templates`, icon: FileText, label: 'CV Templates' },
-        { to: `/${userRole}/cv-database/cv-template-settings`, icon: Settings, label: 'CV Settings' },
+        { to: '/cv-database/cv-dashboard', icon: LayoutDashboard, label: 'CV Dashboard' },
+        { to: '/cv-database/employee-data', icon: Search, label: 'CV Search' },
+        { to: '/cv-database/training-certification', icon: FileText, label: 'Training and Certification' },
+        { to: '/cv-database/employee-data-management', icon: FolderOpen, label: 'CV Completion' },
+        { to: '/cv-database/cv-templates', icon: FileText, label: 'CV Templates' },
+        { to: '/cv-database/cv-template-settings', icon: Settings, label: 'CV Settings' },
       ],
     },
 
@@ -68,10 +68,10 @@ export const getSidebarGroups = (
     (userRole === 'admin') && {
       label: 'Resource Calendar',
       items: [
-        { to: `/${userRole}/resource-calendar/resource-dashboard`, icon: LayoutDashboard, label: 'Resource Dashboard' },
-        { to: `/${userRole}/resource-calendar/planning`, icon: Calendar, label: 'Planning' },
-        { to: `/${userRole}/resource-calendar/calendar`, icon: CalendarDays, label: 'Calendar View' },
-        { to: `/${userRole}/resource-calendar/resource-settings`, icon: Settings, label: 'Resource Settings' },
+        { to: '/resource-calendar/resource-dashboard', icon: LayoutDashboard, label: 'Resource Dashboard' },
+        { to: '/resource-calendar/planning', icon: Calendar, label: 'Planning' },
+        { to: '/resource-calendar/calendar', icon: CalendarDays, label: 'Calendar View' },
+        { to: '/resource-calendar/resource-settings', icon: Settings, label: 'Resource Settings' },
       ],
     },
 
@@ -79,9 +79,9 @@ export const getSidebarGroups = (
     userRole === 'admin' && {
       label: 'Non-Billed Management',
       items: [
-        { to: `/${userRole}/non-billed-management/dashboard`, icon: LayoutDashboard, label: 'Non-Billed Dashboard' },
-        { to: `/${userRole}/non-billed-management/report`, icon: BarChart3, label: 'Non-Billed Report' },
-        { to: `/${userRole}/non-billed-management/settings`, icon: Settings, label: 'Non-Billed Settings' },
+        { to: '/non-billed/dashboard', icon: LayoutDashboard, label: 'Non-Billed Dashboard' },
+        { to: '/non-billed/report', icon: BarChart3, label: 'Non-Billed Report' },
+        { to: '/non-billed/settings', icon: Settings, label: 'Non-Billed Settings' },
       ],
     },
 
@@ -90,14 +90,14 @@ export const getSidebarGroups = (
       label: 'PIP',
       items: [
         ...(userRole === 'admin' ? [
-          { to: '/admin/pip/dashboard', icon: LayoutDashboard, label: 'PIP Dashboard' },
-          { to: '/admin/pip/initiate', icon: UserX, label: 'Initiate' },
-          { to: '/admin/pip/list', icon: List, label: 'PIP List' },
+          { to: '/pip/dashboard', icon: LayoutDashboard, label: 'PIP Dashboard' },
+          { to: '/pip/initiate', icon: UserX, label: 'Initiate' },
+          { to: '/pip/list', icon: List, label: 'PIP List' },
         ] : []),
         ...(userRole === 'manager' ? [
-          { to: '/manager/pip/pm-review', icon: UserCheck, label: 'PM Review' },
+          { to: '/pip/pm-review', icon: UserCheck, label: 'PM Review' },
         ] : []),
-        { to: `/${userRole}/pip/my-situation`, icon: UserCheck, label: 'My Situation' },
+        { to: '/pip/my-situation', icon: UserCheck, label: 'My Situation' },
       ],
     },
 
@@ -106,17 +106,17 @@ export const getSidebarGroups = (
     userRole === 'admin' && {
       label: 'Admin Configuration',
       items: [
-        { to: '/admin/users', icon: Users, label: 'User Management' },
-        { to: '/admin/projects', icon: Database, label: 'Projects' },
-        { to: '/admin/system-settings', icon: Settings, label: 'System Settings' }
+        { to: '/users', icon: Users, label: 'User Management' },
+        { to: '/projects', icon: Database, label: 'Projects' },
+        { to: '/system-settings', icon: Settings, label: 'System Settings' }
       ],
     },
         // Admin Configuration group (admin only)
     userRole === 'admin' && {
       label: 'Audit',
       items: [
-        { to: '/admin/audit/audit-dashboard', icon: AlertTriangle, label: 'Dashboard' },
-        { to: '/admin/audit/profile-image-warnings', icon: ContactRound, label: 'Profile Image' },
+        { to: '/audit/dashboard', icon: AlertTriangle, label: 'Dashboard' },
+        { to: '/audit/profile-image-warnings', icon: ContactRound, label: 'Profile Image' },
       ],
     },
   ].filter(Boolean) as NavigationGroup[];

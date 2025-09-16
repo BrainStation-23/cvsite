@@ -3,7 +3,7 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from '@/components/ui/sonner';
-import { AuthProvider } from '@/contexts/AuthContext';
+import { AuthProvider, useAuth } from '@/contexts/AuthContext';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import Index from '@/pages/Index';
 import Login from '@/pages/Login';
@@ -61,6 +61,21 @@ const queryClient = new QueryClient({
   },
 });
 
+// Role-aware dashboard component to render the correct dashboard at /dashboard
+const RoleDashboard: React.FC = () => {
+  const { user } = useAuth();
+  if (!user) return null;
+  switch (user.role) {
+    case 'admin':
+      return <AdminDashboard />;
+    case 'manager':
+      return <ManagerDashboard />;
+    case 'employee':
+    default:
+      return <EmployeeDashboard />;
+  }
+};
+
 function App(): React.ReactElement {
   return (
     <QueryClientProvider client={queryClient}>
@@ -71,113 +86,74 @@ function App(): React.ReactElement {
             <Route path="/login" element={<Login />} />
             <Route path="/auth/callback" element={<Callback />} />
             <Route path="/auth/logout" element={<FrontChannelLogout />} />
+            {/* Protected app with persistent DashboardLayout (flattened URLs) */}
             <Route
-              path="/profile"
               element={
                 <ProtectedRoute>
-                  <ProfilePage />
+                  <DashboardLayout />
                 </ProtectedRoute>
               }
-            />
-            
-            {/* Nested Admin Routes with persistent DashboardLayout */}
-            <Route path="/admin" element={
-              <ProtectedRoute allowedRoles={['admin']}>
-                <DashboardLayout />
-              </ProtectedRoute>
-            }>
-              <Route path="dashboard" element={<AdminDashboard />} />
-              <Route path="profile" element={<ProfilePage />} />
-              <Route path="myteam" element={<MyTeam />} />
-              <Route path="users" element={<UserManagement />} />
-              <Route path="system-settings" element={<SystemConfigurationSettings />} />
-              <Route path="audit/audit-dashboard" element={<AuditPage />} />
-              <Route path="audit/profile-image-warnings" element={<ProfileImageWarningAudit />} />
-              <Route path="users/add" element={<AddUser />} />
-              <Route path="users/edit/:userId" element={<EditUser />} />
-              <Route path="employee-data-management" element={<EmployeeDataManagement />} />
-              <Route path="employee-data" element={<EmployeeData />} />
-              <Route path="training-certification" element={<TrainingCertification />} />
-              <Route path="projects" element={<ProjectsManagement />} />
-              <Route path="security" element={<SecurityPage />} />
-              
-              {/* Resource Calendar */}
-              <Route path="resource-calendar/planning" element={<ResourceCalendarPlanning />} />
-              <Route path="resource-calendar/calendar" element={<ResourceCalendarView />} />
-              <Route path="resource-calendar/resource-dashboard" element={<ResourceCalendarStatistics />} />
-              <Route path="resource-calendar/resource-settings" element={<ResourcePlanningSettings />} />
-              
-              {/* CV Templates */}
-              <Route path="cv-database/cv-dashboard" element={<CvDashboard />} />
-              <Route path="cv-database/employee-data" element={<EmployeeData />} />
-              <Route path="cv-database/training-certification" element={<TrainingCertification />} />
-              <Route path="cv-database/employee-data-management" element={<EmployeeDataManagement />} />
-              <Route path="cv-database/cv-templates" element={<CVTemplatesPage />} />
-              <Route path="cv-database/cv-templates/documentation" element={<CVTemplateDocumentationPage />} />
-              <Route path="cv-database/cv-templates/:id" element={<CVTemplateViewPage />} />
-              <Route path="cv-database/cv-templates/:id/edit" element={<CVTemplateEditorPage />} />
-              <Route path="cv-database/cv-template-settings" element={<CVTemplateSettings />} />
-              
-              {/* PIP Management */}
-              <Route path="pip/initiate" element={<PIPInitiate />} />
-              <Route path="pip/list" element={<PIPList />} />
-              <Route path="pip/view/:pipId" element={<AdminPIPView />} />
-              <Route path="pip/dashboard" element={<PIPDashboard />} />
-              <Route path="pip/pm-review/:pipId" element={<PIPPMReview />} />
-              <Route path="pip/my-situation" element={<MySituation />} />
-              
-              {/* Bench Management */}
-              <Route path="non-billed-management/dashboard" element={<NonBilledDashboard />} />
-              <Route path="non-billed-management/report" element={<NonBilledReportPage />} />
-              <Route path="non-billed-management/settings" element={<NonBilledSettingsPage />} />
+            >
+              {/* Role-aware dashboard */}
+              <Route path="/dashboard" element={<RoleDashboard />} />
+
+              {/* Core */}
+              <Route path="/profile" element={<ProfilePage />} />
+              <Route path="/myteam" element={<ProtectedRoute allowedRoles={['admin','manager','employee']}><MyTeam /></ProtectedRoute>} />
+              <Route path="/security" element={<SecurityPage />} />
+
+              {/* Users (admin only) */}
+              <Route path="/users" element={<ProtectedRoute allowedRoles={['admin']}><UserManagement /></ProtectedRoute>} />
+              <Route path="/users/add" element={<ProtectedRoute allowedRoles={['admin']}><AddUser /></ProtectedRoute>} />
+              <Route path="/users/edit/:userId" element={<ProtectedRoute allowedRoles={['admin']}><EditUser /></ProtectedRoute>} />
+
+              {/* Projects (admin only) */}
+              <Route path="/projects" element={<ProtectedRoute allowedRoles={['admin']}><ProjectsManagement /></ProtectedRoute>} />
+
+              {/* System Settings (admin only) */}
+              <Route path="/system-settings" element={<ProtectedRoute allowedRoles={['admin']}><SystemConfigurationSettings /></ProtectedRoute>} />
+
+              {/* Audit (admin only) */}
+              <Route path="/audit/dashboard" element={<ProtectedRoute allowedRoles={['admin']}><AuditPage /></ProtectedRoute>} />
+              <Route path="/audit/profile-image-warnings" element={<ProtectedRoute allowedRoles={['admin']}><ProfileImageWarningAudit /></ProtectedRoute>} />
+
+              {/* Resource Calendar (admin only) */}
+              <Route path="/resource-calendar/planning" element={<ProtectedRoute allowedRoles={['admin']}><ResourceCalendarPlanning /></ProtectedRoute>} />
+              <Route path="/resource-calendar/calendar" element={<ProtectedRoute allowedRoles={['admin']}><ResourceCalendarView /></ProtectedRoute>} />
+              <Route path="/resource-calendar/resource-dashboard" element={<ProtectedRoute allowedRoles={['admin']}><ResourceCalendarStatistics /></ProtectedRoute>} />
+              <Route path="/resource-calendar/resource-settings" element={<ProtectedRoute allowedRoles={['admin']}><ResourcePlanningSettings /></ProtectedRoute>} />
+
+              {/* CV Database (admin/manager subset as needed; using admin here to match prior admin pages) */}
+              <Route path="/cv-database/cv-dashboard" element={<ProtectedRoute allowedRoles={['admin','manager']}><CvDashboard /></ProtectedRoute>} />
+              <Route path="/cv-database/employee-data" element={<ProtectedRoute allowedRoles={['admin','manager']}><EmployeeData /></ProtectedRoute>} />
+              <Route path="/cv-database/training-certification" element={<ProtectedRoute allowedRoles={['admin','manager']}><TrainingCertification /></ProtectedRoute>} />
+              <Route path="/cv-database/employee-data-management" element={<ProtectedRoute allowedRoles={['admin']}><EmployeeDataManagement /></ProtectedRoute>} />
+              <Route path="/cv-database/cv-templates" element={<ProtectedRoute allowedRoles={['admin']}><CVTemplatesPage /></ProtectedRoute>} />
+              <Route path="/cv-database/cv-templates/documentation" element={<ProtectedRoute allowedRoles={['admin']}><CVTemplateDocumentationPage /></ProtectedRoute>} />
+              <Route path="/cv-database/cv-templates/:id" element={<ProtectedRoute allowedRoles={['admin']}><CVTemplateViewPage /></ProtectedRoute>} />
+              <Route path="/cv-database/cv-templates/:id/edit" element={<ProtectedRoute allowedRoles={['admin']}><CVTemplateEditorPage /></ProtectedRoute>} />
+              <Route path="/cv-database/cv-template-settings" element={<ProtectedRoute allowedRoles={['admin']}><CVTemplateSettings /></ProtectedRoute>} />
+
+              {/* PIP */}
+              <Route path="/pip/initiate" element={<ProtectedRoute allowedRoles={['admin']}><PIPInitiate /></ProtectedRoute>} />
+              <Route path="/pip/list" element={<ProtectedRoute allowedRoles={['admin']}><PIPList /></ProtectedRoute>} />
+              <Route path="/pip/view/:pipId" element={<ProtectedRoute allowedRoles={['admin']}><AdminPIPView /></ProtectedRoute>} />
+              <Route path="/pip/dashboard" element={<ProtectedRoute allowedRoles={['admin']}><PIPDashboard /></ProtectedRoute>} />
+              <Route path="/pip/pm-review" element={<ProtectedRoute allowedRoles={['manager']}><ManagerPIPList /></ProtectedRoute>} />
+              <Route path="/pip/pm-review/:pipId" element={<ProtectedRoute allowedRoles={['manager']}><ManagerPMReview /></ProtectedRoute>} />
+              <Route path="/pip/my-situation" element={<MySituation />} />
+
+              {/* Non-Billed (admin only) */}
+              <Route path="/non-billed/dashboard" element={<ProtectedRoute allowedRoles={['admin']}><NonBilledDashboard /></ProtectedRoute>} />
+              <Route path="/non-billed/report" element={<ProtectedRoute allowedRoles={['admin']}><NonBilledReportPage /></ProtectedRoute>} />
+              <Route path="/non-billed/settings" element={<ProtectedRoute allowedRoles={['admin']}><NonBilledSettingsPage /></ProtectedRoute>} />
+
+              {/* View Profile (admin + manager) */}
+              <Route path="/employee/profile/:profileId" element={<ProtectedRoute allowedRoles={['admin','manager']}><ViewProfilePage /></ProtectedRoute>} />
             </Route>
-
-            {/* Nested Manager Routes with persistent DashboardLayout */}
-            <Route path="/manager" element={
-              <ProtectedRoute allowedRoles={['manager']}>
-                <DashboardLayout />
-              </ProtectedRoute>
-            }>
-              <Route path="dashboard" element={<ManagerDashboard />} />
-              <Route path="profile" element={<ProfilePage />} />
-              <Route path="myteam" element={<MyTeam />} />
-              <Route path="employee-data" element={<EmployeeData />} />
-              <Route path="training-certification" element={<TrainingCertification />} />
-              <Route path="security" element={<SecurityPage />} />
-              <Route path="pip/pm-review" element={<ManagerPIPList />} />
-              <Route path="pip/pm-review/:pipId" element={<ManagerPMReview />} />
-              <Route path="pip/my-situation" element={<MySituation />} />
-            </Route>
-
-            {/* Nested Employee Routes with persistent DashboardLayout */}
-            <Route path="/employee" element={
-              <ProtectedRoute allowedRoles={['employee']}>
-                <DashboardLayout />
-              </ProtectedRoute>
-            }>
-              <Route path="dashboard" element={<EmployeeDashboard />} />
-              <Route path="profile" element={<ProfilePage />} />
-              <Route path="myteam" element={<MyTeam />} />
-              <Route path="security" element={<SecurityPage />} />
-              <Route path="pip/my-situation" element={<MySituation />} />
-            </Route>
-
-            <Route
-              path="/employee/profile/:profileId"
-              element={
-                <ProtectedRoute allowedRoles={['admin', 'manager']}>
-                  <DashboardLayout>
-                    <ViewProfilePage />
-                  </DashboardLayout>
-                </ProtectedRoute>
-              }
-            />
-
 
             <Route path="*" element={<NotFound />} />
           </Routes>
-
-
 
         </Router>
         <Toaster />

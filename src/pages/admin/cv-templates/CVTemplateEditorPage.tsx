@@ -95,23 +95,9 @@ const CVTemplateEditorPage: React.FC = () => {
     setHasUnsavedChanges(true);
   };
 
-  const handleBack = () => {
-    if (hasUnsavedChanges) {
-      showConfirmation({
-        title: 'Unsaved Changes',
-        description: 'You have unsaved changes. Are you sure you want to leave?',
-        confirmText: 'Leave',
-        cancelText: 'Stay',
-        variant: 'destructive',
-        onConfirm: () => navigate('/admin/cv-database/cv-templates')
-      });
-    } else {
-      navigate('/admin/cv-database/cv-templates');
-    }
-  };
 
   const handlePreview = () => {
-    navigate(`/admin/cv-database/cv-templates/${id}`);
+    navigate(`/cv-database/cv-templates/${id}`);
   };
 
   const handleInsertExample = (exampleHTML: string) => {
@@ -170,10 +156,6 @@ const CVTemplateEditorPage: React.FC = () => {
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b bg-background">
           <div className="flex items-center gap-4">
-            <Button variant="ghost" size="sm" onClick={handleBack}>
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Back to Templates
-            </Button>
             <div className="flex flex-col">
               <input
                 type="text"

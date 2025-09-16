@@ -31,17 +31,8 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
 
   // If roles are specified and user doesn't have permission
   if (user && allowedRoles.length > 0 && !allowedRoles.includes(user.role)) {
-    // Redirect to the appropriate dashboard
-    switch (user.role) {
-      case 'admin':
-        return <Navigate to="/admin/dashboard" replace />;
-      case 'manager':
-        return <Navigate to="/manager/dashboard" replace />;
-      case 'employee':
-        return <Navigate to="/employee/dashboard" replace />;
-      default:
-        return <Navigate to="/login" replace />;
-    }
+    // Redirect to the unified role-aware dashboard
+    return <Navigate to="/dashboard" replace />;
   }
 
   // If all checks pass, render the protected content

@@ -20,26 +20,10 @@ const Login = () => {
       if (from) {
         navigate(from, { replace: true });
       } else {
-        redirectBasedOnRole(user.role);
+        navigate('/dashboard', { replace: true });
       }
     }
   }, [isAuthenticated, user, navigate, location]);
-
-  const redirectBasedOnRole = (role: string) => {
-    switch (role) {
-      case 'admin':
-        navigate('/admin/dashboard');
-        break;
-      case 'manager':
-        navigate('/manager/dashboard');
-        break;
-      case 'employee':
-        navigate('/employee/dashboard');
-        break;
-      default:
-        navigate('/');
-    }
-  };
 
   const handleSignIn = async (email: string, password: string) => {
     try {
