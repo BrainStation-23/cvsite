@@ -11,7 +11,7 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 
-interface BenchFeedbackDialogProps {
+interface NonBilledFeedbackDialogProps {
   isOpen: boolean;
   onClose: () => void;
   employeeName: string;
@@ -19,7 +19,7 @@ interface BenchFeedbackDialogProps {
   onSave: (feedback: string) => Promise<void>;
 }
 
-export const BenchFeedbackDialog: React.FC<BenchFeedbackDialogProps> = ({
+export const NonBilledFeedbackDialog: React.FC<NonBilledFeedbackDialogProps> = ({
   isOpen,
   onClose,
   employeeName,

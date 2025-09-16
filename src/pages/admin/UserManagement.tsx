@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import DashboardLayout from '../../components/Layout/DashboardLayout';
 import { Button } from '@/components/ui/button';
 import { Upload, RefreshCw, UserPlus, Download, Users, Trash2 } from 'lucide-react';
 import { useUserManagement } from '@/hooks/use-user-management';
@@ -138,7 +137,7 @@ const UserManagement: React.FC = () => {
   };
 
   const handleEditClick = (user: UserData) => {
-    navigate(`/admin/users/edit/${user.id}`);
+    navigate(`/users/edit/${user.id}`);
   };
 
   const handleDeleteClick = (user: UserData) => {
@@ -147,7 +146,7 @@ const UserManagement: React.FC = () => {
   };
 
   const handleAddUserClick = () => {
-    navigate('/admin/users/add');
+    navigate('/users/add');
   };
 
   const handleResetPasswordSuccess = async (newPassword: string) => {

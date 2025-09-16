@@ -1,4 +1,4 @@
-export interface BenchRecord {
+export interface NonBilledRecord {
   employee_id: string;
   employee_name: string;
   expertise_id: string;

@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Edit } from 'lucide-react';
+import { Edit } from 'lucide-react';
 import { useCVTemplates } from '@/hooks/use-cv-templates';
 import { EmployeeDataSelector } from '@/components/admin/cv-templates/EmployeeDataSelector';
 import { CVTemplatePreview } from '@/components/admin/cv-templates/CVTemplatePreview';
@@ -15,12 +15,10 @@ const CVTemplateViewPage: React.FC = () => {
 
   const currentTemplate = templates.find(t => t.id === id);
 
-  const handleBack = () => {
-    navigate('/admin/cv-templates');
-  };
+
 
   const handleEdit = () => {
-    navigate(`/admin/cv-templates/${id}/edit`);
+    navigate(`/cv-database/cv-templates/${id}/edit`);
   };
 
   if (!currentTemplate) {
@@ -36,10 +34,6 @@ const CVTemplateViewPage: React.FC = () => {
       {/* Header */}
       <div className="flex items-center justify-between p-4 border-b bg-background shadow-sm">
         <div className="flex items-center gap-4">
-          <Button variant="ghost" size="sm" onClick={handleBack}>
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Back to Templates
-          </Button>
           <div>
             <h1 className="text-2xl font-bold">
               {currentTemplate.name}

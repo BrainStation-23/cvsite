@@ -3,17 +3,17 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Calendar, Clock, Award, Users, Building2 } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
-import { BenchRecord } from './types/benchRecord';
-import { BenchFeedbackCell } from './BenchFeedbackCell';
-import { useBenchFeedback } from '@/hooks/use-bench-feedback';
+import { NonBilledRecord } from './types/NonBilledRecord';
+import { NonBilledFeedbackCell } from './NonBilledFeedbackCell';
+import { useNonBilledFeedback } from '@/hooks/use-non-billed-feedback';
 
-interface BenchTableMobileProps {
-  record: BenchRecord;
+interface NonBilledTableMobileProps {
+  record: NonBilledRecord;
 }
 
-export const BenchTableMobile: React.FC<BenchTableMobileProps> = ({ record }) => {
-  const { updateFeedback } = useBenchFeedback();
-  const formatBenchDate = (dateString: string) => {
+export const NonBilledTableMobile: React.FC<NonBilledTableMobileProps> = ({ record }) => {
+  const { updateFeedback } = useNonBilledFeedback();
+  const formatNonBilledDate = (dateString: string) => {
     try {
       return format(parseISO(dateString), 'MMM dd, yyyy');
     } catch {
@@ -88,7 +88,7 @@ export const BenchTableMobile: React.FC<BenchTableMobileProps> = ({ record }) =>
                 <Calendar className="h-4 w-4 text-muted-foreground" />
                 <div>
                   <p className="text-xs text-muted-foreground">Bench Date</p>
-                  <p className="text-sm font-medium">{formatBenchDate(record.bench_date)}</p>
+                  <p className="text-sm font-medium">{formatNonBilledDate(record.bench_date)}</p>
                 </div>
               </div>
               
@@ -121,7 +121,7 @@ export const BenchTableMobile: React.FC<BenchTableMobileProps> = ({ record }) =>
           {/* Feedback Section */}
           <div className="space-y-2">
             <div className="text-sm font-medium text-muted-foreground">Feedback</div>
-            <BenchFeedbackCell
+            <NonBilledFeedbackCell
               employeeId={record.employee_id}
               employeeName={record.employee_name}
               feedback={record.bench_feedback}

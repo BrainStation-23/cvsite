@@ -36,51 +36,6 @@ const AuditPage: React.FC = () => {
           </p>
         </div>
 
-        {/* Audit Categories Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {auditCategories.map((category) => (
-            <Card key={category.title} className={`${category.color} hover:shadow-lg transition-all duration-200`}>
-              <CardHeader className="pb-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className={`p-2 rounded-lg bg-white dark:bg-gray-800 ${category.iconColor}`}>
-                      <category.icon className="h-6 w-6" />
-                    </div>
-                    <div>
-                      <CardTitle className="text-xl font-semibold text-gray-900 dark:text-white">
-                        {category.title}
-                      </CardTitle>
-                      <div className="flex items-center gap-2 mt-1">
-                        <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium
-                          ${category.severity === 'High' 
-                            ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200' 
-                            : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200'
-                          }`}>
-                          <AlertTriangle className="h-3 w-3 mr-1" />
-                          {category.severity} Priority
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                  <ChevronRight className="h-5 w-5 text-gray-400" />
-                </div>
-                <CardDescription className="text-gray-600 dark:text-gray-300 mt-2">
-                  {category.description}
-                </CardDescription>
-              </CardHeader>
-              
-              <CardContent className="pt-0">
-                <Button asChild className="w-full">
-                  <Link to={category.route}>
-                    View Audit Log
-                    <ChevronRight className="ml-2 h-4 w-4" />
-                  </Link>
-                </Button>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-
         {/* Quick Stats Section */}
         <div className="mt-8 p-6 bg-gray-50 dark:bg-gray-800 rounded-lg">
           <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">

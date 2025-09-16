@@ -17,12 +17,6 @@ const ResourcePlanningSettings: React.FC = () => {
     <div className="flex flex-col h-full">
         {/* Header with back button */}
         <div className="flex items-center gap-4 mb-6">
-          <Button variant="ghost" size="sm" asChild>
-            <Link to="/admin/platform-settings">
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Back to Platform Settings
-            </Link>
-          </Button>
           <div>
             <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
               Resource Planning

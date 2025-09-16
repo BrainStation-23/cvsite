@@ -28,7 +28,7 @@ const PIPList: React.FC = () => {
   };
 
   const handleEditPIP = (pip: PIP) => {
-    navigate(`/admin/pip/edit/${pip.pip_id}`);
+    navigate(`/pip/edit/${pip.pip_id}`);
   };
 
   const handleDeletePIP = (pip: PIP) => {
@@ -36,7 +36,7 @@ const PIPList: React.FC = () => {
   };
 
   const handleViewPIP = (pip: PIP) => {
-    navigate(`/admin/pip/view/${pip.pip_id}`);
+    navigate(`/pip/view/${pip.pip_id}`);
   };
 
   const confirmDelete = () => {

@@ -1,9 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import DashboardLayout from '@/components/Layout/DashboardLayout';
-import { Button } from '@/components/ui/button';
-import { ArrowLeft } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { UserRole } from '@/types';
@@ -100,7 +97,7 @@ const EditUser: React.FC = () => {
           description: 'The requested user could not be found.',
           variant: 'destructive',
         });
-        navigate('/admin/users');
+        navigate('/users');
       }
     } catch (error) {
       console.error('Error fetching user:', error);
@@ -120,7 +117,7 @@ const EditUser: React.FC = () => {
     setIsLoading(true);
 
     try {
-      const { data, error } = await supabase.functions.invoke('update-user', {
+      const { error } = await supabase.functions.invoke('update-user', {
         body: {
           userId,
           email: formData.email,
@@ -183,12 +180,6 @@ const EditUser: React.FC = () => {
     );
   }
 
-  console.log('=== EditUser Render Debug ===');
-  console.log('Current userData:', userData);
-  console.log('Passing to UserForm - expertiseId:', userData.expertise_id);
-  console.log('Passing to UserForm - managerId:', userData.manager);
-  console.log('Passing to UserForm - resourceTypeId:', userData.resource_type);
-
   const initialFormData = {
     email: userData.email,
     firstName: userData.first_name,
@@ -208,27 +199,9 @@ const EditUser: React.FC = () => {
     hasOverhead: userData.has_overhead ?? true
   };
 
-  console.log('Initial form data being passed to UserForm:', initialFormData);
-
   return (
     <div>
       <div className="space-y-6">
-        <div className="flex items-center gap-4">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => navigate('/admin/users')}
-            className="flex items-center gap-2"
-          >
-            <ArrowLeft size={16} />
-            Back to Users
-          </Button>
-          <div>
-            <h1 className="text-2xl font-semibold text-cvsite-navy dark:text-white">Edit User</h1>
-            <p className="text-gray-600 dark:text-gray-400">Update user account information</p>
-          </div>
-        </div>
-
         <UserForm
           initialData={initialFormData}
           onSubmit={handleSubmit}

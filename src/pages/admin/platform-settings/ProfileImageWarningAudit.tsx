@@ -1,6 +1,5 @@
 
 import React, { useState } from 'react';
-import DashboardLayout from '@/components/Layout/DashboardLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -20,12 +19,8 @@ import {
   Download, 
   Calendar,
   User,
-  FileWarning,
   ExternalLink,
-  ChevronLeft,
-  ChevronRight
 } from 'lucide-react';
-import { Link } from 'react-router-dom';
 import { format } from 'date-fns';
 
 const ProfileImageWarningAudit: React.FC = () => {
@@ -72,20 +67,11 @@ const ProfileImageWarningAudit: React.FC = () => {
   };
 
   return (
-    <DashboardLayout>
+    <div>
       <div className="flex flex-col h-full">
         {/* Header */}
         <div className="mb-6">
           <div className="flex items-center gap-3 mb-2">
-            <Link 
-              to="/admin/platform-settings/audit" 
-              className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-            >
-              <ChevronLeft className="h-5 w-5 text-gray-600 dark:text-gray-400" />
-            </Link>
-            <div className="p-2 rounded-lg bg-orange-100 dark:bg-orange-900">
-              <FileWarning className="h-6 w-6 text-orange-600 dark:text-orange-400" />
-            </div>
             <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
               Profile Image Warning Audit
             </h1>
@@ -281,7 +267,6 @@ const ProfileImageWarningAudit: React.FC = () => {
                         onClick={() => handlePageChange(filters.page - 1)}
                         disabled={filters.page <= 1}
                       >
-                        <ChevronLeft className="h-4 w-4" />
                         Previous
                       </Button>
                       <Button
@@ -291,7 +276,6 @@ const ProfileImageWarningAudit: React.FC = () => {
                         disabled={filters.page >= totalPages}
                       >
                         Next
-                        <ChevronRight className="h-4 w-4" />
                       </Button>
                     </div>
                   </div>
@@ -301,7 +285,7 @@ const ProfileImageWarningAudit: React.FC = () => {
           </CardContent>
         </Card>
       </div>
-    </DashboardLayout>
+    </div>
   );
 };
 

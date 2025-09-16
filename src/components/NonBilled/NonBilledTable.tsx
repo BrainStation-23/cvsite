@@ -3,21 +3,21 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
-import { BenchTableRow } from './BenchTableRow';
-import { BenchTableMobile } from './BenchTableMobile';
-import { BenchRecord } from './types/benchRecord';
+import { NonBilledTableRow } from './NonBilledTableRow';
+import { NonBilledTableMobile } from './NonBilledTableMobile';
+import { NonBilledRecord } from './types/NonBilledRecord';
 import PDFExportModal from '../employee/PDFExportModal';
 
-interface BenchTableProps {
-  benchRecords: BenchRecord[];
+interface NonBilledTableProps {
+  nonBilledRecords: NonBilledRecord[];
   isLoading: boolean;
   sortBy: string;
   sortOrder: 'asc' | 'desc';
   onSort: (field: string) => void;
 }
 
-export const BenchTable: React.FC<BenchTableProps> = ({
-  benchRecords,
+export const NonBilledTable: React.FC<NonBilledTableProps> = ({
+  nonBilledRecords,
   isLoading,
   sortBy,
   sortOrder,
@@ -60,7 +60,7 @@ export const BenchTable: React.FC<BenchTableProps> = ({
     return (
       <Card>
         <CardHeader>
-          <CardTitle>Bench Resources</CardTitle>
+          <CardTitle>Non-Billed Resources</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="space-y-3">
@@ -73,15 +73,15 @@ export const BenchTable: React.FC<BenchTableProps> = ({
     );
   }
 
-  if (benchRecords.length === 0) {
+  if (nonBilledRecords.length === 0) {
     return (
       <Card>
         <CardHeader>
-          <CardTitle>Bench Resources</CardTitle>
+          <CardTitle>Non-Billed Resources</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="text-center py-8">
-            <p className="text-muted-foreground">No resources found on bench.</p>
+            <p className="text-muted-foreground">No non-billed resources found.</p>
           </div>
         </CardContent>
       </Card>
@@ -94,7 +94,7 @@ export const BenchTable: React.FC<BenchTableProps> = ({
       <div className="hidden md:block">
         <Card>
           <CardHeader>
-            <CardTitle>Bench Resources</CardTitle>
+            <CardTitle>Non-Billed Resources</CardTitle>
           </CardHeader>
           <CardContent>
             <Table>
@@ -151,8 +151,8 @@ export const BenchTable: React.FC<BenchTableProps> = ({
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {benchRecords.map((record, index) => (
-                  <BenchTableRow key={`${record.employee_id}-${index}`} record={record} onPDFExport={handlePDFExport}/>
+                {nonBilledRecords.map((record, index) => (
+                  <NonBilledTableRow key={`${record.employee_id}-${index}`} record={record} onPDFExport={handlePDFExport}/>
                 ))}
               </TableBody>
             </Table>
@@ -163,10 +163,10 @@ export const BenchTable: React.FC<BenchTableProps> = ({
       {/* Mobile Cards */}
       <div className="md:hidden space-y-4">
         <div className="flex items-center justify-between">
-          <h3 className="text-lg font-semibold">Bench Resources ({benchRecords.length})</h3>
+          <h3 className="text-lg font-semibold">Bench Resources ({nonBilledRecords.length})</h3>
         </div>
-        {benchRecords.map((record, index) => (
-          <BenchTableMobile key={`${record.employee_id}-${index}`} record={record} />
+        {nonBilledRecords.map((record, index) => (
+          <NonBilledTableMobile key={`${record.employee_id}-${index}`} record={record} />
         ))}
       </div>
 

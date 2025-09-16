@@ -2,11 +2,11 @@ import { useState, useCallback, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { BenchRecord } from '@/components/bench/types/benchRecord';
+import { NonBilledRecord } from '@/components/NonBilled/types/NonBilledRecord';
 
 
-interface BenchData {
-  bench_records: BenchRecord[];
+interface NonBilledData {
+  non_billed_records: NonBilledRecord[];
   pagination: {
     total_count: number;
     filtered_count: number;
@@ -16,7 +16,7 @@ interface BenchData {
   };
 }
 
-export function useBenchData() {
+export function useNonBilledData() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -64,20 +64,22 @@ export function useBenchData() {
 
   // Data fetching
   const { data, isLoading, error, refetch } = useQuery({
-    queryKey: ['bench-data', rpcParams],
+    queryKey: ['non-billed-data', rpcParams],
     queryFn: async () => {
-      console.log('Bench Data Query:', rpcParams);
+      console.log('Non-Billed Data Query:', rpcParams);
 
       const { data: rpcData, error } = await supabase.rpc('list_bench', rpcParams);
 
+      console.log('Non-Billed Data RPC Response:', rpcData);
+
       if (error) {
-        console.error('Bench data RPC call error:', error);
+        console.error('Non-Billed data RPC call error:', error);
         throw error;
       }
 
       if (rpcData && typeof rpcData === 'object') {
         return {
-          bench_records: (rpcData as any).bench_records || [],
+          non_billed_records: (rpcData as any).bench_records || [],
           pagination: (rpcData as any).pagination || {
             total_count: 0,
             filtered_count: 0,
@@ -85,11 +87,11 @@ export function useBenchData() {
             per_page: perPage,
             page_count: 0
           }
-        } as BenchData;
+        } as NonBilledData;
       }
 
       return {
-        bench_records: [],
+        non_billed_records: [],
         pagination: {
           total_count: 0,
           filtered_count: 0,
@@ -97,28 +99,28 @@ export function useBenchData() {
           per_page: perPage,
           page_count: 0
         }
-      } as BenchData;
+      } as NonBilledData;
     },
   });
 
   // Sync bench mutation
-  const syncBenchMutation = useMutation({
+  const syncNonBilledMutation = useMutation({
     mutationFn: async () => {
       const { error } = await supabase.rpc('sync_bench_now');
       if (error) throw error;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['bench-data'] });
+      queryClient.invalidateQueries({ queryKey: ['non-billed-data'] });
       toast({
         title: 'Success',
-        description: 'Bench data synchronized successfully.',
+        description: 'Non-billed data synchronized successfully.',
       });
     },
     onError: (error: any) => {
       console.error('Sync bench error:', error);
       toast({
         title: 'Error',
-        description: 'Failed to synchronize bench data.',
+        description: 'Failed to synchronize non-billed data.',
         variant: 'destructive',
       });
     },
@@ -129,7 +131,7 @@ export function useBenchData() {
 
   return {
     // Data
-    benchRecords: data?.bench_records || [],
+    nonBilledRecords: data?.non_billed_records || [],
     pagination: data?.pagination,
     isLoading,
     error,
@@ -158,7 +160,7 @@ export function useBenchData() {
     setPerPage,
 
     // Actions
-    syncBench: syncBenchMutation.mutate,
-    isSyncing: syncBenchMutation.isPending,
+    syncNonBilled: syncNonBilledMutation.mutate,
+    isSyncing: syncNonBilledMutation.isPending,
   };
 }

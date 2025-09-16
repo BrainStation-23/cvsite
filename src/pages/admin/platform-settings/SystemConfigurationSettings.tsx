@@ -2,12 +2,7 @@
 import React from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { ArrowLeft } from 'lucide-react';
-import { Link } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
 import SbuSettings from '@/components/admin/SbuSettings';
-import HrContactSettings from '@/components/admin/HrContactSettings';
-import NoteCategorySettings from '@/components/admin/NoteCategorySettings';
 import SystemHealthSettings from '@/components/admin/system-health/SystemHealthSettings';
 
 const SystemConfigurationSettings: React.FC = () => {
@@ -15,12 +10,6 @@ const SystemConfigurationSettings: React.FC = () => {
     <div className="flex flex-col h-full">
         {/* Header with back button */}
         <div className="flex items-center gap-4 mb-6">
-          <Button variant="ghost" size="sm" asChild>
-            <Link to="/admin/platform-settings">
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Back to Platform Settings
-            </Link>
-          </Button>
           <div>
             <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
               System Configuration
@@ -42,18 +31,6 @@ const SystemConfigurationSettings: React.FC = () => {
                 SBUs
               </TabsTrigger>
               <TabsTrigger 
-                value="hr-contacts" 
-                className="h-12 rounded-none border-b-2 border-transparent data-[state=active]:border-cvsite-teal data-[state=active]:bg-transparent data-[state=active]:shadow-none px-6 font-medium"
-              >
-                HR Contacts
-              </TabsTrigger>
-              <TabsTrigger 
-                value="note-categories" 
-                className="h-12 rounded-none border-b-2 border-transparent data-[state=active]:border-cvsite-teal data-[state=active]:bg-transparent data-[state=active]:shadow-none px-6 font-medium"
-              >
-                Note Categories
-              </TabsTrigger>
-              <TabsTrigger 
                 value="system-health" 
                 className="h-12 rounded-none border-b-2 border-transparent data-[state=active]:border-cvsite-teal data-[state=active]:bg-transparent data-[state=active]:shadow-none px-6 font-medium"
               >
@@ -68,22 +45,6 @@ const SystemConfigurationSettings: React.FC = () => {
               <ScrollArea className="h-full">
                 <div className="p-6">
                   <SbuSettings />
-                </div>
-              </ScrollArea>
-            </TabsContent>
-            
-            <TabsContent value="hr-contacts" className="mt-0 h-full">
-              <ScrollArea className="h-full">
-                <div className="p-6">
-                  <HrContactSettings />
-                </div>
-              </ScrollArea>
-            </TabsContent>
-            
-            <TabsContent value="note-categories" className="mt-0 h-full">
-              <ScrollArea className="h-full">
-                <div className="p-6">
-                  <NoteCategorySettings />
                 </div>
               </ScrollArea>
             </TabsContent>

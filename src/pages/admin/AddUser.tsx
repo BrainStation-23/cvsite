@@ -1,7 +1,6 @@
 
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import DashboardLayout from '@/components/Layout/DashboardLayout';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
@@ -17,7 +16,7 @@ const AddUser: React.FC = () => {
     setIsLoading(true);
 
     try {
-      const { data, error } = await supabase.functions.invoke('create-user', {
+      const { error } = await supabase.functions.invoke('create-user', {
         body: {
           email: formData.email,
           password: formData.password,
@@ -40,7 +39,7 @@ const AddUser: React.FC = () => {
         description: `${formData.firstName} ${formData.lastName} has been added as ${formData.role}.`,
       });
 
-      navigate('/admin/users');
+      navigate('/users');
     } catch (error) {
       console.error('Error creating user:', error);
       toast({
@@ -56,22 +55,6 @@ const AddUser: React.FC = () => {
   return (
     <div>
       <div className="space-y-6">
-        <div className="flex items-center gap-4">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => navigate('/admin/users')}
-            className="flex items-center gap-2"
-          >
-            <ArrowLeft size={16} />
-            Back to Users
-          </Button>
-          <div>
-            <h1 className="text-2xl font-semibold text-cvsite-navy dark:text-white">Add New User</h1>
-            <p className="text-gray-600 dark:text-gray-400">Create a new user account</p>
-          </div>
-        </div>
-
         <UserForm
           onSubmit={handleSubmit}
           isLoading={isLoading}

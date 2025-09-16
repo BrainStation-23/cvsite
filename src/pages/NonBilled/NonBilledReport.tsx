@@ -1,15 +1,15 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { RefreshCw, Download } from 'lucide-react';
-import { BenchFilters } from '@/components/bench/BenchFilters';
-import { BenchTable } from '@/components/bench/BenchTable';
-import { BenchPagination } from '@/components/bench/BenchPagination';
-import { useBenchData } from '@/hooks/use-bench-data';
-import { useBenchExport } from '@/hooks/use-bench-export';  
-export const BenchReport: React.FC = () => {
+import { NonBilledFilters } from '@/components/NonBilled/NonBilled';
+import { NonBilledTable } from '@/components/NonBilled/NonBilledTable';
+import { NonBilledPagination } from '@/components/NonBilled/NonBilledPagination';
+import { useNonBilledData } from '@/hooks/use-non-billed-data';
+import { useNonBilledExport } from '@/hooks/use-non-billed-export';  
+export const NonBilledReport: React.FC = () => {
   const {
     // Data
-    benchRecords,
+    nonBilledRecords,
     pagination,
     isLoading,
     error,
@@ -37,10 +37,10 @@ export const BenchReport: React.FC = () => {
     setPerPage,
     
     // Actions
-    syncBench,
+    syncNonBilled,
     isSyncing,
-  } = useBenchData();
-  const { exportBench, isExporting } = useBenchExport();
+  } = useNonBilledData();
+  const { exportNonBilled, isExporting } = useNonBilledExport();
   const handleSort = (field: string) => {
     if (sortBy === field) {
       setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
@@ -55,12 +55,12 @@ export const BenchReport: React.FC = () => {
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="text-2xl font-bold tracking-tight">Bench Report</h2>
-            <p className="text-muted-foreground">View and analyze bench utilization and resources</p>
+            <h2 className="text-2xl font-bold tracking-tight">Non-Billed Report</h2>
+            <p className="text-muted-foreground">View and analyze non-billed resources</p>
           </div>
         </div>
         <div className="text-center py-8">
-          <p className="text-destructive">Error loading bench data: {error.message}</p>
+          <p className="text-destructive">Error loading non-billed data: {error.message}</p>
           <Button onClick={() => refetch()} className="mt-4">
             <RefreshCw className="mr-2 h-4 w-4" />
             Retry
@@ -75,8 +75,8 @@ export const BenchReport: React.FC = () => {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold tracking-tight">Bench Report</h2>
-          <p className="text-muted-foreground">View and analyze bench utilization and resources</p>
+          <h2 className="text-2xl font-bold tracking-tight">Non-Billed Report</h2>
+          <p className="text-muted-foreground">View and analyze non-billed resources</p>
         </div>
         <div className="flex items-center gap-2">
           <Button
@@ -89,18 +89,18 @@ export const BenchReport: React.FC = () => {
             Refresh
           </Button>
           <Button
-            onClick={() => syncBench()}
+            onClick={() => syncNonBilled()}
             disabled={isSyncing}
             size="sm"
           >
             <RefreshCw className={`mr-2 h-4 w-4 ${isSyncing ? 'animate-spin' : ''}`} />
-            {isSyncing ? 'Syncing...' : 'Sync Bench Now'}
+            {isSyncing ? 'Syncing...' : 'Sync Non-Billed Now'}
           </Button>
           <Button
             variant="outline"
             size="sm"
-            disabled={isLoading || benchRecords.length === 0}
-            onClick={() => exportBench()}
+            disabled={isLoading || nonBilledRecords.length === 0}
+            onClick={() => exportNonBilled()}
           >
             <Download className="mr-2 h-4 w-4" />
             Export CSV
@@ -109,7 +109,7 @@ export const BenchReport: React.FC = () => {
       </div>
 
       {/* Filters */}
-      <BenchFilters
+      <NonBilledFilters
         searchQuery={searchQuery}
         setSearchQuery={setSearchQuery}
         selectedSbus={selectedSbus}
@@ -122,8 +122,8 @@ export const BenchReport: React.FC = () => {
       />
 
       {/* Table */}
-      <BenchTable
-        benchRecords={benchRecords}
+      <NonBilledTable
+        nonBilledRecords={nonBilledRecords}
         isLoading={isLoading}
         sortBy={sortBy}
         sortOrder={sortOrder}
@@ -132,7 +132,7 @@ export const BenchReport: React.FC = () => {
 
       {/* Pagination */}
       {pagination && (
-        <BenchPagination
+        <NonBilledPagination
           pagination={pagination}
           currentPage={currentPage}
           perPage={perPage}
@@ -144,4 +144,4 @@ export const BenchReport: React.FC = () => {
   );
 };
 
-export default BenchReport;
+export default NonBilledReport;

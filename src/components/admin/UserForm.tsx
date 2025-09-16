@@ -52,11 +52,7 @@ const UserForm: React.FC<UserFormProps> = ({
   title,
   description
 }) => {
-  console.log('=== UserForm Debug ===');
-  console.log('Initial data received:', initialData);
-  console.log('Manager ID from initial data:', initialData.managerId);
-  console.log('Expertise ID from initial data:', initialData.expertiseId);
-  console.log('Resource Type ID from initial data:', initialData.resourceTypeId);
+
 
   const [formData, setFormData] = useState<UserFormData>({
     email: initialData.email || '',
@@ -78,17 +74,10 @@ const UserForm: React.FC<UserFormProps> = ({
     hasOverhead: initialData.hasOverhead ?? true
   });
 
-  console.log('Form data state after initialization:', formData);
-  console.log('Manager ID in form state:', formData.managerId);
-  console.log('Expertise ID in form state:', formData.expertiseId);
-  console.log('Resource Type ID in form state:', formData.resourceTypeId);
 
   const handleInputChange = (field: keyof UserFormData, value: string | boolean | null) => {
-    console.log(`=== UserForm Field Change ===`);
-    console.log(`Field: ${field}, New Value:`, value);
     setFormData(prev => {
       const newData = { ...prev, [field]: value };
-      console.log('Updated form data:', newData);
       return newData;
     });
   };

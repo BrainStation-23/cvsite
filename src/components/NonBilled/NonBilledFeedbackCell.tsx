@@ -1,17 +1,17 @@
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { MessageSquare, Edit3 } from 'lucide-react';
-import { BenchFeedbackDialog } from './BenchFeedbackDialog';
+import { NonBilledFeedbackDialog } from './NonBilledFeedbackDialog';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
-interface BenchFeedbackCellProps {
+interface NonBilledFeedbackCellProps {
   employeeId: string;
   employeeName: string;
   feedback: string | null;
   onUpdate: (employeeId: string, feedback: string) => Promise<void>;
 }
 
-export const BenchFeedbackCell: React.FC<BenchFeedbackCellProps> = ({
+export const NonBilledFeedbackCell: React.FC<NonBilledFeedbackCellProps> = ({
   employeeId,
   employeeName,
   feedback,
@@ -61,7 +61,7 @@ export const BenchFeedbackCell: React.FC<BenchFeedbackCellProps> = ({
         </Button>
       </div>
 
-      <BenchFeedbackDialog
+      <NonBilledFeedbackDialog
         isOpen={isDialogOpen}
         onClose={() => setIsDialogOpen(false)}
         employeeName={employeeName}

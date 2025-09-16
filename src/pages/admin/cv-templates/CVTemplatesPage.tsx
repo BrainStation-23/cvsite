@@ -1,7 +1,6 @@
 
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import DashboardLayout from '@/components/Layout/DashboardLayout';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
@@ -38,7 +37,7 @@ const CVTemplatesPage: React.FC = () => {
   };
 
   const handleEdit = (template: CVTemplate) => {
-    navigate(`/admin/cv-templates/${template.id}/edit`);
+    navigate(`/cv-database/cv-templates/${template.id}/edit`);
   };
 
   const handleDelete = (template: CVTemplate) => {
@@ -56,7 +55,7 @@ const CVTemplatesPage: React.FC = () => {
   };
 
   const handlePreview = (template: CVTemplate) => {
-    navigate(`/admin/cv-templates/${template.id}`);
+    navigate(`/cv-database/cv-templates/${template.id}`);
   };
 
   const handleToggleEnabled = (template: CVTemplate) => {
