@@ -144,14 +144,31 @@ export function NonBilledAnalyticsDashboard() {
         </TabsList>
 
         <TabsContent value="overview" className="space-y-6">
+          {/* Toggle button above Experience Distribution */}
+          <div className="flex items-center justify-between mb-2">
+            <span className="font-semibold text-lg">Experience Distribution</span>
+            <Button
+              variant={benchFilter ? "default" : "outline"}
+              size="sm"
+              onClick={() => setBenchFilter(prev => prev ? null : true)}
+            >
+              {benchFilter ? "Showing Bench Only" : "Show Bench Data"}
+            </Button>
+          </div>
+
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Experience Distribution */}
-            {overviewQuery.data && (
-              <ExperienceDistributionChart
-                data={{...overviewQuery.data.experience_distribution, total_count: overviewQuery.data.overview.total_non_billed_resources_count}}
-                isLoading={overviewQuery.isLoading}
-              />
-            )}
+            <div>
+              {overviewQuery.data && (
+                <ExperienceDistributionChart
+                  data={{
+                    ...overviewQuery.data.experience_distribution,
+                    total_count: overviewQuery.data.overview.total_non_billed_resources_count
+                  }}
+                  isLoading={overviewQuery.isLoading}
+                />
+              )}
+            </div>
 
             {/* SBU Analysis Preview */}
             {sbuQuery.data && (
@@ -159,7 +176,7 @@ export function NonBilledAnalyticsDashboard() {
                 data={sbuQuery.data}
                 isLoading={sbuQuery.isLoading}
                 dimension="sbu"
-                title="Non Billed Analysis by SBU (Preview)"
+                title={`Non Billed Analysis by SBU${benchFilter ? " (Bench Only)" : ""}`}
               />
             )}
             
@@ -169,7 +186,7 @@ export function NonBilledAnalyticsDashboard() {
                 data={expertiseQuery.data}
                 isLoading={expertiseQuery.isLoading}
                 dimension="expertise"
-                title="Non Billed Analysis by Expertise"
+                title={`Non Billed Analysis by Expertise${benchFilter ? " (Bench Only)" : ""}`}
               />
             )}
 
@@ -179,7 +196,7 @@ export function NonBilledAnalyticsDashboard() {
                 data={billTypeQuery.data}
                 isLoading={billTypeQuery.isLoading}
                 dimension="bill_type"
-                title="Non Billed Analysis by Bill Type"
+                title={`Non Billed Analysis by Bill Type${benchFilter ? " (Bench Only)" : ""}`}
               />
             )}
           </div>
