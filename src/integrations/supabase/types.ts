@@ -2051,7 +2051,11 @@ export type Database = {
           sbu_filter?: string[]
           start_date_filter?: string
         }
-        Returns: Json
+        Returns: {
+          experience_distribution: Json
+          overview: Json
+          recent_trends: Json
+        }[]
       }
       get_non_billed_resources_risk_analytics: {
         Args: { bench_filter?: boolean; risk_threshold_days?: number }
@@ -2063,6 +2067,10 @@ export type Database = {
           lookback_days?: number
           period_type?: string
         }
+        Returns: Json
+      }
+      get_non_billed_sync_cron_config: {
+        Args: Record<PropertyKey, never>
         Returns: Json
       }
       get_pip_profile_details: {
@@ -2362,6 +2370,10 @@ export type Database = {
           sort_by?: string
           sort_order?: string
         }
+        Returns: Json
+      }
+      manage_non_billed_sync_cron: {
+        Args: { p_enabled: boolean; p_schedule: string }
         Returns: Json
       }
       manage_weekly_score_card_cron: {

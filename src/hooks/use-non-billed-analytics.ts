@@ -8,16 +8,15 @@ interface NonBilledOverviewData {
     avg_non_billed_resources_duration_days: number;
     max_non_billed_resources_duration_days: number;
     min_non_billed_resources_duration_days: number;
-    long_term_non_billed_resources_count: number;
-    critical_non_billed_resources_count: number;
     avg_experience_years: number;
+    // New fields for initial and critical counts (all non-billed)
+    non_billed_initial_count: number;
+    non_billed_critical_count: number;
     // Bench specific fields
     total_bench_count: number;
     avg_bench_duration_days: number;
     bench_initial_count: number;
     bench_critical_count: number;
-    non_bench_initial_count: number;
-    non_bench_critical_count: number;
   };
   experience_distribution: {
     junior: number;
@@ -108,7 +107,16 @@ export function useNonBilledOverview(filters: AnalyticsFilters = {}) {
       });
 
       if (error) throw error;
-      return data as unknown as NonBilledOverviewData;
+      
+      // The RPC returns an array with one row containing the structured data
+      const result = data?.[0];
+      if (!result) throw new Error('No data returned from RPC function');
+      
+      return {
+        overview: result.overview,
+        experience_distribution: result.experience_distribution,
+        recent_trends: result.recent_trends,
+      } as NonBilledOverviewData;
     },
   });
 }

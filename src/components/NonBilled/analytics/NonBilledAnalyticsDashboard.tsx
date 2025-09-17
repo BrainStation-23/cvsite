@@ -1,9 +1,10 @@
 import { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Switch } from '@/components/ui/switch';
+import { Label } from '@/components/ui/label';
 import { DateRangePickerWithPresets } from '@/components/statistics/DateRangePickerWithPresets';
 import { Button } from '@/components/ui/button';
-import { RefreshCw, Download, Calendar, BarChart3, AlertTriangle, TrendingUp } from 'lucide-react';
+import { RefreshCw, Download, BarChart3, AlertTriangle, TrendingUp } from 'lucide-react';
 
 import { 
   useNonBilledOverview, 
@@ -67,10 +68,6 @@ export function NonBilledAnalyticsDashboard() {
     trendsQuery.refetch();
   };
 
-  const handleExport = () => {
-    // TODO: Implement export functionality
-    console.log('Export analytics data');
-  };
 
   return (
     <div className="space-y-6 p-6">
@@ -83,7 +80,7 @@ export function NonBilledAnalyticsDashboard() {
           </p>
         </div>
         
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-4">
           <DateRangePickerWithPresets
             startDate={startDate}
             endDate={endDate}
@@ -93,28 +90,17 @@ export function NonBilledAnalyticsDashboard() {
             }}
           />
           
-          <Select value={benchFilter === null ? 'all' : benchFilter ? 'bench' : 'non-bench'} onValueChange={(value) => {
-            setBenchFilter(value === 'all' ? null : value === 'bench');
-          }}>
-            <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Filter by Type" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Resources</SelectItem>
-              <SelectItem value="bench">Bench Only</SelectItem>
-              <SelectItem value="non-bench">Non-Bench Only</SelectItem>
-            </SelectContent>
-          </Select>
-          
-          <Button variant="outline" size="sm" onClick={handleRefresh} disabled={isLoading}>
-            <RefreshCw className={`h-4 w-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
-            Refresh
-          </Button>
-          
-          <Button variant="outline" size="sm" onClick={handleExport}>
-            <Download className="h-4 w-4 mr-2" />
-            Export
-          </Button>
+          <div className="flex items-center gap-2 px-3 py-2 rounded-md border bg-background">
+            <Label htmlFor="bench-toggle" className="text-sm font-medium">
+              {benchFilter ? 'Bench Only' : 'All Resources'}
+            </Label>
+            <Switch
+              id="bench-toggle"
+              checked={benchFilter === true}
+              onCheckedChange={(checked) => setBenchFilter(checked ? true : null)}
+              className="data-[state=checked]:bg-primary"
+            />
+          </div>
         </div>
       </div>
 
@@ -122,7 +108,8 @@ export function NonBilledAnalyticsDashboard() {
       {overviewQuery.data && (
         <OverviewCards 
           data={overviewQuery.data} 
-          isLoading={overviewQuery.isLoading} 
+          isLoading={overviewQuery.isLoading}
+          benchFilter={benchFilter}
         />
       )}
 
@@ -144,16 +131,11 @@ export function NonBilledAnalyticsDashboard() {
         </TabsList>
 
         <TabsContent value="overview" className="space-y-6">
-          {/* Toggle button above Experience Distribution */}
-          <div className="flex items-center justify-between mb-2">
-            <span className="font-semibold text-lg">Experience Distribution</span>
-            <Button
-              variant={benchFilter ? "default" : "outline"}
-              size="sm"
-              onClick={() => setBenchFilter(prev => prev ? null : true)}
-            >
-              {benchFilter ? "Showing Bench Only" : "Show Bench Data"}
-            </Button>
+          <div className="mb-4">
+            <h2 className="text-xl font-semibold">Experience Distribution</h2>
+            <p className="text-sm text-muted-foreground">
+              {benchFilter ? 'Showing bench resources only' : 'Showing all non-billed resources'}
+            </p>
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
