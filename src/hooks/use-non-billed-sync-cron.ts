@@ -25,7 +25,7 @@ export const useNonBilledSyncCron = () => {
     queryKey: ['non-billed-sync-cron-config'],
     queryFn: async () => {
       console.log('Fetching non-billed sync cron config...');
-      const { data, error } = await supabase.rpc('get_non_billed_sync_cron_config' as any);
+      const { data, error } = await supabase.rpc('get_non_billed_sync_cron_config');
       
       if (error) {
         console.error('Error fetching cron config:', error);
