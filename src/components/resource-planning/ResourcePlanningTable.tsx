@@ -2,8 +2,6 @@
 import React, { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { PanelRightClose, PanelRightOpen } from 'lucide-react';
 import { ResourcePlanningFilters } from './ResourcePlanningFilters';
 import { AdvancedResourceFilters } from './AdvancedResourceFilters';
 import { PlannedResourcesTab } from './PlannedResourcesTab';
@@ -130,28 +128,6 @@ export const ResourcePlanningTable: React.FC = () => {
         )}
       </ResourcePlanningFilters>
 
-      {/* Header with toggle button */}
-      <div className="flex justify-between items-center">
-        <div></div>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => setShowCreateForm(!showCreateForm)}
-          className="flex items-center gap-2"
-        >
-          {showCreateForm ? (
-            <>
-              <PanelRightClose className="h-4 w-4" />
-              Hide Create Form
-            </>
-          ) : (
-            <>
-              <PanelRightOpen className="h-4 w-4" />
-              Show Create Form
-            </>
-          )}
-        </Button>
-      </div>
 
       {/* Main Content */}
       <div className={`grid gap-6 ${showCreateForm ? 'grid-cols-1 lg:grid-cols-3' : 'grid-cols-1'}`}>
