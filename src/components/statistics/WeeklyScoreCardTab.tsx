@@ -6,7 +6,6 @@ import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 import { CalendarIcon, RefreshCw, TrendingUp, Users, BarChart3, Target, Trash2 } from 'lucide-react';
 import { useWeeklyScoreCard, useCalculateWeeklyScoreCard, useDeleteWeeklyScoreCard } from '@/hooks/use-weekly-score-card';
-import { useQueryClient } from '@tanstack/react-query';
 import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
 import DatePicker from '@/components/admin/user/DatePicker';
@@ -27,7 +26,6 @@ export const WeeklyScoreCardTab: React.FC = () => {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [selectedScoreCard, setSelectedScoreCard] = useState<{ id: string; timestamp: string } | null>(null);
   const { toast } = useToast();
-  const queryClient = useQueryClient();
 
   const { data: scoreCards, isLoading, error } = useWeeklyScoreCard({
     startDate: startDate || undefined,
@@ -185,10 +183,10 @@ export const WeeklyScoreCardTab: React.FC = () => {
                     <div className="flex items-center justify-between">
                       <div>
                         <CardTitle className="text-lg font-bold text-foreground">
-                          {format(new Date(scoreCard.timestamp), 'dd MMM')}
+                          {format(new Date(scoreCard.created_at), 'dd MMM')}
                         </CardTitle>
                         <p className="text-sm text-muted-foreground">
-                          {format(new Date(scoreCard.timestamp), 'EEEE, yyyy')}
+                          {format(new Date(scoreCard.created_at), 'EEEE, yyyy')}
                         </p>
                       </div>
                       <div className="flex items-center gap-2">
@@ -199,7 +197,7 @@ export const WeeklyScoreCardTab: React.FC = () => {
                         <Button
                           variant="ghost"
                           size="icon"
-                          onClick={() => handleDeleteClick({ id: scoreCard.id, timestamp: scoreCard.timestamp })}
+                          onClick={() => handleDeleteClick({ id: scoreCard.id, timestamp: scoreCard.created_at })}
                           className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
                           title="Delete this score card"
                         >

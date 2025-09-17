@@ -10,6 +10,7 @@ interface ExperienceDistributionChartProps {
     junior: number;
     mid: number;
     senior: number;
+    lead: number;
     unknown: number;
     total_count: number;
   };
@@ -21,6 +22,7 @@ const EXPERIENCE_COLORS = {
   junior: 'hsl(var(--chart-2))', // Green for junior
   mid: 'hsl(var(--chart-1))', // Blue for mid
   senior: 'hsl(var(--chart-3))', // Purple for senior
+  lead: 'hsl(var(--chart-4))', // Pink for unknown
   unknown: 'hsl(var(--chart-4))', // Pink for unknown
 };
 
@@ -48,6 +50,7 @@ export function ExperienceDistributionChart({ data, isLoading, title }: Experien
     { name: 'Junior', value: data.junior, color: EXPERIENCE_COLORS.junior },
     { name: 'Mid', value: data.mid, color: EXPERIENCE_COLORS.mid },
     { name: 'Senior', value: data.senior, color: EXPERIENCE_COLORS.senior },
+    { name: 'Lead', value: data.lead, color: EXPERIENCE_COLORS.lead },
     { name: 'Unknown', value: data.unknown, color: EXPERIENCE_COLORS.unknown },
   ].filter(item => item.value > 0);
 
@@ -55,6 +58,7 @@ export function ExperienceDistributionChart({ data, isLoading, title }: Experien
     { level: 'Junior', count: data.junior, percentage: total ? Math.round((data.junior / total) * 100) : 0, color: EXPERIENCE_COLORS.junior },
     { level: 'Mid', count: data.mid, percentage: total ? Math.round((data.mid / total) * 100) : 0, color: EXPERIENCE_COLORS.mid },
     { level: 'Senior', count: data.senior, percentage: total ? Math.round((data.senior / total) * 100) : 0, color: EXPERIENCE_COLORS.senior },
+    { level: 'Lead', count: data.lead, percentage: total ? Math.round((data.lead / total) * 100) : 0, color: EXPERIENCE_COLORS.lead },
     { level: 'Unknown', count: data.unknown, percentage: total ? Math.round((data.unknown / total) * 100) : 0, color: EXPERIENCE_COLORS.unknown },
   ].filter(item => item.count > 0);
 
