@@ -37,13 +37,14 @@ interface OverviewData {
 interface OverviewCardsProps {
   data: OverviewData;
   isLoading: boolean;
+  benchFilter: boolean | null;
 }
 
-export function OverviewCards({ data, isLoading }: OverviewCardsProps) {
+export function OverviewCards({ data, isLoading, benchFilter }: OverviewCardsProps) {
   if (isLoading) {
     return (
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-8 gap-4">
-        {Array.from({ length: 8 }).map((_, i) => (
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        {Array.from({ length: 4 }).map((_, i) => (
           <Card key={i} className="animate-pulse">
             <CardContent className="p-6">
               <div className="h-20 bg-muted rounded"></div>
@@ -56,24 +57,19 @@ export function OverviewCards({ data, isLoading }: OverviewCardsProps) {
 
   const cards = [
     {
-      title: 'Total Non Billed',
-      value: data.overview.total_non_billed_resources_count,
+      title: benchFilter ? 'Total Bench' : 'Total Non Billed',
+      value: benchFilter ? data.overview.total_bench_count : data.overview.total_non_billed_resources_count,
       icon: Users,
-      description: 'Current non-billed resources',
+      description: benchFilter ? 'Resources on bench' : 'Current non-billed resources',
       variant: 'default' as const,
     },
     {
-      title: 'Total Bench',
-      value: data.overview.total_bench_count,
-      icon: Building2,
-      description: 'Resources on bench',
-      variant: data.overview.total_bench_count > 0 ? 'secondary' as const : 'default' as const,
-    },
-    {
-      title: 'Avg Bench Duration',
-      value: `${data.overview.avg_bench_duration_days} days`,
+      title: 'Avg Duration',
+      value: benchFilter 
+        ? `${data.overview.avg_bench_duration_days} days`
+        : `${data.overview.avg_non_billed_resources_duration_days} days`,
       icon: Timer,
-      description: 'Average bench duration',
+      description: benchFilter ? 'Average bench duration' : 'Average non-billed duration',
       variant: 'default' as const,
     },
     {
@@ -93,25 +89,25 @@ export function OverviewCards({ data, isLoading }: OverviewCardsProps) {
   ];
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-8 gap-4 animate-fade-in">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 animate-fade-in">
       {cards.map((card) => (
         <Card key={card.title} className="hover-scale">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
+            <CardTitle className="text-sm font-medium text-muted-foreground line-clamp-2">
               {card.title}
             </CardTitle>
-            <card.icon className="h-4 w-4 text-muted-foreground" />
+            <card.icon className="h-4 w-4 text-muted-foreground flex-shrink-0" />
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-foreground">
+          <CardContent className="pt-0">
+            <div className="text-2xl font-bold text-foreground mb-2">
               {typeof card.value === 'number' ? card.value.toLocaleString() : card.value}
             </div>
-            <div className="flex items-center justify-between mt-2">
-              <p className="text-xs text-muted-foreground">
+            <div className="flex flex-col gap-2">
+              <p className="text-xs text-muted-foreground line-clamp-2">
                 {card.description}
               </p>
               {card.variant !== 'default' && (
-                <Badge variant={card.variant} className="text-xs">
+                <Badge variant={card.variant} className="text-xs w-fit">
                   {card.variant === 'destructive' ? 'Alert' : 'Recent'}
                 </Badge>
               )}
