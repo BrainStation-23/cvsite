@@ -2069,6 +2069,10 @@ export type Database = {
         }
         Returns: Json
       }
+      get_non_billed_sync_cron_config: {
+        Args: Record<PropertyKey, never>
+        Returns: Json
+      }
       get_pip_profile_details: {
         Args: { input_pip_id: string }
         Returns: Json
@@ -2366,6 +2370,10 @@ export type Database = {
           sort_by?: string
           sort_order?: string
         }
+        Returns: Json
+      }
+      manage_non_billed_sync_cron: {
+        Args: { p_enabled: boolean; p_schedule: string }
         Returns: Json
       }
       manage_weekly_score_card_cron: {
