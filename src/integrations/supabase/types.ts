@@ -2051,7 +2051,11 @@ export type Database = {
           sbu_filter?: string[]
           start_date_filter?: string
         }
-        Returns: Json
+        Returns: {
+          experience_distribution: Json
+          overview: Json
+          recent_trends: Json
+        }[]
       }
       get_non_billed_resources_risk_analytics: {
         Args: { bench_filter?: boolean; risk_threshold_days?: number }

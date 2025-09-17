@@ -17,16 +17,15 @@ interface OverviewData {
     avg_non_billed_resources_duration_days: number;
     max_non_billed_resources_duration_days: number;
     min_non_billed_resources_duration_days: number;
-    long_term_non_billed_resources_count: number;
-    critical_non_billed_resources_count: number;
     avg_experience_years: number;
+    // New fields for initial and critical counts (all non-billed)
+    non_billed_initial_count: number;
+    non_billed_critical_count: number;
     // Bench specific fields
     total_bench_count: number;
     avg_bench_duration_days: number;
     bench_initial_count: number;
     bench_critical_count: number;
-    non_bench_initial_count: number;
-    non_bench_critical_count: number;
   };
   recent_trends: {
     new_non_billed_resources_last_7_days: number;
@@ -73,18 +72,22 @@ export function OverviewCards({ data, isLoading, benchFilter }: OverviewCardsPro
       variant: 'default' as const,
     },
     {
-      title: 'Long Term (>30d)',
-      value: data.overview.long_term_non_billed_resources_count,
+      title: 'Initial (<30d)',
+      value: benchFilter 
+        ? data.overview.bench_initial_count 
+        : data.overview.non_billed_initial_count,
       icon: Calendar,
-      description: 'Resources >30 days',
-      variant: data.overview.long_term_non_billed_resources_count > 0 ? 'destructive' as const : 'default' as const,
+      description: benchFilter ? 'Bench resources <30 days' : 'Non-billed resources <30 days',
+      variant: 'default' as const,
     },
     {
       title: 'Critical Risk (>60d)',
-      value: data.overview.critical_non_billed_resources_count,
+      value: benchFilter 
+        ? data.overview.bench_critical_count 
+        : data.overview.non_billed_critical_count,
       icon: AlertTriangle,
-      description: 'Resources >60 days',
-      variant: data.overview.critical_non_billed_resources_count > 0 ? 'destructive' as const : 'default' as const,
+      description: benchFilter ? 'Bench resources >60 days' : 'Non-billed resources >60 days',
+      variant: (benchFilter ? data.overview.bench_critical_count : data.overview.non_billed_critical_count) > 0 ? 'destructive' as const : 'default' as const,
     }
   ];
 
