@@ -80,21 +80,12 @@ export const NonBilledReport: React.FC = () => {
         </div>
         <div className="flex items-center gap-2">
           <Button
-            variant="outline"
-            size="sm"
-            onClick={() => refetch()}
-            disabled={isLoading}
-          >
-            <RefreshCw className={`mr-2 h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
-            Refresh
-          </Button>
-          <Button
             onClick={() => syncNonBilled()}
             disabled={isSyncing}
             size="sm"
           >
             <RefreshCw className={`mr-2 h-4 w-4 ${isSyncing ? 'animate-spin' : ''}`} />
-            {isSyncing ? 'Syncing...' : 'Sync Non-Billed Now'}
+            {isSyncing ? 'Syncing...' : 'Sync Now'}
           </Button>
           <Button
             variant="outline"

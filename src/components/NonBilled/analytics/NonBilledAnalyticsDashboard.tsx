@@ -4,7 +4,7 @@ import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { DateRangePickerWithPresets } from '@/components/statistics/DateRangePickerWithPresets';
 import { Button } from '@/components/ui/button';
-import { RefreshCw, Download, Calendar, BarChart3, AlertTriangle, TrendingUp } from 'lucide-react';
+import { RefreshCw, Download, BarChart3, AlertTriangle, TrendingUp } from 'lucide-react';
 
 import { 
   useNonBilledOverview, 
@@ -68,10 +68,6 @@ export function NonBilledAnalyticsDashboard() {
     trendsQuery.refetch();
   };
 
-  const handleExport = () => {
-    // TODO: Implement export functionality
-    console.log('Export analytics data');
-  };
 
   return (
     <div className="space-y-6 p-6">
@@ -105,16 +101,6 @@ export function NonBilledAnalyticsDashboard() {
               className="data-[state=checked]:bg-primary"
             />
           </div>
-          
-          <Button variant="outline" size="sm" onClick={handleRefresh} disabled={isLoading}>
-            <RefreshCw className={`h-4 w-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
-            Refresh
-          </Button>
-          
-          <Button variant="outline" size="sm" onClick={handleExport}>
-            <Download className="h-4 w-4 mr-2" />
-            Export
-          </Button>
         </div>
       </div>
 
