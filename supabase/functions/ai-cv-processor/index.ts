@@ -169,7 +169,7 @@ serve(async (req) => {
             required: ["name", "proficiency"],
             properties: {
               name: { type: "STRING" },
-              proficiency: { type: "NUMBER" }
+              proficiency: { type: "integer" }
             }
           }
         },
@@ -180,7 +180,7 @@ serve(async (req) => {
             required: ["name", "proficiency"],
             properties: {
               name: { type: "STRING" },
-              proficiency: { type: "NUMBER" }
+              proficiency: { type: "integer" }
             }
           }
         },
