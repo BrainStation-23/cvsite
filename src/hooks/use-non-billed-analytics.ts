@@ -23,6 +23,7 @@ interface NonBilledOverviewData {
     junior: number;
     mid: number;
     senior: number;
+    lead: number;
     unknown: number;
     total_count: number;
   };
