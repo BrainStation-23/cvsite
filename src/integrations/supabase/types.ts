@@ -2069,10 +2069,6 @@ export type Database = {
         }
         Returns: Json
       }
-      get_non_billed_sync_cron_config: {
-        Args: Record<PropertyKey, never>
-        Returns: Json
-      }
       get_pip_profile_details: {
         Args: { input_pip_id: string }
         Returns: Json
