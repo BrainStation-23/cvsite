@@ -7,6 +7,20 @@ import { Badge } from '@/components/ui/badge';
 import { CalendarIcon, RefreshCw, TrendingUp, Users, BarChart3, Target, Trash2 } from 'lucide-react';
 import { useWeeklyScoreCard, useCalculateWeeklyScoreCard, useDeleteWeeklyScoreCard } from '@/hooks/use-weekly-score-card';
 import { useToast } from '@/hooks/use-toast';
+
+// Response interface for calculate weekly score card
+interface CalculateWeeklyScoreCardResponse {
+  status: 'success' | 'error';
+  message: string;
+  data?: {
+    timestamp: string;
+    total_resources: number;
+    utilization_rate: number;
+    total_billed_resources: number;
+    total_billable_resources: number;
+    total_non_billed_resources: number;
+  };
+}
 import { format } from 'date-fns';
 import DatePicker from '@/components/admin/user/DatePicker';
 import {
@@ -38,16 +52,22 @@ export const WeeklyScoreCardTab: React.FC = () => {
   const handleCalculateNewCard = async () => {
     try {
       const result = await calculateNewCard();
-      const resultData = result.data as any;
-      if (resultData?.success) {
+      const resultData = result.data as unknown as CalculateWeeklyScoreCardResponse;
+      
+      console.log('Calculate weekly score card result:', resultData);
+      
+      if (resultData?.status === 'success') {
+        const { data } = resultData;
         toast({
           title: 'Success',
-          description: 'New weekly score card calculated successfully',
+          description: data 
+            ? `Calculated for ${data.total_resources} resources with ${Math.round(data.utilization_rate * 100)}% utilization rate`
+            : 'New weekly score card calculated successfully',
         });
       } else {
         toast({
           title: 'Error',
-          description: resultData?.error || 'Failed to calculate weekly score card',
+          description: resultData?.message || 'Failed to calculate weekly score card',
           variant: 'destructive',
         });
       }
