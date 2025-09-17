@@ -54,40 +54,99 @@ export function OverviewCards({ data, isLoading, benchFilter }: OverviewCardsPro
     );
   }
 
+  // Helper function to get filter display name
+  const getFilterDisplayName = () => {
+    if (benchFilter === true) return 'Bench';
+    if (benchFilter === false) return 'Non-Bench';
+    return 'All';
+  };
+
+  // Helper function to get appropriate counts based on filter
+  const getFilteredCounts = () => {
+    if (benchFilter === true) {
+      return {
+        total: data.overview.total_bench_count,
+        avgDuration: data.overview.avg_bench_duration_days,
+        initial: data.overview.bench_initial_count,
+        critical: data.overview.bench_critical_count,
+        filterType: 'bench'
+      };
+    } else if (benchFilter === false) {
+      // Non-bench resources (calculated as total - bench)
+      const nonBenchTotal = data.overview.total_non_billed_resources_count - data.overview.total_bench_count;
+      const nonBenchInitial = data.overview.non_billed_initial_count - data.overview.bench_initial_count;
+      const nonBenchCritical = data.overview.non_billed_critical_count - data.overview.bench_critical_count;
+      const nonBenchAvgDuration = nonBenchTotal > 0 ? data.overview.avg_non_billed_resources_duration_days : 0;
+      
+      return {
+        total: nonBenchTotal,
+        avgDuration: nonBenchAvgDuration,
+        initial: nonBenchInitial,
+        critical: nonBenchCritical,
+        filterType: 'non-bench'
+      };
+    } else {
+      // All resources
+      return {
+        total: data.overview.total_non_billed_resources_count,
+        avgDuration: data.overview.avg_non_billed_resources_duration_days,
+        initial: data.overview.non_billed_initial_count,
+        critical: data.overview.non_billed_critical_count,
+        filterType: 'all'
+      };
+    }
+  };
+
+  const filteredData = getFilteredCounts();
+  const filterName = getFilterDisplayName();
+
+  // Show empty state for non-bench filter if no non-bench resources exist
+  if (benchFilter === false && filteredData.total <= 0) {
+    return (
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <Card className="md:col-span-2 lg:col-span-4">
+          <CardContent className="p-6 text-center">
+            <div className="flex flex-col items-center gap-2">
+              <Users className="h-8 w-8 text-muted-foreground" />
+              <h3 className="text-lg font-semibold">No Non-Bench Resources Found</h3>
+              <p className="text-sm text-muted-foreground">
+                All current non-billed resources appear to be on the bench. Try selecting "All Resources" or "Bench Only" to view data.
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
   const cards = [
     {
-      title: benchFilter ? 'Total Bench' : 'Total Non Billed',
-      value: benchFilter ? data.overview.total_bench_count : data.overview.total_non_billed_resources_count,
+      title: `Total ${filterName}`,
+      value: filteredData.total,
       icon: Users,
-      description: benchFilter ? 'Resources on bench' : 'Current non-billed resources',
+      description: `Current ${filterName.toLowerCase()} resources`,
       variant: 'default' as const,
     },
     {
       title: 'Avg Duration',
-      value: benchFilter 
-        ? `${data.overview.avg_bench_duration_days} days`
-        : `${data.overview.avg_non_billed_resources_duration_days} days`,
+      value: `${Math.round(filteredData.avgDuration)} days`,
       icon: Timer,
-      description: benchFilter ? 'Average bench duration' : 'Average non-billed duration',
+      description: `Average ${filterName.toLowerCase()} duration`,
       variant: 'default' as const,
     },
     {
       title: 'Initial (<30d)',
-      value: benchFilter 
-        ? data.overview.bench_initial_count 
-        : data.overview.non_billed_initial_count,
+      value: filteredData.initial,
       icon: Calendar,
-      description: benchFilter ? 'Bench resources <30 days' : 'Non-billed resources <30 days',
+      description: `${filterName} resources <30 days`,
       variant: 'default' as const,
     },
     {
       title: 'Critical Risk (>60d)',
-      value: benchFilter 
-        ? data.overview.bench_critical_count 
-        : data.overview.non_billed_critical_count,
+      value: filteredData.critical,
       icon: AlertTriangle,
-      description: benchFilter ? 'Bench resources >60 days' : 'Non-billed resources >60 days',
-      variant: (benchFilter ? data.overview.bench_critical_count : data.overview.non_billed_critical_count) > 0 ? 'destructive' as const : 'default' as const,
+      description: `${filterName} resources >60 days`,
+      variant: filteredData.critical > 0 ? 'destructive' as const : 'default' as const,
     }
   ];
 

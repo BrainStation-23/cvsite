@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Switch } from '@/components/ui/switch';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
 import { DateRangePickerWithPresets } from '@/components/statistics/DateRangePickerWithPresets';
 import { Button } from '@/components/ui/button';
@@ -91,15 +91,24 @@ export function NonBilledAnalyticsDashboard() {
           />
           
           <div className="flex items-center gap-2 px-3 py-2 rounded-md border bg-background">
-            <Label htmlFor="bench-toggle" className="text-sm font-medium">
-              {benchFilter ? 'Bench Only' : 'All Resources'}
-            </Label>
-            <Switch
-              id="bench-toggle"
-              checked={benchFilter === true}
-              onCheckedChange={(checked) => setBenchFilter(checked ? true : null)}
-              className="data-[state=checked]:bg-primary"
-            />
+            <Label className="text-sm font-medium">Filter:</Label>
+            <Select
+              value={benchFilter === true ? 'bench' : benchFilter === false ? 'non-bench' : 'all'}
+              onValueChange={(value) => {
+                if (value === 'bench') setBenchFilter(true);
+                else if (value === 'non-bench') setBenchFilter(false);
+                else setBenchFilter(null);
+              }}
+            >
+              <SelectTrigger className="w-40">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Resources</SelectItem>
+                <SelectItem value="bench">Bench Only</SelectItem>
+                <SelectItem value="non-bench">Non-Bench Only</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
         </div>
       </div>
@@ -134,7 +143,9 @@ export function NonBilledAnalyticsDashboard() {
           <div className="mb-4">
             <h2 className="text-xl font-semibold">Experience Distribution</h2>
             <p className="text-sm text-muted-foreground">
-              {benchFilter ? 'Showing bench resources only' : 'Showing all non-billed resources'}
+              {benchFilter === true ? 'Showing bench resources only' : 
+               benchFilter === false ? 'Showing non-bench resources only' : 
+               'Showing all non-billed resources'}
             </p>
           </div>
 
@@ -158,7 +169,10 @@ export function NonBilledAnalyticsDashboard() {
                 data={sbuQuery.data}
                 isLoading={sbuQuery.isLoading}
                 dimension="sbu"
-                title={`Non Billed Analysis by SBU${benchFilter ? " (Bench Only)" : ""}`}
+                title={`Non Billed Analysis by SBU${
+                  benchFilter === true ? " (Bench Only)" : 
+                  benchFilter === false ? " (Non-Bench Only)" : ""
+                }`}
               />
             )}
             
@@ -168,7 +182,10 @@ export function NonBilledAnalyticsDashboard() {
                 data={expertiseQuery.data}
                 isLoading={expertiseQuery.isLoading}
                 dimension="expertise"
-                title={`Non Billed Analysis by Expertise${benchFilter ? " (Bench Only)" : ""}`}
+                title={`Non Billed Analysis by Expertise${
+                  benchFilter === true ? " (Bench Only)" : 
+                  benchFilter === false ? " (Non-Bench Only)" : ""
+                }`}
               />
             )}
 
@@ -178,7 +195,10 @@ export function NonBilledAnalyticsDashboard() {
                 data={billTypeQuery.data}
                 isLoading={billTypeQuery.isLoading}
                 dimension="bill_type"
-                title={`Non Billed Analysis by Bill Type${benchFilter ? " (Bench Only)" : ""}`}
+                title={`Non Billed Analysis by Bill Type${
+                  benchFilter === true ? " (Bench Only)" : 
+                  benchFilter === false ? " (Non-Bench Only)" : ""
+                }`}
               />
             )}
           </div>
