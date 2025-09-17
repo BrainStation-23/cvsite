@@ -1681,7 +1681,6 @@ export type Database = {
           id: string
           jsonb_record: Json
           non_billed_count: number
-          timestamp: string
           updated_at: string
           utilization_rate: number
         }
@@ -1691,7 +1690,6 @@ export type Database = {
           id?: string
           jsonb_record: Json
           non_billed_count?: number
-          timestamp?: string
           updated_at?: string
           utilization_rate?: number
         }
@@ -1701,7 +1699,6 @@ export type Database = {
           id?: string
           jsonb_record?: Json
           non_billed_count?: number
-          timestamp?: string
           updated_at?: string
           utilization_rate?: number
         }

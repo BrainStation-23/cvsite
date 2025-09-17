@@ -4,7 +4,6 @@ import { supabase } from '@/integrations/supabase/client';
 
 export interface WeeklyScoreCard {
   id: string;
-  timestamp: string;
   jsonb_record: {
     non_billed_distribution: Array<{ bill_type_name: string; count: number }>;
     billable_distribution: Array<{ bill_type_name: string; count: number }>;
@@ -32,14 +31,14 @@ export const useWeeklyScoreCard = (options: UseWeeklyScoreCardOptions = {}) => {
       let query = supabase
         .from('weekly_score_card')
         .select('*')
-        .order('timestamp', { ascending: false });
+        .order('created_at', { ascending: false });
 
       // Apply date filters if provided
       if (options.startDate) {
-        query = query.gte('timestamp', options.startDate);
+        query = query.gte('created_at', options.startDate);
       }
       if (options.endDate) {
-        query = query.lte('timestamp', options.endDate);
+        query = query.lte('created_at', options.endDate);
       }
 
       const { data, error } = await query;
