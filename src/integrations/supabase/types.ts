@@ -2381,7 +2381,7 @@ export type Database = {
         Returns: Json
       }
       manage_weekly_validation_cron: {
-        Args: { p_enabled?: boolean; p_schedule?: string }
+        Args: { p_enabled: boolean; p_schedule: string }
         Returns: Json
       }
       reset_weekly_validation: {
