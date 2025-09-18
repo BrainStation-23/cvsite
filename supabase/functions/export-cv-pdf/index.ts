@@ -637,7 +637,8 @@ serve(async (req) => {
   }
 
   try {
-    const { profile_id, template_id } = await req.json();
+    const requestBody: { profile_id: string; template_id: string } = await req.json();
+    const { profile_id, template_id } = requestBody;
 
     if (!profile_id || !template_id) {
       return new Response(
@@ -650,8 +651,8 @@ serve(async (req) => {
     }
 
     // Initialize Supabase client
-    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
-    const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+    const supabaseUrl: string = Deno.env.get('SUPABASE_URL')!;
+    const supabaseKey: string = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
     console.log(`Processing CV export for profile: ${profile_id}, template: ${template_id}`);
@@ -664,20 +665,20 @@ serve(async (req) => {
 
     // Process template
     const processor = new TemplateProcessor({ debugMode: false });
-    const mappedData = mapEmployeeData(employeeData);
-    const processedHTML = processor.processForCV(
+    const mappedData: any = mapEmployeeData(employeeData);
+    const processedHTML: string = processor.processForCV(
       templateData.html_template,
       mappedData,
       templateData
     );
 
     // Generate PDF
-    const pdfBytes = await generatePDFWithPuppeteer(processedHTML);
+    const pdfBytes: Uint8Array = await generatePDFWithPuppeteer(processedHTML);
 
     // Return PDF directly as binary data
-    const filename = `CV-${employeeData.first_name}-${employeeData.last_name}-${templateData.name}.pdf`;
+    const filename: string = `CV-${employeeData.first_name}-${employeeData.last_name}-${templateData.name}.pdf`;
     
-    return new Response(pdfBytes, {
+    return new Response(pdfBytes as Uint8Array, {
       headers: {
         ...corsHeaders,
         'Content-Type': 'application/pdf',
