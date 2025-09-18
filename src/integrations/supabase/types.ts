@@ -1734,6 +1734,7 @@ export type Database = {
           engagement_percentage: number | null
           engagement_start_date: string | null
           expertise: string | null
+          expertise_id: string | null
           first_name: string | null
           full_name: string | null
           id: string | null
@@ -1768,6 +1769,7 @@ export type Database = {
           project_manager_id: string | null
           project_manager_last_name: string | null
           project_name: string | null
+          project_type: string | null
           project_type_name: string | null
           release_date: string | null
           sbu_head_email: string | null
@@ -1784,6 +1786,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "designations"
             referencedColumns: ["name"]
+          },
+          {
+            foreignKeyName: "profiles_expertise_fkey"
+            columns: ["expertise_id"]
+            isOneToOne: false
+            referencedRelation: "expertise_types"
+            referencedColumns: ["id"]
           },
           {
             foreignKeyName: "profiles_manager_fkey"
@@ -1819,6 +1828,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "resource_availability_view"
             referencedColumns: ["profile_id"]
+          },
+          {
+            foreignKeyName: "projects_management_project_type_fkey"
+            columns: ["project_type"]
+            isOneToOne: false
+            referencedRelation: "project_types"
+            referencedColumns: ["id"]
           },
           {
             foreignKeyName: "resource_planning_bill_type_id_fkey"
@@ -2083,6 +2099,7 @@ export type Database = {
           bill_type_filter?: string
           end_date_from?: string
           end_date_to?: string
+          expertise_filter?: string
           items_per_page?: number
           manager_filter?: string
           max_billing_percentage?: number
@@ -2093,6 +2110,7 @@ export type Database = {
           project_bill_type_filter?: string
           project_level_filter?: string
           project_search?: string
+          project_type_filter?: string
           sbu_filter?: string
           search_query?: string
           sort_by?: string
@@ -2107,6 +2125,7 @@ export type Database = {
           bill_type_filter?: string
           end_date_from?: string
           end_date_to?: string
+          expertise_filter?: string
           items_per_page?: number
           manager_filter?: string
           max_billing_percentage?: number
@@ -2117,6 +2136,7 @@ export type Database = {
           project_bill_type_filter?: string
           project_level_filter?: string
           project_search?: string
+          project_type_filter?: string
           sbu_filter?: string
           search_query?: string
           sort_by?: string
@@ -2286,6 +2306,7 @@ export type Database = {
           bill_type_filter?: string
           end_date_from?: string
           end_date_to?: string
+          expertise_filter?: string
           items_per_page?: number
           manager_filter?: string
           max_billing_percentage?: number
@@ -2296,6 +2317,7 @@ export type Database = {
           project_bill_type_filter?: string
           project_level_filter?: string
           project_search?: string
+          project_type_filter?: string
           sbu_filter?: string
           search_query?: string
           sort_by?: string
