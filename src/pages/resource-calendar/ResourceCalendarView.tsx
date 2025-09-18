@@ -37,6 +37,8 @@ interface AdvancedFilters {
   endDateTo: string;
   projectLevelFilter: string | null;
   projectBillTypeFilter: string | null;
+  projectTypeFilter: string | null;
+  expertiseFilter: string | null;
 }
 
 const ResourceCalendarView: React.FC = () => {
@@ -68,6 +70,8 @@ const ResourceCalendarView: React.FC = () => {
     endDateTo: '',
     projectLevelFilter: null,
     projectBillTypeFilter: null,
+    projectTypeFilter: null,
+    expertiseFilter: null,
   });
 
   // Modal states
@@ -133,6 +137,8 @@ const ResourceCalendarView: React.FC = () => {
       endDateTo: '',
       projectLevelFilter: null,
       projectBillTypeFilter: null,
+      projectTypeFilter: null,
+      expertiseFilter: null,
     });
   };
 
