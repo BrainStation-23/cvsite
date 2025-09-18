@@ -4,12 +4,44 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import Papa from 'papaparse';
 
+interface ExportResource {
+  id?: string; // resource_planning.id
+  profile_id?: string;
+  project_id?: string;
+  profile?: {
+    employee_id?: string;
+    first_name?: string;
+    last_name?: string;
+    has_overhead?: boolean;
+  };
+  sbu?: {
+    name?: string;
+  };
+  project?: {
+    project_name?: string;
+    client_name?: string;
+  };
+  manager: {
+    first_name?: string;
+  };
+  bill_type?: {
+    name?: string;
+  };
+  bill_type_id?: string;
+  engagement_percentage?: number;
+  billing_percentage?: number;
+  engagement_start_date?: string;
+  release_date?: string;
+  weekly_validation?: boolean;
+  created_at?: string;
+}
+
 export function usePlannedResourcesExport() {
-  const [isExporting, setIsExporting] = useState(false);
+  const [isExporting, setIsExporting] = useState<boolean>(false);
   const { toast } = useToast();
 
   // Accept selectedItems as an optional parameter
-  const exportPlannedResources = async (selectedItems?: any[]) => {
+  const exportPlannedResources = async (selectedItems?: ExportResource[]): Promise<void> => {
     try {
       setIsExporting(true);
 
@@ -17,6 +49,12 @@ export function usePlannedResourcesExport() {
       if (selectedItems && selectedItems.length > 0) {
         console.log('Selected items for export:', selectedItems);
         const csvData = selectedItems.map(resource => ({
+          // IDs for bulk update (hidden columns)
+          'Resource Planning ID': resource.id || '',
+          'Profile ID': resource.profile_id || '',
+          'Project ID': resource.project_id || '',
+          'Bill Type ID': resource.bill_type_id || '',
+          // Human readable data
           'Employee ID': resource.profile?.employee_id || '',
           'Employee Name': `${resource.profile?.first_name || ''} ${resource.profile?.last_name || ''}`.trim() || '',
           'Overhead': resource.profile?.has_overhead ? 'Yes' : 'No',
@@ -24,13 +62,13 @@ export function usePlannedResourcesExport() {
           'Project Name': resource.project?.project_name || '',
           'Client Name': resource.project?.client_name || '',
           'Manager': resource.manager.first_name || '',
-          'Bill Type': resource.bill_type?.name || resource.bill_type_id || '',
+          'Bill Type': resource.bill_type?.name || '',
           'Engagement %': resource.engagement_percentage || '',
           'Billing %': resource.billing_percentage || '',
-          'Start Date': resource.engagement_start_date || '',
-          'Release Date': resource.release_date || '',
+          'Start Date': resource.engagement_start_date ? resource.engagement_start_date.split('T')[0] : '',
+          'Release Date': resource.release_date ? resource.release_date.split('T')[0] : '',
           'Weekly Validation': resource.weekly_validation ? 'Yes' : 'No',
-          'Created At': resource.created_at ? new Date(resource.created_at).toLocaleDateString() : ''
+          'Created At': resource.created_at ? resource.created_at.split('T')[0] : ''
         }));
 
         const csv = Papa.unparse(csvData);
@@ -125,6 +163,12 @@ export function usePlannedResourcesExport() {
       // Convert the data to CSV format - mapping nested response structure correctly
       const csvData = allResources.map(resource => {
         return {
+          // IDs for bulk update (hidden columns)
+          'Resource Planning ID': resource.id || '',
+          'Profile ID': resource.profile_id || '',
+          'Project ID': resource.project_id || '',
+          'Bill Type ID': resource.bill_type_id || '',
+          // Human readable data
           'Employee ID': resource.profile?.employee_id || '',
           'Employee Name': `${resource.profile?.first_name || ''} ${resource.profile?.last_name || ''}`.trim() || '',
           'Overhead': resource.profile?.has_overhead ? 'Yes' : 'No',
@@ -135,10 +179,10 @@ export function usePlannedResourcesExport() {
           'Bill Type': resource.bill_type?.name || '',
           'Engagement %': resource.engagement_percentage || '',
           'Billing %': resource.billing_percentage || '',
-          'Start Date': resource.engagement_start_date || '',
-          'Release Date': resource.release_date || '',
+          'Start Date': resource.engagement_start_date ? resource.engagement_start_date.split('T')[0] : '',
+          'Release Date': resource.release_date ? resource.release_date.split('T')[0] : '',
           'Weekly Validation': resource.weekly_validation ? 'Yes' : 'No',
-          'Created At': resource.created_at ? new Date(resource.created_at).toLocaleDateString() : ''
+          'Created At': resource.created_at ? resource.created_at.split('T')[0] : ''
         };
       });
       

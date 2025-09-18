@@ -3,6 +3,7 @@ import React from 'react';
 import { ResourcePlanningTable } from '../../components/resource-planning/ResourcePlanningTable';
 import { ResourcePlanningExportButton } from '../../components/resource-planning/ResourcePlanningExportButton';
 import { ResourcePlanningAuditLogsDialog } from '@/components/resource-planning/ResourcePlanningAuditLogsDialog';
+import { BulkResourcePlanningUpdate } from '@/components/resource-planning/BulkResourcePlanningUpdate';
 
 const ResourceCalendarPlanning: React.FC = () => {
 
@@ -16,6 +17,7 @@ const ResourceCalendarPlanning: React.FC = () => {
           </div>
         </div>
         <div className="flex space-x-2">
+          <BulkResourcePlanningUpdate />
           <ResourcePlanningExportButton />
           <ResourcePlanningAuditLogsDialog
             params={{ items_per_page: 100, page_number: 1 }}
