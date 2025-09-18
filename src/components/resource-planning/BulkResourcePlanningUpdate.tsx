@@ -134,7 +134,8 @@ export const BulkResourcePlanningUpdate: React.FC<BulkResourcePlanningUpdateProp
           <DialogHeader>
             <DialogTitle>Bulk Update Resource Planning</DialogTitle>
             <DialogDescription>
-              Upload a CSV file to update existing resource planning records. Make sure your CSV includes columns for employee_id, bill_type, project_name, engagement_percentage, billing_percentage, start_date, and release_date.
+              Upload a CSV file to update multiple resource planning entries at once.
+              You can use the exported CSV from this page - just modify the values you want to update and upload it back.
             </DialogDescription>
           </DialogHeader>
 

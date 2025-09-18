@@ -90,7 +90,7 @@ export const useBulkResourcePlanningUpdate = () => {
     try {
       // Call the RPC function for bulk update
       const { data, error } = await supabase.rpc('bulk_update_resource_planning', {
-        update_data: validRows
+        updates_data: validRows as any
       });
 
       if (error) {

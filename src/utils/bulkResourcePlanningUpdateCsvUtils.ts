@@ -63,25 +63,25 @@ const sanitizeDate = (value: any): string => {
   return trimmed; // Return original if can't parse
 };
 
-export const downloadBulkResourcePlanningUpdateTemplate = () => {
+export const downloadBulkResourcePlanningUpdateTemplate = (): void => {
   const templateData = [
     {
-      employee_id: 'EMP001',
-      bill_type: 'Billable',
-      project_name: 'Project Alpha',
-      engagement_percentage: 75,
-      billing_percentage: 60,
-      start_date: '2024-01-01',
-      release_date: '2024-12-31'
+      'Employee ID': 'EMP001',
+      'Bill Type': 'Billable',
+      'Project Name': 'Project Alpha',
+      'Engagement %': 75,
+      'Billing %': 60,
+      'Start Date': '2024-01-01',
+      'Release Date': '2024-12-31'
     },
     {
-      employee_id: 'EMP002',
-      bill_type: 'Non-Billable',
-      project_name: 'Project Beta',
-      engagement_percentage: 100,
-      billing_percentage: 0,
-      start_date: '2024-02-01',
-      release_date: '2024-06-30'
+      'Employee ID': 'EMP002',
+      'Bill Type': 'Non-Billable',
+      'Project Name': 'Project Beta',
+      'Engagement %': 100,
+      'Billing %': 0,
+      'Start Date': '2024-02-01',
+      'Release Date': '2024-06-30'
     }
   ];
 
@@ -255,23 +255,30 @@ export const validateBulkResourcePlanningUpdateCSVData = (data: any[]): BulkReso
   return { valid, errors };
 };
 
-export const parseBulkResourcePlanningUpdateCSV = (file: File): Promise<any[]> => {
+export const parseBulkResourcePlanningUpdateCSV = (file: File): Promise<Record<string, any>[]> => {
   return new Promise((resolve, reject) => {
     Papa.parse(file, {
       header: true,
       skipEmptyLines: true,
-      transformHeader: (header: string) => {
+      transformHeader: (header: string): string => {
         const normalized = header.trim().toLowerCase();
         const headerMap: Record<string, string> = {
+          // Exported CSV format mappings
+          'employee id': 'employee_id',
+          'bill type': 'bill_type',
+          'project name': 'project_name',
+          'engagement %': 'engagement_percentage',
+          'billing %': 'billing_percentage',
+          'start date': 'start_date',
+          'release date': 'release_date',
+          // Alternative format mappings
           'employeeid': 'employee_id',
           'employee_id': 'employee_id',
           'emp_id': 'employee_id',
           'billtype': 'bill_type',
           'bill_type': 'bill_type',
-          'bill type': 'bill_type',
           'projectname': 'project_name',
           'project_name': 'project_name',
-          'project name': 'project_name',
           'engagementpercentage': 'engagement_percentage',
           'engagement_percentage': 'engagement_percentage',
           'engagement percentage': 'engagement_percentage',
@@ -280,10 +287,8 @@ export const parseBulkResourcePlanningUpdateCSV = (file: File): Promise<any[]> =
           'billing percentage': 'billing_percentage',
           'startdate': 'start_date',
           'start_date': 'start_date',
-          'start date': 'start_date',
           'releasedate': 'release_date',
-          'release_date': 'release_date',
-          'release date': 'release_date'
+          'release_date': 'release_date'
         };
         return headerMap[normalized] || header;
       },

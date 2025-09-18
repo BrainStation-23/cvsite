@@ -4,12 +4,41 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import Papa from 'papaparse';
 
+interface ExportResource {
+  profile?: {
+    employee_id?: string;
+    first_name?: string;
+    last_name?: string;
+    has_overhead?: boolean;
+  };
+  sbu?: {
+    name?: string;
+  };
+  project?: {
+    project_name?: string;
+    client_name?: string;
+  };
+  manager: {
+    first_name?: string;
+  };
+  bill_type?: {
+    name?: string;
+  };
+  bill_type_id?: string;
+  engagement_percentage?: number;
+  billing_percentage?: number;
+  engagement_start_date?: string;
+  release_date?: string;
+  weekly_validation?: boolean;
+  created_at?: string;
+}
+
 export function usePlannedResourcesExport() {
-  const [isExporting, setIsExporting] = useState(false);
+  const [isExporting, setIsExporting] = useState<boolean>(false);
   const { toast } = useToast();
 
   // Accept selectedItems as an optional parameter
-  const exportPlannedResources = async (selectedItems?: any[]) => {
+  const exportPlannedResources = async (selectedItems?: ExportResource[]): Promise<void> => {
     try {
       setIsExporting(true);
 
