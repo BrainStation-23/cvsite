@@ -68,7 +68,14 @@ export default function ReviewStep({ type, formData, onBack }: ReviewStepProps) 
   };
 
   const openNewIssue = () => {
-    window.open('https://github.com/BrainStation-23/cvsite/issues/new', '_blank');
+    const repoUrl = 'https://github.com/BrainStation-23/cvsite/issues/new';
+    const params = new URLSearchParams({
+      title: title,
+      body: enhancedMarkdown,
+      labels: type === 'bug' ? 'bug,platform-feedback' : 'enhancement,platform-feedback',
+    });
+
+    window.open(`${repoUrl}?${params.toString()}`, '_blank');
   };
 
   return (
@@ -80,18 +87,6 @@ export default function ReviewStep({ type, formData, onBack }: ReviewStepProps) 
         </div>
         <Button variant="outline" onClick={onBack} disabled={isEnhancing}>Back</Button>
       </div>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Issue Title</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-3">
-          <Input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Concise issue title" />
-          <div className="flex gap-2">
-            <Button variant="secondary" onClick={copyTitle}>Copy Title</Button>
-          </div>
-        </CardContent>
-      </Card>
 
       <Card>
         <CardHeader>
@@ -111,7 +106,6 @@ export default function ReviewStep({ type, formData, onBack }: ReviewStepProps) 
           )}
           <div className="flex flex-wrap gap-2">
             <Button onClick={generate} disabled={isEnhancing}>{isEnhancing ? 'Enhancing…' : 'Regenerate Markdown'}</Button>
-            <Button variant="secondary" onClick={copyMarkdown} disabled={!enhancedMarkdown || isEnhancing}>Copy Markdown</Button>
             <Button variant="outline" onClick={openNewIssue}>Open GitHub New Issue</Button>
           </div>
         </CardContent>
