@@ -18,6 +18,7 @@ interface SbuMultiSelectProps {
   selectedValues: string[];
   onSelectionChange: (values: string[]) => void;
   placeholder?: string;
+  label?: string;
 }
 
 export const SbuMultiSelect: React.FC<SbuMultiSelectProps> = ({

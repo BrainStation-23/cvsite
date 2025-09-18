@@ -8,7 +8,8 @@ import { ResourceStatisticsHeader } from '../../components/statistics/ResourceSt
 import { ResourceStatisticsOverview } from '../../components/statistics/ResourceStatisticsOverview';
 import { PivotTableContainer } from '../../components/statistics/PivotTableContainer';
 import { WeeklyScoreCardTab } from '../../components/statistics/WeeklyScoreCardTab';
-import { ResourceChangesTab } from '../../components/statistics/ResourceChangesTab';
+import { BillTypeChangesTab } from '../../components/statistics/BillTypeChangesTab';
+import { SbuChangesTab } from '../../components/statistics/SbuChangesTab';
 import { useResourceCountStatistics } from '../../hooks/use-resource-count-statistics';
 
 const ResourceCalendarStatistics: React.FC = () => {
@@ -87,8 +88,11 @@ const ResourceCalendarStatistics: React.FC = () => {
     if (activeTab === 'weekly-scorecard') {
       return 'Weekly utilization and billing analysis dashboard';
     }
-    if (activeTab === 'resource-changes') {
-      return 'Track and analyze bill type and SBU changes over time';
+    if (activeTab === 'bill-type-changes') {
+      return 'Track and analyze bill type changes over time';
+    }
+    if (activeTab === 'sbu-changes') {
+      return 'Track and analyze SBU changes over time';
     }
     
     const hasSpecificFilter = overviewFilters.sbu || overviewFilters.resourceType || overviewFilters.billType || overviewFilters.expertiseType;
@@ -131,7 +135,7 @@ const ResourceCalendarStatistics: React.FC = () => {
 
         {/* Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid w-full grid-cols-5">
             <TabsTrigger value="overview" className="flex items-center gap-2">
               <BarChart3 className="h-4 w-4" />
               Overview
@@ -144,9 +148,13 @@ const ResourceCalendarStatistics: React.FC = () => {
               <TrendingUp className="h-4 w-4" />
               Weekly Score Card
             </TabsTrigger>
-            <TabsTrigger value="resource-changes" className="flex items-center gap-2">
+            <TabsTrigger value="bill-type-changes" className="flex items-center gap-2">
               <History className="h-4 w-4" />
-              Resource Changes
+              Bill Type Changes
+            </TabsTrigger>
+            <TabsTrigger value="sbu-changes" className="flex items-center gap-2">
+              <History className="h-4 w-4" />
+              SBU Changes
             </TabsTrigger>
           </TabsList>
 
@@ -175,8 +183,12 @@ const ResourceCalendarStatistics: React.FC = () => {
             <WeeklyScoreCardTab />
           </TabsContent>
 
-          <TabsContent value="resource-changes" className="mt-6">
-            <ResourceChangesTab />
+          <TabsContent value="bill-type-changes" className="mt-6">
+            <BillTypeChangesTab />
+          </TabsContent>
+
+          <TabsContent value="sbu-changes" className="mt-6">
+            <SbuChangesTab />
           </TabsContent>
         </Tabs>
       </div>

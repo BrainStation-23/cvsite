@@ -18,6 +18,7 @@ interface BillTypeMultiSelectProps {
   selectedValues: string[];
   onSelectionChange: (values: string[]) => void;
   placeholder?: string;
+  label?: string;
 }
 
 export const BillTypeMultiSelect: React.FC<BillTypeMultiSelectProps> = ({

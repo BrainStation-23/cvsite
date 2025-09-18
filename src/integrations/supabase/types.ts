@@ -1882,8 +1882,9 @@ export type Database = {
       }
       get_bill_type_changes: {
         Args: {
-          bill_type_ids?: string[]
           end_date_param?: string
+          new_bill_type_ids?: string[]
+          old_bill_type_ids?: string[]
           profile_ids?: string[]
           sbu_ids?: string[]
           start_date_param?: string
@@ -2228,8 +2229,9 @@ export type Database = {
       get_sbu_changes: {
         Args: {
           end_date_param?: string
+          new_sbu_ids?: string[]
+          old_sbu_ids?: string[]
           profile_ids?: string[]
-          sbu_ids?: string[]
           start_date_param?: string
         }
         Returns: {
