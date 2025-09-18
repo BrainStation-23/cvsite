@@ -49,6 +49,7 @@ import NonBilledSettingsPage from '@/pages/admin/NonBilled/NonBilledSettingsPage
 import NonBilledDashboard from '@/pages/NonBilled/NonBilledDashboard';
 import DashboardLayout from '@/components/Layout/DashboardLayout';
 import CvDashboard from './pages/employee/CvDashboard';
+import PlatformFeedback from './pages/platform-feedback';
 import './App.css';
 
 // Create QueryClient instance outside component to prevent recreation
@@ -101,6 +102,7 @@ function App(): React.ReactElement {
               <Route path="profile" element={<ProfilePage />} />
               <Route path="myteam" element={<MyTeam />} />
               <Route path="security" element={<SecurityPage />} />
+              <Route path="platform-feedback" element={<PlatformFeedback />} />
 
               {/* CV Database (admin/manager) */}
               <Route path="cv-database" element={<ProtectedRoute allowedRoles={['admin','manager']}><Outlet /></ProtectedRoute>}>

@@ -18,7 +18,8 @@ import {
   Network,
   Settings,
   LayoutDashboard,
-  ContactRound
+  ContactRound,
+  MessageSquare
 } from 'lucide-react';
 
 export interface NavigationItem {
@@ -47,7 +48,7 @@ export const getSidebarGroups = (
         { to: '/profile', icon: User, label: 'My Profile' },
         { to: '/myteam', icon: Network, label: 'My Team' },
         { to: '/security', icon: Shield, label: 'Security' },
-
+        { to: '/platform-feedback', icon: MessageSquare, label: 'Platform Feedback' },
       ],
     },
 
