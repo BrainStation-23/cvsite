@@ -12,9 +12,9 @@ function PlatformFeedback() {
   };
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-4xl">
-      <Card>
-        <CardContent className="p-6">
+    <div className="mx-auto h-[88vh]">
+      <Card className='border-none shadow-none'>
+        <CardContent className="border-none">
           {!feedbackType ? (
             <TypeSelector onSelectType={setFeedbackType} onViewExisting={handleViewExisting} />
           ) : (
