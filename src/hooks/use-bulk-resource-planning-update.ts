@@ -42,12 +42,14 @@ export const useBulkResourcePlanningUpdate = () => {
     }
 
     const errorData = updateErrors.map(({ row, error, type }) => ({
+      resource_planning_id: row.resource_planning_id,
+      profile_id: row.profile_id,
+      project_id: row.project_id,
+      bill_type_id: row.bill_type_id,
       employee_id: row.employee_id,
-      bill_type: row.bill_type,
-      project_name: row.project_name,
       engagement_percentage: row.engagement_percentage,
       billing_percentage: row.billing_percentage,
-      start_date: row.start_date,
+      engagement_start_date: row.engagement_start_date,
       release_date: row.release_date,
       error_type: type,
       error_message: error

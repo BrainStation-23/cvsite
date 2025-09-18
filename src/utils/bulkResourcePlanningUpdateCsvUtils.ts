@@ -1,12 +1,14 @@
 import Papa from 'papaparse';
 
 export interface BulkResourcePlanningUpdateCSVRow {
-  employee_id: string;
-  bill_type: string;
-  project_name: string;
+  resource_planning_id: string;
+  profile_id: string;
+  project_id: string;
+  bill_type_id: string;
+  employee_id: string; // Keep for reference/validation
   engagement_percentage: number;
   billing_percentage: number;
-  start_date: string;
+  engagement_start_date: string; // Fixed field name
   release_date: string;
 }
 
@@ -66,22 +68,24 @@ const sanitizeDate = (value: any): string => {
 export const downloadBulkResourcePlanningUpdateTemplate = (): void => {
   const templateData = [
     {
+      'Resource Planning ID': 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx',
+      'Profile ID': 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx',
+      'Project ID': 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx',
+      'Bill Type ID': 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx',
       'Employee ID': 'EMP001',
-      'Bill Type': 'Billable',
+      'Employee Name': 'John Doe',
+      'Overhead': 'Yes',
+      'SBU': 'Technology',
       'Project Name': 'Project Alpha',
+      'Client Name': 'Client A',
+      'Manager': 'Jane Smith',
+      'Bill Type': 'Billable',
       'Engagement %': 75,
       'Billing %': 60,
       'Start Date': '2024-01-01',
-      'Release Date': '2024-12-31'
-    },
-    {
-      'Employee ID': 'EMP002',
-      'Bill Type': 'Non-Billable',
-      'Project Name': 'Project Beta',
-      'Engagement %': 100,
-      'Billing %': 0,
-      'Start Date': '2024-02-01',
-      'Release Date': '2024-06-30'
+      'Release Date': '2024-12-31',
+      'Weekly Validation': 'Yes',
+      'Created At': '2024-01-01'
     }
   ];
 
@@ -103,14 +107,81 @@ export const downloadBulkResourcePlanningUpdateTemplate = (): void => {
 export const validateBulkResourcePlanningUpdateCSVData = (data: any[]): BulkResourcePlanningUpdateValidationResult => {
   const valid: BulkResourcePlanningUpdateCSVRow[] = [];
   const errors: BulkResourcePlanningUpdateValidationError[] = [];
-  const seenEmployeeProjectCombinations = new Set<string>();
+  const seenResourcePlanningIds = new Set<string>();
 
   data.forEach((row: any, index: number) => {
     const rowNumber = index + 2; // +2 because index starts at 0 and CSV has header row
     let hasErrors = false;
     const sanitizedRow: any = {};
 
-    // Sanitize and validate employee_id
+    // Validate resource_planning_id (required for updates)
+    const sanitizedResourcePlanningId = sanitizeText(row.resource_planning_id);
+    if (!sanitizedResourcePlanningId) {
+      errors.push({
+        row: rowNumber,
+        field: 'resource_planning_id',
+        value: row.resource_planning_id || '',
+        message: 'Resource Planning ID is required for updates'
+      });
+      hasErrors = true;
+    } else {
+      if (seenResourcePlanningIds.has(sanitizedResourcePlanningId)) {
+        errors.push({
+          row: rowNumber,
+          field: 'resource_planning_id',
+          value: sanitizedResourcePlanningId,
+          message: 'Duplicate Resource Planning ID found in CSV'
+        });
+        hasErrors = true;
+      } else {
+        seenResourcePlanningIds.add(sanitizedResourcePlanningId);
+        sanitizedRow.resource_planning_id = sanitizedResourcePlanningId;
+      }
+    }
+
+    // Validate profile_id
+    const sanitizedProfileId = sanitizeText(row.profile_id);
+    if (!sanitizedProfileId) {
+      errors.push({
+        row: rowNumber,
+        field: 'profile_id',
+        value: row.profile_id || '',
+        message: 'Profile ID is required'
+      });
+      hasErrors = true;
+    } else {
+      sanitizedRow.profile_id = sanitizedProfileId;
+    }
+
+    // Validate project_id
+    const sanitizedProjectId = sanitizeText(row.project_id);
+    if (!sanitizedProjectId) {
+      errors.push({
+        row: rowNumber,
+        field: 'project_id',
+        value: row.project_id || '',
+        message: 'Project ID is required'
+      });
+      hasErrors = true;
+    } else {
+      sanitizedRow.project_id = sanitizedProjectId;
+    }
+
+    // Validate bill_type_id
+    const sanitizedBillTypeId = sanitizeText(row.bill_type_id);
+    if (!sanitizedBillTypeId) {
+      errors.push({
+        row: rowNumber,
+        field: 'bill_type_id',
+        value: row.bill_type_id || '',
+        message: 'Bill Type ID is required'
+      });
+      hasErrors = true;
+    } else {
+      sanitizedRow.bill_type_id = sanitizedBillTypeId;
+    }
+
+    // Validate employee_id (for reference)
     const sanitizedEmployeeId = sanitizeText(row.employee_id);
     if (!sanitizedEmployeeId) {
       errors.push({
@@ -122,50 +193,6 @@ export const validateBulkResourcePlanningUpdateCSVData = (data: any[]): BulkReso
       hasErrors = true;
     } else {
       sanitizedRow.employee_id = sanitizedEmployeeId;
-    }
-
-    // Sanitize and validate bill_type
-    const sanitizedBillType = sanitizeText(row.bill_type);
-    if (!sanitizedBillType) {
-      errors.push({
-        row: rowNumber,
-        field: 'bill_type',
-        value: row.bill_type || '',
-        message: 'Bill type is required'
-      });
-      hasErrors = true;
-    } else {
-      sanitizedRow.bill_type = sanitizedBillType;
-    }
-
-    // Sanitize and validate project_name
-    const sanitizedProjectName = sanitizeText(row.project_name);
-    if (!sanitizedProjectName) {
-      errors.push({
-        row: rowNumber,
-        field: 'project_name',
-        value: row.project_name || '',
-        message: 'Project name is required'
-      });
-      hasErrors = true;
-    } else {
-      sanitizedRow.project_name = sanitizedProjectName;
-    }
-
-    // Check for duplicate employee_id + project_name combination
-    if (sanitizedEmployeeId && sanitizedProjectName) {
-      const combination = `${sanitizedEmployeeId.toLowerCase()}|${sanitizedProjectName.toLowerCase()}`;
-      if (seenEmployeeProjectCombinations.has(combination)) {
-        errors.push({
-          row: rowNumber,
-          field: 'employee_id',
-          value: sanitizedEmployeeId,
-          message: 'Duplicate combination of employee ID and project name found in CSV'
-        });
-        hasErrors = true;
-      } else {
-        seenEmployeeProjectCombinations.add(combination);
-      }
     }
 
     // Sanitize and validate engagement_percentage
@@ -196,18 +223,18 @@ export const validateBulkResourcePlanningUpdateCSVData = (data: any[]): BulkReso
       sanitizedRow.billing_percentage = sanitizedBillingPercentage;
     }
 
-    // Sanitize and validate start_date
-    const sanitizedStartDate = sanitizeDate(row.start_date);
-    if (!sanitizedStartDate || isNaN(Date.parse(sanitizedStartDate))) {
+    // Sanitize and validate engagement_start_date
+    const sanitizedEngagementStartDate = sanitizeDate(row.engagement_start_date);
+    if (!sanitizedEngagementStartDate || isNaN(Date.parse(sanitizedEngagementStartDate))) {
       errors.push({
         row: rowNumber,
-        field: 'start_date',
-        value: row.start_date || '',
+        field: 'engagement_start_date',
+        value: row.engagement_start_date || '',
         message: 'Start date must be a valid date (YYYY-MM-DD format preferred)'
       });
       hasErrors = true;
     } else {
-      sanitizedRow.start_date = sanitizedStartDate;
+      sanitizedRow.engagement_start_date = sanitizedEngagementStartDate;
     }
 
     // Sanitize and validate release_date
@@ -225,13 +252,13 @@ export const validateBulkResourcePlanningUpdateCSVData = (data: any[]): BulkReso
     }
 
     // Validate date order
-    if (sanitizedStartDate && sanitizedReleaseDate && 
-        !isNaN(Date.parse(sanitizedStartDate)) && !isNaN(Date.parse(sanitizedReleaseDate))) {
-      if (new Date(sanitizedStartDate) > new Date(sanitizedReleaseDate)) {
+    if (sanitizedEngagementStartDate && sanitizedReleaseDate && 
+        !isNaN(Date.parse(sanitizedEngagementStartDate)) && !isNaN(Date.parse(sanitizedReleaseDate))) {
+      if (new Date(sanitizedEngagementStartDate) > new Date(sanitizedReleaseDate)) {
         errors.push({
           row: rowNumber,
-          field: 'start_date',
-          value: sanitizedStartDate,
+          field: 'engagement_start_date',
+          value: sanitizedEngagementStartDate,
           message: 'Start date must be before release date'
         });
         hasErrors = true;
@@ -241,12 +268,14 @@ export const validateBulkResourcePlanningUpdateCSVData = (data: any[]): BulkReso
     // If no errors, add to valid array with sanitized data
     if (!hasErrors) {
       valid.push({
+        resource_planning_id: sanitizedRow.resource_planning_id,
+        profile_id: sanitizedRow.profile_id,
+        project_id: sanitizedRow.project_id,
+        bill_type_id: sanitizedRow.bill_type_id,
         employee_id: sanitizedRow.employee_id,
-        bill_type: sanitizedRow.bill_type,
-        project_name: sanitizedRow.project_name,
         engagement_percentage: sanitizedRow.engagement_percentage,
         billing_percentage: sanitizedRow.billing_percentage,
-        start_date: sanitizedRow.start_date,
+        engagement_start_date: sanitizedRow.engagement_start_date,
         release_date: sanitizedRow.release_date
       });
     }
@@ -263,30 +292,29 @@ export const parseBulkResourcePlanningUpdateCSV = (file: File): Promise<Record<s
       transformHeader: (header: string): string => {
         const normalized = header.trim().toLowerCase();
         const headerMap: Record<string, string> = {
-          // Exported CSV format mappings
+          // Updated CSV format mappings with IDs
+          'resource planning id': 'resource_planning_id',
+          'profile id': 'profile_id',
+          'project id': 'project_id',
+          'bill type id': 'bill_type_id',
           'employee id': 'employee_id',
-          'bill type': 'bill_type',
-          'project name': 'project_name',
           'engagement %': 'engagement_percentage',
           'billing %': 'billing_percentage',
-          'start date': 'start_date',
+          'start date': 'engagement_start_date',
           'release date': 'release_date',
           // Alternative format mappings
-          'employeeid': 'employee_id',
+          'resource_planning_id': 'resource_planning_id',
+          'profile_id': 'profile_id',
+          'project_id': 'project_id',
+          'bill_type_id': 'bill_type_id',
           'employee_id': 'employee_id',
-          'emp_id': 'employee_id',
-          'billtype': 'bill_type',
-          'bill_type': 'bill_type',
-          'projectname': 'project_name',
-          'project_name': 'project_name',
-          'engagementpercentage': 'engagement_percentage',
           'engagement_percentage': 'engagement_percentage',
           'engagement percentage': 'engagement_percentage',
-          'billingpercentage': 'billing_percentage',
           'billing_percentage': 'billing_percentage',
           'billing percentage': 'billing_percentage',
-          'startdate': 'start_date',
-          'start_date': 'start_date',
+          'engagement_start_date': 'engagement_start_date',
+          'startdate': 'engagement_start_date',
+          'start_date': 'engagement_start_date',
           'releasedate': 'release_date',
           'release_date': 'release_date'
         };
@@ -295,7 +323,7 @@ export const parseBulkResourcePlanningUpdateCSV = (file: File): Promise<Record<s
       complete: (results) => {
         try {
           const filteredData = results.data.filter((row: any) => 
-            row.employee_id && row.employee_id.toString().trim() !== ''
+            row.resource_planning_id && row.resource_planning_id.toString().trim() !== ''
           );
           resolve(filteredData);
         } catch (error) {
