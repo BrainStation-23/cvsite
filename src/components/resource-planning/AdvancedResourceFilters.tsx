@@ -11,6 +11,8 @@ import { ChevronDown, Filter } from 'lucide-react';
 import BillTypeCombobox from './BillTypeCombobox';
 import ProjectSearchCombobox from './ProjectSearchCombobox';
 import DatePicker from '@/components/admin/user/DatePicker';  
+import { ProjectTypeCombobox } from '../projects/ProjectTypeCombobox';
+import ExpertiseCombobox from '../admin/user/ExpertiseCombobox';
 
 const STORAGE_KEY = 'resource-calendar/planning/advanced-filters';
 const CACHE_TTL_MS = 12 * 60 * 60 * 1000; 
@@ -28,7 +30,9 @@ interface AdvancedFilters {
   endDateTo: string;
   projectLevelFilter: string | null;
   projectBillTypeFilter: string | null;
-    cachedAt?: number; // timestamp
+  cachedAt?: number; // timestamp
+  projectTypeFilter: string | null;
+  expertiseFilter: string | null;
 }
 
 function isBrowser() {
@@ -49,6 +53,8 @@ function readCache(): AdvancedFilters {
     endDateTo: '',
     projectLevelFilter: null,
     projectBillTypeFilter: null,
+    projectTypeFilter: null,
+    expertiseFilter: null,
   };
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
@@ -65,6 +71,8 @@ function readCache(): AdvancedFilters {
       endDateTo: '',
       projectLevelFilter: null,
       projectBillTypeFilter: null,
+      projectTypeFilter: null,
+      expertiseFilter: null,
     };
     const parsed = JSON.parse(raw) as AdvancedFilters
        if (!parsed.cachedAt || Date.now() - parsed.cachedAt > CACHE_TTL_MS) {
@@ -83,6 +91,8 @@ function readCache(): AdvancedFilters {
       endDateTo: '',
       projectLevelFilter: null,
       projectBillTypeFilter: null,
+      projectTypeFilter: null,
+      expertiseFilter: null,
       };
     }
     return parsed;
@@ -100,6 +110,8 @@ function readCache(): AdvancedFilters {
       endDateTo: '',
       projectLevelFilter: null,
       projectBillTypeFilter: null,
+      projectTypeFilter: null,
+      expertiseFilter: null,
     };
   }
 }
@@ -301,6 +313,24 @@ export const AdvancedResourceFilters: React.FC<AdvancedResourceFiltersProps> = (
                     placeholder="To date"
                   />
                 </div>
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="project-bill-type-filter">Project Type</Label>
+                <ProjectTypeCombobox
+                  value={filters.projectTypeFilter}
+                  onValueChange={(value) => updateFilter('projectTypeFilter', value)}
+                  placeholder="Select project type..."
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="expertise-filter">Expertise</Label>
+                <ExpertiseCombobox
+                  value={filters.expertiseFilter}
+                  onValueChange={(value) => updateFilter('expertiseFilter', value)}
+                  placeholder="Select expertise..."
+                />
               </div>
             </div>
 

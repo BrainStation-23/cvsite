@@ -84,6 +84,8 @@ interface AdvancedFilters {
   endDateTo?: string | null;
   projectLevelFilter?: string | null;
   projectBillTypeFilter?: string | null;
+  projectTypeFilter?: string | null;
+  expertiseFilter?: string | null;
 }
 
 export function useResourceCalendarData(
@@ -144,6 +146,8 @@ export function useResourceCalendarData(
         end_date_to: advancedFilters.endDateTo || null,
         project_level_filter: advancedFilters.projectLevelFilter || null,
         project_bill_type_filter: advancedFilters.projectBillTypeFilter || null,
+        project_type_filter: advancedFilters.projectTypeFilter || null,
+        expertise_filter: advancedFilters.expertiseFilter || null,
       });
 
       if (error) {

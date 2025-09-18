@@ -16,6 +16,8 @@ interface AdvancedFilters {
   endDateTo: string;
   projectLevelFilter: string | null;
   projectBillTypeFilter: string | null;
+  projectTypeFilter: string | null;
+  expertiseFilter: string | null;
 }
 
 const defaultAdvancedFilters: AdvancedFilters = {
@@ -31,6 +33,8 @@ const defaultAdvancedFilters: AdvancedFilters = {
   endDateTo: '',
   projectLevelFilter: null,
   projectBillTypeFilter: null,
+  projectTypeFilter: null,
+  expertiseFilter: null,
 };
 
 export function usePlannedResourcesTab(isActive: boolean = true) {
@@ -91,6 +95,8 @@ export function usePlannedResourcesTab(isActive: boolean = true) {
     end_date_to: advancedFilters.endDateTo || null,
     project_level_filter: advancedFilters.projectLevelFilter,
     project_bill_type_filter: advancedFilters.projectBillTypeFilter,
+    project_type_filter: advancedFilters.projectTypeFilter,
+    expertise_filter: advancedFilters.expertiseFilter,
   }), [
     searchQuery,
     currentPage,
