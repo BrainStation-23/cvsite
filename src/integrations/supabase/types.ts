@@ -1880,6 +1880,41 @@ export type Database = {
         Args: { target_user_id?: string }
         Returns: Json
       }
+      get_bill_type_changes: {
+        Args: {
+          end_date_param?: string
+          new_bill_type_ids?: string[]
+          old_bill_type_ids?: string[]
+          profile_ids?: string[]
+          sbu_ids?: string[]
+          start_date_param?: string
+        }
+        Returns: {
+          career_start_date: string
+          changed_at: string
+          created_at: string
+          date_of_joining: string
+          email: string
+          employee_id: string
+          expertise_id: string
+          expertise_name: string
+          first_name: string
+          id: string
+          last_name: string
+          manager_employee_id: string
+          manager_id: string
+          manager_name: string
+          new_bill_type_id: string
+          new_bill_type_name: string
+          old_bill_type_id: string
+          old_bill_type_name: string
+          profile_id: string
+          project_id: string
+          project_name: string
+          sbu_id: string
+          sbu_name: string
+        }[]
+      }
       get_cv_audit_history: {
         Args: { limit_records?: number; target_profile_id: string }
         Returns: {
@@ -2190,6 +2225,28 @@ export type Database = {
           start_date_filter?: string
         }
         Returns: Json
+      }
+      get_sbu_changes: {
+        Args: {
+          end_date_param?: string
+          new_sbu_ids?: string[]
+          old_sbu_ids?: string[]
+          profile_ids?: string[]
+          start_date_param?: string
+        }
+        Returns: {
+          changed_at: string
+          created_at: string
+          employee_id: string
+          first_name: string
+          id: string
+          last_name: string
+          new_sbu_id: string
+          new_sbu_name: string
+          old_sbu_id: string
+          old_sbu_name: string
+          profile_id: string
+        }[]
       }
       get_sbu_summary_stats: {
         Args: { sbu_filter?: string }
