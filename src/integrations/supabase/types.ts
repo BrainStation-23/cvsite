@@ -1876,6 +1876,10 @@ export type Database = {
         Args: { projects_data: Json }
         Returns: Json
       }
+      bulk_update_resource_planning: {
+        Args: { updates_data: Json }
+        Returns: Json
+      }
       bulk_update_users: {
         Args: { users_data: Json }
         Returns: Json
