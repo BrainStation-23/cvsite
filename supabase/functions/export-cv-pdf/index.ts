@@ -7,7 +7,95 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-// Template processor class - ported from frontend
+// Template utilities - ported from frontend
+const templateUtilities = {
+  formatDate: (dateString: string, formatStr: string = 'MMM yyyy'): string => {
+    if (!dateString) return '';
+    
+    try {
+      const date = new Date(dateString);
+      if (isNaN(date.getTime())) return dateString;
+      
+      const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+      const month = months[date.getMonth()];
+      const year = date.getFullYear();
+      
+      if (formatStr === 'MMM yyyy') {
+        return `${month} ${year}`;
+      }
+      return dateString;
+    } catch {
+      return dateString;
+    }
+  },
+
+  formatDateRange: (startDate: string, endDate: string | null, isCurrent?: boolean): string => {
+    const formattedStart = templateUtilities.formatDate(startDate);
+    
+    if (isCurrent || !endDate) {
+      return `${formattedStart} - Present`;
+    }
+    
+    const formattedEnd = templateUtilities.formatDate(endDate);
+    return `${formattedStart} - ${formattedEnd}`;
+  },
+
+  joinArray: (array: any[], separator: string = ', '): string => {
+    if (!Array.isArray(array)) return '';
+    return array.filter(item => item).join(separator);
+  },
+
+  truncate: (text: string, length: number = 100): string => {
+    if (!text || text.length <= length) return text;
+    return text.substring(0, length).trim() + '...';
+  },
+
+  capitalize: (text: string): string => {
+    if (!text) return '';
+    return text.charAt(0).toUpperCase() + text.slice(1).toLowerCase();
+  },
+
+  formatProficiency: (proficiency: number): string => {
+    if (proficiency >= 9) return 'Expert';
+    if (proficiency >= 7) return 'Advanced';
+    if (proficiency >= 5) return 'Intermediate';
+    if (proficiency >= 3) return 'Beginner';
+    return 'Novice';
+  },
+
+  defaultValue: (value: any, defaultVal: string): string => {
+    if (value === null || value === undefined || value === '') {
+      return defaultVal;
+    }
+    return String(value);
+  }
+};
+
+function applyUtilityFilter(value: any, filter: string, args?: string[]): string {
+  const [utilityName, ...filterArgs] = filter.split(':');
+  const allArgs = [...(filterArgs || []), ...(args || [])];
+
+  switch (utilityName) {
+    case 'formatDate':
+      return templateUtilities.formatDate(value, allArgs[0]);
+    case 'formatDateRange':
+      return templateUtilities.formatDateRange(value, allArgs[0], allArgs[1] === 'true');
+    case 'join':
+      return templateUtilities.joinArray(value, allArgs[0]);
+    case 'truncate':
+      return templateUtilities.truncate(value, parseInt(allArgs[0]) || 100);
+    case 'capitalize':
+      return templateUtilities.capitalize(value);
+    case 'formatProficiency':
+      return templateUtilities.formatProficiency(value);
+    case 'defaultValue':
+      return templateUtilities.defaultValue(value, allArgs[0] || '');
+    default:
+      return String(value || '');
+  }
+}
+
+// Complete Template processor class - ported from frontend
 class TemplateProcessor {
   private debugMode: boolean;
 
@@ -15,97 +103,210 @@ class TemplateProcessor {
     this.debugMode = options.debugMode || false;
   }
 
-  process(template: string, data: any): string {
+  private log(message: string, data?: any) {
     if (this.debugMode) {
-      console.log('Processing template with data:', { template: template.substring(0, 100), data });
+      console.log(`[TemplateProcessor] ${message}`, data);
     }
-
-    let processed = template;
-
-    // Process loops first (before individual variable substitutions)
-    processed = this.processLoops(processed, data);
-    
-    // Then process individual variables
-    processed = this.processVariables(processed, data);
-
-    return processed;
   }
 
-  processForCV(template: string, data: any, templateConfig: any): string {
-    // Add CSS for different orientations
-    const orientationCSS = this.getOrientationCSS(templateConfig.orientation);
-    
-    let processed = this.process(template, data);
-    
-    // Inject orientation-specific CSS
-    if (processed.includes('</head>')) {
-      processed = processed.replace('</head>', `<style>${orientationCSS}</style></head>`);
-    } else {
-      processed = `<style>${orientationCSS}</style>${processed}`;
-    }
-
-    return processed;
-  }
-
-  private processLoops(template: string, data: any): string {
-    const loopRegex = /\{\{\#each\s+(\w+)\s*\}\}([\s\S]*?)\{\{\/each\}\}/g;
-    
-    return template.replace(loopRegex, (match, arrayName, loopContent) => {
-      const array = this.getNestedValue(data, arrayName);
-      
-      if (!Array.isArray(array)) {
-        if (this.debugMode) {
-          console.warn(`Loop variable "${arrayName}" is not an array:`, array);
-        }
-        return '';
-      }
-
-      return array.map((item, index) => {
-        let itemContent = loopContent;
-        
-        // Replace loop variables like {{this.name}}, {{name}}, {{@index}}
-        itemContent = itemContent.replace(/\{\{this\.(\w+)\}\}/g, (match, prop) => {
-          return this.getNestedValue(item, prop) || '';
-        });
-        
-        itemContent = itemContent.replace(/\{\{(\w+)\}\}/g, (match, prop) => {
-          if (prop === '@index') return index.toString();
-          return this.getNestedValue(item, prop) || this.getNestedValue(data, prop) || '';
-        });
-
-        return itemContent;
-      }).join('');
-    });
-  }
-
-  private processVariables(template: string, data: any): string {
-    return template.replace(/\{\{([^#\/][^}]*)\}\}/g, (match, variable) => {
-      const trimmedVar = variable.trim();
-      const value = this.getNestedValue(data, trimmedVar);
-      
-      if (this.debugMode && value === undefined) {
-        console.warn(`Variable "${trimmedVar}" not found in data`);
-      }
-      
-      return value !== undefined ? String(value) : '';
-    });
-  }
-
-  private getNestedValue(obj: any, path: string): any {
-    if (!obj || typeof obj !== 'object') return undefined;
-    
+  private getValue(obj: any, path: string): any {
     return path.split('.').reduce((current, key) => {
-      return current && typeof current === 'object' ? current[key] : undefined;
+      return current && current[key] !== undefined ? current[key] : null;
     }, obj);
   }
 
-  private getOrientationCSS(orientation: string): string {
-    const baseCSS = `
+  private hasContent(value: any): boolean {
+    if (value === null || value === undefined || value === '') return false;
+    if (Array.isArray(value)) return value.length > 0;
+    if (typeof value === 'string') return value.trim().length > 0;
+    return true;
+  }
+
+  private processVariable(template: string, data: any): string {
+    // Handle variables with filters: {{employee.firstName | capitalize}}
+    return template.replace(/\{\{employee\.([^}|\s]+)(\s*\|\s*([^}]+))?\}\}/g, (match, path, filterPart, filter) => {
+      const value = this.getValue(data, path);
+      this.log(`Processing variable: employee.${path}`, { value, filter });
+      
+      if (filter) {
+        return applyUtilityFilter(value, filter.trim());
+      }
+      
+      return String(value || '');
+    });
+  }
+
+  private processLoopVariable(template: string, item: any, index: number): string {
+    // Handle {{this.property}} and {{this.property | filter}}
+    let processed = template.replace(/\{\{this\.([^}|\s]+)(\s*\|\s*([^}]+))?\}\}/g, (match, property, filterPart, filter) => {
+      let value = item[property];
+      
+      // Handle special cases
+      if (property === 'dateRange') {
+        value = applyUtilityFilter(item.startDate, 'formatDateRange', [item.endDate, String(item.isCurrent)]);
+      }
+      
+      this.log(`Processing loop variable: this.${property}`, { value, filter });
+      
+      if (filter) {
+        return applyUtilityFilter(value, filter.trim());
+      }
+      
+      // Handle arrays automatically
+      if (Array.isArray(value)) {
+        return applyUtilityFilter(value, 'join');
+      }
+      
+      return String(value || '');
+    });
+
+    // Process conditionals within loop context (this. prefixed)
+    processed = this.processLoopConditionals(processed, item);
+
+    return processed;
+  }
+
+  private processLoopConditionals(template: string, item: any): string {
+    // Handle {{#if this.property}} ... {{else}} ... {{/if}}
+    template = template.replace(
+      /\{\{#if this\.([^}]+)\}\}([\s\S]*?)(?:\{\{else\}\}([\s\S]*?))?\{\{\/if\}\}/g,
+      (match, path, ifContent, elseContent = '') => {
+        const value = this.getValue(item, path);
+        this.log(`Processing loop conditional: this.${path}`, { value, hasValue: !!value });
+        
+        return value ? ifContent : elseContent;
+      }
+    );
+
+    // Handle {{#unless this.property}} ... {{else}} ... {{/unless}}
+    template = template.replace(
+      /\{\{#unless this\.([^}]+)\}\}([\s\S]*?)(?:\{\{else\}\}([\s\S]*?))?\{\{\/unless\}\}/g,
+      (match, path, unlessContent, elseContent = '') => {
+        const value = this.getValue(item, path);
+        this.log(`Processing loop unless conditional: this.${path}`, { value, hasValue: !!value });
+        
+        return !value ? unlessContent : elseContent;
+      }
+    );
+
+    // Handle {{#ifNotEmpty this.property}} ... {{else}} ... {{/ifNotEmpty}}
+    template = template.replace(
+      /\{\{#ifNotEmpty this\.([^}]+)\}\}([\s\S]*?)(?:\{\{else\}\}([\s\S]*?))?\{\{\/ifNotEmpty\}\}/g,
+      (match, path, ifContent, elseContent = '') => {
+        const value = this.getValue(item, path);
+        const hasContent = this.hasContent(value);
+        this.log(`Processing loop ifNotEmpty conditional: this.${path}`, { value, hasContent });
+        
+        return hasContent ? ifContent : elseContent;
+      }
+    );
+
+    // Handle {{#hasContent this.property}} ... {{else}} ... {{/hasContent}}
+    template = template.replace(
+      /\{\{#hasContent this\.([^}]+)\}\}([\s\S]*?)(?:\{\{else\}\}([\s\S]*?))?\{\{\/hasContent\}\}/g,
+      (match, path, ifContent, elseContent = '') => {
+        const value = this.getValue(item, path);
+        const hasContent = this.hasContent(value);
+        this.log(`Processing loop hasContent conditional: this.${path}`, { value, hasContent });
+        
+        return hasContent ? ifContent : elseContent;
+      }
+    );
+
+    return template;
+  }
+
+  private processLoops(template: string, data: any): string {
+    // Handle {{#each employee.arrayName}} ... {{/each}}
+    return template.replace(
+      /\{\{#each employee\.(\w+)\}\}([\s\S]*?)\{\{\/each\}\}/g,
+      (match, arrayName, loopContent) => {
+        const array = this.getValue(data, arrayName);
+        this.log(`Processing loop: employee.${arrayName}`, { array, arrayLength: array?.length });
+        
+        if (!Array.isArray(array) || array.length === 0) {
+          return '';
+        }
+
+        return array.map((item, index) => {
+          return this.processLoopVariable(loopContent, item, index);
+        }).join('');
+      }
+    );
+  }
+
+  private processConditionals(template: string, data: any): string {
+    // Handle {{#if employee.property}} ... {{else}} ... {{/if}}
+    template = template.replace(
+      /\{\{#if employee\.([^}]+)\}\}([\s\S]*?)(?:\{\{else\}\}([\s\S]*?))?\{\{\/if\}\}/g,
+      (match, path, ifContent, elseContent = '') => {
+        const value = this.getValue(data, path);
+        this.log(`Processing conditional: employee.${path}`, { value, hasValue: !!value });
+        
+        return value ? ifContent : elseContent;
+      }
+    );
+
+    // Handle {{#unless employee.property}} ... {{else}} ... {{/unless}}
+    template = template.replace(
+      /\{\{#unless employee\.([^}]+)\}\}([\s\S]*?)(?:\{\{else\}\}([\s\S]*?))?\{\{\/unless\}\}/g,
+      (match, path, unlessContent, elseContent = '') => {
+        const value = this.getValue(data, path);
+        this.log(`Processing unless conditional: employee.${path}`, { value, hasValue: !!value });
+        
+        return !value ? unlessContent : elseContent;
+      }
+    );
+
+    // Handle {{#ifNotEmpty employee.property}} ... {{else}} ... {{/ifNotEmpty}}
+    template = template.replace(
+      /\{\{#ifNotEmpty employee\.([^}]+)\}\}([\s\S]*?)(?:\{\{else\}\}([\s\S]*?))?\{\{\/ifNotEmpty\}\}/g,
+      (match, path, ifContent, elseContent = '') => {
+        const value = this.getValue(data, path);
+        const hasContent = this.hasContent(value);
+        this.log(`Processing ifNotEmpty conditional: employee.${path}`, { value, hasContent });
+        
+        return hasContent ? ifContent : elseContent;
+      }
+    );
+
+    // Handle {{#hasContent employee.property}} ... {{else}} ... {{/hasContent}}
+    template = template.replace(
+      /\{\{#hasContent employee\.([^}]+)\}\}([\s\S]*?)(?:\{\{else\}\}([\s\S]*?))?\{\{\/hasContent\}\}/g,
+      (match, path, ifContent, elseContent = '') => {
+        const value = this.getValue(data, path);
+        const hasContent = this.hasContent(value);
+        this.log(`Processing hasContent conditional: employee.${path}`, { value, hasContent });
+        
+        return hasContent ? ifContent : elseContent;
+      }
+    );
+
+    return template;
+  }
+
+  private processHelpers(template: string, data: any): string {
+    // Handle {{#ifEquals employee.property "value"}} ... {{else}} ... {{/ifEquals}}
+    template = template.replace(
+      /\{\{#ifEquals employee\.([^}]+) "([^"]+)"\}\}([\s\S]*?)(?:\{\{else\}\}([\s\S]*?))?\{\{\/ifEquals\}\}/g,
+      (match, path, compareValue, ifContent, elseContent = '') => {
+        const value = this.getValue(data, path);
+        this.log(`Processing ifEquals: employee.${path} === "${compareValue}"`, { value, compareValue, matches: value === compareValue });
+        
+        return String(value) === compareValue ? ifContent : elseContent;
+      }
+    );
+
+    return template;
+  }
+
+  private generateFullCVHTML(processedHTML: string, mode: 'fullscreen' | 'download' = 'fullscreen'): string {
+    const baseStyles = `
       body { 
         font-family: Arial, sans-serif; 
         margin: 0; 
         line-height: 1.6; 
-        background: white;
+        background: #f5f5f5;
       }
       @media print {
         body { 
@@ -120,110 +321,157 @@ class TemplateProcessor {
       }
     `;
 
-    if (orientation === 'landscape') {
-      return baseCSS + `
-        @page {
-          size: A4 landscape;
-          margin: 1cm;
-        }
-        .cv-container {
-          max-width: 100%;
-          min-height: 19cm;
-        }
-      `;
-    } else {
-      return baseCSS + `
-        @page {
-          size: A4 portrait;
-          margin: 1cm;
-        }
-        .cv-container {
-          max-width: 19cm;
-          min-height: 26cm;
-        }
-      `;
+    return `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <title>CV Preview</title>
+          <meta charset="utf-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1">
+          <style>${baseStyles}</style>
+        </head>
+        <body>
+          ${processedHTML}
+        </body>
+      </html>
+    `;
+  }
+
+  process(template: string, data: any): string {
+    if (!template) return '';
+
+    this.log('Starting template processing', { templateLength: template.length, hasData: !!data });
+
+    try {
+      let processed = template;
+
+      // CRITICAL: Process loops FIRST, then conditionals
+      // This ensures that conditionals within loops work correctly
+      processed = this.processLoops(processed, data);
+      processed = this.processConditionals(processed, data);
+      processed = this.processHelpers(processed, data);
+      processed = this.processVariable(processed, data);
+
+      this.log('Template processing completed', { processedLength: processed.length });
+      
+      return processed;
+    } catch (error) {
+      this.log('Template processing error', error);
+      throw new Error(`Template processing failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
+  }
+
+  processForCV(htmlTemplate: string, employeeData: any, templateConfig?: { orientation?: 'portrait' | 'landscape' }): string {
+    const processed = this.process(htmlTemplate, employeeData);
+    return this.generateFullCVHTML(processed, 'download');
   }
 }
 
-// Data mapper - ported from frontend
-function mapEmployeeData(employeeData: any): any {
-  if (!employeeData) return {};
+// Complete data mapper - ported from frontend
+function mapEmployeeData(rawData: any): any {
+  if (!rawData) {
+    return {
+      firstName: '',
+      lastName: '',
+      email: '',
+      employeeId: '',
+      biography: '',
+      currentDesignation: '',
+      profileImage: '',
+      technicalSkills: [],
+      specializedSkills: [],
+      experiences: [],
+      education: [],
+      projects: [],
+      trainings: [],
+      achievements: []
+    };
+  }
+
+  const safeString = (value: any): string => {
+    if (value === null || value === undefined) return '';
+    return String(value);
+  };
+
+  const safeArray = (value: any): any[] => {
+    if (!Array.isArray(value)) return [];
+    return value;
+  };
 
   return {
-    // Personal Information
-    first_name: employeeData.first_name || '',
-    last_name: employeeData.last_name || '',
-    employee_id: employeeData.employee_id || '',
-    email: employeeData.email || '',
-    full_name: employeeData.first_name && employeeData.last_name 
-      ? `${employeeData.first_name} ${employeeData.last_name}` 
-      : employeeData.first_name || employeeData.last_name || '',
+    firstName: safeString(rawData.first_name || rawData.general_information?.first_name),
+    lastName: safeString(rawData.last_name || rawData.general_information?.last_name),
+    email: safeString(rawData.email),
+    employeeId: safeString(rawData.employee_id),
+    biography: safeString(rawData.biography || rawData.general_information?.biography),
+    currentDesignation: safeString(rawData.current_designation || rawData.general_information?.current_designation),
+    profileImage: safeString(rawData.profile_image || rawData.general_information?.profile_image),
     
-    // General Information
-    biography: employeeData.general_information?.biography || '',
-    current_designation: employeeData.general_information?.current_designation || '',
-    profile_image: employeeData.general_information?.profile_image || '',
-    
-    // Technical Skills
-    technical_skills: employeeData.technical_skills || [],
-    
-    // Specialized Skills  
-    specialized_skills: employeeData.specialized_skills || [],
-    
-    // Experiences
-    experiences: (employeeData.experiences || []).map((exp: any) => ({
-      ...exp,
-      company_name: exp.company_name || '',
-      designation: exp.designation || '',
-      description: exp.description || '',
-      start_date: exp.start_date || '',
-      end_date: exp.end_date || '',
-      is_current: exp.is_current || false
+    technicalSkills: safeArray(rawData.technical_skills).map((skill: any) => ({
+      id: safeString(skill.id),
+      name: safeString(skill.name),
+      proficiency: skill.proficiency || 0,
+      priority: skill.priority || 0
     })),
     
-    // Education
-    education: (employeeData.education || []).map((edu: any) => ({
-      ...edu,
-      university: edu.university || '',
-      degree: edu.degree || '',
-      department: edu.department || '',
-      gpa: edu.gpa || '',
-      start_date: edu.start_date || '',
-      end_date: edu.end_date || '',
-      is_current: edu.is_current || false
+    specializedSkills: safeArray(rawData.specialized_skills).map((skill: any) => ({
+      id: safeString(skill.id),
+      name: safeString(skill.name),
+      proficiency: skill.proficiency || 0,
+      priority: skill.priority || 0
     })),
     
-    // Training/Certifications
-    trainings: (employeeData.trainings || []).map((training: any) => ({
-      ...training,
-      title: training.title || '',
-      provider: training.provider || '',
-      description: training.description || '',
-      certification_date: training.certification_date || '',
-      certificate_url: training.certificate_url || ''
+    experiences: safeArray(rawData.experiences).map((exp: any) => ({
+      id: safeString(exp.id),
+      companyName: safeString(exp.company_name),
+      designation: safeString(exp.designation),
+      startDate: safeString(exp.start_date),
+      endDate: safeString(exp.end_date),
+      isCurrent: exp.is_current || false,
+      description: safeString(exp.description)
     })),
     
-    // Achievements
-    achievements: (employeeData.achievements || []).map((achievement: any) => ({
-      ...achievement,
-      title: achievement.title || '',
-      description: achievement.description || '',
-      date: achievement.date || ''
+    education: safeArray(rawData.education).map((edu: any) => ({
+      id: safeString(edu.id),
+      university: safeString(edu.university),
+      degree: safeString(edu.degree),
+      department: safeString(edu.department),
+      startDate: safeString(edu.start_date),
+      endDate: safeString(edu.end_date),
+      isCurrent: edu.is_current || false,
+      gpa: safeString(edu.gpa)
     })),
     
-    // Projects
-    projects: (employeeData.projects || []).map((project: any) => ({
-      ...project,
-      name: project.name || '',
-      role: project.role || '',
-      description: project.description || '',
-      responsibility: project.responsibility || '',
-      start_date: project.start_date || '',
-      end_date: project.end_date || '',
-      is_current: project.is_current || false,
-      technologies_used: project.technologies_used || [],
-      url: project.url || ''
+    projects: safeArray(rawData.projects).map((proj: any) => ({
+      id: safeString(proj.id),
+      name: safeString(proj.name),
+      role: safeString(proj.role),
+      startDate: safeString(proj.start_date),
+      endDate: safeString(proj.end_date),
+      isCurrent: proj.is_current || false,
+      description: safeString(proj.description),
+      technologiesUsed: Array.isArray(proj.technologies_used) 
+        ? proj.technologies_used.map((t: any) => safeString(t))
+        : (proj.technologies_used ? safeString(proj.technologies_used).split(',').map((t: string) => t.trim()) : []),
+      url: safeString(proj.url),
+      displayOrder: proj.display_order || 0,
+      responsibility: safeString(proj.responsibility)
+    })),
+    
+    trainings: safeArray(rawData.trainings).map((training: any) => ({
+      id: safeString(training.id),
+      title: safeString(training.title),
+      provider: safeString(training.provider),
+      certificationDate: safeString(training.certification_date),
+      description: safeString(training.description),
+      certificateUrl: safeString(training.certificate_url)
+    })),
+    
+    achievements: safeArray(rawData.achievements).map((achievement: any) => ({
+      id: safeString(achievement.id),
+      title: safeString(achievement.title),
+      date: safeString(achievement.date),
+      description: safeString(achievement.description)
     }))
   };
 }
