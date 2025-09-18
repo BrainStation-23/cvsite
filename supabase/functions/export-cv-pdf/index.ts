@@ -674,19 +674,16 @@ serve(async (req) => {
     // Generate PDF
     const pdfBytes = await generatePDFWithPuppeteer(processedHTML);
 
-    // Return PDF as base64
-    const base64PDF = btoa(String.fromCharCode(...pdfBytes));
-
-    return new Response(
-      JSON.stringify({ 
-        success: true,
-        pdf: base64PDF,
-        filename: `CV-${employeeData.first_name}-${employeeData.last_name}-${templateData.name}.pdf`
-      }),
-      { 
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+    // Return PDF directly as binary data
+    const filename = `CV-${employeeData.first_name}-${employeeData.last_name}-${templateData.name}.pdf`;
+    
+    return new Response(pdfBytes, {
+      headers: {
+        ...corsHeaders,
+        'Content-Type': 'application/pdf',
+        'Content-Disposition': `attachment; filename="${filename}"`,
       }
-    );
+    });
 
   } catch (error) {
     console.error('CV export failed:', error);
