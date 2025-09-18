@@ -199,6 +199,16 @@ export const AdvancedResourceFilters: React.FC<AdvancedResourceFiltersProps> = (
         <CollapsibleContent>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+
+              <div className="space-y-2">
+                <Label htmlFor="expertise-filter">Expertise</Label>
+                <ExpertiseCombobox
+                  value={filters.expertiseFilter}
+                  onValueChange={(value) => updateFilter('expertiseFilter', value)}
+                  placeholder="Select expertise..."
+                />
+              </div>
+
               <div className="space-y-2">
                 <Label htmlFor="bill-type-filter">Bill Type</Label>
                 <BillTypeCombobox
@@ -232,6 +242,14 @@ export const AdvancedResourceFilters: React.FC<AdvancedResourceFiltersProps> = (
                   value={filters.projectBillTypeFilter}
                   onValueChange={(value) => updateFilter('projectBillTypeFilter', value)}
                   placeholder="Select project bill type..."
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="project-bill-type-filter">Project Type</Label>
+                <ProjectTypeCombobox
+                  value={filters.projectTypeFilter}
+                  onValueChange={(value) => updateFilter('projectTypeFilter', value)}
+                  placeholder="Select project type..."
                 />
               </div>
 
@@ -313,24 +331,6 @@ export const AdvancedResourceFilters: React.FC<AdvancedResourceFiltersProps> = (
                     placeholder="To date"
                   />
                 </div>
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="project-bill-type-filter">Project Type</Label>
-                <ProjectTypeCombobox
-                  value={filters.projectTypeFilter}
-                  onValueChange={(value) => updateFilter('projectTypeFilter', value)}
-                  placeholder="Select project type..."
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="expertise-filter">Expertise</Label>
-                <ExpertiseCombobox
-                  value={filters.expertiseFilter}
-                  onValueChange={(value) => updateFilter('expertiseFilter', value)}
-                  placeholder="Select expertise..."
-                />
               </div>
             </div>
 
