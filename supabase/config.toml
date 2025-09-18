@@ -1,4 +1,1 @@
 project_id = "pvkzzkbwjntazemosbot"
-
-[functions.export-cv-pdf]
-verify_jwt = false
