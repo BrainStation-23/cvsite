@@ -124,9 +124,9 @@ Deno.serve(async (req) => {
       )
       .map(employee => ({
         employeeId: employee.employeeId,
-        email: employee.workEmail,
+        email: employee.workEmail?.toLowerCase(),
         name: employee.name || '',
-        managerEmail: employee.parent?.workEmail || null,
+        managerEmail: employee.parent?.workEmail?.toLowerCase() || null,
         sbuName: employee.sbu?.name || null,
         departmentName: employee.department?.name || null,
         jobPositionName: employee.jobPosition?.name?.split(",")[0].trim() || null, // Data Sanitization workaround
