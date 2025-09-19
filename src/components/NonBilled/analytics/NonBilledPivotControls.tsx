@@ -18,6 +18,7 @@ const NON_BILLED_DIMENSION_OPTIONS = [
   { value: 'sbu', label: 'SBU', description: 'Strategic Business Unit' },
   { value: 'expertise', label: 'Expertise', description: 'Area of expertise' },
   { value: 'bill_type', label: 'Bill Type', description: 'Non-billed resource classification' },
+  { value: 'experience_level', label: 'Experience Level', description: 'Resource experience level' },
 ];
 
 export const NonBilledPivotControls: React.FC<NonBilledPivotControlsProps> = ({
