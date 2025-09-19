@@ -26,10 +26,10 @@ interface OdooEmployee {
     name: string;
   } | null;
   jobRole: {
-    jobType: {
-      name: string;
-    } | null;
     role: string | null;
+  } | null;
+  jobType: {
+    name: string;
   } | null;
   resignationDate: string | null;
   exitDate: string | null;
@@ -81,17 +81,17 @@ Deno.serve(async (req) => {
                   department {
                       name
                   }
+                  jobRole {
+                    role
+                  }
+                  jobType {
+                      name
+                  }
                   jobPosition {
                       name
                   }
-                  jobRole {
-                      jobType {
-                          name
-                      }
-                      role
-                  }
+              }
             }
-        }
 
       `
     };
@@ -131,7 +131,7 @@ Deno.serve(async (req) => {
         departmentName: employee.department?.name || null,
         jobPositionName: employee.jobPosition?.name?.split(",")[0].trim() || null, // Data Sanitization workaround
         jobRoleName: employee.jobRole?.role || null,
-        jobTypeName: employee.jobRole?.jobType?.name || null,
+        jobTypeName: employee.jobType?.name || null,
         joiningDate: employee.joiningDate || null,
         careerStartDate: employee.careerStartDate || null,
         dateOfBirth: employee.dateOfBirth || null,
