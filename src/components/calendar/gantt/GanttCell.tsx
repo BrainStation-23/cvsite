@@ -3,20 +3,28 @@ import { GanttEngagement, GanttEngagementPosition } from './types';
 import { formatEngagementTooltip } from './utils';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
+import { Copy } from 'lucide-react';
 
 interface GanttCellProps {
   engagement: GanttEngagement;
   position: GanttEngagementPosition;
   onEngagementClick?: (engagement: GanttEngagement) => void;
+  onDuplicateClick?: (engagement: GanttEngagement) => void;
 }
 
 export const GanttCell: React.FC<GanttCellProps> = ({
   engagement,
   position,
-  onEngagementClick
+  onEngagementClick,
+  onDuplicateClick
 }) => {
   const handleClick = () => {
     onEngagementClick?.(engagement);
+  };
+
+  const handleDuplicateClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    onDuplicateClick?.(engagement);
   };
 
   const backgroundColor = engagement.bill_type?.color_code || '#6b7280';
@@ -61,6 +69,20 @@ export const GanttCell: React.FC<GanttCellProps> = ({
       title={formatEngagementTooltip(engagement)}
     >
       <div className="h-full flex items-center px-2 py-1">
+        {/* Duplicate button - shows on hover */}
+        {onDuplicateClick && (
+          <button
+            onClick={handleDuplicateClick}
+            className={cn(
+              "absolute top-1 right-1 p-1 rounded-sm transition-all duration-200 opacity-0 group-hover:opacity-100",
+              "hover:scale-110 z-10",
+              isLight ? "bg-white/80 text-gray-700 hover:bg-white" : "bg-black/80 text-white hover:bg-black/90"
+            )}
+            title="Duplicate assignment"
+          >
+            <Copy className="h-3 w-3" />
+          </button>
+        )}
         {isMediumCell ? (
           <div className="flex-1 min-w-0">
             <div className={cn("flex items-center gap-1.5 w-full", textColor)}>

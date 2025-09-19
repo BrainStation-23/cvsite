@@ -84,6 +84,10 @@ const ResourceCalendarView: React.FC = () => {
   const { toast } = useToast();
   const { createResourcePlanning, updateResourcePlanning, deleteResourcePlanning, duplicateResourcePlanning } = useResourcePlanningOperations();
 
+  const handleDuplicateClick = (engagement: GanttEngagement) => {
+    duplicateResourcePlanning(engagement.id);
+  };
+
   // Fetch resource data
   const { data: resourceData, isLoading, error } = useResourceCalendarData(
     searchQuery,
@@ -292,6 +296,7 @@ const ResourceCalendarView: React.FC = () => {
               isLoading={isLoading}
               onEngagementClick={handleEngagementClick}
               onEmptySpaceClick={handleEmptySpaceClick}
+              onDuplicateClick={handleDuplicateClick}
             />
           )}
         </div>
