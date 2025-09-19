@@ -1896,6 +1896,10 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: undefined
       }
+      duplicate_resource_assignment: {
+        Args: { assignment_id: string }
+        Returns: Json
+      }
       export_profile_json: {
         Args: { target_user_id?: string }
         Returns: Json

@@ -82,7 +82,7 @@ const ResourceCalendarView: React.FC = () => {
   const [preselectedStartDate, setPreselectedStartDate] = useState<Date | null>(null);
 
   const { toast } = useToast();
-  const { createResourcePlanning, updateResourcePlanning, deleteResourcePlanning } = useResourcePlanningOperations();
+  const { createResourcePlanning, updateResourcePlanning, deleteResourcePlanning, duplicateResourcePlanning } = useResourcePlanningOperations();
 
   // Fetch resource data
   const { data: resourceData, isLoading, error } = useResourceCalendarData(
@@ -225,6 +225,19 @@ const ResourceCalendarView: React.FC = () => {
     }
   };
 
+  const handleModalDuplicate = async (id: string) => {
+    try {
+      duplicateResourcePlanning(id);
+      handleModalClose();
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to duplicate engagement",
+        variant: "destructive",
+      });
+    }
+  };
+
   return (
       <div className="space-y-6">
         {/* Header with Back Button */}
@@ -289,6 +302,7 @@ const ResourceCalendarView: React.FC = () => {
           onClose={handleModalClose}
           onSave={handleModalSave}
           onDelete={handleModalDelete}
+          onDuplicate={handleModalDuplicate}
           mode={modalMode}
           initialData={selectedEngagement}
           preselectedResourceId={preselectedResourceId || undefined}

@@ -20,6 +20,15 @@ interface UpdateResourcePlanningData {
   updates: Partial<ResourcePlanningData>;
 }
 
+interface DuplicateResourceResponse {
+  success: boolean;
+  new_assignment_id?: string;
+  start_date?: string;
+  end_date?: string;
+  message?: string;
+  error?: string;
+}
+
 export const useResourcePlanningOperations = () => {
   const queryClient = useQueryClient();
   const { toast } = useToast();
@@ -121,14 +130,49 @@ export const useResourcePlanningOperations = () => {
     },
   });
 
+  const duplicateResourcePlanning = useMutation({
+    mutationFn: async (assignmentId: string): Promise<DuplicateResourceResponse> => {
+      const { data, error } = await supabase.rpc('duplicate_resource_assignment', {
+        assignment_id: assignmentId,
+      });
+
+      if (error) throw error;
+      
+      const response = data as unknown as DuplicateResourceResponse;
+      if (response && !response.success) {
+        throw new Error(response.error || 'Failed to duplicate assignment');
+      }
+      return response;
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ['planned-resources-tab'] });
+      queryClient.invalidateQueries({ queryKey: ['weekly-validation-tab'] });
+      queryClient.invalidateQueries({ queryKey: ['resource-calendar-data'] });
+      queryClient.invalidateQueries({ queryKey: ['unplanned-resources'] });
+      toast({
+        title: 'Success',
+        description: data?.message || 'Assignment duplicated successfully as a forecast.',
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: 'Error',
+        description: error.message || 'Failed to duplicate assignment.',
+        variant: 'destructive',
+      });
+    },
+  });
+
   return {
     createResourcePlanning: createResourcePlanning.mutate,
     updateResourcePlanning: updateResourcePlanning.mutate,
     invalidateResourcePlanning: invalidateResourcePlanning.mutate,
     deleteResourcePlanning: deleteResourcePlanning.mutate,
+    duplicateResourcePlanning: duplicateResourcePlanning.mutate,
     isCreating: createResourcePlanning.isPending,
     isUpdating: updateResourcePlanning.isPending,
     isInvalidating: invalidateResourcePlanning.isPending,
     isDeleting: deleteResourcePlanning.isPending,
+    isDuplicating: duplicateResourcePlanning.isPending,
   };
 };
