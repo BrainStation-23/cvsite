@@ -4,7 +4,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Label } from '@/components/ui/label';
 import { DateRangePickerWithPresets } from '@/components/statistics/DateRangePickerWithPresets';
 import { Button } from '@/components/ui/button';
-import { RefreshCw, Download, BarChart3, AlertTriangle, TrendingUp } from 'lucide-react';
+import { RefreshCw, Download, BarChart3, AlertTriangle, TrendingUp, Table2 } from 'lucide-react';
 
 import { 
   useNonBilledOverview, 
@@ -18,6 +18,7 @@ import { ExperienceDistributionChart } from './ExperienceDistributionChart';
 import { DimensionalAnalysisChart } from './DimensionalAnalysisChart';
 import { RiskAnalytics } from './RiskAnalytics';
 import { TrendsChart } from './TrendsChart';
+import { NonBilledPivotTableContainer } from './NonBilledPivotTableContainer';
 
 
 export function NonBilledAnalyticsDashboard() {
@@ -124,10 +125,14 @@ export function NonBilledAnalyticsDashboard() {
 
       {/* Main Analytics Tabs */}
       <Tabs defaultValue="overview" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-3">
+        <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="overview" className="flex items-center gap-2">
             <BarChart3 className="h-4 w-4" />
             Overview
+          </TabsTrigger>
+          <TabsTrigger value="pivot" className="flex items-center gap-2">
+            <Table2 className="h-4 w-4" />
+            Pivot Analysis
           </TabsTrigger>
           <TabsTrigger value="risk" className="flex items-center gap-2">
             <AlertTriangle className="h-4 w-4" />
@@ -202,6 +207,13 @@ export function NonBilledAnalyticsDashboard() {
               />
             )}
           </div>
+        </TabsContent>
+
+        <TabsContent value="pivot" className="space-y-6">
+          <NonBilledPivotTableContainer
+            startDate={startDate}
+            endDate={endDate}
+          />
         </TabsContent>
 
         <TabsContent value="risk" className="space-y-6">
