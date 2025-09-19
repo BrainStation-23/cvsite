@@ -28,6 +28,7 @@ interface EngagementModalProps {
   onClose: () => void;
   onSave: (data: EngagementFormData) => void;
   onDelete?: (id: string) => void;
+  onDuplicate?: (id: string) => void;
   initialData?: ResourceCalendarData | null;
   preselectedResourceId?: string;
   preselectedStartDate?: Date;
@@ -40,6 +41,7 @@ export const EngagementModal: React.FC<EngagementModalProps> = ({
   onClose,
   onSave,
   onDelete,
+  onDuplicate,
   initialData,
   preselectedResourceId,
   preselectedStartDate,
@@ -374,7 +376,7 @@ export const EngagementModal: React.FC<EngagementModalProps> = ({
           </div>
 
           <div className="flex justify-between space-x-2 pt-4">
-            <div>
+            <div className="flex space-x-2">
               {mode === 'edit' && isForecasted && onDelete && initialData?.id && (
                 <Button
                   type="button"
@@ -385,6 +387,18 @@ export const EngagementModal: React.FC<EngagementModalProps> = ({
                   }}
                 >
                   Delete
+                </Button>
+              )}
+              {mode === 'edit' && onDuplicate && initialData?.id && (
+                <Button
+                  type="button"
+                  variant="secondary"
+                  onClick={() => {
+                    onDuplicate(initialData.id);
+                    handleClose();
+                  }}
+                >
+                  Duplicate
                 </Button>
               )}
             </div>
