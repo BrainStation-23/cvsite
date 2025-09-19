@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { format } from 'date-fns';
+import { PivotStatistics } from '@/hooks/use-resource-pivot-statistics';
 
 interface NonBilledOverviewData {
   overview: {
@@ -172,6 +173,64 @@ export function useNonBilledTrendsAnalysis(
 
       if (error) throw error;
       return data as unknown as TrendsAnalysisData;
+    },
+  });
+}
+
+interface NonBilledPivotFilters {
+  sbuFilter?: string | null;
+  billTypeFilter?: string | null;
+  expertiseTypeFilter?: string | null;
+  startDate?: Date | null;
+  endDate?: Date | null;
+}
+
+export function useNonBilledPivotStatistics(
+  primaryDimension: string = 'sbu',
+  secondaryDimension: string = 'bill_type',
+  filters: NonBilledPivotFilters = {},
+  enableGrouping: boolean = false
+) {
+  return useQuery({
+    queryKey: ['non-billed-pivot-statistics', primaryDimension, secondaryDimension, filters, enableGrouping],
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc('get_non_billed_pivot_statistics_with_grouping', {
+        primary_dimension: primaryDimension,
+        secondary_dimension: secondaryDimension,
+        sbu_filter: filters.sbuFilter || null,
+        bill_type_filter: filters.billTypeFilter || null,
+        expertise_type_filter: filters.expertiseTypeFilter || null,
+        start_date_filter: filters.startDate ? format(filters.startDate, 'yyyy-MM-dd') : null,
+        end_date_filter: filters.endDate ? format(filters.endDate, 'yyyy-MM-dd') : null,
+        enable_grouping: enableGrouping,
+      });
+
+      if (error) {
+        console.error('Error fetching non-billed pivot statistics:', error);
+        throw error;
+      }
+
+      // Properly parse the JSON response from the RPC function
+      const result = data as unknown as PivotStatistics;
+      
+      // Ensure the data has the expected structure with default values
+      return {
+        pivot_data: result?.pivot_data || [],
+        row_totals: result?.row_totals || [],
+        col_totals: result?.col_totals || [],
+        grand_total: result?.grand_total || 0,
+        dimensions: result?.dimensions || {
+          primary: primaryDimension,
+          secondary: secondaryDimension
+        },
+        grouping: result?.grouping || {
+          enabled: enableGrouping,
+          info: {
+            row_groups: null,
+            col_groups: null
+          }
+        }
+      } as PivotStatistics;
     },
   });
 }
