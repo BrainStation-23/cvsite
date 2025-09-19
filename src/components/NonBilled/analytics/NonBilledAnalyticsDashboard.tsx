@@ -10,8 +10,7 @@ import {
   useNonBilledOverview, 
   useNonBilledDimensionalAnalysis, 
   useNonBilledRiskAnalytics, 
-  useNonBilledTrendsAnalysis,
-  useNonBilledPivotStatistics
+  useNonBilledTrendsAnalysis 
 } from '@/hooks/use-non-billed-analytics';
 
 import { OverviewCards } from './OverviewCards';
@@ -19,7 +18,6 @@ import { ExperienceDistributionChart } from './ExperienceDistributionChart';
 import { DimensionalAnalysisChart } from './DimensionalAnalysisChart';
 import { RiskAnalytics } from './RiskAnalytics';
 import { TrendsChart } from './TrendsChart';
-import { NonBilledPivotTableContainer } from './NonBilledPivotTableContainer';
 
 
 export function NonBilledAnalyticsDashboard() {
@@ -28,13 +26,6 @@ export function NonBilledAnalyticsDashboard() {
   const [benchFilter, setBenchFilter] = useState<boolean | null>(null);
   
   const [periodType, setPeriodType] = useState<'daily' | 'weekly' | 'monthly'>('monthly');
-
-  // Pivot table filters
-  const [pivotFilters, setPivotFilters] = useState({
-    sbuFilter: null as string | null,
-    billTypeFilter: null as string | null,
-    expertiseTypeFilter: null as string | null,
-  });
 
   // Fetch analytics data
   const overviewQuery = useNonBilledOverview({
@@ -64,21 +55,9 @@ export function NonBilledAnalyticsDashboard() {
   const riskQuery = useNonBilledRiskAnalytics(30, benchFilter);
   const trendsQuery = useNonBilledTrendsAnalysis(periodType, 365, benchFilter);
 
-  // Pivot statistics query
-  const pivotQuery = useNonBilledPivotStatistics(
-    'sbu',
-    'bill_type',
-    {
-      ...pivotFilters,
-      startDate,
-      endDate,
-    },
-    false
-  );
-
   const isLoading = overviewQuery.isLoading || sbuQuery.isLoading || 
                    expertiseQuery.isLoading || billTypeQuery.isLoading ||
-                   riskQuery.isLoading || trendsQuery.isLoading || pivotQuery.isLoading;
+                   riskQuery.isLoading || trendsQuery.isLoading;
 
   const handleRefresh = () => {
     overviewQuery.refetch();
@@ -87,19 +66,6 @@ export function NonBilledAnalyticsDashboard() {
     billTypeQuery.refetch();
     riskQuery.refetch();
     trendsQuery.refetch();
-    pivotQuery.refetch();
-  };
-
-  const handlePivotFiltersChange = (newFilters: any) => {
-    setPivotFilters(prev => ({ ...prev, ...newFilters }));
-  };
-
-  const handleClearPivotFilters = () => {
-    setPivotFilters({
-      sbuFilter: null,
-      billTypeFilter: null,
-      expertiseTypeFilter: null,
-    });
   };
 
 
@@ -175,24 +141,66 @@ export function NonBilledAnalyticsDashboard() {
 
         <TabsContent value="overview" className="space-y-6">
           <div className="mb-4">
-            <h2 className="text-xl font-semibold">Non-Billed Resources Cross-Dimensional Analysis</h2>
+            <h2 className="text-xl font-semibold">Experience Distribution</h2>
             <p className="text-sm text-muted-foreground">
-              Interactive pivot table showing count, average duration, initial resources (&lt;30 days), and critical resources (&gt;60 days)
-              {benchFilter === true ? ' - Showing bench resources only' : 
-               benchFilter === false ? ' - Showing non-bench resources only' : 
-               ' - Showing all non-billed resources'}
+              {benchFilter === true ? 'Showing bench resources only' : 
+               benchFilter === false ? 'Showing non-bench resources only' : 
+               'Showing all non-billed resources'}
             </p>
           </div>
 
-          {/* Pivot Table Container */}
-          <div className="bg-card border rounded-lg">
-            <NonBilledPivotTableContainer
-              filters={pivotFilters}
-              onFiltersChange={handlePivotFiltersChange}
-              onClearFilters={handleClearPivotFilters}
-              startDate={startDate}
-              endDate={endDate}
-            />
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Experience Distribution */}
+            <div>
+              {overviewQuery.data && (
+                <ExperienceDistributionChart
+                  data={{
+                    ...overviewQuery.data.experience_distribution,
+                    total_count: overviewQuery.data.overview.total_non_billed_resources_count
+                  }}
+                  isLoading={overviewQuery.isLoading}
+                />
+              )}
+            </div>
+
+            {/* SBU Analysis Preview */}
+            {sbuQuery.data && (
+              <DimensionalAnalysisChart
+                data={sbuQuery.data}
+                isLoading={sbuQuery.isLoading}
+                dimension="sbu"
+                title={`Non Billed Analysis by SBU${
+                  benchFilter === true ? " (Bench Only)" : 
+                  benchFilter === false ? " (Non-Bench Only)" : ""
+                }`}
+              />
+            )}
+            
+            {/* Expertise Analysis */}
+            {expertiseQuery.data && (
+              <DimensionalAnalysisChart
+                data={expertiseQuery.data}
+                isLoading={expertiseQuery.isLoading}
+                dimension="expertise"
+                title={`Non Billed Analysis by Expertise${
+                  benchFilter === true ? " (Bench Only)" : 
+                  benchFilter === false ? " (Non-Bench Only)" : ""
+                }`}
+              />
+            )}
+
+            {/* Bill Type Analysis */}
+            {billTypeQuery.data && (
+              <DimensionalAnalysisChart
+                data={billTypeQuery.data}
+                isLoading={billTypeQuery.isLoading}
+                dimension="bill_type"
+                title={`Non Billed Analysis by Bill Type${
+                  benchFilter === true ? " (Bench Only)" : 
+                  benchFilter === false ? " (Non-Bench Only)" : ""
+                }`}
+              />
+            )}
           </div>
         </TabsContent>
 
