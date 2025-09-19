@@ -18,6 +18,7 @@ import { ExperienceDistributionChart } from './ExperienceDistributionChart';
 import { DimensionalAnalysisChart } from './DimensionalAnalysisChart';
 import { RiskAnalytics } from './RiskAnalytics';
 import { TrendsChart } from './TrendsChart';
+import { PivotTable } from './PivotTable';
 
 
 export function NonBilledAnalyticsDashboard() {
@@ -148,7 +149,7 @@ export function NonBilledAnalyticsDashboard() {
                'Showing all non-billed resources'}
             </p>
           </div>
-
+          <PivotTable startDate={startDate} endDate={endDate} benchFilter={benchFilter} />
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Experience Distribution */}
             <div>

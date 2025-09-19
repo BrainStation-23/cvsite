@@ -175,3 +175,50 @@ export function useNonBilledTrendsAnalysis(
     },
   });
 }
+
+interface PivotTableFilters {
+  startDate?: Date | null;
+  endDate?: Date | null;
+  billTypeFilter?: string[] | null;
+  expertiseTypeFilter?: string[] | null;
+  sbuFilter?: string[] | null;
+  benchFilter?: boolean | null;
+  primaryDimension?: string | null;
+  secondaryDimension?: string | null;
+  enableGrouping?: boolean | null;
+  
+}
+
+export function useNonBilledPivotTable(filters: PivotTableFilters = {}) {
+  return useQuery({
+    queryKey: ['nonBilledPivotTable', filters],
+    queryFn: async () => {
+      const { 
+        startDate, endDate, billTypeFilter, expertiseTypeFilter, sbuFilter, benchFilter,
+        primaryDimension, secondaryDimension, enableGrouping
+      } = filters;
+
+      const { data, error } = await supabase
+        .rpc('get_non_billed_pivot_statistics_with_grouping', {
+          start_date_filter: startDate ? format(startDate, 'yyyy-MM-dd') : null,
+          end_date_filter: endDate ? format(endDate, 'yyyy-MM-dd') : null,
+          bill_type_filter: billTypeFilter?.length ? billTypeFilter.join(',') : null,
+          expertise_type_filter: expertiseTypeFilter?.length ? expertiseTypeFilter.join(',') : null,
+          sbu_filter: sbuFilter?.length ? sbuFilter.join(',') : null,
+          primary_dimension: primaryDimension ?? null,
+          secondary_dimension: secondaryDimension ?? null,
+          enable_grouping: enableGrouping ?? true,
+          
+        });
+
+      if (error) {
+        console.error(error);
+        throw new Error(error.message);
+      } else {
+        console.log(data);
+      }
+
+      return data;
+    },
+  });
+}
