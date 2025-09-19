@@ -24,7 +24,8 @@ interface BillTypeMultiSelectProps {
 export const BillTypeMultiSelect: React.FC<BillTypeMultiSelectProps> = ({
   selectedValues,
   onSelectionChange,
-  placeholder = "Select bill types..."
+  placeholder = "Select bill types...",
+  onMouseDown,
 }) => {
   const [open, setOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -72,7 +73,7 @@ export const BillTypeMultiSelect: React.FC<BillTypeMultiSelectProps> = ({
   };
 
   return (
-    <div className="space-y-2">
+    <div className="space-y-2" onMouseDown={onMouseDown}>
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
           <Button
