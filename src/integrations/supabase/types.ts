@@ -1877,7 +1877,7 @@ export type Database = {
         Returns: Json
       }
       bulk_update_resource_planning: {
-        Args: { users_data: Json }
+        Args: { updates_data: Json }
         Returns: Json
       }
       bulk_update_users: {
@@ -2051,6 +2051,19 @@ export type Database = {
           page_size?: number
           resource_type_filter?: string
           search_term?: string
+        }
+        Returns: Json
+      }
+      get_non_billed_pivot_statistics_with_grouping: {
+        Args: {
+          bill_type_filter?: string
+          enable_grouping?: boolean
+          end_date_filter?: string
+          expertise_type_filter?: string
+          primary_dimension?: string
+          sbu_filter?: string
+          secondary_dimension?: string
+          start_date_filter?: string
         }
         Returns: Json
       }
