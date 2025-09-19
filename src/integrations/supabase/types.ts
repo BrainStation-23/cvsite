@@ -727,6 +727,66 @@ export type Database = {
         }
         Relationships: []
       }
+      job_position: {
+        Row: {
+          created_at: string
+          id: string
+          name: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string | null
+        }
+        Relationships: []
+      }
+      job_role: {
+        Row: {
+          created_at: string
+          id: string
+          name: string | null
+          purpose: string | null
+          responsibilities: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name?: string | null
+          purpose?: string | null
+          responsibilities?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string | null
+          purpose?: string | null
+          responsibilities?: string | null
+        }
+        Relationships: []
+      }
+      job_type: {
+        Row: {
+          created_at: string
+          id: string
+          name: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string | null
+        }
+        Relationships: []
+      }
       non_billed_resources: {
         Row: {
           bill_type_id: string | null
@@ -993,6 +1053,9 @@ export type Database = {
           first_name: string | null
           has_overhead: boolean
           id: string
+          job_position: string | null
+          job_role: string | null
+          job_type: string | null
           last_name: string | null
           manager: string | null
           resignation_date: string | null
@@ -1013,6 +1076,9 @@ export type Database = {
           first_name?: string | null
           has_overhead?: boolean
           id: string
+          job_position?: string | null
+          job_role?: string | null
+          job_type?: string | null
           last_name?: string | null
           manager?: string | null
           resignation_date?: string | null
@@ -1033,6 +1099,9 @@ export type Database = {
           first_name?: string | null
           has_overhead?: boolean
           id?: string
+          job_position?: string | null
+          job_role?: string | null
+          job_type?: string | null
           last_name?: string | null
           manager?: string | null
           resignation_date?: string | null
@@ -1046,6 +1115,27 @@ export type Database = {
             columns: ["expertise"]
             isOneToOne: false
             referencedRelation: "expertise_types"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "profiles_job_position_fkey"
+            columns: ["job_position"]
+            isOneToOne: false
+            referencedRelation: "job_position"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "profiles_job_role_fkey"
+            columns: ["job_role"]
+            isOneToOne: false
+            referencedRelation: "job_role"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "profiles_job_type_fkey"
+            columns: ["job_type"]
+            isOneToOne: false
+            referencedRelation: "job_type"
             referencedColumns: ["id"]
           },
           {
