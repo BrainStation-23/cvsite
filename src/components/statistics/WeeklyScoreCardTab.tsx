@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
-import { CalendarIcon, RefreshCw, TrendingUp, Users, BarChart3, Target, Trash2 } from 'lucide-react';
+import { CalendarIcon, RefreshCw, TrendingUp, Users, BarChart3, Target, Trash2, ChevronDown } from 'lucide-react';
 import { useWeeklyScoreCard, useCalculateWeeklyScoreCard, useDeleteWeeklyScoreCard } from '@/hooks/use-weekly-score-card';
 import { useToast } from '@/hooks/use-toast';
 
@@ -33,6 +33,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '../ui/collapsible';
 
 export const WeeklyScoreCardTab: React.FC = () => {
   const [startDate, setStartDate] = useState<string>('');
@@ -40,7 +41,7 @@ export const WeeklyScoreCardTab: React.FC = () => {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [selectedScoreCard, setSelectedScoreCard] = useState<{ id: string; timestamp: string } | null>(null);
   const { toast } = useToast();
-
+  const [isOpen, setIsOpen] = React.useState(false);
   const { data: scoreCards, isLoading, error } = useWeeklyScoreCard({
     startDate: startDate || undefined,
     endDate: endDate || undefined,
@@ -53,14 +54,14 @@ export const WeeklyScoreCardTab: React.FC = () => {
     try {
       const result = await calculateNewCard();
       const resultData = result.data as unknown as CalculateWeeklyScoreCardResponse;
-      
+
       console.log('Calculate weekly score card result:', resultData);
-      
+
       if (resultData?.status === 'success') {
         const { data } = resultData;
         toast({
           title: 'Success',
-          description: data 
+          description: data
             ? `Calculated for ${data.total_resources} resources with ${Math.round(data.utilization_rate * 100)}% utilization rate`
             : 'New weekly score card calculated successfully',
         });
@@ -137,43 +138,53 @@ export const WeeklyScoreCardTab: React.FC = () => {
     <div className="space-y-6">
       {/* Filters and Actions */}
       <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <CalendarIcon className="h-5 w-5" />
-            Weekly Score Card Filters
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="flex flex-wrap items-end gap-4">
-            <div className="flex-1 min-w-48">
-              <Label htmlFor="startDate">Start Date</Label>
-              <DatePicker
-                value={startDate}
-                onChange={setStartDate}
-                placeholder="Select start date"
-              />
-            </div>
-            <div className="flex-1 min-w-48">
-              <Label htmlFor="endDate">End Date</Label>
-              <DatePicker
-                value={endDate}
-                onChange={setEndDate}
-                placeholder="Select end date"
-              />
-            </div>
-            <Button variant="outline" onClick={clearFilters}>
-              Clear Filters
-            </Button>
-            <Button 
-              onClick={handleCalculateNewCard}
-              disabled={isCalculating}
-              className="flex items-center gap-2"
-            >
-              <RefreshCw className={`h-4 w-4 ${isCalculating ? 'animate-spin' : ''}`} />
-              Calculate New
-            </Button>
-          </div>
-        </CardContent>
+        <Collapsible open={isOpen} onOpenChange={setIsOpen}>
+          <CollapsibleTrigger asChild>
+            <CardHeader className="cursor-pointer hover:bg-muted/50 transition-colors">
+              <CardTitle className="flex items-center justify-between text-base">
+                <div className="flex items-center gap-2">
+                  <CalendarIcon className="h-5 w-5" />
+                  <Label className="text-sm font-medium">Weekly Score Card Filters</Label>
+                </div>
+
+                <ChevronDown className={`h-4 w-4 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+              </CardTitle>
+            </CardHeader>
+          </CollapsibleTrigger>
+          <CollapsibleContent>
+            <CardContent>
+              <div className="flex flex-wrap items-end gap-4">
+                <div className="flex-1 min-w-48">
+                  <Label htmlFor="startDate">Start Date</Label>
+                  <DatePicker
+                    value={startDate}
+                    onChange={setStartDate}
+                    placeholder="Select start date"
+                  />
+                </div>
+                <div className="flex-1 min-w-48">
+                  <Label htmlFor="endDate">End Date</Label>
+                  <DatePicker
+                    value={endDate}
+                    onChange={setEndDate}
+                    placeholder="Select end date"
+                  />
+                </div>
+                <Button variant="outline" onClick={clearFilters}>
+                  Clear Filters
+                </Button>
+                <Button
+                  onClick={handleCalculateNewCard}
+                  disabled={isCalculating}
+                  className="flex items-center gap-2"
+                >
+                  <RefreshCw className={`h-4 w-4 ${isCalculating ? 'animate-spin' : ''}`} />
+                  Calculate New
+                </Button>
+              </div>
+            </CardContent>
+          </CollapsibleContent>
+        </Collapsible>
       </Card>
 
       {/* Modern Weekly Score Cards Grid */}
@@ -237,8 +248,8 @@ export const WeeklyScoreCardTab: React.FC = () => {
                         </span>
                         <span className="text-sm font-bold">{utilizationPercentage}%</span>
                       </div>
-                      <Progress 
-                        value={utilizationPercentage} 
+                      <Progress
+                        value={utilizationPercentage}
                         className="h-2"
                       />
                     </div>
@@ -313,7 +324,7 @@ export const WeeklyScoreCardTab: React.FC = () => {
         <Card>
           <CardContent className="p-6 text-center">
             <p className="text-muted-foreground">No weekly score card data available for the selected period.</p>
-            <Button 
+            <Button
               onClick={handleCalculateNewCard}
               disabled={isCalculating}
               className="mt-4 flex items-center gap-2 mx-auto"
@@ -324,7 +335,7 @@ export const WeeklyScoreCardTab: React.FC = () => {
           </CardContent>
         </Card>
       )}
-      
+
       {/* Delete Confirmation Dialog */}
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent>
@@ -338,7 +349,7 @@ export const WeeklyScoreCardTab: React.FC = () => {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction 
+            <AlertDialogAction
               onClick={handleDeleteConfirm}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
               disabled={deleteScoreCard.isPending}

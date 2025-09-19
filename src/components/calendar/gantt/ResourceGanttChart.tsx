@@ -11,6 +11,7 @@ interface ResourceGanttChartProps {
   isLoading?: boolean;
   onEngagementClick?: (engagement: GanttEngagement) => void;
   onEmptySpaceClick?: (resourceId: string, clickDate: Date) => void;
+  onDuplicateClick?: (engagement: GanttEngagement) => void;
   monthCount?: number;
 }
 
@@ -20,6 +21,7 @@ export const ResourceGanttChart: React.FC<ResourceGanttChartProps> = ({
   isLoading = false,
   onEngagementClick,
   onEmptySpaceClick,
+  onDuplicateClick,
   monthCount = 3,
 }) => {
   // --- Add sort state ---
@@ -120,6 +122,7 @@ export const ResourceGanttChart: React.FC<ResourceGanttChartProps> = ({
             timeline={timeline}
             onEngagementClick={onEngagementClick}
             onEmptySpaceClick={onEmptySpaceClick}
+            onDuplicateClick={onDuplicateClick}
           />
         ))}
         {visibleCount < ganttData.length && (

@@ -68,14 +68,14 @@ export const DateRangePickerWithPresets: React.FC<DateRangePickerWithPresetsProp
     onDateRangeChange(range);
     setTempStartDate(range.startDate || undefined);
     setTempEndDate(range.endDate || undefined);
-    setIsOpen(false);
+    setIsOpen(true);
   };
   const handleApplyCustomRange = () => {
     onDateRangeChange({
       startDate: tempStartDate || null,
       endDate: tempEndDate || null
     });
-    setIsOpen(false);
+    setIsOpen(true);
   };
   const handleClearRange = () => {
     onDateRangeChange({
@@ -84,7 +84,7 @@ export const DateRangePickerWithPresets: React.FC<DateRangePickerWithPresetsProp
     });
     setTempStartDate(undefined);
     setTempEndDate(undefined);
-    setIsOpen(false);
+    setIsOpen(true);
   };
   const formatDateRange = () => {
     if (!startDate && !endDate) return "Select date range";

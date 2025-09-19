@@ -727,6 +727,54 @@ export type Database = {
         }
         Relationships: []
       }
+      job_role: {
+        Row: {
+          color_code: string | null
+          created_at: string
+          id: string
+          name: string | null
+          purpose: string | null
+          responsibilities: string | null
+        }
+        Insert: {
+          color_code?: string | null
+          created_at?: string
+          id?: string
+          name?: string | null
+          purpose?: string | null
+          responsibilities?: string | null
+        }
+        Update: {
+          color_code?: string | null
+          created_at?: string
+          id?: string
+          name?: string | null
+          purpose?: string | null
+          responsibilities?: string | null
+        }
+        Relationships: []
+      }
+      job_type: {
+        Row: {
+          color_code: string | null
+          created_at: string
+          id: string
+          name: string | null
+        }
+        Insert: {
+          color_code?: string | null
+          created_at?: string
+          id?: string
+          name?: string | null
+        }
+        Update: {
+          color_code?: string | null
+          created_at?: string
+          id?: string
+          name?: string | null
+        }
+        Relationships: []
+      }
       non_billed_resources: {
         Row: {
           bill_type_id: string | null
@@ -993,6 +1041,8 @@ export type Database = {
           first_name: string | null
           has_overhead: boolean
           id: string
+          job_role: string | null
+          job_type: string | null
           last_name: string | null
           manager: string | null
           resignation_date: string | null
@@ -1013,6 +1063,8 @@ export type Database = {
           first_name?: string | null
           has_overhead?: boolean
           id: string
+          job_role?: string | null
+          job_type?: string | null
           last_name?: string | null
           manager?: string | null
           resignation_date?: string | null
@@ -1033,6 +1085,8 @@ export type Database = {
           first_name?: string | null
           has_overhead?: boolean
           id?: string
+          job_role?: string | null
+          job_type?: string | null
           last_name?: string | null
           manager?: string | null
           resignation_date?: string | null
@@ -1046,6 +1100,20 @@ export type Database = {
             columns: ["expertise"]
             isOneToOne: false
             referencedRelation: "expertise_types"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "profiles_job_role_fkey"
+            columns: ["job_role"]
+            isOneToOne: false
+            referencedRelation: "job_role"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "profiles_job_type_fkey"
+            columns: ["job_type"]
+            isOneToOne: false
+            referencedRelation: "job_type"
             referencedColumns: ["id"]
           },
           {
@@ -1877,7 +1945,7 @@ export type Database = {
         Returns: Json
       }
       bulk_update_resource_planning: {
-        Args: { users_data: Json }
+        Args: { updates_data: Json }
         Returns: Json
       }
       bulk_update_users: {
@@ -1895,6 +1963,10 @@ export type Database = {
       cleanup_expired_cv_tokens: {
         Args: Record<PropertyKey, never>
         Returns: undefined
+      }
+      duplicate_resource_assignment: {
+        Args: { assignment_id: string }
+        Returns: Json
       }
       export_profile_json: {
         Args: { target_user_id?: string }
@@ -2051,6 +2123,19 @@ export type Database = {
           page_size?: number
           resource_type_filter?: string
           search_term?: string
+        }
+        Returns: Json
+      }
+      get_non_billed_pivot_statistics_with_grouping: {
+        Args: {
+          bill_type_filter?: string
+          enable_grouping?: boolean
+          end_date_filter?: string
+          expertise_type_filter?: string
+          primary_dimension?: string
+          sbu_filter?: string
+          secondary_dimension?: string
+          start_date_filter?: string
         }
         Returns: Json
       }

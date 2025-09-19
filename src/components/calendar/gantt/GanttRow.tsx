@@ -9,13 +9,15 @@ interface GanttRowProps {
   timeline: GanttTimelineMonth[];
   onEngagementClick?: (engagement: GanttEngagement) => void;
   onEmptySpaceClick?: (resourceId: string, clickDate: Date) => void;
+  onDuplicateClick?: (engagement: GanttEngagement) => void;
 }
 
 export const GanttRow: React.FC<GanttRowProps> = ({ 
   resource, 
   timeline, 
   onEngagementClick,
-  onEmptySpaceClick 
+  onEmptySpaceClick,
+  onDuplicateClick 
 }) => {
   const timelineStart = timeline[0]?.weeks[0]?.weekStart;
   const timelineEnd = timeline[timeline.length - 1]?.weeks[timeline[timeline.length - 1].weeks.length - 1]?.weekEnd;
@@ -145,6 +147,7 @@ export const GanttRow: React.FC<GanttRowProps> = ({
               engagement={engagement}
               position={position}
               onEngagementClick={onEngagementClick}
+              onDuplicateClick={onDuplicateClick}
             />
           );
         })}

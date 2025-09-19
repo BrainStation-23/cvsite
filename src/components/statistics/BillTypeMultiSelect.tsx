@@ -24,7 +24,7 @@ interface BillTypeMultiSelectProps {
 export const BillTypeMultiSelect: React.FC<BillTypeMultiSelectProps> = ({
   selectedValues,
   onSelectionChange,
-  placeholder = "Select bill types..."
+  placeholder = "Select bill types...",
 }) => {
   const [open, setOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
