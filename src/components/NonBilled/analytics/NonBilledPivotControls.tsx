@@ -1,9 +1,11 @@
 import React from 'react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { ArrowRightLeft, RotateCcw, Group } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { ArrowUpDown, RotateCcw, Settings2, Table2, TrendingUp, BarChart3, Maximize2, Minimize2 } from 'lucide-react';
+import { NonBilledMetricType } from '@/hooks/use-non-billed-pivot-statistics';
 
 interface NonBilledPivotControlsProps {
   primaryDimension: string;
@@ -11,7 +13,11 @@ interface NonBilledPivotControlsProps {
   onPrimaryDimensionChange: (dimension: string) => void;
   onSecondaryDimensionChange: (dimension: string) => void;
   enableGrouping: boolean;
-  onEnableGroupingChange: (enabled: boolean) => void;
+  onGroupingChange: (enabled: boolean) => void;
+  primaryMetric: NonBilledMetricType;
+  onPrimaryMetricChange: (metric: NonBilledMetricType) => void;
+  displayMode: 'compact' | 'expanded';
+  onDisplayModeChange: (mode: 'compact' | 'expanded') => void;
 }
 
 const NON_BILLED_DIMENSION_OPTIONS = [
@@ -21,13 +27,24 @@ const NON_BILLED_DIMENSION_OPTIONS = [
   { value: 'experience_level', label: 'Experience Level', description: 'Resource experience level' },
 ];
 
+const METRIC_OPTIONS = [
+  { value: 'count', label: 'Count', description: 'Total number of non-billed resources' },
+  { value: 'avg_duration', label: 'Avg Duration', description: 'Average days in non-billed status' },
+  { value: 'initial_count', label: 'Initial Count', description: 'Resources in initial non-billed state' },
+  { value: 'critical_count', label: 'Critical Count', description: 'Resources requiring immediate attention' },
+] as const;
+
 export const NonBilledPivotControls: React.FC<NonBilledPivotControlsProps> = ({
   primaryDimension,
   secondaryDimension,
   onPrimaryDimensionChange,
   onSecondaryDimensionChange,
   enableGrouping,
-  onEnableGroupingChange,
+  onGroupingChange,
+  primaryMetric,
+  onPrimaryMetricChange,
+  displayMode,
+  onDisplayModeChange,
 }) => {
   const handleSwapDimensions = () => {
     onPrimaryDimensionChange(secondaryDimension);
@@ -39,123 +56,169 @@ export const NonBilledPivotControls: React.FC<NonBilledPivotControlsProps> = ({
     onSecondaryDimensionChange('bill_type');
   };
 
-  const getPrimaryOptions = () => NON_BILLED_DIMENSION_OPTIONS.filter(option => option.value !== secondaryDimension);
-  const getSecondaryOptions = () => NON_BILLED_DIMENSION_OPTIONS.filter(option => option.value !== primaryDimension);
-
   return (
     <div className="space-y-4">
-      {/* Controls Header */}
-      <div className="flex items-center justify-between">
-        <h3 className="text-sm font-medium text-foreground">Non-Billed Analysis Dimensions</h3>
-        <div className="flex items-center gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleReset}
-            className="h-8 px-3 text-xs"
-            title="Reset to default dimensions"
-          >
-            <RotateCcw className="h-3 w-3 mr-1" />
-            Reset
-          </Button>
-        </div>
-      </div>
+      {/* Main Controls Card */}
+      <Card>
+        <CardHeader className="pb-3">
+          <CardTitle className="flex items-center gap-2 text-sm">
+            <Settings2 className="w-4 h-4" />
+            Analysis Configuration
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {/* Dimension Selection */}
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-2">
+              <Label className="text-xs font-medium text-muted-foreground flex items-center gap-1">
+                <TrendingUp className="w-3 h-3" />
+                Primary Dimension (Rows)
+              </Label>
+              <Select value={primaryDimension} onValueChange={onPrimaryDimensionChange}>
+                <SelectTrigger className="h-8 text-xs">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {NON_BILLED_DIMENSION_OPTIONS.filter(opt => opt.value !== secondaryDimension).map(option => (
+                    <SelectItem key={option.value} value={option.value} className="text-xs">
+                      <div>
+                        <div className="font-medium">{option.label}</div>
+                        <div className="text-xs text-muted-foreground">{option.description}</div>
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
 
-      {/* Dimension Controls */}
-      <div className="flex items-center gap-4 p-4 rounded-lg border bg-muted/20">
-        <div className="flex items-center gap-3 flex-1">
-          <div className="space-y-1 min-w-0 flex-1">
-            <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-              Rows
-            </label>
-            <Select value={primaryDimension || 'sbu'} onValueChange={onPrimaryDimensionChange}>
-              <SelectTrigger className="h-9">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {getPrimaryOptions().map(option => (
-                  <SelectItem key={option.value} value={option.value}>
-                    <div className="flex flex-col items-start">
-                      <span className="font-medium">{option.label}</span>
-                      <span className="text-xs text-muted-foreground">{option.description}</span>
-                    </div>
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <div className="space-y-2">
+              <Label className="text-xs font-medium text-muted-foreground flex items-center gap-1">
+                <Table2 className="w-3 h-3" />
+                Secondary Dimension (Cols)
+              </Label>
+              <Select value={secondaryDimension} onValueChange={onSecondaryDimensionChange}>
+                <SelectTrigger className="h-8 text-xs">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {NON_BILLED_DIMENSION_OPTIONS.filter(opt => opt.value !== primaryDimension).map(option => (
+                    <SelectItem key={option.value} value={option.value} className="text-xs">
+                      <div>
+                        <div className="font-medium">{option.label}</div>
+                        <div className="text-xs text-muted-foreground">{option.description}</div>
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
           </div>
 
-          <div className="flex-shrink-0">
+          {/* Action Buttons */}
+          <div className="flex items-center gap-2">
             <Button
-              variant="ghost"
+              variant="outline"
               size="sm"
               onClick={handleSwapDimensions}
-              className="h-9 w-9 p-0 hover:bg-primary/10 hover:text-primary border border-dashed border-muted-foreground/30"
-              title="Swap rows and columns"
+              className="h-7 px-3 text-xs flex-1"
             >
-              <ArrowRightLeft className="h-4 w-4" />
+              <ArrowUpDown className="w-3 h-3 mr-1" />
+              Swap Dimensions
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleReset}
+              className="h-7 px-3 text-xs flex-1"
+            >
+              <RotateCcw className="w-3 h-3 mr-1" />
+              Reset
             </Button>
           </div>
 
-          <div className="space-y-1 min-w-0 flex-1">
-            <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-              Columns
-            </label>
-            <Select value={secondaryDimension || 'bill_type'} onValueChange={onSecondaryDimensionChange}>
-              <SelectTrigger className="h-9">
+          {/* Grouping Toggle */}
+          <div className="flex items-center justify-between py-2">
+            <div className="space-y-1">
+              <Label className="text-xs font-medium">Enable Grouping</Label>
+              <div className="text-xs text-muted-foreground">Hierarchical organization</div>
+            </div>
+            <div className="flex items-center space-x-2">
+              <Switch 
+                checked={enableGrouping} 
+                onCheckedChange={onGroupingChange} 
+              />
+            </div>
+          </div>
+
+          {/* Primary Metric Selection */}
+          <div className="space-y-2">
+            <Label className="text-xs font-medium text-muted-foreground flex items-center gap-1">
+              <BarChart3 className="w-3 h-3" />
+              Primary Metric
+            </Label>
+            <Select value={primaryMetric} onValueChange={(value) => onPrimaryMetricChange(value as NonBilledMetricType)}>
+              <SelectTrigger className="h-8 text-xs">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                {getSecondaryOptions().map(option => (
-                  <SelectItem key={option.value} value={option.value}>
-                    <div className="flex flex-col items-start">
-                      <span className="font-medium">{option.label}</span>
-                      <span className="text-xs text-muted-foreground">{option.description}</span>
+                {METRIC_OPTIONS.map(option => (
+                  <SelectItem key={option.value} value={option.value} className="text-xs">
+                    <div>
+                      <div className="font-medium">{option.label}</div>
+                      <div className="text-xs text-muted-foreground">{option.description}</div>
                     </div>
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
           </div>
-        </div>
-      </div>
 
-      {/* Grouping Control */}
-      <div className="flex items-center justify-between p-3 rounded-lg border bg-muted/10">
-        <div className="flex items-center gap-3">
-          <Group className="h-4 w-4 text-muted-foreground" />
-          <div className="space-y-1">
-            <Label htmlFor="enable-grouping" className="text-sm font-medium">
-              Enable Hierarchical Grouping
+          {/* Display Mode Toggle */}
+          <div className="space-y-2">
+            <Label className="text-xs font-medium text-muted-foreground flex items-center gap-1">
+              {displayMode === 'compact' ? <Minimize2 className="w-3 h-3" /> : <Maximize2 className="w-3 h-3" />}
+              Display Mode
             </Label>
-            <p className="text-xs text-muted-foreground">
-              Group data by parent categories when available
-            </p>
+            <div className="flex items-center space-x-2">
+              <Button
+                variant={displayMode === 'compact' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => onDisplayModeChange('compact')}
+                className="h-8 text-xs flex-1"
+              >
+                <Minimize2 className="w-3 h-3 mr-1" />
+                Compact
+              </Button>
+              <Button
+                variant={displayMode === 'expanded' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => onDisplayModeChange('expanded')}
+                className="h-8 text-xs flex-1"
+              >
+                <Maximize2 className="w-3 h-3 mr-1" />
+                Expanded
+              </Button>
+            </div>
           </div>
-        </div>
-        <Switch
-          id="enable-grouping"
-          checked={enableGrouping}
-          onCheckedChange={onEnableGroupingChange}
-        />
-      </div>
+        </CardContent>
+      </Card>
 
-      {/* Dimension Preview */}
+      {/* Preview */}
       <div className="text-xs text-muted-foreground bg-muted/10 p-3 rounded border">
-        <span className="font-medium">Analysis Preview:</span> Non-billed resources grouped by{' '}
+        <span className="font-medium">Preview:</span> Analyzing{' '}
         <span className="font-semibold text-foreground">
           {NON_BILLED_DIMENSION_OPTIONS.find(opt => opt.value === primaryDimension)?.label}
-        </span>
-        {' '}(rows) and cross-referenced with{' '}
+        </span>{' '}
+        vs{' '}
         <span className="font-semibold text-foreground">
           {NON_BILLED_DIMENSION_OPTIONS.find(opt => opt.value === secondaryDimension)?.label}
-        </span>
-        {' '}(columns) to show non-billed resource distribution patterns.
-        {enableGrouping && (
-          <span className="block mt-1 text-primary font-medium">
-            🔗 Hierarchical grouping enabled for better organization
-          </span>
-        )}
+        </span>{' '}
+        showing{' '}
+        <span className="font-semibold text-primary">
+          {METRIC_OPTIONS.find(opt => opt.value === primaryMetric)?.label}
+        </span>{' '}
+        in {displayMode} mode
+        {enableGrouping && <span className="text-primary"> with grouping</span>}
       </div>
     </div>
   );

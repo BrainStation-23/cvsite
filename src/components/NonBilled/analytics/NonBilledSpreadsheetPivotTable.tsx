@@ -1,18 +1,25 @@
 import React from 'react';
 import { Table } from '@/components/ui/table';
-import { PivotStatistics } from '@/hooks/use-resource-pivot-statistics';
+import { NonBilledPivotStatistics, NonBilledMetricType } from '@/hooks/use-non-billed-pivot-statistics';
 import { Loader2, TrendingUp } from 'lucide-react';
-import { usePivotTableState } from '@/hooks/usePivotTableState';
-import { PivotTableSummary } from '../../statistics/pivot-table/PivotTableSummary';
-import { PivotTableHeaders } from '../../statistics/pivot-table/PivotTableHeaders';
-import { PivotTableBody } from '../../statistics/pivot-table/PivotTableBody';
+import { useNonBilledPivotTableState } from '@/hooks/useNonBilledPivotTableState';
+import { NonBilledPivotTableSummary } from './pivot-table/NonBilledPivotTableSummary';
+import { NonBilledPivotTableHeaders } from './pivot-table/NonBilledPivotTableHeaders';
+import { NonBilledPivotTableBody } from './pivot-table/NonBilledPivotTableBody';
 
 interface NonBilledSpreadsheetPivotTableProps {
-  data: PivotStatistics;
+  data: NonBilledPivotStatistics;
   isLoading: boolean;
+  primaryMetric: NonBilledMetricType;
+  displayMode: 'compact' | 'expanded';
 }
 
-export const NonBilledSpreadsheetPivotTable: React.FC<NonBilledSpreadsheetPivotTableProps> = ({ data, isLoading }) => {
+export const NonBilledSpreadsheetPivotTable: React.FC<NonBilledSpreadsheetPivotTableProps> = ({ 
+  data, 
+  isLoading, 
+  primaryMetric, 
+  displayMode 
+}) => {
   const {
     collapsedRowGroups,
     collapsedColGroups,
@@ -23,7 +30,6 @@ export const NonBilledSpreadsheetPivotTable: React.FC<NonBilledSpreadsheetPivotT
     expandAllColGroups,
     collapseAllColGroups,
     isGroupingEnabled,
-    maxValue,
     uniqueRows,
     uniqueCols,
     visibleCols,
@@ -35,7 +41,24 @@ export const NonBilledSpreadsheetPivotTable: React.FC<NonBilledSpreadsheetPivotT
     aggregatedRowTotals,
     aggregatedColTotals,
     aggregatedCellValues
-  } = usePivotTableState(data);
+  } = useNonBilledPivotTableState(data);
+
+  // Calculate max value based on primary metric
+  const maxValue = React.useMemo(() => {
+    const getMetricValue = (item: { count: number; avg_duration: number; initial_count: number; critical_count: number; }) => {
+      switch (primaryMetric) {
+        case 'count': return item.count;
+        case 'avg_duration': return item.avg_duration;
+        case 'initial_count': return item.initial_count;
+        case 'critical_count': return item.critical_count;
+      }
+    };
+
+    const dataValues = Array.from(dataMap.values()).map(getMetricValue);
+    const aggregatedValues = Array.from(aggregatedCellValues.values()).map(getMetricValue);
+    
+    return Math.max(...dataValues, ...aggregatedValues, 1);
+  }, [dataMap, aggregatedCellValues, primaryMetric]);
 
   if (isLoading) {
     return (
@@ -66,7 +89,7 @@ export const NonBilledSpreadsheetPivotTable: React.FC<NonBilledSpreadsheetPivotT
 
   return (
     <div className="h-full flex flex-col bg-background">
-      <PivotTableSummary
+      <NonBilledPivotTableSummary
         data={data}
         uniqueRowsLength={uniqueRows.length}
         visibleColsLength={visibleCols.length}
@@ -84,7 +107,7 @@ export const NonBilledSpreadsheetPivotTable: React.FC<NonBilledSpreadsheetPivotT
         <div className="p-6">
           <div className="rounded-lg border bg-card overflow-x-auto">
             <Table className="text-sm">
-              <PivotTableHeaders
+              <NonBilledPivotTableHeaders
                 data={data}
                 isGroupingEnabled={isGroupingEnabled}
                 groupedCols={groupedCols}
@@ -92,7 +115,7 @@ export const NonBilledSpreadsheetPivotTable: React.FC<NonBilledSpreadsheetPivotT
                 collapsedColGroups={collapsedColGroups}
                 toggleColGroup={toggleColGroup}
               />
-              <PivotTableBody
+              <NonBilledPivotTableBody
                 data={data}
                 isGroupingEnabled={isGroupingEnabled}
                 groupedRows={groupedRows}
@@ -108,6 +131,8 @@ export const NonBilledSpreadsheetPivotTable: React.FC<NonBilledSpreadsheetPivotT
                 aggregatedColTotals={aggregatedColTotals}
                 aggregatedCellValues={aggregatedCellValues}
                 maxValue={maxValue}
+                primaryMetric={primaryMetric}
+                displayMode={displayMode}
                 toggleRowGroup={toggleRowGroup}
               />
             </Table>

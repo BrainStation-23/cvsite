@@ -1,6 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { PivotStatistics } from './use-resource-pivot-statistics';
 import { format } from 'date-fns';
 
 interface NonBilledPivotFilters {
@@ -10,6 +9,55 @@ interface NonBilledPivotFilters {
   expertiseFilter?: string | null;
   billTypeFilter?: string | null;
 }
+
+export interface NonBilledPivotData {
+  row_dimension: string;
+  col_dimension: string;
+  count: number;
+  avg_duration: number;
+  initial_count: number;
+  critical_count: number;
+  row_group?: string;
+  col_group?: string;
+}
+
+export interface NonBilledPivotTotals {
+  dimension: string;
+  total: number;
+  avg_duration: number;
+  initial_count: number;
+  critical_count: number;
+  group_name?: string;
+}
+
+export interface NonBilledGrandTotal {
+  count: number;
+  avg_duration: number;
+  initial_count: number;
+  critical_count: number;
+}
+
+export interface NonBilledGroupInfo {
+  row_groups: string[] | null;
+  col_groups: string[] | null;
+}
+
+export interface NonBilledPivotStatistics {
+  pivot_data: NonBilledPivotData[];
+  row_totals: NonBilledPivotTotals[];
+  col_totals: NonBilledPivotTotals[];
+  grand_total: NonBilledGrandTotal;
+  dimensions: {
+    primary: string;
+    secondary: string;
+  };
+  grouping?: {
+    enabled: boolean;
+    info: NonBilledGroupInfo;
+  };
+}
+
+export type NonBilledMetricType = 'count' | 'avg_duration' | 'initial_count' | 'critical_count';
 
 export function useNonBilledPivotStatistics(
   primaryDimension: string = 'sbu',
@@ -37,12 +85,15 @@ export function useNonBilledPivotStatistics(
       }
 
       // Properly parse the JSON response from the RPC function
-      const result = data as unknown as PivotStatistics;
+      const result = data as unknown as NonBilledPivotStatistics;
       
-      // Handle the different grand_total structure from non-billed RPC
-      const grandTotal = typeof result?.grand_total === 'object' && result.grand_total !== null
-        ? (result.grand_total as any).count || 0
-        : result?.grand_total || 0;
+      // Handle the grand_total structure from non-billed RPC
+      const grandTotal = result?.grand_total || {
+        count: 0,
+        avg_duration: 0,
+        initial_count: 0,
+        critical_count: 0
+      };
       
       // Ensure the data has the expected structure with default values
       return {
@@ -61,7 +112,7 @@ export function useNonBilledPivotStatistics(
             col_groups: null
           }
         }
-      } as PivotStatistics;
+      } as NonBilledPivotStatistics;
     },
   });
 }

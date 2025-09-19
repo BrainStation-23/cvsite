@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
+import { useNonBilledPivotStatistics, NonBilledMetricType } from '@/hooks/use-non-billed-pivot-statistics';
 import { NonBilledPivotControls } from './NonBilledPivotControls';
 import { NonBilledSpreadsheetPivotTable } from './NonBilledSpreadsheetPivotTable';
-import { useNonBilledPivotStatistics } from '@/hooks/use-non-billed-pivot-statistics';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table2, BarChart3 } from 'lucide-react';
 
@@ -16,7 +16,9 @@ export const NonBilledPivotTableContainer: React.FC<NonBilledPivotTableContainer
 }) => {
   const [primaryDimension, setPrimaryDimension] = useState('sbu');
   const [secondaryDimension, setSecondaryDimension] = useState('bill_type');
-  const [enableGrouping, setEnableGrouping] = useState(true);
+  const [enableGrouping, setEnableGrouping] = useState(false);
+  const [primaryMetric, setPrimaryMetric] = useState<NonBilledMetricType>('count');
+  const [displayMode, setDisplayMode] = useState<'compact' | 'expanded'>('compact');
 
   const { data: pivotData, isLoading } = useNonBilledPivotStatistics(
     primaryDimension,
@@ -57,7 +59,7 @@ export const NonBilledPivotTableContainer: React.FC<NonBilledPivotTableContainer
                 <BarChart3 className="h-4 w-4" />
                 {pivotData && (
                   <span className="font-medium">
-                    {pivotData.grand_total} Total Non-Billed Resources
+                    {pivotData.grand_total.count} Total Non-Billed Resources
                   </span>
                 )}
               </div>
@@ -70,7 +72,11 @@ export const NonBilledPivotTableContainer: React.FC<NonBilledPivotTableContainer
                 onPrimaryDimensionChange={handlePrimaryDimensionChange}
                 onSecondaryDimensionChange={handleSecondaryDimensionChange}
                 enableGrouping={enableGrouping}
-                onEnableGroupingChange={setEnableGrouping}
+                onGroupingChange={setEnableGrouping}
+                primaryMetric={primaryMetric}
+                onPrimaryMetricChange={setPrimaryMetric}
+                displayMode={displayMode}
+                onDisplayModeChange={setDisplayMode}
               />
           </CardContent>
         </Card>
@@ -84,6 +90,8 @@ export const NonBilledPivotTableContainer: React.FC<NonBilledPivotTableContainer
               <NonBilledSpreadsheetPivotTable
                 data={pivotData}
                 isLoading={isLoading}
+                primaryMetric={primaryMetric}
+                displayMode={displayMode}
               />
             ) : (
               <div className="flex items-center justify-center h-full min-h-96">
