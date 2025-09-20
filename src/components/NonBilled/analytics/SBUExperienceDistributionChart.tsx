@@ -1,7 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from 'recharts';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { ViewToggle } from '@/components/statistics/ViewToggle';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useState } from 'react';
 import { Grid2X2, BarChart3, PieChart as PieIcon } from 'lucide-react';
@@ -15,7 +14,6 @@ interface SBUExperienceDistribution {
     mid: number;
     senior: number;
     lead: number;
-    unknown: number;
     total_count: number;
   };
 }
@@ -31,7 +29,6 @@ const EXPERIENCE_COLORS = {
   mid: 'hsl(var(--chart-1))', // Blue for mid
   senior: 'hsl(var(--chart-3))', // Purple for senior
   lead: 'hsl(var(--chart-4))', // Pink for lead
-  unknown: 'hsl(var(--chart-5))', // Gray for unknown
 };
 
 type ViewMode = 'stacked-bar' | 'grid-pie' | 'table';
@@ -76,7 +73,6 @@ export function SBUExperienceDistributionChart({ data, isLoading, title }: SBUEx
     mid: sbu.experience_distribution.mid,
     senior: sbu.experience_distribution.senior,
     lead: sbu.experience_distribution.lead,
-    unknown: sbu.experience_distribution.unknown,
     total: sbu.experience_distribution.total_count,
   }));
 
@@ -90,7 +86,6 @@ export function SBUExperienceDistributionChart({ data, isLoading, title }: SBUEx
       { name: 'Mid', value: sbu.experience_distribution.mid, color: EXPERIENCE_COLORS.mid },
       { name: 'Senior', value: sbu.experience_distribution.senior, color: EXPERIENCE_COLORS.senior },
       { name: 'Lead', value: sbu.experience_distribution.lead, color: EXPERIENCE_COLORS.lead },
-      { name: 'Unknown', value: sbu.experience_distribution.unknown, color: EXPERIENCE_COLORS.unknown },
     ].filter(item => item.value > 0)
   }));
 
@@ -113,10 +108,6 @@ export function SBUExperienceDistributionChart({ data, isLoading, title }: SBUEx
       count: sbu.experience_distribution.lead,
       percentage: sbu.experience_distribution.total_count ? Math.round((sbu.experience_distribution.lead / sbu.experience_distribution.total_count) * 100) : 0
     },
-    unknown: {
-      count: sbu.experience_distribution.unknown,
-      percentage: sbu.experience_distribution.total_count ? Math.round((sbu.experience_distribution.unknown / sbu.experience_distribution.total_count) * 100) : 0
-    },
     total: sbu.experience_distribution.total_count
   }));
 
@@ -126,9 +117,8 @@ export function SBUExperienceDistributionChart({ data, isLoading, title }: SBUEx
     mid: totals.mid + row.mid.count,
     senior: totals.senior + row.senior.count,
     lead: totals.lead + row.lead.count,
-    unknown: totals.unknown + row.unknown.count,
     total: totals.total + row.total
-  }), { junior: 0, mid: 0, senior: 0, lead: 0, unknown: 0, total: 0 });
+  }), { junior: 0, mid: 0, senior: 0, lead: 0, total: 0 });
 
   const CustomTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
@@ -220,7 +210,6 @@ export function SBUExperienceDistributionChart({ data, isLoading, title }: SBUEx
                 <Bar dataKey="mid" stackId="a" fill={EXPERIENCE_COLORS.mid} name="Mid" />
                 <Bar dataKey="senior" stackId="a" fill={EXPERIENCE_COLORS.senior} name="Senior" />
                 <Bar dataKey="lead" stackId="a" fill={EXPERIENCE_COLORS.lead} name="Lead" />
-                <Bar dataKey="unknown" stackId="a" fill={EXPERIENCE_COLORS.unknown} name="Unknown" />
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -288,12 +277,6 @@ export function SBUExperienceDistributionChart({ data, isLoading, title }: SBUEx
                       Lead
                     </div>
                   </TableHead>
-                  <TableHead className="text-center">
-                    <div className="flex items-center justify-center gap-2">
-                      <div className="w-3 h-3 rounded-full" style={{ backgroundColor: EXPERIENCE_COLORS.unknown }} />
-                      Unknown
-                    </div>
-                  </TableHead>
                   <TableHead className="text-center font-medium">Total</TableHead>
                 </TableRow>
               </TableHeader>
@@ -325,12 +308,6 @@ export function SBUExperienceDistributionChart({ data, isLoading, title }: SBUEx
                         <div className="text-muted-foreground">({row.lead.percentage}%)</div>
                       </div>
                     </TableCell>
-                    <TableCell className="text-center">
-                      <div className="text-sm">
-                        <div className="font-medium">{row.unknown.count}</div>
-                        <div className="text-muted-foreground">({row.unknown.percentage}%)</div>
-                      </div>
-                    </TableCell>
                     <TableCell className="text-center font-medium">{row.total}</TableCell>
                   </TableRow>
                 ))}
@@ -341,7 +318,6 @@ export function SBUExperienceDistributionChart({ data, isLoading, title }: SBUEx
                   <TableCell className="text-center">{columnTotals.mid}</TableCell>
                   <TableCell className="text-center">{columnTotals.senior}</TableCell>
                   <TableCell className="text-center">{columnTotals.lead}</TableCell>
-                  <TableCell className="text-center">{columnTotals.unknown}</TableCell>
                   <TableCell className="text-center font-bold">{columnTotals.total}</TableCell>
                 </TableRow>
               </TableBody>

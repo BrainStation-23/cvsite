@@ -3,8 +3,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
 import { DateRangePickerWithPresets } from '@/components/statistics/DateRangePickerWithPresets';
-import { Button } from '@/components/ui/button';
-import { RefreshCw, Download, BarChart3, AlertTriangle, TrendingUp } from 'lucide-react';
+import { BarChart3, AlertTriangle, TrendingUp } from 'lucide-react';
 
 import { 
   useNonBilledOverview, 
@@ -55,19 +54,6 @@ export function NonBilledAnalyticsDashboard() {
 
   const riskQuery = useNonBilledRiskAnalytics(30, benchFilter);
   const trendsQuery = useNonBilledTrendsAnalysis(periodType, 365, benchFilter);
-
-  const isLoading = overviewQuery.isLoading || sbuQuery.isLoading || 
-                   expertiseQuery.isLoading || billTypeQuery.isLoading ||
-                   riskQuery.isLoading || trendsQuery.isLoading;
-
-  const handleRefresh = () => {
-    overviewQuery.refetch();
-    sbuQuery.refetch();
-    expertiseQuery.refetch();
-    billTypeQuery.refetch();
-    riskQuery.refetch();
-    trendsQuery.refetch();
-  };
 
 
   return (
@@ -153,11 +139,7 @@ export function NonBilledAnalyticsDashboard() {
           <div className="space-y-6">
             {/* Experience Distribution Section */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <ExperienceDistributionChart
-                data={overviewQuery.data?.experience_distribution || { junior: 0, mid: 0, senior: 0, lead: 0, unknown: 0, total_count: 0 }}
-                isLoading={overviewQuery.isLoading}
-                title="Overall Experience Distribution"
-              />
+             
               <SBUExperienceDistributionChart
                 data={overviewQuery.data?.sbu_experience_distribution || []}
                 isLoading={overviewQuery.isLoading}
