@@ -2,6 +2,20 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { format } from 'date-fns';
 
+interface SBUExperienceDistribution {
+  sbu_id: string;
+  sbu_name: string;
+  sbu_color_code?: string;
+  experience_distribution: {
+    junior: number;
+    mid: number;
+    senior: number;
+    lead: number;
+    unknown: number;
+    total_count: number;
+  };
+}
+
 interface NonBilledOverviewData {
   overview: {
     total_non_billed_resources_count: number;
@@ -30,6 +44,7 @@ interface NonBilledOverviewData {
     new_non_billed_resources_last_7_days: number;
     new_non_billed_resources_last_30_days: number;
   };
+  sbu_experience_distribution: SBUExperienceDistribution[];
 }
 
 interface DimensionalAnalysisData {
@@ -116,7 +131,8 @@ export function useNonBilledOverview(filters: AnalyticsFilters = {}) {
         overview: result.overview,
         experience_distribution: result.experience_distribution,
         recent_trends: result.recent_trends,
-      } as NonBilledOverviewData;
+        sbu_experience_distribution: result.sbu_experience_distribution || [],
+      } as unknown as NonBilledOverviewData;
     },
   });
 }
