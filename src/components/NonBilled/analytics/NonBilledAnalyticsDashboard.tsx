@@ -15,6 +15,7 @@ import {
 
 import { OverviewCards } from './OverviewCards';
 import { ExperienceDistributionChart } from './ExperienceDistributionChart';
+import { SBUExperienceDistributionChart } from './SBUExperienceDistributionChart';
 import { DimensionalAnalysisChart } from './DimensionalAnalysisChart';
 import { RiskAnalytics } from './RiskAnalytics';
 import { TrendsChart } from './TrendsChart';
@@ -149,58 +150,62 @@ export function NonBilledAnalyticsDashboard() {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Experience Distribution */}
-            <div>
-              {overviewQuery.data && (
-                <ExperienceDistributionChart
-                  data={{
-                    ...overviewQuery.data.experience_distribution,
-                    total_count: overviewQuery.data.overview.total_non_billed_resources_count
-                  }}
-                  isLoading={overviewQuery.isLoading}
+          <div className="space-y-6">
+            {/* Experience Distribution Section */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <ExperienceDistributionChart
+                data={overviewQuery.data?.experience_distribution || { junior: 0, mid: 0, senior: 0, lead: 0, unknown: 0, total_count: 0 }}
+                isLoading={overviewQuery.isLoading}
+                title="Overall Experience Distribution"
+              />
+              <SBUExperienceDistributionChart
+                data={overviewQuery.data?.sbu_experience_distribution || []}
+                isLoading={overviewQuery.isLoading}
+                title="SBU Experience Breakdown"
+              />
+            </div>
+
+            {/* Dimensional Analysis */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+              {/* SBU Analysis */}
+              {sbuQuery.data && (
+                <DimensionalAnalysisChart
+                  data={sbuQuery.data}
+                  isLoading={sbuQuery.isLoading}
+                  dimension="sbu"
+                  title={`Non Billed Analysis by SBU${
+                    benchFilter === true ? " (Bench Only)" : 
+                    benchFilter === false ? " (Non-Bench Only)" : ""
+                  }`}
+                />
+              )}
+              
+              {/* Expertise Analysis */}
+              {expertiseQuery.data && (
+                <DimensionalAnalysisChart
+                  data={expertiseQuery.data}
+                  isLoading={expertiseQuery.isLoading}
+                  dimension="expertise"
+                  title={`Non Billed Analysis by Expertise${
+                    benchFilter === true ? " (Bench Only)" : 
+                    benchFilter === false ? " (Non-Bench Only)" : ""
+                  }`}
+                />
+              )}
+
+              {/* Bill Type Analysis */}
+              {billTypeQuery.data && (
+                <DimensionalAnalysisChart
+                  data={billTypeQuery.data}
+                  isLoading={billTypeQuery.isLoading}
+                  dimension="bill_type"
+                  title={`Non Billed Analysis by Bill Type${
+                    benchFilter === true ? " (Bench Only)" : 
+                    benchFilter === false ? " (Non-Bench Only)" : ""
+                  }`}
                 />
               )}
             </div>
-
-            {/* SBU Analysis Preview */}
-            {sbuQuery.data && (
-              <DimensionalAnalysisChart
-                data={sbuQuery.data}
-                isLoading={sbuQuery.isLoading}
-                dimension="sbu"
-                title={`Non Billed Analysis by SBU${
-                  benchFilter === true ? " (Bench Only)" : 
-                  benchFilter === false ? " (Non-Bench Only)" : ""
-                }`}
-              />
-            )}
-            
-            {/* Expertise Analysis */}
-            {expertiseQuery.data && (
-              <DimensionalAnalysisChart
-                data={expertiseQuery.data}
-                isLoading={expertiseQuery.isLoading}
-                dimension="expertise"
-                title={`Non Billed Analysis by Expertise${
-                  benchFilter === true ? " (Bench Only)" : 
-                  benchFilter === false ? " (Non-Bench Only)" : ""
-                }`}
-              />
-            )}
-
-            {/* Bill Type Analysis */}
-            {billTypeQuery.data && (
-              <DimensionalAnalysisChart
-                data={billTypeQuery.data}
-                isLoading={billTypeQuery.isLoading}
-                dimension="bill_type"
-                title={`Non Billed Analysis by Bill Type${
-                  benchFilter === true ? " (Bench Only)" : 
-                  benchFilter === false ? " (Non-Bench Only)" : ""
-                }`}
-              />
-            )}
           </div>
         </TabsContent>
 

@@ -2161,6 +2161,7 @@ export type Database = {
           experience_distribution: Json
           overview: Json
           recent_trends: Json
+          sbu_experience_distribution: Json
         }[]
       }
       get_non_billed_resources_risk_analytics: {
