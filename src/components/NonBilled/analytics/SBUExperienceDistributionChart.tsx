@@ -95,48 +95,40 @@ export function SBUExperienceDistributionChart({ data, isLoading, title }: SBUEx
   }));
 
   // Transform data for table view
-  const tableData = data.flatMap(sbu => [
-    {
-      sbu_name: sbu.sbu_name,
-      level: 'Junior',
+  const tableData = data.map(sbu => ({
+    sbu_name: sbu.sbu_name,
+    junior: {
       count: sbu.experience_distribution.junior,
-      percentage: sbu.experience_distribution.total_count ? Math.round((sbu.experience_distribution.junior / sbu.experience_distribution.total_count) * 100) : 0,
-      color: EXPERIENCE_COLORS.junior,
-      sbu_total: sbu.experience_distribution.total_count,
+      percentage: sbu.experience_distribution.total_count ? Math.round((sbu.experience_distribution.junior / sbu.experience_distribution.total_count) * 100) : 0
     },
-    {
-      sbu_name: sbu.sbu_name,
-      level: 'Mid',
+    mid: {
       count: sbu.experience_distribution.mid,
-      percentage: sbu.experience_distribution.total_count ? Math.round((sbu.experience_distribution.mid / sbu.experience_distribution.total_count) * 100) : 0,
-      color: EXPERIENCE_COLORS.mid,
-      sbu_total: sbu.experience_distribution.total_count,
+      percentage: sbu.experience_distribution.total_count ? Math.round((sbu.experience_distribution.mid / sbu.experience_distribution.total_count) * 100) : 0
     },
-    {
-      sbu_name: sbu.sbu_name,
-      level: 'Senior',
+    senior: {
       count: sbu.experience_distribution.senior,
-      percentage: sbu.experience_distribution.total_count ? Math.round((sbu.experience_distribution.senior / sbu.experience_distribution.total_count) * 100) : 0,
-      color: EXPERIENCE_COLORS.senior,
-      sbu_total: sbu.experience_distribution.total_count,
+      percentage: sbu.experience_distribution.total_count ? Math.round((sbu.experience_distribution.senior / sbu.experience_distribution.total_count) * 100) : 0
     },
-    {
-      sbu_name: sbu.sbu_name,
-      level: 'Lead',
+    lead: {
       count: sbu.experience_distribution.lead,
-      percentage: sbu.experience_distribution.total_count ? Math.round((sbu.experience_distribution.lead / sbu.experience_distribution.total_count) * 100) : 0,
-      color: EXPERIENCE_COLORS.lead,
-      sbu_total: sbu.experience_distribution.total_count,
+      percentage: sbu.experience_distribution.total_count ? Math.round((sbu.experience_distribution.lead / sbu.experience_distribution.total_count) * 100) : 0
     },
-    {
-      sbu_name: sbu.sbu_name,
-      level: 'Unknown',
+    unknown: {
       count: sbu.experience_distribution.unknown,
-      percentage: sbu.experience_distribution.total_count ? Math.round((sbu.experience_distribution.unknown / sbu.experience_distribution.total_count) * 100) : 0,
-      color: EXPERIENCE_COLORS.unknown,
-      sbu_total: sbu.experience_distribution.total_count,
+      percentage: sbu.experience_distribution.total_count ? Math.round((sbu.experience_distribution.unknown / sbu.experience_distribution.total_count) * 100) : 0
     },
-  ]).filter(item => item.count > 0);
+    total: sbu.experience_distribution.total_count
+  }));
+
+  // Calculate column totals
+  const columnTotals = tableData.reduce((totals, row) => ({
+    junior: totals.junior + row.junior.count,
+    mid: totals.mid + row.mid.count,
+    senior: totals.senior + row.senior.count,
+    lead: totals.lead + row.lead.count,
+    unknown: totals.unknown + row.unknown.count,
+    total: totals.total + row.total
+  }), { junior: 0, mid: 0, senior: 0, lead: 0, unknown: 0, total: 0 });
 
   const CustomTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
@@ -272,35 +264,86 @@ export function SBUExperienceDistributionChart({ data, isLoading, title }: SBUEx
               <TableHeader>
                 <TableRow>
                   <TableHead>SBU</TableHead>
-                  <TableHead>Experience Level</TableHead>
-                  <TableHead className="text-right">Count</TableHead>
-                  <TableHead className="text-right">Percentage</TableHead>
+                  <TableHead className="text-center">
+                    <div className="flex items-center justify-center gap-2">
+                      <div className="w-3 h-3 rounded-full" style={{ backgroundColor: EXPERIENCE_COLORS.junior }} />
+                      Junior
+                    </div>
+                  </TableHead>
+                  <TableHead className="text-center">
+                    <div className="flex items-center justify-center gap-2">
+                      <div className="w-3 h-3 rounded-full" style={{ backgroundColor: EXPERIENCE_COLORS.mid }} />
+                      Mid
+                    </div>
+                  </TableHead>
+                  <TableHead className="text-center">
+                    <div className="flex items-center justify-center gap-2">
+                      <div className="w-3 h-3 rounded-full" style={{ backgroundColor: EXPERIENCE_COLORS.senior }} />
+                      Senior
+                    </div>
+                  </TableHead>
+                  <TableHead className="text-center">
+                    <div className="flex items-center justify-center gap-2">
+                      <div className="w-3 h-3 rounded-full" style={{ backgroundColor: EXPERIENCE_COLORS.lead }} />
+                      Lead
+                    </div>
+                  </TableHead>
+                  <TableHead className="text-center">
+                    <div className="flex items-center justify-center gap-2">
+                      <div className="w-3 h-3 rounded-full" style={{ backgroundColor: EXPERIENCE_COLORS.unknown }} />
+                      Unknown
+                    </div>
+                  </TableHead>
+                  <TableHead className="text-center font-medium">Total</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {tableData.map((item, index) => (
-                  <TableRow key={`${item.sbu_name}-${item.level}`}>
-                    <TableCell className="font-medium">{item.sbu_name}</TableCell>
-                    <TableCell className="flex items-center gap-2">
-                      <div 
-                        className="w-3 h-3 rounded-full" 
-                        style={{ backgroundColor: item.color }}
-                      />
-                      {item.level}
+                {tableData.map((row) => (
+                  <TableRow key={row.sbu_name}>
+                    <TableCell className="font-medium">{row.sbu_name}</TableCell>
+                    <TableCell className="text-center">
+                      <div className="text-sm">
+                        <div className="font-medium">{row.junior.count}</div>
+                        <div className="text-muted-foreground">({row.junior.percentage}%)</div>
+                      </div>
                     </TableCell>
-                    <TableCell className="text-right">{item.count}</TableCell>
-                    <TableCell className="text-right">{item.percentage}%</TableCell>
+                    <TableCell className="text-center">
+                      <div className="text-sm">
+                        <div className="font-medium">{row.mid.count}</div>
+                        <div className="text-muted-foreground">({row.mid.percentage}%)</div>
+                      </div>
+                    </TableCell>
+                    <TableCell className="text-center">
+                      <div className="text-sm">
+                        <div className="font-medium">{row.senior.count}</div>
+                        <div className="text-muted-foreground">({row.senior.percentage}%)</div>
+                      </div>
+                    </TableCell>
+                    <TableCell className="text-center">
+                      <div className="text-sm">
+                        <div className="font-medium">{row.lead.count}</div>
+                        <div className="text-muted-foreground">({row.lead.percentage}%)</div>
+                      </div>
+                    </TableCell>
+                    <TableCell className="text-center">
+                      <div className="text-sm">
+                        <div className="font-medium">{row.unknown.count}</div>
+                        <div className="text-muted-foreground">({row.unknown.percentage}%)</div>
+                      </div>
+                    </TableCell>
+                    <TableCell className="text-center font-medium">{row.total}</TableCell>
                   </TableRow>
                 ))}
-                {/* SBU Totals */}
-                {data.map((sbu) => (
-                  <TableRow key={`${sbu.sbu_name}-total`} className="font-medium bg-muted/50">
-                    <TableCell>{sbu.sbu_name}</TableCell>
-                    <TableCell>Total</TableCell>
-                    <TableCell className="text-right">{sbu.experience_distribution.total_count}</TableCell>
-                    <TableCell className="text-right">100%</TableCell>
-                  </TableRow>
-                ))}
+                {/* Column Totals */}
+                <TableRow className="font-medium bg-muted/50 border-t-2">
+                  <TableCell>Total</TableCell>
+                  <TableCell className="text-center">{columnTotals.junior}</TableCell>
+                  <TableCell className="text-center">{columnTotals.mid}</TableCell>
+                  <TableCell className="text-center">{columnTotals.senior}</TableCell>
+                  <TableCell className="text-center">{columnTotals.lead}</TableCell>
+                  <TableCell className="text-center">{columnTotals.unknown}</TableCell>
+                  <TableCell className="text-center font-bold">{columnTotals.total}</TableCell>
+                </TableRow>
               </TableBody>
             </Table>
           </div>
