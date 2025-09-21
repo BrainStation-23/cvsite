@@ -1516,6 +1516,7 @@ export type Database = {
       }
       sbus: {
         Row: {
+          color_code: string | null
           created_at: string
           id: string
           is_department: boolean | null
@@ -1525,6 +1526,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          color_code?: string | null
           created_at?: string
           id?: string
           is_department?: boolean | null
@@ -1534,6 +1536,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          color_code?: string | null
           created_at?: string
           id?: string
           is_department?: boolean | null
@@ -2166,6 +2169,14 @@ export type Database = {
       }
       get_non_billed_resources_risk_analytics: {
         Args: { bench_filter?: boolean; risk_threshold_days?: number }
+        Returns: Json
+      }
+      get_non_billed_resources_sbu_dimensional_analysis: {
+        Args: {
+          bench_filter?: boolean
+          end_date_filter?: string
+          start_date_filter?: string
+        }
         Returns: Json
       }
       get_non_billed_resources_trends_analysis: {
