@@ -181,7 +181,7 @@ export function SBUExpertiseAnalysisChart({
         )}
         
         {showTables && (
-          <div className="max-h-96 overflow-auto">
+          <div className="h-full overflow-auto">
             {(() => {
               // Get unique expertises and SBUs
               const expertises = Array.from(new Set(data.map(item => item.expertise_name))).sort();

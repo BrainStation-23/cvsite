@@ -137,7 +137,7 @@ export function NonBilledAnalyticsDashboard() {
 
         <TabsContent value="overview" className="space-y-6">
           <div className="mb-4">
-            <h2 className="text-xl font-semibold">Experience Distribution</h2>
+            <h2 className="text-xl font-semibold">Non-Billed Overview</h2>
             <p className="text-sm text-muted-foreground">
               {benchFilter === true ? 'Showing bench resources only' : 
                benchFilter === false ? 'Showing non-bench resources only' : 
@@ -146,15 +146,7 @@ export function NonBilledAnalyticsDashboard() {
           </div>
 
           <div className="space-y-6">
-            {/* Experience Distribution Section */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-             
-              <SBUExperienceDistributionChart
-                data={overviewQuery.data?.sbu_experience_distribution || []}
-                isLoading={overviewQuery.isLoading}
-                title="SBU Experience Breakdown"
-              />
-            </div>
+
 
             {/* Dimensional Analysis */}
             <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
@@ -198,14 +190,19 @@ export function NonBilledAnalyticsDashboard() {
               )}
             </div>
 
+
+            {/* Experience Distribution Section */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+             
+              <SBUExperienceDistributionChart
+                data={overviewQuery.data?.sbu_experience_distribution || []}
+                isLoading={overviewQuery.isLoading}
+                title="SBU Experience Breakdown"
+              />
+            </div>
+
             {/* SBU Dimensional Analysis */}
             <div className="space-y-6">
-              <div className="mb-4">
-                <h2 className="text-xl font-semibold">SBU Dimensional Analysis</h2>
-                <p className="text-sm text-muted-foreground">
-                  Detailed breakdown showing total, initial (&lt;30d), and critical (&gt;60d) counts by SBU
-                </p>
-              </div>
 
               <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
                 {/* SBU-Expertise Analysis */}

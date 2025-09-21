@@ -248,7 +248,7 @@ export function SBUExperienceDistributionChart({ data, isLoading, title }: SBUEx
         )}
 
         {viewMode === 'table' && (
-          <div className="max-h-96 overflow-auto">
+          <div className="h-full overflow-auto">
             <Table>
               <TableHeader>
                 <TableRow>
