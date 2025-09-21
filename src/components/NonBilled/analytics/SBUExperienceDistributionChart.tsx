@@ -248,78 +248,102 @@ export function SBUExperienceDistributionChart({ data, isLoading, title }: SBUEx
         )}
 
         {viewMode === 'table' && (
-          <div className="max-h-96 overflow-auto">
+          <div className="h-full overflow-auto">
             <Table>
               <TableHeader>
-                <TableRow>
-                  <TableHead>SBU</TableHead>
-                  <TableHead className="text-center">
-                    <div className="flex items-center justify-center gap-2">
-                      <div className="w-3 h-3 rounded-full" style={{ backgroundColor: EXPERIENCE_COLORS.junior }} />
-                      Junior
-                    </div>
-                  </TableHead>
-                  <TableHead className="text-center">
-                    <div className="flex items-center justify-center gap-2">
-                      <div className="w-3 h-3 rounded-full" style={{ backgroundColor: EXPERIENCE_COLORS.mid }} />
-                      Mid
-                    </div>
-                  </TableHead>
-                  <TableHead className="text-center">
-                    <div className="flex items-center justify-center gap-2">
-                      <div className="w-3 h-3 rounded-full" style={{ backgroundColor: EXPERIENCE_COLORS.senior }} />
-                      Senior
-                    </div>
-                  </TableHead>
-                  <TableHead className="text-center">
-                    <div className="flex items-center justify-center gap-2">
-                      <div className="w-3 h-3 rounded-full" style={{ backgroundColor: EXPERIENCE_COLORS.lead }} />
-                      Lead
-                    </div>
-                  </TableHead>
-                  <TableHead className="text-center font-medium">Total</TableHead>
-                </TableRow>
+          <TableRow>
+            <TableHead>Level</TableHead>
+            {tableData.map((row) => (
+              <TableHead key={row.sbu_name} className="text-center font-medium">
+                {row.sbu_name}
+              </TableHead>
+            ))}
+            <TableHead className="text-center font-bold">Total</TableHead>
+          </TableRow>
               </TableHeader>
               <TableBody>
-                {tableData.map((row) => (
-                  <TableRow key={row.sbu_name}>
-                    <TableCell className="font-medium">{row.sbu_name}</TableCell>
-                    <TableCell className="text-center">
-                      <div className="text-sm">
-                        <div className="font-medium">{row.junior.count}</div>
-                        <div className="text-muted-foreground">({row.junior.percentage}%)</div>
-                      </div>
-                    </TableCell>
-                    <TableCell className="text-center">
-                      <div className="text-sm">
-                        <div className="font-medium">{row.mid.count}</div>
-                        <div className="text-muted-foreground">({row.mid.percentage}%)</div>
-                      </div>
-                    </TableCell>
-                    <TableCell className="text-center">
-                      <div className="text-sm">
-                        <div className="font-medium">{row.senior.count}</div>
-                        <div className="text-muted-foreground">({row.senior.percentage}%)</div>
-                      </div>
-                    </TableCell>
-                    <TableCell className="text-center">
-                      <div className="text-sm">
-                        <div className="font-medium">{row.lead.count}</div>
-                        <div className="text-muted-foreground">({row.lead.percentage}%)</div>
-                      </div>
-                    </TableCell>
-                    <TableCell className="text-center font-medium">{row.total}</TableCell>
-                  </TableRow>
-                ))}
-                {/* Column Totals */}
-                <TableRow className="font-medium bg-muted/50 border-t-2">
-                  <TableCell>Total</TableCell>
-                  <TableCell className="text-center">{columnTotals.junior}</TableCell>
-                  <TableCell className="text-center">{columnTotals.mid}</TableCell>
-                  <TableCell className="text-center">{columnTotals.senior}</TableCell>
-                  <TableCell className="text-center">{columnTotals.lead}</TableCell>
-                  <TableCell className="text-center font-bold">{columnTotals.total}</TableCell>
-                </TableRow>
+          {/* Junior Row */}
+          <TableRow>
+            <TableCell>
+              <div className="flex items-center gap-2">
+                <div className="w-3 h-3 rounded-full" style={{ backgroundColor: EXPERIENCE_COLORS.junior }} />
+                Junior
+              </div>
+            </TableCell>
+            {tableData.map((row) => (
+              <TableCell key={row.sbu_name} className="text-center">
+                <div className="text-sm">
+            <div className="font-medium">{row.junior.count}</div>
+            <div className="text-muted-foreground">({row.junior.percentage}%)</div>
+                </div>
+              </TableCell>
+            ))}
+            <TableCell className="text-center font-bold">{columnTotals.junior}</TableCell>
+          </TableRow>
+          {/* Mid Row */}
+          <TableRow>
+            <TableCell>
+              <div className="flex items-center gap-2">
+                <div className="w-3 h-3 rounded-full" style={{ backgroundColor: EXPERIENCE_COLORS.mid }} />
+                Mid
+              </div>
+            </TableCell>
+            {tableData.map((row) => (
+              <TableCell key={row.sbu_name} className="text-center">
+                <div className="text-sm">
+            <div className="font-medium">{row.mid.count}</div>
+            <div className="text-muted-foreground">({row.mid.percentage}%)</div>
+                </div>
+              </TableCell>
+            ))}
+            <TableCell className="text-center font-bold">{columnTotals.mid}</TableCell>
+          </TableRow>
+          {/* Senior Row */}
+          <TableRow>
+            <TableCell>
+              <div className="flex items-center gap-2">
+                <div className="w-3 h-3 rounded-full" style={{ backgroundColor: EXPERIENCE_COLORS.senior }} />
+                Senior
+              </div>
+            </TableCell>
+            {tableData.map((row) => (
+              <TableCell key={row.sbu_name} className="text-center">
+                <div className="text-sm">
+            <div className="font-medium">{row.senior.count}</div>
+            <div className="text-muted-foreground">({row.senior.percentage}%)</div>
+                </div>
+              </TableCell>
+            ))}
+            <TableCell className="text-center font-bold">{columnTotals.senior}</TableCell>
+          </TableRow>
+          {/* Lead Row */}
+          <TableRow>
+            <TableCell>
+              <div className="flex items-center gap-2">
+                <div className="w-3 h-3 rounded-full" style={{ backgroundColor: EXPERIENCE_COLORS.lead }} />
+                Lead
+              </div>
+            </TableCell>
+            {tableData.map((row) => (
+              <TableCell key={row.sbu_name} className="text-center">
+                <div className="text-sm">
+            <div className="font-medium">{row.lead.count}</div>
+            <div className="text-muted-foreground">({row.lead.percentage}%)</div>
+                </div>
+              </TableCell>
+            ))}
+            <TableCell className="text-center font-bold">{columnTotals.lead}</TableCell>
+          </TableRow>
+          {/* Total Row */}
+          <TableRow className="font-medium bg-muted/50 border-t-2">
+            <TableCell>Total</TableCell>
+            {tableData.map((row) => (
+              <TableCell key={row.sbu_name} className="text-center font-medium">
+                {row.total}
+              </TableCell>
+            ))}
+            <TableCell className="text-center font-bold">{columnTotals.total}</TableCell>
+          </TableRow>
               </TableBody>
             </Table>
           </div>
