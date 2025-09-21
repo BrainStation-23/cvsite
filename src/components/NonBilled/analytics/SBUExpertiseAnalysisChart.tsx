@@ -5,6 +5,8 @@ import { ViewToggle } from '@/components/statistics/ViewToggle';
 import { Button } from '@/components/ui/button';
 import { useState } from 'react';
 
+
+
 interface SBUExpertiseData {
   sbu_id: string;
   sbu_name: string;
@@ -20,6 +22,22 @@ interface SBUExpertiseAnalysisChartProps {
   data: SBUExpertiseData[];
   isLoading: boolean;
   title?: string;
+}
+
+
+function InlineBreakdown({ initial = 0, longTerm = 0, critical = 0 }: { initial?: number; longTerm?: number; critical?: number }) {
+  const total = initial + longTerm + critical;
+  const pct = (value: number) => (total === 0 ? 0 : Math.round((value / total) * 100));
+
+  return (
+    <div className="inline-flex items-center gap-2">
+      <div className="w-24 h-2 rounded overflow-hidden flex" role="img" aria-label={`Breakdown: initial ${initial}, long term ${longTerm}, critical ${critical}`} title={`Initial: ${initial}\nLong term: ${longTerm}\nCritical: ${critical}`}>
+        <div style={{ width: `${pct(initial)}%` }} className="bg-[hsl(var(--chart-2))]"></div>
+        <div style={{ width: `${pct(longTerm)}%` }} className="bg-[hsl(var(--chart-3))]"></div>
+        <div style={{ width: `${pct(critical)}%` }} className="bg-[hsl(var(--destructive))]"></div>
+      </div>
+    </div>
+  );
 }
 
 export function SBUExpertiseAnalysisChart({ 
@@ -246,11 +264,13 @@ export function SBUExpertiseAnalysisChart({
                           
                           return (
                             <TableCell key={sbu} className="text-center">
-                              <div 
-                                className="cursor-help font-medium"
-                                title={`Initial (<30d): ${item.initial_count}\nLong term (30-60d): ${Math.max(0, item.total_count - (item.initial_count || 0) - (item.critical_count || 0))}\nCritical (>60d): ${item.critical_count}`}
-                              >
-                                {item.total_count}
+                              <div className="flex flex-col items-center justify-center">
+                                <div className="font-medium">{item.total_count}</div>
+                                <InlineBreakdown
+                                  initial={item.initial_count}
+                                  longTerm={Math.max(0, item.total_count - (item.initial_count || 0) - (item.critical_count || 0))}
+                                  critical={item.critical_count}
+                                />
                               </div>
                             </TableCell>
                           );
