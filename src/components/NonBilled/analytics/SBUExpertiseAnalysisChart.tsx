@@ -194,6 +194,21 @@ export function SBUExpertiseAnalysisChart({
                 dataMap.set(key, item);
               });
 
+              // Calculate totals
+              const sbuTotals = sbus.map(sbu => {
+                return data
+                  .filter(item => item.sbu_name === sbu)
+                  .reduce((sum, item) => sum + item.total_count, 0);
+              });
+
+              const expertiseTotals = expertises.map(expertise => {
+                return data
+                  .filter(item => item.expertise_name === expertise)
+                  .reduce((sum, item) => sum + item.total_count, 0);
+              });
+
+              const grandTotal = data.reduce((sum, item) => sum + item.total_count, 0);
+
               return (
                 <Table>
                   <TableHeader>
@@ -204,10 +219,11 @@ export function SBUExpertiseAnalysisChart({
                           {sbu}
                         </TableHead>
                       ))}
+                      <TableHead className="text-center font-medium bg-muted">Total</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {expertises.map(expertise => (
+                    {expertises.map((expertise, expertiseIndex) => (
                       <TableRow key={expertise}>
                         <TableCell className="font-medium">{expertise}</TableCell>
                         {sbus.map(sbu => {
@@ -227,8 +243,22 @@ export function SBUExpertiseAnalysisChart({
                             </TableCell>
                           );
                         })}
+                        <TableCell className="text-center font-medium bg-muted">
+                          {expertiseTotals[expertiseIndex]}
+                        </TableCell>
                       </TableRow>
                     ))}
+                    <TableRow className="bg-muted font-medium">
+                      <TableCell className="font-semibold">Total</TableCell>
+                      {sbuTotals.map((total, index) => (
+                        <TableCell key={index} className="text-center font-semibold">
+                          {total}
+                        </TableCell>
+                      ))}
+                      <TableCell className="text-center font-semibold">
+                        {grandTotal}
+                      </TableCell>
+                    </TableRow>
                   </TableBody>
                 </Table>
               );

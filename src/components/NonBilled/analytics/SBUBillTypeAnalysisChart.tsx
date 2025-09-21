@@ -195,6 +195,21 @@ export function SBUBillTypeAnalysisChart({
                 dataMap.set(key, item);
               });
 
+              // Calculate totals
+              const sbuTotals = sbus.map(sbu => {
+                return data
+                  .filter(item => item.sbu_name === sbu)
+                  .reduce((sum, item) => sum + item.total_count, 0);
+              });
+
+              const billTypeTotals = billTypes.map(billType => {
+                return data
+                  .filter(item => item.bill_type_name === billType)
+                  .reduce((sum, item) => sum + item.total_count, 0);
+              });
+
+              const grandTotal = data.reduce((sum, item) => sum + item.total_count, 0);
+
               return (
                 <Table>
                   <TableHeader>
@@ -205,10 +220,11 @@ export function SBUBillTypeAnalysisChart({
                           {sbu}
                         </TableHead>
                       ))}
+                      <TableHead className="text-center font-medium bg-muted">Total</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {billTypes.map(billType => (
+                    {billTypes.map((billType, billTypeIndex) => (
                       <TableRow key={billType}>
                         <TableCell className="font-medium">
                           <div className="flex items-center gap-2">
@@ -241,8 +257,22 @@ export function SBUBillTypeAnalysisChart({
                             </TableCell>
                           );
                         })}
+                        <TableCell className="text-center font-medium bg-muted">
+                          {billTypeTotals[billTypeIndex]}
+                        </TableCell>
                       </TableRow>
                     ))}
+                    <TableRow className="bg-muted font-medium">
+                      <TableCell className="font-semibold">Total</TableCell>
+                      {sbuTotals.map((total, index) => (
+                        <TableCell key={index} className="text-center font-semibold">
+                          {total}
+                        </TableCell>
+                      ))}
+                      <TableCell className="text-center font-semibold">
+                        {grandTotal}
+                      </TableCell>
+                    </TableRow>
                   </TableBody>
                 </Table>
               );
