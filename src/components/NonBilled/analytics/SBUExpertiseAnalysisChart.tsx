@@ -70,6 +70,8 @@ export function SBUExpertiseAnalysisChart({
         total_count: 0,
         initial_count: 0,
         critical_count: 0,
+        // long_term_count will be derived after aggregation
+        long_term_count: 0,
         expertises: []
       };
     }
@@ -80,7 +82,14 @@ export function SBUExpertiseAnalysisChart({
     return acc;
   }, {} as Record<string, any>);
 
-  const chartData = Object.values(sbuGroups);
+  // After aggregation, compute long_term_count = total - initial - critical
+  const chartData = Object.values(sbuGroups).map((sbu: any) => {
+    const computed = Math.max(0, sbu.total_count - (sbu.initial_count || 0) - (sbu.critical_count || 0));
+    return {
+      ...sbu,
+      long_term_count: computed,
+    };
+  });
 
   const CustomTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
@@ -91,6 +100,7 @@ export function SBUExpertiseAnalysisChart({
           <div className="space-y-1 text-sm">
             <p>Total: <span className="font-medium">{data.total_count}</span></p>
             <p>Initial (&lt;30d): <span className="font-medium text-green-600">{data.initial_count}</span></p>
+            <p>Long term (30-60d): <span className="font-medium text-yellow-600">{data.long_term_count}</span></p>
             <p>Critical (&gt;60d): <span className="font-medium text-red-600">{data.critical_count}</span></p>
           </div>
         </div>
@@ -167,12 +177,14 @@ export function SBUExpertiseAnalysisChart({
               {chartType === 'stacked' ? (
                 <>
                   <Bar dataKey="initial_count" stackId="a" fill="hsl(var(--chart-2))" name="Initial (<30d)" />
+                  <Bar dataKey="long_term_count" stackId="a" fill="hsl(var(--chart-3))" name="Long term (30-60d)" />
                   <Bar dataKey="critical_count" stackId="a" fill="hsl(var(--destructive))" name="Critical (>60d)" />
                 </>
               ) : (
                 <>
                   <Bar dataKey="total_count" fill="hsl(var(--chart-1))" name="Total" />
                   <Bar dataKey="initial_count" fill="hsl(var(--chart-2))" name="Initial (<30d)" />
+                  <Bar dataKey="long_term_count" fill="hsl(var(--chart-3))" name="Long term (30-60d)" />
                   <Bar dataKey="critical_count" fill="hsl(var(--destructive))" name="Critical (>60d)" />
                 </>
               )}
@@ -236,7 +248,7 @@ export function SBUExpertiseAnalysisChart({
                             <TableCell key={sbu} className="text-center">
                               <div 
                                 className="cursor-help font-medium"
-                                title={`Initial (<30d): ${item.initial_count}\nCritical (>60d): ${item.critical_count}`}
+                                title={`Initial (<30d): ${item.initial_count}\nLong term (30-60d): ${Math.max(0, item.total_count - (item.initial_count || 0) - (item.critical_count || 0))}\nCritical (>60d): ${item.critical_count}`}
                               >
                                 {item.total_count}
                               </div>
