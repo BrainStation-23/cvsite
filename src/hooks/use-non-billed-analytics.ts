@@ -99,6 +99,30 @@ interface TrendsAnalysisData {
   };
 }
 
+interface SBUDimensionalAnalysisData {
+  expertise_analysis: Array<{
+    sbu_id: string;
+    sbu_name: string;
+    sbu_color_code?: string;
+    expertise_id: string;
+    expertise_name: string;
+    total_count: number;
+    initial_count: number;
+    critical_count: number;
+  }>;
+  bill_type_analysis: Array<{
+    sbu_id: string;
+    sbu_name: string;
+    sbu_color_code?: string;
+    bill_type_id: string;
+    bill_type_name: string;
+    bill_type_color_code?: string;
+    total_count: number;
+    initial_count: number;
+    critical_count: number;
+  }>;
+}
+
 interface AnalyticsFilters {
   startDate?: Date | null;
   endDate?: Date | null;
@@ -188,6 +212,24 @@ export function useNonBilledTrendsAnalysis(
 
       if (error) throw error;
       return data as unknown as TrendsAnalysisData;
+    },
+  });
+}
+
+export function useNonBilledSBUDimensionalAnalysis(
+  filters: Pick<AnalyticsFilters, 'startDate' | 'endDate' | 'benchFilter'> = {}
+) {
+  return useQuery({
+    queryKey: ['non-billed-sbu-dimensional-analysis', filters],
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc('get_non_billed_resources_sbu_dimensional_analysis', {
+        start_date_filter: filters.startDate ? format(filters.startDate, 'yyyy-MM-dd') : null,
+        end_date_filter: filters.endDate ? format(filters.endDate, 'yyyy-MM-dd') : null,
+        bench_filter: filters.benchFilter,
+      });
+
+      if (error) throw error;
+      return data as unknown as SBUDimensionalAnalysisData;
     },
   });
 }

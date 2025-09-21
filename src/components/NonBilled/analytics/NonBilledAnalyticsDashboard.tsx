@@ -9,13 +9,16 @@ import {
   useNonBilledOverview, 
   useNonBilledDimensionalAnalysis, 
   useNonBilledRiskAnalytics, 
-  useNonBilledTrendsAnalysis 
+  useNonBilledTrendsAnalysis,
+  useNonBilledSBUDimensionalAnalysis
 } from '@/hooks/use-non-billed-analytics';
 
 import { OverviewCards } from './OverviewCards';
 import { ExperienceDistributionChart } from './ExperienceDistributionChart';
 import { SBUExperienceDistributionChart } from './SBUExperienceDistributionChart';
 import { DimensionalAnalysisChart } from './DimensionalAnalysisChart';
+import { SBUExpertiseAnalysisChart } from './SBUExpertiseAnalysisChart';
+import { SBUBillTypeAnalysisChart } from './SBUBillTypeAnalysisChart';
 import { RiskAnalytics } from './RiskAnalytics';
 import { TrendsChart } from './TrendsChart';
 
@@ -47,6 +50,12 @@ export function NonBilledAnalyticsDashboard() {
   });
 
   const billTypeQuery = useNonBilledDimensionalAnalysis('bill_type', {
+    startDate,
+    endDate,
+    benchFilter,
+  });
+
+  const sbuDimensionalQuery = useNonBilledSBUDimensionalAnalysis({
     startDate,
     endDate,
     benchFilter,
@@ -187,6 +196,42 @@ export function NonBilledAnalyticsDashboard() {
                   }`}
                 />
               )}
+            </div>
+
+            {/* SBU Dimensional Analysis */}
+            <div className="space-y-6">
+              <div className="mb-4">
+                <h2 className="text-xl font-semibold">SBU Dimensional Analysis</h2>
+                <p className="text-sm text-muted-foreground">
+                  Detailed breakdown showing total, initial (&lt;30d), and critical (&gt;60d) counts by SBU
+                </p>
+              </div>
+
+              <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+                {/* SBU-Expertise Analysis */}
+                {sbuDimensionalQuery.data?.expertise_analysis && (
+                  <SBUExpertiseAnalysisChart
+                    data={sbuDimensionalQuery.data.expertise_analysis}
+                    isLoading={sbuDimensionalQuery.isLoading}
+                    title={`SBU-Expertise Analysis${
+                      benchFilter === true ? " (Bench Only)" : 
+                      benchFilter === false ? " (Non-Bench Only)" : ""
+                    }`}
+                  />
+                )}
+
+                {/* SBU-Bill Type Analysis */}
+                {sbuDimensionalQuery.data?.bill_type_analysis && (
+                  <SBUBillTypeAnalysisChart
+                    data={sbuDimensionalQuery.data.bill_type_analysis}
+                    isLoading={sbuDimensionalQuery.isLoading}
+                    title={`SBU-Bill Type Analysis${
+                      benchFilter === true ? " (Bench Only)" : 
+                      benchFilter === false ? " (Non-Bench Only)" : ""
+                    }`}
+                  />
+                )}
+              </div>
             </div>
           </div>
         </TabsContent>
