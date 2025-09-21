@@ -182,42 +182,57 @@ export function SBUExpertiseAnalysisChart({
         
         {showTables && (
           <div className="max-h-96 overflow-auto">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>SBU</TableHead>
-                  <TableHead>Expertise</TableHead>
-                  <TableHead className="text-right">Total</TableHead>
-                  <TableHead className="text-right">Initial (&lt;30d)</TableHead>
-                  <TableHead className="text-right">Critical (&gt;60d)</TableHead>
-                  <TableHead className="text-right">Critical %</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {data
-                  .sort((a, b) => b.total_count - a.total_count)
-                  .map((item) => {
-                    const criticalPercent = item.total_count > 0 
-                      ? ((item.critical_count / item.total_count) * 100).toFixed(1)
-                      : '0.0';
-                    
-                    return (
-                      <TableRow key={`${item.sbu_id}-${item.expertise_id}`}>
-                        <TableCell className="font-medium">{item.sbu_name}</TableCell>
-                        <TableCell>{item.expertise_name}</TableCell>
-                        <TableCell className="text-right">{item.total_count}</TableCell>
-                        <TableCell className="text-right text-green-600">{item.initial_count}</TableCell>
-                        <TableCell className="text-right text-red-600">{item.critical_count}</TableCell>
-                        <TableCell className="text-right">
-                          <span className={item.critical_count > 0 ? 'text-red-600' : 'text-muted-foreground'}>
-                            {criticalPercent}%
-                          </span>
-                        </TableCell>
+            {(() => {
+              // Get unique expertises and SBUs
+              const expertises = Array.from(new Set(data.map(item => item.expertise_name))).sort();
+              const sbus = Array.from(new Set(data.map(item => item.sbu_name))).sort();
+              
+              // Create a map for quick lookup
+              const dataMap = new Map();
+              data.forEach(item => {
+                const key = `${item.expertise_name}-${item.sbu_name}`;
+                dataMap.set(key, item);
+              });
+
+              return (
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="font-medium">Expertise</TableHead>
+                      {sbus.map(sbu => (
+                        <TableHead key={sbu} className="text-center font-medium">
+                          {sbu}
+                        </TableHead>
+                      ))}
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {expertises.map(expertise => (
+                      <TableRow key={expertise}>
+                        <TableCell className="font-medium">{expertise}</TableCell>
+                        {sbus.map(sbu => {
+                          const item = dataMap.get(`${expertise}-${sbu}`);
+                          if (!item) {
+                            return <TableCell key={sbu} className="text-center text-muted-foreground">-</TableCell>;
+                          }
+                          
+                          return (
+                            <TableCell key={sbu} className="text-center">
+                              <div 
+                                className="cursor-help font-medium"
+                                title={`Initial (<30d): ${item.initial_count}\nCritical (>60d): ${item.critical_count}`}
+                              >
+                                {item.total_count}
+                              </div>
+                            </TableCell>
+                          );
+                        })}
                       </TableRow>
-                    );
-                  })}
-              </TableBody>
-            </Table>
+                    ))}
+                  </TableBody>
+                </Table>
+              );
+            })()}
           </div>
         )}
       </CardContent>

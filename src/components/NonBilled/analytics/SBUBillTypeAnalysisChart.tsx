@@ -183,52 +183,70 @@ export function SBUBillTypeAnalysisChart({
         
         {showTables && (
           <div className="max-h-96 overflow-auto">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>SBU</TableHead>
-                  <TableHead>Bill Type</TableHead>
-                  <TableHead className="text-right">Total</TableHead>
-                  <TableHead className="text-right">Initial (&lt;30d)</TableHead>
-                  <TableHead className="text-right">Critical (&gt;60d)</TableHead>
-                  <TableHead className="text-right">Critical %</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {data
-                  .sort((a, b) => b.total_count - a.total_count)
-                  .map((item) => {
-                    const criticalPercent = item.total_count > 0 
-                      ? ((item.critical_count / item.total_count) * 100).toFixed(1)
-                      : '0.0';
-                    
-                    return (
-                      <TableRow key={`${item.sbu_id}-${item.bill_type_id}`}>
-                        <TableCell className="font-medium">{item.sbu_name}</TableCell>
-                        <TableCell>
+            {(() => {
+              // Get unique bill types and SBUs
+              const billTypes = Array.from(new Set(data.map(item => item.bill_type_name))).sort();
+              const sbus = Array.from(new Set(data.map(item => item.sbu_name))).sort();
+              
+              // Create a map for quick lookup
+              const dataMap = new Map();
+              data.forEach(item => {
+                const key = `${item.bill_type_name}-${item.sbu_name}`;
+                dataMap.set(key, item);
+              });
+
+              return (
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="font-medium">Bill Type</TableHead>
+                      {sbus.map(sbu => (
+                        <TableHead key={sbu} className="text-center font-medium">
+                          {sbu}
+                        </TableHead>
+                      ))}
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {billTypes.map(billType => (
+                      <TableRow key={billType}>
+                        <TableCell className="font-medium">
                           <div className="flex items-center gap-2">
-                            {item.bill_type_color_code && (
-                              <div 
-                                className="w-3 h-3 rounded-full"
-                                style={{ backgroundColor: item.bill_type_color_code }}
-                              />
-                            )}
-                            {item.bill_type_name}
+                            {(() => {
+                              const billTypeItem = data.find(item => item.bill_type_name === billType);
+                              return billTypeItem?.bill_type_color_code && (
+                                <div 
+                                  className="w-3 h-3 rounded-full"
+                                  style={{ backgroundColor: billTypeItem.bill_type_color_code }}
+                                />
+                              );
+                            })()}
+                            {billType}
                           </div>
                         </TableCell>
-                        <TableCell className="text-right">{item.total_count}</TableCell>
-                        <TableCell className="text-right text-green-600">{item.initial_count}</TableCell>
-                        <TableCell className="text-right text-red-600">{item.critical_count}</TableCell>
-                        <TableCell className="text-right">
-                          <span className={item.critical_count > 0 ? 'text-red-600' : 'text-muted-foreground'}>
-                            {criticalPercent}%
-                          </span>
-                        </TableCell>
+                        {sbus.map(sbu => {
+                          const item = dataMap.get(`${billType}-${sbu}`);
+                          if (!item) {
+                            return <TableCell key={sbu} className="text-center text-muted-foreground">-</TableCell>;
+                          }
+                          
+                          return (
+                            <TableCell key={sbu} className="text-center">
+                              <div 
+                                className="cursor-help font-medium"
+                                title={`Initial (<30d): ${item.initial_count}\nCritical (>60d): ${item.critical_count}`}
+                              >
+                                {item.total_count}
+                              </div>
+                            </TableCell>
+                          );
+                        })}
                       </TableRow>
-                    );
-                  })}
-              </TableBody>
-            </Table>
+                    ))}
+                  </TableBody>
+                </Table>
+              );
+            })()}
           </div>
         )}
       </CardContent>
