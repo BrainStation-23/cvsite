@@ -5,6 +5,22 @@ import { ViewToggle } from '@/components/statistics/ViewToggle';
 import { Button } from '@/components/ui/button';
 import { useState } from 'react';
 
+// InlineBreakdown: compact stacked spark for table cells
+function InlineBreakdown({ initial = 0, longTerm = 0, critical = 0 }: { initial?: number; longTerm?: number; critical?: number }) {
+  const total = initial + longTerm + critical;
+  const pct = (value: number) => (total === 0 ? 0 : Math.round((value / total) * 100));
+
+  return (
+    <div className="inline-flex items-center gap-2">
+      <div className="w-24 h-2 rounded overflow-hidden flex" role="img" aria-label={`Breakdown: initial ${initial}, long term ${longTerm}, critical ${critical}`} title={`Initial: ${initial}\nLong term: ${longTerm}\nCritical: ${critical}`}>
+        <div style={{ width: `${pct(initial)}%` }} className="bg-[hsl(var(--chart-2))]"></div>
+        <div style={{ width: `${pct(longTerm)}%` }} className="bg-[hsl(var(--chart-3))]"></div>
+        <div style={{ width: `${pct(critical)}%` }} className="bg-[hsl(var(--destructive))]"></div>
+      </div>
+    </div>
+  );
+}
+
 interface SBUBillTypeData {
   sbu_id: string;
   sbu_name: string;
@@ -71,6 +87,8 @@ export function SBUBillTypeAnalysisChart({
         total_count: 0,
         initial_count: 0,
         critical_count: 0,
+        // long_term_count will be computed after aggregation
+        long_term_count: 0,
         billTypes: []
       };
     }
@@ -81,7 +99,14 @@ export function SBUBillTypeAnalysisChart({
     return acc;
   }, {} as Record<string, any>);
 
-  const chartData = Object.values(sbuGroups);
+  // After aggregation compute long term per SBU
+  const chartData = Object.values(sbuGroups).map((sbu: any) => {
+    const computed = Math.max(0, sbu.total_count - (sbu.initial_count || 0) - (sbu.critical_count || 0));
+    return {
+      ...sbu,
+      long_term_count: computed,
+    };
+  });
 
   const CustomTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
@@ -92,6 +117,7 @@ export function SBUBillTypeAnalysisChart({
           <div className="space-y-1 text-sm">
             <p>Total: <span className="font-medium">{data.total_count}</span></p>
             <p>Initial (&lt;30d): <span className="font-medium text-green-600">{data.initial_count}</span></p>
+            <p>Long term (30-60d): <span className="font-medium text-yellow-600">{data.long_term_count}</span></p>
             <p>Critical (&gt;60d): <span className="font-medium text-red-600">{data.critical_count}</span></p>
           </div>
         </div>
@@ -168,12 +194,14 @@ export function SBUBillTypeAnalysisChart({
               {chartType === 'stacked' ? (
                 <>
                   <Bar dataKey="initial_count" stackId="a" fill="hsl(var(--chart-2))" name="Initial (<30d)" />
+                  <Bar dataKey="long_term_count" stackId="a" fill="hsl(var(--chart-3))" name="Long term (30-60d)" />
                   <Bar dataKey="critical_count" stackId="a" fill="hsl(var(--destructive))" name="Critical (>60d)" />
                 </>
               ) : (
                 <>
                   <Bar dataKey="total_count" fill="hsl(var(--chart-1))" name="Total" />
                   <Bar dataKey="initial_count" fill="hsl(var(--chart-2))" name="Initial (<30d)" />
+                  <Bar dataKey="long_term_count" fill="hsl(var(--chart-3))" name="Long term (30-60d)" />
                   <Bar dataKey="critical_count" fill="hsl(var(--destructive))" name="Critical (>60d)" />
                 </>
               )}
@@ -248,11 +276,13 @@ export function SBUBillTypeAnalysisChart({
                           
                           return (
                             <TableCell key={sbu} className="text-center">
-                              <div 
-                                className="cursor-help font-medium"
-                                title={`Initial (<30d): ${item.initial_count}\nCritical (>60d): ${item.critical_count}`}
-                              >
-                                {item.total_count}
+                              <div className="flex flex-col items-center justify-center">
+                                <div className="font-medium">{item.total_count}</div>
+                                <InlineBreakdown
+                                  initial={item.initial_count}
+                                  longTerm={Math.max(0, item.total_count - (item.initial_count || 0) - (item.critical_count || 0))}
+                                  critical={item.critical_count}
+                                />
                               </div>
                             </TableCell>
                           );
