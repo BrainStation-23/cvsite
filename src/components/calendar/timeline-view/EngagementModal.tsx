@@ -111,9 +111,22 @@ export const EngagementModal: React.FC<EngagementModalProps> = ({
 
   useEffect(() => {
     if (isOpen) {
+      console.log('Modal opened with data:', {
+        preselectedStartDate,
+        initialDataStartDate: initialData?.engagement_start_date,
+        currentMonth,
+        currentYear
+      });
+
       // Reset form when opening the modal
-      const defaultMonth = preselectedStartDate ? preselectedStartDate.getMonth() + 1 : currentMonth;
-      const defaultYear = preselectedStartDate ? preselectedStartDate.getFullYear() : currentYear;
+      const defaultDate = preselectedStartDate || 
+        (initialData?.engagement_start_date ? new Date(initialData.engagement_start_date) : new Date());
+      
+      // Get month and year from the date
+      const defaultMonth = defaultDate.getMonth() + 1; // getMonth() is 0-indexed
+      const defaultYear = defaultDate.getFullYear();
+      
+      console.log('Setting default month/year:', { defaultMonth, defaultYear });
       
       setSelectedMonth(defaultMonth);
       setSelectedYear(defaultYear);
@@ -121,11 +134,15 @@ export const EngagementModal: React.FC<EngagementModalProps> = ({
       // Reset project data when opening the modal
       setSelectedProjectData(null);
       
+      // Format the date for the form
+      const formattedStartDate = format(defaultDate, 'yyyy-MM-dd');
+      console.log('Formatted start date:', formattedStartDate);
+      
       setFormData({
         profile_id: preselectedResourceId || initialData?.profile_id || '',
         engagement_percentage: initialData?.engagement_percentage || 0,
         billing_percentage: initialData?.billing_percentage || 0,
-        engagement_start_date: initialData?.engagement_start_date || '',
+        engagement_start_date: formattedStartDate,
         release_date: initialData?.release_date || '',
         bill_type_id: initialData?.bill_type?.id || '',
         project_id: initialData?.project?.id || '',
@@ -335,43 +352,57 @@ export const EngagementModal: React.FC<EngagementModalProps> = ({
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="month">Month *</Label>
-              <Select
-                value={selectedMonth.toString()}
-                onValueChange={(value) => setSelectedMonth(parseInt(value))}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select month" />
-                </SelectTrigger>
-                <SelectContent>
-                  {months.map((month) => (
-                    <SelectItem key={month.value} value={month.value.toString()}>
-                      {month.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="year">Year *</Label>
-              <Select
-                value={selectedYear.toString()}
-                onValueChange={(value) => setSelectedYear(parseInt(value))}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select year" />
-                </SelectTrigger>
-                <SelectContent>
-                  {years.map((year) => (
-                    <SelectItem key={year} value={year.toString()}>
-                      {year}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+          <div className="space-y-2">
+            <Label>Select Month and Year *</Label>
+            <div className="rounded-lg border p-3">
+              {/* Year Navigation */}
+              <div className="mb-3 flex items-center justify-between">
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setSelectedYear(prev => prev - 1)}
+                  className="h-8 w-8 p-0"
+                >
+                  &larr;
+                </Button>
+                <span className="font-medium">{selectedYear}</span>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setSelectedYear(prev => prev + 1)}
+                  className="h-8 w-8 p-0"
+                >
+                  &rarr;
+                </Button>
+              </div>
+              
+              {/* Month Grid */}
+              <div className="grid grid-cols-3 gap-2">
+                {months.map((month) => {
+                  const isCurrentMonth = month.value === new Date().getMonth() + 1 && selectedYear === new Date().getFullYear();
+                  const isSelected = month.value === selectedMonth;
+                  
+                  return (
+                    <Button
+                      key={month.value}
+                      type="button"
+                      variant={isSelected ? "default" : isCurrentMonth ? "outline" : "ghost"}
+                      size="sm"
+                      className={`h-12 ${isCurrentMonth && !isSelected ? 'border-blue-500' : ''}`}
+                      onClick={() => setSelectedMonth(month.value)}
+                    >
+                      <div className="flex flex-col items-center">
+                        <span className="text-xs">{month.label.substring(0, 3)}</span>
+                        {isCurrentMonth && (
+                          <span className="h-1 w-1 rounded-full bg-blue-500 mt-1"></span>
+                        )}
+                      </div>
+                    </Button>
+                  );
+                })}
+              </div>
             </div>
           </div>
 
