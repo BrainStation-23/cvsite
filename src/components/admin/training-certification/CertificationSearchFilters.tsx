@@ -1,10 +1,10 @@
-
 import React from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Search, X, Filter, Loader2 } from 'lucide-react';
 import { useCertificationFilters } from '@/hooks/use-certification-filters';
+import SbuCombobox from '@/components/admin/user/SbuCombobox';
+import ProviderCombobox from './ProviderCombobox'; // You need to create this
 
 interface CertificationSearchFiltersProps {
   searchQuery: string;
@@ -49,51 +49,31 @@ export const CertificationSearchFilters: React.FC<CertificationSearchFiltersProp
             <span>Filters:</span>
           </div>
           
-          <Select value={providerFilter || 'all'} onValueChange={onProviderFilterChange}>
-            <SelectTrigger className="w-40 h-9 bg-white">
-              <SelectValue placeholder="Provider" />
-            </SelectTrigger>
-            <SelectContent className="bg-white border shadow-lg z-50">
-              <SelectItem value="all">All Providers</SelectItem>
-              {isLoading ? (
-                <SelectItem value="loading" disabled>
-                  <div className="flex items-center gap-2">
-                    <Loader2 className="h-3 w-3 animate-spin" />
-                    Loading...
-                  </div>
-                </SelectItem>
-              ) : (
-                providerOptions.map((provider) => (
-                  <SelectItem key={provider} value={provider}>
-                    {provider}
-                  </SelectItem>
-                ))
-              )}
-            </SelectContent>
-          </Select>
+          {/* Provider Combobox */}
+          <div className='w-80'>
+            <ProviderCombobox
+              value={providerFilter === 'all' ? null : providerFilter}
+              onValueChange={val => onProviderFilterChange(val ?? 'all')}
+              options={providerOptions}
+              isLoading={isLoading}
+              placeholder="Select Provider..."
+            />
+          </div>
 
-          <Select value={sbuFilter || 'all'} onValueChange={onSbuFilterChange}>
-            <SelectTrigger className="w-32 h-9 bg-white">
-              <SelectValue placeholder="SBU" />
-            </SelectTrigger>
-            <SelectContent className="bg-white border shadow-lg z-50">
-              <SelectItem value="all">All SBUs</SelectItem>
-              {isLoading ? (
-                <SelectItem value="loading" disabled>
-                  <div className="flex items-center gap-2">
-                    <Loader2 className="h-3 w-3 animate-spin" />
-                    Loading...
-                  </div>
-                </SelectItem>
-              ) : (
-                sbuOptions.map((sbu) => (
-                  <SelectItem key={sbu.id} value={sbu.name}>
-                    {sbu.name}
-                  </SelectItem>
-                ))
-              )}
-            </SelectContent>
-          </Select>
+
+          {/* SBU Combobox */}
+          <div className='min-w-[400px]'>
+            <SbuCombobox
+              value={sbuOptions.find(sbu => sbu.name === sbuFilter)?.id ?? null}
+              onValueChange={id => {
+                const selected = sbuOptions.find(sbu => sbu.id === id);
+                onSbuFilterChange(selected ? selected.name : 'all');
+              }}
+              placeholder="Select SBU..."
+              disabled={isLoading}
+            />
+          </div>
+
 
           {hasActiveFilters && (
             <Button

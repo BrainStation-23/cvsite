@@ -10,7 +10,7 @@ import { CertificationSearchFilters } from '@/components/admin/training-certific
 import { CertificationTable } from '@/components/admin/training-certification/CertificationTable';
 import { TrainingBulkUploadDialog } from '@/components/admin/training-certification/TrainingBulkUploadDialog';
 import { Skeleton } from '@/components/ui/skeleton';
-
+import { CertificationExportButton } from '@/components/admin/training-certification/CertificateExportButton';
 const TrainingCertification: React.FC = () => {
   const {
     certifications,
@@ -84,6 +84,7 @@ const TrainingCertification: React.FC = () => {
               Refresh
             </Button>
             <TrainingBulkUploadDialog onUploadComplete={refetch} />
+            <CertificationExportButton />
           </div>
         </div>
 

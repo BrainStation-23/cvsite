@@ -3,6 +3,7 @@ import React from 'react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Building2, Clock, Award } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 interface CompactEmployeeProfileProps {
   profile: {
@@ -40,7 +41,8 @@ const CompactEmployeeProfile: React.FC<CompactEmployeeProfileProps> = ({
   const displayLastName = generalInfo?.last_name || profile.general_information?.last_name || profile.last_name || '';
   const displayName = `${displayFirstName} ${displayLastName}`.trim();
   const designation = generalInfo?.current_designation || profile.general_information?.current_designation;
-  
+    const navigate = useNavigate(); 
+
   // Fix image URL handling - check multiple sources and ensure proper URL format
   const profileImage = generalInfo?.profile_image || 
                       profile.general_information?.profile_image || 
@@ -80,9 +82,17 @@ const CompactEmployeeProfile: React.FC<CompactEmployeeProfileProps> = ({
       <div className="flex-1 min-w-0">
         <div className="flex flex-col space-y-1">
           <div className="flex items-center space-x-2">
-            <p className="text-sm font-medium text-foreground truncate">
+            <a
+              href={`/employee/profile/${profile.id}`}
+              onClick={e => {
+                e.preventDefault();
+                navigate(`/employee/profile/${profile.id}`);
+              }}
+              style={{ cursor: 'pointer' }}
+              className="text-sm font-medium text-foreground truncate hover:underline hover:text-blue-600"
+            >
               {displayName}
-            </p>
+            </a>
             {profile.employee_id && (
               <Badge variant="outline" className="text-xs">
                 {profile.employee_id}
