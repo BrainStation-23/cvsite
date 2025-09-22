@@ -119,19 +119,19 @@ function App(): React.ReactElement {
                 <Route path="cv-template-settings" element={<ProtectedRoute allowedRoles={['admin']}><CVTemplateSettings /></ProtectedRoute>} />
               </Route>
 
-              {/* Resource Calendar (admin only) */}
-              <Route path="resource-calendar" element={<ProtectedRoute allowedRoles={['admin']}><Outlet /></ProtectedRoute>}>
+              {/* Resource Calendar (admin/manager with different access) */}
+              <Route path="resource-calendar" element={<ProtectedRoute allowedRoles={['admin', 'manager']}><Outlet /></ProtectedRoute>}>
                 <Route path="dashboard" element={<ResourceCalendarStatistics />} />
-                <Route path="planning" element={<ResourceCalendarPlanning />} />
-                <Route path="calendar" element={<ResourceCalendarView />} />
-                <Route path="settings" element={<ResourcePlanningSettings />} />
+                <Route path="planning" element={<ProtectedRoute allowedRoles={['admin']}><ResourceCalendarPlanning /></ProtectedRoute>} />
+                <Route path="calendar" element={<ProtectedRoute allowedRoles={['admin']}><ResourceCalendarView /></ProtectedRoute>} />
+                <Route path="settings" element={<ProtectedRoute allowedRoles={['admin']}><ResourcePlanningSettings /></ProtectedRoute>} />
               </Route>
 
-              {/* Non-Billed (admin only) */}
-              <Route path="non-billed" element={<ProtectedRoute allowedRoles={['admin']}><Outlet /></ProtectedRoute>}>
+              {/* Non-Billed (admin/manager with different access) */}
+              <Route path="non-billed" element={<ProtectedRoute allowedRoles={['admin', 'manager']}><Outlet /></ProtectedRoute>}>
                 <Route path="dashboard" element={<NonBilledDashboard />} />
                 <Route path="report" element={<NonBilledReportPage />} />
-                <Route path="settings" element={<NonBilledSettingsPage />} />
+                <Route path="settings" element={<ProtectedRoute allowedRoles={['admin']}><NonBilledSettingsPage /></ProtectedRoute>} />
               </Route>
 
               {/* PIP */}
