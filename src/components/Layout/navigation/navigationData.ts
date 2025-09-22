@@ -52,37 +52,43 @@ export const getSidebarGroups = (
       ],
     },
 
-    // CV Database group (admin/manager)
+    // CV Database group (admin/manager with different access levels)
     (userRole === 'admin' || userRole === 'manager') && {
       label: 'CV Database',
       items: [
         { to: '/cv-database/dashboard', icon: LayoutDashboard, label: 'CV Dashboard' },
         { to: '/cv-database/employee-data', icon: Search, label: 'CV Search' },
         { to: '/cv-database/training-certification', icon: FileText, label: 'Training and Certification' },
-        { to: '/cv-database/employee-data-management', icon: FolderOpen, label: 'CV Completion' },
-        { to: '/cv-database/cv-templates', icon: FileText, label: 'CV Templates' },
-        { to: '/cv-database/cv-template-settings', icon: Settings, label: 'CV Settings' },
+        ...(userRole === 'admin' ? [
+          { to: '/cv-database/employee-data-management', icon: FolderOpen, label: 'CV Completion' },
+          { to: '/cv-database/cv-templates', icon: FileText, label: 'CV Templates' },
+          { to: '/cv-database/cv-template-settings', icon: Settings, label: 'CV Settings' },
+        ] : []),
       ],
     },
 
-    // CV Database group (admin/manager)
-    (userRole === 'admin') && {
+    // Resource Calendar group (admin/manager with different access levels)
+    (userRole === 'admin' || userRole === 'manager') && {
       label: 'Resource Calendar',
       items: [
         { to: '/resource-calendar/dashboard', icon: LayoutDashboard, label: 'Resource Dashboard' },
-        { to: '/resource-calendar/planning', icon: Calendar, label: 'Planning' },
-        { to: '/resource-calendar/calendar', icon: CalendarDays, label: 'Calendar View' },
-        { to: '/resource-calendar/settings', icon: Settings, label: 'Resource Settings' },
+        ...(userRole === 'admin' ? [
+          { to: '/resource-calendar/planning', icon: Calendar, label: 'Planning' },
+          { to: '/resource-calendar/calendar', icon: CalendarDays, label: 'Calendar View' },
+          { to: '/resource-calendar/settings', icon: Settings, label: 'Resource Settings' },
+        ] : []),
       ],
     },
 
-    // Bench Management group (admin only)
-    userRole === 'admin' && {
+    // Non-Billed Management group (admin/manager with different access levels)
+    (userRole === 'admin' || userRole === 'manager') && {
       label: 'Non-Billed Management',
       items: [
         { to: '/non-billed/dashboard', icon: LayoutDashboard, label: 'Non-Billed Dashboard' },
         { to: '/non-billed/report', icon: BarChart3, label: 'Non-Billed Report' },
-        { to: '/non-billed/settings', icon: Settings, label: 'Non-Billed Settings' },
+        ...(userRole === 'admin' ? [
+          { to: '/non-billed/settings', icon: Settings, label: 'Non-Billed Settings' },
+        ] : []),
       ],
     },
 
