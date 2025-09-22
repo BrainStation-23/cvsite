@@ -3,6 +3,7 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContaine
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { ViewToggle } from '@/components/statistics/ViewToggle';
 import { useState } from 'react';
+import { MessageSquare } from 'lucide-react';
 
 interface DimensionalData {
   dimension_id: string;
@@ -73,6 +74,9 @@ export function DimensionalAnalysisChart({
     .sort((a, b) => b.total_count - a.total_count)
     .slice(0, 10);
     
+  // Check if there's any data to display
+  const hasData = sortedData.length > 0;
+    
   // Color array for charts
   const chartColors = [
     'hsl(var(--chart-1))', // Blue
@@ -97,82 +101,98 @@ export function DimensionalAnalysisChart({
               Breakdown of non billed metrics across different {dimensionLabels[dimension].toLowerCase()}s
             </p>
           </div>
-          <ViewToggle
-            showCharts={showCharts}
-            showTables={showTables}
-            onToggleCharts={() => {
-              setShowCharts(!showCharts);
-              if (!showCharts && showTables) setShowTables(false);
-            }}
-            onToggleTables={() => {
-              setShowTables(!showTables);
-              if (!showTables && showCharts) setShowCharts(false);
-            }}
-          />
+          {hasData && (
+            <ViewToggle
+              showCharts={showCharts}
+              showTables={showTables}
+              onToggleCharts={() => {
+                setShowCharts(!showCharts);
+                if (!showCharts && showTables) setShowTables(false);
+              }}
+              onToggleTables={() => {
+                setShowTables(!showTables);
+                if (!showTables && showCharts) setShowCharts(false);
+              }}
+            />
+          )}
         </div>
       </CardHeader>
       <CardContent>
-        {showCharts && (
-          <ResponsiveContainer width="100%" height={400}>
-            <BarChart
-              data={sortedData}
-              margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
-            >
-              <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
-              <XAxis 
-                dataKey="dimension_name" 
-                angle={-45}
-                textAnchor="end"
-                height={100}
-                interval={0}
-                fontSize={12}
-              />
-              <YAxis fontSize={12} />
-              <Tooltip content={<CustomTooltip />} />
-              <Bar 
-                dataKey="total_count" 
-                radius={[4, 4, 0, 0]}
-                name="Total Count"
-              >
-                {sortedData.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={chartColors[index % chartColors.length]} />
-                ))}
-              </Bar>
-            </BarChart>
-          </ResponsiveContainer>
-        )}
-        
-        {showTables && (
-          <div className="max-h-96 overflow-auto">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>{dimensionLabels[dimension]}</TableHead>
-                  <TableHead className="text-right">Total Count</TableHead>
-                  <TableHead className="text-right">Avg Duration (days)</TableHead>
-                  <TableHead className="text-right">Long Term Count</TableHead>
-                  {sortedData.some(d => d.avg_experience_years) && (
-                    <TableHead className="text-right">Avg Experience (years)</TableHead>
-                  )}
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {sortedData.map((item) => (
-                  <TableRow key={item.dimension_id}>
-                    <TableCell className="font-medium">{item.dimension_name}</TableCell>
-                    <TableCell className="text-right">{item.total_count}</TableCell>
-                    <TableCell className="text-right">{item.avg_duration_days}</TableCell>
-                    <TableCell className="text-right">{item.long_term_count}</TableCell>
-                    {sortedData.some(d => d.avg_experience_years) && (
-                      <TableCell className="text-right">
-                        {item.avg_experience_years ? `${item.avg_experience_years}y` : '-'}
-                      </TableCell>
-                    )}
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+        {!hasData ? (
+          <div className="flex flex-col items-center justify-center py-12 text-center">
+            <div className="text-muted-foreground mb-2">
+              <MessageSquare className="h-12 w-12 opacity-40" />
+            </div>
+            <h3 className="text-lg font-medium">No data available</h3>
+            <p className="text-sm text-muted-foreground">
+              There is no data to display for the selected filters.
+            </p>
           </div>
+        ) : (
+          <>
+            {showCharts && (
+              <ResponsiveContainer width="100%" height={400}>
+                <BarChart
+                  data={sortedData}
+                  margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
+                >
+                  <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
+                  <XAxis 
+                    dataKey="dimension_name" 
+                    angle={-45}
+                    textAnchor="end"
+                    height={100}
+                    interval={0}
+                    fontSize={12}
+                  />
+                  <YAxis fontSize={12} />
+                  <Tooltip content={<CustomTooltip />} />
+                  <Bar 
+                    dataKey="total_count" 
+                    radius={[4, 4, 0, 0]}
+                    name="Total Count"
+                  >
+                    {sortedData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={chartColors[index % chartColors.length]} />
+                    ))}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            )}
+            
+            {showTables && (
+              <div className="max-h-96 overflow-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>{dimensionLabels[dimension]}</TableHead>
+                      <TableHead className="text-right">Total Count</TableHead>
+                      <TableHead className="text-right">Avg Duration (days)</TableHead>
+                      <TableHead className="text-right">Long Term Count</TableHead>
+                      {sortedData.some(d => d.avg_experience_years) && (
+                        <TableHead className="text-right">Avg Experience (years)</TableHead>
+                      )}
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {sortedData.map((item) => (
+                      <TableRow key={item.dimension_id}>
+                        <TableCell className="font-medium">{item.dimension_name}</TableCell>
+                        <TableCell className="text-right">{item.total_count}</TableCell>
+                        <TableCell className="text-right">{item.avg_duration_days}</TableCell>
+                        <TableCell className="text-right">{item.long_term_count}</TableCell>
+                        {sortedData.some(d => d.avg_experience_years) && (
+                          <TableCell className="text-right">
+                            {item.avg_experience_years ? `${item.avg_experience_years}y` : '-'}
+                          </TableCell>
+                        )}
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            )}
+          </>
         )}
       </CardContent>
     </Card>

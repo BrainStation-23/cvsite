@@ -4,6 +4,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import SbuSettings from '@/components/admin/SbuSettings';
 import SystemHealthSettings from '@/components/admin/system-health/SystemHealthSettings';
+import CronJobsSettings from '@/components/admin/system-health/CronJobsSettings';
 import JobRoleSettings from '@/components/admin/JobRoleSettings';
 import JobTypeSettings from '@/components/admin/JobTypeSettings';
 
@@ -17,7 +18,7 @@ const SystemConfigurationSettings: React.FC = () => {
               System Configuration
             </h1>
             <p className="text-gray-600 dark:text-gray-400">
-              Configure system-wide settings including SBUs, job roles, job types, and system health.
+              Configure system-wide settings including SBUs, job roles, job types, system health, and cron jobs.
             </p>
           </div>
         </div>
@@ -49,6 +50,12 @@ const SystemConfigurationSettings: React.FC = () => {
                 className="h-12 rounded-none border-b-2 border-transparent data-[state=active]:border-cvsite-teal data-[state=active]:bg-transparent data-[state=active]:shadow-none px-6 font-medium"
               >
                 System Health
+              </TabsTrigger>
+              <TabsTrigger 
+                value="cron-jobs" 
+                className="h-12 rounded-none border-b-2 border-transparent data-[state=active]:border-cvsite-teal data-[state=active]:bg-transparent data-[state=active]:shadow-none px-6 font-medium"
+              >
+                Cron Jobs
               </TabsTrigger>
             </TabsList>
           </div>
@@ -83,6 +90,14 @@ const SystemConfigurationSettings: React.FC = () => {
               <ScrollArea className="h-full">
                 <div className="p-6">
                   <SystemHealthSettings />
+                </div>
+              </ScrollArea>
+            </TabsContent>
+            
+            <TabsContent value="cron-jobs" className="mt-0 h-full">
+              <ScrollArea className="h-full">
+                <div className="p-6">
+                  <CronJobsSettings />
                 </div>
               </ScrollArea>
             </TabsContent>
