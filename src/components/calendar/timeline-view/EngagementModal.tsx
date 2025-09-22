@@ -352,34 +352,34 @@ export const EngagementModal: React.FC<EngagementModalProps> = ({
             />
           </div>
 
-          <div className="space-y-2">
-            <Label>Select Month and Year *</Label>
-            <div className="rounded-lg border p-3">
+          <div className="space-y-1.5">
+            <Label className="text-xs font-medium text-gray-700">Month/Year *</Label>
+            <div className="rounded-md border p-2">
               {/* Year Navigation */}
-              <div className="mb-3 flex items-center justify-between">
+              <div className="mb-2 flex items-center justify-between">
                 <Button
                   type="button"
                   variant="ghost"
                   size="sm"
                   onClick={() => setSelectedYear(prev => prev - 1)}
-                  className="h-8 w-8 p-0"
+                  className="h-6 w-6 p-0 text-xs"
                 >
                   &larr;
                 </Button>
-                <span className="font-medium">{selectedYear}</span>
+                <span className="text-sm font-medium">{selectedYear}</span>
                 <Button
                   type="button"
                   variant="ghost"
                   size="sm"
                   onClick={() => setSelectedYear(prev => prev + 1)}
-                  className="h-8 w-8 p-0"
+                  className="h-6 w-6 p-0 text-xs"
                 >
                   &rarr;
                 </Button>
               </div>
               
               {/* Month Grid */}
-              <div className="grid grid-cols-3 gap-2">
+              <div className="grid grid-cols-4 gap-1">
                 {months.map((month) => {
                   const isCurrentMonth = month.value === new Date().getMonth() + 1 && selectedYear === new Date().getFullYear();
                   const isSelected = month.value === selectedMonth;
@@ -390,15 +390,10 @@ export const EngagementModal: React.FC<EngagementModalProps> = ({
                       type="button"
                       variant={isSelected ? "default" : isCurrentMonth ? "outline" : "ghost"}
                       size="sm"
-                      className={`h-12 ${isCurrentMonth && !isSelected ? 'border-blue-500' : ''}`}
+                      className={`h-8 text-xs ${isCurrentMonth && !isSelected ? 'border-blue-500' : ''}`}
                       onClick={() => setSelectedMonth(month.value)}
                     >
-                      <div className="flex flex-col items-center">
-                        <span className="text-xs">{month.label.substring(0, 3)}</span>
-                        {isCurrentMonth && (
-                          <span className="h-1 w-1 rounded-full bg-blue-500 mt-1"></span>
-                        )}
-                      </div>
+                      {month.label.substring(0, 3)}
                     </Button>
                   );
                 })}
