@@ -122,6 +122,7 @@ export const CertificationTable: React.FC<CertificationTableProps> = ({
                           navigate(`/employee/profile/${cert.profile_id}`);
                         }}
                         style={{ cursor: 'pointer' }}
+                        className='hover:underline hover:text-blue-600'
                       >
                         {cert.first_name} {cert.last_name}
                       </a>
