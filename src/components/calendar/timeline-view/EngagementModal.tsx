@@ -168,7 +168,7 @@ export const EngagementModal: React.FC<EngagementModalProps> = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="max-w-md">
+      <DialogContent className="max-w-2xl">
         <DialogHeader>
           <DialogTitle>
             {mode === 'create' ? 'Create Forecasted Assignment' : 'Edit Assignment'}
