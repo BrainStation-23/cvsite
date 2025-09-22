@@ -350,7 +350,7 @@ DATA CONSTRAINTS:
           temperature: 0.1,
           topK: 1,
           topP: 1,
-          maxOutputTokens: 8192,
+          maxOutputTokens: 24576,
           responseMimeType: "application/json",
           responseSchema: profileSchema
         }
