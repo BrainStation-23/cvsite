@@ -102,9 +102,9 @@ export const getSidebarGroups = (
           { to: '/pip/list', icon: List, label: 'PIP List' },
         ] : []),
         ...(userRole === 'manager' ? [
-          { to: '/pip/pm-review', icon: UserCheck, label: 'PM Review' },
+          { to: '/pip/pm-review', icon: UserCheck, label: 'PM Review (Under Development)' },
         ] : []),
-        { to: '/pip/my-situation', icon: UserCheck, label: 'My Situation' },
+        { to: '/pip/my-situation', icon: UserCheck, label: 'My Situation (Under Development)' },
       ],
     },
 
