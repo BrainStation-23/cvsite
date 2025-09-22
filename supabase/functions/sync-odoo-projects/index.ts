@@ -20,6 +20,9 @@ interface OdooProject {
   projectValue: number;
   active: boolean;
   projectManager: OdooProjectManager | null;
+  sbu: {
+    name: string;
+  } | null;
 }
 
 interface OdooResponse {
@@ -60,6 +63,9 @@ Deno.serve(async (req) => {
               name
               email
             }
+            sbu {
+              name
+            }
           }
         }
       `
@@ -87,13 +93,14 @@ Deno.serve(async (req) => {
     // Convert data to JSONB format for the new RPC function
     const projectsJsonb = odooData.data.allProjects.map(project => ({
       projectName: project.name,
-      clientName: '', // Not available in Odoo data, keeping empty
+      clientName: '',
       description: project.description,
       projectLevel: project.projectLevel,
       projectType: project.projectType,
       projectBillType: project.projectBillType,
       projectValue: project.projectValue,
       active: project.active,
+      sbuName: project.sbu?.name || '',
       managerName: project.projectManager?.name || '',
       managerEmail: project.projectManager?.email || ''
     }));
