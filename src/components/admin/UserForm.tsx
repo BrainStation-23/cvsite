@@ -88,7 +88,7 @@ const UserForm: React.FC<UserFormProps> = ({
   };
 
   return (
-    <div className="max-w-4xl mx-auto">
+    <div className="mx-auto">
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
@@ -101,35 +101,14 @@ const UserForm: React.FC<UserFormProps> = ({
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-8">
-            {/* Personal Information Section */}
-            <div className="space-y-4">
-              <div className="flex items-center gap-2 mb-4">
-                <UserCheck size={18} />
-                <h3 className="text-lg font-medium">Personal Information</h3>
-              </div>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-2">
-                  <Label htmlFor="dateOfBirth">Date of Birth</Label>
-                  <DatePicker
-                    value={formData.dateOfBirth}
-                    onChange={(value) => handleInputChange('dateOfBirth', value)}
-                    placeholder="Select date of birth"
-                  />
-                </div>
-              </div>
-            </div>
-
-            <Separator />
-
-            {/* Basic Information Section */}
-            <div className="space-y-4">
+          {/* Basic Information Section */}
+            <div className="">
               <div className="flex items-center gap-2 mb-4">
                 <User size={18} />
                 <h3 className="text-lg font-medium">Basic Information</h3>
               </div>
               
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="firstName">First Name *</Label>
                   <Input
@@ -152,6 +131,16 @@ const UserForm: React.FC<UserFormProps> = ({
                     placeholder="Enter last name"
                   />
                 </div>
+              
+
+                <div className="space-y-2">
+                  <Label htmlFor="dateOfBirth">Date of Birth</Label>
+                  <DatePicker
+                    value={formData.dateOfBirth}
+                    onChange={(value) => handleInputChange('dateOfBirth', value)}
+                    placeholder="Select date of birth"
+                  />
+              </div>
 
                 <div className="space-y-2">
                   <Label htmlFor="email" className="flex items-center gap-2">
@@ -185,16 +174,14 @@ const UserForm: React.FC<UserFormProps> = ({
               </div>
             </div>
 
-            <Separator />
-
             {/* Professional Information Section */}
-            <div className="space-y-4">
+            <div >
               <div className="flex items-center gap-2 mb-4">
                 <Briefcase size={18} />
                 <h3 className="text-lg font-medium">Professional Information</h3>
               </div>
               
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="employeeId" className="flex items-center gap-2">
                     <IdCard size={16} />
@@ -264,7 +251,7 @@ const UserForm: React.FC<UserFormProps> = ({
                   />
                 </div>
 
-                <div className="space-y-2">
+                <div className="space-y-1">
                   <Label htmlFor="resourceType" className="flex items-center gap-2">
                     <Briefcase size={16} />
                     Resource Type (Optional)
@@ -278,10 +265,8 @@ const UserForm: React.FC<UserFormProps> = ({
               </div>
             </div>
 
-            <Separator />
-
             {/* Career Information Section */}
-            <div className="space-y-4">
+            <div className="space-y-1">
               <div className="flex items-center gap-2 mb-4">
                 <Calendar size={18} />
                 <h3 className="text-lg font-medium">Career Information</h3>
@@ -307,8 +292,6 @@ const UserForm: React.FC<UserFormProps> = ({
                 </div>
               </div>
             </div>
-
-            <Separator />
 
             {/* Employment Status Section */}
             <div className="space-y-4">
