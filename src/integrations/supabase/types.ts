@@ -1975,6 +1975,10 @@ export type Database = {
         Args: { target_user_id?: string }
         Returns: Json
       }
+      get_active_cron_jobs: {
+        Args: Record<PropertyKey, never>
+        Returns: Json
+      }
       get_bill_type_changes: {
         Args: {
           end_date_param?: string
@@ -2009,6 +2013,10 @@ export type Database = {
           sbu_id: string
           sbu_name: string
         }[]
+      }
+      get_cron_job_executions: {
+        Args: Record<PropertyKey, never>
+        Returns: Json
       }
       get_cv_audit_history: {
         Args: { limit_records?: number; target_profile_id: string }

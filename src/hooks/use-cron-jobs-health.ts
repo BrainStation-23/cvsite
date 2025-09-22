@@ -52,25 +52,38 @@ export const useCronJobsHealth = () => {
     },
   });
 
-  // Fetch cron job executions - mock data for now since cron tables might not be accessible
+  // Fetch cron job executions using the new RPC function
   const { data: executions, isLoading: executionsLoading, error: executionsError } = useQuery({
     queryKey: ['cron-job-executions'],
     queryFn: async () => {
-      // For now, return empty array since cron tables are not accessible through Supabase client
-      // In a real implementation, this would need a custom RPC function or direct database access
-      console.log('Cron execution history would be fetched here');
-      return [] as CronJobExecution[];
+      const { data, error } = await supabase.rpc('get_cron_job_executions');
+      
+      if (error) {
+        console.error('Error fetching cron job executions:', error);
+        return [];
+      }
+      
+      // The RPC returns JSON, so we need to parse it properly
+      if (Array.isArray(data)) {
+        return data as unknown as CronJobExecution[];
+      }
+      return [];
     },
     retry: 1,
   });
 
-  // Fetch active cron jobs - mock data for now
+  // Fetch active cron jobs using the new RPC function
   const { data: activeJobs, isLoading: activeJobsLoading, error: activeJobsError } = useQuery({
     queryKey: ['active-cron-jobs'],
     queryFn: async () => {
-      // For now, return empty array since cron tables are not accessible through Supabase client
-      console.log('Active cron jobs would be fetched here');
-      return [];
+      const { data, error } = await supabase.rpc('get_active_cron_jobs');
+      
+      if (error) {
+        console.error('Error fetching active cron jobs:', error);
+        return [];
+      }
+      
+      return data || [];
     },
     retry: 1,
   });
