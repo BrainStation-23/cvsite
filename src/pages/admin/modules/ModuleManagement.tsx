@@ -2,10 +2,8 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Plus, Search } from 'lucide-react';
+import { Plus, Search, Settings } from 'lucide-react';
 import { useModulesWithSubModules } from '@/hooks/rbac/useModules';
-import { ModulesList } from '@/components/admin/modules/ModulesList';
 import { ModuleHierarchyTree } from '@/components/admin/modules/ModuleHierarchyTree';
 
 const ModuleManagement: React.FC = () => {
@@ -26,11 +24,12 @@ const ModuleManagement: React.FC = () => {
   }
 
   return (
-    <div className="container mx-auto py-6">
-      <div className="flex justify-between items-center mb-6">
+    <div className="container mx-auto py-6 space-y-6">
+      {/* Header */}
+      <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold">Module Management</h1>
-          <p className="text-muted-foreground">
+          <h1 className="text-3xl font-bold text-foreground">Module Management</h1>
+          <p className="text-muted-foreground mt-1">
             Configure system modules and sub-modules for dynamic navigation and permissions
           </p>
         </div>
@@ -42,32 +41,32 @@ const ModuleManagement: React.FC = () => {
         </Button>
       </div>
 
-      <div className="flex items-center space-x-4 mb-6">
-        <div className="relative flex-1 max-w-sm">
+      {/* Search and Stats */}
+      <div className="flex items-center justify-between gap-4">
+        <div className="relative flex-1 max-w-md">
           <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
           <Input
-            placeholder="Search modules..."
+            placeholder="Search modules and sub-modules..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="pl-9"
           />
         </div>
+        
+        <div className="flex items-center gap-4 text-sm text-muted-foreground">
+          <div className="flex items-center gap-2">
+            <Settings className="h-4 w-4" />
+            <span>{modules?.length || 0} modules</span>
+          </div>
+          <div className="text-muted-foreground">•</div>
+          <div>
+            {modules?.reduce((total, module) => total + (module.sub_modules?.length || 0), 0) || 0} sub-modules
+          </div>
+        </div>
       </div>
 
-      <Tabs defaultValue="list" className="w-full">
-        <TabsList>
-          <TabsTrigger value="list">List View</TabsTrigger>
-          <TabsTrigger value="hierarchy">Hierarchy View</TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="list" className="mt-6">
-          <ModulesList modules={filteredModules || []} />
-        </TabsContent>
-
-        <TabsContent value="hierarchy" className="mt-6">
-          <ModuleHierarchyTree modules={filteredModules || []} />
-        </TabsContent>
-      </Tabs>
+      {/* Module Hierarchy */}
+      <ModuleHierarchyTree modules={filteredModules || []} />
     </div>
   );
 };

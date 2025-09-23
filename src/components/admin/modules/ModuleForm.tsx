@@ -8,6 +8,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Module } from '@/types';
+import { IconPicker } from './IconPicker';
 
 const moduleSchema = z.object({
   name: z.string().min(1, 'Module name is required'),
@@ -92,10 +93,14 @@ export const ModuleForm: React.FC<ModuleFormProps> = ({
             <FormItem>
               <FormLabel>Icon</FormLabel>
               <FormControl>
-                <Input placeholder="e.g., Users, Settings, Database" {...field} />
+                <IconPicker 
+                  value={field.value} 
+                  onChange={field.onChange}
+                  disabled={loading}
+                />
               </FormControl>
               <FormDescription>
-                Lucide icon name for the navigation (optional)
+                Visual icon for the navigation menu
               </FormDescription>
               <FormMessage />
             </FormItem>
