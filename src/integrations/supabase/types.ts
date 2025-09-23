@@ -1576,6 +1576,7 @@ export type Database = {
         Row: {
           created_at: string | null
           id: string
+          module_id: string | null
           permission_type_id: string
           role_id: string
           sbu_restrictions: string[] | null
@@ -1585,6 +1586,7 @@ export type Database = {
         Insert: {
           created_at?: string | null
           id?: string
+          module_id?: string | null
           permission_type_id: string
           role_id: string
           sbu_restrictions?: string[] | null
@@ -1594,6 +1596,7 @@ export type Database = {
         Update: {
           created_at?: string | null
           id?: string
+          module_id?: string | null
           permission_type_id?: string
           role_id?: string
           sbu_restrictions?: string[] | null
@@ -1601,6 +1604,13 @@ export type Database = {
           table_restrictions?: string[] | null
         }
         Relationships: [
+          {
+            foreignKeyName: "role_permissions_module_id_fkey"
+            columns: ["module_id"]
+            isOneToOne: false
+            referencedRelation: "modules"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "role_permissions_permission_type_id_fkey"
             columns: ["permission_type_id"]
