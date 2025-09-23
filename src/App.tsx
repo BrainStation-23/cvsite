@@ -54,6 +54,12 @@ import RoleManagement from '@/pages/admin/roles/RoleManagement';
 import CreateRole from '@/pages/admin/roles/CreateRole';
 import EditRole from '@/pages/admin/roles/EditRole';
 import RolePermissions from '@/pages/admin/roles/RolePermissions';
+import ModuleManagement from '@/pages/admin/modules/ModuleManagement';
+import CreateModule from '@/pages/admin/modules/CreateModule';
+import EditModule from '@/pages/admin/modules/EditModule';
+import SubModuleManagement from '@/pages/admin/modules/SubModuleManagement';
+import CreateSubModule from '@/pages/admin/modules/CreateSubModule';
+import EditSubModule from '@/pages/admin/modules/EditSubModule';
 import './App.css';
 
 // Create QueryClient instance outside component to prevent recreation
@@ -177,6 +183,16 @@ function App(): React.ReactElement {
                 <Route path="create" element={<CreateRole />} />
                 <Route path="edit/:roleId" element={<EditRole />} />
                 <Route path="permissions/:roleId" element={<RolePermissions />} />
+              </Route>
+
+              {/* Module Management (admin only) */}
+              <Route path="admin/modules" element={<ProtectedRoute allowedRoles={['admin']}><Outlet /></ProtectedRoute>}>
+                <Route index element={<ModuleManagement />} />
+                <Route path="create" element={<CreateModule />} />
+                <Route path=":id/edit" element={<EditModule />} />
+                <Route path=":moduleId/submodules" element={<SubModuleManagement />} />
+                <Route path=":moduleId/submodules/create" element={<CreateSubModule />} />
+                <Route path=":moduleId/submodules/:id/edit" element={<EditSubModule />} />
               </Route>
             </Route>
 
