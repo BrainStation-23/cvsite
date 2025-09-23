@@ -121,14 +121,61 @@ export const PermissionMatrixTable: React.FC<PermissionMatrixTableProps> = ({
     onPermissionChange(moduleId, subModuleId, permissionTypeId, true, sbuRestrictions);
   };
 
+  const handleSelectAllModule = (module: Module & { sub_modules: SubModule[] }, checked: boolean) => {
+    // Apply to all permission types for all sub-modules
+    module.sub_modules.forEach(subModule => {
+      permissionTypes.forEach(permissionType => {
+        const currentSBUs = getPermissionSBUs(module.id, subModule.id, permissionType.id);
+        onPermissionChange(module.id, subModule.id, permissionType.id, checked, currentSBUs);
+      });
+    });
+  };
+
+  const handleSelectAllSubModule = (moduleId: string, subModuleId: string, checked: boolean) => {
+    // Apply to all permission types for this sub-module
+    permissionTypes.forEach(permissionType => {
+      const currentSBUs = getPermissionSBUs(moduleId, subModuleId, permissionType.id);
+      onPermissionChange(moduleId, subModuleId, permissionType.id, checked, currentSBUs);
+    });
+  };
+
+  const getModuleSelectAllState = (module: Module & { sub_modules: SubModule[] }) => {
+    let totalPermissions = 0;
+    let grantedPermissions = 0;
+
+    module.sub_modules.forEach(subModule => {
+      permissionTypes.forEach(permissionType => {
+        totalPermissions++;
+        if (hasPermission(module.id, subModule.id, permissionType.id)) {
+          grantedPermissions++;
+        }
+      });
+    });
+
+    if (grantedPermissions === 0) return 'none';
+    if (grantedPermissions === totalPermissions) return 'all';
+    return 'some';
+  };
+
+  const getSubModuleSelectAllState = (moduleId: string, subModuleId: string) => {
+    const grantedPermissions = permissionTypes.filter(permissionType =>
+      hasPermission(moduleId, subModuleId, permissionType.id)
+    ).length;
+
+    if (grantedPermissions === 0) return 'none';
+    if (grantedPermissions === permissionTypes.length) return 'all';
+    return 'some';
+  };
+
   return (
     <div className="space-y-4">
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead className="w-1/3">Module / Sub-module</TableHead>
+            <TableHead className="min-w-[300px]">Module / Sub-module</TableHead>
+            <TableHead className="w-20 text-center">Select All</TableHead>
             {permissionTypes.map((type) => (
-              <TableHead key={type.id} className="text-center capitalize">
+              <TableHead key={type.id} className="w-20 text-center capitalize">
                 {type.name}
               </TableHead>
             ))}
@@ -163,10 +210,23 @@ export const PermissionMatrixTable: React.FC<PermissionMatrixTableProps> = ({
                     </Badge>
                   </div>
                 </TableCell>
+                <TableCell className="w-20 text-center">
+                  <Checkbox
+                    checked={getModuleSelectAllState(module) === 'all'}
+                    ref={(ref) => {
+                      if (ref && 'indeterminate' in ref) {
+                        (ref as any).indeterminate = getModuleSelectAllState(module) === 'some';
+                      }
+                    }}
+                    onCheckedChange={(checked) =>
+                      handleSelectAllModule(module, checked as boolean)
+                    }
+                  />
+                </TableCell>
                 {permissionTypes.map((type) => {
                   const state = getModulePermissionState(module, type.id);
                   return (
-                    <TableCell key={type.id} className="text-center">
+                    <TableCell key={type.id} className="w-20 text-center">
                       <Checkbox
                         checked={state === 'all'}
                         ref={(ref) => {
@@ -192,12 +252,25 @@ export const PermissionMatrixTable: React.FC<PermissionMatrixTableProps> = ({
                       <span className="text-sm">{subModule.name}</span>
                     </div>
                   </TableCell>
+                  <TableCell className="w-20 text-center">
+                    <Checkbox
+                      checked={getSubModuleSelectAllState(module.id, subModule.id) === 'all'}
+                      ref={(ref) => {
+                        if (ref && 'indeterminate' in ref) {
+                          (ref as any).indeterminate = getSubModuleSelectAllState(module.id, subModule.id) === 'some';
+                        }
+                      }}
+                      onCheckedChange={(checked) =>
+                        handleSelectAllSubModule(module.id, subModule.id, checked as boolean)
+                      }
+                    />
+                  </TableCell>
                   {permissionTypes.map((type) => {
                     const isChecked = hasPermission(module.id, subModule.id, type.id);
                     const sbuRestrictions = getPermissionSBUs(module.id, subModule.id, type.id);
 
                     return (
-                      <TableCell key={type.id} className="text-center">
+                      <TableCell key={type.id} className="w-20 text-center">
                         <div className="space-y-2">
                           <Checkbox
                             checked={isChecked}
