@@ -52,7 +52,7 @@ const EditSubModule: React.FC = () => {
         </div>
       </div>
 
-      <div className="max-w-2xl">
+      <div>
         <SubModuleForm
           moduleId={moduleId!}
           subModule={subModule}
