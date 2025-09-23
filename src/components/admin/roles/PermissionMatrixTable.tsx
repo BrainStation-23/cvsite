@@ -186,7 +186,7 @@ export const PermissionMatrixTable: React.FC<PermissionMatrixTableProps> = ({
             const isExpanded = expandedModules.has(module.id);
             
             return (
-            <div key={module.id}>
+            <React.Fragment key={module.id}>
               {/* Module Row */}
               <TableRow className="bg-muted/30 hover:bg-muted/50">
                 <TableCell>
@@ -299,7 +299,7 @@ export const PermissionMatrixTable: React.FC<PermissionMatrixTableProps> = ({
                   })}
                 </TableRow>
               ))}
-            </div>
+            </React.Fragment>
             );
           })}
         </TableBody>
