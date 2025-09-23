@@ -4,7 +4,6 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ArrowLeft, Plus, Search } from 'lucide-react';
 import { useModule, useSubModules } from '@/hooks/rbac/useModules';
-import { SubModulesList } from '@/components/admin/modules/SubModulesList';
 
 const SubModuleManagement: React.FC = () => {
   const { moduleId } = useParams<{ moduleId: string }>();
@@ -61,10 +60,9 @@ const SubModuleManagement: React.FC = () => {
         </div>
       </div>
 
-      <SubModulesList 
-        subModules={filteredSubModules || []} 
-        moduleId={moduleId!}
-      />
+      <div className="text-center text-muted-foreground py-8">
+        No sub-modules found for this module.
+      </div>
     </div>
   );
 };

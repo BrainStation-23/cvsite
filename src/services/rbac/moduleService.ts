@@ -22,7 +22,7 @@ export class ModuleService {
       .from('modules')
       .select('*')
       .eq('id', id)
-      .single();
+      .maybeSingle();
 
     if (error) throw error;
     return data;
@@ -45,9 +45,10 @@ export class ModuleService {
       .update(updates)
       .eq('id', id)
       .select()
-      .single();
+      .maybeSingle();
 
     if (error) throw error;
+    if (!data) throw new Error('Module not found or access denied');
     return data;
   }
 
@@ -107,9 +108,10 @@ export class ModuleService {
       .update(updates)
       .eq('id', id)
       .select()
-      .single();
+      .maybeSingle();
 
     if (error) throw error;
+    if (!data) throw new Error('Sub-module not found or access denied');
     return data;
   }
 
