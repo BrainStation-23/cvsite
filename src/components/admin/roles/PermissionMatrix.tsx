@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
-import { ModulePermissionCard } from './ModulePermissionCard';
+import { PermissionMatrixTable } from './PermissionMatrixTable';
 import { useModulesWithSubModules } from '@/hooks/rbac/useModules';
 import { useRolePermissions, useUpdateRolePermissions, usePermissionTypes } from '@/hooks/rbac/usePermissions';
 import { CustomRole, RolePermission } from '@/types';
@@ -105,16 +105,13 @@ export const PermissionMatrix: React.FC<PermissionMatrixProps> = ({ roleId, role
 
   return (
     <div className="space-y-6">
-      {modules.map((module) => (
-        <ModulePermissionCard
-          key={module.id}
-          module={module}
-          permissionTypes={permissionTypes}
-          permissions={permissions}
-          onPermissionChange={handlePermissionChange}
-          isSBUBound={role.is_sbu_bound}
-        />
-      ))}
+      <PermissionMatrixTable
+        modules={modules}
+        permissionTypes={permissionTypes}
+        permissions={permissions}
+        onPermissionChange={handlePermissionChange}
+        isSBUBound={role.is_sbu_bound}
+      />
       
       <div className="flex justify-end pt-6 border-t">
         <Button 
