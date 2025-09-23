@@ -78,6 +78,8 @@ export interface SubModule {
   module_id: string;
   name: string;
   description?: string;
+  icon?: string;
+  route_path?: string;
   table_names?: string[];
   display_order: number;
   is_active: boolean;
