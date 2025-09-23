@@ -204,6 +204,42 @@ export type Database = {
         }
         Relationships: []
       }
+      custom_roles: {
+        Row: {
+          created_at: string | null
+          created_by: string | null
+          description: string | null
+          id: string
+          is_active: boolean | null
+          is_sbu_bound: boolean | null
+          is_system_role: boolean | null
+          name: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          is_sbu_bound?: boolean | null
+          is_system_role?: boolean | null
+          name: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          is_sbu_bound?: boolean | null
+          is_system_role?: boolean | null
+          name?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       cv_data_audit_logs: {
         Row: {
           changed_at: string | null
@@ -775,6 +811,39 @@ export type Database = {
         }
         Relationships: []
       }
+      modules: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          display_order: number | null
+          icon: string | null
+          id: string
+          is_active: boolean | null
+          name: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          display_order?: number | null
+          icon?: string | null
+          id?: string
+          is_active?: boolean | null
+          name: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          display_order?: number | null
+          icon?: string | null
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       non_billed_resources: {
         Row: {
           bill_type_id: string | null
@@ -976,6 +1045,27 @@ export type Database = {
             referencedColumns: ["profile_id"]
           },
         ]
+      }
+      permission_types: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          id: string
+          name: Database["public"]["Enums"]["permission_type_enum"]
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          name: Database["public"]["Enums"]["permission_type_enum"]
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          name?: Database["public"]["Enums"]["permission_type_enum"]
+        }
+        Relationships: []
       }
       pip_pm_feedback: {
         Row: {
@@ -1246,6 +1336,7 @@ export type Database = {
           project_manager: string | null
           project_name: string
           project_type: string | null
+          sbu_id: string | null
           updated_at: string
         }
         Insert: {
@@ -1260,6 +1351,7 @@ export type Database = {
           project_manager?: string | null
           project_name: string
           project_type?: string | null
+          sbu_id?: string | null
           updated_at?: string
         }
         Update: {
@@ -1274,6 +1366,7 @@ export type Database = {
           project_manager?: string | null
           project_name?: string
           project_type?: string | null
+          sbu_id?: string | null
           updated_at?: string
         }
         Relationships: [
@@ -1296,6 +1389,13 @@ export type Database = {
             columns: ["project_type"]
             isOneToOne: false
             referencedRelation: "project_types"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "projects_management_sbu_id_fkey"
+            columns: ["sbu_id"]
+            isOneToOne: false
+            referencedRelation: "sbus"
             referencedColumns: ["id"]
           },
         ]
@@ -1472,6 +1572,58 @@ export type Database = {
         }
         Relationships: []
       }
+      role_permissions: {
+        Row: {
+          created_at: string | null
+          id: string
+          permission_type_id: string
+          role_id: string
+          sbu_restrictions: string[] | null
+          sub_module_id: string
+          table_restrictions: string[] | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          permission_type_id: string
+          role_id: string
+          sbu_restrictions?: string[] | null
+          sub_module_id: string
+          table_restrictions?: string[] | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          permission_type_id?: string
+          role_id?: string
+          sbu_restrictions?: string[] | null
+          sub_module_id?: string
+          table_restrictions?: string[] | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "role_permissions_permission_type_id_fkey"
+            columns: ["permission_type_id"]
+            isOneToOne: false
+            referencedRelation: "permission_types"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "role_permissions_role_id_fkey"
+            columns: ["role_id"]
+            isOneToOne: false
+            referencedRelation: "custom_roles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "role_permissions_sub_module_id_fkey"
+            columns: ["sub_module_id"]
+            isOneToOne: false
+            referencedRelation: "sub_modules"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       sbu_change_history: {
         Row: {
           changed_at: string
@@ -1589,6 +1741,53 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "resource_availability_view"
             referencedColumns: ["profile_id"]
+          },
+        ]
+      }
+      sub_modules: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          display_order: number | null
+          id: string
+          is_active: boolean | null
+          module_id: string
+          name: string
+          route_path: string | null
+          table_names: string[] | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          display_order?: number | null
+          id?: string
+          is_active?: boolean | null
+          module_id: string
+          name: string
+          route_path?: string | null
+          table_names?: string[] | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          display_order?: number | null
+          id?: string
+          is_active?: boolean | null
+          module_id?: string
+          name?: string
+          route_path?: string | null
+          table_names?: string[] | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sub_modules_module_id_fkey"
+            columns: ["module_id"]
+            isOneToOne: false
+            referencedRelation: "modules"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -1723,27 +1922,54 @@ export type Database = {
       }
       user_roles: {
         Row: {
+          assigned_at: string | null
+          assigned_by: string | null
           created_at: string
+          custom_role_id: string | null
           id: string
           role: string
+          sbu_context: string | null
           updated_at: string
           user_id: string
         }
         Insert: {
+          assigned_at?: string | null
+          assigned_by?: string | null
           created_at?: string
+          custom_role_id?: string | null
           id?: string
           role: string
+          sbu_context?: string | null
           updated_at?: string
           user_id: string
         }
         Update: {
+          assigned_at?: string | null
+          assigned_by?: string | null
           created_at?: string
+          custom_role_id?: string | null
           id?: string
           role?: string
+          sbu_context?: string | null
           updated_at?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "user_roles_custom_role_id_fkey"
+            columns: ["custom_role_id"]
+            isOneToOne: false
+            referencedRelation: "custom_roles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_roles_sbu_context_fkey"
+            columns: ["sbu_context"]
+            isOneToOne: false
+            referencedRelation: "sbus"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       weekly_score_card: {
         Row: {
@@ -1962,10 +2188,6 @@ export type Database = {
       calculate_weekly_score_card: {
         Args: Record<PropertyKey, never>
         Returns: Json
-      }
-      cleanup_expired_cv_tokens: {
-        Args: Record<PropertyKey, never>
-        Returns: undefined
       }
       duplicate_resource_assignment: {
         Args: { assignment_id: string }
@@ -2402,6 +2624,19 @@ export type Database = {
         }
         Returns: Json
       }
+      get_user_permissions: {
+        Args: { _user_id: string }
+        Returns: {
+          allowed_sbus: string[]
+          is_sbu_bound: boolean
+          module_name: string
+          permission_type: Database["public"]["Enums"]["permission_type_enum"]
+          role_name: string
+          route_path: string
+          sub_module_name: string
+          table_names: string[]
+        }[]
+      }
       get_weekly_score_card_cron_config: {
         Args: Record<PropertyKey, never>
         Returns: Json
@@ -2440,8 +2675,31 @@ export type Database = {
         Args: { roles: string[] }
         Returns: boolean
       }
+      has_module_access: {
+        Args: { _module_name: string; _user_id: string }
+        Returns: boolean
+      }
+      has_permission: {
+        Args: {
+          _permission_type: Database["public"]["Enums"]["permission_type_enum"]
+          _sub_module_path: string
+          _table_name?: string
+          _target_sbu_id?: string
+          _user_id: string
+        }
+        Returns: boolean
+      }
       has_role: {
         Args: { _role: string } | { _role: string; _user_id: string }
+        Returns: boolean
+      }
+      has_table_access: {
+        Args: {
+          _permission_type?: Database["public"]["Enums"]["permission_type_enum"]
+          _table_name: string
+          _target_sbu_id?: string
+          _user_id: string
+        }
         Returns: boolean
       }
       import_profile_json: {
@@ -2470,6 +2728,14 @@ export type Database = {
         Returns: boolean
       }
       is_manager: {
+        Args: Record<PropertyKey, never>
+        Returns: boolean
+      }
+      is_system_admin: {
+        Args: Record<PropertyKey, never>
+        Returns: boolean
+      }
+      is_system_admin_or_manager: {
         Args: Record<PropertyKey, never>
         Returns: boolean
       }
@@ -2646,6 +2912,7 @@ export type Database = {
       }
     }
     Enums: {
+      permission_type_enum: "read" | "write" | "update" | "delete"
       pip_status_enum:
         | "hr_initiation"
         | "pm_feedback"
@@ -2780,6 +3047,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      permission_type_enum: ["read", "write", "update", "delete"],
       pip_status_enum: [
         "hr_initiation",
         "pm_feedback",
