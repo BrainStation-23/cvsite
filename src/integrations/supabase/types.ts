@@ -1749,6 +1749,7 @@ export type Database = {
           created_at: string | null
           description: string | null
           display_order: number | null
+          icon: string | null
           id: string
           is_active: boolean | null
           module_id: string
@@ -1761,6 +1762,7 @@ export type Database = {
           created_at?: string | null
           description?: string | null
           display_order?: number | null
+          icon?: string | null
           id?: string
           is_active?: boolean | null
           module_id: string
@@ -1773,6 +1775,7 @@ export type Database = {
           created_at?: string | null
           description?: string | null
           display_order?: number | null
+          icon?: string | null
           id?: string
           is_active?: boolean | null
           module_id?: string
