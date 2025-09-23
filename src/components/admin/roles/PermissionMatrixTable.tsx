@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react';
-import { ChevronDown, ChevronRight } from 'lucide-react';
+import { ChevronDown, ChevronRight, FolderOpen, FileText } from 'lucide-react';
+import { icons } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
@@ -27,6 +28,24 @@ interface PermissionMatrixTableProps {
   ) => void;
   isSBUBound: boolean;
 }
+
+// Icon component to render Lucide icons dynamically
+const DynamicIcon: React.FC<{ iconName?: string; className?: string }> = ({ iconName, className = "h-4 w-4" }) => {
+  if (!iconName) return <FileText className={className} />;
+  
+  // Try to find the icon by name (case insensitive)
+  const iconKey = Object.keys(icons).find(key => 
+    key.toLowerCase() === iconName.toLowerCase().replace(/[-_]/g, '')
+  );
+  
+  if (iconKey) {
+    const IconComponent = icons[iconKey as keyof typeof icons] as React.ComponentType<{ className?: string }>;
+    return <IconComponent className={className} />;
+  }
+  
+  // Fallback icon
+  return <FileText className={className} />;
+};
 
 export const PermissionMatrixTable: React.FC<PermissionMatrixTableProps> = ({
   modules,
@@ -120,94 +139,94 @@ export const PermissionMatrixTable: React.FC<PermissionMatrixTableProps> = ({
             const isExpanded = expandedModules.has(module.id);
             
             return (
-              <React.Fragment key={module.id}>
-                {/* Module Row */}
-                <TableRow className="bg-muted/30 hover:bg-muted/50">
+            <div key={module.id}>
+              {/* Module Row */}
+              <TableRow className="bg-muted/30 hover:bg-muted/50">
+                <TableCell>
+                  <div className="flex items-center gap-3">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-6 w-6 p-0"
+                      onClick={() => toggleModule(module.id)}
+                    >
+                      {isExpanded ? (
+                        <ChevronDown className="h-3 w-3" />
+                      ) : (
+                        <ChevronRight className="h-3 w-3" />
+                      )}
+                    </Button>
+                    <DynamicIcon iconName={module.icon} className="h-4 w-4" />
+                    <span className="font-medium">{module.name}</span>
+                    <Badge variant="outline" className="text-xs">
+                      {module.sub_modules.length} sub-modules
+                    </Badge>
+                  </div>
+                </TableCell>
+                {permissionTypes.map((type) => {
+                  const state = getModulePermissionState(module, type.id);
+                  return (
+                    <TableCell key={type.id} className="text-center">
+                      <Checkbox
+                        checked={state === 'all'}
+                        ref={(ref) => {
+                          if (ref && 'indeterminate' in ref) {
+                            (ref as any).indeterminate = state === 'some';
+                          }
+                        }}
+                        onCheckedChange={(checked) =>
+                          handleModulePermissionToggle(module, type.id, checked as boolean)
+                        }
+                      />
+                    </TableCell>
+                  );
+                })}
+              </TableRow>
+
+              {/* Sub-module Rows */}
+              {isExpanded && module.sub_modules.map((subModule) => (
+                <TableRow key={subModule.id} className="hover:bg-muted/20">
                   <TableCell>
-                    <div className="flex items-center gap-3">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="h-6 w-6 p-0"
-                        onClick={() => toggleModule(module.id)}
-                      >
-                        {isExpanded ? (
-                          <ChevronDown className="h-3 w-3" />
-                        ) : (
-                          <ChevronRight className="h-3 w-3" />
-                        )}
-                      </Button>
-                      {module.icon && <span className="text-base">{module.icon}</span>}
-                      <span className="font-medium">{module.name}</span>
-                      <Badge variant="outline" className="text-xs">
-                        {module.sub_modules.length} sub-modules
-                      </Badge>
+                    <div className="flex items-center gap-3 ml-9">
+                      <DynamicIcon iconName={subModule.icon} className="h-3 w-3" />
+                      <span className="text-sm">{subModule.name}</span>
                     </div>
                   </TableCell>
                   {permissionTypes.map((type) => {
-                    const state = getModulePermissionState(module, type.id);
+                    const isChecked = hasPermission(module.id, subModule.id, type.id);
+                    const sbuRestrictions = getPermissionSBUs(module.id, subModule.id, type.id);
+
                     return (
                       <TableCell key={type.id} className="text-center">
-                        <Checkbox
-                          checked={state === 'all'}
-                          ref={(ref) => {
-                            if (ref && 'indeterminate' in ref) {
-                              (ref as any).indeterminate = state === 'some';
+                        <div className="space-y-2">
+                          <Checkbox
+                            checked={isChecked}
+                            onCheckedChange={(checked) =>
+                              handleSubModulePermissionToggle(
+                                module.id,
+                                subModule.id,
+                                type.id,
+                                checked as boolean
+                              )
                             }
-                          }}
-                          onCheckedChange={(checked) =>
-                            handleModulePermissionToggle(module, type.id, checked as boolean)
-                          }
-                        />
+                          />
+                          {isChecked && isSBUBound && (
+                            <div className="px-2">
+                              <SBURestrictionSelector
+                                value={sbuRestrictions}
+                                onChange={(sbus) =>
+                                  handleSBUChange(module.id, subModule.id, type.id, sbus)
+                                }
+                              />
+                            </div>
+                          )}
+                        </div>
                       </TableCell>
                     );
                   })}
                 </TableRow>
-
-                {/* Sub-module Rows */}
-                {isExpanded && module.sub_modules.map((subModule) => (
-                  <TableRow key={subModule.id} className="hover:bg-muted/20">
-                    <TableCell>
-                      <div className="flex items-center gap-3 ml-9">
-                        {subModule.icon && <span className="text-sm">{subModule.icon}</span>}
-                        <span className="text-sm">{subModule.name}</span>
-                      </div>
-                    </TableCell>
-                    {permissionTypes.map((type) => {
-                      const isChecked = hasPermission(module.id, subModule.id, type.id);
-                      const sbuRestrictions = getPermissionSBUs(module.id, subModule.id, type.id);
-
-                      return (
-                        <TableCell key={type.id} className="text-center">
-                          <div className="space-y-2">
-                            <Checkbox
-                              checked={isChecked}
-                              onCheckedChange={(checked) =>
-                                handleSubModulePermissionToggle(
-                                  module.id,
-                                  subModule.id,
-                                  type.id,
-                                  checked as boolean
-                                )
-                              }
-                            />
-                            {isChecked && isSBUBound && (
-                              <div className="px-2">
-                                <SBURestrictionSelector
-                                  value={sbuRestrictions}
-                                  onChange={(sbus) =>
-                                    handleSBUChange(module.id, subModule.id, type.id, sbus)
-                                  }
-                                />
-                              </div>
-                            )}
-                          </div>
-                        </TableCell>
-                      );
-                    })}
-                  </TableRow>
-                ))}
-              </React.Fragment>
+              ))}
+            </div>
             );
           })}
         </TableBody>
