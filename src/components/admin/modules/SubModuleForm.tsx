@@ -70,8 +70,9 @@ export const SubModuleForm: React.FC<SubModuleFormProps> = ({
   };
 
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-8">
+    <div className="w-full max-w-7xl mx-auto">
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-8">
         {/* Header Section */}
         <div className="space-y-2">
           <h3 className="text-lg font-semibold flex items-center gap-2">
@@ -84,16 +85,16 @@ export const SubModuleForm: React.FC<SubModuleFormProps> = ({
         </div>
 
         {/* Main Content Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
           {/* Column 1: Basic Information */}
-          <Card>
+          <Card className="h-full">
             <CardHeader>
               <CardTitle className="text-base">Basic Information</CardTitle>
               <CardDescription>
                 Essential details about this sub-module
               </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="space-y-6">
               <FormField
                 control={form.control}
                 name="name"
@@ -135,14 +136,14 @@ export const SubModuleForm: React.FC<SubModuleFormProps> = ({
           </Card>
 
           {/* Column 2: Appearance & Navigation */}
-          <Card>
+          <Card className="h-full">
             <CardHeader>
               <CardTitle className="text-base">Appearance & Navigation</CardTitle>
               <CardDescription>
                 How this item looks and where it leads
               </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="space-y-6">
               <FormField
                 control={form.control}
                 name="icon"
@@ -210,14 +211,14 @@ export const SubModuleForm: React.FC<SubModuleFormProps> = ({
           </Card>
 
           {/* Column 3: Data Management */}
-          <Card>
+          <Card className="h-full">
             <CardHeader>
               <CardTitle className="text-base">Data Management</CardTitle>
               <CardDescription>
                 Configure what data this section manages
               </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="space-y-6">
               <FormField
                 control={form.control}
                 name="table_names"
@@ -257,7 +258,8 @@ export const SubModuleForm: React.FC<SubModuleFormProps> = ({
             {loading ? 'Saving...' : (subModule ? 'Update Sub-module' : 'Create Sub-module')}
           </Button>
         </div>
-      </form>
-    </Form>
+        </form>
+      </Form>
+    </div>
   );
 };
