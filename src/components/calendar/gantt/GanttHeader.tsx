@@ -44,7 +44,7 @@ export const GanttHeader: React.FC<GanttHeaderProps> = ({ timeline, resourceCoun
               </Button>
             </div>
         </div>
-        <div className="flex-1 flex">
+        <div className="flex-1 flex pr-[17px]">
           {timeline.map((month, monthIndex) => {
             // Calculate month width based on ALL its weeks (not just filtered ones)
             const monthWeekCount = month.weeks.length;
@@ -70,7 +70,7 @@ export const GanttHeader: React.FC<GanttHeaderProps> = ({ timeline, resourceCoun
         <div className="w-80 flex-shrink-0 border-r bg-muted/30 p-1">
           <div className="text-xs text-muted-foreground">Details</div>
         </div>
-        <div className="flex-1 flex">
+        <div className="flex-1 flex pr-[17px]">
           {timeline.map((month, monthIndex) =>
             month.weeks.map((week, weekIndex) => {
               // Use same percentage calculation as GanttRow

@@ -120,8 +120,7 @@ export const GanttRow: React.FC<GanttRowProps> = ({
               return (
                 <div
                   key={`${monthIndex}-${weekIndex}`}
-                  className={`border-r border-border/20 cursor-pointer hover:bg-muted/20 transition-colors ${isCurrentWeek ? 'bg-primary/5' : ''}`}
-                  style={{ width: `${weekPercentage}%` }}
+                  className={`flex-1 border-r border-border/20 cursor-pointer hover:bg-muted/20 transition-colors ${isCurrentWeek ? 'bg-primary/5' : ''}`}
                   onClick={handleEmptyClick}
                 />
               );
