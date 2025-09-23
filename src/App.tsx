@@ -50,6 +50,10 @@ import NonBilledDashboard from '@/pages/NonBilled/NonBilledDashboard';
 import DashboardLayout from '@/components/Layout/DashboardLayout';
 import CvDashboard from './pages/employee/CvDashboard';
 import PlatformFeedback from './pages/platform-feedback';
+import RoleManagement from '@/pages/admin/roles/RoleManagement';
+import CreateRole from '@/pages/admin/roles/CreateRole';
+import EditRole from '@/pages/admin/roles/EditRole';
+import RolePermissions from '@/pages/admin/roles/RolePermissions';
 import './App.css';
 
 // Create QueryClient instance outside component to prevent recreation
@@ -165,6 +169,14 @@ function App(): React.ReactElement {
               <Route path="audit" element={<ProtectedRoute allowedRoles={['admin']}><Outlet /></ProtectedRoute>}>
                 <Route path="dashboard" element={<AuditPage />} />
                 <Route path="profile-image-warnings" element={<ProfileImageWarningAudit />} />
+              </Route>
+
+              {/* Role Management (admin only) */}
+              <Route path="admin/roles" element={<ProtectedRoute allowedRoles={['admin']}><Outlet /></ProtectedRoute>}>
+                <Route index element={<RoleManagement />} />
+                <Route path="create" element={<CreateRole />} />
+                <Route path="edit/:roleId" element={<EditRole />} />
+                <Route path="permissions/:roleId" element={<RolePermissions />} />
               </Route>
             </Route>
 

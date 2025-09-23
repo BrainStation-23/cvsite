@@ -115,7 +115,8 @@ export const getSidebarGroups = (
       items: [
         { to: '/users', icon: Users, label: 'User Management' },
         { to: '/projects', icon: Database, label: 'Projects' },
-        { to: '/system-settings', icon: Settings, label: 'System Settings' }
+        { to: '/system-settings', icon: Settings, label: 'System Settings' },
+        { to: '/admin/roles', icon: Shield, label: 'Role Management' }
       ],
     },
         // Admin Configuration group (admin only)
