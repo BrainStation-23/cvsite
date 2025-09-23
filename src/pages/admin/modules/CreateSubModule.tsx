@@ -38,7 +38,7 @@ const CreateSubModule: React.FC = () => {
         </div>
       </div>
 
-      <div className="max-w-2xl">
+      <div className="w-full">
         <SubModuleForm
           moduleId={moduleId!}
           onSubmit={handleSubmit}
