@@ -39,14 +39,14 @@ const UnifiedDashboard: React.FC = () => {
       description: 'Manage employee data and CVs',
       icon: <FileText className="h-10 w-10 text-cvsite-teal" />,
       link: '/cv-database/employee-data-management',
-      condition: hasModuleAccess("CV Database") && hasSubModulePermission("CV Management", "manage"),
+      condition: hasModuleAccess("CV Database") && hasSubModulePermission("CV Management", "read"),
     },
     {
       title: 'CV Templates',
       description: 'Manage CV templates and layouts',
       icon: <FileText className="h-10 w-10 text-cvsite-teal" />,
       link: '/cv-database/cv-templates',
-      condition: hasModuleAccess("CV Database") && hasSubModulePermission("CV Templates", "manage"),
+      condition: hasModuleAccess("CV Database") && hasSubModulePermission("CV Templates", "read"),
     },
     {
       title: 'PIP Dashboard',
@@ -74,7 +74,7 @@ const UnifiedDashboard: React.FC = () => {
       description: 'Advanced resource planning tools',
       icon: <Calendar className="h-10 w-10 text-cvsite-teal" />,
       link: '/resource-calendar/planning',
-      condition: hasModuleAccess("Resource Calendar") && hasSubModulePermission("Resource Calendar Management", "manage"),
+      condition: hasModuleAccess("Resource Calendar") && hasSubModulePermission("Resource Calendar Management", "read"),
     },
     {
       title: 'Non-Billed Dashboard',
@@ -88,28 +88,28 @@ const UnifiedDashboard: React.FC = () => {
       description: 'Manage system users and their roles',
       icon: <Users className="h-10 w-10 text-cvsite-teal" />,
       link: '/users',
-      condition: hasModuleAccess("Admin Configuration") && hasSubModulePermission("User Management", "manage"),
+      condition: hasModuleAccess("Admin Configuration") && hasSubModulePermission("User Management", "read"),
     },
     {
       title: 'Role Management',
       description: 'Configure user roles and permissions',
       icon: <Settings className="h-10 w-10 text-cvsite-teal" />,
       link: '/admin/roles',
-      condition: hasModuleAccess("Admin Configuration") && hasSubModulePermission("Role Management", "manage"),
+      condition: hasModuleAccess("Admin Configuration") && hasSubModulePermission("Role Management", "read"),
     },
     {
       title: 'Module Management',
       description: 'Configure system modules and permissions',
       icon: <Settings className="h-10 w-10 text-cvsite-teal" />,
       link: '/admin/modules',
-      condition: hasModuleAccess("Admin Configuration") && hasSubModulePermission("Module Management", "manage"),
+      condition: hasModuleAccess("Admin Configuration") && hasSubModulePermission("Module Management", "read"),
     },
     {
       title: 'Projects',
       description: 'Manage projects and assignments',
       icon: <Briefcase className="h-10 w-10 text-cvsite-teal" />,
       link: '/projects',
-      condition: hasModuleAccess("Admin Configuration") && hasSubModulePermission("Project Management", "manage"),
+      condition: hasModuleAccess("Admin Configuration") && hasSubModulePermission("Project Management", "read"),
     }
   ];
 
