@@ -5,7 +5,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { LogOut, Menu } from 'lucide-react';
 import SidebarNavigation from './navigation/SidebarNavigation';
 import DashboardHeader from './DashboardHeader';
-import { getSidebarGroups } from './navigation/navigationData';
+import { getPermissionBasedSidebarGroups } from './navigation/navigationData';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Toaster } from '@/components/ui/toaster';
 
@@ -65,9 +65,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
     }
   };
 
-  const sidebarGroups = getSidebarGroups(
-    user?.role || ''
-  );
+  const sidebarGroups = getPermissionBasedSidebarGroups();
 
   return (
     <div className="flex h-screen bg-gray-100 dark:bg-gray-900 overflow-x-hidden">

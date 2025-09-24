@@ -13,6 +13,23 @@ export interface User {
   profileImageUrl?: string;
   created_at: string;
   updated_at: string;
+  // New permission-based fields
+  customRole?: CustomRole;
+  sbuContext?: string;
+  permissions?: UserPermission[];
+}
+
+export interface UserPermission {
+  id: string;
+  role_id: string;
+  module_id: string;
+  module_name: string;
+  sub_module_id?: string;
+  sub_module_name?: string;
+  permission_type: 'create' | 'read' | 'update' | 'delete' | 'manage';
+  sbu_restrictions?: string[];
+  route_path?: string;
+  table_names?: string[];
 }
 
 export interface Skill {
@@ -59,6 +76,78 @@ export interface Achievement {
   title: string;
   date: string;
   description: string;
+}
+
+// RBAC Types
+export interface Module {
+  id: string;
+  name: string;
+  description?: string;
+  icon?: string;
+  display_order: number;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface SubModule {
+  id: string;
+  module_id: string;
+  name: string;
+  description?: string;
+  icon?: string;
+  route_path?: string;
+  table_names?: string[];
+  display_order: number;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface PermissionType {
+  id: string;
+  name: 'create' | 'read' | 'update' | 'delete' | 'manage';
+  description?: string;
+  created_at: string;
+}
+
+export interface CustomRole {
+  id: string;
+  name: string;
+  description?: string;
+  is_sbu_bound: boolean;
+  created_by: string;
+  created_at: string;
+  updated_at: string;
+  is_active: boolean;
+  is_system_role: boolean;
+}
+
+export interface RolePermission {
+  id: string;
+  role_id: string;
+  module_id: string;
+  sub_module_id?: string;
+  permission_type_id: string;
+  sbu_restrictions?: string[];
+  created_at: string;
+  updated_at: string;
+}
+
+export interface UserCustomRole {
+  id: string;
+  user_id: string;
+  role_id: string;
+  sbu_context?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface SBU {
+  id: string;
+  name: string;
+  created_at: string;
+  updated_at: string;
 }
 
 export interface Project {

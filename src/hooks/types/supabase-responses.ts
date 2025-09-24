@@ -1,6 +1,4 @@
 
-import { UserRole } from '@/types';
-
 export interface ListUsersResponse {
   users: {
     id: string;
@@ -9,7 +7,10 @@ export interface ListUsersResponse {
     last_sign_in_at: string;
     first_name: string;
     last_name: string;
-    role: UserRole;
+    custom_role_id: string | null;
+    custom_role_name: string | null;
+    sbu_context: string | null;
+    sbu_context_name: string | null;
     employee_id?: string;
     sbu_id?: string | null;
     sbu_name?: string | null;

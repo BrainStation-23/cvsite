@@ -25,7 +25,8 @@ serve(async (req) => {
       email, 
       firstName, 
       lastName, 
-      role, 
+      customRoleId,
+      sbuContext, 
       employeeId, 
       sbuId, 
       expertiseId, 
@@ -54,6 +55,8 @@ serve(async (req) => {
       if (firstName) userMetadata.first_name = firstName;
       if (lastName) userMetadata.last_name = lastName;
       if (employeeId) userMetadata.employee_id = employeeId;
+      if (customRoleId !== undefined) userMetadata.custom_role_id = customRoleId;
+      if (sbuContext !== undefined) userMetadata.sbu_context = sbuContext;
       if (sbuId !== undefined) userMetadata.sbu_id = sbuId;
       if (expertiseId !== undefined) userMetadata.expertise_id = expertiseId;
       if (resourceTypeId !== undefined) userMetadata.resource_type_id = resourceTypeId;
@@ -112,54 +115,48 @@ serve(async (req) => {
       }
     }
     
-    // Update role if provided
-    if (role) {
-      // Validate role
-      if (!['admin', 'manager', 'employee'].includes(role)) {
-        return new Response(
-          JSON.stringify({ error: 'Invalid role. Must be admin, manager, or employee' }),
-          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-        );
-      }
-      
-      // First get the existing role to see if we need to update
-      const { data: existingRoles, error: fetchError } = await supabase
-        .from('user_roles')
-        .select('id, role')
-        .eq('user_id', userId);
-      
-      if (fetchError) {
-        return new Response(
-          JSON.stringify({ error: fetchError.message }),
-          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-        );
-      }
-      
-      if (existingRoles && existingRoles.length > 0) {
-        // User has roles, update if different
-        const existingRole = existingRoles[0];
-        if (existingRole.role !== role) {
-          const { error: updateRoleError } = await supabase
-            .from('user_roles')
-            .update({ role })
-            .eq('id', existingRole.id);
-          
-          if (updateRoleError) {
-            return new Response(
-              JSON.stringify({ error: updateRoleError.message }),
-              { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-            );
-          }
+    // Update custom role if provided
+    if (customRoleId !== undefined) {
+      if (customRoleId) {
+        // Validate custom role assignment
+        const { data: validRole, error: roleValidationError } = await supabase
+          .rpc('validate_custom_role_assignment', {
+            _custom_role_id: customRoleId,
+            _sbu_context: sbuContext
+          });
+
+        if (roleValidationError || !validRole) {
+          return new Response(
+            JSON.stringify({ error: 'Invalid custom role assignment or SBU context mismatch' }),
+            { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          );
+        }
+
+        // Assign new custom role
+        const { error: roleAssignError } = await supabase
+          .rpc('assign_custom_role_to_user', {
+            _user_id: userId,
+            _custom_role_id: customRoleId,
+            _sbu_context: sbuContext,
+            _assigned_by: null // Will use auth.uid() in function
+          });
+        
+        if (roleAssignError) {
+          return new Response(
+            JSON.stringify({ error: roleAssignError.message }),
+            { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          );
         }
       } else {
-        // No roles found, insert new role
-        const { error: insertRoleError } = await supabase
+        // Remove existing role if customRoleId is explicitly set to null
+        const { error: removeRoleError } = await supabase
           .from('user_roles')
-          .insert({ user_id: userId, role });
+          .delete()
+          .eq('user_id', userId);
         
-        if (insertRoleError) {
+        if (removeRoleError) {
           return new Response(
-            JSON.stringify({ error: insertRoleError.message }),
+            JSON.stringify({ error: removeRoleError.message }),
             { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
           );
         }

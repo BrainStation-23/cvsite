@@ -3,23 +3,23 @@ import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
-import { User, Mail, Lock, IdCard, Building, Calendar, Briefcase, UserCheck, Settings } from 'lucide-react';
+import { User, Mail, Lock, IdCard, Building, Calendar, Briefcase, Settings } from 'lucide-react';
 import { Switch } from '@/components/ui/switch';
-import { UserRole } from '@/types';
 import SbuCombobox from './user/SbuCombobox';
 import ExpertiseCombobox from './user/ExpertiseCombobox';
 import ResourceTypeCombobox from './user/ResourceTypeCombobox';
 import DatePicker from './user/DatePicker';
 import { ProfileCombobox } from './user/ProfileCombobox';
+import CustomRoleCombobox from './user/CustomRoleCombobox';
 
 interface UserFormData {
   email: string;
   firstName: string;
   lastName: string;
-  role: UserRole;
+  customRoleId: string | null;
+  sbuContext: string | null;
   password: string;
   employeeId: string;
   sbuId: string | null;
@@ -58,7 +58,8 @@ const UserForm: React.FC<UserFormProps> = ({
     email: initialData.email || '',
     firstName: initialData.firstName || '',
     lastName: initialData.lastName || '',
-    role: initialData.role || 'employee',
+    customRoleId: initialData.customRoleId || null,
+    sbuContext: initialData.sbuContext || null,
     password: initialData.password || '',
     employeeId: initialData.employeeId || '',
     sbuId: initialData.sbuId || null,
@@ -74,6 +75,8 @@ const UserForm: React.FC<UserFormProps> = ({
     hasOverhead: initialData.hasOverhead ?? true
   });
 
+  const [isRoleSbuBound, setIsRoleSbuBound] = useState(false);
+
 
   const handleInputChange = (field: keyof UserFormData, value: string | boolean | null) => {
     setFormData(prev => {
@@ -88,7 +91,7 @@ const UserForm: React.FC<UserFormProps> = ({
   };
 
   return (
-    <div className="max-w-4xl mx-auto">
+    <div className="mx-auto">
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
@@ -101,35 +104,14 @@ const UserForm: React.FC<UserFormProps> = ({
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-8">
-            {/* Personal Information Section */}
-            <div className="space-y-4">
-              <div className="flex items-center gap-2 mb-4">
-                <UserCheck size={18} />
-                <h3 className="text-lg font-medium">Personal Information</h3>
-              </div>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-2">
-                  <Label htmlFor="dateOfBirth">Date of Birth</Label>
-                  <DatePicker
-                    value={formData.dateOfBirth}
-                    onChange={(value) => handleInputChange('dateOfBirth', value)}
-                    placeholder="Select date of birth"
-                  />
-                </div>
-              </div>
-            </div>
-
-            <Separator />
-
-            {/* Basic Information Section */}
-            <div className="space-y-4">
+          {/* Basic Information Section */}
+            <div className="">
               <div className="flex items-center gap-2 mb-4">
                 <User size={18} />
                 <h3 className="text-lg font-medium">Basic Information</h3>
               </div>
               
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="firstName">First Name *</Label>
                   <Input
@@ -152,6 +134,16 @@ const UserForm: React.FC<UserFormProps> = ({
                     placeholder="Enter last name"
                   />
                 </div>
+              
+
+                <div className="space-y-2">
+                  <Label htmlFor="dateOfBirth">Date of Birth</Label>
+                  <DatePicker
+                    value={formData.dateOfBirth}
+                    onChange={(value) => handleInputChange('dateOfBirth', value)}
+                    placeholder="Select date of birth"
+                  />
+              </div>
 
                 <div className="space-y-2">
                   <Label htmlFor="email" className="flex items-center gap-2">
@@ -185,16 +177,14 @@ const UserForm: React.FC<UserFormProps> = ({
               </div>
             </div>
 
-            <Separator />
-
             {/* Professional Information Section */}
-            <div className="space-y-4">
+            <div >
               <div className="flex items-center gap-2 mb-4">
                 <Briefcase size={18} />
                 <h3 className="text-lg font-medium">Professional Information</h3>
               </div>
               
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="employeeId" className="flex items-center gap-2">
                     <IdCard size={16} />
@@ -211,21 +201,37 @@ const UserForm: React.FC<UserFormProps> = ({
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="role" className="flex items-center gap-2">
+                  <Label htmlFor="customRole" className="flex items-center gap-2">
                     <Building size={16} />
                     Role *
                   </Label>
-                  <Select value={formData.role} onValueChange={(value) => handleInputChange('role', value)}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select role" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="admin">Admin</SelectItem>
-                      <SelectItem value="manager">Manager</SelectItem>
-                      <SelectItem value="employee">Employee</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <CustomRoleCombobox
+                    value={formData.customRoleId}
+                    onValueChange={(value) => handleInputChange('customRoleId', value)}
+                    onRoleChange={(roleInfo) => {
+                      setIsRoleSbuBound(roleInfo.isSbuBound);
+                      // Clear SBU context if role is not SBU-bound
+                      if (!roleInfo.isSbuBound) {
+                        handleInputChange('sbuContext', null);
+                      }
+                    }}
+                    placeholder="Select role..."
+                  />
                 </div>
+
+                {isRoleSbuBound && (
+                  <div className="space-y-2">
+                    <Label htmlFor="sbuContext" className="flex items-center gap-2">
+                      <Building size={16} />
+                      SBU Context *
+                    </Label>
+                    <SbuCombobox
+                      value={formData.sbuContext}
+                      onValueChange={(value) => handleInputChange('sbuContext', value)}
+                      placeholder="Select SBU context for this role..."
+                    />
+                  </div>
+                )}
 
                 <div className="space-y-2">
                   <Label htmlFor="manager" className="flex items-center gap-2">
@@ -264,7 +270,7 @@ const UserForm: React.FC<UserFormProps> = ({
                   />
                 </div>
 
-                <div className="space-y-2">
+                <div className="space-y-1">
                   <Label htmlFor="resourceType" className="flex items-center gap-2">
                     <Briefcase size={16} />
                     Resource Type (Optional)
@@ -278,10 +284,8 @@ const UserForm: React.FC<UserFormProps> = ({
               </div>
             </div>
 
-            <Separator />
-
             {/* Career Information Section */}
-            <div className="space-y-4">
+            <div className="space-y-1">
               <div className="flex items-center gap-2 mb-4">
                 <Calendar size={18} />
                 <h3 className="text-lg font-medium">Career Information</h3>
@@ -307,8 +311,6 @@ const UserForm: React.FC<UserFormProps> = ({
                 </div>
               </div>
             </div>
-
-            <Separator />
 
             {/* Employment Status Section */}
             <div className="space-y-4">

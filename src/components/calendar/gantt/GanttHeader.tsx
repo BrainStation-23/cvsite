@@ -13,10 +13,13 @@ interface GanttHeaderProps {
 }
 
 export const GanttHeader: React.FC<GanttHeaderProps> = ({ timeline, resourceCount, sortBy, sortOrder, onSort }) => {
-    const getSortIcon = (column: string) => {
-      if (sortBy !== column) return <ArrowUpDown className="h-4 w-4" />;
-      return sortOrder === 'asc' ? <ArrowUp className="h-4 w-4" /> : <ArrowDown className="h-4 w-4" />;
-    };
+  // Calculate total weeks for percentage calculation (same as GanttRow)
+  const totalWeeks = timeline.reduce((acc, month) => acc + month.weeks.length, 0);
+  
+  const getSortIcon = (column: string) => {
+    if (sortBy !== column) return <ArrowUpDown className="h-4 w-4" />;
+    return sortOrder === 'asc' ? <ArrowUp className="h-4 w-4" /> : <ArrowDown className="h-4 w-4" />;
+  };
   
   return (
     <div className="sticky top-0 z-10 bg-background border-b">
@@ -41,17 +44,24 @@ export const GanttHeader: React.FC<GanttHeaderProps> = ({ timeline, resourceCoun
               </Button>
             </div>
         </div>
-        <div className="flex-1 flex">
-          {timeline.map((month, monthIndex) => (
-            <div
-              key={monthIndex}
-              className="flex-1 border-r last:border-r-0 bg-muted/50 p-2 text-center"
-            >
-              <div className="text-sm font-medium">
-                {format(month.month, 'MMM yyyy')}
+        <div className="flex-1 flex pr-[17px]">
+          {timeline.map((month, monthIndex) => {
+            // Calculate month width based on ALL its weeks (not just filtered ones)
+            const monthWeekCount = month.weeks.length;
+            const monthWidthPercentage = (monthWeekCount / totalWeeks) * 100;
+            
+            return (
+              <div
+                key={monthIndex}
+                className="border-r last:border-r-0 bg-muted/50 p-2 text-center"
+                style={{ width: `${monthWidthPercentage}%` }}
+              >
+                <div className="text-sm font-medium">
+                  {format(month.month, 'MMM yyyy')}
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
       
@@ -60,25 +70,27 @@ export const GanttHeader: React.FC<GanttHeaderProps> = ({ timeline, resourceCoun
         <div className="w-80 flex-shrink-0 border-r bg-muted/30 p-1">
           <div className="text-xs text-muted-foreground">Details</div>
         </div>
-        <div className="flex-1 flex">
-          {timeline.map((month, monthIndex) => (
-            <div key={monthIndex} className="flex-1 flex">
-              {month.weeks
-                .filter((week) => format(week.weekStart, 'MM') === format(month.month, 'MM'))
-                .map((week, weekIndex) => (
-                  <div
-                    key={`${monthIndex}-${weekIndex}`}
-                    className={`flex-1 border-r last:border-r-0 p-1 text-center ${
-                      week.isCurrentWeek ? 'bg-primary/10' : 'bg-muted/30'
-                    }`}
-                  >
-                    <div className="text-xs text-muted-foreground">
-                      {format(week.weekStart, 'dd')}
-                    </div>
+        <div className="flex-1 flex pr-[17px]">
+          {timeline.map((month, monthIndex) =>
+            month.weeks.map((week, weekIndex) => {
+              // Use same percentage calculation as GanttRow
+              const weekPercentage = 100 / totalWeeks;
+              
+              return (
+                <div
+                  key={`${monthIndex}-${weekIndex}`}
+                  className={`border-r last:border-r-0 p-1 text-center ${
+                    week.isCurrentWeek ? 'bg-primary/10' : 'bg-muted/30'
+                  }`}
+                  style={{ width: `${weekPercentage}%` }}
+                >
+                  <div className="text-xs text-muted-foreground">
+                    {format(week.weekStart, 'dd')}
                   </div>
-                ))}
-            </div>
-          ))}
+                </div>
+              );
+            })
+          )}
         </div>
       </div>
     </div>

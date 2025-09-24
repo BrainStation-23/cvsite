@@ -10,17 +10,17 @@ import {
   SelectValue 
 } from '@/components/ui/select';
 import { Search, X } from 'lucide-react';
-import { UserRole } from '@/types';
 import { SortColumn, SortOrder } from '@/hooks/use-user-management';
 import UserAdvancedFilters from './UserAdvancedFilters';
+import CustomRoleCombobox from './user/CustomRoleCombobox';
 
 interface UserSearchFiltersProps {
   onSearch: (query: string | null) => void;
-  onFilterRole: (role: UserRole | null) => void;
+  onFilterRole: (customRoleId: string | null) => void;
   onSortChange: (column: SortColumn, order: SortOrder) => void;
   onReset: () => void;
   searchQuery: string | null;
-  currentRole: UserRole | null;
+  currentRole: string | null;
   sortBy: SortColumn;
   sortOrder: SortOrder;
   isLoading: boolean;
@@ -129,20 +129,11 @@ const UserSearchFilters: React.FC<UserSearchFiltersProps> = ({
           <label className="text-sm font-medium block mb-1 text-gray-700 dark:text-gray-300">
             Filter by Role
           </label>
-          <Select
-            value={currentRole || "all-roles"}
-            onValueChange={(value) => onFilterRole(value === "all-roles" ? null : value as UserRole)}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="All Roles" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all-roles">All Roles</SelectItem>
-              <SelectItem value="admin">Admin</SelectItem>
-              <SelectItem value="manager">Manager</SelectItem>
-              <SelectItem value="employee">Employee</SelectItem>
-            </SelectContent>
-          </Select>
+          <CustomRoleCombobox
+            value={currentRole || ""}
+            onValueChange={(value) => onFilterRole(value || null)}
+            placeholder="All Roles"
+          />
         </div>
         
         <div>
