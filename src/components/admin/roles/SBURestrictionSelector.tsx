@@ -1,11 +1,10 @@
 import React from 'react';
-import { Check, ChevronsUpDown, Filter } from 'lucide-react';
+import { ChevronsUpDown, Filter } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Badge } from '@/components/ui/badge';
 import { useSBUs } from '@/hooks/rbac/useModules';
-import { cn } from '@/lib/utils';
 
 interface SBURestrictionSelectorProps {
   value: string[];
