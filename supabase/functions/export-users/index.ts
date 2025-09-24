@@ -26,7 +26,7 @@ serve(async (req) => {
     // Use the list_users function to get all users with their profile information
     const { data: usersResponse, error: usersError } = await supabase.rpc('list_users', {
       search_query: null,
-      filter_role: null,
+      filter_custom_role_id: null,
       page_number: 1,
       items_per_page: 10000, // Large number to get all users
       sort_by: 'email',
@@ -54,7 +54,7 @@ serve(async (req) => {
       email: user.email || '',
       firstName: user.first_name || '',
       lastName: user.last_name || '',
-      role: user.role || 'employee',
+      role: user.custom_role_name || 'No Role',
       employeeId: user.employee_id || '',
       managerName: user.manager_name || '',
       sbuName: user.sbu_name || '',

@@ -50,7 +50,7 @@ const EditUser: React.FC = () => {
       // Fetch user data from list_users RPC function
       const { data, error } = await supabase.rpc('list_users', {
         search_query: null,
-        filter_role: null,
+        filter_custom_role_id: null,
         page_number: 1,
         items_per_page: 1000,
         sort_by: 'email',

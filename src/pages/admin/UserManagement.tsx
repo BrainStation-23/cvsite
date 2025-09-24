@@ -29,7 +29,7 @@ const UserManagement: React.FC = () => {
     isBulkUploading,
     selectedUser,
     searchQuery,
-    filterRole,
+    filterCustomRoleId,
     sortBy,
     sortOrder,
     filterSbuId,
@@ -62,10 +62,10 @@ const UserManagement: React.FC = () => {
     });
   };
 
-  const handleFilterRole = (role: UserRole | null) => {
+  const handleFilterRole = (customRoleId: string | null) => {
     fetchUsers({
       page: 1,
-      role
+      customRoleId
     });
   };
 
@@ -255,7 +255,7 @@ const UserManagement: React.FC = () => {
         onSortChange={handleSortChange} 
         onReset={resetFilters} 
         searchQuery={searchQuery} 
-        currentRole={filterRole} 
+        currentRole={filterCustomRoleId} 
         sortBy={sortBy} 
         sortOrder={sortOrder} 
         isLoading={isLoading}

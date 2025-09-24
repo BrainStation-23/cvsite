@@ -157,9 +157,9 @@ const UserList: React.FC<UserListProps> = ({
                         </Badge>
                       )}
 
-                      <Badge variant={getRoleBadgeVariant(user.role)}>
+                      <Badge variant={getRoleBadgeVariant(user.customRoleName || 'employee')}>
                         <Crown className="h-3 w-3 mr-1" />
-                        {user.role.charAt(0).toUpperCase() + user.role.slice(1)}
+                        {user.customRoleName || 'No Role'}
                       </Badge>
 
                       {user.sbuName && (
