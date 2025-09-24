@@ -1,5 +1,5 @@
 import React from 'react';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Settings } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useNavigate, useParams } from 'react-router-dom';
@@ -58,18 +58,26 @@ const EditRole: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center gap-4">
-        <Button variant="ghost" size="sm" onClick={() => navigate('/admin/roles')}>
-          <ArrowLeft className="h-4 w-4 mr-2" />
-          Back to Roles
-        </Button>
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Edit Role: {role.name}</h1>
-          <p className="text-muted-foreground">
-            Modify role configuration and permissions
-          </p>
+      <div className="flex items-center gap-4 justify-between">
+          <div className='flex items-center gap-4'>
+          <Button variant="ghost" size="sm" onClick={() => navigate('/admin/roles')}>
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back to Roles
+          </Button>
+          <div>
+            <h1 className="text-3xl font-bold tracking-tight">Edit Role: {role.name}</h1>
+            <p className="text-muted-foreground">
+              Modify role configuration and permissions
+            </p>
+          </div>
         </div>
+
+        <Button variant="outline" onClick={() => navigate(`/admin/roles/permissions/${roleId}`)}>
+          <Settings className="h-4 w-4 mr-2" />
+          Permissions Settings
+        </Button>
       </div>
+
 
       <Card>
         <CardHeader>
