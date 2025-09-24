@@ -219,25 +219,53 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   // New permission-based methods - hybrid approach with cache + RPC fallback
   const hasModuleAccess = (moduleId: string): boolean => {
-    if (!user?.permissions) return false;
+    console.log('=== hasModuleAccess Debug ===');
+    console.log('Looking for module:', moduleId);
+    console.log('User permissions:', user?.permissions?.map(p => ({
+      module: p.module_name,
+      subModule: p.sub_module_name,
+      permission: p.permission_type
+    })));
+    
+    if (!user?.permissions) {
+      console.log('No user permissions found');
+      return false;
+    }
     
     // Use cached permissions for performance
-    return user.permissions.some(permission => 
+    const hasAccess = user.permissions.some(permission => 
       permission.module_name === moduleId || permission.module_id === moduleId
     );
+    
+    console.log('Module access result:', hasAccess);
+    console.log('=== End hasModuleAccess Debug ===');
+    
+    return hasAccess;
   };
 
   const hasSubModulePermission = (
     subModuleId: string, 
     permissionType: 'create' | 'read' | 'update' | 'delete' | 'manage'
   ): boolean => {
-    if (!user?.permissions) return false;
+    console.log('=== hasSubModulePermission Debug ===');
+    console.log('Looking for sub-module:', subModuleId, 'with permission:', permissionType);
+    console.log('Available sub-modules:', user?.permissions?.map(p => p.sub_module_name));
+    
+    if (!user?.permissions) {
+      console.log('No user permissions found');
+      return false;
+    }
     
     // Use cached permissions with SBU restrictions already processed by RPC
-    return user.permissions.some(permission => 
+    const hasAccess = user.permissions.some(permission => 
       (permission.sub_module_name === subModuleId || permission.sub_module_id === subModuleId) && 
       permission.permission_type === permissionType
     );
+    
+    console.log('Sub-module permission result:', hasAccess);
+    console.log('=== End hasSubModulePermission Debug ===');
+    
+    return hasAccess;
   };
 
   const hasRouteAccess = (routePath: string): boolean => {

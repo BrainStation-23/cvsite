@@ -51,7 +51,7 @@ export const getPermissionBasedSidebarGroups = (): NavigationGroup[] => {
       items: [
         { to: '/dashboard', icon: Home, label: 'Dashboard' },
         { to: '/profile', icon: User, label: 'My Profile' },
-        { to: '/myteam', icon: Network, label: 'My Team', requiredModuleAccess: 'team_management' },
+        { to: '/myteam', icon: Network, label: 'My Team', requiredModuleAccess: 'Team Management' },
         { to: '/security', icon: Shield, label: 'Security' },
         { to: '/platform-feedback', icon: MessageSquare, label: 'Platform Feedback' },
       ],
@@ -65,47 +65,47 @@ export const getPermissionBasedSidebarGroups = (): NavigationGroup[] => {
           to: '/cv-database/dashboard', 
           icon: LayoutDashboard, 
           label: 'CV Dashboard',
-          requiredModuleAccess: 'cv_database',
+          requiredModuleAccess: 'CV Database',
           requiredPermissionType: 'read'
         },
         { 
           to: '/cv-database/employee-data', 
           icon: Search, 
           label: 'CV Search',
-          requiredModuleAccess: 'cv_database',
-          requiredSubModuleAccess: 'employee_data',
+          requiredModuleAccess: 'CV Database',
+          requiredSubModuleAccess: 'CV Search',
           requiredPermissionType: 'read'
         },
         { 
           to: '/cv-database/training-certification', 
           icon: FileText, 
           label: 'Training and Certification',
-          requiredModuleAccess: 'cv_database',
-          requiredSubModuleAccess: 'training_certification',
+          requiredModuleAccess: 'CV Database',
+          requiredSubModuleAccess: 'Training and Certification',
           requiredPermissionType: 'read'
         },
         { 
           to: '/cv-database/employee-data-management', 
           icon: FolderOpen, 
           label: 'CV Completion',
-          requiredModuleAccess: 'cv_database',
-          requiredSubModuleAccess: 'employee_data_management',
+          requiredModuleAccess: 'CV Database',
+          requiredSubModuleAccess: 'CV Completion',
           requiredPermissionType: 'update'
         },
         { 
           to: '/cv-database/cv-templates', 
           icon: FileText, 
           label: 'CV Templates',
-          requiredModuleAccess: 'cv_database',
-          requiredSubModuleAccess: 'cv_templates',
+          requiredModuleAccess: 'CV Database',
+          requiredSubModuleAccess: 'CV Templates',
           requiredPermissionType: 'read'
         },
         { 
           to: '/cv-database/cv-template-settings', 
           icon: Settings, 
           label: 'CV Settings',
-          requiredModuleAccess: 'cv_database',
-          requiredSubModuleAccess: 'cv_template_settings',
+          requiredModuleAccess: 'CV Database',
+          requiredSubModuleAccess: 'CV Settings',
           requiredPermissionType: 'update'
         },
       ],
@@ -119,31 +119,31 @@ export const getPermissionBasedSidebarGroups = (): NavigationGroup[] => {
           to: '/resource-calendar/dashboard', 
           icon: LayoutDashboard, 
           label: 'Resource Dashboard',
-          requiredModuleAccess: 'resource_calendar',
+          requiredModuleAccess: 'Resource Calendar',
           requiredPermissionType: 'read'
         },
         { 
           to: '/resource-calendar/planning', 
           icon: Calendar, 
           label: 'Planning',
-          requiredModuleAccess: 'resource_calendar',
-          requiredSubModuleAccess: 'resource_planning',
+          requiredModuleAccess: 'Resource Calendar',
+          requiredSubModuleAccess: 'Resource Planning',
           requiredPermissionType: 'update'
         },
         { 
           to: '/resource-calendar/calendar', 
           icon: CalendarDays, 
           label: 'Calendar View',
-          requiredModuleAccess: 'resource_calendar',
-          requiredSubModuleAccess: 'calendar_view',
+          requiredModuleAccess: 'Resource Calendar',
+          requiredSubModuleAccess: 'Calendar View',
           requiredPermissionType: 'read'
         },
         { 
           to: '/resource-calendar/settings', 
           icon: Settings, 
           label: 'Resource Settings',
-          requiredModuleAccess: 'resource_calendar',
-          requiredSubModuleAccess: 'resource_settings',
+          requiredModuleAccess: 'Resource Calendar',
+          requiredSubModuleAccess: 'Resource Settings',
           requiredPermissionType: 'update'
         },
       ],
@@ -157,23 +157,23 @@ export const getPermissionBasedSidebarGroups = (): NavigationGroup[] => {
           to: '/non-billed/dashboard', 
           icon: LayoutDashboard, 
           label: 'Non-Billed Dashboard',
-          requiredModuleAccess: 'non_billed_management',
+          requiredModuleAccess: 'Non-Billed Management',
           requiredPermissionType: 'read'
         },
         { 
           to: '/non-billed/report', 
           icon: BarChart3, 
           label: 'Non-Billed Report',
-          requiredModuleAccess: 'non_billed_management',
-          requiredSubModuleAccess: 'non_billed_reports',
+          requiredModuleAccess: 'Non-Billed Management',
+          requiredSubModuleAccess: 'Non-Billed Reports',
           requiredPermissionType: 'read'
         },
         { 
           to: '/non-billed/settings', 
           icon: Settings, 
           label: 'Non-Billed Settings',
-          requiredModuleAccess: 'non_billed_management',
-          requiredSubModuleAccess: 'non_billed_settings',
+          requiredModuleAccess: 'Non-Billed Management',
+          requiredSubModuleAccess: 'Non-Billed Settings',
           requiredPermissionType: 'update'
         },
       ],
@@ -187,31 +187,31 @@ export const getPermissionBasedSidebarGroups = (): NavigationGroup[] => {
           to: '/pip/dashboard', 
           icon: LayoutDashboard, 
           label: 'PIP Dashboard',
-          requiredModuleAccess: 'pip_management',
+          requiredModuleAccess: 'PIP',
           requiredPermissionType: 'read'
         },
         { 
           to: '/pip/initiate', 
           icon: UserX, 
           label: 'Initiate',
-          requiredModuleAccess: 'pip_management',
-          requiredSubModuleAccess: 'pip_initiate',
+          requiredModuleAccess: 'PIP',
+          requiredSubModuleAccess: 'PIP Initiate',
           requiredPermissionType: 'create'
         },
         { 
           to: '/pip/list', 
           icon: List, 
           label: 'PIP List',
-          requiredModuleAccess: 'pip_management',
-          requiredSubModuleAccess: 'pip_list',
+          requiredModuleAccess: 'PIP',
+          requiredSubModuleAccess: 'PIP List',
           requiredPermissionType: 'read'
         },
         { 
           to: '/pip/pm-review', 
           icon: UserCheck, 
           label: 'PM Review',
-          requiredModuleAccess: 'pip_management',
-          requiredSubModuleAccess: 'pip_pm_review',
+          requiredModuleAccess: 'PIP',
+          requiredSubModuleAccess: 'PIP PM Review',
           requiredPermissionType: 'update'
         },
         { to: '/pip/my-situation', icon: UserCheck, label: 'My Situation' },
@@ -226,35 +226,35 @@ export const getPermissionBasedSidebarGroups = (): NavigationGroup[] => {
           to: '/users', 
           icon: Users, 
           label: 'User Management',
-          requiredModuleAccess: 'user_management',
+          requiredModuleAccess: 'Admin Configuration',
           requiredPermissionType: 'read'
         },
         { 
           to: '/projects', 
           icon: Database, 
           label: 'Projects',
-          requiredModuleAccess: 'project_management',
+          requiredModuleAccess: 'Admin Configuration',
           requiredPermissionType: 'read'
         },
         { 
           to: '/system-settings', 
           icon: Settings, 
           label: 'System Settings',
-          requiredModuleAccess: 'system_settings',
+          requiredModuleAccess: 'Admin Configuration',
           requiredPermissionType: 'update'
         },
         { 
           to: '/admin/roles', 
           icon: Shield, 
           label: 'Role Management',
-          requiredModuleAccess: 'role_management',
+          requiredModuleAccess: 'Admin Configuration',
           requiredPermissionType: 'read'
         },
         { 
           to: '/admin/modules', 
           icon: LayoutDashboard, 
           label: 'Module Management',
-          requiredModuleAccess: 'module_management',
+          requiredModuleAccess: 'Admin Configuration',
           requiredPermissionType: 'read'
         }
       ],
@@ -268,15 +268,15 @@ export const getPermissionBasedSidebarGroups = (): NavigationGroup[] => {
           to: '/audit/dashboard', 
           icon: AlertTriangle, 
           label: 'Dashboard',
-          requiredModuleAccess: 'audit',
+          requiredModuleAccess: 'Audit',
           requiredPermissionType: 'read'
         },
         { 
           to: '/audit/profile-image-warnings', 
           icon: ContactRound, 
           label: 'Profile Image',
-          requiredModuleAccess: 'audit',
-          requiredSubModuleAccess: 'profile_image_audit',
+          requiredModuleAccess: 'Audit',
+          requiredSubModuleAccess: 'Profile Image Audit',
           requiredPermissionType: 'read'
         },
       ],
