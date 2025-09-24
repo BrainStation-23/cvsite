@@ -196,7 +196,7 @@ export const PermissionMatrixTable: React.FC<PermissionMatrixTableProps> = ({
 
   return (
     <div className="space-y-4">
-      <Table>
+      <Table className="table-fixed">
         <TableHeader>
           <TableRow>
             <TableHead className="min-w-[300px]">Module / Sub-module</TableHead>
@@ -325,7 +325,7 @@ export const PermissionMatrixTable: React.FC<PermissionMatrixTableProps> = ({
 
                         return (
                           <TableCell key={type.id} className="w-20 text-center">
-                            <div className="space-y-2">
+                            <div className="relative flex items-center justify-center">
                               <Checkbox
                                 checked={isChecked}
                                 onCheckedChange={(checked) =>
@@ -338,8 +338,9 @@ export const PermissionMatrixTable: React.FC<PermissionMatrixTableProps> = ({
                                 }
                               />
                               {isChecked && isSBUBound && (
-                                <div className="px-2">
+                                <div className="absolute right-1">
                                   <SBURestrictionSelector
+                                    compact
                                     value={sbuRestrictions}
                                     onChange={(sbus) =>
                                       handleSBUChange(

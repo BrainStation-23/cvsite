@@ -1,5 +1,5 @@
 import React from 'react';
-import { Check, ChevronsUpDown } from 'lucide-react';
+import { Check, ChevronsUpDown, Filter } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
@@ -10,11 +10,13 @@ import { cn } from '@/lib/utils';
 interface SBURestrictionSelectorProps {
   value: string[];
   onChange: (sbuIds: string[]) => void;
+  compact?: boolean;
 }
 
 export const SBURestrictionSelector: React.FC<SBURestrictionSelectorProps> = ({
   value = [],
   onChange,
+  compact = false,
 }) => {
   const { data: sbus, isLoading } = useSBUs();
   const [open, setOpen] = React.useState(false);
@@ -34,7 +36,17 @@ export const SBURestrictionSelector: React.FC<SBURestrictionSelectorProps> = ({
   };
 
   if (isLoading || !sbus) {
-    return (
+    return compact ? (
+      <Button
+        variant="ghost"
+        size="sm"
+        disabled
+        className="h-6 w-6 p-0 opacity-50"
+        aria-label="Loading SBU restrictions"
+      >
+        <Filter className="h-3 w-3" />
+      </Button>
+    ) : (
       <div className="text-xs text-muted-foreground">Loading SBUs...</div>
     );
   }
@@ -42,35 +54,46 @@ export const SBURestrictionSelector: React.FC<SBURestrictionSelectorProps> = ({
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
-        <Button
-          variant="outline"
-          role="combobox"
-          aria-expanded={open}
-          className="w-full justify-between text-xs h-8"
-          size="sm"
-        >
-          <div className="flex flex-wrap gap-1">
-            {value.length === 0 ? (
-              <span className="text-muted-foreground">All SBUs</span>
-            ) : value.length === sbus.length ? (
-              <span className="text-muted-foreground">All SBUs</span>
-            ) : (
-              <div className="flex flex-wrap gap-1">
-                {getSBUNames().slice(0, 2).map((name) => (
-                  <Badge key={name} variant="secondary" className="text-xs px-1 py-0">
-                    {name}
-                  </Badge>
-                ))}
-                {value.length > 2 && (
-                  <Badge variant="secondary" className="text-xs px-1 py-0">
-                    +{value.length - 2}
-                  </Badge>
-                )}
-              </div>
-            )}
-          </div>
-          <ChevronsUpDown className="ml-2 h-3 w-3 shrink-0 opacity-50" />
-        </Button>
+        {compact ? (
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-6 w-6 p-0"
+            aria-label="SBU restrictions"
+          >
+            <Filter className="h-3 w-3" />
+          </Button>
+        ) : (
+          <Button
+            variant="outline"
+            role="combobox"
+            aria-expanded={open}
+            className="w-full justify-between text-xs h-8"
+            size="sm"
+          >
+            <div className="flex flex-wrap gap-1">
+              {value.length === 0 ? (
+                <span className="text-muted-foreground">All SBUs</span>
+              ) : value.length === sbus.length ? (
+                <span className="text-muted-foreground">All SBUs</span>
+              ) : (
+                <div className="flex flex-wrap gap-1">
+                  {getSBUNames().slice(0, 2).map((name) => (
+                    <Badge key={name} variant="secondary" className="text-xs px-1 py-0">
+                      {name}
+                    </Badge>
+                  ))}
+                  {value.length > 2 && (
+                    <Badge variant="secondary" className="text-xs px-1 py-0">
+                      +{value.length - 2}
+                    </Badge>
+                  )}
+                </div>
+              )}
+            </div>
+            <ChevronsUpDown className="ml-2 h-3 w-3 shrink-0 opacity-50" />
+          </Button>
+        )}
       </PopoverTrigger>
       <PopoverContent className="w-[200px] p-2" align="start">
         <div className="space-y-2">
