@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Check, ChevronsUpDown, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useSbuSearch } from '@/hooks/use-sbu-search';
+import { useUserAccessibleSbus } from '@/hooks/use-user-accessible-sbus';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -13,16 +14,47 @@ interface SbuComboboxProps {
   onValueChange: (value: string | null) => void;
   placeholder?: string;
   disabled?: boolean;
+  respectSbuBound?: boolean;
+  autoSelectOwnSbu?: boolean;
+  targetUserId?: string | null;
 }
 
 const SbuCombobox: React.FC<SbuComboboxProps> = ({
   value,
   onValueChange,
   placeholder = "Select SBU...",
-  disabled = false
+  disabled = false,
+  respectSbuBound = false,
+  autoSelectOwnSbu = true,
+  targetUserId = null
 }) => {
   const [open, setOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+
+  // Use either user-accessible SBUs or all SBUs based on respectSbuBound prop
+  const { data: userAccessibleResult, isLoading: userAccessibleLoading } = useUserAccessibleSbus({
+    searchQuery: respectSbuBound ? (searchQuery || null) : null,
+    targetUserId: respectSbuBound ? targetUserId : null,
+  });
+
+  const { data: allSbuResult, isLoading: allSbuLoading } = useSbuSearch({
+    searchQuery: !respectSbuBound ? (searchQuery || null) : null,
+    page: 1,
+    perPage: 50
+  });
+
+  // Determine which data source to use
+  const sbus = respectSbuBound 
+    ? (userAccessibleResult?.sbus || [])
+    : (allSbuResult?.sbus || []);
+  const isLoading = respectSbuBound ? userAccessibleLoading : allSbuLoading;
+
+  // Auto-select user's own SBU if respectSbuBound is true and no value is set
+  useEffect(() => {
+    if (respectSbuBound && autoSelectOwnSbu && !value && userAccessibleResult?.defaultSbuId) {
+      onValueChange(userAccessibleResult.defaultSbuId);
+    }
+  }, [respectSbuBound, autoSelectOwnSbu, value, userAccessibleResult?.defaultSbuId, onValueChange]);
   
   // Fetch selected SBU separately to ensure it's always available
   const { data: selectedSbu } = useQuery({
@@ -42,14 +74,6 @@ const SbuCombobox: React.FC<SbuComboboxProps> = ({
     enabled: !!value,
   });
 
-  const { data: searchResult, isLoading } = useSbuSearch({
-    searchQuery: searchQuery || null,
-    page: 1,
-    perPage: 50
-  });
-
-  const sbus = searchResult?.sbus || [];
-  
   // Combine search results with selected SBU to ensure it's always available
   const allSbus = React.useMemo(() => {
     const combinedSbus = [...sbus];
