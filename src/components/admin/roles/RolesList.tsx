@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
-import { Edit, Lock, Shield, Trash2 } from 'lucide-react';
+import { Copy, Edit, Lock, Shield, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useNavigate } from 'react-router-dom';
-import { useRoles, useDeleteRole } from '@/hooks/rbac/useRoles';
+import { useRoles, useDeleteRole, useCreateRole } from '@/hooks/rbac/useRoles';
 import { ConfirmationDialog } from '@/components/ui/confirmation-dialog';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
@@ -19,6 +19,7 @@ export const RolesList: React.FC = () => {
   const navigate = useNavigate();
   const { data: roles, isLoading } = useRoles();
   const deleteRoleMutation = useDeleteRole();
+  const createRoleMutation = useCreateRole();
   const [roleToDelete, setRoleToDelete] = useState<string | null>(null);
 
   const handleDelete = async () => {
@@ -26,6 +27,19 @@ export const RolesList: React.FC = () => {
       await deleteRoleMutation.mutateAsync(roleToDelete);
       setRoleToDelete(null);
     }
+  };
+
+  const handleDuplicate = async (role: any) => {
+    const duplicatedRole = {
+      name: `${role.name} (duplicate)`,
+      description: role.description,
+      is_sbu_bound: role.is_sbu_bound,
+      is_system_role: false, // Duplicated roles are never system roles
+      created_by: role.created_by,
+      is_active: true,
+    };
+    
+    await createRoleMutation.mutateAsync(duplicatedRole);
   };
 
   if (isLoading) {
@@ -115,11 +129,20 @@ export const RolesList: React.FC = () => {
                     <Edit className="mr-2 h-4 w-4" />
                     Edit
                   </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => handleDuplicate(role)}
+                    disabled={createRoleMutation.isPending}
+                  >
+                    <Copy className="h-4 w-4" />
+                  </Button>
                   {!role.is_system_role && (
                     <Button
                       variant="ghost"
                       size="sm"
                       onClick={() => setRoleToDelete(role.id)}
+                      className="text-destructive hover:text-destructive"
                     >
                       <Trash2 className="h-4 w-4" />
                     </Button>
