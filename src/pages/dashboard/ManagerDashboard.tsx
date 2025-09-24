@@ -1,6 +1,7 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { User, Database, Shield } from 'lucide-react';
+import { User, Shield , Search } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 const ManagerDashboard: React.FC = () => {
   const modules = [
@@ -8,19 +9,19 @@ const ManagerDashboard: React.FC = () => {
       title: 'My Profile',
       description: 'View and edit your profile information',
       icon: <User className="h-10 w-10 text-cvsite-teal" />,
-      link: '/manager/profile',
+      link: '/profile',
     },
     {
-      title: 'Employee Data',
-      description: 'View and manage employee profiles',
-      icon: <Database className="h-10 w-10 text-cvsite-teal" />,
-      link: '/manager/employee-data',
+      title: 'CV Search',
+      description: 'Search for CVs',
+      icon: <Search className="h-10 w-10 text-cvsite-teal" />,
+      link: '/cv-database/employee-data',
     },
     {
       title: 'Security',
       description: 'Update your password and security settings',
       icon: <Shield className="h-10 w-10 text-cvsite-teal" />,
-      link: '/manager/security',
+      link: '/security',
     }
   ];
 
@@ -36,12 +37,12 @@ const ManagerDashboard: React.FC = () => {
           </CardHeader>
           <CardContent>
             <p className="text-sm text-gray-500 dark:text-gray-400">{module.description}</p>
-            <a 
-              href={module.link}
-              className="mt-4 inline-block text-cvsite-teal hover:text-cvsite-navy dark:hover:text-cvsite-light-blue"
+            <Link 
+              to={module.link}
+              className="mt-4 inline-block text-cvsite-teal hover:text-cvsite-navy dark:hover:text-cvsite-light-blue transition-colors"
             >
               Access &rarr;
-            </a>
+            </Link>
           </CardContent>
         </Card>
       ))}
