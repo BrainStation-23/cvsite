@@ -98,7 +98,7 @@ export function useUserManagement({
     isBulkUploading: state.isBulkUploading,
     pagination: state.pagination,
     searchQuery: state.searchQuery,
-    filterRole: state.filterRole,
+    filterCustomRoleId: state.filterCustomRoleId,
     sortBy: state.sortBy,
     sortOrder: state.sortOrder,
     setSelectedUser: state.setSelectedUser,

@@ -1,7 +1,6 @@
 
 import { useState } from 'react';
 import { UserData, PaginationData, SortColumn, SortOrder } from '../types/user-management';
-import { UserRole } from '@/types';
 
 export function useUserState() {
   const [users, setUsers] = useState<UserData[]>([]);
@@ -19,7 +18,7 @@ export function useUserState() {
   
   // Basic filters
   const [searchQuery, setSearchQuery] = useState<string | null>(null);
-  const [filterRole, setFilterRole] = useState<UserRole | null>(null);
+  const [filterCustomRoleId, setFilterCustomRoleId] = useState<string | null>(null);
   const [sortBy, setSortBy] = useState<SortColumn>('created_at');
   const [sortOrder, setSortOrder] = useState<SortOrder>('desc');
   
@@ -46,8 +45,8 @@ export function useUserState() {
     setPagination,
     searchQuery,
     setSearchQuery,
-    filterRole,
-    setFilterRole,
+    filterCustomRoleId,
+    setFilterCustomRoleId,
     sortBy,
     setSortBy,
     sortOrder,

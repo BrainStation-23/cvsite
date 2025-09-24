@@ -2776,6 +2776,7 @@ export type Database = {
       }
       list_users: {
         Args: {
+          filter_custom_role_id?: string
           filter_expertise_id?: string
           filter_manager_id?: string
           filter_max_company_years?: number
@@ -2783,7 +2784,6 @@ export type Database = {
           filter_min_company_years?: number
           filter_min_total_years?: number
           filter_resource_type_id?: string
-          filter_role?: string
           filter_sbu_id?: string
           items_per_page?: number
           page_number?: number

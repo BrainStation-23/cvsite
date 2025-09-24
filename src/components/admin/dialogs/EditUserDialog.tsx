@@ -25,7 +25,7 @@ interface EditUserDialogProps {
     email: string;
     firstName: string;
     lastName: string;
-    role: UserRole;
+    customRoleId: string | null;
     employeeId: string;
     sbuId?: string | null;
     expertiseId?: string | null;
@@ -55,7 +55,7 @@ export const EditUserDialog: React.FC<EditUserDialogProps> = ({
     email: '',
     firstName: '',
     lastName: '',
-    role: '' as UserRole,
+    customRoleId: null as string | null,
     employeeId: '',
     sbuId: null as string | null,
     expertiseId: null as string | null,
@@ -78,7 +78,7 @@ export const EditUserDialog: React.FC<EditUserDialogProps> = ({
         email: user.email,
         firstName: user.firstName,
         lastName: user.lastName,
-        role: user.role,
+        customRoleId: user.customRoleId || null,
         employeeId: user.employeeId || '',
         sbuId: user.sbuId || null,
         expertiseId: user.expertiseId || null,
@@ -161,8 +161,8 @@ export const EditUserDialog: React.FC<EditUserDialogProps> = ({
               Role
             </Label>
             <Select
-              value={editUser.role}
-              onValueChange={(value) => setEditUser({ ...editUser, role: value as UserRole })}
+              value={editUser.customRoleId || ''}
+              onValueChange={(value) => setEditUser({ ...editUser, customRoleId: value || null })}
             >
               <SelectTrigger id="edit-role">
                 <SelectValue placeholder="Select a role" />

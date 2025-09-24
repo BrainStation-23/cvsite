@@ -1,12 +1,13 @@
 
-import { UserRole } from '@/types';
-
 export interface UserData {
   id: string;
   email: string;
   firstName: string;
   lastName: string;
-  role: UserRole;
+  customRoleId: string | null;
+  customRoleName: string | null;
+  sbuContext: string | null;
+  sbuContextName: string | null;
   employeeId: string;
   sbuId: string | null;
   sbuName: string | null;
