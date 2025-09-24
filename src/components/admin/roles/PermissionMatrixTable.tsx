@@ -535,7 +535,7 @@ export const PermissionMatrixTable: React.FC<PermissionMatrixTableProps> = ({
                                   }
                                 />
                                 {isChecked && isSBUBound && !isRead && (
-                                  <div className="absolute right-1 top-1">
+                                  <div className="absolute left-[44px]">
                                     <SBURestrictionSelector
                                       compact
                                       value={sbuRestrictions}
