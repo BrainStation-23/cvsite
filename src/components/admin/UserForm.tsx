@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
-import { User, Mail, Lock, IdCard, Building, Calendar, Briefcase, UserCheck, Settings } from 'lucide-react';
+import { User, Mail, Lock, IdCard, Building, Calendar, Briefcase, Settings } from 'lucide-react';
 import { Switch } from '@/components/ui/switch';
 import SbuCombobox from './user/SbuCombobox';
 import ExpertiseCombobox from './user/ExpertiseCombobox';
