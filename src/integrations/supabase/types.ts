@@ -2211,6 +2211,10 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: Json
       }
+      duplicate_custom_role: {
+        Args: { new_role_name?: string; source_role_id: string }
+        Returns: string
+      }
       duplicate_resource_assignment: {
         Args: { assignment_id: string }
         Returns: Json

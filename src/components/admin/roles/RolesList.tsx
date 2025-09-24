@@ -3,7 +3,8 @@ import { Copy, Edit, Lock, Shield, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useNavigate } from 'react-router-dom';
-import { useRoles, useDeleteRole, useCreateRole } from '@/hooks/rbac/useRoles';
+import { useRoles, useDeleteRole } from '@/hooks/rbac/useRoles';
+import { useDuplicateRole } from '@/hooks/rbac/useDuplicateRole';
 import { ConfirmationDialog } from '@/components/ui/confirmation-dialog';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
@@ -19,7 +20,7 @@ export const RolesList: React.FC = () => {
   const navigate = useNavigate();
   const { data: roles, isLoading } = useRoles();
   const deleteRoleMutation = useDeleteRole();
-  const createRoleMutation = useCreateRole();
+  const duplicateRoleMutation = useDuplicateRole();
   const [roleToDelete, setRoleToDelete] = useState<string | null>(null);
 
   const handleDelete = async () => {
@@ -30,16 +31,9 @@ export const RolesList: React.FC = () => {
   };
 
   const handleDuplicate = async (role: any) => {
-    const duplicatedRole = {
-      name: `${role.name} (duplicate)`,
-      description: role.description,
-      is_sbu_bound: role.is_sbu_bound,
-      is_system_role: false, // Duplicated roles are never system roles
-      created_by: role.created_by,
-      is_active: true,
-    };
-    
-    await createRoleMutation.mutateAsync(duplicatedRole);
+    await duplicateRoleMutation.mutateAsync({
+      sourceRoleId: role.id
+    });
   };
 
   if (isLoading) {
@@ -133,7 +127,7 @@ export const RolesList: React.FC = () => {
                     variant="ghost"
                     size="sm"
                     onClick={() => handleDuplicate(role)}
-                    disabled={createRoleMutation.isPending}
+                    disabled={duplicateRoleMutation.isPending}
                   >
                     <Copy className="h-4 w-4" />
                   </Button>
