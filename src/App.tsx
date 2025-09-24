@@ -113,7 +113,7 @@ function App(): React.ReactElement {
                   <Route path=":id" element={<ProtectedRoute requiredModuleAccess="CV Database" requiredSubModuleAccess="CV Templates" requiredPermissionType="read"><CVTemplateViewPage /></ProtectedRoute>} />
                   <Route path=":id/edit" element={<ProtectedRoute requiredModuleAccess="CV Database" requiredSubModuleAccess="CV Templates" requiredPermissionType="update"><CVTemplateEditorPage /></ProtectedRoute>} />
                 </Route>
-                <Route path="cv-template-settings" element={<ProtectedRoute requiredModuleAccess="CV Database" requiredSubModuleAccess="CV Templates" requiredPermissionType="read"><CVTemplateSettings /></ProtectedRoute>} />
+                <Route path="cv-template-settings" element={<ProtectedRoute requiredModuleAccess="CV Database" requiredSubModuleAccess="CV Settings" requiredPermissionType="create"><CVTemplateSettings /></ProtectedRoute>} />
               </Route>
 
               {/* Resource Calendar */}
