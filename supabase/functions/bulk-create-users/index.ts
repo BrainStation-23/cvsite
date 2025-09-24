@@ -1,4 +1,3 @@
-
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.38.4";
 import Papa from "https://esm.sh/papaparse@5.4.1";
@@ -109,6 +108,30 @@ const getManagerIdByEmail = async (supabase: any, managerEmail: string): Promise
   return managers && managers.length > 0 ? managers[0].id : null;
 };
 
+const getCustomRoleByIdOrName = async (supabase: any, customRoleId?: string, customRoleName?: string): Promise<{id: string, name: string, is_sbu_bound: boolean} | null> => {
+  if (!customRoleId && !customRoleName) return null;
+  
+  let query = supabase
+    .from('custom_roles')
+    .select('id, name, is_sbu_bound')
+    .eq('is_active', true);
+  
+  if (customRoleId && customRoleId.trim() !== '') {
+    query = query.eq('id', customRoleId.trim());
+  } else if (customRoleName && customRoleName.trim() !== '') {
+    query = query.ilike('name', customRoleName.trim());
+  }
+  
+  const { data: roles, error } = await query.limit(1);
+  
+  if (error) {
+    console.error('Error fetching custom role:', error);
+    return null;
+  }
+  
+  return roles && roles.length > 0 ? roles[0] : null;
+};
+
 const generateRandomPassword = (): string => {
   const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*';
   let password = '';
@@ -166,7 +189,10 @@ serve(async (req) => {
           email, 
           firstName, 
           lastName, 
-          role, 
+          customRoleId,
+          customRoleName,
+          sbuContextId,
+          sbuContextName,
           password, 
           employeeId, 
           managerEmail,
@@ -191,11 +217,6 @@ serve(async (req) => {
         }
         
         try {
-          // Validate role
-          const validRole = role && ['admin', 'manager', 'employee'].includes(role.toLowerCase()) 
-            ? role.toLowerCase() 
-            : 'employee';
-          
           // Generate password if not provided
           const userPassword = password && password.trim() ? password.trim() : generateRandomPassword();
           if (!password || !password.trim()) {
@@ -208,6 +229,27 @@ serve(async (req) => {
           const resourceTypeId = await getResourceTypeIdByName(supabase, resourceTypeName);
           const managerId = await getManagerIdByEmail(supabase, managerEmail);
           
+          // Get custom role information
+          const customRole = await getCustomRoleByIdOrName(supabase, customRoleId, customRoleName);
+          
+          // Handle SBU context for SBU-bound roles
+          let sbuContextUuid: string | null = null;
+          if (customRole?.is_sbu_bound) {
+            if (sbuContextId && sbuContextId.trim() !== '') {
+              sbuContextUuid = sbuContextId.trim();
+            } else if (sbuContextName && sbuContextName.trim() !== '') {
+              sbuContextUuid = await getSbuIdByName(supabase, sbuContextName);
+            }
+            
+            if (!sbuContextUuid) {
+              results.failed.push({ 
+                email, 
+                error: `SBU-bound role '${customRole.name}' requires SBU context, but none was provided or found` 
+              });
+              continue;
+            }
+          }
+          
           // Parse dates
           const parsedDateOfJoining = dateOfJoining && dateOfJoining.trim() ? dateOfJoining.trim() : null;
           const parsedCareerStartDate = careerStartDate && careerStartDate.trim() ? careerStartDate.trim() : null;
@@ -219,11 +261,10 @@ serve(async (req) => {
           const activeValue = active !== undefined ? (active === 'true' || active === true || active === 'TRUE' || active === '1') : true;
           const hasOverheadValue = hasOverhead !== undefined ? (hasOverhead === 'true' || hasOverhead === true || hasOverhead === 'TRUE' || hasOverhead === '1') : true;
           
-          console.log(`Creating user: ${email} with SBU: ${sbuName} (ID: ${sbuId}), Manager: ${managerEmail} (ID: ${managerId})`);
+          console.log(`Creating user: ${email} with custom role: ${customRole?.name || 'None'}, SBU: ${sbuName} (ID: ${sbuId}), Manager: ${managerEmail} (ID: ${managerId})`);
           console.log(`User status: active=${activeValue}, hasOverhead=${hasOverheadValue}`);
           
-          
-          // Create user in Supabase Auth
+          // Create user in Supabase Auth (without role in user_metadata)
           const { data: authData, error: authError } = await supabase.auth.admin.createUser({
             email: email.trim(),
             password: userPassword,
@@ -231,7 +272,6 @@ serve(async (req) => {
             user_metadata: {
               first_name: firstName.trim(),
               last_name: lastName.trim(),
-              role: validRole,
               employee_id: employeeId ? employeeId.trim() : '',
               sbu_id: sbuId,
               expertise_id: expertiseId,
@@ -290,6 +330,57 @@ serve(async (req) => {
             }
           }
           
+          // Assign custom role if provided
+          if (customRole) {
+            try {
+              const { error: roleError } = await supabase.rpc('assign_custom_role_to_user', {
+                _user_id: authData.user.id,
+                _custom_role_id: customRole.id,
+                _sbu_context: sbuContextUuid,
+                _assigned_by: null // Let the function use auth.uid() as fallback
+              });
+              
+              if (roleError) {
+                console.error(`Error assigning custom role to user ${email}:`, roleError);
+                // Don't fail the entire operation, but note the warning
+                results.successful.push({ 
+                  email, 
+                  userId: authData.user.id,
+                  warning: `User created but custom role assignment failed: ${roleError.message}`,
+                  sbuAssigned: !!sbuId,
+                  sbuName: sbuId ? sbuName : null,
+                  managerAssigned: !!managerId,
+                  managerEmail: managerId ? managerEmail : null,
+                  expertiseAssigned: !!expertiseId,
+                  expertiseName: expertiseId ? expertiseName : null,
+                  resourceTypeAssigned: !!resourceTypeId,
+                  resourceTypeName: resourceTypeId ? resourceTypeName : null,
+                  customRoleAssigned: false,
+                  customRoleName: customRole.name
+                });
+                continue;
+              }
+            } catch (roleError: any) {
+              console.error(`Exception assigning custom role to user ${email}:`, roleError);
+              results.successful.push({ 
+                email, 
+                userId: authData.user.id,
+                warning: `User created but custom role assignment failed: ${roleError.message}`,
+                sbuAssigned: !!sbuId,
+                sbuName: sbuId ? sbuName : null,
+                managerAssigned: !!managerId,
+                managerEmail: managerId ? managerEmail : null,
+                expertiseAssigned: !!expertiseId,
+                expertiseName: expertiseId ? expertiseName : null,
+                resourceTypeAssigned: !!resourceTypeId,
+                resourceTypeName: resourceTypeId ? resourceTypeName : null,
+                customRoleAssigned: false,
+                customRoleName: customRole.name
+              });
+              continue;
+            }
+          }
+          
           results.successful.push({ 
             email, 
             userId: authData.user.id,
@@ -300,7 +391,10 @@ serve(async (req) => {
             expertiseAssigned: !!expertiseId,
             expertiseName: expertiseId ? expertiseName : null,
             resourceTypeAssigned: !!resourceTypeId,
-            resourceTypeName: resourceTypeId ? resourceTypeName : null
+            resourceTypeName: resourceTypeId ? resourceTypeName : null,
+            customRoleAssigned: !!customRole,
+            customRoleName: customRole?.name || null,
+            sbuContextAssigned: !!sbuContextUuid
           });
           
           console.log(`Successfully created user: ${email}`);

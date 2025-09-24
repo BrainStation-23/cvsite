@@ -54,9 +54,12 @@ serve(async (req) => {
       email: user.email || '',
       firstName: user.first_name || '',
       lastName: user.last_name || '',
-      role: user.custom_role_name || 'No Role',
+      customRoleId: user.custom_role_id || '',
+      customRoleName: user.custom_role_name || '',
+      sbuContextId: user.sbu_context || '',
+      sbuContextName: user.sbu_context_name || '',
       employeeId: user.employee_id || '',
-      managerName: user.manager_name || '',
+      managerEmail: user.manager_email || '',
       sbuName: user.sbu_name || '',
       expertiseName: user.expertise_name || '',
       resourceTypeName: user.resource_type_name || '',
@@ -73,10 +76,11 @@ serve(async (req) => {
     
     // Convert to CSV format with human-friendly headers
     const csvHeaders = [
-      'userId', 'email', 'firstName', 'lastName', 'role', 'employeeId', 
-      'managerName', 'sbuName', 'expertiseName', 'resourceTypeName', 
-      'dateOfJoining', 'careerStartDate', 'dateOfBirth', 'resignationDate', 
-      'exitDate', 'active', 'hasOverhead', 'createdAt', 'lastSignIn'
+      'userId', 'email', 'firstName', 'lastName', 'customRoleId', 'customRoleName', 
+      'sbuContextId', 'sbuContextName', 'employeeId', 'managerEmail', 'sbuName', 
+      'expertiseName', 'resourceTypeName', 'dateOfJoining', 'careerStartDate', 
+      'dateOfBirth', 'resignationDate', 'exitDate', 'active', 'hasOverhead', 
+      'createdAt', 'lastSignIn'
     ];
     
     const csvRows = csvData.map(row => [
@@ -84,9 +88,12 @@ serve(async (req) => {
       row.email,
       row.firstName,
       row.lastName,
-      row.role,
+      row.customRoleId,
+      row.customRoleName,
+      row.sbuContextId,
+      row.sbuContextName,
       row.employeeId,
-      row.managerName,
+      row.managerEmail,
       row.sbuName,
       row.expertiseName,
       row.resourceTypeName,
