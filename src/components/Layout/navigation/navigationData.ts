@@ -127,8 +127,8 @@ export const getPermissionBasedSidebarGroups = (): NavigationGroup[] => {
           icon: Calendar, 
           label: 'Planning',
           requiredModuleAccess: 'Resource Calendar',
-          requiredSubModuleAccess: 'Resource Planning',
-          requiredPermissionType: 'update'
+          requiredSubModuleAccess: 'Planning',
+          requiredPermissionType: 'read'
         },
         { 
           to: '/resource-calendar/calendar', 
@@ -165,7 +165,7 @@ export const getPermissionBasedSidebarGroups = (): NavigationGroup[] => {
           icon: BarChart3, 
           label: 'Non-Billed Report',
           requiredModuleAccess: 'Non-Billed Management',
-          requiredSubModuleAccess: 'Non-Billed Reports',
+          requiredSubModuleAccess: 'Non-Billed Report',
           requiredPermissionType: 'read'
         },
         { 
@@ -212,7 +212,7 @@ export const getPermissionBasedSidebarGroups = (): NavigationGroup[] => {
           label: 'PM Review',
           requiredModuleAccess: 'PIP',
           requiredSubModuleAccess: 'PIP PM Review',
-          requiredPermissionType: 'update'
+          requiredPermissionType: 'read'
         },
         { to: '/pip/my-situation', icon: UserCheck, label: 'My Situation' },
       ],
@@ -276,7 +276,7 @@ export const getPermissionBasedSidebarGroups = (): NavigationGroup[] => {
           icon: ContactRound, 
           label: 'Profile Image',
           requiredModuleAccess: 'Audit',
-          requiredSubModuleAccess: 'Profile Image Audit',
+          requiredSubModuleAccess: 'Profile Image Warnings',
           requiredPermissionType: 'read'
         },
       ],

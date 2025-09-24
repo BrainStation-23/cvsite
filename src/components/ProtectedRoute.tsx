@@ -9,7 +9,7 @@ interface ProtectedRouteProps {
   // New permission-based route protection
   requiredModuleAccess?: string;
   requiredSubModuleAccess?: string;
-  requiredPermissionType?: 'create' | 'read' | 'update' | 'delete' | 'manage';
+  requiredPermissionType?: 'create' | 'read' | 'update' | 'delete';
 }
 
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ 

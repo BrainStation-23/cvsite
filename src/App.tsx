@@ -106,44 +106,44 @@ function App(): React.ReactElement {
                 <Route path="dashboard" element={<ProtectedRoute requiredModuleAccess="CV Database" requiredSubModuleAccess="CV Dashboard" requiredPermissionType="read"><CvDashboard /></ProtectedRoute>} />
                 <Route path="employee-data" element={<ProtectedRoute requiredModuleAccess="CV Database" requiredSubModuleAccess="CV Search" requiredPermissionType="read"><EmployeeData /></ProtectedRoute>} />
                 <Route path="training-certification" element={<ProtectedRoute requiredModuleAccess="CV Database" requiredSubModuleAccess="CV Search" requiredPermissionType="read"><TrainingCertification /></ProtectedRoute>} />
-                <Route path="employee-data-management" element={<ProtectedRoute requiredModuleAccess="CV Database" requiredSubModuleAccess="CV Management" requiredPermissionType="read"><EmployeeDataManagement /></ProtectedRoute>} />
+                <Route path="employee-data-management" element={<ProtectedRoute requiredModuleAccess="CV Database" requiredSubModuleAccess="CV Completion" requiredPermissionType="read"><EmployeeDataManagement /></ProtectedRoute>} />
                 <Route path="cv-templates">
                   <Route index element={<ProtectedRoute requiredModuleAccess="CV Database" requiredSubModuleAccess="CV Templates" requiredPermissionType="read"><CVTemplatesPage /></ProtectedRoute>} />
                   <Route path="documentation" element={<ProtectedRoute requiredModuleAccess="CV Database" requiredSubModuleAccess="CV Templates" requiredPermissionType="read"><CVTemplateDocumentationPage /></ProtectedRoute>} />
                   <Route path=":id" element={<ProtectedRoute requiredModuleAccess="CV Database" requiredSubModuleAccess="CV Templates" requiredPermissionType="read"><CVTemplateViewPage /></ProtectedRoute>} />
-                  <Route path=":id/edit" element={<ProtectedRoute requiredModuleAccess="CV Database" requiredSubModuleAccess="CV Templates" requiredPermissionType="read"><CVTemplateEditorPage /></ProtectedRoute>} />
+                  <Route path=":id/edit" element={<ProtectedRoute requiredModuleAccess="CV Database" requiredSubModuleAccess="CV Templates" requiredPermissionType="update"><CVTemplateEditorPage /></ProtectedRoute>} />
                 </Route>
                 <Route path="cv-template-settings" element={<ProtectedRoute requiredModuleAccess="CV Database" requiredSubModuleAccess="CV Templates" requiredPermissionType="read"><CVTemplateSettings /></ProtectedRoute>} />
               </Route>
 
               {/* Resource Calendar */}
               <Route path="resource-calendar" element={<ProtectedRoute requiredModuleAccess="Resource Calendar"><Outlet /></ProtectedRoute>}>
-                <Route path="dashboard" element={<ProtectedRoute requiredModuleAccess="Resource Calendar" requiredSubModuleAccess="Resource Calendar Dashboard" requiredPermissionType="read"><ResourceCalendarStatistics /></ProtectedRoute>} />
-                <Route path="planning" element={<ProtectedRoute requiredModuleAccess="Resource Calendar" requiredSubModuleAccess="Resource Calendar Management" requiredPermissionType="read"><ResourceCalendarPlanning /></ProtectedRoute>} />
-                <Route path="calendar" element={<ProtectedRoute requiredModuleAccess="Resource Calendar" requiredSubModuleAccess="Resource Calendar Management" requiredPermissionType="read"><ResourceCalendarView /></ProtectedRoute>} />
-                <Route path="settings" element={<ProtectedRoute requiredModuleAccess="Resource Calendar" requiredSubModuleAccess="Resource Calendar Management" requiredPermissionType="read"><ResourcePlanningSettings /></ProtectedRoute>} />
+                <Route path="dashboard" element={<ProtectedRoute requiredModuleAccess="Resource Calendar" requiredSubModuleAccess="Resource Dashboard" requiredPermissionType="read"><ResourceCalendarStatistics /></ProtectedRoute>} />
+                <Route path="planning" element={<ProtectedRoute requiredModuleAccess="Resource Calendar" requiredSubModuleAccess="Planning" requiredPermissionType="read"><ResourceCalendarPlanning /></ProtectedRoute>} />
+                <Route path="calendar" element={<ProtectedRoute requiredModuleAccess="Resource Calendar" requiredSubModuleAccess="Calendar View" requiredPermissionType="read"><ResourceCalendarView /></ProtectedRoute>} />
+                <Route path="settings" element={<ProtectedRoute requiredModuleAccess="Resource Calendar" requiredSubModuleAccess="Resource Settings" requiredPermissionType="read"><ResourcePlanningSettings /></ProtectedRoute>} />
               </Route>
 
               {/* Non-Billed */}
-              <Route path="non-billed" element={<ProtectedRoute requiredModuleAccess="Non-Billed"><Outlet /></ProtectedRoute>}>
-                <Route path="dashboard" element={<ProtectedRoute requiredModuleAccess="Non-Billed" requiredSubModuleAccess="Non-Billed Dashboard" requiredPermissionType="read"><NonBilledDashboard /></ProtectedRoute>} />
-                <Route path="report" element={<ProtectedRoute requiredModuleAccess="Non-Billed" requiredSubModuleAccess="Non-Billed Dashboard" requiredPermissionType="read"><NonBilledReportPage /></ProtectedRoute>} />
-                <Route path="settings" element={<ProtectedRoute requiredModuleAccess="Non-Billed" requiredSubModuleAccess="Non-Billed Management" requiredPermissionType="read"><NonBilledSettingsPage /></ProtectedRoute>} />
+              <Route path="non-billed" element={<ProtectedRoute requiredModuleAccess="Non-Billed Management"><Outlet /></ProtectedRoute>}>
+                <Route path="dashboard" element={<ProtectedRoute requiredModuleAccess="Non-Billed Management" requiredSubModuleAccess="Non-Billed Dashboard" requiredPermissionType="read"><NonBilledDashboard /></ProtectedRoute>} />
+                <Route path="report" element={<ProtectedRoute requiredModuleAccess="Non-Billed Management" requiredSubModuleAccess="Non-Billed Report" requiredPermissionType="read"><NonBilledReportPage /></ProtectedRoute>} />
+                <Route path="settings" element={<ProtectedRoute requiredModuleAccess="Non-Billed Management" requiredSubModuleAccess="Non-Billed Settings" requiredPermissionType="read"><NonBilledSettingsPage /></ProtectedRoute>} />
               </Route>
 
               {/* PIP */}
               <Route path="pip">
-                <Route path="initiate" element={<ProtectedRoute requiredModuleAccess="PIP" requiredSubModuleAccess="PIP Initiate" requiredPermissionType="create"><PIPInitiate /></ProtectedRoute>} />
-                <Route path="list" element={<ProtectedRoute requiredModuleAccess="PIP" requiredSubModuleAccess="PIP Dashboard" requiredPermissionType="read"><PIPList /></ProtectedRoute>} />
-                <Route path="view/:pipId" element={<ProtectedRoute requiredModuleAccess="PIP" requiredSubModuleAccess="PIP Dashboard" requiredPermissionType="read"><AdminPIPView /></ProtectedRoute>} />
-                <Route path="dashboard" element={<ProtectedRoute requiredModuleAccess="PIP" requiredSubModuleAccess="PIP Dashboard" requiredPermissionType="read"><PIPDashboard /></ProtectedRoute>} />
-                <Route path="pm-review" element={<ProtectedRoute requiredModuleAccess="PIP" requiredSubModuleAccess="PIP PM Review" requiredPermissionType="read"><ManagerPIPList /></ProtectedRoute>} />
-                <Route path="pm-review/:pipId" element={<ProtectedRoute requiredModuleAccess="PIP" requiredSubModuleAccess="PIP PM Review" requiredPermissionType="update"><ManagerPMReview /></ProtectedRoute>} />
+              <Route path="dashboard" element={<ProtectedRoute requiredModuleAccess="PIP" requiredSubModuleAccess="PIP Dashboard" requiredPermissionType="read"><PIPDashboard /></ProtectedRoute>} />
+                <Route path="initiate" element={<ProtectedRoute requiredModuleAccess="PIP" requiredSubModuleAccess="Initiate" requiredPermissionType="create"><PIPInitiate /></ProtectedRoute>} />
+                <Route path="list" element={<ProtectedRoute requiredModuleAccess="PIP" requiredSubModuleAccess="PIP List" requiredPermissionType="read"><PIPList /></ProtectedRoute>} />
+                <Route path="view/:pipId" element={<ProtectedRoute requiredModuleAccess="PIP" requiredSubModuleAccess="PIP List" requiredPermissionType="read"><AdminPIPView /></ProtectedRoute>} />
+                <Route path="pm-review" element={<ProtectedRoute requiredModuleAccess="PIP" requiredSubModuleAccess="PM Review" requiredPermissionType="read"><ManagerPIPList /></ProtectedRoute>} />
+                <Route path="pm-review/:pipId" element={<ProtectedRoute requiredModuleAccess="PIP" requiredSubModuleAccess="PM Review" requiredPermissionType="update"><ManagerPMReview /></ProtectedRoute>} />
                 <Route path="my-situation" element={<MySituation />} />
               </Route>
 
               {/* View Profile */}
-              <Route path="employee/profile/:profileId" element={<ProtectedRoute requiredModuleAccess="CV Database" requiredSubModuleAccess="CV Search" requiredPermissionType="read"><ViewProfilePage /></ProtectedRoute>} />
+              <Route path="employee/profile/:profileId" element={<ProtectedRoute requiredModuleAccess="CV Database" requiredSubModuleAccess="CV Search" requiredPermissionType="update"><ViewProfilePage /></ProtectedRoute>} />
 
               {/* Users */}
               <Route path="users" element={<ProtectedRoute requiredModuleAccess="Admin Configuration" requiredSubModuleAccess="User Management" requiredPermissionType="read"><Outlet /></ProtectedRoute>}>
@@ -153,13 +153,13 @@ function App(): React.ReactElement {
               </Route>
 
               {/* Projects */}
-              <Route path="projects" element={<ProtectedRoute requiredModuleAccess="Admin Configuration" requiredSubModuleAccess="Project Management" requiredPermissionType="read"><ProjectsManagement /></ProtectedRoute>} />
+              <Route path="projects" element={<ProtectedRoute requiredModuleAccess="Admin Configuration" requiredSubModuleAccess="Projects" requiredPermissionType="read"><ProjectsManagement /></ProtectedRoute>} />
 
               {/* System Settings */}
-              <Route path="system-settings" element={<ProtectedRoute requiredModuleAccess="Admin Configuration" requiredSubModuleAccess="System Configuration" requiredPermissionType="read"><SystemConfigurationSettings /></ProtectedRoute>} />
+              <Route path="system-settings" element={<ProtectedRoute requiredModuleAccess="Admin Configuration" requiredSubModuleAccess="System Settings" requiredPermissionType="read"><SystemConfigurationSettings /></ProtectedRoute>} />
 
               {/* Audit */}
-              <Route path="audit" element={<ProtectedRoute requiredModuleAccess="Admin Configuration" requiredSubModuleAccess="Audit Logs" requiredPermissionType="read"><Outlet /></ProtectedRoute>}>
+              <Route path="audit" element={<ProtectedRoute requiredModuleAccess="Audit" requiredSubModuleAccess="Audit Dashboard" requiredPermissionType="read"><Outlet /></ProtectedRoute>}>
                 <Route path="dashboard" element={<AuditPage />} />
                 <Route path="profile-image-warnings" element={<ProfileImageWarningAudit />} />
               </Route>
