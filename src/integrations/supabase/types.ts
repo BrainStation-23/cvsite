@@ -2178,6 +2178,15 @@ export type Database = {
       }
     }
     Functions: {
+      assign_custom_role_to_user: {
+        Args: {
+          _assigned_by?: string
+          _custom_role_id: string
+          _sbu_context?: string
+          _user_id: string
+        }
+        Returns: undefined
+      }
       bulk_sync_odoo_employees: {
         Args: { employees_data: Json }
         Returns: Json
@@ -2922,6 +2931,10 @@ export type Database = {
           p_skill_gap_example?: string
         }
         Returns: string
+      }
+      validate_custom_role_assignment: {
+        Args: { _custom_role_id: string; _sbu_context?: string }
+        Returns: boolean
       }
     }
     Enums: {
