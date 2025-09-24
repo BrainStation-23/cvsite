@@ -1,11 +1,18 @@
 import React, { useState } from 'react';
-import { Edit, Lock, Shield, Trash2 } from 'lucide-react';
+import { Copy, Edit, Lock, MoreVertical, Shield, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useNavigate } from 'react-router-dom';
 import { useRoles, useDeleteRole } from '@/hooks/rbac/useRoles';
+import { useDuplicateRole } from '@/hooks/rbac/useDuplicateRole';
 import { ConfirmationDialog } from '@/components/ui/confirmation-dialog';
 import { Skeleton } from '@/components/ui/skeleton';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import {
   Table,
   TableBody,
@@ -19,6 +26,7 @@ export const RolesList: React.FC = () => {
   const navigate = useNavigate();
   const { data: roles, isLoading } = useRoles();
   const deleteRoleMutation = useDeleteRole();
+  const duplicateRoleMutation = useDuplicateRole();
   const [roleToDelete, setRoleToDelete] = useState<string | null>(null);
 
   const handleDelete = async () => {
@@ -26,6 +34,12 @@ export const RolesList: React.FC = () => {
       await deleteRoleMutation.mutateAsync(roleToDelete);
       setRoleToDelete(null);
     }
+  };
+
+  const handleDuplicate = async (role: any) => {
+    await duplicateRoleMutation.mutateAsync({
+      sourceRoleId: role.id
+    });
   };
 
   if (isLoading) {
@@ -115,15 +129,34 @@ export const RolesList: React.FC = () => {
                     <Edit className="mr-2 h-4 w-4" />
                     Edit
                   </Button>
-                  {!role.is_system_role && (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => setRoleToDelete(role.id)}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  )}
+                  
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                        <MoreVertical className="h-4 w-4" />
+                        <span className="sr-only">More actions</span>
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem 
+                        onClick={() => handleDuplicate(role)}
+                        disabled={duplicateRoleMutation.isPending}
+                        className="cursor-pointer"
+                      >
+                        <Copy className="mr-2 h-4 w-4" />
+                        <span>Duplicate</span>
+                      </DropdownMenuItem>
+                      {!role.is_system_role && (
+                        <DropdownMenuItem 
+                          onClick={() => setRoleToDelete(role.id)}
+                          className="cursor-pointer text-destructive focus:text-destructive"
+                        >
+                          <Trash2 className="mr-2 h-4 w-4" />
+                          <span>Delete</span>
+                        </DropdownMenuItem>
+                      )}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 </div>
               </TableCell>
             </TableRow>

@@ -2211,6 +2211,10 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: Json
       }
+      duplicate_custom_role: {
+        Args: { new_role_name?: string; source_role_id: string }
+        Returns: string
+      }
       duplicate_resource_assignment: {
         Args: { assignment_id: string }
         Returns: Json
@@ -2644,6 +2648,10 @@ export type Database = {
           sbu_filter?: string
           search_query?: string
         }
+        Returns: Json
+      }
+      get_user_accessible_sbus: {
+        Args: { search_query?: string; target_user_id?: string }
         Returns: Json
       }
       get_user_permissions: {
