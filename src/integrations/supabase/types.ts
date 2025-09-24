@@ -2646,6 +2646,10 @@ export type Database = {
         }
         Returns: Json
       }
+      get_user_accessible_sbus: {
+        Args: { search_query?: string; target_user_id?: string }
+        Returns: Json
+      }
       get_user_permissions: {
         Args: { _user_id: string }
         Returns: {
