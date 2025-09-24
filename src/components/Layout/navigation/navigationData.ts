@@ -66,6 +66,7 @@ export const getPermissionBasedSidebarGroups = (): NavigationGroup[] => {
           icon: LayoutDashboard, 
           label: 'CV Dashboard',
           requiredModuleAccess: 'CV Database',
+          requiredSubModuleAccess: 'CV Database',
           requiredPermissionType: 'read'
         },
         { 
@@ -120,6 +121,7 @@ export const getPermissionBasedSidebarGroups = (): NavigationGroup[] => {
           icon: LayoutDashboard, 
           label: 'Resource Dashboard',
           requiredModuleAccess: 'Resource Calendar',
+          requiredSubModuleAccess: 'Resource Dashboard',
           requiredPermissionType: 'read'
         },
         { 
@@ -158,6 +160,7 @@ export const getPermissionBasedSidebarGroups = (): NavigationGroup[] => {
           icon: LayoutDashboard, 
           label: 'Non-Billed Dashboard',
           requiredModuleAccess: 'Non-Billed Management',
+          requiredSubModuleAccess: 'Non-Billed Dashboard',
           requiredPermissionType: 'read'
         },
         { 
@@ -188,6 +191,7 @@ export const getPermissionBasedSidebarGroups = (): NavigationGroup[] => {
           icon: LayoutDashboard, 
           label: 'PIP Dashboard',
           requiredModuleAccess: 'PIP',
+          requiredSubModuleAccess: 'PIP Dashboard',
           requiredPermissionType: 'read'
         },
         { 
@@ -227,6 +231,7 @@ export const getPermissionBasedSidebarGroups = (): NavigationGroup[] => {
           icon: Users, 
           label: 'User Management',
           requiredModuleAccess: 'Admin Configuration',
+          requiredSubModuleAccess: 'User Management',
           requiredPermissionType: 'read'
         },
         { 
@@ -234,6 +239,7 @@ export const getPermissionBasedSidebarGroups = (): NavigationGroup[] => {
           icon: Database, 
           label: 'Projects',
           requiredModuleAccess: 'Admin Configuration',
+          requiredSubModuleAccess: 'Projects',
           requiredPermissionType: 'read'
         },
         { 
@@ -241,6 +247,7 @@ export const getPermissionBasedSidebarGroups = (): NavigationGroup[] => {
           icon: Settings, 
           label: 'System Settings',
           requiredModuleAccess: 'Admin Configuration',
+          requiredSubModuleAccess: 'System Settings',
           requiredPermissionType: 'update'
         },
         { 
@@ -248,6 +255,7 @@ export const getPermissionBasedSidebarGroups = (): NavigationGroup[] => {
           icon: Shield, 
           label: 'Role Management',
           requiredModuleAccess: 'Admin Configuration',
+          requiredSubModuleAccess: 'Role Management',
           requiredPermissionType: 'read'
         },
         { 
@@ -255,6 +263,7 @@ export const getPermissionBasedSidebarGroups = (): NavigationGroup[] => {
           icon: LayoutDashboard, 
           label: 'Module Management',
           requiredModuleAccess: 'Admin Configuration',
+          requiredSubModuleAccess: 'Module Management',
           requiredPermissionType: 'read'
         }
       ],
@@ -269,6 +278,7 @@ export const getPermissionBasedSidebarGroups = (): NavigationGroup[] => {
           icon: AlertTriangle, 
           label: 'Dashboard',
           requiredModuleAccess: 'Audit',
+          requiredSubModuleAccess: 'Audit Dashboard',
           requiredPermissionType: 'read'
         },
         { 
