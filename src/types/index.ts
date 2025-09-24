@@ -28,6 +28,8 @@ export interface UserPermission {
   sub_module_name?: string;
   permission_type: 'create' | 'read' | 'update' | 'delete' | 'manage';
   sbu_restrictions?: string[];
+  route_path?: string;
+  table_names?: string[];
 }
 
 export interface Skill {
