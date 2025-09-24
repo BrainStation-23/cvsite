@@ -24,7 +24,7 @@ const SbuCombobox: React.FC<SbuComboboxProps> = ({
   onValueChange,
   placeholder = "Select SBU...",
   disabled = false,
-  respectSbuBound = false,
+  respectSbuBound = true,
   autoSelectOwnSbu = true,
   targetUserId = null
 }) => {
