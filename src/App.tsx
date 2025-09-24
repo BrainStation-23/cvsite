@@ -57,7 +57,6 @@ import RolePermissions from '@/pages/admin/roles/RolePermissions';
 import ModuleManagement from '@/pages/admin/modules/ModuleManagement';
 import CreateModule from '@/pages/admin/modules/CreateModule';
 import EditModule from '@/pages/admin/modules/EditModule';
-import SubModuleManagement from '@/pages/admin/modules/SubModuleManagement';
 import CreateSubModule from '@/pages/admin/modules/CreateSubModule';
 import EditSubModule from '@/pages/admin/modules/EditSubModule';
 import './App.css';
@@ -190,7 +189,6 @@ function App(): React.ReactElement {
                 <Route index element={<ModuleManagement />} />
                 <Route path="create" element={<CreateModule />} />
                 <Route path=":id/edit" element={<EditModule />} />
-                <Route path=":moduleId/submodules" element={<SubModuleManagement />} />
                 <Route path=":moduleId/submodules/create" element={<CreateSubModule />} />
                 <Route path=":moduleId/submodules/:id/edit" element={<EditSubModule />} />
               </Route>

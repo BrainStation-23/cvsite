@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Edit, Shield, Trash2, Users } from 'lucide-react';
+import { Edit, Shield, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useNavigate } from 'react-router-dom';
@@ -101,14 +101,16 @@ export const RolesList: React.FC = () => {
                     size="sm"
                     onClick={() => navigate(`/admin/roles/permissions/${role.id}`)}
                   >
-                    <Shield className="h-4 w-4" />
+                    <Shield className="mr-2 h-4 w-4" />
+                    Permissions
                   </Button>
                   <Button
                     variant="ghost"
                     size="sm"
                     onClick={() => navigate(`/admin/roles/edit/${role.id}`)}
                   >
-                    <Edit className="h-4 w-4" />
+                    <Edit className="mr-2 h-4 w-4" />
+                    Edit
                   </Button>
                   {!role.is_system_role && (
                     <Button

@@ -15,7 +15,7 @@ const CreateSubModule: React.FC = () => {
   const handleSubmit = async (subModuleData: Omit<SubModule, 'id' | 'created_at' | 'updated_at'>) => {
     try {
       await createSubModule.mutateAsync(subModuleData);
-      navigate(`/admin/modules/${moduleId}/submodules`);
+      navigate(`/admin/modules`);
     } catch (error) {
       console.error('Error creating sub-module:', error);
     }
@@ -25,9 +25,9 @@ const CreateSubModule: React.FC = () => {
     <div className="container mx-auto py-6">
       <div className="flex items-center gap-4 mb-6">
         <Button variant="outline" size="sm" asChild>
-          <Link to={`/admin/modules/${moduleId}/submodules`}>
+          <Link to={`/admin/modules`}>
             <ArrowLeft className="w-4 h-4 mr-2" />
-            Back to Sub-modules
+            Back to Modules
           </Link>
         </Button>
         <div>
