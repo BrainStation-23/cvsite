@@ -1940,7 +1940,7 @@ export type Database = {
           created_at: string
           custom_role_id: string | null
           id: string
-          role: string
+          role: string | null
           sbu_context: string | null
           updated_at: string
           user_id: string
@@ -1951,7 +1951,7 @@ export type Database = {
           created_at?: string
           custom_role_id?: string | null
           id?: string
-          role: string
+          role?: string | null
           sbu_context?: string | null
           updated_at?: string
           user_id: string
@@ -1962,7 +1962,7 @@ export type Database = {
           created_at?: string
           custom_role_id?: string | null
           id?: string
-          role?: string
+          role?: string | null
           sbu_context?: string | null
           updated_at?: string
           user_id?: string

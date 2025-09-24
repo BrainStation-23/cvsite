@@ -3,7 +3,6 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { UserRole } from '@/types';
 import UserForm from '@/components/admin/UserForm';
 
 interface UserData {
@@ -11,7 +10,10 @@ interface UserData {
   email: string;
   first_name: string;
   last_name: string;
-  role: UserRole;
+  custom_role_id: string | null;
+  custom_role_name: string | null;
+  sbu_context: string | null;
+  sbu_context_name: string | null;
   employee_id: string;
   sbu_id: string | null;
   expertise_id: string | null;
@@ -74,7 +76,10 @@ const EditUser: React.FC = () => {
           email: user.email || '',
           first_name: user.first_name || '',
           last_name: user.last_name || '',
-          role: user.role || 'employee',
+          custom_role_id: user.custom_role_id || null,
+          custom_role_name: user.custom_role_name || null,
+          sbu_context: user.sbu_context || null,
+          sbu_context_name: user.sbu_context_name || null,
           employee_id: user.employee_id || '',
           sbu_id: user.sbu_id || null,
           expertise_id: user.expertise_id || null,
@@ -123,7 +128,8 @@ const EditUser: React.FC = () => {
           email: formData.email,
           firstName: formData.firstName,
           lastName: formData.lastName,
-          role: formData.role,
+          customRoleId: formData.customRoleId || null,
+          sbuContext: formData.sbuContext || null,
           employeeId: formData.employeeId,
           sbuId: formData.sbuId || null,
           expertiseId: formData.expertiseId || null,
@@ -184,7 +190,8 @@ const EditUser: React.FC = () => {
     email: userData.email,
     firstName: userData.first_name,
     lastName: userData.last_name,
-    role: userData.role,
+    customRoleId: userData.custom_role_id,
+    sbuContext: userData.sbu_context,
     employeeId: userData.employee_id,
     sbuId: userData.sbu_id,
     expertiseId: userData.expertise_id,

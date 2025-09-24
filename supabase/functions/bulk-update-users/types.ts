@@ -3,7 +3,10 @@ export interface UserUpdateData {
   userId: string;
   firstName?: string;
   lastName?: string;
-  role?: string;
+  customRoleId?: string;
+  customRoleName?: string;
+  sbuContextId?: string;
+  sbuContextName?: string;
   employeeId?: string;
   managerEmail?: string;
   sbuName?: string;
