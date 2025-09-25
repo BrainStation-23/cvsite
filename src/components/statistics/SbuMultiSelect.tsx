@@ -6,8 +6,8 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Badge } from '@/components/ui/badge';
 import { Check, ChevronsUpDown, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { useQuery } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
+import { useSbuSearch } from '@/hooks/use-sbu-search';
+import { useUserAccessibleSbus } from '@/hooks/use-user-accessible-sbus';
 
 interface Sbu {
   id: string;
@@ -29,25 +29,27 @@ export const SbuMultiSelect: React.FC<SbuMultiSelectProps> = ({
   const [open, setOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
 
-  const { data: sbus = [], isLoading } = useQuery({
-    queryKey: ['sbus-for-multi-select', searchQuery],
-    queryFn: async () => {
-      let query = supabase
-        .from('sbus')
-        .select('id, name')
-        .order('name', { ascending: true });
-
-      if (searchQuery) {
-        query = query.ilike('name', `%${searchQuery}%`);
-      }
-
-      const { data, error } = await query.limit(50);
-      if (error) throw error;
-      
-      // Filter out any SBUs with empty or null names
-      return (data as Sbu[]).filter(sbu => sbu.name && sbu.name.trim() !== '');
-    },
+  // Get user-accessible SBUs and determine if user is SBU-bound
+  const { data: userAccessibleResult, isLoading: userAccessibleLoading } = useUserAccessibleSbus({
+    searchQuery: searchQuery || null,
   });
+
+  // Determine if user is SBU-bound from the RPC response
+  const isSbuBound = userAccessibleResult?.isSbuBound ?? false;
+
+  // Fetch all SBUs only if user is NOT SBU-bound
+  const { data: allSbuResult, isLoading: allSbuLoading } = useSbuSearch({
+    searchQuery: !isSbuBound ? (searchQuery || null) : null,
+    page: 1,
+    perPage: 50
+  });
+
+  // Determine which data source to use based on SBU-bound status
+  const sbus = isSbuBound 
+    ? (userAccessibleResult?.sbus || [])
+    : (allSbuResult?.sbus || []);
+
+  const isLoading = userAccessibleLoading || allSbuLoading;
 
   const selectedSbus = sbus.filter(sbu => selectedValues.includes(sbu.id));
 
