@@ -42,6 +42,7 @@ export const RolesList: React.FC = () => {
     });
   };
 
+  // Show loading state
   if (isLoading) {
     return (
       <div className="space-y-4">
@@ -49,7 +50,6 @@ export const RolesList: React.FC = () => {
           <div key={i} className="flex items-center space-x-4">
             <Skeleton className="h-12 w-12 rounded-full" />
             <div className="space-y-2">
-              <Skeleton className="h-4 w-[250px]" />
               <Skeleton className="h-4 w-[200px]" />
             </div>
           </div>
@@ -58,12 +58,14 @@ export const RolesList: React.FC = () => {
     );
   }
 
-  if (!roles || roles.length === 0) {
+  // Filter out system roles for display
+  const filteredRoles = roles?.filter(role => !role.is_system_role) || [];
+
+  if (filteredRoles.length === 0) {
     return (
-      <div className="text-center py-8">
-        <Shield className="mx-auto h-12 w-12 text-muted-foreground" />
-        <h3 className="mt-4 text-lg font-semibold">No custom roles found</h3>
+      <div className="space-y-4">
         <p className="text-muted-foreground">
+          You don't have any custom roles yet. 
           Create your first custom role to get started.
         </p>
         <Button 
@@ -89,7 +91,7 @@ export const RolesList: React.FC = () => {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {roles.map((role) => (
+          {filteredRoles.map((role) => (
             <TableRow key={role.id}>
               <TableCell className="font-medium">{role.name}</TableCell>
               <TableCell className="text-muted-foreground">
