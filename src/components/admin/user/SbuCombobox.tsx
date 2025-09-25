@@ -92,6 +92,13 @@ const SbuCombobox: React.FC<SbuComboboxProps> = ({
   }, [sbus, selectedSbu]);
 
   const handleSelect = (sbuId: string) => {
+    // For SBU-bound users, prevent deselecting if it would leave them with no SBUs
+    if (isSbuBound && sbuId === value) {
+      // Don't allow deselecting the current SBU for SBU-bound users
+      setOpen(false);
+      return;
+    }
+    
     if (sbuId === value) {
       onValueChange(null);
     } else {
@@ -102,6 +109,10 @@ const SbuCombobox: React.FC<SbuComboboxProps> = ({
 
   const handleClear = (e: React.MouseEvent) => {
     e.stopPropagation();
+    // Prevent clearing for SBU-bound users
+    if (isSbuBound) {
+      return;
+    }
     onValueChange(null);
   };
 
