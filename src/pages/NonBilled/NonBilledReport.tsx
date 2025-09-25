@@ -95,7 +95,7 @@ export const NonBilledReport: React.FC = () => {
             {isSyncing ? 'Syncing...' : 'Sync Now'}
           </Button>
           
-          {isSbuBound && <Button
+          {!isSbuBound && <Button
             variant="outline"
             size="sm"
             disabled={isLoading || nonBilledRecords.length === 0}

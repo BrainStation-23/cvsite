@@ -32,7 +32,7 @@ const ResourceCalendarPlanning: React.FC = () => {
         </div>
         <div className="flex space-x-2">
           {permissions.showBulkUpdateButton && <BulkResourcePlanningUpdate />}
-          {permissions.canRead && isSbuBound && <ResourcePlanningExportButton />}
+          {permissions.canRead && !isSbuBound && <ResourcePlanningExportButton />}
           {permissions.canRead && ( 
             <ResourcePlanningAuditLogsDialog
             params={{ items_per_page: 100, page_number: 1 }}
