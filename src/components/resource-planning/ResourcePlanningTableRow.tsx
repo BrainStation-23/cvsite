@@ -12,6 +12,7 @@ import { ConfirmationDialog } from '@/components/ui/confirmation-dialog';
 import { CompleteEngagementDialog } from '@/components/ui/complete-engagement-dialog';
 import { ResourcePlanningTableEditRow } from './ResourcePlanningTableEditRow';
 import { ResourcePlanningData } from './types/resourceplanning';
+import { useResourcePlanningPermissions }  from '@/hooks/use-resource-planning-permissions';
 
 interface EditFormData {
   profileId: string;
@@ -51,6 +52,7 @@ export const ResourcePlanningTableRow: React.FC<ResourcePlanningTableRowProps> =
   isSelected = false,
   onSelect,
 }) => {
+  const permissions = useResourcePlanningPermissions();
   const { updateResourcePlanning, deleteResourcePlanning, createResourcePlanning, isDeleting, isUpdating, isCreating } = useResourcePlanningOperations();
   const { isOpen, config, showConfirmation, hideConfirmation, handleConfirm } = useConfirmationDialog();
   const { 
@@ -263,16 +265,19 @@ export const ResourcePlanningTableRow: React.FC<ResourcePlanningTableRowProps> =
         
         <TableCell className="py-1 px-2">
           <div className="flex items-center gap-1">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => onStartEdit(item)}
-              disabled={isUpdating || editLoading}
-              className="h-6 w-6 p-0"
-              title="Edit assignment"
-            >
-              <Edit2 className="h-3 w-3" />
-            </Button>
+            {permissions.showEditButton && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => onStartEdit(item)}
+                disabled={isUpdating || editLoading}
+                className="h-6 w-6 p-0"
+                title="Edit assignment"
+              >
+                <Edit2 className="h-3 w-3" />
+              </Button>
+            )}
+            {permissions.showCompleteButton && (
             <Button
               variant="outline"
               size="sm"
@@ -283,6 +288,9 @@ export const ResourcePlanningTableRow: React.FC<ResourcePlanningTableRowProps> =
               <CheckCircle className="h-3 w-3 mr-1" />
               Complete
             </Button>
+            )}
+
+            {permissions.showInvalidateButton && (
             <Button
               variant="outline"
               size="sm"
@@ -298,6 +306,10 @@ export const ResourcePlanningTableRow: React.FC<ResourcePlanningTableRowProps> =
               <XCircle className="h-3 w-3 mr-1" />
               Invalidate
             </Button>
+            )}
+
+
+            {permissions.showDuplicateButton && (
             <Button
               variant="ghost"
               size="sm"
@@ -308,6 +320,9 @@ export const ResourcePlanningTableRow: React.FC<ResourcePlanningTableRowProps> =
             >
               <Copy className="h-3 w-3" />
             </Button>
+            )}
+            
+            {permissions.showDeleteButton && (
             <Button
               variant="ghost"
               size="sm"
@@ -318,6 +333,7 @@ export const ResourcePlanningTableRow: React.FC<ResourcePlanningTableRowProps> =
             >
               <Trash2 className="h-3 w-3" />
             </Button>
+            )}
           </div>
         </TableCell>
       </TableRow>

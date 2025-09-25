@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
+import { useResourcePlanningPermissions } from '@/hooks/use-resource-planning-permissions';
 
 interface ResourcePlanningTableHeaderProps {
   sortBy: string;
@@ -26,6 +27,7 @@ export const ResourcePlanningTableHeader: React.FC<ResourcePlanningTableHeaderPr
   isIndeterminate = false,
   onSelectAll,
 }) => {
+  const permissions = useResourcePlanningPermissions();
   const getSortIcon = (column: string) => {
     if (sortBy !== column) return <ArrowUpDown className="h-4 w-4" />;
     return sortOrder === 'asc' ? <ArrowUp className="h-4 w-4" /> : <ArrowDown className="h-4 w-4" />;
@@ -171,7 +173,9 @@ export const ResourcePlanningTableHeader: React.FC<ResourcePlanningTableHeaderPr
             </Button>
           </TableHead>
           
-          <TableHead>Actions</TableHead>
+          {
+            permissions.canCreate && <TableHead>Actions</TableHead>
+          }
         </TableRow>
       </TableHeader>
     </TooltipProvider>
