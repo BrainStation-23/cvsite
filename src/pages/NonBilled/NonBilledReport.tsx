@@ -6,6 +6,8 @@ import { NonBilledTable } from '@/components/NonBilled/NonBilledTable';
 import { NonBilledPagination } from '@/components/NonBilled/NonBilledPagination';
 import { useNonBilledData } from '@/hooks/use-non-billed-data';
 import { useNonBilledExport } from '@/hooks/use-non-billed-export';  
+import {useUserAccessibleSbus} from '@/hooks/use-user-accessible-sbus';
+
 export const NonBilledReport: React.FC = () => {
   const {
     // Data
@@ -40,6 +42,11 @@ export const NonBilledReport: React.FC = () => {
     syncNonBilled,
     isSyncing,
   } = useNonBilledData();
+  
+  // Get SBU-bound info
+  const { data: accessibleSbuData, isLoading: sbuLoading } = useUserAccessibleSbus();
+  const isSbuBound = accessibleSbuData?.isSbuBound ?? false;
+
   const { exportNonBilled, isExporting } = useNonBilledExport();
   const handleSort = (field: string) => {
     if (sortBy === field) {
@@ -87,7 +94,8 @@ export const NonBilledReport: React.FC = () => {
             <RefreshCw className={`mr-2 h-4 w-4 ${isSyncing ? 'animate-spin' : ''}`} />
             {isSyncing ? 'Syncing...' : 'Sync Now'}
           </Button>
-          <Button
+          
+          {isSbuBound && <Button
             variant="outline"
             size="sm"
             disabled={isLoading || nonBilledRecords.length === 0}
@@ -95,7 +103,8 @@ export const NonBilledReport: React.FC = () => {
           >
             <Download className="mr-2 h-4 w-4" />
             Export CSV
-          </Button>
+          </Button>}
+
         </div>
       </div>
 

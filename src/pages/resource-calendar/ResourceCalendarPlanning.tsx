@@ -5,9 +5,15 @@ import { ResourcePlanningExportButton } from '../../components/resource-planning
 import { ResourcePlanningAuditLogsDialog } from '@/components/resource-planning/ResourcePlanningAuditLogsDialog';
 import { BulkResourcePlanningUpdate } from '@/components/resource-planning/BulkResourcePlanningUpdate';
 import { useResourcePlanningPermissions }  from '@/hooks/use-resource-planning-permissions';
+import {useUserAccessibleSbus} from '@/hooks/use-user-accessible-sbus';
 
 const ResourceCalendarPlanning: React.FC = () => {
   const permissions = useResourcePlanningPermissions();
+  
+  // Get SBU-bound info
+  const { data: accessibleSbuData, isLoading: sbuLoading } = useUserAccessibleSbus();
+  const isSbuBound = accessibleSbuData?.isSbuBound ?? false;
+
   if (!permissions.canRead) {
     return (
       <div className="text-center text-gray-500 dark:text-gray-400">
@@ -26,7 +32,7 @@ const ResourceCalendarPlanning: React.FC = () => {
         </div>
         <div className="flex space-x-2">
           {permissions.showBulkUpdateButton && <BulkResourcePlanningUpdate />}
-          {permissions.canRead && <ResourcePlanningExportButton />}
+          {permissions.canRead && isSbuBound && <ResourcePlanningExportButton />}
           {permissions.canRead && ( 
             <ResourcePlanningAuditLogsDialog
             params={{ items_per_page: 100, page_number: 1 }}
