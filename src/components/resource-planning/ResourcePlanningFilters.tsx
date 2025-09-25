@@ -89,7 +89,7 @@ export const ResourcePlanningFilters: React.FC<ResourcePlanningFiltersProps> = (
 }) => {
   const hasActiveFilters = selectedSbu || selectedManager || searchQuery;
   const isUnplannedTab = activeTab === 'unplanned';
-  const [isOpen, setIsOpen] = React.useState(false);
+  const [isOpen, setIsOpen] = React.useState(true);
 
   // 1) Hydrate from cache on mount
   useEffect(() => {

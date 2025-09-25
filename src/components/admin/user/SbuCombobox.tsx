@@ -14,8 +14,6 @@ interface SbuComboboxProps {
   onValueChange: (value: string | null) => void;
   placeholder?: string;
   disabled?: boolean;
-  respectSbuBound?: boolean;
-  autoSelectOwnSbu?: boolean;
   targetUserId?: string | null;
 }
 
@@ -24,37 +22,39 @@ const SbuCombobox: React.FC<SbuComboboxProps> = ({
   onValueChange,
   placeholder = "Select SBU...",
   disabled = false,
-  respectSbuBound = true,
-  autoSelectOwnSbu = true,
   targetUserId = null
 }) => {
   const [open, setOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
 
-  // Use either user-accessible SBUs or all SBUs based on respectSbuBound prop
+  // Always fetch user-accessible data first to determine SBU-bound status
   const { data: userAccessibleResult, isLoading: userAccessibleLoading } = useUserAccessibleSbus({
-    searchQuery: respectSbuBound ? (searchQuery || null) : null,
-    targetUserId: respectSbuBound ? targetUserId : null,
+    searchQuery: searchQuery || null,
+    targetUserId: targetUserId,
   });
 
+  // Determine if user is SBU-bound from the RPC response
+  const isSbuBound = userAccessibleResult?.isSbuBound ?? false;
+
+  // Fetch all SBUs only if user is NOT SBU-bound
   const { data: allSbuResult, isLoading: allSbuLoading } = useSbuSearch({
-    searchQuery: !respectSbuBound ? (searchQuery || null) : null,
+    searchQuery: !isSbuBound ? (searchQuery || null) : null,
     page: 1,
     perPage: 50
   });
 
-  // Determine which data source to use
-  const sbus = respectSbuBound 
+  // Determine which data source to use based on SBU-bound status
+  const sbus = isSbuBound 
     ? (userAccessibleResult?.sbus || [])
     : (allSbuResult?.sbus || []);
-  const isLoading = respectSbuBound ? userAccessibleLoading : allSbuLoading;
+  const isLoading = isSbuBound ? userAccessibleLoading : allSbuLoading;
 
-  // Auto-select user's own SBU if respectSbuBound is true and no value is set
+  // Auto-select user's own SBU if SBU-bound and no value is set
   useEffect(() => {
-    if (respectSbuBound && autoSelectOwnSbu && !value && userAccessibleResult?.defaultSbuId) {
+    if (isSbuBound && !value && userAccessibleResult?.defaultSbuId) {
       onValueChange(userAccessibleResult.defaultSbuId);
     }
-  }, [respectSbuBound, autoSelectOwnSbu, value, userAccessibleResult?.defaultSbuId, onValueChange]);
+  }, [isSbuBound, value, userAccessibleResult?.defaultSbuId, onValueChange]);
   
   // Fetch selected SBU separately to ensure it's always available
   const { data: selectedSbu } = useQuery({
@@ -92,6 +92,13 @@ const SbuCombobox: React.FC<SbuComboboxProps> = ({
   }, [sbus, selectedSbu]);
 
   const handleSelect = (sbuId: string) => {
+    // For SBU-bound users, prevent deselecting if it would leave them with no SBUs
+    if (isSbuBound && sbuId === value) {
+      // Don't allow deselecting the current SBU for SBU-bound users
+      setOpen(false);
+      return;
+    }
+    
     if (sbuId === value) {
       onValueChange(null);
     } else {
@@ -102,6 +109,10 @@ const SbuCombobox: React.FC<SbuComboboxProps> = ({
 
   const handleClear = (e: React.MouseEvent) => {
     e.stopPropagation();
+    // Prevent clearing for SBU-bound users
+    if (isSbuBound) {
+      return;
+    }
     onValueChange(null);
   };
 

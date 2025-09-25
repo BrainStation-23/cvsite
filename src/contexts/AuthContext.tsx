@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { User as SupabaseUser, Session } from '@supabase/supabase-js';
+import { useQueryClient } from '@tanstack/react-query';
 import { supabase } from '../integrations/supabase/client';
 import { User, UserRole, UserPermission, CustomRole } from '../types';
 
@@ -27,6 +28,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const queryClient = useQueryClient();
 
   const fetchUserProfile = async (supabaseUser: SupabaseUser) => {
     try {
@@ -117,6 +119,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, currentSession) => {
         console.log('Auth state change:', event, currentSession?.user?.id);
+        
+        // Clear React Query cache on auth state changes
+        if (event === 'SIGNED_OUT' || (event === 'SIGNED_IN' && currentSession?.user?.id !== user?.id)) {
+          queryClient.clear();
+          // Clear SBU-related localStorage that can bleed across users
+          localStorage.removeItem('resource-calendar/planning/basic-filters');
+          localStorage.removeItem('resource-calendar/planning/advanced-filters');
+        }
+        
         setSession(currentSession);
         
         if (currentSession?.user) {
@@ -202,6 +213,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setSession(null);
       setUser(null);
     } finally {
+      // Always clear cache and localStorage, even if sign out fails
+      queryClient.clear();
+      localStorage.removeItem('resource-calendar/planning/basic-filters');
+      localStorage.removeItem('resource-calendar/planning/advanced-filters');
       setIsLoading(false);
     }
   };
