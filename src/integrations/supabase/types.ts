@@ -2553,6 +2553,10 @@ export type Database = {
         Args: { target_id: string }
         Returns: Json
       }
+      get_public_tables: {
+        Args: Record<PropertyKey, never>
+        Returns: string[]
+      }
       get_recent_cv_changes: {
         Args: { limit_records?: number }
         Returns: {
@@ -2939,6 +2943,30 @@ export type Database = {
           p_skill_gap_example?: string
         }
         Returns: string
+      }
+      user_has_create_permission: {
+        Args: { _table_name?: string; _user_id?: string }
+        Returns: boolean
+      }
+      user_has_delete_permission: {
+        Args: { _table_name?: string; _user_id?: string }
+        Returns: boolean
+      }
+      user_has_read_permission: {
+        Args: { _table_name?: string; _user_id?: string }
+        Returns: boolean
+      }
+      user_has_table_permission: {
+        Args: {
+          _permission_type: string
+          _table_name: string
+          _user_id: string
+        }
+        Returns: boolean
+      }
+      user_has_update_permission: {
+        Args: { _table_name?: string; _user_id?: string }
+        Returns: boolean
       }
       validate_custom_role_assignment: {
         Args: { _custom_role_id: string; _sbu_context?: string }

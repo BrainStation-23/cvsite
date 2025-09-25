@@ -144,14 +144,11 @@ export class ModuleService {
 
   // Table discovery and validation
   static async getAvailableTables(): Promise<string[]> {
-    // This would ideally query the database schema
-    // For now, we'll return common table names
-    return [
-      'profiles', 'projects', 'trainings', 'achievements', 'experiences', 
-      'education', 'technical_skills', 'specialized_skills', 'notes',
-      'resource_planning', 'projects_management', 'bill_types',
-      'custom_roles', 'user_roles', 'modules', 'sub_modules'
-    ];
+    const { data, error } = await supabase
+      .rpc('get_public_tables');
+
+    if (error) throw error;
+    return data || [];
   }
 
   static async getAllSBUs(): Promise<SBU[]> {
