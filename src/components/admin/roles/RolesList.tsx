@@ -59,7 +59,8 @@ export const RolesList: React.FC = () => {
   }
 
   // Filter out system roles for display
-  const filteredRoles = roles?.filter(role => !role.is_system_role) || [];
+  //const filteredRoles = roles?.filter(role => !role.is_system_role) || [];
+  const filteredRoles = roles;
 
   if (filteredRoles.length === 0) {
     return (

@@ -4,6 +4,7 @@ import { formatEngagementTooltip } from './utils';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import { Copy } from 'lucide-react';
+import { useResourceCalendarPermissions } from '@/hooks/use-resource-calendar-permissions';
 
 interface GanttCellProps {
   engagement: GanttEngagement;
@@ -18,6 +19,7 @@ export const GanttCell: React.FC<GanttCellProps> = ({
   onEngagementClick,
   onDuplicateClick
 }) => {
+  const permissions = useResourceCalendarPermissions();
   const handleClick = () => {
     onEngagementClick?.(engagement);
   };
@@ -65,12 +67,12 @@ export const GanttCell: React.FC<GanttCellProps> = ({
         backgroundColor,
         top: `${topPosition}px`
       }}
-      onClick={handleClick}
+      onClick={permissions.canEditProject ? handleClick : undefined}
       title={formatEngagementTooltip(engagement)}
     >
       <div className="h-full flex items-center px-2 py-1">
         {/* Duplicate button - shows on hover */}
-        {onDuplicateClick && (
+        {permissions.showDuplicateProjectButton && onDuplicateClick && (
           <button
             onClick={handleDuplicateClick}
             className={cn(
@@ -84,6 +86,7 @@ export const GanttCell: React.FC<GanttCellProps> = ({
             <Copy className="h-3 w-3" />
           </button>
         )}
+       
         {isMediumCell ? (
           <div className="flex-1 min-w-0">
             <div className={cn("flex items-center gap-1.5 w-full", textColor)}>
