@@ -39,7 +39,7 @@ export class RoleService {
   static async deleteRole(id: string): Promise<void> {
     const { error } = await supabase
       .from('custom_roles')
-      .update({ is_active: false })
+      .delete()
       .eq('id', id);
 
     if (error) throw error;
