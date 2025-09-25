@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
@@ -51,10 +51,21 @@ export const SbuMultiSelect: React.FC<SbuMultiSelectProps> = ({
 
   const isLoading = userAccessibleLoading || allSbuLoading;
 
+  // Auto-select all accessible SBUs for SBU-bound users
+  useEffect(() => {
+    if (!isLoading && isSbuBound && sbus.length > 0 && selectedValues.length === 0) {
+      onSelectionChange(sbus.map(sbu => sbu.id));
+    }
+  }, [isLoading, isSbuBound, sbus, selectedValues.length, onSelectionChange]);
+
   const selectedSbus = sbus.filter(sbu => selectedValues.includes(sbu.id));
 
   const handleSelect = (sbuId: string) => {
     if (selectedValues.includes(sbuId)) {
+      // For SBU-bound users, prevent deselecting if it would leave them with no SBUs
+      if (isSbuBound && selectedValues.length === 1) {
+        return; // Don't allow deselecting the last SBU for SBU-bound users
+      }
       onSelectionChange(selectedValues.filter(id => id !== sbuId));
     } else {
       onSelectionChange([...selectedValues, sbuId]);
@@ -66,10 +77,18 @@ export const SbuMultiSelect: React.FC<SbuMultiSelectProps> = ({
   };
 
   const handleClearAll = () => {
+    // For SBU-bound users, don't allow clearing all - keep all accessible SBUs selected
+    if (isSbuBound) {
+      return;
+    }
     onSelectionChange([]);
   };
 
   const removeSbu = (sbuId: string) => {
+    // For SBU-bound users, prevent removing if it would leave them with no SBUs
+    if (isSbuBound && selectedValues.length === 1) {
+      return;
+    }
     onSelectionChange(selectedValues.filter(id => id !== sbuId));
   };
 
