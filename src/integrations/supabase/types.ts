@@ -378,6 +378,51 @@ export type Database = {
         }
         Relationships: []
       }
+      degrees_audit_logs: {
+        Row: {
+          changed_at: string
+          changed_by: string | null
+          changed_fields: string[] | null
+          created_at: string
+          id: string
+          new_data: Json | null
+          old_data: Json | null
+          operation_type: string
+          record_id: string
+          user_designation: string | null
+          user_role: string | null
+          user_sbu_name: string | null
+        }
+        Insert: {
+          changed_at?: string
+          changed_by?: string | null
+          changed_fields?: string[] | null
+          created_at?: string
+          id?: string
+          new_data?: Json | null
+          old_data?: Json | null
+          operation_type: string
+          record_id: string
+          user_designation?: string | null
+          user_role?: string | null
+          user_sbu_name?: string | null
+        }
+        Update: {
+          changed_at?: string
+          changed_by?: string | null
+          changed_fields?: string[] | null
+          created_at?: string
+          id?: string
+          new_data?: Json | null
+          old_data?: Json | null
+          operation_type?: string
+          record_id?: string
+          user_designation?: string | null
+          user_role?: string | null
+          user_sbu_name?: string | null
+        }
+        Relationships: []
+      }
       departments: {
         Row: {
           created_at: string
@@ -402,6 +447,51 @@ export type Database = {
         }
         Relationships: []
       }
+      departments_audit_logs: {
+        Row: {
+          changed_at: string
+          changed_by: string | null
+          changed_fields: string[] | null
+          created_at: string
+          id: string
+          new_data: Json | null
+          old_data: Json | null
+          operation_type: string
+          record_id: string
+          user_designation: string | null
+          user_role: string | null
+          user_sbu_name: string | null
+        }
+        Insert: {
+          changed_at?: string
+          changed_by?: string | null
+          changed_fields?: string[] | null
+          created_at?: string
+          id?: string
+          new_data?: Json | null
+          old_data?: Json | null
+          operation_type: string
+          record_id: string
+          user_designation?: string | null
+          user_role?: string | null
+          user_sbu_name?: string | null
+        }
+        Update: {
+          changed_at?: string
+          changed_by?: string | null
+          changed_fields?: string[] | null
+          created_at?: string
+          id?: string
+          new_data?: Json | null
+          old_data?: Json | null
+          operation_type?: string
+          record_id?: string
+          user_designation?: string | null
+          user_role?: string | null
+          user_sbu_name?: string | null
+        }
+        Relationships: []
+      }
       designations: {
         Row: {
           created_at: string
@@ -420,6 +510,51 @@ export type Database = {
           id?: string
           name?: string
           updated_at?: string
+        }
+        Relationships: []
+      }
+      designations_audit_logs: {
+        Row: {
+          changed_at: string
+          changed_by: string | null
+          changed_fields: string[] | null
+          created_at: string
+          id: string
+          new_data: Json | null
+          old_data: Json | null
+          operation_type: string
+          record_id: string
+          user_designation: string | null
+          user_role: string | null
+          user_sbu_name: string | null
+        }
+        Insert: {
+          changed_at?: string
+          changed_by?: string | null
+          changed_fields?: string[] | null
+          created_at?: string
+          id?: string
+          new_data?: Json | null
+          old_data?: Json | null
+          operation_type: string
+          record_id: string
+          user_designation?: string | null
+          user_role?: string | null
+          user_sbu_name?: string | null
+        }
+        Update: {
+          changed_at?: string
+          changed_by?: string | null
+          changed_fields?: string[] | null
+          created_at?: string
+          id?: string
+          new_data?: Json | null
+          old_data?: Json | null
+          operation_type?: string
+          record_id?: string
+          user_designation?: string | null
+          user_role?: string | null
+          user_sbu_name?: string | null
         }
         Relationships: []
       }
@@ -763,6 +898,51 @@ export type Database = {
         }
         Relationships: []
       }
+      hr_contacts_audit_logs: {
+        Row: {
+          changed_at: string
+          changed_by: string | null
+          changed_fields: string[] | null
+          created_at: string
+          id: string
+          new_data: Json | null
+          old_data: Json | null
+          operation_type: string
+          record_id: string
+          user_designation: string | null
+          user_role: string | null
+          user_sbu_name: string | null
+        }
+        Insert: {
+          changed_at?: string
+          changed_by?: string | null
+          changed_fields?: string[] | null
+          created_at?: string
+          id?: string
+          new_data?: Json | null
+          old_data?: Json | null
+          operation_type: string
+          record_id: string
+          user_designation?: string | null
+          user_role?: string | null
+          user_sbu_name?: string | null
+        }
+        Update: {
+          changed_at?: string
+          changed_by?: string | null
+          changed_fields?: string[] | null
+          created_at?: string
+          id?: string
+          new_data?: Json | null
+          old_data?: Json | null
+          operation_type?: string
+          record_id?: string
+          user_designation?: string | null
+          user_role?: string | null
+          user_sbu_name?: string | null
+        }
+        Relationships: []
+      }
       job_role: {
         Row: {
           color_code: string | null
@@ -917,6 +1097,51 @@ export type Database = {
           id?: string
           name?: string
           updated_at?: string
+        }
+        Relationships: []
+      }
+      note_categories_audit_logs: {
+        Row: {
+          changed_at: string
+          changed_by: string | null
+          changed_fields: string[] | null
+          created_at: string
+          id: string
+          new_data: Json | null
+          old_data: Json | null
+          operation_type: string
+          record_id: string
+          user_designation: string | null
+          user_role: string | null
+          user_sbu_name: string | null
+        }
+        Insert: {
+          changed_at?: string
+          changed_by?: string | null
+          changed_fields?: string[] | null
+          created_at?: string
+          id?: string
+          new_data?: Json | null
+          old_data?: Json | null
+          operation_type: string
+          record_id: string
+          user_designation?: string | null
+          user_role?: string | null
+          user_sbu_name?: string | null
+        }
+        Update: {
+          changed_at?: string
+          changed_by?: string | null
+          changed_fields?: string[] | null
+          created_at?: string
+          id?: string
+          new_data?: Json | null
+          old_data?: Json | null
+          operation_type?: string
+          record_id?: string
+          user_designation?: string | null
+          user_role?: string | null
+          user_sbu_name?: string | null
         }
         Relationships: []
       }
@@ -1438,6 +1663,51 @@ export type Database = {
           },
         ]
       }
+      references_audit_logs: {
+        Row: {
+          changed_at: string
+          changed_by: string | null
+          changed_fields: string[] | null
+          created_at: string
+          id: string
+          new_data: Json | null
+          old_data: Json | null
+          operation_type: string
+          record_id: string
+          user_designation: string | null
+          user_role: string | null
+          user_sbu_name: string | null
+        }
+        Insert: {
+          changed_at?: string
+          changed_by?: string | null
+          changed_fields?: string[] | null
+          created_at?: string
+          id?: string
+          new_data?: Json | null
+          old_data?: Json | null
+          operation_type: string
+          record_id: string
+          user_designation?: string | null
+          user_role?: string | null
+          user_sbu_name?: string | null
+        }
+        Update: {
+          changed_at?: string
+          changed_by?: string | null
+          changed_fields?: string[] | null
+          created_at?: string
+          id?: string
+          new_data?: Json | null
+          old_data?: Json | null
+          operation_type?: string
+          record_id?: string
+          user_designation?: string | null
+          user_role?: string | null
+          user_sbu_name?: string | null
+        }
+        Relationships: []
+      }
       resource_planning: {
         Row: {
           bill_type_id: string | null
@@ -1930,6 +2200,51 @@ export type Database = {
           name?: string
           type?: string
           updated_at?: string
+        }
+        Relationships: []
+      }
+      universities_audit_logs: {
+        Row: {
+          changed_at: string
+          changed_by: string | null
+          changed_fields: string[] | null
+          created_at: string
+          id: string
+          new_data: Json | null
+          old_data: Json | null
+          operation_type: string
+          record_id: string
+          user_designation: string | null
+          user_role: string | null
+          user_sbu_name: string | null
+        }
+        Insert: {
+          changed_at?: string
+          changed_by?: string | null
+          changed_fields?: string[] | null
+          created_at?: string
+          id?: string
+          new_data?: Json | null
+          old_data?: Json | null
+          operation_type: string
+          record_id: string
+          user_designation?: string | null
+          user_role?: string | null
+          user_sbu_name?: string | null
+        }
+        Update: {
+          changed_at?: string
+          changed_by?: string | null
+          changed_fields?: string[] | null
+          created_at?: string
+          id?: string
+          new_data?: Json | null
+          old_data?: Json | null
+          operation_type?: string
+          record_id?: string
+          user_designation?: string | null
+          user_role?: string | null
+          user_sbu_name?: string | null
         }
         Relationships: []
       }
@@ -2656,6 +2971,10 @@ export type Database = {
       }
       get_user_accessible_sbus: {
         Args: { search_query?: string; target_user_id?: string }
+        Returns: Json
+      }
+      get_user_audit_context: {
+        Args: Record<PropertyKey, never>
         Returns: Json
       }
       get_user_permissions: {
