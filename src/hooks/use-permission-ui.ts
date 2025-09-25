@@ -36,7 +36,12 @@ export const usePermissionUI = (config: PermissionConfig) => {
     // Combined permissions
     hasAnyPermission: config.permissions.some(p => hasPermission(p)),
     hasAllPermissions: config.permissions.every(p => hasPermission(p)),
-    
+
+    //calendar
+    canEditProject: hasPermission('update'),
+    canCreateForecastedProject: hasPermission('create'),
+    showDuplicateProjectButton: hasPermission('create'),
+
     // Specific permission checker
     hasPermission,
   };
