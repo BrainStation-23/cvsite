@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
 
 export interface UserAccessibleSbuItem {
   id: string;
@@ -24,9 +25,11 @@ export interface UserAccessibleSbuResult {
 
 export const useUserAccessibleSbus = (params: UserAccessibleSbuParams = {}) => {
   const { searchQuery = null, targetUserId = null } = params;
+  const { user } = useAuth();
+  const currentUserId = user?.id;
 
   return useQuery({
-    queryKey: ['user-accessible-sbus', targetUserId, searchQuery],
+    queryKey: ['user-accessible-sbus', currentUserId, targetUserId, searchQuery],
     queryFn: async (): Promise<UserAccessibleSbuResult> => {
       const { data, error } = await supabase.rpc('get_user_accessible_sbus', {
         target_user_id: targetUserId,
@@ -48,5 +51,8 @@ export const useUserAccessibleSbus = (params: UserAccessibleSbuParams = {}) => {
         isSbuBound: result?.is_sbu_bound || false,
       };
     },
+    staleTime: 0,
+    refetchOnMount: 'always',
+    refetchOnWindowFocus: true,
   });
 };
