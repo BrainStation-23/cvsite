@@ -66,7 +66,7 @@ export const getPermissionBasedSidebarGroups = (): NavigationGroup[] => {
           icon: LayoutDashboard, 
           label: 'CV Dashboard',
           requiredModuleAccess: 'CV Database',
-          requiredSubModuleAccess: 'CV Database',
+          requiredSubModuleAccess: 'CV Dashboard',
           requiredPermissionType: 'read'
         },
         { 
