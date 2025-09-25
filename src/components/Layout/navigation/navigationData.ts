@@ -199,7 +199,7 @@ export const getPermissionBasedSidebarGroups = (): NavigationGroup[] => {
           icon: UserX, 
           label: 'Initiate',
           requiredModuleAccess: 'PIP',
-          requiredSubModuleAccess: 'PIP Initiate',
+          requiredSubModuleAccess: 'Initiate',
           requiredPermissionType: 'create'
         },
         { 
@@ -215,10 +215,16 @@ export const getPermissionBasedSidebarGroups = (): NavigationGroup[] => {
           icon: UserCheck, 
           label: 'PM Review',
           requiredModuleAccess: 'PIP',
-          requiredSubModuleAccess: 'PIP PM Review',
+          requiredSubModuleAccess: 'PM Review',
           requiredPermissionType: 'read'
         },
-        { to: '/pip/my-situation', icon: UserCheck, label: 'My Situation' },
+        { to: '/pip/my-situation', 
+          icon: UserCheck, 
+          label: 'My Situation',
+          requiredModuleAccess: 'PIP',
+          requiredSubModuleAccess: 'My Situation',
+          requiredPermissionType: 'read' 
+        },
       ],
     },
 
