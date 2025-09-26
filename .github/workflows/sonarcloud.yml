@@ -1,12 +1,13 @@
 name: Sonar Analysis
 permissions:
   contents: read
+  security-events: write   # needed to upload SARIF to GitHub code scanning
 on:
   push:
-    branches:
-      - main
+    branches: [main]
   pull_request:
     types: [opened, synchronize, reopened]
+
 jobs:
   sonarqube:
     name: SonarQube
@@ -14,8 +15,58 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
+          fetch-depth: 0  # better relevancy of analysis
+
       - name: SonarQube Scan
         uses: SonarSource/sonarqube-scan-action@v6
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        # If you're on self-hosted SonarQube and you keep sonar.host.url inside sonar-project.properties,
+        # the action will pick it up automatically. Nothing else to set.
+
+      # --- Export Sonar findings to SARIF (no extra vars) ---
+      - name: Extract Sonar settings from sonar-project.properties
+        id: vars
+        run: |
+          # project key (required)
+          PROJECT_KEY=$(grep -E '^[[:space:]]*sonar\.projectKey[[:space:]]*=' sonar-project.properties | sed 's/.*=//')
+          # host url (optional in file). Default to SonarCloud if not present.
+          HOST_URL=$(grep -E '^[[:space:]]*sonar\.host\.url[[:space:]]*=' sonar-project.properties | sed 's/.*=//' || true)
+          if [ -z "$HOST_URL" ]; then HOST_URL="https://sonarcloud.io"; fi
+          echo "project_key=$PROJECT_KEY" >> $GITHUB_OUTPUT
+          echo "host_url=$HOST_URL" >> $GITHUB_OUTPUT
+
+      - name: Install sonar-tools (CLI exporter)
+        run: |
+          curl -sL https://github.com/okorach/sonar-tools/releases/latest/download/sonar-tools_Linux_x86_64.tar.gz \
+          | tar -xz sonar-findings-export
+          sudo mv sonar-findings-export /usr/local/bin/
+
+      # Optional: small wait so the just-finished analysis is indexed before export.
+      - name: Wait briefly for analysis indexing
+        run: sleep 12
+
+      - name: Export SARIF from Sonar
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: ${{ steps.vars.outputs.host_url }}
+        run: |
+          # Export only BUG + VULNERABILITY + SECURITY_HOTSPOT (tweak as you like)
+          sonar-findings-export \
+            -k "${{ steps.vars.outputs.project_key }}" \
+            --types BUG,VULNERABILITY,SECURITY_HOTSPOT \
+            --format sarif \
+            -f sonar.sarif
+
+      # Upload SARIF to GitHub Code Scanning
+      - name: Upload SARIF to GitHub
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: sonar.sarif
+
+      # (nice to have) keep a copy as a build artifact too
+      - name: Archive SARIF
+        uses: actions/upload-artifact@v4
+        with:
+          name: sonar-sarif
+          path: sonar.sarif
