@@ -19,7 +19,7 @@ jobs:
 
       # Use the official OSV-Scanner Action (it can auto-upload SARIF)
       - name: OSV-Scanner
-        uses: google/osv-scanner-action@v2
+        uses: google/osv-scanner-action@v2.2.2
         with:
           scan-args: "--recursive ."   # scan the whole repo; adjust as needed
           format: sarif                 # produce SARIF for GitHub Code scanning
