@@ -1,6 +1,5 @@
 import { supabase } from '../../integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { UserRole } from '@/types';
 
 export function useUserCreation(state: ReturnType<typeof import('./use-user-state').useUserState>) {
   const { toast } = useToast();

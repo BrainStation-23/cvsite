@@ -9,8 +9,7 @@ export function useEmployeeProfileEditor(profileId: string) {
   const { toast } = useToast();
   const [isSaving, setIsSaving] = useState(false);
 
-  // Check if current user can edit (admin or manager)
-  const canEdit = user?.role === 'admin' || user?.role === 'manager';
+  
 
   // Save general info for employee
   const saveGeneralInfo = async (data: {
@@ -18,7 +17,7 @@ export function useEmployeeProfileEditor(profileId: string) {
     lastName: string;
     biography: string | null;
   }) => {
-    if (!canEdit || !profileId) return false;
+    if (!profileId) return false;
     
     try {
       setIsSaving(true);
@@ -77,7 +76,7 @@ export function useEmployeeProfileEditor(profileId: string) {
 
   // Technical skills functions
   const handleAddTechnicalSkill = async (skill: Omit<Skill, 'id'>) => {
-    if (!canEdit || !profileId) return false;
+    if (!profileId) return false;
     
     try {
       // Get the highest priority to add the new skill at the end
@@ -119,7 +118,7 @@ export function useEmployeeProfileEditor(profileId: string) {
   };
 
   const deleteTechnicalSkill = async (id: string) => {
-    if (!canEdit || !profileId) return false;
+    if (!profileId) return false;
     
     try {
       const { error } = await supabase
@@ -149,7 +148,7 @@ export function useEmployeeProfileEditor(profileId: string) {
 
   // Specialized skills functions
   const handleAddSpecializedSkill = async (skill: Omit<Skill, 'id'>) => {
-    if (!canEdit || !profileId) return false;
+    if (!profileId) return false;
     
     try {
       // Get the highest priority to add the new skill at the end
@@ -191,7 +190,7 @@ export function useEmployeeProfileEditor(profileId: string) {
   };
 
   const deleteSpecializedSkill = async (id: string) => {
-    if (!canEdit || !profileId) return false;
+    if (!profileId) return false;
     
     try {
       const { error } = await supabase
@@ -221,7 +220,7 @@ export function useEmployeeProfileEditor(profileId: string) {
 
   // Experience functions
   const saveExperience = async (experience: Omit<Experience, 'id'>) => {
-    if (!canEdit || !profileId) return false;
+    if (!profileId) return false;
     
     try {
       setIsSaving(true);
@@ -260,7 +259,7 @@ export function useEmployeeProfileEditor(profileId: string) {
   };
 
   const updateExperience = async (id: string, experience: Partial<Experience>) => {
-    if (!canEdit || !profileId) return false;
+    if (!profileId) return false;
     
     try {
       setIsSaving(true);
@@ -302,7 +301,7 @@ export function useEmployeeProfileEditor(profileId: string) {
   };
 
   const deleteExperience = async (id: string) => {
-    if (!canEdit || !profileId) return false;
+    if (!profileId) return false;
     
     try {
       const { error } = await supabase
@@ -332,7 +331,7 @@ export function useEmployeeProfileEditor(profileId: string) {
 
   // Education functions - simplified for brevity, following same pattern
   const saveEducation = async (education: Omit<Education, 'id'>) => {
-    if (!canEdit || !profileId) return false;
+    if (!profileId) return false;
     
     try {
       setIsSaving(true);
@@ -372,7 +371,7 @@ export function useEmployeeProfileEditor(profileId: string) {
   };
 
   const updateEducation = async (id: string, education: Partial<Education>) => {
-    if (!canEdit || !profileId) return false;
+    if (!profileId) return false;
     
     try {
       setIsSaving(true);
@@ -415,7 +414,7 @@ export function useEmployeeProfileEditor(profileId: string) {
   };
 
   const deleteEducation = async (id: string) => {
-    if (!canEdit || !profileId) return false;
+    if (!profileId) return false;
     
     try {
       const { error } = await supabase
@@ -445,7 +444,7 @@ export function useEmployeeProfileEditor(profileId: string) {
 
   // Training, Achievement, and Project functions follow the same pattern
   const saveTraining = async (training: Omit<Training, 'id'>) => {
-    if (!canEdit || !profileId) return false;
+    if (!profileId) return false;
     
     try {
       setIsSaving(true);
@@ -483,7 +482,7 @@ export function useEmployeeProfileEditor(profileId: string) {
   };
 
   const updateTraining = async (id: string, training: Partial<Training>) => {
-    if (!canEdit || !profileId) return false;
+    if (!profileId) return false;
     
     try {
       setIsSaving(true);
@@ -524,7 +523,7 @@ export function useEmployeeProfileEditor(profileId: string) {
   };
 
   const deleteTraining = async (id: string) => {
-    if (!canEdit || !profileId) return false;
+    if (!profileId) return false;
     
     try {
       const { error } = await supabase
@@ -553,7 +552,7 @@ export function useEmployeeProfileEditor(profileId: string) {
   };
 
   const saveAchievement = async (achievement: Omit<Achievement, 'id'>) => {
-    if (!canEdit || !profileId) return false;
+    if (!profileId) return false;
     
     try {
       setIsSaving(true);
@@ -589,7 +588,7 @@ export function useEmployeeProfileEditor(profileId: string) {
   };
 
   const updateAchievement = async (id: string, achievement: Partial<Achievement>) => {
-    if (!canEdit || !profileId) return false;
+    if (!profileId) return false;
     
     try {
       setIsSaving(true);
@@ -628,7 +627,7 @@ export function useEmployeeProfileEditor(profileId: string) {
   };
 
   const deleteAchievement = async (id: string) => {
-    if (!canEdit || !profileId) return false;
+    if (!profileId) return false;
     
     try {
       const { error } = await supabase
@@ -657,7 +656,7 @@ export function useEmployeeProfileEditor(profileId: string) {
   };
 
   const saveProject = async (project: Omit<Project, 'id'>) => {
-    if (!canEdit || !profileId) return false;
+    if (!profileId) return false;
     
     try {
       setIsSaving(true);
@@ -699,7 +698,7 @@ export function useEmployeeProfileEditor(profileId: string) {
   };
 
   const updateProject = async (id: string, project: Partial<Project>) => {
-    if (!canEdit || !profileId) return false;
+    if (!profileId) return false;
     
     try {
       setIsSaving(true);
@@ -744,7 +743,7 @@ export function useEmployeeProfileEditor(profileId: string) {
   };
 
   const deleteProject = async (id: string) => {
-    if (!canEdit || !profileId) return false;
+    if (!profileId) return false;
     
     try {
       const { error } = await supabase
@@ -773,7 +772,6 @@ export function useEmployeeProfileEditor(profileId: string) {
   };
 
   return {
-    canEdit,
     isSaving,
     saveGeneralInfo,
     handleAddTechnicalSkill,

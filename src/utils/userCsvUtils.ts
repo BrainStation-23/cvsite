@@ -1,12 +1,10 @@
 import Papa from 'papaparse';
-import { UserRole } from '@/types';
 
 export interface UserCSVRow {
   userId?: string; // For updates
   email: string;
   firstName: string;
   lastName?: string; // Made optional
-  role?: UserRole;
   password?: string;
   employeeId?: string;
   managerEmail?: string;
@@ -44,23 +42,7 @@ const generateRandomPassword = (): string => {
   return password;
 };
 
-// Helper function to format role with proper case
-const formatUserRole = (role: string): UserRole | null => {
-  if (!role || typeof role !== 'string') return 'employee';
-  
-  const lowerRole = role.toLowerCase().trim();
-  switch (lowerRole) {
-    case 'admin':
-      return 'admin';
-    case 'manager':
-      return 'manager';
-    case 'employee':
-    case '':
-      return 'employee';
-    default:
-      return null;
-  }
-};
+
 
 // Helper function to validate email format
 const isValidEmail = (email: string): boolean => {
@@ -364,17 +346,7 @@ export const validateCSVData = (data: any[], existingUsers: any[] = [], mode: 'c
 
     // lastName is now optional - no validation needed
 
-    // Validate role (optional, defaults to employee)
-    const formattedRole = formatUserRole(row.role);
-    if (row.role && !formattedRole) {
-      errors.push({
-        row: rowNumber,
-        field: 'role',
-        value: row.role || '',
-        message: 'Role must be one of: admin, manager, employee (case insensitive)'
-      });
-      hasErrors = true;
-    }
+
 
     // Validate manager email format if provided
     if (row.managerEmail && row.managerEmail.trim() && !isValidEmail(row.managerEmail.trim())) {
@@ -435,12 +407,11 @@ export const validateCSVData = (data: any[], existingUsers: any[] = [], mode: 'c
     }
 
     // If no errors, add to valid array with defaults
-    if (!hasErrors && formattedRole) {
+    if (!hasErrors) {
       const validRow: UserCSVRow = {
         email: row.email.trim(),
         firstName: row.firstName.trim(),
         lastName: row.lastName && row.lastName.trim() ? row.lastName.trim() : undefined, // Make optional
-        role: formattedRole,
         employeeId: row.employeeId ? row.employeeId.trim() : '',
         managerEmail: row.managerEmail ? row.managerEmail.trim() : '',
         sbuName: row.sbuName ? row.sbuName.trim() : '',
