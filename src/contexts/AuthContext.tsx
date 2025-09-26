@@ -10,8 +10,6 @@ interface AuthContextType {
   isLoading: boolean;
   signIn: (email: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
-  // Backward compatibility
-  hasPermission: (requiredRole: UserRole | UserRole[]) => boolean;
   // New permission-based methods (cached)
   hasModuleAccess: (moduleId: string) => boolean;
   hasSubModulePermission: (subModuleId: string, permissionType: 'create' | 'read' | 'update' | 'delete' | 'manage') => boolean;
@@ -370,7 +368,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         isLoading, 
         signIn, 
         signOut,
-        hasPermission,
         hasModuleAccess,
         hasSubModulePermission,
         hasRouteAccess,
