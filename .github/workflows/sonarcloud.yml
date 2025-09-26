@@ -70,19 +70,19 @@ jobs:
             --format sarif \
             -f sonar.sarif
 
-      # 🔧 Fix SARIF paths safely: only adjust strings, strip "file:///src/"
       - name: Fix SARIF paths
         run: |
           jq 'walk(
             if type == "object"
                and has("artifactLocation")
                and (.artifactLocation.uri | type == "string")
-               and (.artifactLocation.uri | startswith("file:///src/"))
-            then .artifactLocation.uri |= sub("file:///src/"; "")
+               and (.artifactLocation.uri | startswith("file:///"))
+            then .artifactLocation.uri |= sub("file:///"; "")
             else .
             end
           )' sonar.sarif > sonar-fixed.sarif
           mv sonar-fixed.sarif sonar.sarif
+
 
       - name: Upload SARIF to GitHub Code Scanning
         uses: github/codeql-action/upload-sarif@v3
