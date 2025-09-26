@@ -37,7 +37,6 @@ import PIPInitiate from '@/pages/pip/PIPInitiate';
 import PIPList from '@/pages/pip/PIPList';
 import PIPDashboard from '@/pages/pip/PIPDashboard';
 import MySituation from '@/pages/pip/MySituation';
-import PIPPMReview from '@/pages/pip/PIPPMReview';
 import ManagerPIPList from '@/pages/pip/ManagerPIPList';
 import ManagerPMReview from '@/pages/pip/ManagerPMReview';
 import AdminPIPView from './pages/pip/AdminPIPView';
