@@ -12,7 +12,7 @@ import { EditResourcePlanningDialog } from './EditResourcePlanningDialog';
 import { usePlannedResourcesTab } from '../../hooks/use-planned-resources-tab';
 import { useWeeklyValidationTab } from '../../hooks/use-weekly-validation-tab';
 import { useInlineEdit } from './hooks/useInlineEdit';
-import { useResourcePlanningPermissions } from '@/hooks/use-resource-planning-permissions';
+import { useResourcePlanningPermissions } from '@/hooks/use-resource-permissions';
 
 export const ResourcePlanningTable: React.FC = () => {
   const permissions = useResourcePlanningPermissions();

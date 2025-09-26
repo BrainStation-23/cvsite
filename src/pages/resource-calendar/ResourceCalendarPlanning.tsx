@@ -4,7 +4,7 @@ import { ResourcePlanningTable } from '../../components/resource-planning/Resour
 import { ResourcePlanningExportButton } from '../../components/resource-planning/ResourcePlanningExportButton';
 import { ResourcePlanningAuditLogsDialog } from '@/components/resource-planning/ResourcePlanningAuditLogsDialog';
 import { BulkResourcePlanningUpdate } from '@/components/resource-planning/BulkResourcePlanningUpdate';
-import { useResourcePlanningPermissions }  from '@/hooks/use-resource-planning-permissions';
+import { useResourcePlanningPermissions }  from '@/hooks/use-resource-permissions';
 import {useUserAccessibleSbus} from '@/hooks/use-user-accessible-sbus';
 
 const ResourceCalendarPlanning: React.FC = () => {

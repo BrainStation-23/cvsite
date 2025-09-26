@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
-import { useResourcePlanningPermissions } from '@/hooks/use-resource-planning-permissions';
+import { useResourcePlanningPermissions } from '@/hooks/use-resource-permissions';
 
 interface ResourcePlanningTableHeaderProps {
   sortBy: string;

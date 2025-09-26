@@ -3,7 +3,7 @@ import { GanttResourceData, GanttEngagement, GanttTimelineMonth } from './types'
 import { GanttCell } from './GanttCell';
 import { calculateEngagementPosition, assignEngagementTracks, calculateMaxTracks, calculateClickedDate } from './utils';
 import { Briefcase, Calendar } from 'lucide-react';
-import { useResourceCalendarPermissions } from '@/hooks/use-resource-calendar-permissions';
+import { useResourceCalendarPermissions } from '@/hooks/use-resource-permissions';
 
 interface GanttRowProps {
   resource: GanttResourceData;

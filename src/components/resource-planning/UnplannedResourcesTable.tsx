@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Plus, User, Calendar, Briefcase, Building2 } from 'lucide-react';
 import { ResourcePlanningPagination } from './ResourcePlanningPagination';
 import { Badge } from '@/components/ui/badge';
-import { useResourcePlanningPermissions } from '@/hooks/use-resource-planning-permissions';
+import { useResourcePlanningPermissions } from '@/hooks/use-resource-permissions';
 
 interface UnplannedResource {
   id: string;

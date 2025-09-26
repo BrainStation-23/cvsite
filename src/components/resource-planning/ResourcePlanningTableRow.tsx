@@ -12,7 +12,7 @@ import { ConfirmationDialog } from '@/components/ui/confirmation-dialog';
 import { CompleteEngagementDialog } from '@/components/ui/complete-engagement-dialog';
 import { ResourcePlanningTableEditRow } from './ResourcePlanningTableEditRow';
 import { ResourcePlanningData } from './types/resourceplanning';
-import { useResourcePlanningPermissions }  from '@/hooks/use-resource-planning-permissions';
+import { useResourcePlanningPermissions }  from '@/hooks/use-resource-permissions';
 
 interface EditFormData {
   profileId: string;

@@ -4,7 +4,7 @@ import { formatEngagementTooltip } from './utils';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import { Copy } from 'lucide-react';
-import { useResourceCalendarPermissions } from '@/hooks/use-resource-calendar-permissions';
+import { useResourceCalendarPermissions } from '@/hooks/use-resource-permissions';
 
 interface GanttCellProps {
   engagement: GanttEngagement;
