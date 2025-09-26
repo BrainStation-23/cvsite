@@ -1,4 +1,6 @@
 
+// Legacy role enum for backward compatibility
+export type UserRole = 'admin' | 'hr' | 'manager' | 'employee';
 
 export interface User {
   id: string;
@@ -8,6 +10,7 @@ export interface User {
   firstName: string;
   lastName: string;
   employee_id?: string;
+  role: UserRole; // Legacy role field for backward compatibility
   profileImageUrl?: string;
   created_at: string;
   updated_at: string;

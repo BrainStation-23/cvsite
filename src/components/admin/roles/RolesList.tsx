@@ -7,6 +7,7 @@ import { useRoles, useDeleteRole } from '@/hooks/rbac/useRoles';
 import { useDuplicateRole } from '@/hooks/rbac/useDuplicateRole';
 import { ConfirmationDialog } from '@/components/ui/confirmation-dialog';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useAuth } from '@/contexts/AuthContext';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -28,6 +29,7 @@ export const RolesList: React.FC = () => {
   const deleteRoleMutation = useDeleteRole();
   const duplicateRoleMutation = useDuplicateRole();
   const [roleToDelete, setRoleToDelete] = useState<string | null>(null);
+  const { canViewSystemRoles } = useAuth();
 
   const handleDelete = async () => {
     if (roleToDelete) {
@@ -58,9 +60,15 @@ export const RolesList: React.FC = () => {
     );
   }
 
-  // Filter out system roles for display
-  //const filteredRoles = roles?.filter(role => !role.is_system_role) || [];
-  const filteredRoles = roles;
+  // Filter system roles based on user permissions
+  const filteredRoles = roles?.filter(role => {
+    // If user has system role access, show all roles
+    if (canViewSystemRoles()) {
+      return true;
+    }
+    // Otherwise, hide system roles
+    return !role.is_system_role;
+  }) || [];
 
   if (filteredRoles.length === 0) {
     return (
