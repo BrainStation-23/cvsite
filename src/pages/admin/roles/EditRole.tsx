@@ -6,9 +6,11 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { RoleForm } from '@/components/admin/roles/RoleForm';
 import { useRole } from '@/hooks/rbac/useRoles';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useQueryClient } from '@tanstack/react-query';
 
 const EditRole: React.FC = () => {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const { roleId } = useParams<{ roleId: string }>();
   const { data: role, isLoading } = useRole(roleId!);
 
@@ -87,7 +89,17 @@ const EditRole: React.FC = () => {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <RoleForm role={role} />
+          <RoleForm 
+            key={roleId} // This forces a remount when roleId changes
+            role={role} 
+            onSuccess={() => {
+              // Invalidate both the roles list and the specific role query
+              if (roleId) {
+                queryClient.invalidateQueries({ queryKey: ['roles'] });
+                queryClient.invalidateQueries({ queryKey: ['role', roleId] });
+              }
+            }}
+          />
         </CardContent>
       </Card>
     </div>
