@@ -15,6 +15,8 @@ interface AuthContextType {
   hasSubModulePermission: (subModuleId: string, permissionType: 'create' | 'read' | 'update' | 'delete' | 'manage') => boolean;
   hasRouteAccess: (routePath: string) => boolean;
   getUserPermissions: () => UserPermission[];
+  // Role visibility helper
+  canViewSystemRoles: () => boolean;
   // Real-time RPC-based permission methods for critical checks
   hasModuleAccessRealTime: (moduleId: string) => Promise<boolean>;
   hasSubModulePermissionRealTime: (subModuleId: string, permissionType: 'create' | 'read' | 'update' | 'delete' | 'manage', targetSbuId?: string) => Promise<boolean>;
@@ -48,10 +50,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         return;
       }
 
-      // Get basic user role for backward compatibility
+      // Get basic user role for backward compatibility and custom role details
       const { data: roleData } = await supabase
         .from('user_roles')
-        .select('role, custom_role_id, sbu_context')
+        .select(`
+          role, 
+          custom_role_id, 
+          sbu_context,
+          custom_roles!inner(is_system_role)
+        `)
         .eq('user_id', supabaseUser.id)
         .single();
 
@@ -86,7 +93,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         created_by: supabaseUser.id,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
-        is_system_role: false
+        is_system_role: (roleData as any)?.custom_roles?.is_system_role || false
       } : undefined;
 
       setUser({
@@ -303,6 +310,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return user?.permissions || [];
   };
 
+  // Helper function to check if user can view system roles
+  const canViewSystemRoles = (): boolean => {
+    if (!user?.customRole) return false;
+    return user.customRole.is_system_role === true;
+  };
+
   // Real-time RPC-based permission methods for critical security checks
   const hasModuleAccessRealTime = async (moduleId: string): Promise<boolean> => {
     if (!user?.id) return false;
@@ -372,6 +385,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         hasSubModulePermission,
         hasRouteAccess,
         getUserPermissions,
+        canViewSystemRoles,
         hasModuleAccessRealTime,
         hasSubModulePermissionRealTime
       }}

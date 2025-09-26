@@ -1,5 +1,3 @@
-
-
 export interface User {
   id: string;
   email: string;
@@ -11,7 +9,6 @@ export interface User {
   profileImageUrl?: string;
   created_at: string;
   updated_at: string;
-  // New permission-based fields
   customRole?: CustomRole;
   sbuContext?: string;
   permissions?: UserPermission[];
