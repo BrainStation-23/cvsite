@@ -2,27 +2,37 @@ name: OSV → GitHub Security
 
 on:
   pull_request:
-    types: [opened, synchronize, reopened]
+    branches: [ main ]
   push:
     branches: [ main ]
+  schedule:
+    - cron: "30 12 * * 1"   # Mon 12:30 UTC (optional)
 
 permissions:
+  actions: read
   contents: read
-  security-events: write   # required to upload SARIF to Code scanning
+  security-events: write
 
 jobs:
-  osv-scan:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+  # Full scan on push/schedule
+  scan-scheduled:
+    if: github.event_name != 'pull_request'
+    uses: google/osv-scanner-action/.github/workflows/osv-scanner-reusable.yml@v2.2.2
+    with:
+      # Optional: pass CLI args (one per line)
+      scan-args: |-
+        --recursive
+        ./
+      upload-sarif: true
+      fail-on-vuln: true
 
-      # Use the official OSV-Scanner Action (it can auto-upload SARIF)
-      - name: OSV-Scanner
-        uses: google/osv-scanner-action@v2.2.2
-        with:
-          scan-args: "--recursive ."   # scan the whole repo; adjust as needed
-          format: sarif                 # produce SARIF for GitHub Code scanning
-          fail-on-vuln: true            # fail the job when vulns are found
-          severity: "HIGH,CRITICAL"     # gate on these severities
-          upload-sarif: true            # send results to Security tab
+  # PR delta scan (fails only if PR introduces new vulns)
+  scan-pr:
+    if: github.event_name == 'pull_request'
+    uses: google/osv-scanner-action/.github/workflows/osv-scanner-reusable-pr.yml@v2.2.2
+    with:
+      scan-args: |-
+        --recursive
+        ./
+      upload-sarif: true
+      fail-on-vuln: true
