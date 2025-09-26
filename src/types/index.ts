@@ -1,6 +1,3 @@
-
-export type UserRole = 'admin' | 'manager' | 'employee';
-
 export interface User {
   id: string;
   email: string;
@@ -9,10 +6,25 @@ export interface User {
   firstName: string;
   lastName: string;
   employee_id?: string;
-  role: UserRole;
   profileImageUrl?: string;
   created_at: string;
   updated_at: string;
+  customRole?: CustomRole;
+  sbuContext?: string;
+  permissions?: UserPermission[];
+}
+
+export interface UserPermission {
+  id: string;
+  role_id: string;
+  module_id: string;
+  module_name: string;
+  sub_module_id?: string;
+  sub_module_name?: string;
+  permission_type: 'create' | 'read' | 'update' | 'delete' | 'manage';
+  sbu_restrictions?: string[];
+  route_path?: string;
+  table_names?: string[];
 }
 
 export interface Skill {
@@ -104,6 +116,7 @@ export interface CustomRole {
   updated_at: string;
   is_active: boolean;
   is_system_role: boolean;
+  is_self_bound: boolean;
 }
 
 export interface RolePermission {

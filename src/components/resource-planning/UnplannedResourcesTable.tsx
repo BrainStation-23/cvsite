@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Plus, User, Calendar, Briefcase, Building2 } from 'lucide-react';
 import { ResourcePlanningPagination } from './ResourcePlanningPagination';
 import { Badge } from '@/components/ui/badge';
+import { useResourcePlanningPermissions } from '@/hooks/use-resource-permissions';
 
 interface UnplannedResource {
   id: string;
@@ -85,6 +86,8 @@ export const UnplannedResourcesTable: React.FC<UnplannedResourcesTableProps> = (
   isLoading,
   onCreatePlan,
 }) => {
+  const permissions = useResourcePlanningPermissions();
+  
   if (isLoading) {
     return (
       <div className="flex justify-center items-center py-12">
@@ -119,7 +122,7 @@ export const UnplannedResourcesTable: React.FC<UnplannedResourcesTableProps> = (
               <TableHead>Current Engagement</TableHead>
               <TableHead>Available Capacity</TableHead>
               <TableHead>Active Assignments</TableHead>
-              <TableHead>Actions</TableHead>
+              { permissions.canCreate && <TableHead>Actions</TableHead> }
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -258,17 +261,18 @@ export const UnplannedResourcesTable: React.FC<UnplannedResourcesTableProps> = (
                       )}
                     </div>
                   </TableCell>
-
-                  <TableCell>
-                    <Button
-                      size="sm"
-                      onClick={() => onCreatePlan(resource.profile_id)}
-                      className="flex items-center gap-2"
-                    >
-                      <Plus className="h-4 w-4" />
-                      Create Plan
-                    </Button>
-                  </TableCell>
+                  
+                  { permissions.canCreate && <TableCell>
+                  <Button
+                    size="sm"
+                    onClick={() => onCreatePlan(resource.profile_id)}
+                    className="flex items-center gap-2"
+                  >
+                    <Plus className="h-4 w-4" />
+                    Create Plan
+                  </Button>
+                </TableCell>
+                }
                 </TableRow>
               ))
             )}

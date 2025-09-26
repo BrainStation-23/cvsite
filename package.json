@@ -66,9 +66,9 @@
     "docx": "^9.5.0",
     "embla-carousel-react": "^8.3.0",
     "exceljs": "^4.4.0",
-    "html2pdf.js": "^0.10.3",
+    "html2pdf.js": "^0.12.1",
     "input-otp": "^1.2.4",
-    "jspdf": "^3.0.1",
+    "jspdf": "^3.0.3",
     "lucide-react": "^0.462.0",
     "monaco-editor": "^0.45.0",
     "next-themes": "^0.3.0",
@@ -88,7 +88,7 @@
     "tailwind-merge": "^2.5.2",
     "tailwindcss-animate": "^1.0.7",
     "vaul": "^0.9.3",
-    "xlsx": "^0.18.5",
+    "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz",
     "zod": "^3.23.8"
   },
   "devDependencies": {
@@ -112,6 +112,6 @@
     "ts-unused-exports": "^11.0.1",
     "typescript": "^5.5.3",
     "typescript-eslint": "^8.0.1",
-    "vite": "^5.4.19"
+    "vite": "^5.4.20"
   }
 }

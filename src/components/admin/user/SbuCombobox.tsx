@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Check, ChevronsUpDown, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useSbuSearch } from '@/hooks/use-sbu-search';
+import { useUserAccessibleSbus } from '@/hooks/use-user-accessible-sbus';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -13,16 +14,47 @@ interface SbuComboboxProps {
   onValueChange: (value: string | null) => void;
   placeholder?: string;
   disabled?: boolean;
+  targetUserId?: string | null;
 }
 
 const SbuCombobox: React.FC<SbuComboboxProps> = ({
   value,
   onValueChange,
   placeholder = "Select SBU...",
-  disabled = false
+  disabled = false,
+  targetUserId = null
 }) => {
   const [open, setOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+
+  // Always fetch user-accessible data first to determine SBU-bound status
+  const { data: userAccessibleResult, isLoading: userAccessibleLoading } = useUserAccessibleSbus({
+    searchQuery: searchQuery || null,
+    targetUserId: targetUserId,
+  });
+
+  // Determine if user is SBU-bound from the RPC response
+  const isSbuBound = userAccessibleResult?.isSbuBound ?? false;
+
+  // Fetch all SBUs only if user is NOT SBU-bound
+  const { data: allSbuResult, isLoading: allSbuLoading } = useSbuSearch({
+    searchQuery: !isSbuBound ? (searchQuery || null) : null,
+    page: 1,
+    perPage: 50
+  });
+
+  // Determine which data source to use based on SBU-bound status
+  const sbus = isSbuBound 
+    ? (userAccessibleResult?.sbus || [])
+    : (allSbuResult?.sbus || []);
+  const isLoading = isSbuBound ? userAccessibleLoading : allSbuLoading;
+
+  // Auto-select user's own SBU if SBU-bound and no value is set
+  useEffect(() => {
+    if (isSbuBound && !value && userAccessibleResult?.defaultSbuId) {
+      onValueChange(userAccessibleResult.defaultSbuId);
+    }
+  }, [isSbuBound, value, userAccessibleResult?.defaultSbuId, onValueChange]);
   
   // Fetch selected SBU separately to ensure it's always available
   const { data: selectedSbu } = useQuery({
@@ -42,14 +74,6 @@ const SbuCombobox: React.FC<SbuComboboxProps> = ({
     enabled: !!value,
   });
 
-  const { data: searchResult, isLoading } = useSbuSearch({
-    searchQuery: searchQuery || null,
-    page: 1,
-    perPage: 50
-  });
-
-  const sbus = searchResult?.sbus || [];
-  
   // Combine search results with selected SBU to ensure it's always available
   const allSbus = React.useMemo(() => {
     const combinedSbus = [...sbus];
@@ -68,6 +92,13 @@ const SbuCombobox: React.FC<SbuComboboxProps> = ({
   }, [sbus, selectedSbu]);
 
   const handleSelect = (sbuId: string) => {
+    // For SBU-bound users, prevent deselecting if it would leave them with no SBUs
+    if (isSbuBound && sbuId === value) {
+      // Don't allow deselecting the current SBU for SBU-bound users
+      setOpen(false);
+      return;
+    }
+    
     if (sbuId === value) {
       onValueChange(null);
     } else {
@@ -78,6 +109,10 @@ const SbuCombobox: React.FC<SbuComboboxProps> = ({
 
   const handleClear = (e: React.MouseEvent) => {
     e.stopPropagation();
+    // Prevent clearing for SBU-bound users
+    if (isSbuBound) {
+      return;
+    }
     onValueChange(null);
   };
 

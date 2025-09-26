@@ -112,6 +112,8 @@ export function useGeneralInfo(profileId?: string) {
       }
     },
     enabled: !!targetProfileId,
+    //keeps the previous tab data while fetching new data
+    placeholderData: (previousData) => previousData,
   });
 
   // Handle error in fetching

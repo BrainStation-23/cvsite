@@ -3,6 +3,7 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Trash2, CheckCircle, CheckCircle2, Copy, XCircle } from 'lucide-react';
 import { ResourcePlanningExportButton } from './ResourcePlanningExportButton';
+import { useResourcePlanningPermissions } from '@/hooks/use-resource-permissions';
 
 interface BulkActionsToolbarProps {
   selectedCount: number;
@@ -29,18 +30,20 @@ export const BulkActionsToolbar: React.FC<BulkActionsToolbarProps> = ({
   showInvalidate = false,
   selectedItems
 }) => {
+  const permissions = useResourcePlanningPermissions();
   if (selectedCount === 0) return null;
 
   return (
     <div className="flex items-center gap-2 p-3 bg-muted/50 border-b">
+     
       <span className="text-sm font-medium text-muted-foreground">
         {selectedCount} item{selectedCount !== 1 ? 's' : ''} selected
       </span>
       
       <div className="flex items-center gap-2">
-        <ResourcePlanningExportButton selectedItems={selectedItems} />
+        {permissions.canRead && <ResourcePlanningExportButton selectedItems={selectedItems} />}
         
-        <Button
+        {permissions.showCompleteButton && <Button
           variant="outline"
           size="sm"
           onClick={onBulkComplete}
@@ -48,9 +51,9 @@ export const BulkActionsToolbar: React.FC<BulkActionsToolbarProps> = ({
         >
           <CheckCircle className="h-4 w-4 mr-1.5" />
           Complete
-        </Button>
-        
-        <Button
+        </Button>}
+
+        {permissions.showDuplicateButton && <Button
           variant="outline"
           size="sm"
           onClick={onBulkCopy}
@@ -59,9 +62,9 @@ export const BulkActionsToolbar: React.FC<BulkActionsToolbarProps> = ({
           <Copy className="h-4 w-4 mr-1.5" />
           Copy
         </Button>
-        
-        {showValidate && onBulkValidate && (
-          <Button
+        }
+
+        {showValidate && onBulkValidate && permissions.canUpdate && <Button
             variant="outline"
             size="sm"
             onClick={onBulkValidate}
@@ -70,10 +73,9 @@ export const BulkActionsToolbar: React.FC<BulkActionsToolbarProps> = ({
             <CheckCircle2 className="h-4 w-4 mr-1.5" />
             Validate
           </Button>
-        )}
-        
-        {showInvalidate && onBulkInvalidate && (
-          <Button
+        }
+
+        {showInvalidate && onBulkInvalidate && permissions.canUpdate &&  <Button
             variant="outline"
             size="sm"
             onClick={onBulkInvalidate}
@@ -82,9 +84,9 @@ export const BulkActionsToolbar: React.FC<BulkActionsToolbarProps> = ({
             <XCircle className="h-4 w-4 mr-1.5" />
             Invalidate
           </Button>
-        )}
+        }
         
-        <Button
+        {permissions.showDeleteButton && <Button
           variant="outline"
           size="sm"
           onClick={onBulkDelete}
@@ -93,6 +95,7 @@ export const BulkActionsToolbar: React.FC<BulkActionsToolbarProps> = ({
           <Trash2 className="h-4 w-4 mr-1.5" />
           Delete
         </Button>
+       }
       </div>
     </div>
   );

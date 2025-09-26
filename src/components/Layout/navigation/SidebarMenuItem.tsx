@@ -3,6 +3,7 @@ import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { ChevronDown, ChevronRight } from 'lucide-react';
 import { NavigationItem } from './navigationData';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface SidebarMenuItemProps {
   item: NavigationItem;
@@ -12,8 +13,56 @@ interface SidebarMenuItemProps {
 const SidebarMenuItem: React.FC<SidebarMenuItemProps> = ({ item, isSidebarOpen }) => {
   const location = useLocation();
   const IconComponent = item.icon;
+  const { hasModuleAccess, hasSubModulePermission } = useAuth();
+
+  // Check if user has permission to see this navigation item
+  const hasPermission = (): boolean => {
+    // If no permissions specified, show the item (for core items like Dashboard, Profile)
+    if (!item.requiredModuleAccess && !item.requiredSubModuleAccess) {
+      return true;
+    }
+
+    // Check module access
+    if (item.requiredModuleAccess && !hasModuleAccess(item.requiredModuleAccess)) {
+      return false;
+    }
+
+    // Check sub-module permission
+    if (item.requiredSubModuleAccess && item.requiredPermissionType) {
+      return hasSubModulePermission(item.requiredSubModuleAccess, item.requiredPermissionType);
+    }
+
+    return true;
+  };
+
+  // Don't render if user doesn't have permission
+  if (!hasPermission()) {
+    return null;
+  }
 
   if (item.hasSubmenu) {
+    // Filter submenu items based on permissions
+    const allowedSubmenuItems = item.submenuItems?.filter(subItem => {
+      if (!subItem.requiredModuleAccess && !subItem.requiredSubModuleAccess) {
+        return true;
+      }
+
+      if (subItem.requiredModuleAccess && !hasModuleAccess(subItem.requiredModuleAccess)) {
+        return false;
+      }
+
+      if (subItem.requiredSubModuleAccess && subItem.requiredPermissionType) {
+        return hasSubModulePermission(subItem.requiredSubModuleAccess, subItem.requiredPermissionType);
+      }
+
+      return true;
+    });
+
+    // Don't render parent item if no submenu items are allowed
+    if (!allowedSubmenuItems || allowedSubmenuItems.length === 0) {
+      return null;
+    }
+
     return (
       <>
         <div className="flex items-center">
@@ -40,7 +89,7 @@ const SidebarMenuItem: React.FC<SidebarMenuItemProps> = ({ item, isSidebarOpen }
         {/* Submenu */}
         {item.isExpanded && isSidebarOpen && (
           <ul className="ml-4 mt-1">
-            {item.submenuItems?.map((subItem) => {
+            {allowedSubmenuItems.map((subItem) => {
               const SubIconComponent = subItem.icon;
               return (
                 <li key={subItem.to} className="mb-1">

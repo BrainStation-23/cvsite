@@ -1,13 +1,13 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Badge } from '@/components/ui/badge';
 import { Check, ChevronsUpDown, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { useQuery } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
+import { useSbuSearch } from '@/hooks/use-sbu-search';
+import { useUserAccessibleSbus } from '@/hooks/use-user-accessible-sbus';
 
 interface Sbu {
   id: string;
@@ -29,30 +29,43 @@ export const SbuMultiSelect: React.FC<SbuMultiSelectProps> = ({
   const [open, setOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
 
-  const { data: sbus = [], isLoading } = useQuery({
-    queryKey: ['sbus-for-multi-select', searchQuery],
-    queryFn: async () => {
-      let query = supabase
-        .from('sbus')
-        .select('id, name')
-        .order('name', { ascending: true });
-
-      if (searchQuery) {
-        query = query.ilike('name', `%${searchQuery}%`);
-      }
-
-      const { data, error } = await query.limit(50);
-      if (error) throw error;
-      
-      // Filter out any SBUs with empty or null names
-      return (data as Sbu[]).filter(sbu => sbu.name && sbu.name.trim() !== '');
-    },
+  // Get user-accessible SBUs and determine if user is SBU-bound
+  const { data: userAccessibleResult, isLoading: userAccessibleLoading } = useUserAccessibleSbus({
+    searchQuery: searchQuery || null,
   });
+
+  // Determine if user is SBU-bound from the RPC response
+  const isSbuBound = userAccessibleResult?.isSbuBound ?? false;
+
+  // Fetch all SBUs only if user is NOT SBU-bound
+  const { data: allSbuResult, isLoading: allSbuLoading } = useSbuSearch({
+    searchQuery: !isSbuBound ? (searchQuery || null) : null,
+    page: 1,
+    perPage: 50
+  });
+
+  // Determine which data source to use based on SBU-bound status
+  const sbus = isSbuBound 
+    ? (userAccessibleResult?.sbus || [])
+    : (allSbuResult?.sbus || []);
+
+  const isLoading = userAccessibleLoading || allSbuLoading;
+
+  // Auto-select all accessible SBUs for SBU-bound users
+  useEffect(() => {
+    if (!isLoading && isSbuBound && sbus.length > 0 && selectedValues.length === 0) {
+      onSelectionChange(sbus.map(sbu => sbu.id));
+    }
+  }, [isLoading, isSbuBound, sbus, selectedValues.length, onSelectionChange]);
 
   const selectedSbus = sbus.filter(sbu => selectedValues.includes(sbu.id));
 
   const handleSelect = (sbuId: string) => {
     if (selectedValues.includes(sbuId)) {
+      // For SBU-bound users, prevent deselecting if it would leave them with no SBUs
+      if (isSbuBound && selectedValues.length === 1) {
+        return; // Don't allow deselecting the last SBU for SBU-bound users
+      }
       onSelectionChange(selectedValues.filter(id => id !== sbuId));
     } else {
       onSelectionChange([...selectedValues, sbuId]);
@@ -64,10 +77,18 @@ export const SbuMultiSelect: React.FC<SbuMultiSelectProps> = ({
   };
 
   const handleClearAll = () => {
+    // For SBU-bound users, don't allow clearing all - keep all accessible SBUs selected
+    if (isSbuBound) {
+      return;
+    }
     onSelectionChange([]);
   };
 
   const removeSbu = (sbuId: string) => {
+    // For SBU-bound users, prevent removing if it would leave them with no SBUs
+    if (isSbuBound && selectedValues.length === 1) {
+      return;
+    }
     onSelectionChange(selectedValues.filter(id => id !== sbuId));
   };
 

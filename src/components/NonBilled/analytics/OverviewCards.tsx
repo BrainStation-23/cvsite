@@ -2,12 +2,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { 
   Users, 
-  Clock, 
   AlertTriangle, 
-  TrendingUp, 
   Calendar,
-  Target,
-  Building2,
   Timer
 } from 'lucide-react';
 
@@ -39,7 +35,7 @@ interface OverviewCardsProps {
   benchFilter: boolean | null;
 }
 
-export function OverviewCards({ data, isLoading, benchFilter }: OverviewCardsProps) {
+export function OverviewCards({ data, isLoading, benchFilter }: Readonly<OverviewCardsProps>) {
   if (isLoading) {
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">

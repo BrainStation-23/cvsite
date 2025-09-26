@@ -12,8 +12,10 @@ import { EditResourcePlanningDialog } from './EditResourcePlanningDialog';
 import { usePlannedResourcesTab } from '../../hooks/use-planned-resources-tab';
 import { useWeeklyValidationTab } from '../../hooks/use-weekly-validation-tab';
 import { useInlineEdit } from './hooks/useInlineEdit';
+import { useResourcePlanningPermissions } from '@/hooks/use-resource-permissions';
 
 export const ResourcePlanningTable: React.FC = () => {
+  const permissions = useResourcePlanningPermissions();
   const [activeTab, setActiveTab] = useState('planned');
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [preselectedProfileId, setPreselectedProfileId] = useState<string | null>(null);
@@ -77,6 +79,9 @@ export const ResourcePlanningTable: React.FC = () => {
   };
 
   const handleCreatePlan = (profileId: string) => {
+    if(!permissions.canCreate) {
+      return;
+    }
     console.log('Create plan for profile:', profileId);
     setPreselectedProfileId(profileId);
     setShowCreateForm(true);
@@ -94,6 +99,7 @@ export const ResourcePlanningTable: React.FC = () => {
     //hide form
     setShowCreateForm(false);
   };
+
 
   return (
     <div className="space-y-6">
@@ -186,7 +192,7 @@ export const ResourcePlanningTable: React.FC = () => {
         </div>
 
         {/* Right side - Create Form (conditionally rendered) */}
-        {showCreateForm && (
+        {showCreateForm && permissions.canCreate && (
           <div className="lg:col-span-1">
             <Card>
               <CardHeader>

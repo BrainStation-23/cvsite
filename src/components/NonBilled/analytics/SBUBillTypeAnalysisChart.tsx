@@ -1,5 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer} from 'recharts';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { ViewToggle } from '@/components/statistics/ViewToggle';
 import { Button } from '@/components/ui/button';
@@ -43,7 +43,7 @@ export function SBUBillTypeAnalysisChart({
   data, 
   isLoading, 
   title 
-}: SBUBillTypeAnalysisChartProps) {
+}: Readonly<SBUBillTypeAnalysisChartProps>) {
   const [showCharts, setShowCharts] = useState(true);
   const [showTables, setShowTables] = useState(false);
   const [chartType, setChartType] = useState<'stacked' | 'grouped'>('stacked');

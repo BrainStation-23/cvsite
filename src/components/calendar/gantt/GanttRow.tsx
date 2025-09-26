@@ -3,6 +3,7 @@ import { GanttResourceData, GanttEngagement, GanttTimelineMonth } from './types'
 import { GanttCell } from './GanttCell';
 import { calculateEngagementPosition, assignEngagementTracks, calculateMaxTracks, calculateClickedDate } from './utils';
 import { Briefcase, Calendar } from 'lucide-react';
+import { useResourceCalendarPermissions } from '@/hooks/use-resource-permissions';
 
 interface GanttRowProps {
   resource: GanttResourceData;
@@ -19,6 +20,7 @@ export const GanttRow: React.FC<GanttRowProps> = ({
   onEmptySpaceClick,
   onDuplicateClick 
 }) => {
+  const permissions = useResourceCalendarPermissions();
   const timelineStart = timeline[0]?.weeks[0]?.weekStart;
   const timelineEnd = timeline[timeline.length - 1]?.weeks[timeline[timeline.length - 1].weeks.length - 1]?.weekEnd;
   
@@ -121,7 +123,7 @@ export const GanttRow: React.FC<GanttRowProps> = ({
                 <div
                   key={`${monthIndex}-${weekIndex}`}
                   className={`flex-1 border-r border-border/20 cursor-pointer hover:bg-muted/20 transition-colors ${isCurrentWeek ? 'bg-primary/5' : ''}`}
-                  onClick={handleEmptyClick}
+                  onClick={permissions.canCreateForecastedProject ? handleEmptyClick : undefined}
                 />
               );
             })

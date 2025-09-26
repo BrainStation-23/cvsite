@@ -25,7 +25,8 @@ serve(async (req) => {
       password, 
       firstName, 
       lastName, 
-      role, 
+      customRoleId,
+      sbuContext,
       employeeId, 
       sbuId, 
       expertiseId, 
@@ -38,7 +39,8 @@ serve(async (req) => {
       email, 
       firstName, 
       lastName, 
-      role, 
+      customRoleId,
+      sbuContext, 
       employeeId, 
       sbuId, 
       expertiseId, 
@@ -47,17 +49,23 @@ serve(async (req) => {
       careerStartDate 
     });
     
-    if (!email || !password || !firstName || !lastName || !role || !employeeId) {
+    if (!email || !password || !firstName || !lastName || !customRoleId || !employeeId) {
       return new Response(
-        JSON.stringify({ error: 'Missing required fields: email, password, firstName, lastName, role, and employeeId are all required' }),
+        JSON.stringify({ error: 'Missing required fields: email, password, firstName, lastName, customRoleId, and employeeId are all required' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
     
-    // Validate role
-    if (!['admin', 'manager', 'employee'].includes(role)) {
+    // Validate custom role assignment
+    const { data: validRole, error: roleValidationError } = await supabase
+      .rpc('validate_custom_role_assignment', {
+        _custom_role_id: customRoleId,
+        _sbu_context: sbuContext
+      });
+
+    if (roleValidationError || !validRole) {
       return new Response(
-        JSON.stringify({ error: 'Invalid role. Must be admin, manager, or employee' }),
+        JSON.stringify({ error: 'Invalid custom role assignment or SBU context mismatch' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
@@ -70,7 +78,8 @@ serve(async (req) => {
       user_metadata: {
         first_name: firstName,
         last_name: lastName,
-        role: role,
+        custom_role_id: customRoleId,
+        sbu_context: sbuContext,
         employee_id: employeeId,
         sbu_id: sbuId,
         expertise_id: expertiseId,
@@ -125,7 +134,21 @@ serve(async (req) => {
       }
     }
     
-    console.log('User created successfully by trigger:', authData.user.id);
+    // Assign custom role to user
+    const { error: roleAssignError } = await supabase
+      .rpc('assign_custom_role_to_user', {
+        _user_id: authData.user.id,
+        _custom_role_id: customRoleId,
+        _sbu_context: sbuContext,
+        _assigned_by: null // Will use auth.uid() in function
+      });
+    
+    if (roleAssignError) {
+      console.error('Error assigning custom role:', roleAssignError);
+      // Don't fail the entire operation if role assignment fails
+    }
+    
+    console.log('User created successfully with custom role:', authData.user.id);
     
     return new Response(
       JSON.stringify({ 
@@ -135,7 +158,8 @@ serve(async (req) => {
           email: authData.user.email,
           firstName,
           lastName,
-          role,
+          customRoleId,
+          sbuContext,
           employeeId,
           sbuId,
           expertiseId,

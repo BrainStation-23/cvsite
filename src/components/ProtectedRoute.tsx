@@ -1,18 +1,21 @@
 
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { UserRole } from '../types';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
-  allowedRoles?: UserRole[];
+  requiredModuleAccess?: string;
+  requiredSubModuleAccess?: string;
+  requiredPermissionType?: 'create' | 'read' | 'update' | 'delete';
 }
 
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ 
   children, 
-  allowedRoles = ['admin', 'manager', 'employee'] 
+  requiredModuleAccess,
+  requiredSubModuleAccess,
+  requiredPermissionType = 'read'
 }) => {
-  const { isAuthenticated, user, isLoading } = useAuth();
+  const { isAuthenticated, user, isLoading, hasModuleAccess, hasSubModulePermission, hasRouteAccess } = useAuth();
   const location = useLocation();
 
   // Show loading state while checking authentication
@@ -29,10 +32,22 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
-  // If roles are specified and user doesn't have permission
-  if (user && allowedRoles.length > 0 && !allowedRoles.includes(user.role)) {
-    // Redirect to the unified role-aware dashboard
-    return <Navigate to="/dashboard" replace />;
+  // Check permission-based access first (if specified)
+  if (user) {
+    // Check route-based access
+    if (!hasRouteAccess(location.pathname)) {
+      return <Navigate to="/dashboard" replace />;
+    }
+
+    // Check module access
+    if (requiredModuleAccess && !hasModuleAccess(requiredModuleAccess)) {
+      return <Navigate to="/dashboard" replace />;
+    }
+
+    // Check sub-module permission
+    if (requiredSubModuleAccess && !hasSubModulePermission(requiredSubModuleAccess, requiredPermissionType)) {
+      return <Navigate to="/dashboard" replace />;
+    }
   }
 
   // If all checks pass, render the protected content

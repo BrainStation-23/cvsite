@@ -26,7 +26,7 @@ serve(async (req) => {
     // Use the list_users function to get all users with their profile information
     const { data: usersResponse, error: usersError } = await supabase.rpc('list_users', {
       search_query: null,
-      filter_role: null,
+      filter_custom_role_id: null,
       page_number: 1,
       items_per_page: 10000, // Large number to get all users
       sort_by: 'email',
@@ -54,9 +54,9 @@ serve(async (req) => {
       email: user.email || '',
       firstName: user.first_name || '',
       lastName: user.last_name || '',
-      role: user.role || 'employee',
+      customRoleName: user.custom_role_name || '',
       employeeId: user.employee_id || '',
-      managerName: user.manager_name || '',
+      managerEmail: user.manager_email || '',
       sbuName: user.sbu_name || '',
       expertiseName: user.expertise_name || '',
       resourceTypeName: user.resource_type_name || '',
@@ -73,8 +73,8 @@ serve(async (req) => {
     
     // Convert to CSV format with human-friendly headers
     const csvHeaders = [
-      'userId', 'email', 'firstName', 'lastName', 'role', 'employeeId', 
-      'managerName', 'sbuName', 'expertiseName', 'resourceTypeName', 
+      'userId', 'email', 'firstName', 'lastName', 'customRoleName', 
+      'employeeId', 'managerEmail', 'sbuName', 'expertiseName', 'resourceTypeName', 
       'dateOfJoining', 'careerStartDate', 'dateOfBirth', 'resignationDate', 
       'exitDate', 'active', 'hasOverhead', 'createdAt', 'lastSignIn'
     ];
@@ -84,9 +84,9 @@ serve(async (req) => {
       row.email,
       row.firstName,
       row.lastName,
-      row.role,
+      row.customRoleName,
       row.employeeId,
-      row.managerName,
+      row.managerEmail,
       row.sbuName,
       row.expertiseName,
       row.resourceTypeName,

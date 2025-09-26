@@ -12,6 +12,7 @@ import { useIncompleteCvProfiles } from '@/hooks/use-incomplete-cv-profiles';
 import { useProfileCountsByResourceType } from '@/hooks/use-profile-counts-by-resource-type';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useDebounce } from '@/hooks/use-debounce';
+import {useCvCompletionPermissions} from '@/hooks/use-cv-permissions';
 
 // Memoized profile card component to prevent unnecessary re-renders
 const ProfileCard = React.memo(({ 
@@ -21,6 +22,7 @@ const ProfileCard = React.memo(({
   profile: any; 
   onEdit: (id: string) => void;
 }) => {
+  const permissions = useCvCompletionPermissions();
   const completionPercentage = profile.total_sections > 0 
     ? Math.round((profile.completion_score / profile.total_sections) * 100)
     : 0;
@@ -45,7 +47,7 @@ const ProfileCard = React.memo(({
               {profile.missing_count} missing sections
             </div>
           </div>
-          <Button
+          {permissions.canEditCv && <Button
             size="sm"
             variant="outline"
             onClick={() => onEdit(profile.profile_id)}
@@ -53,7 +55,8 @@ const ProfileCard = React.memo(({
           >
             <Edit className="h-4 w-4" />
             Edit
-          </Button>
+          </Button>}
+
         </div>
       </div>
       

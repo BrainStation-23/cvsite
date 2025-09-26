@@ -1,7 +1,8 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { User as SupabaseUser, Session } from '@supabase/supabase-js';
+import { useQueryClient } from '@tanstack/react-query';
 import { supabase } from '../integrations/supabase/client';
-import { User, UserRole } from '../types';
+import { User, UserPermission, CustomRole } from '../types';
 
 interface AuthContextType {
   user: User | null;
@@ -9,7 +10,16 @@ interface AuthContextType {
   isLoading: boolean;
   signIn: (email: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
-  hasPermission: (requiredRole: UserRole | UserRole[]) => boolean;
+  // New permission-based methods (cached)
+  hasModuleAccess: (moduleId: string) => boolean;
+  hasSubModulePermission: (subModuleId: string, permissionType: 'create' | 'read' | 'update' | 'delete' | 'manage') => boolean;
+  hasRouteAccess: (routePath: string) => boolean;
+  getUserPermissions: () => UserPermission[];
+  // Role visibility helper
+  canViewSystemRoles: () => boolean;
+  // Real-time RPC-based permission methods for critical checks
+  hasModuleAccessRealTime: (moduleId: string) => Promise<boolean>;
+  hasSubModulePermissionRealTime: (subModuleId: string, permissionType: 'create' | 'read' | 'update' | 'delete' | 'manage', targetSbuId?: string) => Promise<boolean>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -18,23 +28,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const queryClient = useQueryClient();
 
   const fetchUserProfile = async (supabaseUser: SupabaseUser) => {
     try {
-      // Get user role
-      const { data: roleData, error: roleError } = await supabase
-        .from('user_roles')
-        .select('role')
-        .eq('user_id', supabaseUser.id)
-        .single();
+      // Use RPC function to get all user permissions in one call
+      const { data: permissionsData, error: permissionsError } = await supabase
+        .rpc('get_user_permissions', { _user_id: supabaseUser.id });
 
-      if (roleError) {
-        console.error('Error fetching user role:', roleError);
+      if (permissionsError) {
+        console.error('Error fetching user permissions:', permissionsError);
         
-        // If user doesn't have a role, this might be a new OAuth user
-        // The callback should have handled this, but let's be safe
-        if (roleError.code === 'PGRST116') {
-          console.log('No user role found - this might be a new OAuth user');
+        // If user doesn't have permissions, this might be a new OAuth user
+        if (permissionsError.code === 'PGRST301' || permissionsError.message?.includes('permission denied')) {
+          console.log('No user permissions found - this might be a new OAuth user');
           setUser(null);
           return;
         }
@@ -43,14 +50,50 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         return;
       }
 
-      const userRole = roleData.role as UserRole;
+      const { data: roleData } = await supabase
+        .from('user_roles')
+        .select(`
+          custom_role_id, 
+          sbu_context,
+          custom_roles!inner(is_system_role)
+        `)
+        .eq('user_id', supabaseUser.id)
+        .single();
 
-      // Get profile data for display name and employee ID
+      // Get profile data for display information
       const { data: profileData } = await supabase
         .from('profiles')
-        .select('first_name, last_name, employee_id')
+        .select('first_name, last_name, employee_id, sbu_id')
         .eq('id', supabaseUser.id)
         .single();
+
+      // Transform RPC permissions data to UserPermission interface
+      const userPermissions: UserPermission[] = (permissionsData || []).map((p, index) => ({
+        id: `permission_${index}`, // Generate ID since RPC doesn't return it
+        role_id: roleData?.custom_role_id || `role_${index}`, // Use role data or generate
+        module_id: `module_${index}`, // Generate since not returned by RPC
+        module_name: p.module_name,
+        sub_module_id: `sub_module_${index}`, // Generate since not returned by RPC
+        sub_module_name: p.sub_module_name,
+        permission_type: p.permission_type === 'write' ? 'create' : p.permission_type as 'create' | 'read' | 'update' | 'delete' | 'manage',
+        sbu_restrictions: p.allowed_sbus || [],
+        route_path: p.route_path,
+        table_names: p.table_names
+      }));
+
+      // Extract custom role info from permissions data (first permission should have role info)
+      const customRole: CustomRole | undefined = permissionsData && permissionsData.length > 0 ? {
+        id: roleData?.custom_role_id || `role_${supabaseUser.id}`,
+        name: permissionsData[0].role_name,
+        description: '', // Not returned by RPC
+        is_sbu_bound: permissionsData[0].is_sbu_bound || false,
+        is_active: true,
+        created_by: supabaseUser.id,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        is_system_role: (roleData as any)?.custom_roles?.is_system_role || false,
+        is_self_bound: permissionsData[0].is_self_bound || false
+      } : undefined;
 
       setUser({
         id: supabaseUser.id,
@@ -60,10 +103,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         firstName: profileData?.first_name || supabaseUser.user_metadata.first_name || supabaseUser.user_metadata.name?.split(' ')[0] || '',
         lastName: profileData?.last_name || supabaseUser.user_metadata.last_name || supabaseUser.user_metadata.name?.split(' ').slice(1).join(' ') || '',
         employee_id: profileData?.employee_id,
-        role: userRole,
         profileImageUrl: supabaseUser.user_metadata.avatar_url || supabaseUser.user_metadata.picture || '/placeholder.svg',
         created_at: supabaseUser.created_at,
         updated_at: supabaseUser.updated_at || supabaseUser.created_at,
+        // New permission-based fields
+        customRole,
+        sbuContext: roleData?.sbu_context || profileData?.sbu_id,
+        permissions: userPermissions
       });
     } catch (error) {
       console.error('Error setting up user profile:', error);
@@ -76,6 +122,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, currentSession) => {
         console.log('Auth state change:', event, currentSession?.user?.id);
+        
+        // Clear React Query cache on auth state changes
+        if (event === 'SIGNED_OUT' || (event === 'SIGNED_IN' && currentSession?.user?.id !== user?.id)) {
+          queryClient.clear();
+          // Clear SBU-related localStorage that can bleed across users
+          localStorage.removeItem('resource-calendar/planning/basic-filters');
+          localStorage.removeItem('resource-calendar/planning/advanced-filters');
+        }
+        
         setSession(currentSession);
         
         if (currentSession?.user) {
@@ -161,18 +216,150 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setSession(null);
       setUser(null);
     } finally {
+      // Always clear cache and localStorage, even if sign out fails
+      queryClient.clear();
+      localStorage.removeItem('resource-calendar/planning/basic-filters');
+      localStorage.removeItem('resource-calendar/planning/advanced-filters');
       setIsLoading(false);
     }
   };
 
-  const hasPermission = (requiredRole: UserRole | UserRole[]): boolean => {
-    if (!user) return false;
+
+
+  // New permission-based methods - hybrid approach with cache + RPC fallback
+  const hasModuleAccess = (moduleId: string): boolean => {
+    console.log('=== hasModuleAccess Debug ===');
+    console.log('Looking for module:', moduleId);
+    console.log('User permissions:', user?.permissions?.map(p => ({
+      module: p.module_name,
+      subModule: p.sub_module_name,
+      permission: p.permission_type
+    })));
     
-    if (Array.isArray(requiredRole)) {
-      return requiredRole.includes(user.role);
+    if (!user?.permissions) {
+      console.log('No user permissions found');
+      return false;
     }
     
-    return user.role === requiredRole;
+    // Use cached permissions for performance
+    const hasAccess = user.permissions.some(permission => 
+      permission.module_name === moduleId || permission.module_id === moduleId
+    );
+    
+    console.log('Module access result:', hasAccess);
+    console.log('=== End hasModuleAccess Debug ===');
+    
+    return hasAccess;
+  };
+
+  const hasSubModulePermission = (
+    subModuleId: string, 
+    permissionType: 'create' | 'read' | 'update' | 'delete' | 'manage'
+  ): boolean => {
+    console.log('=== hasSubModulePermission Debug ===');
+    console.log('Looking for sub-module:', subModuleId, 'with permission:', permissionType);
+    console.log('Available sub-modules:', user?.permissions?.map(p => p.sub_module_name));
+    
+    if (!user?.permissions) {
+      console.log('No user permissions found');
+      return false;
+    }
+    
+    // Use cached permissions with SBU restrictions already processed by RPC
+    const hasAccess = user.permissions.some(permission => 
+      (permission.sub_module_name === subModuleId || permission.sub_module_id === subModuleId) && 
+      permission.permission_type === permissionType
+    );
+    
+    console.log('Sub-module permission result:', hasAccess);
+    console.log('=== End hasSubModulePermission Debug ===');
+    
+    return hasAccess;
+  };
+
+  const hasRouteAccess = (routePath: string): boolean => {
+    if (!user?.permissions) return false;
+    
+    // Check if route matches any permission route paths
+    const routePermission = user.permissions.find(permission => 
+      permission.route_path === routePath
+    );
+
+    if (routePermission) {
+      return routePermission.permission_type === 'read';
+    }
+
+    // Fallback: check for any read permission
+    return user.permissions.some(permission => 
+      permission.permission_type === 'read'
+    );
+  };
+
+  const getUserPermissions = (): UserPermission[] => {
+    return user?.permissions || [];
+  };
+
+  // Helper function to check if user can view system roles
+  const canViewSystemRoles = (): boolean => {
+    if (!user?.customRole) return false;
+    return user.customRole.is_system_role === true;
+  };
+
+  // Real-time RPC-based permission methods for critical security checks
+  const hasModuleAccessRealTime = async (moduleId: string): Promise<boolean> => {
+    if (!user?.id) return false;
+    
+    try {
+      const { data, error } = await supabase
+        .rpc('has_module_access', { 
+          _user_id: user.id, 
+          _module_name: moduleId 
+        });
+      
+      if (error) {
+        console.error('Error checking module access:', error);
+        // Fallback to cached permissions on error
+        return hasModuleAccess(moduleId);
+      }
+      
+      return data || false;
+    } catch (error) {
+      console.error('Error in hasModuleAccessRealTime:', error);
+      return hasModuleAccess(moduleId);
+    }
+  };
+
+  const hasSubModulePermissionRealTime = async (
+    subModuleId: string, 
+    permissionType: 'create' | 'read' | 'update' | 'delete' | 'manage',
+    targetSbuId?: string
+  ): Promise<boolean> => {
+    if (!user?.id) return false;
+    
+    try {
+      // Convert 'create' to 'write' for the database function, filter out 'manage'
+      const dbPermissionType = permissionType === 'create' ? 'write' : 
+                               permissionType === 'manage' ? 'read' : permissionType;
+      
+      const { data, error } = await supabase
+        .rpc('has_permission', {
+          _user_id: user.id,
+          _sub_module_path: subModuleId,
+          _permission_type: dbPermissionType,
+          _target_sbu_id: targetSbuId || user.sbuContext
+        });
+      
+      if (error) {
+        console.error('Error checking sub-module permission:', error);
+        // Fallback to cached permissions on error
+        return hasSubModulePermission(subModuleId, permissionType);
+      }
+      
+      return data || false;
+    } catch (error) {
+      console.error('Error in hasSubModulePermissionRealTime:', error);
+      return hasSubModulePermission(subModuleId, permissionType);
+    }
   };
 
   return (
@@ -183,7 +370,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         isLoading, 
         signIn, 
         signOut,
-        hasPermission
+        hasModuleAccess,
+        hasSubModulePermission,
+        hasRouteAccess,
+        getUserPermissions,
+        canViewSystemRoles,
+        hasModuleAccessRealTime,
+        hasSubModulePermissionRealTime
       }}
     >
       {children}

@@ -3,23 +3,23 @@ import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
-import { User, Mail, Lock, IdCard, Building, Calendar, Briefcase, UserCheck, Settings } from 'lucide-react';
+import { User, Mail, Lock, IdCard, Building, Calendar, Briefcase, Settings } from 'lucide-react';
 import { Switch } from '@/components/ui/switch';
-import { UserRole } from '@/types';
 import SbuCombobox from './user/SbuCombobox';
 import ExpertiseCombobox from './user/ExpertiseCombobox';
 import ResourceTypeCombobox from './user/ResourceTypeCombobox';
 import DatePicker from './user/DatePicker';
 import { ProfileCombobox } from './user/ProfileCombobox';
+import CustomRoleCombobox from './user/CustomRoleCombobox';
 
 interface UserFormData {
   email: string;
   firstName: string;
   lastName: string;
-  role: UserRole;
+  customRoleId: string | null;
+  sbuContext: string | null;
   password: string;
   employeeId: string;
   sbuId: string | null;
@@ -58,7 +58,8 @@ const UserForm: React.FC<UserFormProps> = ({
     email: initialData.email || '',
     firstName: initialData.firstName || '',
     lastName: initialData.lastName || '',
-    role: initialData.role || 'employee',
+    customRoleId: initialData.customRoleId || null,
+    sbuContext: initialData.sbuContext || null,
     password: initialData.password || '',
     employeeId: initialData.employeeId || '',
     sbuId: initialData.sbuId || null,
@@ -73,6 +74,8 @@ const UserForm: React.FC<UserFormProps> = ({
     active: initialData.active ?? true,
     hasOverhead: initialData.hasOverhead ?? true
   });
+
+  const [isRoleSbuBound, setIsRoleSbuBound] = useState(false);
 
 
   const handleInputChange = (field: keyof UserFormData, value: string | boolean | null) => {
@@ -198,21 +201,37 @@ const UserForm: React.FC<UserFormProps> = ({
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="role" className="flex items-center gap-2">
+                  <Label htmlFor="customRole" className="flex items-center gap-2">
                     <Building size={16} />
                     Role *
                   </Label>
-                  <Select value={formData.role} onValueChange={(value) => handleInputChange('role', value)}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select role" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="admin">Admin</SelectItem>
-                      <SelectItem value="manager">Manager</SelectItem>
-                      <SelectItem value="employee">Employee</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <CustomRoleCombobox
+                    value={formData.customRoleId}
+                    onValueChange={(value) => handleInputChange('customRoleId', value)}
+                    onRoleChange={(roleInfo) => {
+                      setIsRoleSbuBound(roleInfo.isSbuBound);
+                      // Clear SBU context if role is not SBU-bound
+                      if (!roleInfo.isSbuBound) {
+                        handleInputChange('sbuContext', null);
+                      }
+                    }}
+                    placeholder="Select role..."
+                  />
                 </div>
+
+                {isRoleSbuBound && (
+                  <div className="space-y-2">
+                    <Label htmlFor="sbuContext" className="flex items-center gap-2">
+                      <Building size={16} />
+                      SBU Context *
+                    </Label>
+                    <SbuCombobox
+                      value={formData.sbuContext}
+                      onValueChange={(value) => handleInputChange('sbuContext', value)}
+                      placeholder="Select SBU context for this role..."
+                    />
+                  </div>
+                )}
 
                 <div className="space-y-2">
                   <Label htmlFor="manager" className="flex items-center gap-2">

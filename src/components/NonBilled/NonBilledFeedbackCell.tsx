@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { MessageSquare, Edit3 } from 'lucide-react';
 import { NonBilledFeedbackDialog } from './NonBilledFeedbackDialog';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { useNonBilledReportPermissions } from '@/hooks/use-non-billed-permissions';
 
 interface NonBilledFeedbackCellProps {
   employeeId: string;
@@ -17,6 +18,8 @@ export const NonBilledFeedbackCell: React.FC<NonBilledFeedbackCellProps> = ({
   feedback,
   onUpdate,
 }) => {
+  const permissions = useNonBilledReportPermissions();
+
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   const truncatedFeedback = feedback && feedback.length > 50 
@@ -51,7 +54,7 @@ export const NonBilledFeedbackCell: React.FC<NonBilledFeedbackCellProps> = ({
             <span className="align-middle">No feedback</span>
           </div>
         )}
-        <Button
+        {permissions.canEditFeedback && <Button
           variant="ghost"
           size="sm"
           className="h-7 w-7 p-0 ml-1"
@@ -59,6 +62,8 @@ export const NonBilledFeedbackCell: React.FC<NonBilledFeedbackCellProps> = ({
         >
           <Edit3 className="h-3.5 w-3.5" />
         </Button>
+        }
+
       </div>
 
       <NonBilledFeedbackDialog

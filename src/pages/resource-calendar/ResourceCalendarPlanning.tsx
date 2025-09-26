@@ -4,9 +4,23 @@ import { ResourcePlanningTable } from '../../components/resource-planning/Resour
 import { ResourcePlanningExportButton } from '../../components/resource-planning/ResourcePlanningExportButton';
 import { ResourcePlanningAuditLogsDialog } from '@/components/resource-planning/ResourcePlanningAuditLogsDialog';
 import { BulkResourcePlanningUpdate } from '@/components/resource-planning/BulkResourcePlanningUpdate';
+import { useResourcePlanningPermissions }  from '@/hooks/use-resource-permissions';
+import {useUserAccessibleSbus} from '@/hooks/use-user-accessible-sbus';
 
 const ResourceCalendarPlanning: React.FC = () => {
+  const permissions = useResourcePlanningPermissions();
+  
+  // Get SBU-bound info
+  const { data: accessibleSbuData, isLoading: sbuLoading } = useUserAccessibleSbus();
+  const isSbuBound = accessibleSbuData?.isSbuBound ?? false;
 
+  if (!permissions.canRead) {
+    return (
+      <div className="text-center text-gray-500 dark:text-gray-400">
+        You do not have permission to view this content.
+      </div>
+    );
+  }       
   return (
     <div className="space-y-4">
       {/* Header */}
@@ -17,11 +31,13 @@ const ResourceCalendarPlanning: React.FC = () => {
           </div>
         </div>
         <div className="flex space-x-2">
-          <BulkResourcePlanningUpdate />
-          <ResourcePlanningExportButton />
-          <ResourcePlanningAuditLogsDialog
+          {permissions.showBulkUpdateButton && <BulkResourcePlanningUpdate />}
+          {permissions.canRead && !isSbuBound && <ResourcePlanningExportButton />}
+          {permissions.canRead && ( 
+            <ResourcePlanningAuditLogsDialog
             params={{ items_per_page: 100, page_number: 1 }}
           />
+          )}
         </div>
       </div>
       <ResourcePlanningTable />

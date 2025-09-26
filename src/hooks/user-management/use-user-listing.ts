@@ -2,7 +2,6 @@
 import { supabase } from '../../integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { SortColumn, SortOrder } from '../types/user-management';
-import { UserRole } from '@/types';
 import { ListUsersResponse } from '../types/supabase-responses';
 
 export function useUserListing(state: ReturnType<typeof import('./use-user-state').useUserState>) {
@@ -13,8 +12,8 @@ export function useUserListing(state: ReturnType<typeof import('./use-user-state
     setIsLoading,
     searchQuery,
     setSearchQuery,
-    filterRole,
-    setFilterRole,
+    filterCustomRoleId,
+    setFilterCustomRoleId,
     sortBy,
     setSortBy,
     sortOrder,
@@ -38,7 +37,7 @@ export function useUserListing(state: ReturnType<typeof import('./use-user-state
     page?: number;
     perPage?: number;
     search?: string | null;
-    role?: UserRole | null;
+    customRoleId?: string | null;
     sortColumn?: SortColumn;
     sortDirection?: SortOrder;
     sbuId?: string | null;
@@ -52,7 +51,7 @@ export function useUserListing(state: ReturnType<typeof import('./use-user-state
       page = state.pagination.page,
       perPage = state.pagination.perPage,
       search = searchQuery,
-      role = filterRole,
+      customRoleId = filterCustomRoleId,
       sortColumn = sortBy,
       sortDirection = sortOrder,
       sbuId = filterSbuId,
@@ -68,7 +67,7 @@ export function useUserListing(state: ReturnType<typeof import('./use-user-state
     try {
       const { data, error } = await supabase.rpc('list_users', {
         search_query: search || null,
-        filter_role: role || null,
+        filter_custom_role_id: customRoleId || null,
         filter_sbu_id: sbuId || null,
         filter_manager_id: managerId || null,
         filter_resource_type_id: resourceTypeId || null,
@@ -99,7 +98,10 @@ export function useUserListing(state: ReturnType<typeof import('./use-user-state
         email: user.email,
         firstName: user.first_name || '',
         lastName: user.last_name || '',
-        role: user.role || 'employee',
+        customRoleId: user.custom_role_id || null,
+        customRoleName: user.custom_role_name || null,
+        sbuContext: user.sbu_context || null,
+        sbuContextName: user.sbu_context_name || null,
         employeeId: user.employee_id || '',
         sbuId: user.sbu_id || null,
         sbuName: user.sbu_name || null,
@@ -126,7 +128,7 @@ export function useUserListing(state: ReturnType<typeof import('./use-user-state
       
       // Update state with the query parameters
       setSearchQuery(search);
-      setFilterRole(role);
+      setFilterCustomRoleId(customRoleId);
       setSortBy(sortColumn);
       setSortOrder(sortDirection);
       setFilterSbuId(sbuId);
@@ -157,7 +159,7 @@ export function useUserListing(state: ReturnType<typeof import('./use-user-state
     fetchUsers({
       page: 1,
       search: null,
-      role: null,
+      customRoleId: null,
       sortColumn: 'created_at',
       sortDirection: 'desc',
       sbuId: null,

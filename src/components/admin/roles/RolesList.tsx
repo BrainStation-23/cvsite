@@ -1,11 +1,19 @@
 import React, { useState } from 'react';
-import { Edit, Shield, Trash2, Users } from 'lucide-react';
+import { Copy, Edit, Lock, MoreVertical, Shield, Trash2, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useNavigate } from 'react-router-dom';
 import { useRoles, useDeleteRole } from '@/hooks/rbac/useRoles';
+import { useDuplicateRole } from '@/hooks/rbac/useDuplicateRole';
 import { ConfirmationDialog } from '@/components/ui/confirmation-dialog';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useAuth } from '@/contexts/AuthContext';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import {
   Table,
   TableBody,
@@ -19,7 +27,9 @@ export const RolesList: React.FC = () => {
   const navigate = useNavigate();
   const { data: roles, isLoading } = useRoles();
   const deleteRoleMutation = useDeleteRole();
+  const duplicateRoleMutation = useDuplicateRole();
   const [roleToDelete, setRoleToDelete] = useState<string | null>(null);
+  const { canViewSystemRoles } = useAuth();
 
   const handleDelete = async () => {
     if (roleToDelete) {
@@ -28,6 +38,13 @@ export const RolesList: React.FC = () => {
     }
   };
 
+  const handleDuplicate = async (role: any) => {
+    await duplicateRoleMutation.mutateAsync({
+      sourceRoleId: role.id
+    });
+  };
+
+  // Show loading state
   if (isLoading) {
     return (
       <div className="space-y-4">
@@ -35,7 +52,6 @@ export const RolesList: React.FC = () => {
           <div key={i} className="flex items-center space-x-4">
             <Skeleton className="h-12 w-12 rounded-full" />
             <div className="space-y-2">
-              <Skeleton className="h-4 w-[250px]" />
               <Skeleton className="h-4 w-[200px]" />
             </div>
           </div>
@@ -44,12 +60,21 @@ export const RolesList: React.FC = () => {
     );
   }
 
-  if (!roles || roles.length === 0) {
+  // Filter system roles based on user permissions
+  const filteredRoles = roles?.filter(role => {
+    // If user has system role access, show all roles
+    if (canViewSystemRoles()) {
+      return true;
+    }
+    // Otherwise, hide system roles
+    return !role.is_system_role;
+  }) || [];
+
+  if (filteredRoles.length === 0) {
     return (
-      <div className="text-center py-8">
-        <Shield className="mx-auto h-12 w-12 text-muted-foreground" />
-        <h3 className="mt-4 text-lg font-semibold">No custom roles found</h3>
+      <div className="space-y-4">
         <p className="text-muted-foreground">
+          You don't have any custom roles yet. 
           Create your first custom role to get started.
         </p>
         <Button 
@@ -75,7 +100,7 @@ export const RolesList: React.FC = () => {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {roles.map((role) => (
+          {filteredRoles.map((role) => (
             <TableRow key={role.id}>
               <TableCell className="font-medium">{role.name}</TableCell>
               <TableCell className="text-muted-foreground">
@@ -87,7 +112,16 @@ export const RolesList: React.FC = () => {
                     <Badge variant="secondary">System</Badge>
                   )}
                   {role.is_sbu_bound && (
-                    <Badge variant="outline">SBU Bound</Badge>
+                    <Badge variant="outline" className="gap-1">
+                      <Lock className="h-3 w-3" />
+                      SBU Bound
+                    </Badge>
+                  )}
+                  {role.is_self_bound && (
+                    <Badge variant="outline" className="gap-1">
+                      <User className="h-3 w-3" />
+                      Self Bound
+                    </Badge>
                   )}
                 </div>
               </TableCell>
@@ -101,24 +135,45 @@ export const RolesList: React.FC = () => {
                     size="sm"
                     onClick={() => navigate(`/admin/roles/permissions/${role.id}`)}
                   >
-                    <Shield className="h-4 w-4" />
+                    <Shield className="mr-2 h-4 w-4" />
+                    Permissions
                   </Button>
                   <Button
                     variant="ghost"
                     size="sm"
                     onClick={() => navigate(`/admin/roles/edit/${role.id}`)}
                   >
-                    <Edit className="h-4 w-4" />
+                    <Edit className="mr-2 h-4 w-4" />
+                    Edit
                   </Button>
-                  {!role.is_system_role && (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => setRoleToDelete(role.id)}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  )}
+                  
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                        <MoreVertical className="h-4 w-4" />
+                        <span className="sr-only">More actions</span>
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem 
+                        onClick={() => handleDuplicate(role)}
+                        disabled={duplicateRoleMutation.isPending}
+                        className="cursor-pointer"
+                      >
+                        <Copy className="mr-2 h-4 w-4" />
+                        <span>Duplicate</span>
+                      </DropdownMenuItem>
+                      {!role.is_system_role && (
+                        <DropdownMenuItem 
+                          onClick={() => setRoleToDelete(role.id)}
+                          className="cursor-pointer text-destructive focus:text-destructive"
+                        >
+                          <Trash2 className="mr-2 h-4 w-4" />
+                          <span>Delete</span>
+                        </DropdownMenuItem>
+                      )}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 </div>
               </TableCell>
             </TableRow>

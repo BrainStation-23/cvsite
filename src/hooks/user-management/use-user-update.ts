@@ -1,7 +1,6 @@
 
 import { supabase } from '../../integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { UserRole } from '@/types';
 
 export function useUserUpdate(state: ReturnType<typeof import('./use-user-state').useUserState>) {
   const { toast } = useToast();
@@ -13,7 +12,8 @@ export function useUserUpdate(state: ReturnType<typeof import('./use-user-state'
     email: string;
     firstName: string;
     lastName: string;
-    role: UserRole;
+    customRoleId?: string | null;
+    sbuContext?: string | null;
     employeeId: string;
     sbuId?: string | null;
     expertiseId?: string | null;
@@ -37,7 +37,8 @@ export function useUserUpdate(state: ReturnType<typeof import('./use-user-state'
           email: userData.email,
           firstName: userData.firstName,
           lastName: userData.lastName,
-          role: userData.role,
+          customRoleId: userData.customRoleId,
+          sbuContext: userData.sbuContext,
           employeeId: userData.employeeId,
           sbuId: userData.sbuId,
           expertiseId: userData.expertiseId,

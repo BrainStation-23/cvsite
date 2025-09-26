@@ -1,5 +1,4 @@
-import { useState, useEffect } from 'react';
-import { startOfWeek, endOfWeek } from 'date-fns';
+import { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
@@ -17,20 +16,17 @@ import {
 import { OverviewCards } from './OverviewCards';
 import { SBUExperienceDistributionChart } from './SBUExperienceDistributionChart';
 import { DimensionalAnalysisChart } from './DimensionalAnalysisChart';
-import { SBUExpertiseAnalysisChart } from './SBUExpertiseAnalysisChart';
 import { SBUBillTypeAnalysisChart } from './SBUBillTypeAnalysisChart';
 import { RiskAnalytics } from './RiskAnalytics';
 import { TrendsChart } from './TrendsChart';
-
+import { SBUExpertiseAnalysisChart } from './SBUExpertiseAnalysisChart';
 
 export function NonBilledAnalyticsDashboard() {
-  const [startDate, setStartDate] = useState<Date | null>(startOfWeek(new Date(), { weekStartsOn: 1 }));
-  const [endDate, setEndDate] = useState<Date | null>(endOfWeek(new Date(), { weekStartsOn: 1 }));
+  const [startDate, setStartDate] = useState<Date | null>(null);
+  const [endDate, setEndDate] = useState<Date | null>(null);
   const [benchFilter, setBenchFilter] = useState<boolean | null>(null);
-  
-  const [periodType, setPeriodType] = useState<'daily' | 'weekly' | 'monthly'>('monthly');
 
-  // Fetch analytics data
+  const [periodType, setPeriodType] = useState<'daily' | 'weekly' | 'monthly'>('monthly');
   const overviewQuery = useNonBilledOverview({
     startDate,
     endDate,

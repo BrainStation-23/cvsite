@@ -14,6 +14,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Edit, Mail, MessageSquare, MoreHorizontal, Download, Eye } from 'lucide-react';
+import {useCvSearchPermissions} from '@/hooks/use-cv-permissions';
 
 interface CompactEmployeeActionsProps {
   profile: any;
@@ -32,13 +33,14 @@ const CompactEmployeeActions: React.FC<CompactEmployeeActionsProps> = ({
   onPDFExport,
   onPreview
 }) => {
+  const permissions = useCvSearchPermissions();
   return (
     <TooltipProvider>
       <div className="items-center justify-end gap-1">
         {/* Primary Actions - Always Visible */}
         <Tooltip>
           <TooltipTrigger asChild>
-            <Button 
+            {permissions.canEditCv && <Button 
               variant="ghost" 
               size="sm"
               onClick={() => onViewProfile(profile.id)}
@@ -46,6 +48,8 @@ const CompactEmployeeActions: React.FC<CompactEmployeeActionsProps> = ({
             >
               <Edit className="h-4 w-4" />
             </Button>
+            }
+
           </TooltipTrigger>
           <TooltipContent>
             <p>Edit Profile</p>

@@ -10,13 +10,13 @@ const EmployeeDashboard: React.FC = () => {
       title: 'My Profile',
       description: 'View and edit your profile information',
       icon: <User className="h-10 w-10 text-cvsite-teal" />,
-      link: '/employee/profile',
+      link: '/profile',
     },
     {
       title: 'Security',
       description: 'Update your password and security settings',
       icon: <Shield className="h-10 w-10 text-cvsite-teal" />,
-      link: '/employee/security',
+      link: '/security',
     }
   ];
 

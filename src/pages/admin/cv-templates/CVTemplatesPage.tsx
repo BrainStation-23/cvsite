@@ -10,6 +10,7 @@ import { useCVTemplates, CVTemplate } from '@/hooks/use-cv-templates';
 import { CVTemplateForm } from '@/components/admin/cv-templates/CVTemplateForm';
 import { ConfirmationDialog } from '@/components/ui/confirmation-dialog';
 import { useConfirmationDialog } from '@/hooks/use-confirmation-dialog';
+import { useCvTemplatePermissions } from '@/hooks/use-cv-permissions';
 
 const CVTemplatesPage: React.FC = () => {
   const navigate = useNavigate();
@@ -25,7 +26,7 @@ const CVTemplatesPage: React.FC = () => {
     isDeleting,
     isDuplicating
   } = useCVTemplates();
-
+  const permissions = useCvTemplatePermissions();
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingTemplate, setEditingTemplate] = useState<CVTemplate | undefined>();
   
@@ -123,10 +124,10 @@ const CVTemplatesPage: React.FC = () => {
               Manage CV templates for generating customized resumes
             </p>
           </div>
-          <Button onClick={handleCreateNew}>
+          {permissions.canCreateCvTemplate && <Button onClick={handleCreateNew}>
             <Plus className="h-4 w-4 mr-2" />
             Create Template
-          </Button>
+          </Button>}
         </div>
 
         {/* Templates Table */}
@@ -177,29 +178,31 @@ const CVTemplatesPage: React.FC = () => {
                     </TableCell>
                     <TableCell>
                       <div className="flex items-center gap-2">
-                        <Switch
+                        {permissions.canEditCvTemplate && <Switch
                           checked={template.enabled}
                           onCheckedChange={() => handleToggleEnabled(template)}
                           disabled={isUpdating}
                         />
+                        }
                         <Badge variant={template.enabled ? "default" : "secondary"}>
                           {template.enabled ? 'Enabled' : 'Disabled'}
                         </Badge>
                       </div>
                     </TableCell>
                     <TableCell>
-                      <Switch
+                      {permissions.canEditCvTemplate && <Switch
                         checked={template.is_default}
                         onCheckedChange={() => handleToggleDefault(template)}
                         disabled={isUpdating}
                       />
+                      }
                     </TableCell>
                     <TableCell className="text-muted-foreground">
                       {formatDate(template.updated_at)}
                     </TableCell>
                     <TableCell>
                       <div className="flex gap-1">
-                        <Button
+                        {permissions.canPreviewCvTemplate && <Button
                           size="sm"
                           variant="ghost"
                           onClick={() => handlePreview(template)}
@@ -207,7 +210,9 @@ const CVTemplatesPage: React.FC = () => {
                         >
                           <Eye className="h-4 w-4" />
                         </Button>
-                        <Button
+                        }
+
+                        {permissions.canEditCvTemplate && <Button
                           size="sm"
                           variant="ghost"
                           onClick={() => handleEdit(template)}
@@ -216,7 +221,8 @@ const CVTemplatesPage: React.FC = () => {
                         >
                           <Pencil className="h-4 w-4" />
                         </Button>
-                        <Button
+                        }
+                        {permissions.canCreateCvTemplate && <Button
                           size="sm"
                           variant="ghost"
                           onClick={() => handleDuplicate(template)}
@@ -224,8 +230,9 @@ const CVTemplatesPage: React.FC = () => {
                           title="Duplicate"
                         >
                           <Copy className="h-4 w-4" />
-                        </Button>
-                        <Button
+                        </Button>}
+
+                        {permissions.canDeleteCvTemplate && <Button
                           size="sm"
                           variant="ghost"
                           onClick={() => handleDelete(template)}
@@ -233,7 +240,8 @@ const CVTemplatesPage: React.FC = () => {
                           title={template.is_default ? "Cannot delete default template" : "Delete"}
                         >
                           <Trash2 className="h-4 w-4" />
-                        </Button>
+                        </Button>}
+
                       </div>
                     </TableCell>
                   </TableRow>

@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Trash2, Edit2, Save, X, Download, Upload, Loader2 } from 'lucide-react';
+import { Trash2, Edit2, Save, X, Loader2 } from 'lucide-react';
 import { useJobRoleSettings, JobRoleFormData, JobRoleItem } from '@/hooks/use-job-role-settings';
 import JobRoleCSVManager from './job-role/JobRoleCSVManager';
 

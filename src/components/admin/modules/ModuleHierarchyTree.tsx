@@ -108,7 +108,7 @@ export const ModuleHierarchyTree: React.FC<ModuleHierarchyTreeProps> = ({ module
                     </Link>
                   </Button>
                   <Button variant="outline" size="sm" asChild>
-                    <Link to={`/admin/modules/${module.id}/submodules`}>
+                    <Link to={`/admin/modules/${module.id}/submodules/create`}>
                       <Plus className="h-4 w-4 mr-1" />
                       Sub-modules
                     </Link>
