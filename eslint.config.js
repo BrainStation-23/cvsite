@@ -1,37 +1,40 @@
+// eslint.config.js
 import js from "@eslint/js";
 import globals from "globals";
 import reactHooks from "eslint-plugin-react-hooks";
 import reactRefresh from "eslint-plugin-react-refresh";
-import tseslint from "typescript-eslint";
+import tsPlugin from "@typescript-eslint/eslint-plugin";
+import tsParser from "@typescript-eslint/parser";
 
-export default tseslint.config(
-  { ignores: ["dist"] },
+// Pick only the rules you want from recommended configs
+const tsRecommendedRules = tsPlugin.configs.recommended.rules;
+const jsRecommendedRules = js.configs.recommended.rules;
+
+export default [
   {
-    // This covers all the file extensions we care about
     files: ["**/*.{js,jsx,ts,tsx}"],
 
-    // Extend recommended configs
-    extends: [js.configs.recommended, ...tseslint.configs.recommended],
-
     languageOptions: {
-      ecmaVersion: 2020,
+      parser: tsParser,
+      parserOptions: {
+        ecmaVersion: 2020,
+        sourceType: "module",
+      },
       globals: globals.browser,
     },
 
     plugins: {
       "react-hooks": reactHooks,
       "react-refresh": reactRefresh,
+      "@typescript-eslint": tsPlugin,
     },
 
     rules: {
+      ...jsRecommendedRules,
+      ...tsRecommendedRules,
       ...reactHooks.configs.recommended.rules,
-      "react-refresh/only-export-components": [
-        "warn",
-        { allowConstantExport: true },
-      ],
-
-      // Disable rules you don’t need
+      "react-refresh/only-export-components": ["warn", { allowConstantExport: true }],
       "@typescript-eslint/no-unused-vars": "off",
     },
-  }
-);
+  },
+];
