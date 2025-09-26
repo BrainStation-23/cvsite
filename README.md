@@ -1,50 +1,66 @@
-# CVSite — Modern CV/Resume Management Platform
+# HR Database — Next-Generation Talent Management Platform
 
-CVSite is a modern, full-featured platform for building, managing, and exporting professional CVs and resumes. Designed for individuals, HR teams, and organizations, it streamlines the process of profile creation, skill and experience tracking, and exporting to multiple formats.
+[![Technical Debt](https://sonarcloud.io/api/project_badges/measure?project=BrainStation-23_cvsite&metric=sqale_index)](https://sonarcloud.io/summary/new_code?id=BrainStation-23_cvsite)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=BrainStation-23_cvsite&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=BrainStation-23_cvsite)
+[![Reliability Rating](https://sonarcloud.io/api/project_badges/measure?project=BrainStation-23_cvsite&metric=reliability_rating)](https://sonarcloud.io/summary/new_code?id=BrainStation-23_cvsite)
+[![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=BrainStation-23_cvsite&metric=security_rating)](https://sonarcloud.io/summary/new_code?id=BrainStation-23_cvsite)
+[![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=BrainStation-23_cvsite&metric=sqale_rating)](https://sonarcloud.io/summary/new_code?id=BrainStation-23_cvsite)
 
-## What Does CVSite Do?
+> **Revolutionizing HR operations with intelligent automation, seamless team collaboration, and enterprise-grade security.**
 
-- **Profile Management:** Create rich personal profiles with sections for general info, education, experience, skills, achievements, projects, and more.
-- **Smart Image Handling:** Upload, analyze, and validate professional headshots with built-in AI analysis and guideline feedback.
-- **Flexible Section Editing:** Add, edit, reorder, and group sections like skills, education, and experience for a tailored CV.
-- **Data Import/Export:** Import/export profile data in JSON and other formats. Export CVs as PDF, DOCX, and more.
-- **Template System:** Use and customize CV templates for consistent, beautiful layouts.
-- **Responsive UI:** Built with React and Tailwind CSS for a fast, accessible, and mobile-friendly experience.
-- **Admin Tools:** Manage users, templates, and organizational settings (for HR/enterprise use).
+HR Database transforms how organizations manage talent by combining powerful employee profiling, advanced permission systems, and AI-driven insights into one unified platform. From startups to enterprise organizations, we're making HR management effortless and data-driven.
 
-## Key Features
+## 🚀 Why HR Database?
 
-- Drag-and-drop section reordering
-- Skill and experience grouping
-- AI-powered profile image analysis
-- JSON import/export with schema validation
-- PDF/DOCX export with template selection
-- User authentication and profile privacy controls
-- Modern, accessible design
+**For HR Teams:**
+- ⚡ **Lightning-fast profile creation** with AI-powered image analysis and validation
+- 🎯 **Smart team visualization** with hierarchical org charts and relationship mapping  
+- 📊 **Advanced analytics** for workforce insights and reporting
+- 🔒 **Enterprise security** with role-based permissions and row-level access control
 
-## Getting Started
+**For Employees:**
+- ✨ **Beautiful CV generation** with professional templates and one-click PDF export
+- 🎨 **Drag-and-drop customization** for skills, experience, and achievements
+- 📱 **Mobile-optimized interface** for updates anywhere, anytime
+- 🔄 **Seamless data import/export** with JSON, CSV, and Excel support
 
-### Prerequisites
-- [Node.js](https://nodejs.org/) (v18 or higher recommended)
-- [npm](https://www.npmjs.com/) or [yarn](https://yarnpkg.com/)
+**For Organizations:**
+- 👥 **Comprehensive user management** with bulk operations and CSV imports
+- 🏢 **Multi-tenant architecture** supporting complex organizational structures
+- 🛡️ **Granular permission system** ensuring data privacy and compliance
+- 📈 **Scalable infrastructure** powered by Supabase and modern cloud architecture
 
-### Installation
-```sh
-git clone <YOUR_GIT_REPOSITORY_URL>
-cd cvsite
-npm install
-```
+## ✨ Core Features
 
-### Running Locally
-```sh
-npm run dev
-```
-Visit [http://localhost:5173](http://localhost:5173) in your browser.
+### 🎭 **AI-Powered Profile Management**
+- Professional headshot analysis with posture and lighting validation
+- Intelligent skill categorization and experience grouping
+- Automated profile completeness scoring and recommendations
 
-### Building for Production
-```sh
-npm run build
-```
+### 🏗️ **Advanced Team Management** 
+- Interactive organizational charts with manager-employee relationships
+- Team hierarchy visualization and reporting structures
+- Cross-departmental collaboration tools
+
+### 🔐 **Enterprise-Grade Security**
+- Role-based access control with custom permission matrices
+- Row-level security ensuring users only see authorized data
+- Audit trails and compliance reporting
+
+### 📄 **Professional Document Generation**
+- Multiple CV/resume templates with customization options
+- One-click PDF and DOCX export with professional formatting
+- Bulk document generation for HR operations
+
+### 🔄 **Seamless Data Operations**
+- CSV/Excel import with intelligent field mapping
+- JSON-based profile backup and migration
+- RESTful API for third-party integrations
+
+### 📈 **Analytics & Insights**
+- Workforce demographics and skill distribution
+- Employee growth tracking and performance metrics
+- Custom reporting with exportable dashboards
 
 ## Tech Stack
 - **React** (UI framework)
