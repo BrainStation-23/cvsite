@@ -54,7 +54,6 @@ serve(async (req) => {
       email: user.email || '',
       firstName: user.first_name || '',
       lastName: user.last_name || '',
-      customRoleId: user.custom_role_id || '',
       customRoleName: user.custom_role_name || '',
       sbuContextId: user.sbu_context || '',
       sbuContextName: user.sbu_context_name || '',
@@ -76,7 +75,7 @@ serve(async (req) => {
     
     // Convert to CSV format with human-friendly headers
     const csvHeaders = [
-      'userId', 'email', 'firstName', 'lastName', 'customRoleId', 'customRoleName', 
+      'userId', 'email', 'firstName', 'lastName', 'customRoleName', 
       'sbuContextId', 'sbuContextName', 'employeeId', 'managerEmail', 'sbuName', 
       'expertiseName', 'resourceTypeName', 'dateOfJoining', 'careerStartDate', 
       'dateOfBirth', 'resignationDate', 'exitDate', 'active', 'hasOverhead', 
@@ -88,7 +87,6 @@ serve(async (req) => {
       row.email,
       row.firstName,
       row.lastName,
-      row.customRoleId,
       row.customRoleName,
       row.sbuContextId,
       row.sbuContextName,
