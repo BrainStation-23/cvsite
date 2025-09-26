@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Filter, Sparkles } from 'lucide-react';
+import { Filter } from 'lucide-react';
 import { 
   EmployeeProfileSortColumn, 
   EmployeeProfileSortOrder 
@@ -12,10 +12,8 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from '@/components/ui/collapsible';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 import BasicSearchBar from './search/BasicSearchBar';
-import AISearchBar from './search/AISearchBar';
 import FilterChipsList from './search/FilterChipsList';
 import AdvancedFiltersPanel from './search/AdvancedFiltersPanel';
 import SortControls from './search/SortControls';
@@ -75,7 +73,6 @@ const EnhancedEmployeeSearchFilters: React.FC<EnhancedEmployeeSearchFiltersProps
   isLoading
 }) => {
   const [isFiltersOpen, setIsFiltersOpen] = useState(false);
-  const [searchMode, setSearchMode] = useState<'manual' | 'ai'>('manual');
   
   const [experienceYears, setExperienceYears] = useState<number[]>([0, 20]);
   const [minGraduationYear, setMinGraduationYear] = useState<number | null>(null);
@@ -188,78 +185,7 @@ const EnhancedEmployeeSearchFilters: React.FC<EnhancedEmployeeSearchFiltersProps
     onReset
   });
 
-  const handleAISearch = (filters: any) => {
-    console.log('Applying AI search filters:', filters);
-
-    const changed: string[] = [];
-    let updates: Record<string, any> = {};
-
-    if ('search_query' in filters && filters.search_query !== searchQuery) {
-      onSearch(filters.search_query);
-      changed.push('search');
-      updates.searchQuery = filters.search_query;
-    }
-    if ('skill_filter' in filters && filters.skill_filter !== skillFilter) {
-      onSkillFilter(filters.skill_filter);
-      changed.push('skill');
-      updates.skillFilter = filters.skill_filter;
-    }
-    if ('experience_filter' in filters && filters.experience_filter !== experienceFilter) {
-      onExperienceFilter(filters.experience_filter);
-      changed.push('experience');
-      updates.experienceFilter = filters.experience_filter;
-    }
-    if ('education_filter' in filters && filters.education_filter !== educationFilter) {
-      onEducationFilter(filters.education_filter);
-      changed.push('education');
-      updates.educationFilter = filters.education_filter;
-    }
-    if ('training_filter' in filters && filters.training_filter !== trainingFilter) {
-      onTrainingFilter(filters.training_filter);
-      changed.push('training');
-      updates.trainingFilter = filters.training_filter;
-    }
-    if ('achievement_filter' in filters && filters.achievement_filter !== achievementFilter) {
-      onAchievementFilter(filters.achievement_filter);
-      changed.push('achievement');
-      updates.achievementFilter = filters.achievement_filter;
-    }
-    if ('project_filter' in filters && filters.project_filter !== projectFilter) {
-      onProjectFilter(filters.project_filter);
-      changed.push('project');
-      updates.projectFilter = filters.project_filter;
-    }
-
-    // Advanced filters
-    const advancedFilters: any = {};
-    if ('min_experience_years' in filters) {
-      advancedFilters.minExperienceYears = filters.min_experience_years;
-      changed.push('experience-years');
-    }
-    if ('max_experience_years' in filters) {
-      advancedFilters.maxExperienceYears = filters.max_experience_years;
-      changed.push('experience-years');
-    }
-    if ('min_graduation_year' in filters) {
-      advancedFilters.minGraduationYear = filters.min_graduation_year;
-      changed.push('graduation-years');
-    }
-    if ('max_graduation_year' in filters) {
-      advancedFilters.maxGraduationYear = filters.max_graduation_year;
-      changed.push('graduation-years');
-    }
-    if ('completion_status' in filters && filters.completion_status !== completionStatus) {
-      advancedFilters.completionStatus = filters.completion_status;
-      changed.push('completion');
-    }
-
-    if (Object.keys(advancedFilters).length > 0) {
-      onAdvancedFilters(advancedFilters);
-    }
-
-    setHighlightedFilters(Array.from(new Set(changed)));
-    setTimeout(() => setHighlightedFilters([]), 2000);
-  };
+ 
 
   const hasActiveFilters = activeFilters.length > 0;
 
@@ -268,34 +194,11 @@ const EnhancedEmployeeSearchFilters: React.FC<EnhancedEmployeeSearchFiltersProps
       {/* Header with Search Controls and Sort */}
       <div className="flex flex-col lg:flex-row gap-4 items-start lg:items-center justify-between">
         <div className="flex-1 w-full lg:w-auto">
-          {/* Search Mode Tabs */}
-          <Tabs value={searchMode} onValueChange={(value) => setSearchMode(value as 'manual' | 'ai')} className="w-full">
-            <TabsList className="grid w-full grid-cols-2 mb-4">
-              <TabsTrigger value="manual" className="flex items-center gap-2">
-                <Filter className="h-4 w-4" />
-                Manual Search
-              </TabsTrigger>
-              <TabsTrigger value="ai" className="flex items-center gap-2">
-                <Sparkles className="h-4 w-4" />
-                AI Search
-              </TabsTrigger>
-            </TabsList>
-            
-            <TabsContent value="manual">
-              <BasicSearchBar
+        <BasicSearchBar
                 searchQuery={searchQuery}
                 onSearch={onSearch}
                 isLoading={isLoading}
               />
-            </TabsContent>
-            
-            <TabsContent value="ai">
-              <AISearchBar
-                onAISearch={handleAISearch}
-                isLoading={isLoading}
-              />
-            </TabsContent>
-          </Tabs>
         </div>
         
         <div className="flex-shrink-0">
