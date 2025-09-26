@@ -116,6 +116,7 @@ export interface CustomRole {
   updated_at: string;
   is_active: boolean;
   is_system_role: boolean;
+  is_self_bound: boolean;
 }
 
 export interface RolePermission {

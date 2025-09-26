@@ -2949,6 +2949,7 @@ export type Database = {
         Returns: {
           allowed_sbus: string[]
           is_sbu_bound: boolean
+          is_self_bound: boolean
           module_name: string
           permission_type: Database["public"]["Enums"]["permission_type_enum"]
           role_name: string
