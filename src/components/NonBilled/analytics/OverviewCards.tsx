@@ -2,12 +2,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { 
   Users, 
-  Clock, 
   AlertTriangle, 
-  TrendingUp, 
   Calendar,
-  Target,
-  Building2,
   Timer
 } from 'lucide-react';
 
