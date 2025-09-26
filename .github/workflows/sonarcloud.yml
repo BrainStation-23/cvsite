@@ -1,7 +1,8 @@
 name: Sonar Analysis
 permissions:
   contents: read
-  security-events: write  # needed to upload SARIF
+  security-events: write  # needed to upload SARIF to GitHub code scanning
+
 on:
   push:
     branches: [main]
@@ -16,29 +17,40 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 0
+          fetch-depth: 0  # better relevancy of analysis
 
       - name: SonarQube Scan
         uses: SonarSource/sonarqube-scan-action@v6
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        # If sonar.host.url is in sonar-project.properties, the action will pick it up
 
-      # Read projectKey and optional host url from sonar-project.properties (no extra vars)
+      # Pull settings from sonar-project.properties (no extra vars)
       - name: Extract Sonar settings
         id: sonar_vars
         shell: bash
         run: |
-          PROJECT_KEY=$(grep -E '^[[:space:]]*sonar\.projectKey[[:space:]]*=' sonar-project.properties | sed 's/.*=//')
-          HOST_URL=$(grep -E '^[[:space:]]*sonar\.host\.url[[:space:]]*=' sonar-project.properties | sed 's/.*=//' || true)
+          # Project key (required)
+          PROJECT_KEY=$(grep -E '^[[:space:]]*sonar\.projectKey[[:space:]]*=' sonar-project.properties | sed 's/.*=//' | tr -d '[:space:]')
+          # Organization (required for SonarCloud, optional for self-hosted)
+          ORG=$(grep -E '^[[:space:]]*sonar\.organization[[:space:]]*=' sonar-project.properties | sed 's/.*=//' | tr -d '[:space:]' || true)
+          # Host URL (optional; default to SonarCloud)
+          HOST_URL=$(grep -E '^[[:space:]]*sonar\.host\.url[[:space:]]*=' sonar-project.properties | sed 's/.*=//' | tr -d '[:space:]' || true)
           if [ -z "$HOST_URL" ]; then HOST_URL="https://sonarcloud.io"; fi
+
+          if [ -z "$PROJECT_KEY" ]; then
+            echo "sonar.projectKey missing in sonar-project.properties"; exit 1
+          fi
           echo "project_key=$PROJECT_KEY" >> "$GITHUB_OUTPUT"
+          echo "organization=$ORG" >> "$GITHUB_OUTPUT"
           echo "host_url=$HOST_URL" >> "$GITHUB_OUTPUT"
 
-      # ✅ Correct way: install sonar-tools from PyPI
-      - name: Install sonar-tools
-        run: python3 -m pip install --upgrade pip && python3 -m pip install sonar-tools
+      - name: Install sonar-tools (CLI)
+        run: |
+          python3 -m pip install --upgrade pip
+          python3 -m pip install sonar-tools
 
-      # Give Sonar a moment to index the just-completed analysis (helps avoid empty exports)
+      # Give Sonar a short moment to index; adjust if your repo is very large
       - name: Wait briefly for indexing
         run: sleep 10
 
@@ -46,16 +58,23 @@ jobs:
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: ${{ steps.sonar_vars.outputs.host_url }}
+        shell: bash
         run: |
+          # Build args; SonarCloud requires -o <organization>
+          EXTRA_ARGS=()
+          if [ -n "${{ steps.sonar_vars.outputs.organization }}" ]; then
+            EXTRA_ARGS+=(-o "${{ steps.sonar_vars.outputs.organization }}")
+          fi
+
           sonar-findings-export \
             -k "${{ steps.sonar_vars.outputs.project_key }}" \
+            "${EXTRA_ARGS[@]}" \
             --types BUG,VULNERABILITY,SECURITY_HOTSPOT \
             --format sarif \
             -f sonar.sarif
 
-      - name: Upload SARIF to GitHub
+      - name: Upload SARIF to GitHub Code Scanning
         uses: github/codeql-action/upload-sarif@v3
         with:
           sarif_file: sonar.sarif
 
-  
