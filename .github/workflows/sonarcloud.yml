@@ -25,7 +25,6 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         # If sonar.host.url is in sonar-project.properties, the action will pick it up
 
-      # Pull settings from sonar-project.properties (no extra vars)
       - name: Extract Sonar settings
         id: sonar_vars
         shell: bash
@@ -50,7 +49,6 @@ jobs:
           python3 -m pip install --upgrade pip
           python3 -m pip install sonar-tools
 
-      # Give Sonar a short moment to index; adjust if your repo is very large
       - name: Wait briefly for indexing
         run: sleep 10
 
@@ -60,7 +58,6 @@ jobs:
           SONAR_HOST_URL: ${{ steps.sonar_vars.outputs.host_url }}
         shell: bash
         run: |
-          # Build args; SonarCloud requires -o <organization>
           EXTRA_ARGS=()
           if [ -n "${{ steps.sonar_vars.outputs.organization }}" ]; then
             EXTRA_ARGS+=(-o "${{ steps.sonar_vars.outputs.organization }}")
@@ -73,12 +70,15 @@ jobs:
             --format sarif \
             -f sonar.sarif
 
-      # 🔧 Fix absolute file paths (file:///...) to repo-relative paths
+      # 🔧 Fix SARIF paths safely: only adjust strings, strip "file:///src/"
       - name: Fix SARIF paths
         run: |
           jq 'walk(
-            if type == "object" and has("artifactLocation") and .artifactLocation.uri | startswith("file:///")
-            then .artifactLocation.uri |= sub("file://.*/"; "")
+            if type == "object"
+               and has("artifactLocation")
+               and (.artifactLocation.uri | type == "string")
+               and (.artifactLocation.uri | startswith("file:///src/"))
+            then .artifactLocation.uri |= sub("file:///src/"; "")
             else .
             end
           )' sonar.sarif > sonar-fixed.sarif
