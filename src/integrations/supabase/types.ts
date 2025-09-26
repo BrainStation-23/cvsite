@@ -212,6 +212,7 @@ export type Database = {
           id: string
           is_active: boolean | null
           is_sbu_bound: boolean | null
+          is_self_bound: boolean
           is_system_role: boolean | null
           name: string
           updated_at: string | null
@@ -223,6 +224,7 @@ export type Database = {
           id?: string
           is_active?: boolean | null
           is_sbu_bound?: boolean | null
+          is_self_bound?: boolean
           is_system_role?: boolean | null
           name: string
           updated_at?: string | null
@@ -234,6 +236,7 @@ export type Database = {
           id?: string
           is_active?: boolean | null
           is_sbu_bound?: boolean | null
+          is_self_bound?: boolean
           is_system_role?: boolean | null
           name?: string
           updated_at?: string | null
@@ -635,42 +638,6 @@ export type Database = {
             referencedColumns: ["name"]
           },
         ]
-      }
-      employees: {
-        Row: {
-          biography: string | null
-          created_at: string
-          designation: string | null
-          first_name: string
-          id: string
-          last_name: string
-          profile_image: string | null
-          updated_at: string
-          user_id: string
-        }
-        Insert: {
-          biography?: string | null
-          created_at?: string
-          designation?: string | null
-          first_name: string
-          id?: string
-          last_name: string
-          profile_image?: string | null
-          updated_at?: string
-          user_id: string
-        }
-        Update: {
-          biography?: string | null
-          created_at?: string
-          designation?: string | null
-          first_name?: string
-          id?: string
-          last_name?: string
-          profile_image?: string | null
-          updated_at?: string
-          user_id?: string
-        }
-        Relationships: []
       }
       experiences: {
         Row: {
