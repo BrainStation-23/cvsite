@@ -2,7 +2,7 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import { User as SupabaseUser, Session } from '@supabase/supabase-js';
 import { useQueryClient } from '@tanstack/react-query';
 import { supabase } from '../integrations/supabase/client';
-import { User, UserRole, UserPermission, CustomRole } from '../types';
+import { User, UserPermission, CustomRole } from '../types';
 
 interface AuthContextType {
   user: User | null;
@@ -50,11 +50,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         return;
       }
 
-      // Get basic user role for backward compatibility and custom role details
       const { data: roleData } = await supabase
         .from('user_roles')
         .select(`
-          role, 
           custom_role_id, 
           sbu_context,
           custom_roles!inner(is_system_role)
@@ -93,7 +91,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         created_by: supabaseUser.id,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
-        is_system_role: (roleData as any)?.custom_roles?.is_system_role || false
+        is_system_role: (roleData as any)?.custom_roles?.is_system_role || false,
+        is_self_bound: permissionsData[0].is_self_bound || false
       } : undefined;
 
       setUser({
@@ -104,7 +103,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         firstName: profileData?.first_name || supabaseUser.user_metadata.first_name || supabaseUser.user_metadata.name?.split(' ')[0] || '',
         lastName: profileData?.last_name || supabaseUser.user_metadata.last_name || supabaseUser.user_metadata.name?.split(' ').slice(1).join(' ') || '',
         employee_id: profileData?.employee_id,
-        role: (roleData?.role as UserRole) || 'employee',
         profileImageUrl: supabaseUser.user_metadata.avatar_url || supabaseUser.user_metadata.picture || '/placeholder.svg',
         created_at: supabaseUser.created_at,
         updated_at: supabaseUser.updated_at || supabaseUser.created_at,
@@ -226,16 +224,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  // Backward compatibility method
-  const hasPermission = (requiredRole: UserRole | UserRole[]): boolean => {
-    if (!user) return false;
-    
-    if (Array.isArray(requiredRole)) {
-      return requiredRole.includes(user.role);
-    }
-    
-    return user.role === requiredRole;
-  };
+
 
   // New permission-based methods - hybrid approach with cache + RPC fallback
   const hasModuleAccess = (moduleId: string): boolean => {

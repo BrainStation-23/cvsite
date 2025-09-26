@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Copy, Edit, Lock, MoreVertical, Shield, Trash2 } from 'lucide-react';
+import { Copy, Edit, Lock, MoreVertical, Shield, Trash2, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useNavigate } from 'react-router-dom';
@@ -115,6 +115,12 @@ export const RolesList: React.FC = () => {
                     <Badge variant="outline" className="gap-1">
                       <Lock className="h-3 w-3" />
                       SBU Bound
+                    </Badge>
+                  )}
+                  {role.is_self_bound && (
+                    <Badge variant="outline" className="gap-1">
+                      <User className="h-3 w-3" />
+                      Self Bound
                     </Badge>
                   )}
                 </div>

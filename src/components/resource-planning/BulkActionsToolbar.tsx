@@ -3,7 +3,7 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Trash2, CheckCircle, CheckCircle2, Copy, XCircle } from 'lucide-react';
 import { ResourcePlanningExportButton } from './ResourcePlanningExportButton';
-import { useResourcePlanningPermissions } from '@/hooks/use-resource-planning-permissions';
+import { useResourcePlanningPermissions } from '@/hooks/use-resource-permissions';
 
 interface BulkActionsToolbarProps {
   selectedCount: number;

@@ -7,3 +7,12 @@ export const useResourcePlanningPermissions = () => {
     permissions: ['create', 'read', 'update', 'delete']
   });
 };
+
+
+export const useResourceCalendarPermissions = () => {
+return usePermissionUI({
+    moduleId: 'Resource Calendar',
+    subModuleId: 'Calendar View',
+    permissions: ['create', 'read', 'update', 'delete']
+});
+};
