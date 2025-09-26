@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Sheet, SheetContent, SheetOverlay } from '@/components/ui/sheet';
+import { Sheet, SheetContent} from '@/components/ui/sheet';
 
 interface MobileSidebarProps {
   isOpen: boolean;

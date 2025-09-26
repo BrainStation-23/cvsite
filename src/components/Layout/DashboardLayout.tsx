@@ -21,7 +21,6 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
   
   const getPageTitle = () => {
     const path = location.pathname;
-    const role = user?.role || '';
     
     // First try to find a matching navigation item
     for (const group of sidebarGroups) {
@@ -35,21 +34,6 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
       }
     }
     
-    // Fallback for dashboard
-    if (path.endsWith('/dashboard') || path === `/${role}` || path === `/${role}/`) {
-      return `${role.charAt(0).toUpperCase() + role.slice(1)} Dashboard`;
-    }
-    
-    // Fallback: Convert path segments to title case
-    const pathWithoutRole = path.replace(`/${role}`, '');
-    const segments = pathWithoutRole.split('/').filter(Boolean);
-    
-    return segments
-      .map(segment => segment.split('-')
-        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-        .join(' ')
-      )
-      .join(' - ');
   };
 
   const toggleSidebar = () => {

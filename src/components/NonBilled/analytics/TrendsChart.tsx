@@ -23,7 +23,7 @@ interface TrendsChartProps {
   onPeriodChange: (period: 'daily' | 'weekly' | 'monthly') => void;
 }
 
-export function TrendsChart({ data, isLoading, periodType, onPeriodChange }: TrendsChartProps) {
+export function TrendsChart({ data, isLoading, periodType, onPeriodChange }: Readonly<TrendsChartProps>) {
   if (isLoading) {
     return (
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

@@ -50,7 +50,7 @@ interface RiskAnalyticsProps {
   isLoading: boolean;
 }
 
-export function RiskAnalytics({ data, isLoading }: RiskAnalyticsProps) {
+export function RiskAnalytics({ data, isLoading }: Readonly<RiskAnalyticsProps>) {
   if (isLoading) {
     return (
       <div className="space-y-6">

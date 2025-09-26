@@ -120,7 +120,7 @@ const UnifiedDashboard: React.FC = () => {
   ];
 
   console.log('=== Dashboard Debug ===');
-  console.log('User role:', user?.role);
+
   console.log('Available modules count:', availableModules.length);
   console.log('Filtered modules:', availableModules.map(m => m.title));
 

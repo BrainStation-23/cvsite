@@ -91,15 +91,7 @@ export function useExperience(profileId?: string) {
   const saveExperience = async (experience: Omit<Experience, 'id'>) => {
     if (!targetProfileId) return false;
     
-    // Check if user can edit this profile
-    if (targetProfileId !== user?.id && user?.role !== 'admin' && user?.role !== 'manager') {
-      toast({
-        title: 'Permission Denied',
-        description: 'You do not have permission to edit this profile',
-        variant: 'destructive'
-      });
-      return false;
-    }
+   
     
     try {
       setIsSaving(true);
@@ -143,15 +135,7 @@ export function useExperience(profileId?: string) {
   const updateExperience = async (id: string, experience: Partial<Experience>) => {
     if (!targetProfileId) return false;
     
-    // Check if user can edit this profile
-    if (targetProfileId !== user?.id && user?.role !== 'admin' && user?.role !== 'manager') {
-      toast({
-        title: 'Permission Denied',
-        description: 'You do not have permission to edit this profile',
-        variant: 'destructive'
-      });
-      return false;
-    }
+  
     
     try {
       setIsSaving(true);
@@ -212,16 +196,7 @@ export function useExperience(profileId?: string) {
   const deleteExperience = async (id: string) => {
     if (!targetProfileId) return false;
     
-    // Check if user can edit this profile
-    if (targetProfileId !== user?.id && user?.role !== 'admin' && user?.role !== 'manager') {
-      toast({
-        title: 'Permission Denied',
-        description: 'You do not have permission to edit this profile',
-        variant: 'destructive'
-      });
-      return false;
-    }
-    
+  
     try {
       const { error } = await supabase
         .from('experiences')

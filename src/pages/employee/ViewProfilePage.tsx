@@ -33,8 +33,7 @@ const ViewProfilePage: React.FC = () => {
   const { achievements, saveAchievement, updateAchievement, deleteAchievement, isLoading: achievementsLoading, isSaving: achievementsSaving } = useAchievements(profileId);
   const { projects, saveProject, updateProject, deleteProject, reorderProjects, isLoading: projectsLoading, isSaving: projectsSaving } = useProjects(profileId);
 
-  // Check if current user can edit (admin or manager)
-  const canEdit = user?.role === 'admin' || user?.role === 'manager';
+  
 
   const isLoading = generalInfoLoading || skillsLoading || experienceLoading || educationLoading || trainingLoading || achievementsLoading || projectsLoading;
   const isSaving = generalInfoSaving || skillsSaving || experienceSaving || educationSaving || trainingSaving || achievementsSaving || projectsSaving;
@@ -134,7 +133,7 @@ const ViewProfilePage: React.FC = () => {
       <div className="flex-1 min-h-0 py-4">
         <ProfileTabs
           form={form}
-          isEditing={canEdit}
+          isEditing={true}
           onImageUpdate={handleImageUpdate}
           technicalSkills={technicalSkills}
           specializedSkills={specializedSkills}
