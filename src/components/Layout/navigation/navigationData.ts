@@ -31,11 +31,9 @@ export interface NavigationItem {
   isExpanded?: boolean;
   onToggle?: () => void;
   // Permission-based access control
-  requiredModuleAccess?: string;
-  requiredSubModuleAccess?: string;
-  requiredPermissionType?: 'create' | 'read' | 'update' | 'delete' | 'manage';
-  // Keep for backward compatibility
-  allowedRoles?: string[];
+  requiredModuleAccess: string;
+  requiredSubModuleAccess: string;
+  requiredPermissionType: 'create' | 'read' | 'update' | 'delete' | 'manage';
 }
 
 export interface NavigationGroup {
@@ -49,11 +47,46 @@ export const getPermissionBasedSidebarGroups = (): NavigationGroup[] => {
     {
       label: null,
       items: [
-        { to: '/dashboard', icon: Home, label: 'Dashboard' },
-        { to: '/profile', icon: User, label: 'My Profile' },
-        { to: '/myteam', icon: Network, label: 'My Team', requiredModuleAccess: 'Team Management' },
-        { to: '/security', icon: Shield, label: 'Security' },
-        { to: '/platform-feedback', icon: MessageSquare, label: 'Platform Feedback' },
+        { 
+          to: '/dashboard', 
+          icon: Home, 
+          label: 'Dashboard',
+          requiredModuleAccess: 'General',
+          requiredSubModuleAccess: 'Dashboard',
+          requiredPermissionType: 'read'
+        },
+        { 
+          to: '/profile', 
+          icon: User, 
+          label: 'My Profile',
+          requiredModuleAccess: 'General',
+          requiredSubModuleAccess: 'My Profile',
+          requiredPermissionType: 'read'
+        },
+        { 
+          to: '/myteam', 
+          icon: Network, 
+          label: 'My Team',
+          requiredModuleAccess: 'General',
+          requiredSubModuleAccess: 'My Team',
+          requiredPermissionType: 'read'
+        },
+        { 
+          to: '/security', 
+          icon: Shield, 
+          label: 'Security',
+          requiredModuleAccess: 'General',
+          requiredSubModuleAccess: 'Security',
+          requiredPermissionType: 'read'
+        },
+        { 
+          to: '/platform-feedback', 
+          icon: MessageSquare, 
+          label: 'Platform Feedback',
+          requiredModuleAccess: 'General',
+          requiredSubModuleAccess: 'Platform Feedback',
+          requiredPermissionType: 'read'
+        },
       ],
     },
 

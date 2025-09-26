@@ -92,14 +92,32 @@ function App(): React.ReactElement {
                 </ProtectedRoute>
               }
             >
-              {/* Permission-based unified dashboard */}
-              <Route path="dashboard" element={<PermissionBasedDashboard />} />
-
               {/* Core */}
-              <Route path="profile" element={<ProfilePage />} />
-              <Route path="myteam" element={<MyTeam />} />
-              <Route path="security" element={<SecurityPage />} />
-              <Route path="platform-feedback" element={<PlatformFeedback />} />
+              <Route path="dashboard" element={
+                <ProtectedRoute requiredModuleAccess="General" requiredSubModuleAccess="Dashboard" requiredPermissionType="read">
+                  <PermissionBasedDashboard />
+                </ProtectedRoute>
+              } />
+              <Route path="profile" element={
+                <ProtectedRoute requiredModuleAccess="General" requiredSubModuleAccess="My Profile" requiredPermissionType="read">
+                  <ProfilePage />
+                </ProtectedRoute>
+              } />
+              <Route path="myteam" element={
+                <ProtectedRoute requiredModuleAccess="General" requiredSubModuleAccess="My Team" requiredPermissionType="read">
+                  <MyTeam />
+                </ProtectedRoute>
+              } />
+              <Route path="security" element={
+                <ProtectedRoute requiredModuleAccess="General" requiredSubModuleAccess="Security" requiredPermissionType="read">
+                  <SecurityPage />
+                </ProtectedRoute>
+              } />
+              <Route path="platform-feedback" element={
+                <ProtectedRoute requiredModuleAccess="General" requiredSubModuleAccess="Platform Feedback" requiredPermissionType="read">
+                  <PlatformFeedback />
+                </ProtectedRoute>
+              } />
 
               {/* CV Database */}
               <Route path="cv-database" element={<ProtectedRoute requiredModuleAccess="CV Database"><Outlet /></ProtectedRoute>}>
@@ -148,8 +166,8 @@ function App(): React.ReactElement {
               {/* Users */}
               <Route path="users" element={<ProtectedRoute requiredModuleAccess="Admin Configuration" requiredSubModuleAccess="User Management" requiredPermissionType="read"><Outlet /></ProtectedRoute>}>
                 <Route index element={<UserManagement />} />
-                <Route path="add" element={<AddUser />} />
-                <Route path="edit/:userId" element={<EditUser />} />
+                <Route path="add" element={<ProtectedRoute requiredModuleAccess="Admin Configuration" requiredSubModuleAccess="User Management" requiredPermissionType="create"><AddUser /></ProtectedRoute>} />
+                <Route path="edit/:userId" element={<ProtectedRoute requiredModuleAccess="Admin Configuration" requiredSubModuleAccess="User Management" requiredPermissionType="update"><EditUser /></ProtectedRoute>} />
               </Route>
 
               {/* Projects */}
@@ -161,24 +179,24 @@ function App(): React.ReactElement {
               {/* Audit */}
               <Route path="audit" element={<ProtectedRoute requiredModuleAccess="Audit" requiredSubModuleAccess="Audit Dashboard" requiredPermissionType="read"><Outlet /></ProtectedRoute>}>
                 <Route path="dashboard" element={<AuditPage />} />
-                <Route path="profile-image-warnings" element={<ProfileImageWarningAudit />} />
+                <Route path="profile-image-warnings" element={<ProtectedRoute requiredModuleAccess="Audit" requiredSubModuleAccess="Audit Dashboard" requiredPermissionType="read"><ProfileImageWarningAudit /></ProtectedRoute>} />
               </Route>
 
               {/* Role Management */}
               <Route path="admin/roles" element={<ProtectedRoute requiredModuleAccess="Admin Configuration" requiredSubModuleAccess="Role Management" requiredPermissionType="read"><Outlet /></ProtectedRoute>}>
                 <Route index element={<RoleManagement />} />
-                <Route path="create" element={<CreateRole />} />
-                <Route path="edit/:roleId" element={<EditRole />} />
-                <Route path="permissions/:roleId" element={<RolePermissions />} />
+                <Route path="create" element={<ProtectedRoute requiredModuleAccess="Admin Configuration" requiredSubModuleAccess="Role Management" requiredPermissionType="create"><CreateRole /></ProtectedRoute>} />
+                <Route path="edit/:roleId" element={<ProtectedRoute requiredModuleAccess="Admin Configuration" requiredSubModuleAccess="Role Management" requiredPermissionType="update"><EditRole /></ProtectedRoute>} />
+                <Route path="permissions/:roleId" element={<ProtectedRoute requiredModuleAccess="Admin Configuration" requiredSubModuleAccess="Role Management" requiredPermissionType="update"><RolePermissions /></ProtectedRoute>} />
               </Route>
 
               {/* Module Management */}
               <Route path="admin/modules" element={<ProtectedRoute requiredModuleAccess="Admin Configuration" requiredSubModuleAccess="Module Management" requiredPermissionType="read"><Outlet /></ProtectedRoute>}>
                 <Route index element={<ModuleManagement />} />
-                <Route path="create" element={<CreateModule />} />
-                <Route path=":id/edit" element={<EditModule />} />
-                <Route path=":moduleId/submodules/create" element={<CreateSubModule />} />
-                <Route path=":moduleId/submodules/:id/edit" element={<EditSubModule />} />
+                <Route path="create" element={<ProtectedRoute requiredModuleAccess="Admin Configuration" requiredSubModuleAccess="Module Management" requiredPermissionType="create"><CreateModule /></ProtectedRoute>} />
+                <Route path=":id/edit" element={<ProtectedRoute requiredModuleAccess="Admin Configuration" requiredSubModuleAccess="Module Management" requiredPermissionType="update"><EditModule /></ProtectedRoute>} />
+                <Route path=":moduleId/submodules/create" element={<ProtectedRoute requiredModuleAccess="Admin Configuration" requiredSubModuleAccess="Module Management" requiredPermissionType="create"><CreateSubModule /></ProtectedRoute>} />
+                <Route path=":moduleId/submodules/:id/edit" element={<ProtectedRoute requiredModuleAccess="Admin Configuration" requiredSubModuleAccess="Module Management" requiredPermissionType="update"><EditSubModule /></ProtectedRoute>} />
               </Route>
             </Route>
 
