@@ -34,7 +34,7 @@ export const NonBilledFilters: React.FC<NonBilledFiltersProps> = ({
   clearFilters,
 }) => {
   const hasActiveFilters = selectedSbus.length > 0 || selectedExpertises.length > 0 || selectedBillTypes.length > 0 || searchQuery;
-  const [isOpen, setIsOpen] = React.useState(false);
+  const [isOpen, setIsOpen] = React.useState(true);
 
   return (
     <Card className="mb-4">

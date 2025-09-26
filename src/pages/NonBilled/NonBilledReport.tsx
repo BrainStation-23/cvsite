@@ -7,6 +7,7 @@ import { NonBilledPagination } from '@/components/NonBilled/NonBilledPagination'
 import { useNonBilledData } from '@/hooks/use-non-billed-data';
 import { useNonBilledExport } from '@/hooks/use-non-billed-export';  
 import {useUserAccessibleSbus} from '@/hooks/use-user-accessible-sbus';
+import { useNonBilledReportPermissions } from '@/hooks/use-non-billed-permissions';
 
 export const NonBilledReport: React.FC = () => {
   const {
@@ -42,6 +43,8 @@ export const NonBilledReport: React.FC = () => {
     syncNonBilled,
     isSyncing,
   } = useNonBilledData();
+  
+  const permissions = useNonBilledReportPermissions();
   
   // Get SBU-bound info
   const { data: accessibleSbuData, isLoading: sbuLoading } = useUserAccessibleSbus();
@@ -86,14 +89,15 @@ export const NonBilledReport: React.FC = () => {
           <p className="text-muted-foreground">View and analyze non-billed resources</p>
         </div>
         <div className="flex items-center gap-2">
-          <Button
+          
+          {permissions.canSynchNonBilledData && permissions.canCreateSynchNonBilledData && <Button
             onClick={() => syncNonBilled()}
             disabled={isSyncing}
             size="sm"
           >
             <RefreshCw className={`mr-2 h-4 w-4 ${isSyncing ? 'animate-spin' : ''}`} />
             {isSyncing ? 'Syncing...' : 'Sync Now'}
-          </Button>
+          </Button>}
           
           {!isSbuBound && <Button
             variant="outline"
