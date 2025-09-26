@@ -1,0 +1,28 @@
+name: OSV → GitHub Security
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+  push:
+    branches: [ main ]
+
+permissions:
+  contents: read
+  security-events: write   # required to upload SARIF to Code scanning
+
+jobs:
+  osv-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # Use the official OSV-Scanner Action (it can auto-upload SARIF)
+      - name: OSV-Scanner
+        uses: google/osv-scanner-action@v2
+        with:
+          scan-args: "--recursive ."   # scan the whole repo; adjust as needed
+          format: sarif                 # produce SARIF for GitHub Code scanning
+          fail-on-vuln: true            # fail the job when vulns are found
+          severity: "HIGH,CRITICAL"     # gate on these severities
+          upload-sarif: true            # send results to Security tab
