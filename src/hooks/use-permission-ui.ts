@@ -46,6 +46,15 @@ export const usePermissionUI = (config: PermissionConfig) => {
     canEditFeedback: hasPermission('update'),
     canSynchNonBilledData: hasPermission('update'),
     canCreateSynchNonBilledData: hasPermission('create'),
+
+    //CV Database permissions
+    canEditCv: hasPermission('update'),
+    canCreateCv: hasPermission('create'),
+    canEditCvTemplate: hasPermission('update'),
+    canCreateCvTemplate: hasPermission('create'),
+    canDeleteCvTemplate: hasPermission('delete'),
+    canPreviewCvTemplate: hasPermission('read'),
+
     // Specific permission checker
     hasPermission,
   };

@@ -11,7 +11,16 @@ import { CertificationTable } from '@/components/admin/training-certification/Ce
 import { TrainingBulkUploadDialog } from '@/components/admin/training-certification/TrainingBulkUploadDialog';
 import { Skeleton } from '@/components/ui/skeleton';
 import { CertificationExportButton } from '@/components/admin/training-certification/CertificateExportButton';
+import {useCvTrainingPermissions} from '@/hooks/use-cv-permissions';
+import {useUserAccessibleSbus} from '@/hooks/use-user-accessible-sbus';
 const TrainingCertification: React.FC = () => {
+  
+  const permissions = useCvTrainingPermissions();
+  
+  // Get SBU-bound info
+  const { data: accessibleSbuData, isLoading: sbuLoading } = useUserAccessibleSbus();
+  const isSbuBound = accessibleSbuData?.isSbuBound ?? false;
+  
   const {
     certifications,
     pagination,
@@ -83,8 +92,8 @@ const TrainingCertification: React.FC = () => {
               <RefreshCw className={`h-4 w-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
               Refresh
             </Button>
-            <TrainingBulkUploadDialog onUploadComplete={refetch} />
-            <CertificationExportButton />
+            {permissions.canCreateCv && permissions.canEditCv && <TrainingBulkUploadDialog onUploadComplete={refetch} />}
+            {!isSbuBound && permissions.canCreateCv && permissions.canEditCv && <CertificationExportButton />}
           </div>
         </div>
 
