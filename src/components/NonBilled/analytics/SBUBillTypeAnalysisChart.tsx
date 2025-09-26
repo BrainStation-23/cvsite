@@ -43,7 +43,7 @@ export function SBUBillTypeAnalysisChart({
   data, 
   isLoading, 
   title 
-}: SBUBillTypeAnalysisChartProps) {
+}: Readonly<SBUBillTypeAnalysisChartProps>) {
   const [showCharts, setShowCharts] = useState(true);
   const [showTables, setShowTables] = useState(false);
   const [chartType, setChartType] = useState<'stacked' | 'grouped'>('stacked');

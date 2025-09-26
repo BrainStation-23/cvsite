@@ -26,7 +26,7 @@ const EXPERIENCE_COLORS = {
   unknown: 'hsl(var(--chart-4))', // Pink for unknown
 };
 
-export function ExperienceDistributionChart({ data, isLoading, title }: ExperienceDistributionChartProps) {
+export function ExperienceDistributionChart({ data, isLoading, title }: Readonly<ExperienceDistributionChartProps>) {
   const [showCharts, setShowCharts] = useState(false);
   const [showTables, setShowTables] = useState(true);
 

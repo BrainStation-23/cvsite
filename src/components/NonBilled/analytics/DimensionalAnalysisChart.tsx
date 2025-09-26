@@ -27,7 +27,7 @@ export function DimensionalAnalysisChart({
   isLoading, 
   dimension,
   title
-}: DimensionalAnalysisChartProps) {
+}: Readonly<DimensionalAnalysisChartProps>) {
   const [showCharts, setShowCharts] = useState(false);
   const [showTables, setShowTables] = useState(true);  if (isLoading) {
     return (

@@ -33,7 +33,7 @@ const EXPERIENCE_COLORS = {
 
 type ViewMode = 'stacked-bar' | 'grid-pie' | 'table';
 
-export function SBUExperienceDistributionChart({ data, isLoading, title }: SBUExperienceDistributionChartProps) {
+export function SBUExperienceDistributionChart({ data, isLoading, title }: Readonly<SBUExperienceDistributionChartProps>) {
   const [viewMode, setViewMode] = useState<ViewMode>('stacked-bar');
 
   if (isLoading) {
