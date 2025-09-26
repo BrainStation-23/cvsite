@@ -73,8 +73,18 @@ jobs:
             --format sarif \
             -f sonar.sarif
 
+      # 🔧 Fix absolute file paths (file:///...) to repo-relative paths
+      - name: Fix SARIF paths
+        run: |
+          jq 'walk(
+            if type == "object" and has("artifactLocation") and .artifactLocation.uri | startswith("file:///")
+            then .artifactLocation.uri |= sub("file://.*/"; "")
+            else .
+            end
+          )' sonar.sarif > sonar-fixed.sarif
+          mv sonar-fixed.sarif sonar.sarif
+
       - name: Upload SARIF to GitHub Code Scanning
         uses: github/codeql-action/upload-sarif@v3
         with:
           sarif_file: sonar.sarif
-
