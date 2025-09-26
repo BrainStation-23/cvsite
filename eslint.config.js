@@ -12,7 +12,7 @@ const jsRecommendedRules = js.configs.recommended.rules;
 
 export default [
   {
-    files: ["**/*.{js,jsx,ts,tsx}"],
+    files: ["src/**/*.{js,jsx,ts,tsx}"],
 
     languageOptions: {
       parser: tsParser,
