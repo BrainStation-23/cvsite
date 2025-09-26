@@ -27,10 +27,7 @@ jobs:
           cache: npm
 
       - name: Install dependencies
-        run: |
-          npm ci
-          # Ensure latest ESLint + formatter are installed
-          npm install --save-dev eslint@latest @microsoft/eslint-formatter-sarif
+        run: npm install
 
       - name: Run ESLint
         env:
