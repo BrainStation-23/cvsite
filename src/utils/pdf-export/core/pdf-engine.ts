@@ -111,7 +111,7 @@ export class PDFEngine {
     const opt = {
       filename: `${filename}.pdf`,
       image: { 
-        type: 'webp', 
+        type: 'webp' as const, 
         quality: 0.98 
       },
       html2canvas: {
@@ -124,9 +124,9 @@ export class PDFEngine {
         scrollY: 0
       },
       jsPDF: { 
-        orientation: 'portrait',
+        orientation: 'portrait' as const,
         unit: pageSize === 'a4' ? 'mm' : 'in',
-        format: [width, height],
+        format: [width, height] as [number, number],
         putOnlyUsedFonts: true,
         floatPrecision: 16
       },

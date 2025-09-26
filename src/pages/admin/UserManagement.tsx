@@ -8,7 +8,6 @@ import UserList from '@/components/admin/UserList';
 import UserPagination from '@/components/admin/UserPagination';
 import { ResetPasswordDialog, DeleteUserDialog, BulkUploadDialog, BulkDeleteUsersDialog } from '@/components/admin/UserDialogs';
 import { UserData, SortColumn, SortOrder } from '@/hooks/types/user-management';
-import { UserRole } from '@/types';
 import { useOdooEmployeeSync } from '@/hooks/use-odoo-employee-sync';
 import { OdooSyncResultDialog } from '@/components/admin/OdooSyncResultDialog';
 

@@ -1,12 +1,9 @@
 
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { UserRole } from '../types';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
-  allowedRoles?: UserRole[];
-  // New permission-based route protection
   requiredModuleAccess?: string;
   requiredSubModuleAccess?: string;
   requiredPermissionType?: 'create' | 'read' | 'update' | 'delete';
@@ -14,7 +11,6 @@ interface ProtectedRouteProps {
 
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ 
   children, 
-  allowedRoles = ['admin', 'manager', 'employee'],
   requiredModuleAccess,
   requiredSubModuleAccess,
   requiredPermissionType = 'read'
@@ -50,11 +46,6 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
 
     // Check sub-module permission
     if (requiredSubModuleAccess && !hasSubModulePermission(requiredSubModuleAccess, requiredPermissionType)) {
-      return <Navigate to="/dashboard" replace />;
-    }
-
-    // Fallback to role-based access for backward compatibility
-    if (allowedRoles.length > 0 && !allowedRoles.includes(user.role)) {
       return <Navigate to="/dashboard" replace />;
     }
   }

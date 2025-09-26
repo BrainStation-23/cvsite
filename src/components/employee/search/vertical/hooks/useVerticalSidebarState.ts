@@ -2,7 +2,6 @@
 import { useState } from 'react';
 
 export function useVerticalSidebarState() {
-  const [searchMode, setSearchMode] = useState<'manual' | 'ai'>('manual');
   const [experienceYears, setExperienceYears] = useState<number[]>([0, 20]);
   const [minGraduationYear, setMinGraduationYear] = useState<number | null>(null);
   const [maxGraduationYear, setMaxGraduationYear] = useState<number | null>(null);
@@ -20,8 +19,6 @@ export function useVerticalSidebarState() {
   const [highlightedFilters, setHighlightedFilters] = useState<string[]>([]);
 
   return {
-    searchMode,
-    setSearchMode,
     experienceYears,
     setExperienceYears,
     minGraduationYear,
