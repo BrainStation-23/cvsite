@@ -187,3 +187,16 @@ export interface Note {
   updated_at: string;
   category?: NoteCategory;
 }
+
+export type UserRole = 'admin' | 'manager' | 'employee';
+
+export interface UserRoleRecord {
+  user_id: string;
+  role?: UserRole;
+  custom_role_id?: string;
+  sbu_context?: string;
+  assigned_by?: string;
+  assigned_at: string;
+  created_at: string;
+  updated_at: string;
+}

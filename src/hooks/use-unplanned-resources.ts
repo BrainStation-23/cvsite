@@ -68,7 +68,26 @@ export function useUnplannedResources({
     resource_type: UnplannedResourceType | null;
     created_at: string;
     updated_at: string;
-    active_assignments: unknown[];
+    active_assignments: Array<{
+      id: string;
+      engagement_percentage: number;
+      billing_percentage: number;
+      engagement_start_date: string;
+      release_date?: string;
+      engagement_complete: boolean;
+      weekly_validation: boolean;
+      project?: {
+        id: string;
+        project_name: string;
+        client_name: string;
+        project_manager: string;
+        budget: number;
+      };
+      bill_type?: {
+        id: string;
+        name: string;
+      };
+    }>;
   }
 
   interface UnplannedResourcesPagination {

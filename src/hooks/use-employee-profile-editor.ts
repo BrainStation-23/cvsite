@@ -3,6 +3,14 @@ import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { Skill, Experience, Education, Training, Achievement, Project } from '@/types';
+import { Database } from '@/integrations/supabase/types';
+
+// Type aliases for Update operations
+type ExperienceUpdate = Database['public']['Tables']['experiences']['Update'];
+type EducationUpdate = Database['public']['Tables']['education']['Update'];
+type TrainingUpdate = Database['public']['Tables']['trainings']['Update'];
+type AchievementUpdate = Database['public']['Tables']['achievements']['Update'];
+type ProjectUpdate = Database['public']['Tables']['projects']['Update'];
 
 export function useEmployeeProfileEditor(profileId: string) {
   const { user } = useAuth();
@@ -264,7 +272,7 @@ export function useEmployeeProfileEditor(profileId: string) {
     try {
       setIsSaving(true);
       
-      const updateData: any = { updated_at: new Date().toISOString() };
+      const updateData: ExperienceUpdate = { updated_at: new Date().toISOString() };
       
       if (experience.companyName) updateData.company_name = experience.companyName;
       if (experience.designation !== undefined) updateData.designation = experience.designation;
@@ -376,7 +384,7 @@ export function useEmployeeProfileEditor(profileId: string) {
     try {
       setIsSaving(true);
       
-      const updateData: any = { updated_at: new Date().toISOString() };
+      const updateData: EducationUpdate = { updated_at: new Date().toISOString() };
       
       if (education.university) updateData.university = education.university;
       if (education.degree !== undefined) updateData.degree = education.degree;
@@ -487,7 +495,7 @@ export function useEmployeeProfileEditor(profileId: string) {
     try {
       setIsSaving(true);
       
-      const updateData: any = { updated_at: new Date().toISOString() };
+      const updateData: TrainingUpdate = { updated_at: new Date().toISOString() };
       
       if (training.title) updateData.title = training.title;
       if (training.provider) updateData.provider = training.provider;
@@ -593,7 +601,7 @@ export function useEmployeeProfileEditor(profileId: string) {
     try {
       setIsSaving(true);
       
-      const updateData: any = { updated_at: new Date().toISOString() };
+      const updateData: AchievementUpdate = { updated_at: new Date().toISOString() };
       
       if (achievement.title) updateData.title = achievement.title;
       if (achievement.description !== undefined) updateData.description = achievement.description;
@@ -703,7 +711,7 @@ export function useEmployeeProfileEditor(profileId: string) {
     try {
       setIsSaving(true);
       
-      const updateData: any = { updated_at: new Date().toISOString() };
+      const updateData: ProjectUpdate = { updated_at: new Date().toISOString() };
       
       if (project.name) updateData.name = project.name;
       if (project.role) updateData.role = project.role;

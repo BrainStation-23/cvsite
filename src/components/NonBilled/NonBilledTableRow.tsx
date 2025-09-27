@@ -4,7 +4,7 @@ import { Badge } from '@/components/ui/badge';
 import { Calendar, Clock, Award ,Download} from 'lucide-react';
 import { format, parseISO } from 'date-fns';
 import { Button } from '@/components/ui/button';
-import { NonBilledRecord } from './types/NonBilledRecord';
+import { NonBilledRecord } from './types/non-billed-record-data';
 import { NonBilledFeedbackCell } from './NonBilledFeedbackCell';
 import { useNonBilledFeedback } from '@/hooks/use-non-billed-feedback';
 import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from '@/components/ui/tooltip';
