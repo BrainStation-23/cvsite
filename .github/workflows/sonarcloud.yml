@@ -1,7 +1,6 @@
 name: Sonar Analysis
 permissions:
   contents: read
-  security-events: write  # needed to upload SARIF to GitHub code scanning
 
 on:
   push:
@@ -23,68 +22,4 @@ jobs:
         uses: SonarSource/sonarqube-scan-action@v6
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        # If sonar.host.url is in sonar-project.properties, the action will pick it up
 
-      - name: Extract Sonar settings
-        id: sonar_vars
-        shell: bash
-        run: |
-          # Project key (required)
-          PROJECT_KEY=$(grep -E '^[[:space:]]*sonar\.projectKey[[:space:]]*=' sonar-project.properties | sed 's/.*=//' | tr -d '[:space:]')
-          # Organization (required for SonarCloud, optional for self-hosted)
-          ORG=$(grep -E '^[[:space:]]*sonar\.organization[[:space:]]*=' sonar-project.properties | sed 's/.*=//' | tr -d '[:space:]' || true)
-          # Host URL (optional; default to SonarCloud)
-          HOST_URL=$(grep -E '^[[:space:]]*sonar\.host\.url[[:space:]]*=' sonar-project.properties | sed 's/.*=//' | tr -d '[:space:]' || true)
-          if [ -z "$HOST_URL" ]; then HOST_URL="https://sonarcloud.io"; fi
-
-          if [ -z "$PROJECT_KEY" ]; then
-            echo "sonar.projectKey missing in sonar-project.properties"; exit 1
-          fi
-          echo "project_key=$PROJECT_KEY" >> "$GITHUB_OUTPUT"
-          echo "organization=$ORG" >> "$GITHUB_OUTPUT"
-          echo "host_url=$HOST_URL" >> "$GITHUB_OUTPUT"
-
-      - name: Install sonar-tools (CLI)
-        run: |
-          python3 -m pip install --upgrade pip
-          python3 -m pip install sonar-tools
-
-      - name: Wait briefly for indexing
-        run: sleep 10
-
-      - name: Export SARIF from Sonar
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          SONAR_HOST_URL: ${{ steps.sonar_vars.outputs.host_url }}
-        shell: bash
-        run: |
-          EXTRA_ARGS=()
-          if [ -n "${{ steps.sonar_vars.outputs.organization }}" ]; then
-            EXTRA_ARGS+=(-o "${{ steps.sonar_vars.outputs.organization }}")
-          fi
-
-          sonar-findings-export \
-            -k "${{ steps.sonar_vars.outputs.project_key }}" \
-            "${EXTRA_ARGS[@]}" \
-            --types BUG,VULNERABILITY,SECURITY_HOTSPOT \
-            --format sarif \
-            -f sonar.sarif
-
-      - name: Fix SARIF paths
-        run: |
-          jq 'walk(
-            if type == "object"
-               and has("artifactLocation")
-               and (.artifactLocation.uri | type == "string")
-               and (.artifactLocation.uri | startswith("file:///"))
-            then .artifactLocation.uri |= sub("file:///"; "")
-            else .
-            end
-          )' sonar.sarif > sonar-fixed.sarif
-          mv sonar-fixed.sarif sonar.sarif
-
-
-      - name: Upload SARIF to GitHub Code Scanning
-        uses: github/codeql-action/upload-sarif@v3
-        with:
-          sarif_file: sonar.sarif
