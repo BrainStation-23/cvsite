@@ -101,7 +101,7 @@ export interface SubModule {
 
 export interface PermissionType {
   id: string;
-  name: 'create' | 'read' | 'update' | 'delete' | 'manage';
+  name: 'create' | 'read' | 'update' | 'delete' | 'manage' | 'write';
   description?: string;
   created_at: string;
 }
@@ -123,9 +123,10 @@ export interface RolePermission {
   id: string;
   role_id: string;
   module_id: string;
-  sub_module_id?: string;
+  sub_module_id: string;
   permission_type_id: string;
   sbu_restrictions?: string[];
+  table_restrictions?: string[];
   created_at: string;
   updated_at: string;
 }
@@ -189,8 +190,11 @@ export interface Note {
 }
 
 
+export type UserRole = 'admin' | 'manager' | 'employee';
+
 export interface UserRoleRecord {
   user_id: string;
+  role?: UserRole;
   custom_role_id?: string;
   sbu_context?: string;
   assigned_by?: string;

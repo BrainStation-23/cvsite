@@ -17,16 +17,18 @@ export const PermissionMatrix: React.FC<PermissionMatrixProps> = ({ roleId, role
   const { data: permissionTypes, isLoading: typesLoading } = usePermissionTypes();
   const updatePermissionsMutation = useUpdateRolePermissions();
   
-  const [permissions, setPermissions] = useState<Omit<RolePermission, 'id' | 'created_at' | 'updated_at' | 'role_id'>[]>([]);
+  const [permissions, setPermissions] = useState<Omit<RolePermission, 'id' | 'created_at' | 'updated_at'>[]>([]);
 
   useEffect(() => {
     if (rolePermissions) {
       setPermissions(
         rolePermissions.map(rp => ({
+          role_id: rp.role_id,
           module_id: rp.module_id,
           sub_module_id: rp.sub_module_id,
           permission_type_id: rp.permission_type_id,
           sbu_restrictions: rp.sbu_restrictions,
+          table_restrictions: rp.table_restrictions,
         }))
       );
     }
@@ -50,10 +52,12 @@ export const PermissionMatrix: React.FC<PermissionMatrixProps> = ({ roleId, role
         
         if (!exists) {
           return [...prev, {
+            role_id: roleId,
             module_id: moduleId,
-            sub_module_id: subModuleId,
+            sub_module_id: subModuleId || '',
             permission_type_id: permissionTypeId,
-            sbu_restrictions: sbuRestrictions,
+            sbu_restrictions: sbuRestrictions || [],
+            table_restrictions: [],
           }];
         } else {
           // Update existing permission with new SBU restrictions
