@@ -54,7 +54,7 @@ export const downloadCSVTemplate = (tableName: SettingTableName) => {
   }
 };
 
-export const exportItemsToCSV = (items: any[], tableName: SettingTableName) => {
+export const exportItemsToCSV = (items: { name: string }[], tableName: SettingTableName) => {
   const csvData = items.map(item => ({
     name: item.name
   }));
@@ -74,15 +74,15 @@ export const exportItemsToCSV = (items: any[], tableName: SettingTableName) => {
   }
 };
 
-export const validateCSVData = (data: any[], existingItems: any[] = []): CSVValidationResult => {
+export const validateCSVData = (data: ResourcePlanningCSVRow[], existingItems: { name: string }[] = []): CSVValidationResult => {
   const valid: ResourcePlanningCSVRow[] = [];
   const errors: CSVValidationError[] = [];
-  const seenNames = new Set();
+  const seenNames = new Set<string>();
   
   // Create a set of existing item names for quick lookup
-  const existingNames = new Set(existingItems.map(item => item.name.toLowerCase().trim()));
+  const existingNames = new Set<string>(existingItems.map(item => item.name.toLowerCase().trim()));
 
-  data.forEach((row: any, index: number) => {
+  data.forEach((row: ResourcePlanningCSVRow, index: number) => {
     const rowNumber = index + 2; // +2 because index starts at 0 and CSV has header row
     let hasErrors = false;
 
@@ -91,7 +91,7 @@ export const validateCSVData = (data: any[], existingItems: any[] = []): CSVVali
       errors.push({
         row: rowNumber,
         field: 'name',
-        value: row.name || '',
+        value: String(row.name ?? ''),
         message: 'Name is required'
       });
       hasErrors = true;
@@ -132,15 +132,15 @@ export const validateCSVData = (data: any[], existingItems: any[] = []): CSVVali
   return { valid, errors };
 };
 
-export const parseResourcePlanningCSV = (file: File): Promise<any[]> => {
+export const parseResourcePlanningCSV = (file: File): Promise<ResourcePlanningCSVRow[]> => {
   return new Promise((resolve, reject) => {
-    Papa.parse(file, {
+    Papa.parse<ResourcePlanningCSVRow>(file, {
       header: true,
       complete: (results) => {
         try {
           // Filter out empty rows
-          const filteredData = results.data.filter((row: any) => 
-            row.name && row.name.toString().trim() !== ''
+          const filteredData: ResourcePlanningCSVRow[] = results.data.filter((row) => 
+            row && typeof row.name !== 'undefined' && row.name !== null && row.name.toString().trim() !== ''
           );
           resolve(filteredData);
         } catch (error) {

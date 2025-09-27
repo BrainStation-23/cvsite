@@ -3,6 +3,40 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
+// Types for RPC result and resource planning rows
+interface WeeklyValidationPagination {
+  total_count: number;
+  filtered_count: number;
+  page: number;
+  per_page: number;
+  page_count: number;
+}
+
+export type ResourcePlanningRow = {
+  id?: string;
+  profile_id: string;
+  project_id: string;
+  bill_type_id?: string;
+  engagement_percentage: number;
+  billing_percentage: number;
+  engagement_start_date: string;
+  release_date: string | null;
+  engagement_complete: boolean;
+  weekly_validation: boolean;
+  [key: string]: unknown;
+};
+
+interface WeeklyValidationData {
+  resource_planning: ResourcePlanningRow[];
+  pagination: WeeklyValidationPagination;
+}
+
+const isWeeklyValidationData = (val: unknown): val is WeeklyValidationData => {
+  if (typeof val !== 'object' || val === null) return false;
+  const v = val as Record<string, unknown>;
+  return 'resource_planning' in v && 'pagination' in v && Array.isArray((v as any).resource_planning);
+};
+
 interface AdvancedFilters {
   billTypeFilter: string | null;
   projectSearch: string;
@@ -108,8 +142,10 @@ export function useWeeklyValidationTab(isActive: boolean = true) {
     advancedFilters
   ]);
 
+  // Types are declared at module scope above
+
   // Data fetching - only enabled when tab is active
-  const { data, isLoading, error, refetch } = useQuery({
+  const { data, isLoading, error, refetch } = useQuery<WeeklyValidationData>({
     queryKey: ['weekly-validation-tab', rpcParams],
     queryFn: async () => {
       console.log('Weekly Validation Tab Query:', rpcParams);
@@ -121,18 +157,7 @@ export function useWeeklyValidationTab(isActive: boolean = true) {
         throw error;
       }
 
-      if (rpcData && typeof rpcData === 'object' && 'resource_planning' in rpcData) {
-        return {
-          resource_planning: (rpcData as any).resource_planning || [],
-          pagination: (rpcData as any).pagination || {
-            total_count: 0,
-            filtered_count: 0,
-            page: currentPage,
-            per_page: perPage,
-            page_count: 0
-          }
-        };
-      }
+      if (isWeeklyValidationData(rpcData)) return rpcData;
 
       return {
         resource_planning: [],
@@ -166,7 +191,7 @@ export function useWeeklyValidationTab(isActive: boolean = true) {
         description: 'Resource planning validated successfully.',
       });
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       console.error('Validation error:', error);
       toast({
         title: 'Error',
@@ -194,7 +219,7 @@ export function useWeeklyValidationTab(isActive: boolean = true) {
         description: `${resourcePlanningIds.length} resource assignments validated successfully.`,
       });
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       console.error('Bulk validation error:', error);
       toast({
         title: 'Error',
@@ -222,7 +247,7 @@ export function useWeeklyValidationTab(isActive: boolean = true) {
         description: `${resourcePlanningIds.length} resource assignments marked as complete.`,
       });
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       console.error('Bulk completion error:', error);
       toast({
         title: 'Error',
@@ -250,7 +275,7 @@ export function useWeeklyValidationTab(isActive: boolean = true) {
         description: `${resourcePlanningIds.length} resource assignments deleted successfully.`,
       });
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       console.error('Bulk deletion error:', error);
       toast({
         title: 'Error',
@@ -271,12 +296,12 @@ export function useWeeklyValidationTab(isActive: boolean = true) {
 
       if (fetchError) throw fetchError;
 
-      if (!originalRecords || originalRecords.length === 0) {
+      if (!Array.isArray(originalRecords) || originalRecords.length === 0) {
         throw new Error('No records found to copy');
       }
 
       // Create new records based on the original ones
-      const recordsToCopy = originalRecords.map(record => ({
+      const recordsToCopy = (originalRecords as ResourcePlanningRow[]).map(record => ({
         profile_id: record.profile_id,
         project_id: record.project_id,
         bill_type_id: record.bill_type_id,
@@ -302,7 +327,7 @@ export function useWeeklyValidationTab(isActive: boolean = true) {
         description: `${resourcePlanningIds.length} resource assignments copied successfully.`,
       });
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       console.error('Bulk copy error:', error);
       toast({
         title: 'Error',

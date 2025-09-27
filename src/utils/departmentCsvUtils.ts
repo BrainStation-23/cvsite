@@ -50,7 +50,7 @@ export const downloadDepartmentCSVTemplate = () => {
   }
 };
 
-export const exportDepartmentsToCSV = (departments: any[]) => {
+export const exportDepartmentsToCSV = (departments: DepartmentFormData[]) => {
   const csvData = departments.map(department => ({
     name: department.name,
     full_form: department.full_form || ''
@@ -71,15 +71,18 @@ export const exportDepartmentsToCSV = (departments: any[]) => {
   }
 };
 
-export const validateDepartmentCSVData = (data: any[], existingDepartments: any[] = []): DepartmentCSVValidationResult => {
+export const validateDepartmentCSVData = (
+  data: DepartmentCSVRow[],
+  existingDepartments: DepartmentFormData[] = []
+): DepartmentCSVValidationResult => {
   const valid: DepartmentFormData[] = [];
   const errors: DepartmentCSVValidationError[] = [];
-  const seenNames = new Set();
+  const seenNames = new Set<string>();
   
   // Create a set of existing department names for quick lookup
-  const existingNames = new Set(existingDepartments.map(d => d.name.toLowerCase().trim()));
+  const existingNames = new Set<string>(existingDepartments.map(d => d.name.toLowerCase().trim()));
 
-  data.forEach((row: any, index: number) => {
+  data.forEach((row: DepartmentCSVRow, index: number) => {
     const rowNumber = index + 2; // +2 because index starts at 0 and CSV has header row
     let hasErrors = false;
 
@@ -130,15 +133,15 @@ export const validateDepartmentCSVData = (data: any[], existingDepartments: any[
   return { valid, errors };
 };
 
-export const parseDepartmentsCSV = (file: File): Promise<any[]> => {
+export const parseDepartmentsCSV = (file: File): Promise<DepartmentCSVRow[]> => {
   return new Promise((resolve, reject) => {
-    Papa.parse(file, {
+    Papa.parse<DepartmentCSVRow>(file, {
       header: true,
       complete: (results) => {
         try {
           // Filter out empty rows
-          const filteredData = results.data.filter((row: any) => 
-            row.name && row.name.toString().trim() !== ''
+          const filteredData: DepartmentCSVRow[] = results.data.filter((row) =>
+            row && typeof row.name !== 'undefined' && row.name !== null && row.name.toString().trim() !== ''
           );
           resolve(filteredData);
         } catch (error) {

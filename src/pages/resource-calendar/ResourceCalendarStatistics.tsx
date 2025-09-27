@@ -1,7 +1,5 @@
 
 import React, { useState } from 'react';
-import { useLocation } from 'react-router-dom';
-import DashboardLayout from '../../components/Layout/DashboardLayout';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { BarChart3, Table2, TrendingUp, History } from 'lucide-react';
 import { ResourceStatisticsHeader } from '../../components/statistics/ResourceStatisticsHeader';
@@ -13,9 +11,6 @@ import { SbuChangesTab } from '../../components/statistics/SbuChangesTab';
 import { useResourceCountStatistics } from '../../hooks/use-resource-count-statistics';
 
 const ResourceCalendarStatistics: React.FC = () => {
-  const location = useLocation();
-  const isAdmin = location.pathname.includes('/admin/');
-  const baseUrl = isAdmin ? '/admin/resource-calendar' : '/manager/resource-calendar';
 
   // State for active tab
   const [activeTab, setActiveTab] = useState('overview');
@@ -124,7 +119,6 @@ const ResourceCalendarStatistics: React.FC = () => {
     <div className="space-y-6">
         {/* Header */}
         <ResourceStatisticsHeader
-          baseUrl={baseUrl}
           groupingDescription={getGroupingDescription()}
           activeTab={activeTab}
           showCharts={showCharts}

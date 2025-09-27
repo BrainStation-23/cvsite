@@ -130,7 +130,7 @@ function App(): React.ReactElement {
                   <Route path=":id" element={<ProtectedRoute requiredModuleAccess="CV Database" requiredSubModuleAccess="CV Templates" requiredPermissionType="read"><CVTemplateViewPage /></ProtectedRoute>} />
                   <Route path=":id/edit" element={<ProtectedRoute requiredModuleAccess="CV Database" requiredSubModuleAccess="CV Templates" requiredPermissionType="update"><CVTemplateEditorPage /></ProtectedRoute>} />
                 </Route>
-                <Route path="cv-template-settings" element={<ProtectedRoute requiredModuleAccess="CV Database" requiredSubModuleAccess="CV Settings" requiredPermissionType="create"><CVTemplateSettings /></ProtectedRoute>} />
+                <Route path="cv-template-settings" element={<ProtectedRoute requiredModuleAccess="CV Database" requiredSubModuleAccess="CV Settings" requiredPermissionType="write"><CVTemplateSettings /></ProtectedRoute>} />
               </Route>
 
               {/* Resource Calendar */}
@@ -151,7 +151,7 @@ function App(): React.ReactElement {
               {/* PIP */}
               <Route path="pip">
               <Route path="dashboard" element={<ProtectedRoute requiredModuleAccess="PIP" requiredSubModuleAccess="PIP Dashboard" requiredPermissionType="read"><PIPDashboard /></ProtectedRoute>} />
-                <Route path="initiate" element={<ProtectedRoute requiredModuleAccess="PIP" requiredSubModuleAccess="Initiate" requiredPermissionType="create"><PIPInitiate /></ProtectedRoute>} />
+                <Route path="initiate" element={<ProtectedRoute requiredModuleAccess="PIP" requiredSubModuleAccess="Initiate" requiredPermissionType="write"><PIPInitiate /></ProtectedRoute>} />
                 <Route path="list" element={<ProtectedRoute requiredModuleAccess="PIP" requiredSubModuleAccess="PIP List" requiredPermissionType="read"><PIPList /></ProtectedRoute>} />
                 <Route path="view/:pipId" element={<ProtectedRoute requiredModuleAccess="PIP" requiredSubModuleAccess="PIP List" requiredPermissionType="read"><AdminPIPView /></ProtectedRoute>} />
                 <Route path="pm-review" element={<ProtectedRoute requiredModuleAccess="PIP" requiredSubModuleAccess="PM Review" requiredPermissionType="read"><ManagerPIPList /></ProtectedRoute>} />
@@ -165,7 +165,7 @@ function App(): React.ReactElement {
               {/* Users */}
               <Route path="users" element={<ProtectedRoute requiredModuleAccess="Admin Configuration" requiredSubModuleAccess="User Management" requiredPermissionType="read"><Outlet /></ProtectedRoute>}>
                 <Route index element={<UserManagement />} />
-                <Route path="add" element={<ProtectedRoute requiredModuleAccess="Admin Configuration" requiredSubModuleAccess="User Management" requiredPermissionType="create"><AddUser /></ProtectedRoute>} />
+                <Route path="add" element={<ProtectedRoute requiredModuleAccess="Admin Configuration" requiredSubModuleAccess="User Management" requiredPermissionType="write"><AddUser /></ProtectedRoute>} />
                 <Route path="edit/:userId" element={<ProtectedRoute requiredModuleAccess="Admin Configuration" requiredSubModuleAccess="User Management" requiredPermissionType="update"><EditUser /></ProtectedRoute>} />
               </Route>
 
@@ -184,7 +184,7 @@ function App(): React.ReactElement {
               {/* Role Management */}
               <Route path="admin/roles" element={<ProtectedRoute requiredModuleAccess="Admin Configuration" requiredSubModuleAccess="Role Management" requiredPermissionType="read"><Outlet /></ProtectedRoute>}>
                 <Route index element={<RoleManagement />} />
-                <Route path="create" element={<ProtectedRoute requiredModuleAccess="Admin Configuration" requiredSubModuleAccess="Role Management" requiredPermissionType="create"><CreateRole /></ProtectedRoute>} />
+                <Route path="create" element={<ProtectedRoute requiredModuleAccess="Admin Configuration" requiredSubModuleAccess="Role Management" requiredPermissionType="write"><CreateRole /></ProtectedRoute>} />
                 <Route path="edit/:roleId" element={<ProtectedRoute requiredModuleAccess="Admin Configuration" requiredSubModuleAccess="Role Management" requiredPermissionType="update"><EditRole /></ProtectedRoute>} />
                 <Route path="permissions/:roleId" element={<ProtectedRoute requiredModuleAccess="Admin Configuration" requiredSubModuleAccess="Role Management" requiredPermissionType="update"><RolePermissions /></ProtectedRoute>} />
               </Route>
@@ -192,9 +192,9 @@ function App(): React.ReactElement {
               {/* Module Management */}
               <Route path="admin/modules" element={<ProtectedRoute requiredModuleAccess="Admin Configuration" requiredSubModuleAccess="Module Management" requiredPermissionType="read"><Outlet /></ProtectedRoute>}>
                 <Route index element={<ModuleManagement />} />
-                <Route path="create" element={<ProtectedRoute requiredModuleAccess="Admin Configuration" requiredSubModuleAccess="Module Management" requiredPermissionType="create"><CreateModule /></ProtectedRoute>} />
+                <Route path="create" element={<ProtectedRoute requiredModuleAccess="Admin Configuration" requiredSubModuleAccess="Module Management" requiredPermissionType="write"><CreateModule /></ProtectedRoute>} />
                 <Route path=":id/edit" element={<ProtectedRoute requiredModuleAccess="Admin Configuration" requiredSubModuleAccess="Module Management" requiredPermissionType="update"><EditModule /></ProtectedRoute>} />
-                <Route path=":moduleId/submodules/create" element={<ProtectedRoute requiredModuleAccess="Admin Configuration" requiredSubModuleAccess="Module Management" requiredPermissionType="create"><CreateSubModule /></ProtectedRoute>} />
+                <Route path=":moduleId/submodules/create" element={<ProtectedRoute requiredModuleAccess="Admin Configuration" requiredSubModuleAccess="Module Management" requiredPermissionType="write"><CreateSubModule /></ProtectedRoute>} />
                 <Route path=":moduleId/submodules/:id/edit" element={<ProtectedRoute requiredModuleAccess="Admin Configuration" requiredSubModuleAccess="Module Management" requiredPermissionType="update"><EditSubModule /></ProtectedRoute>} />
               </Route>
             </Route>

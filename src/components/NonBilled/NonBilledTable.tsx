@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
 import { NonBilledTableRow } from './NonBilledTableRow';
 import { NonBilledTableMobile } from './NonBilledTableMobile';
-import { NonBilledRecord } from './types/NonBilledRecord';
+import { NonBilledRecord } from './types/non-billed-record-data';
 import PDFExportModal from '../employee/PDFExportModal';
 
 interface NonBilledTableProps {

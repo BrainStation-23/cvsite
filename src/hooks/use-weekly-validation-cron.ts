@@ -71,7 +71,7 @@ export const useWeeklyValidationCron = () => {
         });
       }
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       console.error('Cron management error:', error);
       toast({
         title: 'Error',

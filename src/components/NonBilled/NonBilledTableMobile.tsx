@@ -3,7 +3,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Calendar, Clock, Award, Users, Building2 } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
-import { NonBilledRecord } from './types/NonBilledRecord';
+import { NonBilledRecord } from './types/non-billed-record-data';
 import { NonBilledFeedbackCell } from './NonBilledFeedbackCell';
 import { useNonBilledFeedback } from '@/hooks/use-non-billed-feedback';
 

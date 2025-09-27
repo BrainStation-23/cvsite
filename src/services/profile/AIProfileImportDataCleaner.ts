@@ -1,12 +1,12 @@
 
 import { ProfileImportDataCleaner } from './ProfileImportDataCleaner';
-import { ProfileJSONData } from './ProfileJSONService';
+import { ProfileJSONData, ProfileJSONService } from './ProfileJSONService';
 
 export class AIProfileImportDataCleaner extends ProfileImportDataCleaner {
   // Handle AI-specific data cleaning and validation
-  static cleanAIExtractedData(data: any): any {
-    // First apply standard cleaning
-    const cleaned = this.cleanImportData(data);
+  static cleanAIExtractedData(data: ProfileJSONData): ProfileJSONData {
+    // First apply standard cleaning using the canonical cleaner
+    const cleaned = ProfileJSONService.cleanImportData(data);
 
     // Apply AI-specific fixes
     cleaned.technicalSkills = this.cleanAISkills(cleaned.technicalSkills, 'technical');
@@ -18,35 +18,12 @@ export class AIProfileImportDataCleaner extends ProfileImportDataCleaner {
     return cleaned;
   }
 
-  // Add the missing cleanImportData method
-  static cleanImportData(data: ProfileJSONData): ProfileJSONData {
-    return {
-      generalInfo: this.cleanPersonalInfo(data.generalInfo),
-      technicalSkills: (data.technicalSkills || [])
-        .filter(skill => skill.name && skill.name.trim() !== '')
-        .map(skill => this.cleanSkill(skill)),
-      specializedSkills: (data.specializedSkills || [])
-        .filter(skill => skill.name && skill.name.trim() !== '')
-        .map(skill => this.cleanSkill(skill)),
-      experiences: (data.experiences || [])
-        .filter(exp => exp.companyName && exp.companyName.trim() !== '' && exp.designation && exp.designation.trim() !== '')
-        .map(exp => this.cleanExperience(exp)),
-      education: (data.education || [])
-        .filter(edu => edu.university && edu.university.trim() !== '')
-        .map(edu => this.cleanEducation(edu)),
-      trainings: (data.trainings || [])
-        .filter(training => training.title && training.title.trim() !== '')
-        .map(training => this.cleanTraining(training)),
-      achievements: (data.achievements || [])
-        .filter(achievement => achievement.title && achievement.title.trim() !== '')
-        .map(achievement => this.cleanAchievement(achievement)),
-      projects: (data.projects || [])
-        .filter(project => project.name && project.name.trim() !== '' && project.description && project.description.trim() !== '')
-        .map(project => this.cleanProject(project))
-    };
-  }
+  // Note: general import cleaning is handled by ProfileJSONService.cleanImportData
 
-  private static cleanAISkills(skills: any[], type: 'technical' | 'specialized'): any[] {
+  private static cleanAISkills(
+    skills: Array<{ name: string; proficiency: number }>,
+    type: 'technical' | 'specialized'
+  ): Array<{ name: string; proficiency: number }> {
     if (!Array.isArray(skills)) return [];
     
     return skills.map(skill => ({
@@ -66,26 +43,28 @@ export class AIProfileImportDataCleaner extends ProfileImportDataCleaner {
     // Clean common AI extraction issues
     return name
       .trim()
-      .replace(/[^\w\s\.\+\#\-]/g, '') // Remove special chars except common programming ones
+      .replace(/[^\w\s.+#-]/g, '') // Remove special chars except common programming ones
       .replace(/\s+/g, ' ') // Normalize spaces
       .substring(0, 50); // Limit length
   }
 
-  private static cleanAIExperiences(experiences: any[]): any[] {
+  private static cleanAIExperiences(
+    experiences: ProfileJSONData['experiences']
+  ): ProfileJSONData['experiences'] {
     if (!Array.isArray(experiences)) return [];
     
-    return experiences.map(exp => ({
-      ...this.cleanExperience(exp),
-      // Additional AI-specific cleaning
-      companyName: this.cleanCompanyName(exp.companyName),
-      designation: this.cleanDesignation(exp.designation),
-      description: this.cleanDescription(exp.description),
-    })).filter(exp => exp.companyName && exp.companyName.trim().length > 0);
+    return experiences
+      .map(exp => ({
+        ...exp,
+        companyName: this.cleanCompanyName(exp.companyName),
+        designation: this.cleanDesignation(exp.designation),
+        description: this.cleanDescription(exp.description ?? ''),
+      }))
+      .filter(exp => exp.companyName && exp.companyName.trim().length > 0);
   }
 
   private static cleanCompanyName(name: string): string {
     if (!name) return '';
-    
     return name
       .trim()
       .replace(/^(at\s+|@\s+)/i, '') // Remove "at" or "@" prefixes
@@ -111,15 +90,17 @@ export class AIProfileImportDataCleaner extends ProfileImportDataCleaner {
       .substring(0, 2000); // Limit description length
   }
 
-  private static cleanAIEducation(education: any[]): any[] {
+  private static cleanAIEducation(
+    education: ProfileJSONData['education']
+  ): ProfileJSONData['education'] {
     if (!Array.isArray(education)) return [];
     
     return education.map(edu => ({
-      ...this.cleanEducation(edu),
+      ...edu,
       // Additional AI-specific cleaning for education
       university: this.cleanUniversityName(edu.university),
-      degree: this.cleanDegreeName(edu.degree),
-      department: this.cleanDepartmentName(edu.department),
+      degree: this.cleanDegreeName(edu.degree as string | undefined || ''),
+      department: this.cleanDepartmentName(edu.department as string | undefined || ''),
     })).filter(edu => edu.university && edu.university.trim().length > 0);
   }
 
@@ -172,11 +153,13 @@ export class AIProfileImportDataCleaner extends ProfileImportDataCleaner {
     return mapped || name.trim().substring(0, 100);
   }
 
-  private static cleanAIProjects(projects: any[]): any[] {
+  private static cleanAIProjects(
+    projects: ProfileJSONData['projects']
+  ): ProfileJSONData['projects'] {
     if (!Array.isArray(projects)) return [];
     
     return projects.map(project => ({
-      ...this.cleanProject(project),
+      ...project,
       // Clean technologies used array
       technologiesUsed: this.cleanTechnologiesArray(project.technologiesUsed),
       // Clean project name and description
@@ -193,7 +176,7 @@ export class AIProfileImportDataCleaner extends ProfileImportDataCleaner {
       .substring(0, 100);
   }
 
-  private static cleanTechnologiesArray(technologies: any): string[] {
+  private static cleanTechnologiesArray(technologies: unknown): string[] {
     if (!Array.isArray(technologies)) return [];
     
     return technologies
@@ -203,16 +186,19 @@ export class AIProfileImportDataCleaner extends ProfileImportDataCleaner {
   }
 
   // Validate extracted data against database constraints
-  static async validateWithDatabase(data: any, databases: {
-    universities: string[],
-    degrees: string[],
-    departments: string[],
-    designations: string[]
-  }): Promise<any> {
-    const validated = { ...data };
+  static async validateWithDatabase(
+    data: ProfileJSONData,
+    databases: {
+      universities: string[];
+      degrees: string[];
+      departments: string[];
+      designations: string[];
+    }
+  ): Promise<ProfileJSONData> {
+    const validated: ProfileJSONData = { ...data } as ProfileJSONData;
 
     // Filter education by valid universities
-    validated.education = validated.education.filter((edu: any) => {
+    validated.education = validated.education.filter((edu) => {
       const universityMatch = databases.universities.some(uni => 
         uni.toLowerCase().includes(edu.university.toLowerCase()) ||
         edu.university.toLowerCase().includes(uni.toLowerCase())
@@ -226,19 +212,19 @@ export class AIProfileImportDataCleaner extends ProfileImportDataCleaner {
     });
 
     // Validate and map degrees
-    validated.education = validated.education.map((edu: any) => ({
+    validated.education = validated.education.map((edu) => ({
       ...edu,
-      degree: this.findBestMatch(edu.degree, databases.degrees) || edu.degree
+      degree: this.findBestMatch(edu.degree ?? '', databases.degrees) || edu.degree
     }));
 
     // Validate and map departments
-    validated.education = validated.education.map((edu: any) => ({
+    validated.education = validated.education.map((edu) => ({
       ...edu,
-      department: this.findBestMatch(edu.department, databases.departments) || edu.department
+      department: this.findBestMatch(edu.department ?? '', databases.departments) || edu.department
     }));
 
     // Validate and map designations
-    validated.experiences = validated.experiences.map((exp: any) => ({
+    validated.experiences = validated.experiences.map((exp) => ({
       ...exp,
       designation: this.findBestMatch(exp.designation, databases.designations) || exp.designation
     }));

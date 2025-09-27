@@ -1,7 +1,7 @@
 
 import { useState, useCallback } from 'react';
 
-export function useBulkSelection(items: any[] = []) {
+export function useBulkSelection<T extends { id: string }>(items: T[] = []) {
   const [selectedItems, setSelectedItems] = useState<string[]>([]);
 
   const selectItem = useCallback((itemId: string, selected: boolean) => {
@@ -15,7 +15,7 @@ export function useBulkSelection(items: any[] = []) {
   }, []);
 
   const selectAll = useCallback(() => {
-    const allIds = items.map(item => item.id);
+    const allIds = items.map((item) => item.id);
     setSelectedItems(allIds);
   }, [items]);
 

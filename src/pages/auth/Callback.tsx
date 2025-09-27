@@ -116,7 +116,7 @@ const Callback = () => {
           console.log('No session found, redirecting to login');
           navigate('/login');
         }
-      } catch (error: any) {
+      } catch (error: unknown) {
         console.error('Unexpected callback error:', error);
         toast({
           title: "Authentication Error",

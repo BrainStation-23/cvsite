@@ -6,7 +6,7 @@ interface ProtectedRouteProps {
   children: React.ReactNode;
   requiredModuleAccess?: string;
   requiredSubModuleAccess?: string;
-  requiredPermissionType?: 'create' | 'read' | 'update' | 'delete';
+  requiredPermissionType?: 'write' | 'read' | 'update' | 'delete';
 }
 
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ 

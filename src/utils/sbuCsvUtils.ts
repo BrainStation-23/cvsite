@@ -18,19 +18,27 @@ export interface SbuItem {
   updated_at: string;
 }
 
+// Raw CSV row as parsed by Papa
+interface SbuCSVRow {
+  name?: string;
+  sbu_head_email?: string;
+  sbu_head_name?: string;
+  is_department?: string | boolean;
+}
+
 export const parseSbuCSV = (file: File): Promise<SbuFormData[]> => {
   return new Promise((resolve, reject) => {
-    Papa.parse(file, {
+    Papa.parse<SbuCSVRow>(file, {
       header: true,
       skipEmptyLines: true,
       complete: (results) => {
         try {
-          const sbus = results.data.map((item: any) => ({
-            name: item.name || '',
-            sbu_head_email: item.sbu_head_email || '',
-            sbu_head_name: item.sbu_head_name || '',
+          const sbus: SbuFormData[] = results.data.map((item) => ({
+            name: item.name ? String(item.name) : '',
+            sbu_head_email: item.sbu_head_email ? String(item.sbu_head_email) : '',
+            sbu_head_name: item.sbu_head_name ? String(item.sbu_head_name) : '',
             is_department: item.is_department === 'true' || item.is_department === true
-          })) as SbuFormData[];
+          }));
           resolve(sbus);
         } catch (error) {
           reject(error);

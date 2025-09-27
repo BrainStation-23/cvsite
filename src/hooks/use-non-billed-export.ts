@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import Papa from 'papaparse';
+import { NonBilledRecord, NonBilledResponse } from '@/components/NonBilled/types/non-billed-record-data';
 
 export function useNonBilledExport() {
   const [isExporting, setIsExporting] = useState(false);
@@ -13,7 +14,7 @@ export function useNonBilledExport() {
       setIsExporting(true);
 
       // Export all bench data using pagination
-      let allRecords: any[] = [];
+      let allRecords: NonBilledRecord[] = [];
       let currentPage = 1;
       const itemsPerPage = 1000;
       let hasMorePages = true;
@@ -35,17 +36,13 @@ export function useNonBilledExport() {
           throw error;
         }
 
-        if (rpcData && typeof rpcData === 'object' && 'non_billed_records' in rpcData) {
-          const pageRecords = (rpcData as any).non_billed_records || [];
-          const pagination = (rpcData as any).pagination;
+        const typed = (rpcData as unknown as NonBilledResponse) ?? ({} as NonBilledResponse);
+        const { non_billed_resources_records = [], pagination } = typed;
 
-          allRecords = [...allRecords, ...pageRecords];
+        allRecords = [...allRecords, ...non_billed_resources_records];
 
-          if (pagination && currentPage < pagination.page_count) {
-            currentPage++;
-          } else {
-            hasMorePages = false;
-          }
+        if (pagination && currentPage < pagination.page_count) {
+          currentPage++;
         } else {
           hasMorePages = false;
         }
@@ -60,24 +57,23 @@ export function useNonBilledExport() {
         return;
       }
 
-      const csvData = allRecords.map(record => ({
-        'Employee ID': record.employee_id || '',
-        'Employee Name': record.employee_name,
-        'Expertise': record.expertise || '',
-        'Bill Type': record.bill_type_name || '',
-        'Non-Billed Date': record.non_billed_resources_date || '',
-        'SBU': record.sbu_name || '',
-        'Planned Status': record.planned_status || '',
-        'Duration (Days)': record.non_billed_resources_duration_days || 0,
-        'Years of Experience': record.total_years_experience || 0,
-        'Feedback': record.non_billed_resources_feedback || ''
+      const csvData = allRecords.map((record: NonBilledRecord) => ({
+        'Employee ID': record.employee_id ?? '',
+        'Employee Name': record.employee_name ?? '',
+        'Expertise': record.expertise ?? '',
+        'Bill Type': record.bill_type_name ?? '',
+        'Non-Billed Date': record.non_billed_resources_date ?? '',
+        'SBU': record.sbu_name ?? '',
+        'Planned Status': record.planned_status ?? '',
+        'Duration (Days)': record.non_billed_resources_duration_days ?? 0,
+        'Years of Experience': record.total_years_experience ?? 0,
+        'Feedback': record.non_billed_resources_feedback ?? ''
       }));
 
       const csv = Papa.unparse(csvData);
 
       const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
       const link = document.createElement('a');
-
       if (link.download !== undefined) {
         const url = URL.createObjectURL(blob);
         link.setAttribute('href', url);

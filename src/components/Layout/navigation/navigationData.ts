@@ -33,7 +33,7 @@ export interface NavigationItem {
   // Permission-based access control
   requiredModuleAccess: string;
   requiredSubModuleAccess: string;
-  requiredPermissionType: 'create' | 'read' | 'update' | 'delete' | 'manage';
+  requiredPermissionType: 'write' | 'read' | 'update' | 'delete' ;
 }
 
 export interface NavigationGroup {
@@ -233,7 +233,7 @@ export const getPermissionBasedSidebarGroups = (): NavigationGroup[] => {
           label: 'Initiate',
           requiredModuleAccess: 'PIP',
           requiredSubModuleAccess: 'Initiate',
-          requiredPermissionType: 'create'
+          requiredPermissionType: 'write'
         },
         { 
           to: '/pip/list', 

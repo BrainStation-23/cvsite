@@ -2,7 +2,7 @@ import { useState, useCallback, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { NonBilledRecord } from '@/components/NonBilled/types/NonBilledRecord';
+import { NonBilledRecord, NonBilledResponse, NonBilledRpcParams } from '@/components/NonBilled/types/non-billed-record-data';
 
 
 interface NonBilledData {
@@ -42,7 +42,7 @@ export function useNonBilledData() {
   }, []);
 
   // Memoized RPC parameters
-  const rpcParams = useMemo(() => ({
+  const rpcParams: NonBilledRpcParams = useMemo(() => ({
     search_query: searchQuery || null,
     page_number: currentPage,
     items_per_page: perPage,
@@ -63,7 +63,7 @@ export function useNonBilledData() {
   ]);
 
   // Data fetching
-  const { data, isLoading, error, refetch } = useQuery({
+  const { data, isLoading, error, refetch } = useQuery<NonBilledData>({
     queryKey: ['non-billed-data', rpcParams],
     queryFn: async () => {
       console.log('Non-Billed Data Query:', rpcParams);
@@ -78,16 +78,17 @@ export function useNonBilledData() {
       }
 
       if (rpcData && typeof rpcData === 'object') {
+        const typed = rpcData as unknown as NonBilledResponse;
         return {
-          non_billed_records: (rpcData as any).non_billed_resources_records || [],
-          pagination: (rpcData as any).pagination || {
+          non_billed_records: typed.non_billed_resources_records || [],
+          pagination: typed.pagination || {
             total_count: 0,
             filtered_count: 0,
-            page: currentPage,
-            per_page: perPage,
+            page: rpcParams.page_number,
+            per_page: rpcParams.items_per_page,
             page_count: 0
           }
-        } as NonBilledData;
+        } satisfies NonBilledData;
       }
 
       return {
@@ -95,8 +96,8 @@ export function useNonBilledData() {
         pagination: {
           total_count: 0,
           filtered_count: 0,
-          page: currentPage,
-          per_page: perPage,
+          page: rpcParams.page_number,
+          per_page: rpcParams.items_per_page,
           page_count: 0
         }
       } as NonBilledData;
@@ -116,7 +117,7 @@ export function useNonBilledData() {
         description: 'Non-billed data synchronized successfully.',
       });
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       console.error('Sync bench error:', error);
       toast({
         title: 'Error',

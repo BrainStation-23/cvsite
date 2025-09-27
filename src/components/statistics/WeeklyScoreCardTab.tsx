@@ -35,6 +35,11 @@ import {
 } from '@/components/ui/alert-dialog';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '../ui/collapsible';
 
+interface DistributionItem {
+  bill_type_name: string;
+  count: number;
+}
+
 export const WeeklyScoreCardTab: React.FC = () => {
   const [startDate, setStartDate] = useState<string>('');
   const [endDate, setEndDate] = useState<string>('');
@@ -204,8 +209,8 @@ export const WeeklyScoreCardTab: React.FC = () => {
             {scoreCards.map((scoreCard) => {
               const totalBillable = scoreCard.billed_count + scoreCard.non_billed_count;
               const utilizationPercentage = Math.round(scoreCard.utilization_rate * 100);
-              const nonBilledTotal = scoreCard.jsonb_record?.non_billed_distribution?.reduce((sum: number, item: any) => sum + item.count, 0) || 0;
-              const supportTotal = scoreCard.jsonb_record?.support_distribution?.reduce((sum: number, item: any) => sum + item.count, 0) || 0;
+              const nonBilledTotal = scoreCard.jsonb_record?.non_billed_distribution?.reduce((sum: number, item: DistributionItem) => sum + item.count, 0) || 0;
+              const supportTotal = scoreCard.jsonb_record?.support_distribution?.reduce((sum: number, item: DistributionItem) => sum + item.count, 0) || 0;
               const grandTotal = totalBillable + supportTotal;
 
               return (
@@ -284,7 +289,7 @@ export const WeeklyScoreCardTab: React.FC = () => {
                           <span className="font-semibold text-destructive">{nonBilledTotal}</span>
                         </div>
                         <div className="space-y-1 ml-2">
-                          {scoreCard.jsonb_record?.non_billed_distribution?.map((item: any, index: number) => (
+                          {scoreCard.jsonb_record?.non_billed_distribution?.map((item: DistributionItem, index: number) => (
                             <div key={index} className="flex justify-between text-sm">
                               <span className="text-muted-foreground truncate">{item.bill_type_name}</span>
                               <span className="font-medium min-w-fit">{item.count}</span>
@@ -305,7 +310,7 @@ export const WeeklyScoreCardTab: React.FC = () => {
                           <span className="font-semibold text-secondary-foreground">{supportTotal}</span>
                         </div>
                         <div className="space-y-1 ml-2">
-                          {scoreCard.jsonb_record?.support_distribution?.map((item: any, index: number) => (
+                          {scoreCard.jsonb_record?.support_distribution?.map((item: DistributionItem, index: number) => (
                             <div key={index} className="flex justify-between text-sm">
                               <span className="text-muted-foreground truncate">{item.bill_type_name}</span>
                               <span className="font-medium min-w-fit">{item.count}</span>

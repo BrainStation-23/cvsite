@@ -12,14 +12,14 @@ interface AuthContextType {
   signOut: () => Promise<void>;
   // New permission-based methods (cached)
   hasModuleAccess: (moduleId: string) => boolean;
-  hasSubModulePermission: (subModuleId: string, permissionType: 'create' | 'read' | 'update' | 'delete' | 'manage') => boolean;
+  hasSubModulePermission: (subModuleId: string, permissionType: 'write' | 'read' | 'update' | 'delete') => boolean;
   hasRouteAccess: (routePath: string) => boolean;
   getUserPermissions: () => UserPermission[];
   // Role visibility helper
   canViewSystemRoles: () => boolean;
   // Real-time RPC-based permission methods for critical checks
   hasModuleAccessRealTime: (moduleId: string) => Promise<boolean>;
-  hasSubModulePermissionRealTime: (subModuleId: string, permissionType: 'create' | 'read' | 'update' | 'delete' | 'manage', targetSbuId?: string) => Promise<boolean>;
+  hasSubModulePermissionRealTime: (subModuleId: string, permissionType: 'write' | 'read' | 'update' | 'delete', targetSbuId?: string) => Promise<boolean>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -75,7 +75,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         module_name: p.module_name,
         sub_module_id: `sub_module_${index}`, // Generate since not returned by RPC
         sub_module_name: p.sub_module_name,
-        permission_type: p.permission_type === 'write' ? 'create' : p.permission_type as 'create' | 'read' | 'update' | 'delete' | 'manage',
+        permission_type: p.permission_type ,
         sbu_restrictions: p.allowed_sbus || [],
         route_path: p.route_path,
         table_names: p.table_names
@@ -254,7 +254,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const hasSubModulePermission = (
     subModuleId: string, 
-    permissionType: 'create' | 'read' | 'update' | 'delete' | 'manage'
+    permissionType: 'write' | 'read' | 'update' | 'delete' 
   ): boolean => {
     console.log('=== hasSubModulePermission Debug ===');
     console.log('Looking for sub-module:', subModuleId, 'with permission:', permissionType);
@@ -331,21 +331,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const hasSubModulePermissionRealTime = async (
     subModuleId: string, 
-    permissionType: 'create' | 'read' | 'update' | 'delete' | 'manage',
+    permissionType: 'write' | 'read' | 'update' | 'delete',
     targetSbuId?: string
   ): Promise<boolean> => {
     if (!user?.id) return false;
     
     try {
-      // Convert 'create' to 'write' for the database function, filter out 'manage'
-      const dbPermissionType = permissionType === 'create' ? 'write' : 
-                               permissionType === 'manage' ? 'read' : permissionType;
       
       const { data, error } = await supabase
         .rpc('has_permission', {
           _user_id: user.id,
           _sub_module_path: subModuleId,
-          _permission_type: dbPermissionType,
+          _permission_type: permissionType,
           _target_sbu_id: targetSbuId || user.sbuContext
         });
       

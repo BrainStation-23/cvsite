@@ -1,10 +1,8 @@
-
-import { useState, useCallback, useRef } from 'react';
+import { useState, useCallback, useRef, useMemo } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { 
   EmployeeProfile, 
-  EmployeeProfilesPagination, 
   EmployeeProfileSortColumn, 
   EmployeeProfileSortOrder,
   EmployeeProfilesResponse 
@@ -19,11 +17,11 @@ interface PaginationData {
 }
 
 // Debounce utility function
-const debounce = (func: Function, delay: number) => {
-  let timeoutId: NodeJS.Timeout;
-  return (...args: any[]) => {
+const debounce = <T extends (...args: unknown[]) => void>(func: T, delay: number) => {
+  let timeoutId: number;
+  return (...args: Parameters<T>) => {
     clearTimeout(timeoutId);
-    timeoutId = setTimeout(() => func.apply(null, args), delay);
+    timeoutId = window.setTimeout(() => func(...args), delay);
   };
 };
 
@@ -162,7 +160,10 @@ export function useEmployeeProfilesEnhanced() {
         sort_order: sortDir
       });
 
-      const { data, error } = await Promise.race([queryPromise, timeoutPromise]) as any;
+      const { data, error } = await Promise.race([queryPromise, timeoutPromise]) as {
+        data: EmployeeProfilesResponse | null;
+        error: { message?: string; code?: string } | null;
+      };
 
       if (error) {
         console.error('Error fetching employee profiles:', error);
@@ -206,18 +207,19 @@ export function useEmployeeProfilesEnhanced() {
           setSortOrder(sortDir);
         }
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error fetching employee profiles:', error);
       
       // Enhanced error handling for different error types
       let errorMessage = 'There was an error fetching employee profiles';
       
-      if (error.message?.includes('timeout') || error.code === '57014') {
+      const err = error as { message?: string; code?: string };
+      if (err?.message?.includes('timeout') || err?.code === '57014') {
         errorMessage = 'Database query timed out. Please try using filters to reduce the dataset size.';
-      } else if (error.message?.includes('network') || error.message?.includes('fetch')) {
+      } else if (err?.message?.includes('network') || err?.message?.includes('fetch')) {
         errorMessage = 'Network error occurred. Please check your connection and try again.';
-      } else if (error.message) {
-        errorMessage = error.message;
+      } else if (err?.message) {
+        errorMessage = err.message;
       }
 
       toast({
@@ -235,15 +237,16 @@ export function useEmployeeProfilesEnhanced() {
   }, [pagination.page, pagination.perPage, searchQuery, skillFilter, experienceFilter, educationFilter, trainingFilter, achievementFilter, projectFilter, minEngagementPercentage, maxEngagementPercentage, minBillingPercentage, maxBillingPercentage, releaseDateFrom, releaseDateTo, availabilityStatus, currentProjectSearch, sortBy, sortOrder, toast]);
 
   // Debounced search function to reduce query frequency
-  const debouncedFetchProfiles = useCallback(
-    debounce((options: any) => {
-      // Don't debounce if this is a pagination change
-      if (isPaginationChange.current) {
-        fetchProfiles(options);
-      } else {
-        fetchProfiles(options);
-      }
-    }, 500),
+  const debouncedFetchProfiles = useMemo(
+    () =>
+      debounce((options: Parameters<typeof fetchProfiles>[0]) => {
+        // Don't debounce if this is a pagination change
+        if (isPaginationChange.current) {
+          fetchProfiles(options);
+        } else {
+          fetchProfiles(options);
+        }
+      }, 500),
     [fetchProfiles]
   );
 

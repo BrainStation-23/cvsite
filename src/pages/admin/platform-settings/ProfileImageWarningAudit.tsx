@@ -23,6 +23,33 @@ import {
 } from 'lucide-react';
 import { format } from 'date-fns';
 
+// Typed shape for audit items consumed in this view
+interface ProfileImageAuditItem {
+  id: string;
+  upload_timestamp: string;
+  profile?: {
+    employee_id?: string;
+    first_name?: string;
+    last_name?: string;
+  } | null;
+  general_information?: {
+    first_name?: string;
+    last_name?: string;
+  } | null;
+  uploaded_by?: {
+    employee_id?: string;
+    first_name?: string;
+    last_name?: string;
+  } | null;
+  uploaded_by_general_info?: {
+    first_name?: string;
+    last_name?: string;
+  } | null;
+  validation_errors: string[];
+  image_url?: string | null;
+  profile_id?: string;
+}
+
 const ProfileImageWarningAudit: React.FC = () => {
   const [filters, setFilters] = useState({
     searchTerm: '',
@@ -46,8 +73,8 @@ const ProfileImageWarningAudit: React.FC = () => {
     setFilters(prev => ({ ...prev, page }));
   };
 
-  const getDisplayName = (item: any) => {
-    const generalInfo = item.general_information?.[0];
+  const getDisplayName = (item: ProfileImageAuditItem) => {
+    const generalInfo = item.general_information || undefined;
     const profileInfo = item.profile;
     
     const firstName = generalInfo?.first_name || profileInfo?.first_name || '';
@@ -56,8 +83,8 @@ const ProfileImageWarningAudit: React.FC = () => {
     return `${firstName} ${lastName}`.trim() || 'Unknown User';
   };
 
-  const getUploaderName = (item: any) => {
-    const generalInfo = item.uploaded_by_general_info?.[0];
+  const getUploaderName = (item: ProfileImageAuditItem) => {
+    const generalInfo = item.uploaded_by_general_info || undefined;
     const profileInfo = item.uploaded_by;
     
     const firstName = generalInfo?.first_name || profileInfo?.first_name || '';

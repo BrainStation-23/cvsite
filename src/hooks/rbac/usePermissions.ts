@@ -28,9 +28,16 @@ export const useUpdateRolePermissions = () => {
       permissions 
     }: { 
       roleId: string; 
-      permissions: Omit<RolePermission, 'id' | 'created_at' | 'updated_at' | 'role_id'>[] 
-    }) =>
-      PermissionService.updateRolePermissions(roleId, permissions),
+      permissions: Omit<RolePermission, 'id' | 'created_at' | 'updated_at'>[] 
+    }) => {
+      const permissionsWithRoleId = permissions.map(p => ({ 
+        ...p, 
+        role_id: roleId,
+        sub_module_id: p.sub_module_id || '',
+        table_restrictions: p.table_restrictions || undefined
+      }));
+      return PermissionService.updateRolePermissions(roleId, permissionsWithRoleId);
+    },
     onSuccess: (_, { roleId }) => {
       queryClient.invalidateQueries({ queryKey: ['rolePermissions', roleId] });
       toast({
@@ -38,7 +45,7 @@ export const useUpdateRolePermissions = () => {
         description: 'Role permissions updated successfully',
       });
     },
-    onError: (error) => {
+    onError: () => {
       toast({
         title: 'Error',
         description: 'Failed to update role permissions',

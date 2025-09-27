@@ -2,7 +2,6 @@ import { useEffect, useMemo, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { Input } from '@/components/ui/input';
 import { useAiEnhance } from '@/hooks/use-ai-enhance';
 import { toast } from 'sonner';
 import type { FeedbackType } from '../types/feedback';

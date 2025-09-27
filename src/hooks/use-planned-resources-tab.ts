@@ -2,6 +2,7 @@ import { useState, useCallback, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { ResourcePlanningData } from '@/components/resource-planning/types/resourceplanning';
 
 interface AdvancedFilters {
   billTypeFilter: string | null;
@@ -75,7 +76,31 @@ export function usePlannedResourcesTab(isActive: boolean = true) {
   const resetPage = useCallback(() => setCurrentPage(1), []);
 
   // Memoized RPC parameters with new project-level filters
-  const rpcParams = useMemo(() => ({
+  interface PlannedResourcesRpcParams {
+    search_query: string | null;
+    page_number: number;
+    items_per_page: number;
+    sort_by: string;
+    sort_order: 'asc' | 'desc';
+    sbu_filter: string | null;
+    manager_filter: string | null;
+    bill_type_filter: string | null;
+    project_search: string | null;
+    min_engagement_percentage: number | null;
+    max_engagement_percentage: number | null;
+    min_billing_percentage: number | null;
+    max_billing_percentage: number | null;
+    start_date_from: string | null;
+    start_date_to: string | null;
+    end_date_from: string | null;
+    end_date_to: string | null;
+    project_level_filter: string | null;
+    project_bill_type_filter: string | null;
+    project_type_filter: string | null;
+    expertise_filter: string | null;
+  }
+
+  const rpcParams: PlannedResourcesRpcParams = useMemo(() => ({
     search_query: searchQuery || null,
     page_number: currentPage,
     items_per_page: perPage, // <-- Use perPage here
@@ -109,7 +134,20 @@ export function usePlannedResourcesTab(isActive: boolean = true) {
   ]);
 
   // Data fetching - only enabled when tab is active
-  const { data, isLoading, error, refetch } = useQuery({
+  interface PlannedResourcesPagination {
+    total_count: number;
+    filtered_count: number;
+    page: number;
+    per_page: number;
+    page_count: number;
+  }
+
+  interface PlannedResourcesResponse {
+    resource_planning: ResourcePlanningData[];
+    pagination: PlannedResourcesPagination;
+  }
+
+  const { data, isLoading, error, refetch } = useQuery<PlannedResourcesResponse>({
     queryKey: ['planned-resources-tab', rpcParams],
     queryFn: async () => {
       console.log('Planned Resources Tab Query:', rpcParams);
@@ -121,17 +159,17 @@ export function usePlannedResourcesTab(isActive: boolean = true) {
         throw error;
       }
 
-      if (rpcData && typeof rpcData === 'object' && 'resource_planning' in rpcData) {
-        return {
-          resource_planning: (rpcData as any).resource_planning || [],
-          pagination: (rpcData as any).pagination || {
-            total_count: 0,
-            filtered_count: 0,
-            page: currentPage,
-            per_page: perPage,
-            page_count: 0
-          }
+      const maybe = rpcData as unknown;
+      if (
+        typeof maybe === 'object' && maybe !== null &&
+        'resource_planning' in maybe && Array.isArray((maybe as { resource_planning: unknown }).resource_planning) &&
+        'pagination' in maybe
+      ) {
+        const typed: PlannedResourcesResponse = {
+          resource_planning: (maybe as { resource_planning: ResourcePlanningData[] }).resource_planning,
+          pagination: (maybe as { pagination: PlannedResourcesPagination }).pagination,
         };
+        return typed;
       }
 
       return {
@@ -139,11 +177,11 @@ export function usePlannedResourcesTab(isActive: boolean = true) {
         pagination: {
           total_count: 0,
           filtered_count: 0,
-          page: currentPage,
-          per_page: perPage,
+          page: rpcParams.page_number,
+          per_page: rpcParams.items_per_page,
           page_count: 0
         }
-      };
+      } as PlannedResourcesResponse;
     },
     enabled: isActive,
   });
@@ -166,7 +204,7 @@ export function usePlannedResourcesTab(isActive: boolean = true) {
         description: `${resourcePlanningIds.length} resource assignments marked as complete.`,
       });
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       console.error('Bulk completion error:', error);
       toast({
         title: 'Error',
@@ -194,7 +232,7 @@ export function usePlannedResourcesTab(isActive: boolean = true) {
         description: `${resourcePlanningIds.length} resource assignments deleted successfully.`,
       });
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       console.error('Bulk deletion error:', error);
       toast({
         title: 'Error',
@@ -222,7 +260,7 @@ export function usePlannedResourcesTab(isActive: boolean = true) {
         description: `${resourcePlanningIds.length} resource assignments invalidated successfully.`,
       });
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       console.error('Bulk invalidation error:', error);
       toast({
         title: 'Error',
@@ -274,7 +312,7 @@ export function usePlannedResourcesTab(isActive: boolean = true) {
         description: `${resourcePlanningIds.length} resource assignments copied successfully.`,
       });
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       console.error('Bulk copy error:', error);
       toast({
         title: 'Error',
@@ -301,8 +339,8 @@ export function usePlannedResourcesTab(isActive: boolean = true) {
     clearAdvancedFilters,
     
     // Data and pagination
-    data: data?.resource_planning || [],
-    pagination: data?.pagination,
+    data: (data?.resource_planning as ResourcePlanningData[]) || [],
+    pagination: data?.pagination as PlannedResourcesPagination | undefined,
     isLoading: isActive ? isLoading : false,
     error,
     refetch,

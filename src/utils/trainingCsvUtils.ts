@@ -104,48 +104,40 @@ export const downloadTrainingCSVTemplate = () => {
   }
 };
 
-export const validateTrainingCSVData = async (data: any[]): Promise<TrainingCSVValidationResult> => {
+export const validateTrainingCSVData = async (
+  data: Array<Record<string, unknown>>
+): Promise<TrainingCSVValidationResult> => {
   const valid: TrainingFormData[] = [];
   const errors: TrainingCSVValidationError[] = [];
-  const seenCombinations = new Set();
+  const seenCombinations = new Set<string>();
+
+  const asString = (v: unknown) => (typeof v === 'string' ? v : v === null || v === undefined ? '' : String(v)).trim();
 
   for (let i = 0; i < data.length; i++) {
-    const row = data[i];
+    const r = data[i] as Record<string, unknown>;
     const rowNumber = i + 2; // +2 because index starts at 0 and CSV has header row
     let hasErrors = false;
 
+    const employeeId = asString(r.employee_id);
+    const title = asString(r.title);
+
     // Validate employee_id (required)
-    if (!row.employee_id || typeof row.employee_id !== 'string' || row.employee_id.trim() === '') {
-      errors.push({
-        row: rowNumber,
-        field: 'employee_id',
-        value: row.employee_id || '',
-        message: 'Employee ID is required'
-      });
+    if (!employeeId) {
+      errors.push({ row: rowNumber, field: 'employee_id', value: employeeId, message: 'Employee ID is required' });
       hasErrors = true;
     }
 
     // Validate title (required)
-    if (!row.title || typeof row.title !== 'string' || row.title.trim() === '') {
-      errors.push({
-        row: rowNumber,
-        field: 'title',
-        value: row.title || '',
-        message: 'Certification title is required'
-      });
+    if (!title) {
+      errors.push({ row: rowNumber, field: 'title', value: title, message: 'Certification title is required' });
       hasErrors = true;
     }
 
     // Check for duplicate employee_id + title combination
-    if (row.employee_id && row.title) {
-      const combination = `${row.employee_id.trim()}-${row.title.trim()}`;
+    if (employeeId && title) {
+      const combination = `${employeeId}-${title}`;
       if (seenCombinations.has(combination)) {
-        errors.push({
-          row: rowNumber,
-          field: 'combination',
-          value: combination,
-          message: 'Duplicate employee ID and title combination'
-        });
+        errors.push({ row: rowNumber, field: 'combination', value: combination, message: 'Duplicate employee ID and title combination' });
         hasErrors = true;
       } else {
         seenCombinations.add(combination);
@@ -154,47 +146,35 @@ export const validateTrainingCSVData = async (data: any[]): Promise<TrainingCSVV
 
     // Validate certification_date (optional but must be valid if provided)
     let formattedCertDate = '';
-    if (row.certification_date && row.certification_date.trim() !== '') {
-      if (!validateDate(row.certification_date)) {
-        errors.push({
-          row: rowNumber,
-          field: 'certification_date',
-          value: row.certification_date,
-          message: 'Invalid date format. Use YYYY-MM-DD or MM/DD/YYYY'
-        });
+    const certDateRaw = asString(r.certification_date);
+    if (certDateRaw !== '') {
+      if (!validateDate(certDateRaw)) {
+        errors.push({ row: rowNumber, field: 'certification_date', value: certDateRaw, message: 'Invalid date format. Use YYYY-MM-DD or MM/DD/YYYY' });
         hasErrors = true;
       } else {
-        formattedCertDate = formatDate(row.certification_date);
+        formattedCertDate = formatDate(certDateRaw);
       }
     }
 
     // Validate expiry_date (optional but must be valid if provided)
     let formattedExpiryDate = '';
-    if (row.expiry_date && row.expiry_date.trim() !== '') {
-      if (!validateDate(row.expiry_date)) {
-        errors.push({
-          row: rowNumber,
-          field: 'expiry_date',
-          value: row.expiry_date,
-          message: 'Invalid expiry date format. Use YYYY-MM-DD or MM/DD/YYYY'
-        });
+    const expiryDateRaw = asString(r.expiry_date);
+    if (expiryDateRaw !== '') {
+      if (!validateDate(expiryDateRaw)) {
+        errors.push({ row: rowNumber, field: 'expiry_date', value: expiryDateRaw, message: 'Invalid expiry date format. Use YYYY-MM-DD or MM/DD/YYYY' });
         hasErrors = true;
       } else {
-        formattedExpiryDate = formatDate(row.expiry_date);
+        formattedExpiryDate = formatDate(expiryDateRaw);
       }
     }
 
     // Validate URL format (optional)
-    if (row.certificate_url && row.certificate_url.trim() !== '') {
+    const certUrlRaw = asString(r.certificate_url);
+    if (certUrlRaw !== '') {
       try {
-        new URL(row.certificate_url);
+        new URL(certUrlRaw);
       } catch {
-        errors.push({
-          row: rowNumber,
-          field: 'certificate_url',
-          value: row.certificate_url,
-          message: 'Invalid URL format'
-        });
+        errors.push({ row: rowNumber, field: 'certificate_url', value: certUrlRaw, message: 'Invalid URL format' });
         hasErrors = true;
       }
     }
@@ -202,13 +182,13 @@ export const validateTrainingCSVData = async (data: any[]): Promise<TrainingCSVV
     // If no errors, add to valid array
     if (!hasErrors) {
       valid.push({
-        employee_id: row.employee_id.trim(),
-        title: row.title.trim(),
-        provider: row.provider?.trim() || 'Unknown',
+        employee_id: employeeId,
+        title: title,
+        provider: asString(r.provider) || 'Unknown',
         certification_date: formattedCertDate || new Date().toISOString().split('T')[0],
-        description: row.description?.trim() || '',
-        certificate_url: row.certificate_url?.trim() || '',
-        is_renewable: parseBoolean(row.is_renewable || ''),
+        description: asString(r.description) || '',
+        certificate_url: certUrlRaw || '',
+        is_renewable: parseBoolean(asString(r.is_renewable)),
         expiry_date: formattedExpiryDate || ''
       });
     }
@@ -217,16 +197,19 @@ export const validateTrainingCSVData = async (data: any[]): Promise<TrainingCSVV
   return { valid, errors };
 };
 
-export const parseTrainingCSV = (file: File): Promise<any[]> => {
+export const parseTrainingCSV = (file: File): Promise<Record<string, unknown>[]> => {
   return new Promise((resolve, reject) => {
     Papa.parse(file, {
       header: true,
       complete: (results) => {
         try {
-          // Filter out empty rows
-          const filteredData = results.data.filter((row: any) => 
-            row.employee_id && row.employee_id.toString().trim() !== ''
-          );
+          const raw = results.data as Record<string, unknown>[];
+          const filteredData = raw.filter((row) => {
+            const val = row['employee_id'];
+            if (val === undefined || val === null) return false;
+            const s = typeof val === 'string' ? val : String(val);
+            return s.trim() !== '';
+          });
           resolve(filteredData);
         } catch (error) {
           reject(error);

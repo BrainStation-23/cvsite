@@ -4,9 +4,15 @@ import { createRoot } from 'react-dom/client';
 import App from './App';
 import './index.css';
 
+declare global {
+  interface Window {
+    React: typeof React;
+  }
+}
+
 // Ensure React is available globally for development
 if (typeof window !== 'undefined') {
-  (window as any).React = React;
+  window.React = React;
 }
 
 const container = document.getElementById("root");

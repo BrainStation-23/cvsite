@@ -12,6 +12,9 @@ const jsRecommendedRules = js.configs.recommended.rules;
 
 export default [
   {
+    ignores: ["src/components/ui/**"],
+  },
+  {
     files: ["src/**/*.{js,jsx,ts,tsx}"],
 
     languageOptions: {

@@ -244,89 +244,70 @@ export const downloadUpdateCSVTemplate = () => {
   }
 };
 
-export const validateCSVData = (data: any[], existingUsers: any[] = [], mode: 'create' | 'update' = 'create'): CSVValidationResult => {
+export type ExistingUser = { email: string; id: string };
+
+export const validateCSVData = (
+  data: Array<Record<string, unknown>>,
+  existingUsers: ExistingUser[] = [],
+  mode: 'create' | 'update' = 'create'
+): CSVValidationResult => {
   const valid: UserCSVRow[] = [];
   const errors: CSVValidationError[] = [];
-  const seenEmails = new Set();
-  const seenUserIds = new Set();
-  
+  const seenEmails = new Set<string>();
+  const seenUserIds = new Set<string>();
+
+  // Helper to safely coerce unknown values to trimmed strings
+  const asString = (v: unknown) => (typeof v === 'string' ? v : v === null || v === undefined ? '' : String(v)).trim();
+
   // Create a set of existing user emails for quick lookup
   const existingEmails = new Set(existingUsers.map(u => u.email.toLowerCase().trim()));
   const existingUserIds = new Set(existingUsers.map(u => u.id));
 
-  data.forEach((row: any, index: number) => {
+  data.forEach((row, index) => {
+    const r = row as Record<string, unknown>;
     const rowNumber = index + 2; // +2 because index starts at 0 and CSV has header row
     let hasErrors = false;
 
     // Validate userId for update mode
     if (mode === 'update') {
-      if (!row.userId || typeof row.userId !== 'string' || row.userId.trim() === '') {
-        errors.push({
-          row: rowNumber,
-          field: 'userId',
-          value: row.userId || '',
-          message: 'User ID is required for updates'
-        });
+      const userId = asString(r.userId);
+      if (!userId) {
+        errors.push({ row: rowNumber, field: 'userId', value: userId, message: 'User ID is required for updates' });
         hasErrors = true;
       } else {
-        const trimmedUserId = row.userId.trim();
-        if (seenUserIds.has(trimmedUserId)) {
-          errors.push({
-            row: rowNumber,
-            field: 'userId',
-            value: trimmedUserId,
-            message: 'Duplicate user ID in CSV'
-          });
+        if (seenUserIds.has(userId)) {
+          errors.push({ row: rowNumber, field: 'userId', value: userId, message: 'Duplicate user ID in CSV' });
           hasErrors = true;
         } else {
-          seenUserIds.add(trimmedUserId);
+          seenUserIds.add(userId);
         }
       }
     }
 
     // Validate email (required)
-    if (!row.email || typeof row.email !== 'string' || row.email.trim() === '') {
-      errors.push({
-        row: rowNumber,
-        field: 'email',
-        value: row.email || '',
-        message: 'Email is required'
-      });
+    const emailRaw = asString(r.email);
+    if (!emailRaw) {
+      errors.push({ row: rowNumber, field: 'email', value: emailRaw, message: 'Email is required' });
       hasErrors = true;
     } else {
-      const trimmedEmail = row.email.trim();
+      const trimmedEmail = emailRaw;
       const lowerEmail = trimmedEmail.toLowerCase();
-      
+
       // Basic email validation
       if (!isValidEmail(trimmedEmail)) {
-        errors.push({
-          row: rowNumber,
-          field: 'email',
-          value: trimmedEmail,
-          message: 'Invalid email format'
-        });
+        errors.push({ row: rowNumber, field: 'email', value: trimmedEmail, message: 'Invalid email format' });
         hasErrors = true;
       } else {
         // Check for duplicates within CSV
         if (seenEmails.has(lowerEmail)) {
-          errors.push({
-            row: rowNumber,
-            field: 'email',
-            value: trimmedEmail,
-            message: 'Duplicate email in CSV'
-          });
+          errors.push({ row: rowNumber, field: 'email', value: trimmedEmail, message: 'Duplicate email in CSV' });
           hasErrors = true;
         } else {
           seenEmails.add(lowerEmail);
-          
+
           // For create mode, check if user already exists
           if (mode === 'create' && existingEmails.has(lowerEmail)) {
-            errors.push({
-              row: rowNumber,
-              field: 'email',
-              value: trimmedEmail,
-              message: 'User with this email already exists'
-            });
+            errors.push({ row: rowNumber, field: 'email', value: trimmedEmail, message: 'User with this email already exists' });
             hasErrors = true;
           }
         }
@@ -334,111 +315,98 @@ export const validateCSVData = (data: any[], existingUsers: any[] = [], mode: 'c
     }
 
     // Validate firstName (required)
-    if (!row.firstName || typeof row.firstName !== 'string' || row.firstName.trim() === '') {
-      errors.push({
-        row: rowNumber,
-        field: 'firstName',
-        value: row.firstName || '',
-        message: 'First name is required'
-      });
+    const firstNameRaw = asString(r.firstName);
+    if (!firstNameRaw) {
+      errors.push({ row: rowNumber, field: 'firstName', value: firstNameRaw, message: 'First name is required' });
       hasErrors = true;
     }
-
-    // lastName is now optional - no validation needed
-
-
 
     // Validate manager email format if provided
-    if (row.managerEmail && row.managerEmail.trim() && !isValidEmail(row.managerEmail.trim())) {
-      errors.push({
-        row: rowNumber,
-        field: 'managerEmail',
-        value: row.managerEmail,
-        message: 'Invalid manager email format'
-      });
+    const managerEmailRaw = asString(r.managerEmail);
+    if (managerEmailRaw && !isValidEmail(managerEmailRaw)) {
+      errors.push({ row: rowNumber, field: 'managerEmail', value: managerEmailRaw, message: 'Invalid manager email format' });
       hasErrors = true;
     }
 
-    // Validate and normalize date of joining if provided
-    let normalizedDateOfJoining = null;
-    if (row.dateOfJoining && row.dateOfJoining.trim()) {
-      normalizedDateOfJoining = normalizeDate(row.dateOfJoining.trim());
-      // Don't fail validation for invalid dates - just set to null and warn
+    // Validate and normalize date fields if provided (don't fail on invalid dates)
+    let normalizedDateOfJoining: string | null = null;
+    const dojRaw = asString(r.dateOfJoining);
+    if (dojRaw) {
+      normalizedDateOfJoining = normalizeDate(dojRaw);
       if (normalizedDateOfJoining === null) {
-        console.warn(`Invalid date format for dateOfJoining at row ${rowNumber}: ${row.dateOfJoining}. Will be set to null.`);
+        console.warn(`Invalid date format for dateOfJoining at row ${rowNumber}: ${dojRaw}. Will be set to null.`);
       }
     }
 
-    // Validate and normalize career start date if provided
-    let normalizedCareerStartDate = null;
-    if (row.careerStartDate && row.careerStartDate.trim()) {
-      normalizedCareerStartDate = normalizeDate(row.careerStartDate.trim());
-      // Don't fail validation for invalid dates - just set to null and warn
+    let normalizedCareerStartDate: string | null = null;
+    const csdRaw = asString(r.careerStartDate);
+    if (csdRaw) {
+      normalizedCareerStartDate = normalizeDate(csdRaw);
       if (normalizedCareerStartDate === null) {
-        console.warn(`Invalid date format for careerStartDate at row ${rowNumber}: ${row.careerStartDate}. Will be set to null.`);
+        console.warn(`Invalid date format for careerStartDate at row ${rowNumber}: ${csdRaw}. Will be set to null.`);
       }
     }
 
-    // Validate and normalize date of birth if provided
-    let normalizedDateOfBirth = null;
-    if (row.dateOfBirth && row.dateOfBirth.trim()) {
-      normalizedDateOfBirth = normalizeDate(row.dateOfBirth.trim());
+    let normalizedDateOfBirth: string | null = null;
+    const dobRaw = asString(r.dateOfBirth);
+    if (dobRaw) {
+      normalizedDateOfBirth = normalizeDate(dobRaw);
       if (normalizedDateOfBirth === null) {
-        console.warn(`Invalid date format for dateOfBirth at row ${rowNumber}: ${row.dateOfBirth}. Will be set to null.`);
+        console.warn(`Invalid date format for dateOfBirth at row ${rowNumber}: ${dobRaw}. Will be set to null.`);
       }
     }
 
-    // Validate and normalize resignation date if provided
-    let normalizedResignationDate = null;
-    if (row.resignationDate && row.resignationDate.trim()) {
-      normalizedResignationDate = normalizeDate(row.resignationDate.trim());
+    let normalizedResignationDate: string | null = null;
+    const resRaw = asString(r.resignationDate);
+    if (resRaw) {
+      normalizedResignationDate = normalizeDate(resRaw);
       if (normalizedResignationDate === null) {
-        console.warn(`Invalid date format for resignationDate at row ${rowNumber}: ${row.resignationDate}. Will be set to null.`);
+        console.warn(`Invalid date format for resignationDate at row ${rowNumber}: ${resRaw}. Will be set to null.`);
       }
     }
 
-    // Validate and normalize exit date if provided
-    let normalizedExitDate = null;
-    if (row.exitDate && row.exitDate.trim()) {
-      normalizedExitDate = normalizeDate(row.exitDate.trim());
+    let normalizedExitDate: string | null = null;
+    const exitRaw = asString(r.exitDate);
+    if (exitRaw) {
+      normalizedExitDate = normalizeDate(exitRaw);
       if (normalizedExitDate === null) {
-        console.warn(`Invalid date format for exitDate at row ${rowNumber}: ${row.exitDate}. Will be set to null.`);
+        console.warn(`Invalid date format for exitDate at row ${rowNumber}: ${exitRaw}. Will be set to null.`);
       }
     }
 
     // If no errors, add to valid array with defaults
     if (!hasErrors) {
       const validRow: UserCSVRow = {
-        email: row.email.trim(),
-        firstName: row.firstName.trim(),
-        lastName: row.lastName && row.lastName.trim() ? row.lastName.trim() : undefined, // Make optional
-        employeeId: row.employeeId ? row.employeeId.trim() : '',
-        managerEmail: row.managerEmail ? row.managerEmail.trim() : '',
-        sbuName: row.sbuName ? row.sbuName.trim() : '',
-        expertiseName: row.expertiseName ? row.expertiseName.trim() : '',
-        resourceTypeName: row.resourceTypeName ? row.resourceTypeName.trim() : '',
+        email: asString(r.email),
+        firstName: asString(r.firstName),
+        lastName: asString(r.lastName) || undefined,
+        employeeId: asString(r.employeeId) || '',
+        managerEmail: asString(r.managerEmail) || '',
+        sbuName: asString(r.sbuName) || '',
+        expertiseName: asString(r.expertiseName) || '',
+        resourceTypeName: asString(r.resourceTypeName) || '',
         dateOfJoining: normalizedDateOfJoining || '',
         careerStartDate: normalizedCareerStartDate || '',
         dateOfBirth: normalizedDateOfBirth || '',
         resignationDate: normalizedResignationDate || '',
         exitDate: normalizedExitDate || '',
-        active: row.active !== undefined ? (row.active === 'true' || row.active === true) : true,
-        hasOverhead: row.hasOverhead !== undefined ? (row.hasOverhead === 'true' || row.hasOverhead === true) : true
+        active: r.active !== undefined ? (asString(r.active) === 'true' || asString(r.active) === '1') : true,
+        hasOverhead: r.hasOverhead !== undefined ? (asString(r.hasOverhead) === 'true' || asString(r.hasOverhead) === '1') : true
       };
 
       // Add userId for update mode
       if (mode === 'update') {
-        validRow.userId = row.userId.trim();
+        validRow.userId = asString(r.userId);
       }
 
       // Handle password
       if (mode === 'create') {
-        validRow.password = row.password && row.password.trim() ? row.password.trim() : generateRandomPassword();
+        const pw = asString(r.password);
+        validRow.password = pw || generateRandomPassword();
       } else {
         // For updates, only include password if provided
-        if (row.password && row.password.trim()) {
-          validRow.password = row.password.trim();
-        }
+        const pw = asString(r.password);
+        if (pw) validRow.password = pw;
       }
 
       valid.push(validRow);
@@ -448,17 +416,21 @@ export const validateCSVData = (data: any[], existingUsers: any[] = [], mode: 'c
   return { valid, errors };
 };
 
-export const parseUsersCSV = (file: File): Promise<any[]> => {
+export const parseUsersCSV = (file: File): Promise<Record<string, unknown>[]> => {
   return new Promise((resolve, reject) => {
     Papa.parse(file, {
       header: true,
       skipEmptyLines: true,
       complete: (results) => {
         try {
-          // Filter out empty rows
-          const filteredData = results.data.filter((row: any) => 
-            row.email && row.email.toString().trim() !== ''
-          );
+          // Filter out empty rows and coerce types safely
+          const raw = results.data as Record<string, unknown>[];
+          const filteredData = raw.filter((row) => {
+            const val = row['email'];
+            if (val === undefined || val === null) return false;
+            const s = typeof val === 'string' ? val : String(val);
+            return s.trim() !== '';
+          });
           resolve(filteredData);
         } catch (error) {
           reject(error);

@@ -1,8 +1,14 @@
 import { supabase } from '@/integrations/supabase/client';
 import { RolePermission, PermissionType } from '@/types';
+import { Database } from '@/integrations/supabase/types';
+
+// Type aliases for better readability
+type RolePermissionRow = Database['public']['Tables']['role_permissions']['Row'];
+type RolePermissionInsert = Database['public']['Tables']['role_permissions']['Insert'];
+type PermissionTypeRow = Database['public']['Tables']['permission_types']['Row'];
 
 export class PermissionService {
-  static async getRolePermissions(roleId: string): Promise<any[]> {
+  static async getRolePermissions(roleId: string): Promise<RolePermissionRow[]> {
     const { data, error } = await supabase
       .from('role_permissions')
       .select('*')
@@ -12,7 +18,7 @@ export class PermissionService {
     return data || [];
   }
 
-  static async assignPermission(permission: any): Promise<any> {
+  static async assignPermission(permission: RolePermissionInsert): Promise<RolePermissionRow> {
     const { data, error } = await supabase
       .from('role_permissions')
       .insert([permission])
@@ -32,7 +38,7 @@ export class PermissionService {
     if (error) throw error;
   }
 
-  static async getPermissionTypes(): Promise<any[]> {
+  static async getPermissionTypes(): Promise<PermissionTypeRow[]> {
     const { data, error } = await supabase
       .from('permission_types')
       .select('*')
@@ -42,7 +48,7 @@ export class PermissionService {
     return data || [];
   }
 
-  static async updateRolePermissions(roleId: string, permissions: any[]): Promise<void> {
+  static async updateRolePermissions(roleId: string, permissions: RolePermissionInsert[]): Promise<void> {
     // Remove existing permissions
     const { error: deleteError } = await supabase
       .from('role_permissions')
