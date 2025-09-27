@@ -1,3 +1,47 @@
+import { Database } from '@/integrations/supabase/types';
+
+// ===== SUPABASE TYPE EXPORTS =====
+// These types are now sourced directly from the database schema
+// for better accuracy and automatic sync with schema changes
+
+export type PermissionType = Database['public']['Tables']['permission_types']['Row'];
+export type PermissionTypeEnum = Database["public"]["Enums"]["permission_type_enum"];
+export type RolePermission = Database['public']['Tables']['role_permissions']['Row'];
+export type Module = Database['public']['Tables']['modules']['Row'];
+export type SubModule = Database['public']['Tables']['sub_modules']['Row'];
+export type CustomRole = Database['public']['Tables']['custom_roles']['Row'];
+export type NoteCategory = Database['public']['Tables']['note_categories']['Row'];
+export type Note = Database['public']['Tables']['notes']['Row'];
+
+// Legacy interface types (keeping existing application compatibility)
+export interface Achievement {
+  id: string;
+  title: string;
+  date: string;
+  description: string;
+}
+
+export interface Education {
+  id: string;
+  university: string;
+  degree?: string;
+  department?: string;
+  startDate: string;
+  endDate?: string;
+  isCurrent?: boolean;
+  gpa?: string;
+}
+
+export interface Experience {
+  id: string;
+  companyName: string;
+  designation: string;
+  description?: string;
+  startDate: string;
+  endDate?: string;
+  isCurrent?: boolean;
+}
+
 export interface User {
   id: string;
   email: string;
@@ -21,7 +65,7 @@ export interface UserPermission {
   module_name: string;
   sub_module_id?: string;
   sub_module_name?: string;
-  permission_type: 'create' | 'read' | 'update' | 'delete' | 'manage';
+  permission_type: 'create' | 'read' | 'update' | 'delete' | 'manage' | 'write';
   sbu_restrictions?: string[];
   route_path?: string;
   table_names?: string[];
@@ -34,26 +78,6 @@ export interface Skill {
   priority: number;
 }
 
-export interface Experience {
-  id: string;
-  companyName: string;
-  designation: string;
-  description?: string;
-  startDate: string;
-  endDate?: string;
-  isCurrent?: boolean;
-}
-
-export interface Education {
-  id: string;
-  university: string;
-  degree?: string;
-  department?: string;
-  startDate: string;
-  endDate?: string;
-  isCurrent?: boolean;
-  gpa?: string;
-}
 
 export interface Training {
   id: string;
@@ -66,70 +90,6 @@ export interface Training {
   expiryDate?: string;
 }
 
-export interface Achievement {
-  id: string;
-  title: string;
-  date: string;
-  description: string;
-}
-
-// RBAC Types
-export interface Module {
-  id: string;
-  name: string;
-  description?: string;
-  icon?: string;
-  display_order: number;
-  is_active: boolean;
-  created_at: string;
-  updated_at: string;
-}
-
-export interface SubModule {
-  id: string;
-  module_id: string;
-  name: string;
-  description?: string;
-  icon?: string;
-  route_path?: string;
-  table_names?: string[];
-  display_order: number;
-  is_active: boolean;
-  created_at: string;
-  updated_at: string;
-}
-
-export interface PermissionType {
-  id: string;
-  name: 'create' | 'read' | 'update' | 'delete' | 'manage' | 'write';
-  description?: string;
-  created_at: string;
-}
-
-export interface CustomRole {
-  id: string;
-  name: string;
-  description?: string;
-  is_sbu_bound: boolean;
-  created_by: string;
-  created_at: string;
-  updated_at: string;
-  is_active: boolean;
-  is_system_role: boolean;
-  is_self_bound: boolean;
-}
-
-export interface RolePermission {
-  id: string;
-  role_id: string;
-  module_id: string;
-  sub_module_id: string;
-  permission_type_id: string;
-  sbu_restrictions?: string[];
-  table_restrictions?: string[];
-  created_at: string;
-  updated_at: string;
-}
 
 export interface UserCustomRole {
   id: string;
@@ -169,25 +129,7 @@ export interface GeneralInfo {
   currentDesignation?: string;
 }
 
-export interface NoteCategory {
-  id: string;
-  name: string;
-  icon?: string;
-  created_at: string;
-  updated_at: string;
-}
 
-export interface Note {
-  id: string;
-  profile_id: string;
-  category_id?: string;
-  title: string;
-  content?: string;
-  created_by: string;
-  created_at: string;
-  updated_at: string;
-  category?: NoteCategory;
-}
 
 
 export type UserRole = 'admin' | 'manager' | 'employee';
