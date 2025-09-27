@@ -5,6 +5,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Badge } from '@/components/ui/badge';
 import { Search } from 'lucide-react';
 import * as LucideIcons from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
 
 // Common module icons for quick selection
 const POPULAR_ICONS = [
@@ -44,7 +45,7 @@ export const IconPicker: React.FC<IconPickerProps> = ({
     : POPULAR_ICONS;
 
   const renderIcon = (iconName: string) => {
-    const IconComponent = LucideIcons[iconName as keyof typeof LucideIcons] as React.ComponentType<any>;
+    const IconComponent = LucideIcons[iconName as keyof typeof LucideIcons] as LucideIcon | undefined;
     if (!IconComponent) return null;
     return <IconComponent className="h-4 w-4" />;
   };
@@ -89,7 +90,7 @@ export const IconPicker: React.FC<IconPickerProps> = ({
 
           <div className="grid grid-cols-6 gap-2 max-h-64 overflow-y-auto">
             {filteredIcons.map((iconName) => {
-              const IconComponent = LucideIcons[iconName as keyof typeof LucideIcons] as React.ComponentType<any>;
+              const IconComponent = LucideIcons[iconName as keyof typeof LucideIcons] as LucideIcon | undefined;
               if (!IconComponent) return null;
 
               return (

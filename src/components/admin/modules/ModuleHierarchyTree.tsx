@@ -6,11 +6,11 @@ import { ChevronRight, ChevronDown, Edit, Settings, Plus, Eye, EyeOff } from 'lu
 import { Link } from 'react-router-dom';
 import { Module, SubModule } from '@/types';
 import * as LucideIcons from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
 
 interface ModuleHierarchyTreeProps {
   modules: (Module & { sub_modules: SubModule[] })[];
 }
-
 export const ModuleHierarchyTree: React.FC<ModuleHierarchyTreeProps> = ({ modules }) => {
   const [expandedModules, setExpandedModules] = useState<Set<string>>(
     new Set(modules.map(m => m.id))
@@ -28,12 +28,12 @@ export const ModuleHierarchyTree: React.FC<ModuleHierarchyTreeProps> = ({ module
     });
   };
 
-  const renderIcon = (iconName?: string) => {
+  const renderIcon = (iconName?: string): JSX.Element => {
     if (!iconName) return <div className="w-5 h-5 rounded bg-muted" />;
-    
-    const IconComponent = LucideIcons[iconName as keyof typeof LucideIcons] as React.ComponentType<any>;
+
+    const IconComponent = LucideIcons[iconName as keyof typeof LucideIcons] as LucideIcon | undefined;
     if (!IconComponent) return <div className="w-5 h-5 rounded bg-muted" />;
-    
+
     return <IconComponent className="w-5 h-5" />;
   };
 
@@ -42,7 +42,6 @@ export const ModuleHierarchyTree: React.FC<ModuleHierarchyTreeProps> = ({ module
       {modules.map((module) => {
         const isExpanded = expandedModules.has(module.id);
         const hasSubModules = module.sub_modules && module.sub_modules.length > 0;
-
         return (
           <Card key={module.id} className="border-l-4 border-l-primary/20 hover:border-l-primary/40 transition-colors">
             <CardHeader className="pb-3">
@@ -121,7 +120,7 @@ export const ModuleHierarchyTree: React.FC<ModuleHierarchyTreeProps> = ({ module
             {hasSubModules && isExpanded && (
               <CardContent className="pt-0">
                 <div className="ml-14 space-y-2 border-l-2 border-muted pl-4">
-                  {module.sub_modules.map((subModule, index) => (
+                  {module.sub_modules.map(subModule => (
                     <div 
                       key={subModule.id}
                       className="flex items-center gap-3 p-3 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors group"
@@ -202,4 +201,5 @@ export const ModuleHierarchyTree: React.FC<ModuleHierarchyTreeProps> = ({ module
       )}
     </div>
   );
-};
+}
+;

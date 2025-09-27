@@ -71,16 +71,92 @@ export interface ProjectJSON {
   url?: string | null;
 }
 
+// Input interfaces (allowing mixed snake_case/camelCase and Date values)
+interface GeneralInfoInput {
+  firstName?: string;
+  lastName?: string;
+  first_name?: string;
+  last_name?: string;
+  biography?: string | null;
+  profileImage?: string | null;
+  profile_image?: string | null;
+  currentDesignation?: string | null;
+  current_designation?: string | null;
+}
+
+interface SkillInput {
+  name: string;
+  proficiency: number;
+}
+
+interface ExperienceInput {
+  companyName?: string;
+  company_name?: string;
+  designation: string;
+  description?: string | null;
+  startDate?: string | Date;
+  endDate?: string | Date;
+  start_date?: string;
+  end_date?: string;
+  isCurrent?: boolean;
+  is_current?: boolean;
+}
+
+interface EducationInput {
+  university: string;
+  degree?: string | null;
+  department?: string | null;
+  gpa?: string | null;
+  startDate?: string | Date;
+  endDate?: string | Date;
+  start_date?: string;
+  end_date?: string;
+  isCurrent?: boolean;
+  is_current?: boolean;
+}
+
+interface TrainingInput {
+  title: string;
+  provider?: string | null;
+  description?: string | null;
+  date?: string | Date;
+  certification_date?: string;
+  certificateUrl?: string | null;
+  certificate_url?: string | null;
+}
+
+interface AchievementInput {
+  title: string;
+  description?: string | null;
+  date?: string | Date;
+}
+
+interface ProjectInput {
+  name: string;
+  role?: string | null;
+  description: string;
+  responsibility?: string | null;
+  startDate?: string | Date;
+  endDate?: string | Date;
+  start_date?: string;
+  end_date?: string;
+  isCurrent?: boolean;
+  is_current?: boolean;
+  technologiesUsed?: string[];
+  technologies_used?: string[];
+  url?: string | null;
+}
+
 export class ProfileJSONService {
   static exportProfile(profileData: {
-    generalInfo: any;
-    technicalSkills: any[];
-    specializedSkills: any[];
-    experiences: any[];
-    education: any[];
-    trainings: any[];
-    achievements: any[];
-    projects: any[];
+    generalInfo: GeneralInfoInput;
+    technicalSkills: SkillInput[];
+    specializedSkills: SkillInput[];
+    experiences: ExperienceInput[];
+    education: EducationInput[];
+    trainings: TrainingInput[];
+    achievements: AchievementInput[];
+    projects: ProjectInput[];
   }): ProfileJSONData {
     return {
       generalInfo: {
@@ -155,39 +231,92 @@ export class ProfileJSONService {
   }
 
   static cleanImportData(data: ProfileJSONData): ProfileJSONData {
+    const dateToYMD = (d?: Date): string | undefined => (d ? d.toISOString().split('T')[0] : undefined);
+
+    const cleanedGeneral = ProfileImportDataCleaner.cleanPersonalInfo(data.generalInfo);
+    const cleanedTech = data.technicalSkills
+      .filter(skill => skill.name && skill.name.trim() !== '')
+      .map(skill => ProfileImportDataCleaner.cleanSkill(skill));
+    const cleanedSpec = data.specializedSkills
+      .filter(skill => skill.name && skill.name.trim() !== '')
+      .map(skill => ProfileImportDataCleaner.cleanSkill(skill));
+    const cleanedExp = data.experiences
+      .filter(exp => exp.companyName && exp.companyName.trim() !== '' && exp.designation && exp.designation.trim() !== '')
+      .map(exp => ProfileImportDataCleaner.cleanExperience(exp))
+      .map(exp => ({
+        companyName: exp.companyName,
+        designation: exp.designation,
+        description: exp.description ?? undefined,
+        startDate: dateToYMD(exp.startDate),
+        endDate: dateToYMD(exp.endDate),
+        isCurrent: exp.isCurrent,
+      }));
+    const cleanedEdu = data.education
+      .filter(edu => edu.university && edu.university.trim() !== '')
+      .map(edu => ProfileImportDataCleaner.cleanEducation(edu))
+      .map(edu => ({
+        university: edu.university,
+        degree: edu.degree ?? undefined,
+        department: edu.department ?? undefined,
+        gpa: edu.gpa ?? undefined,
+        startDate: dateToYMD(edu.startDate),
+        endDate: dateToYMD(edu.endDate),
+        isCurrent: edu.isCurrent,
+      }));
+    const cleanedTrainings = data.trainings
+      .filter(training => training.title && training.title.trim() !== '')
+      .map(training => ProfileImportDataCleaner.cleanTraining(training))
+      .map(t => ({
+        title: t.title,
+        provider: t.provider ?? undefined,
+        description: t.description ?? undefined,
+        date: dateToYMD(t.date),
+        certificateUrl: t.certificateUrl ?? undefined,
+      }));
+    const cleanedAchievements = data.achievements
+      .filter(achievement => achievement.title && achievement.title.trim() !== '')
+      .map(achievement => ProfileImportDataCleaner.cleanAchievement(achievement))
+      .map(a => ({
+        title: a.title,
+        description: a.description ?? undefined,
+        date: dateToYMD(a.date),
+      }));
+    const cleanedProjects = data.projects
+      .filter(project => project.name && project.name.trim() !== '' && project.description && project.description.trim() !== '')
+      .map(project => ProfileImportDataCleaner.cleanProject(project))
+      .map(p => ({
+        name: p.name,
+        role: p.role ?? undefined,
+        description: p.description,
+        responsibility: p.responsibility ?? undefined,
+        startDate: dateToYMD(p.startDate),
+        endDate: dateToYMD(p.endDate),
+        isCurrent: p.isCurrent,
+        technologiesUsed: p.technologiesUsed,
+        url: p.url ?? undefined,
+      }));
+
     return {
-      generalInfo: ProfileImportDataCleaner.cleanPersonalInfo(data.generalInfo),
-      technicalSkills: data.technicalSkills
-        .filter(skill => skill.name && skill.name.trim() !== '') // Only filter on required field
-        .map(skill => ProfileImportDataCleaner.cleanSkill(skill)),
-      specializedSkills: data.specializedSkills
-        .filter(skill => skill.name && skill.name.trim() !== '') // Only filter on required field
-        .map(skill => ProfileImportDataCleaner.cleanSkill(skill)),
-      experiences: data.experiences
-        .filter(exp => exp.companyName && exp.companyName.trim() !== '' && exp.designation && exp.designation.trim() !== '') // Only filter on required fields
-        .map(exp => ProfileImportDataCleaner.cleanExperience(exp)),
-      education: data.education
-        .filter(edu => edu.university && edu.university.trim() !== '') // Only filter on required field
-        .map(edu => ProfileImportDataCleaner.cleanEducation(edu)),
-      trainings: data.trainings
-        .filter(training => training.title && training.title.trim() !== '') // Only filter on required field
-        .map(training => ProfileImportDataCleaner.cleanTraining(training)),
-      achievements: data.achievements
-        .filter(achievement => achievement.title && achievement.title.trim() !== '') // Only filter on required field - description can be null
-        .map(achievement => ProfileImportDataCleaner.cleanAchievement(achievement)),
-      projects: data.projects
-        .filter(project => project.name && project.name.trim() !== '' && project.description && project.description.trim() !== '') // Only filter on required fields
-        .map(project => ProfileImportDataCleaner.cleanProject(project))
+      generalInfo: cleanedGeneral,
+      technicalSkills: cleanedTech,
+      specializedSkills: cleanedSpec,
+      experiences: cleanedExp,
+      education: cleanedEdu,
+      trainings: cleanedTrainings,
+      achievements: cleanedAchievements,
+      projects: cleanedProjects,
     };
   }
 
   // Add backward compatibility helper
-  static migratePersonalInfoToGeneralInfo(data: any): ProfileJSONData {
+  static migratePersonalInfoToGeneralInfo(
+    data: ProfileJSONData & { personalInfo?: ProfileJSONData['generalInfo'] }
+  ): ProfileJSONData {
     if (data.personalInfo && !data.generalInfo) {
+      const { personalInfo, ...rest } = data as ProfileJSONData & { personalInfo?: ProfileJSONData['generalInfo'] };
       return {
-        ...data,
-        generalInfo: data.personalInfo,
-        personalInfo: undefined
+        ...(rest as ProfileJSONData),
+        generalInfo: personalInfo as ProfileJSONData['generalInfo']
       };
     }
     return data;

@@ -14,20 +14,22 @@ export class DataFetcher {
   private static readonly AVAILABLE_RPC_FUNCTIONS = [
     'get_employee_data_masked',
     'get_employee_data'
-  ];
+  ] as const;
+
+  private static typeOfRpcName(name: typeof DataFetcher.AVAILABLE_RPC_FUNCTIONS[number]) { return name; }
 
   async fetchEmployeeData(
     profileId: string, 
-    rpcFunctionName?: string, 
+    rpcFunctionName?: typeof DataFetcher.AVAILABLE_RPC_FUNCTIONS[number], 
     limits?: EmployeeDataLimits
   ): Promise<EmployeeProfile> {
     // Use provided RPC function name or default to masked version
-    const functionName = rpcFunctionName || 'get_employee_data_masked';
+    const functionName: typeof DataFetcher.AVAILABLE_RPC_FUNCTIONS[number] = rpcFunctionName || 'get_employee_data_masked';
     
     // Validate that the RPC function is in our allowed list
     if (!DataFetcher.AVAILABLE_RPC_FUNCTIONS.includes(functionName)) {
       console.warn(`Unknown RPC function: ${functionName}, falling back to default`);
-      const fallbackFunction = 'get_employee_data_masked';
+      const fallbackFunction: typeof DataFetcher.AVAILABLE_RPC_FUNCTIONS[number] = 'get_employee_data_masked';
       return this.fetchEmployeeData(profileId, fallbackFunction, limits);
     }
 
@@ -46,7 +48,7 @@ export class DataFetcher {
       })
     };
 
-    const { data, error } = await supabase.rpc(functionName as any, rpcParams);
+    const { data, error } = await supabase.rpc(functionName, rpcParams);
 
     if (error) {
       console.error(`Error fetching employee data with ${functionName}:`, error);
@@ -61,7 +63,7 @@ export class DataFetcher {
 
     // Ensure projects include responsibility field
     if (employeeData.projects) {
-      employeeData.projects = employeeData.projects.map((project: any) => ({
+      employeeData.projects = employeeData.projects.map((project) => ({
         ...project,
         responsibility: project.responsibility || ''
       }));
@@ -105,9 +107,14 @@ export class DataFetcher {
     };
     
     // Then fetch employee data using the specified RPC function and limits
+    const rpcName: typeof DataFetcher.AVAILABLE_RPC_FUNCTIONS[number] =
+      (DataFetcher.AVAILABLE_RPC_FUNCTIONS as readonly string[]).includes(templateData.data_source_function)
+        ? (templateData.data_source_function as typeof DataFetcher.AVAILABLE_RPC_FUNCTIONS[number])
+        : 'get_employee_data_masked';
+
     const employeeData = await this.fetchEmployeeData(
-      profileId, 
-      templateData.data_source_function,
+      profileId,
+      rpcName,
       limits
     );
 

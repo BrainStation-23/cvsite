@@ -22,8 +22,19 @@ export interface BulkResourcePlanningValidationError {
   message: string;
 }
 
+// Loosely-typed input row read from CSV
+export type BulkResourcePlanningInputRow = {
+  employee_id?: unknown;
+  bill_type?: unknown;
+  project_name?: unknown;
+  engagement_percentage?: unknown;
+  billing_percentage?: unknown;
+  start_date?: unknown;
+  release_date?: unknown;
+} & Record<string, unknown>;
+
 // Utility function to sanitize percentage values
-const sanitizePercentage = (value: any): number | null => {
+const sanitizePercentage = (value: unknown): number | null => {
   if (!value) return null;
   
   let stringValue = String(value).trim();
@@ -44,13 +55,13 @@ const sanitizePercentage = (value: any): number | null => {
 };
 
 // Utility function to sanitize text fields
-const sanitizeText = (value: any): string => {
+const sanitizeText = (value: unknown): string => {
   if (!value) return '';
   return String(value).trim().replace(/\s+/g, ' '); // Replace multiple spaces with single space
 };
 
 // Utility function to sanitize date fields
-const sanitizeDate = (value: any): string => {
+const sanitizeDate = (value: unknown): string => {
   if (!value) return '';
   const trimmed = String(value).trim();
   
@@ -109,15 +120,15 @@ export const downloadBulkResourcePlanningTemplate = () => {
   }
 };
 
-export const validateBulkResourcePlanningCSVData = (data: any[]): BulkResourcePlanningValidationResult => {
+export const validateBulkResourcePlanningCSVData = (data: BulkResourcePlanningInputRow[]): BulkResourcePlanningValidationResult => {
   const valid: BulkResourcePlanningCSVRow[] = [];
   const errors: BulkResourcePlanningValidationError[] = [];
   const seenEmployeeProjectCombinations = new Set<string>();
 
-  data.forEach((row: any, index: number) => {
+  data.forEach((row: BulkResourcePlanningInputRow, index: number) => {
     const rowNumber = index + 2; // +2 because index starts at 0 and CSV has header row
     let hasErrors = false;
-    const sanitizedRow: any = {};
+    const sanitizedRow: Partial<BulkResourcePlanningCSVRow> = {};
 
     // Sanitize and validate employee_id
     const sanitizedEmployeeId = sanitizeText(row.employee_id);
@@ -125,7 +136,7 @@ export const validateBulkResourcePlanningCSVData = (data: any[]): BulkResourcePl
       errors.push({
         row: rowNumber,
         field: 'employee_id',
-        value: row.employee_id || '',
+        value: String(row.employee_id ?? ''),
         message: 'Employee ID is required'
       });
       hasErrors = true;
@@ -139,7 +150,7 @@ export const validateBulkResourcePlanningCSVData = (data: any[]): BulkResourcePl
       errors.push({
         row: rowNumber,
         field: 'bill_type',
-        value: row.bill_type || '',
+        value: String(row.bill_type ?? ''),
         message: 'Bill type is required'
       });
       hasErrors = true;
@@ -153,7 +164,7 @@ export const validateBulkResourcePlanningCSVData = (data: any[]): BulkResourcePl
       errors.push({
         row: rowNumber,
         field: 'project_name',
-        value: row.project_name || '',
+        value: String(row.project_name ?? ''),
         message: 'Project name is required'
       });
       hasErrors = true;
@@ -183,7 +194,7 @@ export const validateBulkResourcePlanningCSVData = (data: any[]): BulkResourcePl
       errors.push({
         row: rowNumber,
         field: 'engagement_percentage',
-        value: row.engagement_percentage || '',
+        value: String(row.engagement_percentage ?? ''),
         message: 'Engagement percentage must be a valid number between 0 and 100 (can include % symbol or decimal format like 0.25)'
       });
       hasErrors = true;
@@ -197,7 +208,7 @@ export const validateBulkResourcePlanningCSVData = (data: any[]): BulkResourcePl
       errors.push({
         row: rowNumber,
         field: 'billing_percentage',
-        value: row.billing_percentage || '',
+        value: String(row.billing_percentage ?? ''),
         message: 'Billing percentage must be a valid number between 0 and 100 (can include % symbol or decimal format like 0.25)'
       });
       hasErrors = true;
@@ -211,7 +222,7 @@ export const validateBulkResourcePlanningCSVData = (data: any[]): BulkResourcePl
       errors.push({
         row: rowNumber,
         field: 'start_date',
-        value: row.start_date || '',
+        value: String(row.start_date ?? ''),
         message: 'Start date must be a valid date (YYYY-MM-DD format preferred)'
       });
       hasErrors = true;
@@ -225,7 +236,7 @@ export const validateBulkResourcePlanningCSVData = (data: any[]): BulkResourcePl
       errors.push({
         row: rowNumber,
         field: 'release_date',
-        value: row.release_date || '',
+        value: String(row.release_date ?? ''),
         message: 'Release date must be a valid date (YYYY-MM-DD format preferred)'
       });
       hasErrors = true;
@@ -250,13 +261,13 @@ export const validateBulkResourcePlanningCSVData = (data: any[]): BulkResourcePl
     // If no errors, add to valid array with sanitized data
     if (!hasErrors) {
       valid.push({
-        employee_id: sanitizedRow.employee_id,
-        bill_type: sanitizedRow.bill_type,
-        project_name: sanitizedRow.project_name,
-        engagement_percentage: sanitizedRow.engagement_percentage,
-        billing_percentage: sanitizedRow.billing_percentage,
-        start_date: sanitizedRow.start_date,
-        release_date: sanitizedRow.release_date
+        employee_id: sanitizedRow.employee_id as string,
+        bill_type: sanitizedRow.bill_type as string,
+        project_name: sanitizedRow.project_name as string,
+        engagement_percentage: sanitizedRow.engagement_percentage as number,
+        billing_percentage: sanitizedRow.billing_percentage as number,
+        start_date: sanitizedRow.start_date as string,
+        release_date: sanitizedRow.release_date as string,
       });
     }
   });
@@ -264,9 +275,9 @@ export const validateBulkResourcePlanningCSVData = (data: any[]): BulkResourcePl
   return { valid, errors };
 };
 
-export const parseBulkResourcePlanningCSV = (file: File): Promise<any[]> => {
+export const parseBulkResourcePlanningCSV = (file: File): Promise<BulkResourcePlanningInputRow[]> => {
   return new Promise((resolve, reject) => {
-    Papa.parse(file, {
+    Papa.parse<BulkResourcePlanningInputRow>(file, {
       header: true,
       skipEmptyLines: true,
       transformHeader: (header: string) => {
@@ -298,8 +309,8 @@ export const parseBulkResourcePlanningCSV = (file: File): Promise<any[]> => {
       },
       complete: (results) => {
         try {
-          const filteredData = results.data.filter((row: any) => 
-            row.employee_id && row.employee_id.toString().trim() !== ''
+          const filteredData: BulkResourcePlanningInputRow[] = results.data.filter((row) => 
+            row && typeof row.employee_id !== 'undefined' && row.employee_id !== null && row.employee_id.toString().trim() !== ''
           );
           resolve(filteredData);
         } catch (error) {
