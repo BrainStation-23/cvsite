@@ -2,31 +2,20 @@
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { getErrorMessage } from '@/utils/error-utils';
 
 
-interface ProgressInfo {
-  currentChunk: number;
-  totalChunks: number;
-  processedUsers: number;
-  totalUsers: number;
-  errors: any[];
-  isComplete: boolean;
-}
+type ParsedCsv = { users?: unknown[] };
+type BulkProcessResult = {
+  successCount?: number;
+  errorCount?: number;
+  results?: { successful?: unknown[]; failed?: Array<{ userId?: string; error?: string }>; };
+};
 
-export function useChunkedBulkUpdate() {
+export function useBulkUpdate() {
   const { toast } = useToast();
   const [isProcessing, setIsProcessing] = useState(false);
-  const [progress, setProgress] = useState<ProgressInfo>({
-    currentChunk: 0,
-    totalChunks: 0,
-    processedUsers: 0,
-    totalUsers: 0,
-    errors: [],
-    isComplete: false
-  });
-
-
-
+  
   const parseCSVFile = async (file: File) => {
     try {
       const formData = new FormData();
@@ -38,14 +27,14 @@ export function useChunkedBulkUpdate() {
 
       if (error) throw error;
 
-      return data;
-    } catch (error) {
+      return data as ParsedCsv;
+    } catch (error: unknown) {
       console.error('Error parsing CSV:', error);
       throw error;
     }
   };
 
-  const processBulkUsers = async (users: any[]) => {
+  const processBulkUsers = async (users: unknown[]) => {
     const { data, error } = await supabase.functions.invoke('bulk-update-users', {
       body: { users }
     });
@@ -55,25 +44,17 @@ export function useChunkedBulkUpdate() {
       throw error;
     }
 
-    return data;
+    return data as BulkProcessResult;
   };
 
   const bulkUpdateUsers = async (file: File) => {
     try {
       setIsProcessing(true);
-      setProgress({
-        currentChunk: 0,
-        totalChunks: 1,
-        processedUsers: 0,
-        totalUsers: 0,
-        errors: [],
-        isComplete: false
-      });
 
       // Step 1: Parse CSV file
       const parseResult = await parseCSVFile(file);
       
-      if (!parseResult.users || parseResult.users.length === 0) {
+      if (!parseResult?.users || parseResult.users.length === 0) {
         toast({
           title: "No valid users found",
           description: "No valid users found in the CSV file",
@@ -82,13 +63,8 @@ export function useChunkedBulkUpdate() {
         return { success: false, error: "No valid users found" };
       }
 
-      const users = parseResult.users;
+      const users = parseResult.users as unknown[];
       console.log(`Total users to process: ${users.length}`);
-      
-      setProgress(prev => ({
-        ...prev,
-        totalUsers: users.length
-      }));
 
       toast({
         title: 'Processing users',
@@ -103,15 +79,6 @@ export function useChunkedBulkUpdate() {
         
         const successCount = bulkResult.successCount || 0;
         const errorCount = bulkResult.errorCount || 0;
-        
-        // Update progress
-        setProgress(prev => ({
-          ...prev,
-          currentChunk: 1,
-          processedUsers: users.length,
-          errors: bulkResult.results?.failed || [],
-          isComplete: true
-        }));
 
         // Show results
         if (successCount > 0) {
@@ -136,50 +103,35 @@ export function useChunkedBulkUpdate() {
             totalUsers: users.length,
             successfulUsers: successCount,
             failedUsers: errorCount,
-            totalChunks: 1
           }
         };
 
-      } catch (error: any) {
+      } catch (error: unknown) {
         console.error('Error processing bulk update:', error);
-        
-        // Add all users to failed list
-        const allFailed = users.map(user => ({
-          userId: user.userId,
-          error: error.message || 'Bulk processing failed'
-        }));
-        
-        setProgress(prev => ({
-          ...prev,
-          currentChunk: 1,
-          processedUsers: users.length,
-          errors: allFailed,
-          isComplete: true
-        }));
-
+        const message = getErrorMessage(error) || 'Bulk processing failed';
         toast({
           title: 'Bulk update failed',
-          description: error.message,
+          description: message,
           variant: 'destructive'
         });
-        
         return {
           success: false,
-          error: error.message,
-          results: { successful: [], failed: allFailed }
+          error: message,
+          results: { successful: [], failed: [] }
         };
       }
 
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error in bulk update process:', error);
+      const message = getErrorMessage(error) || 'Bulk update failed';
       toast({
         title: 'Bulk update failed',
-        description: error.message,
+        description: message,
         variant: 'destructive'
       });
       return { 
         success: false, 
-        error: error.message 
+        error: message 
       };
     } finally {
       setIsProcessing(false);
@@ -189,6 +141,5 @@ export function useChunkedBulkUpdate() {
   return {
     bulkUpdateUsers,
     isProcessing,
-    progress
   };
 }

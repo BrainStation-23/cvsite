@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { BulkResourcePlanningCSVRow } from '@/utils/bulkResourcePlanningCsvUtils';
+import type { Database } from '@/integrations/supabase/types';
 import Papa from 'papaparse';
 
 interface ImportProgress {
@@ -89,7 +90,8 @@ export const useBulkResourcePlanningImport = () => {
     });
 
     const errors: ImportError[] = [];
-    const successfulImports: any[] = [];
+    type ResourcePlanningInsert = Database['public']['Tables']['resource_planning']['Insert'];
+    const successfulImports: ResourcePlanningInsert[] = [];
 
     for (let i = 0; i < validRows.length; i++) {
       const row = validRows[i];
@@ -153,7 +155,7 @@ export const useBulkResourcePlanningImport = () => {
         }
 
         // Insert the record
-        const insertData = {
+        const insertData: ResourcePlanningInsert = {
           profile_id: profile.id,
           bill_type_id: billType.id,
           project_id: project.id,

@@ -4,13 +4,11 @@ import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Progress } from '@/components/ui/progress';
-import { Loader2, X, Download, AlertCircle, CheckCircle } from 'lucide-react';
+import { Loader2, X, Download } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
-import { Alert, AlertDescription } from '@/components/ui/alert';
 import UserCSVValidation from '@/components/admin/UserCSVValidation';
 import { parseUsersCSV, validateCSVData, downloadCSVTemplate, downloadUpdateCSVTemplate } from '@/utils/userCsvUtils';
-import { useChunkedBulkUpdate } from '@/hooks/use-chunked-bulk-update';
+import { useBulkUpdate } from '@/hooks/use-bulk-update';
 
 interface BulkUploadDialogProps {
   isOpen: boolean;
@@ -35,8 +33,8 @@ export const BulkUploadDialog: React.FC<BulkUploadDialogProps> = ({
   const [validationResult, setValidationResult] = useState<any>(null);
   const [isValidating, setIsValidating] = useState(false);
   
-  // Use the new chunked bulk update hook for update mode
-  const { bulkUpdateUsers, isProcessing, progress } = useChunkedBulkUpdate();
+  // Use the simplified bulk update hook for update mode
+  const { bulkUpdateUsers, isProcessing } = useBulkUpdate();
   
   const dialogTitle = title || (mode === 'create' ? 'Bulk Create Users' : 'Bulk Update Users');
   const dialogDescription = description || (mode === 'create' 
@@ -109,10 +107,7 @@ export const BulkUploadDialog: React.FC<BulkUploadDialogProps> = ({
     ? `Create ${validationResult?.valid?.length || 0} Users`
     : `Update ${validationResult?.valid?.length || 0} Users`;
 
-  const getProgressPercentage = () => {
-    if (mode === 'create' || !progress.totalUsers) return 0;
-    return Math.round((progress.processedUsers / progress.totalUsers) * 100);
-  };
+  // Progress no longer tracked; updates happen in a single request
   
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
@@ -168,50 +163,7 @@ export const BulkUploadDialog: React.FC<BulkUploadDialogProps> = ({
             </div>
           )}
 
-          {/* Progress for chunked updates */}
-          {mode === 'update' && isProcessing && progress.totalUsers > 0 && (
-            <div className="space-y-3">
-              <div className="flex items-center gap-2 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
-                <Loader2 className="h-4 w-4 animate-spin" />
-                <div className="flex-1">
-                  <div className="text-sm font-medium">
-                    Processing chunk {progress.currentChunk} of {progress.totalChunks}
-                  </div>
-                  <div className="text-xs text-gray-600">
-                    {progress.processedUsers} of {progress.totalUsers} users processed
-                  </div>
-                </div>
-              </div>
-              
-              <div className="space-y-2">
-                <div className="flex justify-between text-sm">
-                  <span>Progress</span>
-                  <span>{getProgressPercentage()}%</span>
-                </div>
-                <Progress value={getProgressPercentage()} className="w-full" />
-              </div>
-
-              {progress.errors.length > 0 && (
-                <Alert>
-                  <AlertCircle className="h-4 w-4" />
-                  <AlertDescription>
-                    {progress.errors.length} errors encountered so far. Processing will continue.
-                  </AlertDescription>
-                </Alert>
-              )}
-            </div>
-          )}
-
-          {/* Completion status */}
-          {mode === 'update' && progress.isComplete && (
-            <Alert>
-              <CheckCircle className="h-4 w-4" />
-              <AlertDescription>
-                Bulk update completed! {progress.processedUsers - progress.errors.length} users updated successfully.
-                {progress.errors.length > 0 && ` ${progress.errors.length} users failed to update.`}
-              </AlertDescription>
-            </Alert>
-          )}
+          {/* Progress UI removed; single-step update handled by toasts */}
 
           {validationResult && !isValidating && (
             <div className="border rounded-lg p-4">
@@ -219,7 +171,7 @@ export const BulkUploadDialog: React.FC<BulkUploadDialogProps> = ({
               {mode === 'update' && validationResult.valid.length > 250 && (
                 <div className="mt-2 p-2 bg-yellow-50 dark:bg-yellow-900/20 rounded text-sm text-yellow-800 dark:text-yellow-200">
                   <strong>Large Update Notice:</strong> You're updating {validationResult.valid.length} users. 
-                  This will be processed in chunks of 250 users with real-time progress tracking.
+                  The update runs in a single operation; please keep the dialog open until you see the success toast.
                 </div>
               )}
             </div>

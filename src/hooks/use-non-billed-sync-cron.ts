@@ -70,7 +70,7 @@ export const useNonBilledSyncCron = () => {
         });
       }
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       console.error('Cron management error:', error);
       toast({
         title: 'Error',

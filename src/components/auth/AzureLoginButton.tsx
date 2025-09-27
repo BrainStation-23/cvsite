@@ -3,6 +3,7 @@ import React from 'react';
 import { Button } from "@/components/ui/button";
 import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { getErrorMessage } from "@/utils/error-utils";
 
 interface AzureLoginButtonProps {
   loading: boolean;
@@ -29,11 +30,12 @@ export const AzureLoginButton: React.FC<AzureLoginButtonProps> = ({ loading, set
       // The redirect will happen automatically if successful
       console.log('Azure AD login initiated');
       
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Azure login error:', error);
+      const message = getErrorMessage(error) || "Unable to authenticate with Microsoft Azure AD";
       toast({
         title: "Azure Login Failed",
-        description: error.message || "Unable to authenticate with Microsoft Azure AD",
+        description: message,
         variant: "destructive"
       });
       setLoading(false);
