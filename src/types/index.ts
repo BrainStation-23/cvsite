@@ -188,11 +188,9 @@ export interface Note {
   category?: NoteCategory;
 }
 
-export type UserRole = 'admin' | 'manager' | 'employee';
 
 export interface UserRoleRecord {
   user_id: string;
-  role?: UserRole;
   custom_role_id?: string;
   sbu_context?: string;
   assigned_by?: string;
