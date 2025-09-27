@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import Papa from 'papaparse';
-import { NonBilledRecord, NonBilledResponse } from '@/components/NonBilled/types/non-billed.types';
+import { NonBilledRecord, NonBilledResponse } from '@/components/NonBilled/types/non-billed-record-data';
 
 export function useNonBilledExport() {
   const [isExporting, setIsExporting] = useState(false);
