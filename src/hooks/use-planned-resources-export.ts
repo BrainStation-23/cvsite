@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import Papa from 'papaparse';
+import { ResourcePlanningData } from '@/components/resource-planning/types/resourceplanning';
 
 interface ExportResource {
   id?: string; // resource_planning.id
@@ -96,7 +97,21 @@ export function usePlannedResourcesExport() {
 
       console.log('Starting planned resources export using pagination...');
       
-      let allResources: any[] = [];
+      // Types for RPC params and response
+      interface PlannedResourcesPagination {
+        total_count: number;
+        filtered_count: number;
+        page: number;
+        per_page: number;
+        page_count: number;
+      }
+
+      interface PlannedResourcesResponse {
+        resource_planning: ResourcePlanningData[];
+        pagination: PlannedResourcesPagination;
+      }
+
+      let allResources: ResourcePlanningData[] = [];
       let currentPage = 1;
       const itemsPerPage = 1000; // Use a large page size for efficiency
       let hasMorePages = true;
@@ -130,21 +145,15 @@ export function usePlannedResourcesExport() {
           throw error;
         }
         
-        if (rpcData && typeof rpcData === 'object' && 'resource_planning' in rpcData) {
-          const pageResources = (rpcData as any).resource_planning || [];
-          const pagination = (rpcData as any).pagination;
-          
-          console.log(`Page ${currentPage}: Retrieved ${pageResources.length} resources`);
-          allResources = [...allResources, ...pageResources];
-          
-          // Check if we have more pages
-          if (pagination && currentPage < pagination.page_count) {
-            currentPage++;
-          } else {
-            hasMorePages = false;
-          }
+        const { resource_planning = [], pagination } = (rpcData as unknown as PlannedResourcesResponse) ?? ({} as PlannedResourcesResponse);
+
+        console.log(`Page ${currentPage}: Retrieved ${resource_planning.length} resources`);
+        allResources = [...allResources, ...resource_planning];
+
+        // Check if we have more pages
+        if (pagination && currentPage < pagination.page_count) {
+          currentPage++;
         } else {
-          console.warn('Unexpected RPC response structure:', rpcData);
           hasMorePages = false;
         }
       }
@@ -175,14 +184,14 @@ export function usePlannedResourcesExport() {
           'SBU': resource.sbu?.name || '',
           'Project Name': resource.project?.project_name || '',
           'Client Name': resource.project?.client_name || '',
-          'Manager': resource.manager.first_name || '',
+          'Manager': resource.manager?.first_name || '',
           'Bill Type': resource.bill_type?.name || '',
           'Engagement %': resource.engagement_percentage || 0,
           'Billing %': resource.billing_percentage || 0,
-          'Start Date': resource.engagement_start_date ? resource.engagement_start_date.split('T')[0] : '',
-          'Release Date': resource.release_date ? resource.release_date.split('T')[0] : '',
+          'Start Date': resource.engagement_start_date ? String(resource.engagement_start_date).split('T')[0] : '',
+          'Release Date': resource.release_date ? String(resource.release_date).split('T')[0] : '',
           'Weekly Validation': resource.weekly_validation ? 'Yes' : 'No',
-          'Created At': resource.created_at ? resource.created_at.split('T')[0] : ''
+          'Created At': resource.created_at ? String(resource.created_at).split('T')[0] : ''
         };
       });
       
