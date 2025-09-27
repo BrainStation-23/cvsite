@@ -17,17 +17,7 @@ export interface ValidationProgress {
 
 export interface ImageAnalysisResult {
   isProfessionalHeadshot: boolean;
-  isFaceCentered: boolean;
-  hasNoSunglassesOrHats: boolean;
-  isNotGroupPhoto: boolean;
   confidence: number;
-  details: {
-    faceCount: number;
-    glasses: string;
-    accessories: string[];
-    facePosition: string;
-    recommendations: string[];
-  };
   background?: {
     passed: boolean;
     details: string;

@@ -54,9 +54,6 @@ export const useImageAnalysis = () => {
       // Build final result without Azure data
       const mergedResult = {
         isProfessionalHeadshot: localResults.every(r => r.passed),
-        isFaceCentered: true, // Assume true since we're not doing face detection
-        hasNoSunglassesOrHats: true, // Assume true since we're not doing accessory detection
-        isNotGroupPhoto: true, // Assume true since we're not doing group detection
         confidence: localResults.every(r => r.passed) ? 100 : 50,
         background: {
           passed: bgResult.passed,
