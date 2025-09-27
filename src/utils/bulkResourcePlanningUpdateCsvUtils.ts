@@ -24,8 +24,21 @@ export interface BulkResourcePlanningUpdateValidationError {
   message: string;
 }
 
+// Loosely-typed input row as read from CSV (values may be strings, numbers, etc.)
+export type BulkResourcePlanningUpdateInputRow = {
+  resource_planning_id?: unknown;
+  profile_id?: unknown;
+  project_id?: unknown;
+  bill_type_id?: unknown;
+  employee_id?: unknown;
+  engagement_percentage?: unknown;
+  billing_percentage?: unknown;
+  engagement_start_date?: unknown;
+  release_date?: unknown;
+} & Record<string, unknown>;
+
 // Utility function to sanitize percentage values
-const sanitizePercentage = (value: any): number | null => {
+const sanitizePercentage = (value: unknown): number | null => {
   if (!value) return null;
   
   let stringValue = String(value).trim();
@@ -46,13 +59,13 @@ const sanitizePercentage = (value: any): number | null => {
 };
 
 // Utility function to sanitize text fields
-const sanitizeText = (value: any): string => {
+const sanitizeText = (value: unknown): string => {
   if (!value) return '';
   return String(value).trim().replace(/\s+/g, ' '); // Replace multiple spaces with single space
 };
 
 // Utility function to sanitize date fields
-const sanitizeDate = (value: any): string => {
+const sanitizeDate = (value: unknown): string => {
   if (!value) return '';
   const trimmed = String(value).trim();
   
@@ -104,15 +117,15 @@ export const downloadBulkResourcePlanningUpdateTemplate = (): void => {
   }
 };
 
-export const validateBulkResourcePlanningUpdateCSVData = (data: any[]): BulkResourcePlanningUpdateValidationResult => {
+export const validateBulkResourcePlanningUpdateCSVData = (data: BulkResourcePlanningUpdateInputRow[]): BulkResourcePlanningUpdateValidationResult => {
   const valid: BulkResourcePlanningUpdateCSVRow[] = [];
   const errors: BulkResourcePlanningUpdateValidationError[] = [];
   const seenResourcePlanningIds = new Set<string>();
 
-  data.forEach((row: any, index: number) => {
+  data.forEach((row: BulkResourcePlanningUpdateInputRow, index: number) => {
     const rowNumber = index + 2; // +2 because index starts at 0 and CSV has header row
     let hasErrors = false;
-    const sanitizedRow: any = {};
+    const sanitizedRow: Partial<BulkResourcePlanningUpdateCSVRow> = {};
 
     // Validate resource_planning_id (required for updates)
     const sanitizedResourcePlanningId = sanitizeText(row.resource_planning_id);
@@ -120,7 +133,7 @@ export const validateBulkResourcePlanningUpdateCSVData = (data: any[]): BulkReso
       errors.push({
         row: rowNumber,
         field: 'resource_planning_id',
-        value: row.resource_planning_id || '',
+        value: String(row.resource_planning_id ?? ''),
         message: 'Resource Planning ID is required for updates'
       });
       hasErrors = true;
@@ -145,7 +158,7 @@ export const validateBulkResourcePlanningUpdateCSVData = (data: any[]): BulkReso
       errors.push({
         row: rowNumber,
         field: 'profile_id',
-        value: row.profile_id || '',
+        value: String(row.profile_id ?? ''),
         message: 'Profile ID is required'
       });
       hasErrors = true;
@@ -159,7 +172,7 @@ export const validateBulkResourcePlanningUpdateCSVData = (data: any[]): BulkReso
       errors.push({
         row: rowNumber,
         field: 'project_id',
-        value: row.project_id || '',
+        value: String(row.project_id ?? ''),
         message: 'Project ID is required'
       });
       hasErrors = true;
@@ -173,7 +186,7 @@ export const validateBulkResourcePlanningUpdateCSVData = (data: any[]): BulkReso
       errors.push({
         row: rowNumber,
         field: 'bill_type_id',
-        value: row.bill_type_id || '',
+        value: String(row.bill_type_id ?? ''),
         message: 'Bill Type ID is required'
       });
       hasErrors = true;
@@ -187,7 +200,7 @@ export const validateBulkResourcePlanningUpdateCSVData = (data: any[]): BulkReso
       errors.push({
         row: rowNumber,
         field: 'employee_id',
-        value: row.employee_id || '',
+        value: String(row.employee_id ?? ''),
         message: 'Employee ID is required'
       });
       hasErrors = true;
@@ -201,7 +214,7 @@ export const validateBulkResourcePlanningUpdateCSVData = (data: any[]): BulkReso
       errors.push({
         row: rowNumber,
         field: 'engagement_percentage',
-        value: row.engagement_percentage || '',
+        value: String(row.engagement_percentage ?? ''),
         message: 'Engagement percentage must be a valid number between 0 and 100'
       });
       hasErrors = true;
@@ -215,7 +228,7 @@ export const validateBulkResourcePlanningUpdateCSVData = (data: any[]): BulkReso
       errors.push({
         row: rowNumber,
         field: 'billing_percentage',
-        value: row.billing_percentage || '',
+        value: String(row.billing_percentage ?? ''),
         message: 'Billing percentage must be a valid number between 0 and 100'
       });
       hasErrors = true;
@@ -229,7 +242,7 @@ export const validateBulkResourcePlanningUpdateCSVData = (data: any[]): BulkReso
       errors.push({
         row: rowNumber,
         field: 'engagement_start_date',
-        value: row.engagement_start_date || '',
+        value: String(row.engagement_start_date ?? ''),
         message: 'Start date must be a valid date (YYYY-MM-DD format preferred)'
       });
       hasErrors = true;
@@ -243,7 +256,7 @@ export const validateBulkResourcePlanningUpdateCSVData = (data: any[]): BulkReso
       errors.push({
         row: rowNumber,
         field: 'release_date',
-        value: row.release_date || '',
+        value: String(row.release_date ?? ''),
         message: 'Release date must be a valid date (YYYY-MM-DD format preferred)'
       });
       hasErrors = true;
@@ -268,15 +281,15 @@ export const validateBulkResourcePlanningUpdateCSVData = (data: any[]): BulkReso
     // If no errors, add to valid array with sanitized data
     if (!hasErrors) {
       valid.push({
-        resource_planning_id: sanitizedRow.resource_planning_id,
-        profile_id: sanitizedRow.profile_id,
-        project_id: sanitizedRow.project_id,
-        bill_type_id: sanitizedRow.bill_type_id,
-        employee_id: sanitizedRow.employee_id,
-        engagement_percentage: sanitizedRow.engagement_percentage,
-        billing_percentage: sanitizedRow.billing_percentage,
-        engagement_start_date: sanitizedRow.engagement_start_date,
-        release_date: sanitizedRow.release_date
+        resource_planning_id: sanitizedRow.resource_planning_id as string,
+        profile_id: sanitizedRow.profile_id as string,
+        project_id: sanitizedRow.project_id as string,
+        bill_type_id: sanitizedRow.bill_type_id as string,
+        employee_id: sanitizedRow.employee_id as string,
+        engagement_percentage: sanitizedRow.engagement_percentage as number,
+        billing_percentage: sanitizedRow.billing_percentage as number,
+        engagement_start_date: sanitizedRow.engagement_start_date as string,
+        release_date: sanitizedRow.release_date as string
       });
     }
   });
@@ -284,9 +297,9 @@ export const validateBulkResourcePlanningUpdateCSVData = (data: any[]): BulkReso
   return { valid, errors };
 };
 
-export const parseBulkResourcePlanningUpdateCSV = (file: File): Promise<Record<string, any>[]> => {
+export const parseBulkResourcePlanningUpdateCSV = (file: File): Promise<BulkResourcePlanningUpdateInputRow[]> => {
   return new Promise((resolve, reject) => {
-    Papa.parse(file, {
+    Papa.parse<BulkResourcePlanningUpdateInputRow>(file, {
       header: true,
       skipEmptyLines: true,
       transformHeader: (header: string): string => {
@@ -322,8 +335,8 @@ export const parseBulkResourcePlanningUpdateCSV = (file: File): Promise<Record<s
       },
       complete: (results) => {
         try {
-          const filteredData = results.data.filter((row: any) => 
-            row.resource_planning_id && row.resource_planning_id.toString().trim() !== ''
+          const filteredData: BulkResourcePlanningUpdateInputRow[] = results.data.filter((row) => 
+            row && typeof row.resource_planning_id !== 'undefined' && row.resource_planning_id !== null && row.resource_planning_id.toString().trim() !== ''
           );
           resolve(filteredData);
         } catch (error) {

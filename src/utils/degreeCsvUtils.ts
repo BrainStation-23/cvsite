@@ -14,6 +14,11 @@ export interface DegreeItem {
   updated_at: string;
 }
 
+export interface DegreeCSVRow {
+  name: string;
+  full_form?: string;
+}
+
 export interface DegreeCSVValidationResult {
   valid: DegreeFormData[];
   errors: Array<{
@@ -24,13 +29,13 @@ export interface DegreeCSVValidationResult {
   }>;
 }
 
-export const parseDegreeCSV = (file: File): Promise<any[]> => {
+export const parseDegreeCSV = (file: File): Promise<DegreeCSVRow[]> => {
   return new Promise((resolve, reject) => {
-    Papa.parse(file, {
+    Papa.parse<DegreeCSVRow>(file, {
       header: true,
       skipEmptyLines: true,
       complete: (results) => {
-        resolve(results.data);
+        resolve(results.data as DegreeCSVRow[]);
       },
       error: (error) => {
         reject(error);
@@ -40,7 +45,7 @@ export const parseDegreeCSV = (file: File): Promise<any[]> => {
 };
 
 export const validateDegreeCSVData = (
-  data: any[],
+  data: DegreeCSVRow[],
   existingDegrees: DegreeItem[]
 ): DegreeCSVValidationResult => {
   const valid: DegreeFormData[] = [];
@@ -52,9 +57,9 @@ export const validateDegreeCSVData = (
   }> = [];
 
   const seenNames = new Set<string>();
-  const existingNames = new Set(existingDegrees.map(d => d.name.toLowerCase()));
+  const existingNames = new Set<string>(existingDegrees.map(d => d.name.toLowerCase()));
 
-  data.forEach((row, index) => {
+  data.forEach((row: DegreeCSVRow, index: number) => {
     const rowNumber = index + 2; // +2 because of 0-index and header row
     
     // Validate name (required)
@@ -92,7 +97,7 @@ export const validateDegreeCSVData = (
     // If no errors for this row, add to valid array
     if (!errors.some(error => error.row === rowNumber)) {
       valid.push({
-        name: name,
+        name: name as string,
         full_form: row.full_form?.toString().trim() || undefined
       });
     }

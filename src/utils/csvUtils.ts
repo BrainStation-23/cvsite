@@ -83,7 +83,7 @@ export const downloadCSVTemplate = () => {
   }
 };
 
-export const exportUniversitiesToCSV = (universities: any[]) => {
+export const exportUniversitiesToCSV = (universities: UniversityFormData[]) => {
   const csvData = universities.map(university => ({
     name: university.name,
     type: university.type,
@@ -105,15 +105,15 @@ export const exportUniversitiesToCSV = (universities: any[]) => {
   }
 };
 
-export const validateCSVData = (data: any[], existingUniversities: any[] = []): CSVValidationResult => {
+export const validateCSVData = (data: UniversityCSVRow[], existingUniversities: UniversityFormData[] = []): CSVValidationResult => {
   const valid: UniversityFormData[] = [];
   const errors: CSVValidationError[] = [];
-  const seenNames = new Set();
+  const seenNames = new Set<string>();
   
   // Create a set of existing university names for quick lookup
-  const existingNames = new Set(existingUniversities.map(u => u.name.toLowerCase().trim()));
+  const existingNames = new Set<string>(existingUniversities.map(u => u.name.toLowerCase().trim()));
 
-  data.forEach((row: any, index: number) => {
+  data.forEach((row: UniversityCSVRow, index: number) => {
     const rowNumber = index + 2; // +2 because index starts at 0 and CSV has header row
     let hasErrors = false;
 
@@ -177,15 +177,15 @@ export const validateCSVData = (data: any[], existingUniversities: any[] = []): 
   return { valid, errors };
 };
 
-export const parseUniversitiesCSV = (file: File): Promise<any[]> => {
+export const parseUniversitiesCSV = (file: File): Promise<UniversityCSVRow[]> => {
   return new Promise((resolve, reject) => {
-    Papa.parse(file, {
+    Papa.parse<UniversityCSVRow>(file, {
       header: true,
       complete: (results) => {
         try {
           // Filter out empty rows
-          const filteredData = results.data.filter((row: any) => 
-            row.name && row.name.toString().trim() !== ''
+          const filteredData: UniversityCSVRow[] = results.data.filter((row) => 
+            row && typeof row.name !== 'undefined' && row.name !== null && row.name.toString().trim() !== ''
           );
           resolve(filteredData);
         } catch (error) {

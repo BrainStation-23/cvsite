@@ -14,19 +14,22 @@ export class TemplateProcessor {
     this.debugMode = options.debugMode || false;
   }
 
-  private log(message: string, data?: any) {
+  private log(message: string, data?: unknown) {
     if (this.debugMode) {
       console.log(`[TemplateProcessor] ${message}`, data);
     }
   }
 
-  private getValue(obj: any, path: string): any {
-    return path.split('.').reduce((current, key) => {
-      return current && current[key] !== undefined ? current[key] : null;
-    }, obj);
+  private getValue(obj: unknown, path: string): unknown {
+    return path.split('.').reduce<unknown>((current, key) => {
+      if (current && typeof current === 'object' && key in (current as Record<string, unknown>)) {
+        return (current as Record<string, unknown>)[key];
+      }
+      return null;
+    }, obj as unknown);
   }
 
-  private hasContent(value: any): boolean {
+  private hasContent(value: unknown): boolean {
     if (value === null || value === undefined || value === '') return false;
     if (Array.isArray(value)) return value.length > 0;
     if (typeof value === 'string') return value.trim().length > 0;
@@ -47,14 +50,17 @@ export class TemplateProcessor {
     });
   }
 
-  private processLoopVariable(template: string, item: any, index: number): string {
+  private processLoopVariable(template: string, item: Record<string, unknown>, index: number): string {
     // Handle {{this.property}} and {{this.property | filter}}
     let processed = template.replace(/\{\{this\.([^}|\s]+)(\s*\|\s*([^}]+))?\}\}/g, (match, property, filterPart, filter) => {
-      let value = item[property];
+      let value = item[property as keyof typeof item];
       
       // Handle special cases
       if (property === 'dateRange') {
-        value = applyUtilityFilter(item.startDate, 'formatDateRange', [item.endDate, String(item.isCurrent)]);
+        const startDate = String(item['startDate'] ?? '');
+        const endDate = String(item['endDate'] ?? '');
+        const isCurrent = String(Boolean(item['isCurrent']));
+        value = applyUtilityFilter(startDate, 'formatDateRange', [endDate, isCurrent]);
       }
       
       this.log(`Processing loop variable: this.${property}`, { value, filter });
@@ -77,7 +83,7 @@ export class TemplateProcessor {
     return processed;
   }
 
-  private processLoopConditionals(template: string, item: any): string {
+  private processLoopConditionals(template: string, item: Record<string, unknown>): string {
     // Handle {{#if this.property}} ... {{else}} ... {{/if}}
     template = template.replace(
       /\{\{#if this\.([^}]+)\}\}([\s\S]*?)(?:\{\{else\}\}([\s\S]*?))?\{\{\/if\}\}/g,
@@ -133,19 +139,18 @@ export class TemplateProcessor {
       /\{\{#each employee\.(\w+)\}\}([\s\S]*?)\{\{\/each\}\}/g,
       (match, arrayName, loopContent) => {
         const array = this.getValue(data, arrayName);
-        this.log(`Processing loop: employee.${arrayName}`, { array, arrayLength: array?.length });
+        this.log(`Processing loop: employee.${arrayName}`, { array, arrayLength: (array as unknown[] | undefined)?.length });
         
         if (!Array.isArray(array) || array.length === 0) {
           return '';
         }
 
-        return array.map((item, index) => {
+        return (array as Record<string, unknown>[]).map((item, index) => {
           return this.processLoopVariable(loopContent, item, index);
         }).join('');
       }
     );
   }
-
   private processConditionals(template: string, data: MappedEmployeeData): string {
     // Handle {{#if employee.property}} ... {{else}} ... {{/if}}
     template = template.replace(
@@ -291,7 +296,7 @@ export class TemplateProcessor {
     }
   }
 
-  processForCV(htmlTemplate: string, employeeData: any, templateConfig?: { orientation?: 'portrait' | 'landscape' }): string {
+  processForCV(htmlTemplate: string, employeeData: MappedEmployeeData, templateConfig?: { orientation?: 'portrait' | 'landscape' }): string {
     const processed = this.process(htmlTemplate, employeeData);
     
     // Apply orientation-specific styling if template config is provided
