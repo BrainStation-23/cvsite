@@ -43,7 +43,7 @@ export class AIProfileImportDataCleaner extends ProfileImportDataCleaner {
     // Clean common AI extraction issues
     return name
       .trim()
-      .replace(/[^\w\s\.\+\#\-]/g, '') // Remove special chars except common programming ones
+      .replace(/[^\w\s.+#-]/g, '') // Remove special chars except common programming ones
       .replace(/\s+/g, ' ') // Normalize spaces
       .substring(0, 50); // Limit length
   }

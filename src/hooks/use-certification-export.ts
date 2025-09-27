@@ -23,6 +23,36 @@ export interface ExportCertificationRecord {
   updated_at: string;
 }
 
+interface CertificationsPagination {
+  total_count: number;
+  filtered_count: number;
+  page: number;
+  per_page: number;
+  page_count: number;
+}
+
+interface CertificationsResponse {
+  certifications: Array<{
+    first_name: string | null;
+    last_name: string | null;
+    employee_id: string | null;
+    sbu_name: string | null;
+    sbu_id: string | null;
+    id: string;
+    profile_id: string;
+    title: string | null;
+    provider: string | null;
+    certification_date: string | null;
+    description: string | null;
+    certificate_url: string | null;
+    is_renewable: boolean | null;
+    expiry_date: string | null;
+    created_at: string;
+    updated_at: string;
+  }>;
+  pagination: CertificationsPagination;
+}
+
 export function useCertificationExport() {
   const [isExporting, setIsExporting] = useState<boolean>(false);
   const { toast } = useToast();
@@ -32,7 +62,7 @@ export function useCertificationExport() {
     try {
       setIsExporting(true);
       console.log('Starting certification export using pagination...');
-      let allCertifications: ExportCertificationRecord[] = [];
+      let allCertifications: CertificationsResponse['certifications'] = [];
       let currentPage = 1;
       const itemsPerPage = 1000; // Use a large page size for efficiency
       let hasMorePages = true;
@@ -56,8 +86,9 @@ export function useCertificationExport() {
         }
         
         if (rpcData && typeof rpcData === 'object' && 'certifications' in rpcData) {
-          const pageResources = (rpcData as any).certifications || [];
-          const pagination = (rpcData as any).pagination;
+          const typed = rpcData as unknown as CertificationsResponse;
+          const pageResources = typed.certifications || [];
+          const pagination = typed.pagination;
 
           console.log(`Page ${currentPage}: Retrieved ${pageResources.length} certifications`);
           allCertifications = [...allCertifications, ...pageResources];
@@ -88,18 +119,18 @@ export function useCertificationExport() {
       // Convert the data to CSV format - mapping nested response structure correctly
       // Convert the data to CSV format
       const csvData = allCertifications.map(cert => ({
-        'Employee ID': cert.employee_id || '',
-        'Employee Name': `${cert.first_name || ''} ${cert.last_name || ''}`.trim(),
-        'SBU': cert.sbu_name || '',
-        'Title': cert.title || '',
-        'Provider': cert.provider || '',
-        'Certification Date': cert.certification_date ? cert.certification_date.split('T')[0] : '',
-        'Expiry Date': cert.expiry_date ? cert.expiry_date.split('T')[0] : '',
-        'Description': cert.description || '',
-        'Certificate URL': cert.certificate_url || '',
+        'Employee ID': cert.employee_id ?? '',
+        'Employee Name': `${cert.first_name ?? ''} ${cert.last_name ?? ''}`.trim(),
+        'SBU': cert.sbu_name ?? '',
+        'Title': cert.title ?? '',
+        'Provider': cert.provider ?? '',
+        'Certification Date': cert.certification_date ? String(cert.certification_date).split('T')[0] : '',
+        'Expiry Date': cert.expiry_date ? String(cert.expiry_date).split('T')[0] : '',
+        'Description': cert.description ?? '',
+        'Certificate URL': cert.certificate_url ?? '',
         'Is Renewable': cert.is_renewable ? 'Yes' : 'No',
-        'Created At': cert.created_at ? cert.created_at.split('T')[0] : '',
-        'Updated At': cert.updated_at ? cert.updated_at.split('T')[0] : '',
+        'Created At': cert.created_at ? String(cert.created_at).split('T')[0] : '',
+        'Updated At': cert.updated_at ? String(cert.updated_at).split('T')[0] : '',
       }));
       
       console.log(`Converting ${csvData.length} records to CSV`);

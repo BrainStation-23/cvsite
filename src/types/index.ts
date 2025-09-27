@@ -65,7 +65,7 @@ export interface UserPermission {
   module_name: string;
   sub_module_id?: string;
   sub_module_name?: string;
-  permission_type: 'create' | 'read' | 'update' | 'delete' | 'manage' | 'write';
+  permission_type: 'read' | 'update' | 'delete' | 'write';
   sbu_restrictions?: string[];
   route_path?: string;
   table_names?: string[];

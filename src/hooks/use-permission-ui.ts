@@ -3,13 +3,13 @@ import { useAuth } from '@/contexts/AuthContext';
 export interface PermissionConfig {
   moduleId: string;
   subModuleId: string;
-  permissions: Array<'create' | 'read' | 'update' | 'delete'>;
+  permissions: Array<'write' | 'read' | 'update' | 'delete'>;
 }
 
 export const usePermissionUI = (config: PermissionConfig) => {
   const { hasSubModulePermission } = useAuth();
   
-  const hasPermission = (permission: 'create' | 'read' | 'update' | 'delete') => {
+  const hasPermission = (permission: 'write' | 'read' | 'update' | 'delete') => {
     return hasSubModulePermission(config.subModuleId, permission);
   };
 
@@ -18,9 +18,9 @@ export const usePermissionUI = (config: PermissionConfig) => {
     canRead: hasPermission('read'),
     
     //Resource Planning Create permissions
-    canCreate: hasPermission('create'),
-    showCreateButton: hasPermission('create'),
-    showDuplicateButton: hasPermission('create'),
+    canCreate: hasPermission('write'),
+    showCreateButton: hasPermission('write'),
+    showDuplicateButton: hasPermission('write'),
     
     //Resource Planning Update permissions  
     canUpdate: hasPermission('update'),
@@ -39,19 +39,19 @@ export const usePermissionUI = (config: PermissionConfig) => {
 
     //Resource Calendar permissions
     canEditProject: hasPermission('update'),
-    canCreateForecastedProject: hasPermission('create'),
-    showDuplicateProjectButton: hasPermission('create'),
+    canCreateForecastedProject: hasPermission('write'),
+    showDuplicateProjectButton: hasPermission('write'),
     
     //Non Billed permissions
     canEditFeedback: hasPermission('update'),
     canSynchNonBilledData: hasPermission('update'),
-    canCreateSynchNonBilledData: hasPermission('create'),
+    canCreateSynchNonBilledData: hasPermission('write'),
 
     //CV Database permissions
     canEditCv: hasPermission('update'),
-    canCreateCv: hasPermission('create'),
+    canCreateCv: hasPermission('write'),
     canEditCvTemplate: hasPermission('update'),
-    canCreateCvTemplate: hasPermission('create'),
+    canCreateCvTemplate: hasPermission('write'),
     canDeleteCvTemplate: hasPermission('delete'),
     canPreviewCvTemplate: hasPermission('read'),
 

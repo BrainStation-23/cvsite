@@ -3,10 +3,6 @@ import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
-interface ChunkResult {
-  successful: any[];
-  failed: any[];
-}
 
 interface ProgressInfo {
   currentChunk: number;
@@ -29,7 +25,7 @@ export function useChunkedBulkUpdate() {
     isComplete: false
   });
 
-  // Remove chunking logic as we now use RPC function for bulk processing
+
 
   const parseCSVFile = async (file: File) => {
     try {

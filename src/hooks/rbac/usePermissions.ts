@@ -45,7 +45,7 @@ export const useUpdateRolePermissions = () => {
         description: 'Role permissions updated successfully',
       });
     },
-    onError: (error) => {
+    onError: () => {
       toast({
         title: 'Error',
         description: 'Failed to update role permissions',

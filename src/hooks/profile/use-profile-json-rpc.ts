@@ -2,6 +2,8 @@
 import { useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import { getErrorMessage } from '@/utils/error-utils';
+import type { Json } from '@/integrations/supabase/types';
 
 interface ImportResult {
   success: boolean;
@@ -62,20 +64,21 @@ export function useProfileJsonRpc() {
 
       console.log('=== EXPORT PROFILE END ===');
       return { success: true, data };
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Export error:', error);
+      const message = getErrorMessage(error) || 'Failed to export profile data';
       toast({
         title: 'Export Failed',
-        description: error.message || 'Failed to export profile data',
+        description: message,
         variant: 'destructive'
       });
-      return { success: false, error: error.message };
+      return { success: false, error: message };
     } finally {
       setIsExporting(false);
     }
   };
 
-  const importProfile = async (profileData: any, targetUserId?: string) => {
+  const importProfile = async (profileData: unknown, targetUserId?: string) => {
     try {
       setIsImporting(true);
       console.log('=== IMPORT PROFILE START ===');
@@ -88,7 +91,7 @@ export function useProfileJsonRpc() {
       }
 
       const { data, error } = await supabase.rpc('import_profile_json', {
-        profile_data: profileData,
+        profile_data: profileData as Json,
         target_user_id: targetUserId || null
       });
 
@@ -116,14 +119,15 @@ export function useProfileJsonRpc() {
 
       console.log('=== IMPORT PROFILE END ===');
       return { success: true, stats: result };
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Import error:', error);
+      const message = getErrorMessage(error) || 'Failed to import profile data';
       toast({
         title: 'Import Failed',
-        description: error.message || 'Failed to import profile data',
+        description: message,
         variant: 'destructive'
       });
-      return { success: false, error: error.message };
+      return { success: false, error: message };
     } finally {
       setIsImporting(false);
     }

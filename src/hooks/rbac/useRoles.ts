@@ -32,7 +32,7 @@ export const useCreateRole = () => {
         description: 'Role created successfully',
       });
     },
-    onError: (error) => {
+    onError: () => {
       toast({
         title: 'Error',
         description: 'Failed to create role',
@@ -56,7 +56,7 @@ export const useUpdateRole = () => {
         description: 'Role updated successfully',
       });
     },
-    onError: (error) => {
+    onError: () => {
       toast({
         title: 'Error',
         description: 'Failed to update role',
@@ -79,7 +79,7 @@ export const useDeleteRole = () => {
         description: 'Role deleted successfully',
       });
     },
-    onError: (error) => {
+    onError: () => {
       toast({
         title: 'Error',
         description: 'Failed to delete role',

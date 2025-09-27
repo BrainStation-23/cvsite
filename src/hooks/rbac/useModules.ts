@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { ModuleService } from '@/services/rbac/moduleService';
 import { Module, SubModule } from '@/types';
 import { toast } from 'sonner';
+import { getErrorMessage } from '@/utils/error-utils';
 
 export const useModules = (includeInactive = false) => {
   return useQuery({
@@ -66,8 +67,9 @@ export const useCreateModule = () => {
       queryClient.invalidateQueries({ queryKey: ['modulesWithSubModules'] });
       toast.success('Module created successfully');
     },
-    onError: (error: any) => {
-      toast.error(error.message || 'Failed to create module');
+    onError: (error: unknown) => {
+      const message = getErrorMessage(error) || 'Failed to create module';
+      toast.error(message);
     },
   });
 };
@@ -83,8 +85,9 @@ export const useUpdateModule = () => {
       queryClient.invalidateQueries({ queryKey: ['modulesWithSubModules'] });
       toast.success('Module updated successfully');
     },
-    onError: (error: any) => {
-      toast.error(error.message || 'Failed to update module');
+    onError: (error: unknown) => {
+      const message = getErrorMessage(error) || 'Failed to update module';
+      toast.error(message);
     },
   });
 };
@@ -99,8 +102,9 @@ export const useDeleteModule = () => {
       queryClient.invalidateQueries({ queryKey: ['modulesWithSubModules'] });
       toast.success('Module deleted successfully');
     },
-    onError: (error: any) => {
-      toast.error(error.message || 'Failed to delete module');
+    onError: (error: unknown) => {
+      const message = getErrorMessage(error) || 'Failed to delete module';
+      toast.error(message);
     },
   });
 };
@@ -117,8 +121,9 @@ export const useCreateSubModule = () => {
       queryClient.invalidateQueries({ queryKey: ['modulesWithSubModules'] });
       toast.success('Sub-module created successfully');
     },
-    onError: (error: any) => {
-      toast.error(error.message || 'Failed to create sub-module');
+    onError: (error: unknown) => {
+      const message = getErrorMessage(error) || 'Failed to create sub-module';
+      toast.error(message);
     },
   });
 };
@@ -134,8 +139,9 @@ export const useUpdateSubModule = () => {
       queryClient.invalidateQueries({ queryKey: ['modulesWithSubModules'] });
       toast.success('Sub-module updated successfully');
     },
-    onError: (error: any) => {
-      toast.error(error.message || 'Failed to update sub-module');
+    onError: (error: unknown) => {
+      const message = getErrorMessage(error) || 'Failed to update sub-module';
+      toast.error(message);
     },
   });
 };
@@ -150,8 +156,9 @@ export const useDeleteSubModule = () => {
       queryClient.invalidateQueries({ queryKey: ['modulesWithSubModules'] });
       toast.success('Sub-module deleted successfully');
     },
-    onError: (error: any) => {
-      toast.error(error.message || 'Failed to delete sub-module');
+    onError: (error: unknown) => {
+      const message = getErrorMessage(error) || 'Failed to delete sub-module';
+      toast.error(message);
     },
   });
 };
