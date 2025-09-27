@@ -29,7 +29,10 @@ export const templateUtilities = {
 
   joinArray: (array: any[], separator: string = ', '): string => {
     if (!Array.isArray(array)) return '';
-    return array.filter(item => item).join(separator);
+    return array
+      .filter(item => item !== null && item !== undefined && item !== '')
+      .map(item => String(item))
+      .join(separator);
   },
 
   truncate: (text: string, length: number = 100): string => {
@@ -58,26 +61,28 @@ export const templateUtilities = {
   }
 };
 
-export const applyUtilityFilter = (value: any, filter: string, args?: string[]): string => {
+export const applyUtilityFilter = (value: unknown, filter: string, args?: string[]): string => {
   const [utilityName, ...filterArgs] = filter.split(':');
   const allArgs = [...(filterArgs || []), ...(args || [])];
 
   switch (utilityName) {
     case 'formatDate':
-      return templateUtilities.formatDate(value, allArgs[0]);
+      return templateUtilities.formatDate(String(value || ''), allArgs[0]);
     case 'formatDateRange':
-      return templateUtilities.formatDateRange(value, allArgs[0], allArgs[1] === 'true');
+      // treat value as startDate, first arg as endDate, second arg as isCurrent flag
+      return templateUtilities.formatDateRange(String(value || ''), allArgs[0] || null, allArgs[1] === 'true');
     case 'join':
-      return templateUtilities.joinArray(value, allArgs[0]);
+      return templateUtilities.joinArray(Array.isArray(value) ? value : [value], allArgs[0]);
     case 'truncate':
-      return templateUtilities.truncate(value, parseInt(allArgs[0]) || 100);
+      return templateUtilities.truncate(String(value || ''), parseInt(allArgs[0]) || 100);
     case 'capitalize':
-      return templateUtilities.capitalize(value);
+      return templateUtilities.capitalize(String(value || ''));
     case 'formatProficiency':
-      return templateUtilities.formatProficiency(value);
+      const prof = Number(value as unknown as number);
+      return templateUtilities.formatProficiency(Number.isFinite(prof) ? prof : 0);
     case 'defaultValue':
       return templateUtilities.defaultValue(value, allArgs[0] || '');
     default:
-      return String(value || '');
+      return String(value ?? '');
   }
 };
