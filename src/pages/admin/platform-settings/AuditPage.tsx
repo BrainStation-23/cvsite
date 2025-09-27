@@ -1,24 +1,8 @@
 
 import React from 'react';
-import DashboardLayout from '@/components/Layout/DashboardLayout';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Link } from 'react-router-dom';
-import { AlertTriangle, ChevronRight, Shield, FileWarning } from 'lucide-react';
+import { Shield } from 'lucide-react';
 
 const AuditPage: React.FC = () => {
-  const auditCategories = [
-    {
-      title: 'Profile Image Warnings',
-      description: 'View and manage forced profile image uploads that bypassed validation checks.',
-      icon: FileWarning,
-      route: '/admin/platform-settings/audit/profile-image-warnings',
-      color: 'bg-orange-50 dark:bg-orange-950 border-orange-200 dark:border-orange-800',
-      iconColor: 'text-orange-600 dark:text-orange-400',
-      severity: 'High'
-    }
-  ];
-
   return (
     <div className="flex flex-col h-full">
         {/* Header */}

@@ -1,8 +1,6 @@
 
 import React, { useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
-import { ArrowLeft } from 'lucide-react';
+import { useLocation } from 'react-router-dom';
 import { ResourceCalendarFilters } from '../../components/calendar/ResourceCalendarFilters';
 import { CalendarHeader } from '../../components/calendar/CalendarHeader';
 import { ResourceGanttChart } from '../../components/calendar/gantt/ResourceGanttChart';
